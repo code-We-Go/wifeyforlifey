@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 250, 245, 250;
+  --background-end-rgb: 255, 255, 255;
+
+  /* Brand Colors */
+  --primary-color: 323, 100%, 90%; /* Light Pink */
+  --primary-hover: 323, 100%, 85%; /* Slightly darker Pink */
+  --secondary-color: 266, 100%, 94%; /* Lavender */
+  --accent-color: 152, 70%, 95%; /* Mint */
+
+  /* UI Colors */
+  --success-color: 142, 76%, 36%;
+  --warning-color: 43, 96%, 56%;
+  --error-color: 0, 84%, 60%;
+
+  /* Typography Colors */
+  --heading-color: 323, 30%, 30%;
+  --body-color: 323, 15%, 25%;
+  --muted-color: 323, 10%, 55%;
+
+  /* Border and background colors */
+  --border-color: 323, 20%, 90%;
+  --input-color: 323, 20%, 96%;
+  --background-color: 323, 30%, 99%;
+  --card-color: 0, 0%, 100%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.04), 0 3px 6px rgba(0, 0, 0, 0.08);
+
+  /* Fonts */
+  /* --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair); */
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 323 100% 90%;
+    --primary-foreground: 323 30% 30%;
+    --secondary: 266 100% 94%;
+    --secondary-foreground: 266 30% 30%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 152 70% 95%;
+    --accent-foreground: 152 30% 30%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 323 20% 90%;
+    --input: 323 20% 96%;
+    --ring: 323 80% 90%;
+    --radius: 0.75rem;
+  }
+
+  /* .dark {
+    --background: 323 30% 10%;
+    --foreground: 0 0% 98%;
+    --card: 323 25% 15%;
+    --card-foreground: 0 0% 98%;
+    --popover: 323 30% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 323 80% 80%;
+    --primary-foreground: 323 20% 20%;
+    --secondary: 266 80% 84%;
+    --secondary-foreground: 266 20% 20%;
+    --muted: 323 20% 20%;
+    --muted-foreground: 323 10% 70%;
+    --accent: 152 50% 85%;
+    --accent-foreground: 152 20% 20%;
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 323 20% 30%;
+    --input: 323 20% 25%;
+    --ring: 323 80% 70%;
+  } */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-medium tracking-tight;
+  }
+  h1 {
+    @apply text-4xl sm:text-5xl md:text-6xl;
+  }
+  h2 {
+    @apply text-3xl sm:text-4xl;
+  }
+  h3 {
+    @apply text-2xl sm:text-3xl;
+  }
+  h4 {
+    @apply text-xl sm:text-2xl;
+  }
+  h5 {
+    @apply text-lg sm:text-xl;
+  }
+  h6 {
+    @apply text-base sm:text-lg;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply container mx-auto px-4 md:px-6 max-w-7xl;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full px-5 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-5 py-2 font-medium transition-all duration-200;
+  }
+
+  .btn-outline {
+    @apply border border-primary text-primary-foreground hover:bg-primary/10 rounded-full px-5 py-2 font-medium transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+  }
+
+  .product-card {
+    @apply rounded-xl overflow-hidden bg-card shadow-sm card-hover;
+  }
+
+  .video-card {
+    @apply rounded-xl overflow-hidden bg-card shadow-sm card-hover;
+  }
+
+  .subscription-badge {
+    @apply bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full;
+  }
+
+  .price-tag {
+    @apply text-lg font-semibold text-primary-foreground;
+  }
+}
