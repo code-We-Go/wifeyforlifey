@@ -79,7 +79,7 @@ export default function Header() {
 
                      <Link href="/" className=" border-x-2 lg:flex-shrink-0 border-creamey items-center px-8 lg:px-16 space-x-2">
               
-              <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/Wifey for Lifey Primary Logo With Slogan Cream.png"} /> 
+              <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"} /> 
           </Link>
           {rightNavigation.map((item) => (
               <Link
