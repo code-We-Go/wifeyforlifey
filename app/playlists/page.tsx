@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense } from 'react';
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Play, Lock, Filter } from "lucide-react";
@@ -32,7 +32,11 @@ interface PlaylistFilters {
   sortBy?: string;
 }
 
-export default function PlaylistsPage() {
+function PlaylistsPageFallback() {
+  return <div>Loading...</div>;
+}
+
+function PlaylistsPage() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
@@ -316,6 +320,12 @@ export default function PlaylistsPage() {
       </div>
     </div>
   );
+}
+
+export default function PlaylistPageWrapper(){
+  <Suspense fallback={<PlaylistsPageFallback />}>
+      <PlaylistsPage />
+    </Suspense>
 }
 
 // Badge component for active filters
