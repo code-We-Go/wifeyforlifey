@@ -38,23 +38,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={` ${wifeyFont.className}`}>
+    <html lang="en" suppressHydrationWarning className="w-full">
+      <body className={`w-full min-h-screen ${wifeyFont.className}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
         >
-          <AuthProvider>
+          {/* <AuthProvider> */}
             <CartProvider>
-              <div className="flex min-h-screen flex-col">
+              <div className="flex min-h-screen w-full flex-col">
                 <Header />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 w-full">{children}</main>
                 <Footer />
               </div>
               <Toaster />
             </CartProvider>
-          </AuthProvider>
+          {/* </AuthProvider> */}
         </ThemeProvider>
       </body>
     </html>

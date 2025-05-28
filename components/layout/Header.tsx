@@ -4,16 +4,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useCart } from "@/providers/CartProvider";
-import { ShoppingBag, Heart, User, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Heart, User, Menu, X, Search, ListVideo, Store, VenetianMask } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-
+import Image from "next/image";
 const navigation = [
   { name: "Home", href: "/" },
   { name: "Shop", href: "/shop" },
   { name: "Playlists", href: "/playlists" },
   { name: "About", href: "/about" },
+];
+const leftNavigation = [
+  // { name: "Home", href: "/",icon:<ShoppingBag/> },
+  { name: "Shop", href: "/shop" ,icon:<Store />},
+  { name: "Playlists", href: "/playlists", icon:<ListVideo /> },
+  { name: "About", href: "/about" , icon:<VenetianMask /> },
+];
+const rightNavigation = [
+  { name: "Shop", href: "/shop" ,icon:<Store />},
+  { name: "Wishlist", href: "/playlists", icon:<Heart /> },
+  { name: "Cart", href: "/cart" , icon: <ShoppingBag/> },
+
 ];
 
 export default function Header() {
@@ -36,39 +48,60 @@ export default function Header() {
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300 ease-in-out",
         isScrolled
-          ? "bg-white/90 backdrop-blur-md shadow-sm"
-          : "bg-transparent"
+          ? "bg-lovely/50 backdrop-blur-md shadow-sm"
+          : "bg-lovely"
       )}
     >
-      <div className="container-custom mx-auto">
-        <div className="flex h-16 md:h-20 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="font-display text-2xl font-bold text-primary-foreground">
-              Petal & Playlist
-            </span>
-          </Link>
+      <div className=" mx-auto">
+        <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
+ 
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => (
+          <nav className="hidden  text-lovely justify-center items-center md:flex px-2 py-8">
+            {leftNavigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
+                  " text-base font-medium  transition-colors hover:text-red-900",
                   pathname === item.href
-                    ? "text-primary-foreground border-b-2 border-primary"
-                    : "text-muted-foreground"
+                    ? "text-red-900 "
+                    : "text-creamey"
                 )}
               >
+                <div className="flex md:px-3 lg:px-6 xl:px-12 border-l-2 border-creamey  flex-col gap-2 items-center justify-center">
+                  {item.icon}
                 {item.name}
+                </div>
               </Link>
+            ))}
+                      {/* Logo */}
+
+                     <Link href="/" className=" border-x-2 lg:flex-shrink-0 border-creamey items-center px-8 lg:px-16 space-x-2">
+              
+              <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/Wifey for Lifey Primary Logo With Slogan Cream.png"} /> 
+          </Link>
+          {rightNavigation.map((item) => (
+              <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "text-base font-medium  transition-colors hover:text-red-900",
+                pathname === item.href
+                  ? "text-red-900 "
+                  : "text-creamey"
+              )}
+            >
+              <div className="flex px-3 lg:px-6 xl:px-12 border-r-2 border-creamey  flex-col gap-2 items-center justify-center">
+                {item.icon}
+              {item.name}
+              </div>
+            </Link>
             ))}
           </nav>
 
           {/* Desktop Action Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" size="icon" aria-label="Search">
               <Search className="h-5 w-5" />
             </Button>
@@ -92,31 +125,23 @@ export default function Header() {
                 <User className="h-5 w-5" />
               </Button>
             </Link>
-          </div>
+          </div> */}
 
           {/* Mobile Menu Toggle */}
-          <div className="flex md:hidden">
-            <Link href="/cart" className="relative mr-4">
-              <Button variant="ghost" size="icon" aria-label="Cart">
-                <ShoppingBag className="h-5 w-5" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Button>
-            </Link>
-            <Sheet>
+          <div className="flex w-full justify-between md:hidden items-center text-creamey">
+          <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetTitle className="hidden">test</SheetTitle>
+              <SheetContent side="left" className="w-[300px] bg-lovely text-creamey sm:w-[400px]">
+
                 <div className="flex flex-col h-full py-6">
                   <div className="flex items-center justify-between mb-8">
                     <Link href="/" className="font-display text-xl font-bold">
-                      Petal & Playlist
+                    <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/Wifey for Lifey Primary Logo Cream.png"} /> 
                     </Link>
                   </div>
                   <nav className="flex flex-col space-y-6">
@@ -125,10 +150,10 @@ export default function Header() {
                         key={item.name}
                         href={item.href}
                         className={cn(
-                          "text-base font-medium transition-colors hover:text-primary",
+                          "text-base font-medium  hover:text-red-900",
                           pathname === item.href
-                            ? "text-primary-foreground"
-                            : "text-muted-foreground"
+                            ? "text-red-900"
+                            : "text-creamey"
                         )}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
@@ -149,6 +174,23 @@ export default function Header() {
                 </div>
               </SheetContent>
             </Sheet>
+            <Link href="/" className="  lg:flex-shrink-0  items-center px-8 lg:px-16 space-x-2">
+              
+              <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/Wifey for Lifey Primary Logo Cream.png"} /> 
+          </Link>
+            <div className="w-4"></div>
+            {/* <Link href="/cart" className="relative mr-4">
+              <Button variant="ghost" size="icon" aria-label="Cart">
+                <ShoppingBag className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link> */}
+                            
+ 
           </div>
         </div>
       </div>

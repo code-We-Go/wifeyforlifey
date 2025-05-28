@@ -7,6 +7,9 @@ import { mockPlaylists } from "@/models/VideoPlaylist";
 import ProductCard from "@/components/shop/ProductCard";
 import VideoCard from "@/components/playlists/VideoCard";
 import { Gluten, lifeyFont, wifeyFont } from "./layout";
+import HeroSection from "@/components/sections/HeroSection";
+import HeroTwo from "@/components/sections/HeroTwo";
+import JoinNow from "@/components/sections/JoinNow";
 
 export default function Home() {
   // Filter featured products
@@ -16,49 +19,11 @@ export default function Home() {
   const featuredPlaylists = mockPlaylists.slice(0, 2);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <section className="bg-pink-gradient py-16 md:py-24">
-        <div className="container-custom grid md:grid-cols-2 gap-8 items-center">
-          <div className="space-y-6 md:pr-12">
-            <h1
-              className={`${lifeyFont.className} text-4xl md:text-5xl lg:text-6xl  font-bold text-primary-foreground`}
-            >
-              Embrace Your Style & Passion
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
-              Shop unique products and unlock exclusive video content to express
-              your true self.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="rounded-full">
-                <Link href="/shop">
-                  Shop Now <ShoppingBag className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="rounded-full"
-              >
-                <Link href="/playlists">
-                  Explore Playlists <Video className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-          <div className="relative h-[300px] md:h-[500px] rounded-lg overflow-hidden animate-float">
-            <Image
-              src="https://images.pexels.com/photos/5709661/pexels-photo-5709661.jpeg"
-              alt="Hero Image"
-              fill
-              priority
-              className="object-cover rounded-lg"
-            />
-          </div>
-        </div>
-      </section>
+      <HeroSection/>
+      <HeroTwo/>
+      <JoinNow/>
 
       {/* Featured Products Section */}
       <section className="py-16">
@@ -160,7 +125,7 @@ export default function Home() {
 
       {/* Newsletter Section */}
       <section className="bg-accent py-16">
-        <div className="container-custom text-center max-w-3xl">
+        <div className="container-custom text-center ">
           <h2 className="text-3xl font-display font-medium text-accent-foreground mb-4">
             Join Our Community
           </h2>

@@ -21,6 +21,10 @@ const config: Config = {
         display: ['var(--font-playfair)'],
       },
       colors: {
+        pinkey:"#FFB6C7",
+        creamey:"#FBF3E0",
+        lovely:"#D32333",
+        everGreen:"#12665C",
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

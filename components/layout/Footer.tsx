@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="container-custom py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="font-display text-xl">Petal & Playlist</h3>
+            <h3 className="font-display text-xl">Wifey For Lifey</h3>
             <p className="text-muted-foreground text-sm">
               Shop trendy products and subscribe to exclusive video content all in one place.
             </p>
@@ -112,7 +112,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Petal & Playlist. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Wifey For Lifey. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-foreground">
               Privacy Policy
