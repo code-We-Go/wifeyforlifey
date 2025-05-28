@@ -1,5 +1,5 @@
 "use client";
-
+import {Suspense} from 'react'
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -27,7 +27,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { mockProducts, productCategories, Product, ProductFilters } from "@/models/Product";
 import ProductCard from "@/components/shop/ProductCard";
 
-export default function ShopPage() {
+function Fullback (){
+  return <div>Loading ...</div>
+}
+
+ function ShopPage() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
@@ -268,6 +272,11 @@ export default function ShopPage() {
       </div>
     </div>
   );
+}
+
+export default function ShopPageWrapper(){
+ return  <Suspense fallback={<Fullback/>}>
+  </Suspense>
 }
 
 // Badge component for active filters
