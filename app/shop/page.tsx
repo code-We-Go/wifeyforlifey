@@ -217,7 +217,7 @@ export default function ShopPage() {
         </div>
 
         {/* Active Filters */}
-        {(filters.category || filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
+        {(filters.category || filters.minPrice? filters.minPrice:1 > 0 || filters.maxPrice ? filters.maxPrice:1 < maxProductPrice) && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {filters.category && (
@@ -229,7 +229,7 @@ export default function ShopPage() {
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
-            {(filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
+            {(filters.minPrice ? filters.minPrice:1  > 0 || filters.maxPrice? filters.maxPrice:1 < maxProductPrice) && (
               <Badge 
                 onClick={() => {
                   updateFilter("minPrice", 0);
