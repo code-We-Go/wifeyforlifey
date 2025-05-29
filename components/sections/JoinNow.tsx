@@ -17,11 +17,13 @@ const JoinNow = () => {
           Subscribe Now & Join Our Club .
         </h1>
         <p className="text-lg md:text-xl ">
-          Shop unique products and unlock exclusive video content to express
-          your true self.
+         unlock exclusive content ,Planning Tips, and Insider Deals!
+
+.
         </p>
+
         <div className="flex flex-col sm:flex-row gap-4">
-          <Button asChild size="lg" className="rounded-full">
+          <Button asChild size="lg" className="rounded-full bg-lovely hover:bg-everGreen text-creamey">
             <Link href="/packages">
               Subscribe
             </Link>
@@ -30,7 +32,7 @@ const JoinNow = () => {
             asChild
             size="lg"
             variant="outline"
-            className="rounded-full"
+            className="rounded-full bg-creamey text-lovely hover:bg-everGreen hover:text-creamey"
           >
             <Link href="/playlists">
               see what&apos;s inside

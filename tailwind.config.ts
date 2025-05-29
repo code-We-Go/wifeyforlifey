@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  
   darkMode: ['class'],
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,7 +9,8 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    container: {
+    backgroundImage: {pattern1 : 'url(/patterns/patternCreamey.png)'}
+    ,container: {
       center: true,
       padding: '2rem',
       screens: {

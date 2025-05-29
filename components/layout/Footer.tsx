@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 
 export default function Footer() {
   return (
-    <footer className="bg-card border-t">
+    <footer className="bg-card border-t bg-lovely text-creamey">
       <div className="container-custom py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="font-display text-xl">Wifey For Lifey</h3>
-            <p className="text-muted-foreground text-sm">
-              Shop trendy products and subscribe to exclusive video content all in one place.
+            <h3 className="font-display text-xl">Wifey for Lifey – Your Bridal Era Bestie</h3>
+            <p className=" text-sm">
+            Wifey for Lifey isn’t just a brand — it’s a full support system designed to guide brides through every step of their wedding and home-prep journey. From engagement to honeymoon, we empower brides with tools, content, and emotional support to help them feel calm, confident, and in control.
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="icon" aria-label="Instagram">
@@ -33,27 +33,27 @@ export default function Footer() {
             <h6 className="font-medium mb-4">Shop</h6>
             <ul className="space-y-2">
               <li>
-                <Link href="/shop?category=clothing" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/shop?category=clothing" className=" hover:text-foreground text-sm">
                   Clothing
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=accessories" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/shop?category=accessories" className=" hover:text-foreground text-sm">
                   Accessories
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=home" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/shop?category=home" className=" hover:text-foreground text-sm">
                   Home Decor
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=bath" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/shop?category=bath" className=" hover:text-foreground text-sm">
                   Bath & Body
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=stationery" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/shop?category=stationery" className=" hover:text-foreground text-sm">
                   Stationery
                 </Link>
               </li>
@@ -64,27 +64,27 @@ export default function Footer() {
             <h6 className="font-medium mb-4">Playlists</h6>
             <ul className="space-y-2">
               <li>
-                <Link href="/playlists?category=tutorials" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/playlists?category=tutorials" className=" hover:text-foreground text-sm">
                   Tutorials
                 </Link>
               </li>
               <li>
-                <Link href="/playlists?category=lifestyle" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/playlists?category=lifestyle" className=" hover:text-foreground text-sm">
                   Lifestyle
                 </Link>
               </li>
               <li>
-                <Link href="/playlists?category=fashion" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/playlists?category=fashion" className=" hover:text-foreground text-sm">
                   Fashion
                 </Link>
               </li>
               <li>
-                <Link href="/playlists?category=beauty" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/playlists?category=beauty" className=" hover:text-foreground text-sm">
                   Beauty
                 </Link>
               </li>
               <li>
-                <Link href="/playlists?category=fitness" className="text-muted-foreground hover:text-foreground text-sm">
+                <Link href="/playlists?category=fitness" className=" hover:text-foreground text-sm">
                   Fitness
                 </Link>
               </li>
@@ -93,7 +93,7 @@ export default function Footer() {
 
           <div>
             <h6 className="font-medium mb-4">Subscribe to our Newsletter</h6>
-            <p className="text-muted-foreground text-sm mb-4">
+            <p className=" text-sm mb-4">
               Get the latest updates, sales, and exclusive content straight to your inbox.
             </p>
             <form className="space-y-2">
@@ -103,7 +103,7 @@ export default function Footer() {
                   placeholder="Your email"
                   className="rounded-r-none"
                 />
-                <Button type="submit" className="rounded-l-none">
+                <Button type="submit" className="bg-pinkey text-lovely rounded-l-none">
                   Subscribe
                 </Button>
               </div>
@@ -111,7 +111,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
+        <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm ">
           <p>&copy; {new Date().getFullYear()} Wifey For Lifey. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-foreground">

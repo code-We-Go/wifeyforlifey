@@ -18,9 +18,9 @@ const HeroTwo = () => {
   const fyonkaRotation = useTransform(scrollYProgress, [0, 0.2], [-60, 30])
   const ringScale = useTransform(scrollYProgress, [0, 0.15], [0.5, 1])
   const textX = useTransform(scrollYProgress, [0, 0.2], [200, 0])
-  const textXr = useTransform(scrollYProgress, [0, 0.15], [-200, 0])
+  const textXr = useTransform(scrollYProgress, [-0.2, 0.15], [-200, 0])
   const glassesXr = useTransform(scrollYProgress, [0, 0.2], [-200, 0])
-  const paragraphX = useTransform(scrollYProgress, [0, 0.01], [40, 0])
+  const paragraphX = useTransform(scrollYProgress, [-0.2, 0.01], [40, 0])
   const partyX =useTransform(scrollYProgress,[0,0.15],[200,0])
   const sectionY = useTransform(scrollYProgress, [0, 0.4], [30, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.1], [30, 0])
@@ -42,7 +42,7 @@ const HeroTwo = () => {
             scale: mainImageScale,
             opacity: mainImageOpacity
           }}
-          className='absolute bottom-0 md:top-[20vh] -right-[200px]'>
+          className='absolute bottom-[10vh] md:top-[20vh] -right-[30vw] md:-right-[200px]'>
             <Image className='aspect-auto' src={"/hero/Bride 2_The Efficeint Planner.png"} alt={"ultimate best friend"} width={400} height={50}/>
         </motion.div>
         <motion.div 
@@ -88,13 +88,14 @@ const HeroTwo = () => {
             x: textX,
             opacity: textOpacity
           }}
-          className='text-lovely max-w-[40vw] md:max-w-[30vw] lg:max-w-[25vw] text-sm sm:text-base md:text-lg'>
+          className=' text-lovely max-w-[40vw] md:max-w-[30vw] lg:max-w-[25vw] text-sm sm:text-base md:text-lg'>
             
               <motion.p
                 style={{
                   x: paragraphX,
                   opacity: paragraphOpacities[0]
                 }}
+                className=''
               >
                 Wifey for lifey is your ultimate bridal bestie ! From 
                 planning tools to stress-free tips, we&apos;ve got everything you need 

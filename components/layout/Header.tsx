@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useCart } from "@/providers/CartProvider";
-import { ShoppingBag, Heart, User, Menu, X, Search, ListVideo, Store, VenetianMask } from "lucide-react";
+import { ShoppingBag, Heart, User, Menu, X, Search, ListVideo, Store, VenetianMask, Club, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ const leftNavigation = [
   { name: "About", href: "/about" , icon:<VenetianMask /> },
 ];
 const rightNavigation = [
-  { name: "Shop", href: "/shop" ,icon:<Store />},
+  { name: "Club", href: "/pages/Gehaz" ,icon:<PartyPopper />},
   { name: "Wishlist", href: "/playlists", icon:<Heart /> },
   { name: "Cart", href: "/cart" , icon: <ShoppingBag/> },
 
