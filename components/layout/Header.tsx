@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useCart } from "@/providers/CartProvider";
-import { ShoppingBag, Heart, User, Menu, X, Search, ListVideo, Store, VenetianMask, Club, PartyPopper } from "lucide-react";
+import { ShoppingBag, Heart, User, Menu, X, Search, ListVideo, Store, VenetianMask, Club, PartyPopper, TicketPercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -19,12 +19,14 @@ const leftNavigation = [
   // { name: "Home", href: "/",icon:<ShoppingBag/> },
   { name: "Shop", href: "/shop" ,icon:<Store />},
   { name: "Playlists", href: "/playlists", icon:<ListVideo /> },
+  { name: "Deals", href: "/playlists", icon:<TicketPercent /> },
   { name: "About", href: "/about" , icon:<VenetianMask /> },
 ];
 const rightNavigation = [
   { name: "Club", href: "/pages/Gehaz" ,icon:<PartyPopper />},
   { name: "Wishlist", href: "/playlists", icon:<Heart /> },
   { name: "Cart", href: "/cart" , icon: <ShoppingBag/> },
+  { name: "Account", href: "/pages/Gehaz" ,icon:<User />},
 
 ];
 
@@ -49,7 +51,7 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      if (currentScrollY > lastScrollY && currentScrollY > 10) {
         // Scrolling down, hide header
         setIsVisible(false);
       } else {
@@ -90,7 +92,7 @@ export default function Header() {
                     : "text-creamey"
                 )}
               >
-                <div className="flex md:px-3 lg:px-6 xl:px-12 border-l-2 border-creamey  flex-col gap-2 items-center justify-center">
+                <div className="flex md:px-2 lg:px-4 xl:px-8 border-l-2 border-creamey  flex-col gap-2 items-center justify-center">
                   {item.icon}
                 {item.name}
                 </div>
@@ -113,7 +115,7 @@ export default function Header() {
                   : "text-creamey"
               )}
             >
-              <div className="flex px-3 lg:px-6 xl:px-12 border-r-2 border-creamey  flex-col gap-2 items-center justify-center">
+              <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey  flex-col gap-2 items-center justify-center">
                 {item.icon}
               {item.name}
               </div>

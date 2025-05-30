@@ -39,7 +39,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="w-full">
-      <body className={`w-full min-h-screen ${wifeyFont.className}`}>
+      <body className={`w-full min-h-screen ${wifeyFont.className} bg-creamey`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
