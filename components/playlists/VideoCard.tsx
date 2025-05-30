@@ -40,7 +40,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
               </Badge>
             )}
           </div>
-          <h3 className="font-medium line-clamp-1">{playlist.title}</h3>
+          <h3 className="font-medium text-lovely line-clamp-1">{playlist.title}</h3>
           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
             {playlist.description}
           </p>

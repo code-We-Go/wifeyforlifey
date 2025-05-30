@@ -35,9 +35,9 @@ export default function Home() {
 <Playlists/>
 
       {/* Newsletter Section */}
-      {/* <section className="bg-accent py-16">
+      <section className="bg-creamey py-16">
         <div className="container-custom text-center ">
-          <h2 className="text-3xl font-display font-medium text-accent-foreground mb-4">
+          <h2 className="text-4xl md:text-5xl font-display font-semibold text-accent-foreground mb-4">
             Join Our Community
           </h2>
           <p className="text-muted-foreground mb-8">
@@ -50,12 +50,12 @@ export default function Home() {
               placeholder="Your email address"
               className="rounded-full flex-1"
             />
-            <Button type="submit" className="rounded-full">
+            <Button type="submit" className="bg-everGreen hover:bg-lovely text-creamey rounded-full">
               Subscribe
             </Button>
           </form>
         </div>
-      </section> */}
+      </section>
     </div>
   );
 }

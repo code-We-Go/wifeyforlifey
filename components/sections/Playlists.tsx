@@ -12,18 +12,18 @@ const Playlists = () => {
     const featuredPlaylists = mockPlaylists.slice(0, 2);
 
   return (
-    <section className="py-16 bg-pinkey">
+    <section className="py-16 bg-lovely text-creamey">
     <div className="container-custom">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
         <div>
-          <h2 className="text-4xl md:text-5xl   font-display font-semibold text-lovely  mb-2">
+          <h2 className="text-4xl md:text-5xl   font-display font-semibold   mb-2">
             Featured Playlists
           </h2>
-          <p className="text-lovely/60">
+          <p className="text-creamey/60">
             Explore our curated video collections
           </p>
         </div>
-        <Button asChild variant="outline" className="mt-4 hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey md:mt-0">
+        <Button asChild variant="outline" className="mt-4 hover:bg-saga bg-everGreen hover:text-creamey border-0  text-creamey md:mt-0">
           <Link href="/playlists">
             View All <ArrowRight className="ml-2 h-4 w-4" />
           </Link>

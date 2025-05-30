@@ -323,7 +323,7 @@ function PlaylistsPage() {
 }
 
 export default function PlaylistPageWrapper(){
-  <Suspense fallback={<PlaylistsPageFallback />}>
+ return <Suspense fallback={<PlaylistsPageFallback />}>
       <PlaylistsPage />
     </Suspense>
 }

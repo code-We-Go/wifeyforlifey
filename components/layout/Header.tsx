@@ -33,15 +33,36 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { totalItems } = useCart();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
 
+
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Scrolling down, hide header
+        setIsVisible(false);
+      } else {
+        // Scrolling up, show header
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
 
   return (
     <header
@@ -49,7 +70,7 @@ export default function Header() {
         "sticky top-0 z-50 w-full transition-all duration-300 ease-in-out",
         isScrolled
           ? "bg-lovely/50 backdrop-blur-md shadow-sm"
-          : "bg-lovely"
+          : "bg-lovely" ,isVisible ? 'translate-y-0' : '-translate-y-16 md:-translate-y-32'
       )}
     >
       <div className=" mx-auto">

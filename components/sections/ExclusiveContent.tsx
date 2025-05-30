@@ -2,7 +2,7 @@ import React from 'react'
 import ProductCard from "@/components/shop/ProductCard";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
+import { ArrowRight, Star, TrendingUp, Video, ShoppingBag, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 
@@ -33,7 +33,7 @@ const ExclusiveContent = () => {
                 <span>Gehaz Planner – A complete household planning guide </span>
               </div>
               <div className="flex items-center">
-                <Video className="h-5 w-5 text-creamey mr-2" />
+                <Users  className="h-5 w-5 text-creamey mr-2" />
                 <span>Private WhatsApp Support Group</span>
               </div>
             </div>
@@ -43,10 +43,10 @@ const ExclusiveContent = () => {
           </div>
           <div className="relative border-2 border-creamey h-[400px] rounded-lg overflow-hidden">
             <Image
-              src="/unlock/sale.jpeg"
+              src="/unlock/2.jpeg"
               alt="Subscription Banner"
               fill
-              className="aspect-auto object-center rounded-lg"
+              className="aspect-auto  object-top rounded-lg"
             />
           </div>
         </div>
