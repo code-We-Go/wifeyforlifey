@@ -276,6 +276,7 @@ function Fullback (){
 
 export default function ShopPageWrapper(){
  return  <Suspense fallback={<Fullback/>}>
+  <ShopPage/>
   </Suspense>
 }
 

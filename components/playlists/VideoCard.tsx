@@ -20,7 +20,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-            <div className="h-14 w-14 rounded-full bg-white/80 flex items-center justify-center">
+            <div className="h-14 w-14 rounded-full  flex items-center justify-center">
               {playlist.requiresSubscription ? (
                 <Lock className="h-6 w-6 text-primary" />
               ) : (
@@ -29,7 +29,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             </div>
           </div>
         </div>
-        <div className="p-4">
+        <div className="p-4 ">
           <div className="flex items-center justify-between mb-2">
             <Badge variant="secondary" className="font-normal">
               {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}

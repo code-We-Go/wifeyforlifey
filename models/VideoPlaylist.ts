@@ -32,9 +32,10 @@ export const videoCategories = [
 export const mockPlaylists: VideoPlaylist[] = [
   {
     _id: '1',
-    title: 'Summer Makeup Tutorials',
+    title: 'Self-Care',
     description: 'Learn how to create beautiful summer makeup looks with these step-by-step tutorials.',
-    thumbnail: 'https://images.pexels.com/photos/2253832/pexels-photo-2253832.jpeg',
+    // thumbnail: 'https://images.pexels.com/photos/2253832/pexels-photo-2253832.jpeg',
+    thumbnail:"/video/1.png",
     category: 'beauty',
     requiresSubscription: true,
     videos: [
@@ -60,9 +61,9 @@ export const mockPlaylists: VideoPlaylist[] = [
   },
   {
     _id: '2',
-    title: 'DIY Room Decor Ideas',
+    title: 'Dinning & Kitchen',
     description: 'Transform your space with these easy and affordable DIY room decor projects.',
-    thumbnail: 'https://images.pexels.com/photos/4846461/pexels-photo-4846461.jpeg',
+    thumbnail: '/video/2.png',
     category: 'lifestyle',
     requiresSubscription: false,
     videos: [

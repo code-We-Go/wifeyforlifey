@@ -11,7 +11,7 @@ const FeaturedProducts = () => {
     .filter((product) => product.featured)
     .slice(0, 3);
   return (
-    <section className="  bg-creamey bg-opacity-50 bg-cover">
+    <section className="  bg-creamey ">
         {/* <div className='inset-0 bg-black/10 backdrop-blur-[4px]'> */}
     <div className="py-16 container-custom ">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">

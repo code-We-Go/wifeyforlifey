@@ -12,41 +12,41 @@ const ExclusiveContent = () => {
     <section className="bg-pattern1  ">
                 <div className='inset-0 w-full h-full py-16 bg-black/5 backdrop-blur-[3px]'>
 
-    <div className="container-custom">
-      <div className="bg-white rounded-2xl p-8 md:p-12 shadow-lg">
+    <div className="container-custom ">
+      <div className="bg-everGreen rounded-2xl p-8   shadow-lg">
         <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div className="space-y-6">
-            <h2 className="text-3xl font-display font-medium text-primary-foreground">
+          <div className="space-y-6 ">
+            <h2 className="text-3xl font-display font-medium text-creamey">
               Unlock Exclusive Content
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-creamey">
               Subscribe to gain access to premium video playlists,
               tutorials, and behind-the-scenes content.
             </p>
-            <div className="space-y-4">
+            <div className="space-y-4 text-creamey">
               <div className="flex items-center">
-                <Star className="h-5 w-5 text-primary mr-2" />
-                <span>Premium video tutorials</span>
+                <Video className="h-5 w-5 text-creamey mr-2" />
+                <span>Exclusive bridal video library</span>
               </div>
               <div className="flex items-center">
-                <TrendingUp className="h-5 w-5 text-primary mr-2" />
-                <span>Early access to new content</span>
+                <TrendingUp className="h-5 w-5 text-creamey mr-2" />
+                <span>Gehaz Planner – A complete household planning guide </span>
               </div>
               <div className="flex items-center">
-                <Video className="h-5 w-5 text-primary mr-2" />
-                <span>Exclusive behind-the-scenes</span>
+                <Video className="h-5 w-5 text-creamey mr-2" />
+                <span>Private WhatsApp Support Group</span>
               </div>
             </div>
-            <Button asChild size="lg" className="rounded-full">
+            <Button asChild size="lg" className="hover:bg-lovely bg-creamey hover:text-creamey text-everGreen rounded-full">
               <Link href="/subscribe">Subscribe Now</Link>
             </Button>
           </div>
-          <div className="relative h-[300px] rounded-lg overflow-hidden">
+          <div className="relative border-2 border-creamey h-[400px] rounded-lg overflow-hidden">
             <Image
-              src="https://images.pexels.com/photos/6457518/pexels-photo-6457518.jpeg"
+              src="/unlock/sale.jpeg"
               alt="Subscription Banner"
               fill
-              className="object-cover rounded-lg"
+              className="aspect-auto object-center rounded-lg"
             />
           </div>
         </div>

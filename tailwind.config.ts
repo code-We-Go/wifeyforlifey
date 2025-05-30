@@ -27,6 +27,7 @@ const config: Config = {
         creamey:"#FBF3E0",
         lovely:"#D32333",
         everGreen:"#12665C",
+        saga:"#81C8BB",
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

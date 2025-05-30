@@ -11,6 +11,7 @@ import HeroTwo from "@/components/sections/HeroTwo";
 import JoinNow from "@/components/sections/JoinNow";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import ExclusiveContent from "@/components/sections/ExclusiveContent";
+import Playlists from "@/components/sections/Playlists";
 
 export default function Home() {
   // Filter featured products
@@ -31,31 +32,7 @@ export default function Home() {
       <ExclusiveContent/>
 
       {/* Featured Playlists Section */}
-      <section className="py-16">
-        <div className="container-custom">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-            <div>
-              <h2 className="text-3xl font-display font-medium text-primary-foreground mb-2">
-                Featured Playlists
-              </h2>
-              <p className="text-muted-foreground">
-                Explore our curated video collections
-              </p>
-            </div>
-            <Button asChild variant="outline" className="mt-4 md:mt-0">
-              <Link href="/playlists">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {featuredPlaylists.map((playlist) => (
-              <VideoCard key={playlist._id} playlist={playlist} />
-            ))}
-          </div>
-        </div>
-      </section>
+<Playlists/>
 
       {/* Newsletter Section */}
       {/* <section className="bg-accent py-16">
