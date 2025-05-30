@@ -26,6 +26,7 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { mockProducts, productCategories, Product, ProductFilters } from "@/models/Product";
 import ProductCard from "@/components/shop/ProductCard";
+import { lifeyFont, thirdFont } from '@/fonts';
 
 function Fullback (){
   return <div>Loading ...</div>
@@ -108,7 +109,7 @@ function Fullback (){
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="flex flex-col space-y-4">
-          <h1 className="text-3xl md:text-4xl font-display font-medium">Shop</h1>
+          <h1 className={`${thirdFont.className} text-4xl md:text-5xl  text-everGreen font-semibold`}>Shop</h1>
           <p className="text-muted-foreground">
             Discover our curated collection of products designed just for you.
           </p>

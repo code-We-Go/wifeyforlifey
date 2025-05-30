@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import React from 'react'
 import ProductCard from '../shop/ProductCard';
+import { thirdFont } from '@/fonts';
 
 const FeaturedProducts = () => {
     const featuredProducts = mockProducts
@@ -16,7 +17,7 @@ const FeaturedProducts = () => {
     <div className="py-16 container-custom ">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
         <div>
-          <h2 className="text-4xl md:text-5xl   font-display font-semibold text-everGreen mb-2">
+          <h2 className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl  font-display font-semibold text-everGreen mb-2`}>
             Featured Products
           </h2>
           {/* <p className="text-creamey text">

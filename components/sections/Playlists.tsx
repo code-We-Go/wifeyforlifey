@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 import VideoCard from "@/components/playlists/VideoCard";
 import { mockPlaylists } from '@/models/VideoPlaylist';
+import { thirdFont } from '@/fonts';
 
 const Playlists = () => {
     const featuredPlaylists = mockPlaylists.slice(0, 2);
@@ -16,7 +17,7 @@ const Playlists = () => {
     <div className="container-custom">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
         <div>
-          <h2 className="text-4xl md:text-5xl   font-display font-semibold   mb-2">
+          <h2 className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl font-semibold   mb-2`}>
             Featured Playlists
           </h2>
           <p className="text-creamey/60">

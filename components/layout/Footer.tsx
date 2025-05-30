@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Instagram, Facebook, Twitter, Youtube, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { thirdFont } from "@/fonts";
 
 export default function Footer() {
   return (
@@ -9,7 +10,7 @@ export default function Footer() {
       <div className="container-custom py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="font-display text-xl">Wifey for Lifey – Your Bridal Era Bestie</h3>
+            <h3 className={`${thirdFont.className} text-xl lg:text-2xl  font-semibold`}>Wifey for Lifey – Your Bridal Era Bestie</h3>
             <p className=" text-sm">
             Wifey for Lifey isn’t just a brand — it’s a full support system designed to guide brides through every step of their wedding and home-prep journey. From engagement to honeymoon, we empower brides with tools, content, and emotional support to help them feel calm, confident, and in control.
             </p>

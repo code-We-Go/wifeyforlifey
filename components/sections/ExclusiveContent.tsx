@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { thirdFont } from '@/fonts';
 
 
 
@@ -16,7 +17,7 @@ const ExclusiveContent = () => {
       <div className="bg-everGreen rounded-2xl p-8   shadow-lg">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6 ">
-            <h2 className="text-3xl font-display font-medium text-creamey">
+              <h2 className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl text-creamey`}>
               Unlock Exclusive Content
             </h2>
             <p className="text-creamey">

@@ -36,7 +36,9 @@ export const mockProducts: Product[] = [
     name: 'Pastel Pink Cardigan',
     description: 'Soft and cozy pastel pink cardigan, perfect for layering. Made with premium cotton blend for ultimate comfort.',
     price: 39.99,
-    images: ['https://images.pexels.com/photos/7691096/pexels-photo-7691096.jpeg'],
+    images: ['https://images.pexels.com/photos/7691096/pexels-photo-7691096.jpeg',
+      'https://images.pexels.com/photos/7691096/pexels-photo-7691096.jpeg'
+    ],
     category: 'clothing',
     stock: 25,
     featured: true,
@@ -57,7 +59,10 @@ export const mockProducts: Product[] = [
     name: 'Rose Gold Earrings',
     description: 'Elegant rose gold earrings with small diamond accents. Perfect for everyday wear or special occasions.',
     price: 79.99,
-    images: ['https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg'],
+    images: ['https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
+      'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
+    '  https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg' 
+    ],
     category: 'accessories',
     stock: 15,
     featured: true,

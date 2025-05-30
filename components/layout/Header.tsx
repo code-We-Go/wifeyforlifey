@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { thirdFont } from "@/fonts";
 const navigation = [
   { name: "Home", href: "/" },
   { name: "Shop", href: "/shop" },
   { name: "Playlists", href: "/playlists" },
+  { name: "Deals", href: "/playlists", icon:<TicketPercent /> },
+
   { name: "About", href: "/about" },
 ];
 const leftNavigation = [
@@ -75,7 +78,8 @@ export default function Header() {
           : "bg-lovely" ,isVisible ? 'translate-y-0' : '-translate-y-16 md:-translate-y-32'
       )}
     >
-      <div className=" mx-auto">
+      {/* <div className="mx-auto"  > */}
+      <div className={`mx-auto ${thirdFont.className } text-6xl font-semibold`} >
         <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
  
 
@@ -161,7 +165,7 @@ export default function Header() {
               <SheetTitle className="hidden">test</SheetTitle>
               <SheetContent side="left" className="w-[300px] bg-lovely text-creamey sm:w-[400px]">
 
-                <div className="flex flex-col h-full py-6">
+                <div className={`${thirdFont.className} flex flex-col h-full py-6 `}>
                   <div className="flex items-center justify-between mb-8">
                     <Link href="/" className="font-display text-xl font-bold">
                     <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"} /> 
@@ -173,7 +177,7 @@ export default function Header() {
                         key={item.name}
                         href={item.href}
                         className={cn(
-                          "text-base font-medium  hover:text-red-900",
+                          "text-lg font-medium  hover:text-red-900",
                           pathname === item.href
                             ? "text-red-900"
                             : "text-creamey"
@@ -184,14 +188,19 @@ export default function Header() {
                       </Link>
                     ))}
                   </nav>
-                  <div className="mt-auto space-y-4">
-                    <Link href="/account" className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>Account</span>
+                  <div className="mt-auto text-lg space-y-4">
+                   
+                    <Link href="/cart" className="flex items-center space-x-2">
+                      <ShoppingBag className="h-5 w-5" />
+                      <span>Cart</span>
                     </Link>
                     <Link href="/wishlist" className="flex items-center space-x-2">
                       <Heart className="h-5 w-5" />
                       <span>Wishlist</span>
+                    </Link>
+                    <Link href="/account" className="flex items-center space-x-2">
+                      <User className="h-5 w-5" />
+                      <span>Account</span>
                     </Link>
                   </div>
                 </div>

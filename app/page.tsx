@@ -12,6 +12,7 @@ import JoinNow from "@/components/sections/JoinNow";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import ExclusiveContent from "@/components/sections/ExclusiveContent";
 import Playlists from "@/components/sections/Playlists";
+import { thirdFont } from "@/fonts";
 
 export default function Home() {
   // Filter featured products
@@ -37,7 +38,7 @@ export default function Home() {
       {/* Newsletter Section */}
       <section className="bg-creamey py-16">
         <div className="container-custom text-center ">
-          <h2 className="text-4xl md:text-5xl font-display font-semibold text-accent-foreground mb-4">
+          <h2 className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl font-semibold text-accent-foreground mb-4`}>
             Join Our Community
           </h2>
           <p className="text-muted-foreground mb-8">

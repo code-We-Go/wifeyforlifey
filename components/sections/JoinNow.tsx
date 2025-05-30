@@ -1,4 +1,4 @@
-import { lifeyFont } from '@/fonts'
+import { lifeyFont, thirdFont } from '@/fonts'
 import {  ShoppingBag, Video } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/button'
@@ -12,7 +12,7 @@ const JoinNow = () => {
     <div className="container-custom grid md:grid-cols-2 gap-8 items-center">
       <div className="space-y-6 md:pr-12">
         <h1
-          className={` text-4xl md:text-5xl lg:text-6xl  font-bold `}
+          className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl  font-bold `}
         >
           Subscribe Now & Join Our Club .
         </h1>
