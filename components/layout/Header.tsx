@@ -162,7 +162,7 @@ export default function Header() {
                 <div className="flex flex-col h-full py-6">
                   <div className="flex items-center justify-between mb-8">
                     <Link href="/" className="font-display text-xl font-bold">
-                    <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/Wifey for Lifey Primary Logo Cream.png"} /> 
+                    <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"} /> 
                     </Link>
                   </div>
                   <nav className="flex flex-col space-y-6">
@@ -197,7 +197,7 @@ export default function Header() {
             </Sheet>
             <Link href="/" className="  lg:flex-shrink-0  items-center px-8 lg:px-16 space-x-2">
               
-              <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/Wifey for Lifey Primary Logo Cream.png"} /> 
+              <Image className="aspect-auto" alt="logo" width={200} height={150} src={"/logo/WifeyforLifeyPrimaryLogoCream.png"} /> 
           </Link>
             <div className="w-4"></div>
             {/* <Link href="/cart" className="relative mr-4">
