@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/providers/CartProvider";
+import { thirdFont } from "@/fonts";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart();
@@ -50,7 +51,7 @@ export default function CartPage() {
   return (
     <div className="container-custom py-8 md:py-12">
       <div className="flex items-center mb-8">
-        <h1 className="text-3xl font-display font-medium">Shopping Cart</h1>
+        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl font-display font-semibold`}>Shopping Cart</h1>
         <span className="ml-2 text-muted-foreground">
           ({totalItems} {totalItems === 1 ? "item" : "items"})
         </span>
@@ -60,34 +61,43 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-6">
           <div className="hidden md:grid grid-cols-12 gap-4 text-sm text-muted-foreground mb-2">
-            <div className="col-span-6">Product</div>
+            <div className="col-span-5 text-center">Product</div>
+            <div className="col-span-2 text-center">Variants</div>
             <div className="col-span-2 text-center">Quantity</div>
-            <div className="col-span-2 text-center">Price</div>
-            <div className="col-span-2 text-right">Total</div>
+            <div className="col-span-1 text-center">Price</div>
+            <div className="col-span-1 text-right">Total</div>
           </div>
 
           <Separator className="hidden md:block" />
 
-          {items.map((item) => (
-            <div key={item.productId} className="bg-card rounded-lg p-4 md:p-6 shadow-sm">
+          {items.map((item,index) => (
+            <div key={index} className="bg-card bg-everGreen text-creamey rounded-lg p-4 md:p-6 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 {/* Product */}
-                <div className="md:col-span-6 flex items-center space-x-4">
+                <div className="md:col-span-5 flex items-center space-x-4">
                   <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
                     <Image
-                      src={item.image}
-                      alt={item.name}
+                      src={item.imageUrl}
+                      alt={item.productName}
                       fill
                       className="object-cover rounded-md"
                     />
                   </div>
                   <div>
-                    <h3 className="font-medium line-clamp-1">{item.name}</h3>
-                    <p className="text-sm text-muted-foreground md:hidden">
+                    <h5 className="font-medium line-clamp-1">{item.productName}</h5>
+                    {/* <p className="text-sm text-muted-foreground md:hidden">
                       ${item.price.toFixed(2)}
-                    </p>
+                    </p> */}
                   </div>
+
                 </div>
+                <div className="md:col-span-1 hidden md:block text-center">
+                  {item.variant.name}
+                </div>
+                <div className="md:col-span-1 hidden md:block text-center">
+                  {item.attributes.name}
+                </div>
+
 
                 {/* Quantity */}
                 <div className="md:col-span-2 flex items-center justify-between md:justify-center">
@@ -100,11 +110,11 @@ export default function CartPage() {
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => 
-                        updateQuantity(item.productId, Math.max(1, item.quantity - 1))
+                        updateQuantity(item.productId, Math.max(1, item.quantity - 1),item.variant, item.attributes)
                       }
                     >
                       <span className="sr-only">Decrease quantity</span>
-                      <span aria-hidden>-</span>
+                      <span className="text-everGreen" aria-hidden>-</span>
                     </Button>
                     <span className="w-10 text-center">{item.quantity}</span>
                     <Button
@@ -112,17 +122,17 @@ export default function CartPage() {
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => 
-                        updateQuantity(item.productId, item.quantity + 1)
+                        updateQuantity(item.productId, item.quantity + 1,item.variant,item.attributes)
                       }
                     >
                       <span className="sr-only">Increase quantity</span>
-                      <span aria-hidden>+</span>
+                      <span className="text-everGreen" aria-hidden>+</span>
                     </Button>
                   </div>
                 </div>
 
                 {/* Price */}
-                <div className="md:col-span-2 hidden md:block text-center">
+                <div className="md:col-span-1 hidden md:block text-center">
                   ${item.price.toFixed(2)}
                 </div>
 
@@ -139,7 +149,7 @@ export default function CartPage() {
                       variant="ghost"
                       size="icon"
                       className="ml-2 h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.productId,item.variant,item.attributes)}
                     >
                       <Trash2 className="h-4 w-4" />
                       <span className="sr-only">Remove item</span>
@@ -161,27 +171,27 @@ export default function CartPage() {
         </div>
 
         {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="bg-card rounded-lg p-6 shadow-sm sticky top-24">
+        <div className="lg:col-span-1 ">
+          <div className="bg-card rounded-lg p-6 shadow-sm sticky bg-everGreen text-creamey top-24">
             <h2 className="text-xl font-medium mb-4">Order Summary</h2>
             
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-gray-50">Subtotal</span>
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-gray-50">Shipping</span>
                 <span>
                   {shipping === 0 ? (
-                    <span className="text-green-600">Free</span>
+                    <span className="text-gray-50">Calculated at checkout</span>
                   ) : (
                     `$${shipping.toFixed(2)}`
                   )}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tax (10%)</span>
+                <span className="text-gray-50">Tax (10%)</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
 
@@ -206,21 +216,22 @@ export default function CartPage() {
                   type="submit" 
                   variant="outline"
                   disabled={!couponCode || isApplying}
+                  className="text-creamey bg-everGreen hover:bg-lovely"
                 >
                   Apply
                 </Button>
               </div>
             </form>
 
-            <Button className="w-full mt-6 rounded-full" size="lg" asChild>
+            <Button className="w-full hover:bg-saga text-creamey bg-lovely/90 mt-6 rounded-full" size="lg" asChild>
               <Link href="/checkout">
                 <CreditCard className="mr-2 h-5 w-5" />
                 Checkout
               </Link>
             </Button>
 
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Secure checkout powered by Paymob
+            <p className="text-xs text-gray-50 text-center mt-4">
+              Secure online payment powered by Paymob
             </p>
           </div>
         </div>

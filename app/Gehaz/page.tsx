@@ -20,7 +20,7 @@ function Image({ id }: { id: number }) {
 
     return (
         <section className="img-container pt-16 md:pt-32">
-            <div ref={ref}>
+            {/* <div ref={ref}>
                 <img
                     src={`/photos/cityscape/${id}.jpg`}
                     alt="A London skyscraper"
@@ -31,7 +31,7 @@ function Image({ id }: { id: number }) {
                 initial={{ visibility: "hidden" }}
                 animate={{ visibility: "visible" }}
                 style={{ y }}
-            >{`#00${id}`}</motion.h2>
+            >{`#00${id}`}</motion.h2> */}
         </section>
     )
 }

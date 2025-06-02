@@ -1,5 +1,5 @@
 "use client";
-import {Suspense} from 'react'
+import {Suspense, useContext} from 'react'
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -24,15 +24,19 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { mockProducts, productCategories, Product, ProductFilters } from "@/models/Product";
+import { mockProducts, productCategories, ProductFilters } from "@/models/Product";
+import { Product } from '../interfaces/interfaces';
 import ProductCard from "@/components/shop/ProductCard";
 import { lifeyFont, thirdFont } from '@/fonts';
+import { wishListContext } from "@/app/context/wishListContext";
+
 
 function Fullback (){
   return <div>Loading ...</div>
 }
 
  function ShopPage() {
+  const { wishList, setWishList } = useContext(wishListContext);
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
@@ -51,13 +55,13 @@ function Fullback (){
     let result = [...mockProducts];
     
     // Filter by category
-    if (filters.category) {
-      result = result.filter(product => product.category === filters.category);
-    }
+    // if (filters.category) {
+    //   result = result.filter(product => product.category === filters.category);
+    // }
     
     // Filter by price range
     result = result.filter(
-      product => product.price >= (filters.minPrice || 0) && product.price <= (filters.maxPrice || 100)
+      product => product.price.local >= (filters.minPrice || 0) && product.price.local <= (filters.maxPrice || 100)
     );
     
     // Filter by search term
@@ -65,16 +69,16 @@ function Fullback (){
       const searchLower = filters.search.toLowerCase();
       result = result.filter(
         product => 
-          product.name.toLowerCase().includes(searchLower) || 
+          product.title.toLowerCase().includes(searchLower) || 
           product.description.toLowerCase().includes(searchLower)
       );
     }
     
     // Sort products
     if (filters.sortBy === "price_asc") {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => a.price.local - b.price.local);
     } else if (filters.sortBy === "price_desc") {
-      result.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => b.price.local - a.price.local);
     } else if (filters.sortBy === "popular") {
       result.sort((a, b) => (b.ratings || 0) - (a.ratings || 0));
     } else {
@@ -101,7 +105,7 @@ function Fullback (){
 
   // Find min and max price in the product list
   const maxProductPrice = Math.ceil(
-    Math.max(...mockProducts.map(product => product.price))
+    Math.max(...mockProducts.map(product => product.price.local))
   );
 
   return (
@@ -228,7 +232,7 @@ function Fullback (){
             {filters.category && (
               <Badge 
                 onClick={() => updateFilter("category", "")} 
-                className="cursor-pointer"
+                className="cursor-pointer bg-pinkey"
               >
                 {productCategories.find(c => c.id === filters.category)?.name}
                 <X className="ml-1 h-3 w-3" />
@@ -240,7 +244,7 @@ function Fullback (){
                   updateFilter("minPrice", 0);
                   updateFilter("maxPrice", maxProductPrice);
                 }} 
-                className="cursor-pointer"
+                className="cursor-pointer bg-pinkey"
               >
                 Price: ${filters.minPrice} - ${filters.maxPrice}
                 <X className="ml-1 h-3 w-3" />
@@ -252,9 +256,19 @@ function Fullback (){
         {/* Products Grid */}
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
+            {filteredProducts.map((product) => {
+                 const productID = product._id;
+                 const fav = wishList.find(
+                   (favorite) => favorite.productId === productID
+                 );
+                 return (
+                   <ProductCard
+                     key={product._id}
+                     product={product}
+                     favorite={fav ? true : false}
+                   />
+                 );
+ })}
           </div>
         ) : (
           <div className="text-center py-12">
@@ -290,7 +304,7 @@ function Badge({
   return (
     <div 
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-secondary text-secondary-foreground", 
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-pinkey text-lovely ", 
         className
       )} 
       {...props}

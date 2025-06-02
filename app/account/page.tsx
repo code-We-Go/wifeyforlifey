@@ -1,6 +1,33 @@
+'use client'
+
 import { UserCircle, Heart, ShoppingBag, Gift } from 'lucide-react';
+import { useEffect } from 'react';
+import { ConnectDB } from '../config/db';
+import axios from 'axios'
 
 export default function AccountPage() {
+  useEffect(() => {
+    
+
+    const testDB = async () => {
+      try {
+        const res = await axios(`/api/db`);
+     
+      } catch (error) {
+        console.error( error);
+      }
+      // try {
+      //   const res = await axios(`/api/categoryProducts?categoryID=${categoryID}`);
+      //   const data = res.data.data;
+      //   console.log('categoryProducts'+data.length)
+      //   setProductList(data);
+      // } catch (error) {
+      //   console.error("Error fetching category data:", error);
+      // }
+    };
+    testDB()
+  }, [])
+  
   // This would typically come from your authentication system
   const user = {
     name: 'John Doe',

@@ -18,6 +18,7 @@ import { mockProducts } from "@/models/Product";
 import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/shop/ProductCard";
+import { Product, Variant } from "@/app/interfaces/interfaces";
 
 export default function ProductPage() {
   const params = useParams();
@@ -27,7 +28,11 @@ export default function ProductPage() {
 
   const product = mockProducts.find((p) => p._id === productId);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(product?.variations[0]);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedAttribute, setSelectedAttribute] = useState<{ name: string; stock: number } | undefined>(
+    selectedVariant?.attributes[0]
+  );
 
   if (!product) {
     return (
@@ -44,22 +49,44 @@ export default function ProductPage() {
     );
   }
 
-  const incrementQuantity = () => setQuantity((prev) => prev + 1);
-  const decrementQuantity = () =>
+  const incrementQuantity = () => {
+    if (selectedAttribute && quantity < selectedAttribute.stock) {
+      setQuantity((prev) => prev + 1);
+    }
+  };
+
+  const decrementQuantity = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
+  const handleVariantChange = (variant: Variant) => {
+    setSelectedVariant(variant);
+    setSelectedAttribute(variant.attributes[0]);
+    setSelectedImage(0);
+    setQuantity(1);
+  };
+
+  const handleAttributeChange = (attribute: { name: string; stock: number }) => {
+    setSelectedAttribute(attribute);
+    setQuantity(1);
+  };
 
   const handleAddToCart = () => {
+    if (!selectedVariant || !selectedAttribute) return;
+
     addItem({
-      productId: product._id || "",
-      name: product.name,
-      price: product.price,
-      image: product.images[0],
-      quantity,
+      productId: product._id,
+      productName: product.title,
+      price: product.price.local,
+      attributes:selectedAttribute,
+      variant:selectedVariant,
+      imageUrl: selectedVariant.images[0].url,
+      quantity
     });
 
     toast({
       title: "Added to cart",
-      description: `${product.name} (${quantity} ${
+      description: `${product.title} (${quantity} ${
         quantity === 1 ? "item" : "items"
       }) has been added to your cart.`,
     });
@@ -67,7 +94,7 @@ export default function ProductPage() {
 
   // Related products (simple implementation: same category but different product)
   const relatedProducts = mockProducts
-    .filter((p) => p.category === product.category && p._id !== product._id)
+    .filter((p) => p.categoryID === product.categoryID && p._id !== product._id)
     .slice(0, 4);
 
   return (
@@ -99,11 +126,11 @@ export default function ProductPage() {
               <div className="flex items-center">
                 <span className="mx-2 text-muted-foreground">/</span>
                 <Link
-                  href={`/shop?category=${product.category}`}
+                  href={`/shop?category=${product.categoryID}`}
                   className="text-muted-foreground hover:text-foreground text-sm"
                 >
-                  {product.category.charAt(0).toUpperCase() +
-                    product.category.slice(1)}
+                  {product.categoryID.charAt(0).toUpperCase() +
+                    product.categoryID.slice(1)}
                 </Link>
               </div>
             </li>
@@ -111,7 +138,7 @@ export default function ProductPage() {
               <div className="flex items-center">
                 <span className="mx-2 text-muted-foreground">/</span>
                 <span className="text-sm font-medium text-foreground line-clamp-1">
-                  {product.name}
+                  {product.title}
                 </span>
               </div>
             </li>
@@ -134,17 +161,19 @@ export default function ProductPage() {
         {/* Product Images */}
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-            <Image
-              src={product.images[selectedImage]}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
+            {selectedVariant && (
+              <Image
+                src={selectedVariant.images[selectedImage].url}
+                alt={product.title}
+                fill
+                className="object-cover"
+              />
+            )}
           </div>
 
-          {product.images.length > 1 && (
+          {selectedVariant && selectedVariant.images.length > 1 && (
             <div className="flex space-x-2 overflow-auto pb-1">
-              {product.images.map((image, index) => (
+              {selectedVariant.images.map((image, index) => (
                 <button
                   key={index}
                   className={`relative w-20 h-20 rounded-md overflow-hidden border-2 ${
@@ -155,8 +184,8 @@ export default function ProductPage() {
                   onClick={() => setSelectedImage(index)}
                 >
                   <Image
-                    src={image}
-                    alt={`${product.name} - Image ${index + 1}`}
+                    src={image.url}
+                    alt={`${product.title} - Image ${index + 1}`}
                     fill
                     className="object-cover"
                   />
@@ -170,7 +199,7 @@ export default function ProductPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-display font-medium">
-              {product.name}
+              {product.title}
             </h1>
             <div className="flex items-center mt-2">
               <div className="flex items-center mr-2">
@@ -186,16 +215,54 @@ export default function ProductPage() {
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">
-                {product.ratings} ({product.reviews?.length || 0} reviews)
+                {product.ratings} ratings
               </span>
             </div>
           </div>
 
           <div className="text-2xl font-medium">
-            ${product.price.toFixed(2)}
+            LE{product.price.local.toFixed(2)}
           </div>
 
           <p className="text-muted-foreground">{product.description}</p>
+
+          {/* Variants Selection */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Variants</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.variations.map((variant, index) => (
+                  <Button
+                    key={index}
+                    variant={selectedVariant === variant ? "default" : "outline"}
+                    onClick={() => handleVariantChange(variant)}
+                    className="rounded-full"
+                  >
+                    {variant.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {selectedVariant && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">{selectedVariant.attributeName}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVariant.attributes.map((attr, index) => (
+                    <Button
+                      key={index}
+                      variant={selectedAttribute === attr ? "default" : "outline"}
+                      onClick={() => handleAttributeChange(attr)}
+                      className="rounded-full"
+                      disabled={attr.stock <= 0}
+                    >
+                      {attr.name} 
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div>
             <div className="text-sm font-medium mb-2">Quantity</div>
@@ -214,27 +281,30 @@ export default function ProductPage() {
                 variant="outline"
                 size="icon"
                 onClick={incrementQuantity}
-                disabled={quantity >= product.stock}
+                disabled={!selectedAttribute || quantity >= selectedAttribute.stock}
               >
                 <span className="sr-only">Increase quantity</span>
                 <span aria-hidden>+</span>
               </Button>
-              <span className="text-sm text-muted-foreground ml-2">
-                {product.stock} available
-              </span>
+              {selectedAttribute && (
+                <span className="text-sm text-muted-foreground ml-2">
+                  {selectedAttribute.stock} available
+                </span>
+              )}
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
             <Button
               size="lg"
-              className="rounded-full"
+              className="rounded-full bg-lovely hover:bg-everGreen text-creamey"
               onClick={handleAddToCart}
+              disabled={!selectedVariant || !selectedAttribute}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Add to Cart
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full">
+            <Button size="lg" variant="outline" className="bg-lovely hover:bg-everGreen text-creamey hover:text-creamey rounded-full">
               <Heart className="mr-2 h-5 w-5" />
               Add to Wishlist
             </Button>
@@ -261,68 +331,32 @@ export default function ProductPage() {
           <TabsList className="w-full justify-start border-b rounded-none">
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="py-4">
             <div className="prose max-w-none">
               <p>{product.description}</p>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-                in dui mauris. Vivamus hendrerit arcu sed erat molestie
-                vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh
-                porttitor. Ut in nulla enim.
-              </p>
             </div>
           </TabsContent>
           <TabsContent value="details" className="py-4">
             <div className="space-y-4">
               <h3 className="font-medium">Product Details</h3>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Category: {product.category}</li>
-                <li>Stock: {product.stock} units</li>
-                <li>Rating: {product.ratings} / 5</li>
-                <li>Material: Premium Quality</li>
-                <li>Style: Modern</li>
+                {product.productDetails.map((detail, index) => (
+                  <li key={index}>{detail}</li>
+                ))}
               </ul>
-            </div>
-          </TabsContent>
-          <TabsContent value="reviews" className="py-4">
-            <div className="space-y-6">
-              <h3 className="font-medium">Customer Reviews</h3>
-              {product.reviews && product.reviews.length > 0 ? (
-                <div className="space-y-4">
-                  {product.reviews.map((review, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="font-medium">{review.username}</div>
-                          <div className="flex mt-1">
-                            {Array.from({ length: 5 }).map((_, idx) => (
-                              <Star
-                                key={idx}
-                                className={`h-4 w-4 ${
-                                  idx < review.rating
-                                    ? "text-yellow-400 fill-yellow-400"
-                                    : "text-muted-foreground"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(review.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                      <p className="mt-2 text-muted-foreground">
-                        {review.comment}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No reviews yet. Be the first to review this product!</p>
-              )}
-              <Button>Write a Review</Button>
+              <h3 className="font-medium mt-6">Product Care</h3>
+              <ul className="list-disc pl-5 space-y-2">
+                {product.productCare.map((care, index) => (
+                  <li key={index}>{care}</li>
+                ))}
+              </ul>
+              <h3 className="font-medium mt-6">Dimensions</h3>
+              <ul className="list-disc pl-5 space-y-2">
+                {product.productDimensions.map((dimension, index) => (
+                  <li key={index}>{dimension}</li>
+                ))}
+              </ul>
             </div>
           </TabsContent>
         </Tabs>
@@ -336,7 +370,7 @@ export default function ProductPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
+              <ProductCard key={product._id} product={product} favorite={false} />
             ))}
           </div>
         </div>

@@ -2,12 +2,15 @@ import { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { AuthProvider } from "@/providers/AuthProvider";
 import { CartProvider } from "@/providers/CartProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import localFonts from "next/font/local";
+import UserProvider from "./UserProvider";
+import WishListProvider from "./WishListProvider";
+import { ModalProvider } from "./context/ModalContext";
+import ProductModal from "@/components/shop/ProductModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,16 +48,21 @@ export default function RootLayout({
           defaultTheme="light"
           enableSystem={false}
         >
-          {/* <AuthProvider> */}
+          <UserProvider>
             <CartProvider>
-              <div className="flex min-h-screen w-full flex-col">
-                <Header />
-                <main className="flex-1 w-full">{children}</main>
-                <Footer />
-              </div>
-              <Toaster />
+              <WishListProvider>
+                <ModalProvider>
+                  <div className="relative flex min-h-screen flex-col">
+                    <Header />
+                    <main className="flex-1">{children}</main>
+                    <Footer />
+                  </div>
+                  <ProductModal />
+                  <Toaster />
+                </ModalProvider>
+              </WishListProvider>
             </CartProvider>
-          {/* </AuthProvider> */}
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

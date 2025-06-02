@@ -1,13 +1,13 @@
 "use client";
 
-import { CartItem } from "@/models/User";
+import { attribute, CartItem, Variant } from "@/app/interfaces/interfaces";
 import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (productId: string , variant:Variant ,attribute:attribute) => void;
+  updateQuantity: (productId: string, quantity: number,variant:Variant ,attribute:attribute) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -37,7 +37,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.productId === item.productId);
+      const existingItem = prevItems.find((i) => (i.productId === item.productId && i.attributes.name === item.attributes.name));
       if (existingItem) {
         return prevItems.map((i) =>
           i.productId === item.productId
@@ -49,19 +49,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prevItems) => prevItems.filter((i) => i.productId !== productId));
+  const removeItem = (productId: string,variant:Variant ,attribute:attribute) => {
+    setItems((prevItems) => prevItems.filter((i) => (i.productId !== productId && i.attributes !== attribute && i.variant !== variant)));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeItem(productId);
-      return;
-    }
+  const updateQuantity = (productId: string, quantity: number,variant:Variant ,attribute:attribute) => {
+    // if (quantity <= 0) {
+    //   removeItem(productId);
+    //   return;
+    // }
     
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+       ( item.productId === productId  && item.attributes === attribute && item.variant === variant)? { ...item, quantity } : item
       )
     );
   };
