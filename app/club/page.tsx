@@ -10,6 +10,7 @@ import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carouse
 import Image from "next/image";
 import { EmblaOptionsType } from 'embla-carousel'
 import EmblaCarouselAutoScroll from "@/components/embla/EmblaCarouselAutoScroll";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const OPTIONS: EmblaOptionsType = { loop: true }
 
@@ -19,7 +20,7 @@ const ClubPage = () => {
   const MotionSection = motion<'section'>('section');
 
   return (
-    <div className="container-custom py-16 max-lg:max-w-6xl xl:max-w-7xl  mx-auto">
+    <div className="container-custom py-16 max-lg:max-w-6xl xl:max-w-7xl mx-auto overflow-x-hidden">
       <MotionSection 
   variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
@@ -36,6 +37,19 @@ const ClubPage = () => {
         <p className="text-lg text-gray-600 leading-relaxed">
           Planning your wedding and building your home shouldn&apos;t feel overwhelming or lonely. That&apos;s why Wifey for Lifey offers every bride a personalized experience that guides, supports, and celebrates you through every step — from confusion to confidence, from &quot;I don&apos;t know where to start&quot; to &quot;I&apos;ve got this!&quot;
         </p>
+        <div className="mt-8">
+          <EmblaCarouselAutoScroll
+            slides={[
+              <div key={1} className="relative h-[400px]">
+                <Image src="/joinNow/Brid and Bridesmaids.png" alt="Welcome to Wifey Experience" fill className="object-cover rounded-lg" />
+              </div>,
+              <div key={2} className="relative h-[400px]">
+                <Image src="/joinNow/Brid and Bridesmaids.png" alt="Bridal Support System" fill className="object-cover rounded-lg" />
+              </div>
+            ]}
+            options={OPTIONS}
+          />
+        </div>
       </MotionSection>
 
       <MotionSection 
@@ -53,6 +67,28 @@ const ClubPage = () => {
         <p className="text-lg text-gray-600 leading-relaxed mb-8">
           Here&apos;s what you get when you join The Wifey Experience:
         </p>
+        <div className="grid grid-cols-2 gap-4 mt-8">
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="relative h-[300px] cursor-pointer hover:opacity-90 transition-opacity">
+                <Image src="/joinNow/Brid and Bridesmaids.png" alt="Wifey Experience" fill className="object-cover rounded-lg" />
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
+              <Image src="/joinNow/Brid and Bridesmaids.png" alt="Wifey Experience" width={1200} height={800} className="rounded-lg" />
+            </DialogContent>
+          </Dialog>
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="relative h-[300px] cursor-pointer hover:opacity-90 transition-opacity">
+                <Image src="/joinNow/Brid and Bridesmaids.png" alt="Wifey Experience" fill className="object-cover rounded-lg" />
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
+              <Image src="/joinNow/experience-2.jpg" alt="Wifey Experience" width={1200} height={800} className="rounded-lg" />
+            </DialogContent>
+          </Dialog>
+        </div>
       </MotionSection>
 
       <MotionSection 
@@ -77,36 +113,19 @@ const ClubPage = () => {
         </div>
         <div className="w-full md:w-1/2">
           <EmblaCarouselAutoScroll
-          slides={[    
-         <div key={1}>
-            <Image  src="/joinNow/Brid and Bridesmaids.png" alt="Gehaz Planner" width={500} height={500} />
-          </div>,
-         
-          
-            <div key={2}>
-            <Image  src="/joinNow/Brid and Bridesmaids.png" alt="Gehaz Planner" width={400} height={500} />
-            </div>,
-          <div key={3}> 
-                    <Image  src="/joinNow/Brid and Bridesmaids.png" alt="Gehaz Planner" width={300} height={500} />
-          </div>
-          ]}
-          options={OPTIONS}
+            slides={[
+              <div key={1} className="relative h-[400px]">
+                <Image src="/joinNow/planner-1.jpg" alt="Gehaz Planner" fill className="object-cover rounded-lg" />
+              </div>,
+              <div key={2} className="relative h-[400px]">
+                <Image src="/joinNow/planner-2.jpg" alt="Planner Details" fill className="object-cover rounded-lg" />
+              </div>,
+              <div key={3} className="relative h-[400px]">
+                <Image src="/joinNow/planner-3.jpg" alt="Planner Features" fill className="object-cover rounded-lg" />
+              </div>
+            ]}
+            options={OPTIONS}
           />
-          {/* <Carousel opts={OPTIONS}>
-          <CarouselContent className="w-full h-full">
-
-         
-            <CarouselItem>
-              <Image src="/joinNow/Brid and Bridesmaids.png" alt="Gehaz Planner" width={500} height={500} />
-            </CarouselItem>
-            <CarouselItem>
-              <Image src="/joinNow/Brid and Bridesmaids.png" alt="Gehaz Planner" width={400} height={500} />
-            </CarouselItem>
-            <CarouselItem>
-              <Image src="/joinNow/Brid and Bridesmaids.png" alt="Gehaz Planner" width={300} height={500} />
-            </CarouselItem>
-            </CarouselContent>
-          </Carousel> */}
         </div>
       </MotionSection>
 
@@ -131,6 +150,38 @@ const ClubPage = () => {
         <p className="text-lg text-gray-600 leading-relaxed">
           Because when you know better, you buy better — and no Facebook comment MotionSection can shake you. 💅
         </p>
+        <div className="mt-8 grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((num) => (
+            <Dialog key={num}>
+              <DialogTrigger asChild>
+                <div className="relative h-[250px] cursor-pointer hover:opacity-90 transition-opacity">
+                  <Image 
+                    src={`/joinNow/video-${num}.jpg`} 
+                    alt={`Video Preview ${num}`} 
+                    fill 
+                    className="object-cover rounded-lg"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-lovely" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <div className="aspect-video">
+                  <iframe 
+                    className="w-full h-full rounded-lg"
+                    src={`https://www.youtube.com/embed/VIDEO_ID_${num}`}
+                    allowFullScreen
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          ))}
+        </div>
       </MotionSection>
 
       <MotionSection 
@@ -148,6 +199,33 @@ const ClubPage = () => {
         <p className="text-lg text-gray-600 leading-relaxed">
           You&apos;ll get access to exclusive discounts and special offers made just for our brides. So when you&apos;re ready to shop, you know where to go (and who to avoid 👀). - no sponsorship fluff
         </p>
+        <div className="mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((num) => (
+              <Dialog key={num}>
+                <DialogTrigger asChild>
+                  <div className="relative h-[200px] cursor-pointer hover:opacity-90 transition-opacity">
+                    <Image 
+                      src={`/joinNow/discount-${num}.jpg`} 
+                      alt={`Discount Partner ${num}`} 
+                      fill 
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <Image 
+                    src={`/joinNow/discount-${num}.jpg`} 
+                    alt={`Discount Partner ${num}`} 
+                    width={1200} 
+                    height={800} 
+                    className="rounded-lg"
+                  />
+                </DialogContent>
+              </Dialog>
+            ))}
+          </div>
+        </div>
       </MotionSection>
 
       <MotionSection 
@@ -176,6 +254,19 @@ const ClubPage = () => {
           <p className="text-lg text-gray-600 leading-relaxed">• Emotional check-ins</p>
           <p className="text-lg text-gray-600 leading-relaxed">• Real answers to &quot;is it just me or…?&quot;</p>
         </div>
+        <div className="mt-8">
+          <EmblaCarouselAutoScroll
+            slides={[
+              <div key={1} className="relative h-[400px]">
+                <Image src="/joinNow/support-1.jpg" alt="Support Circle" fill className="object-cover rounded-lg" />
+              </div>,
+              <div key={2} className="relative h-[400px]">
+                <Image src="/joinNow/support-2.jpg" alt="Community Support" fill className="object-cover rounded-lg" />
+              </div>
+            ]}
+            options={OPTIONS}
+          />
+        </div>
       </MotionSection>
 
       <MotionSection className="mb-12">
@@ -185,6 +276,30 @@ const ClubPage = () => {
         <p className="text-lg text-gray-600 leading-relaxed">
           Because it feels like having a real-life bridal bestie who&apos;s been through it all — organized everything for you, explained every detail, and never judged you for feeling overwhelmed.
         </p>
+        <div className="mt-8">
+          <div className="grid grid-cols-2 gap-4">
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="relative h-[300px] cursor-pointer hover:opacity-90 transition-opacity">
+                  <Image src="/joinNow/different-1.jpg" alt="Why It's Different" fill className="object-cover rounded-lg" />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <Image src="/joinNow/different-1.jpg" alt="Why It's Different" width={1200} height={800} className="rounded-lg" />
+              </DialogContent>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="relative h-[300px] cursor-pointer hover:opacity-90 transition-opacity">
+                  <Image src="/joinNow/different-2.jpg" alt="Personal Experience" fill className="object-cover rounded-lg" />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <Image src="/joinNow/different-2.jpg" alt="Personal Experience" width={1200} height={800} className="rounded-lg" />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       </MotionSection>
 
       <MotionSection className="text-center bg-pinkey p-8 rounded-lg">
@@ -206,7 +321,7 @@ const ClubPage = () => {
         <Button
             asChild
             variant="outline"
-            className="hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey  mt-4 "
+            className="bg-everGreen hover:text-creamey border-0 hover:bg-lovely text-creamey  mt-4 "
           >
             <Link href="/subscribtion">
               Join Now <ArrowRight className=" ml-2 h-4 w-4" />

@@ -29,7 +29,7 @@ export const mockProducts: Product[] = [
         name: "Pastel Pink",
         attributeName:"Size",
         attributes: [
-          { name: "Siz", stock: 10 },
+          { name: "S", stock: 10 },
           { name: "M", stock: 15 },
           { name: "L", stock: 5 },
         ],

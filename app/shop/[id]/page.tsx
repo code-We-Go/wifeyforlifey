@@ -19,8 +19,10 @@ import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/shop/ProductCard";
 import { Product, Variant } from "@/app/interfaces/interfaces";
+import { thirdFont } from "@/fonts";
 
 export default function ProductPage() {
+
   const params = useParams();
   const productId = params.id as string;
   const { toast } = useToast();
@@ -33,6 +35,24 @@ export default function ProductPage() {
   const [selectedAttribute, setSelectedAttribute] = useState<{ name: string; stock: number } | undefined>(
     selectedVariant?.attributes[0]
   );
+  const handleShare = async () => {
+    const productUrl = `${window.location.origin}/shop/${productId}`;
+
+    try {
+      await navigator.clipboard.writeText(productUrl);
+      toast({
+        title: "Link Copied",
+        description: "Product link has been copied to your clipboard.",
+        variant: "added", // Use success variant (add to toastVariants if needed)
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy the link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!product) {
     return (
@@ -198,10 +218,10 @@ export default function ProductPage() {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-display font-medium">
+            <h1 className={`${thirdFont.className} text-everGreen tracking-normal text-4xl font-display font-medium`}>
               {product.title}
             </h1>
-            <div className="flex items-center mt-2">
+            {/* <div className="flex items-center mt-2">
               <div className="flex items-center mr-2">
                 {Array.from({ length: 5 }).map((_, index) => (
                   <Star
@@ -217,7 +237,7 @@ export default function ProductPage() {
               <span className="text-sm text-muted-foreground">
                 {product.ratings} ratings
               </span>
-            </div>
+            </div> */}
           </div>
 
           <div className="text-2xl font-medium">
@@ -317,7 +337,8 @@ export default function ProductPage() {
               <Truck className="h-5 w-5 mr-2 text-muted-foreground" />
               <span className="text-sm">Free shipping on orders over $50</span>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center hover:cursor-pointer"
+            onClick={handleShare}>
               <Share2 className="h-5 w-5 mr-2 text-muted-foreground" />
               <span className="text-sm">Share this product</span>
             </div>

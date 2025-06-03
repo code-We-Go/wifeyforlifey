@@ -50,14 +50,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = (productId: string,variant:Variant ,attribute:attribute) => {
-    setItems((prevItems) => prevItems.filter((i) => (i.productId !== productId && i.attributes !== attribute && i.variant !== variant)));
-  };
+    setItems((prevItems) =>
+      prevItems.filter(
+        (i) =>
+          i.productId !== productId ||
+          i.attributes !== attribute ||
+          i.variant !== variant
+      )
+    );  };
 
   const updateQuantity = (productId: string, quantity: number,variant:Variant ,attribute:attribute) => {
-    // if (quantity <= 0) {
-    //   removeItem(productId);
-    //   return;
-    // }
+    if (quantity <= 0) {
+      removeItem(productId,variant,attribute);
+      return;
+    }
     
     setItems((prevItems) =>
       prevItems.map((item) =>

@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/app/context/ModalContext";
 import { thirdFont } from "@/fonts";
-
+import { useToast } from "@/hooks/use-toast";
 export default function ProductCard({
   product,
   favorite,
@@ -26,7 +26,7 @@ export default function ProductCard({
   const { cart, setCart } = useContext(cartContext);
   const [heartIsEmpty, setHeartIsEmpty] = useState(!favorite);
   const { openModal } = useModal();
-
+  const { toast } = useToast();
   const toggleHeart = () => {
     setHeartIsEmpty(!heartIsEmpty);
   };
@@ -49,24 +49,34 @@ export default function ProductCard({
           imageUrl: product.variations[0].images[0].url,
         },
       ]);
-      Swal.fire({
-        background: "#cb808b",
-        color: "white",
-        toast: false,
-        iconColor: "#473728",
-        position: "center",
-        text: "YOUR PRODUCT HAS BEEN ADDED TO YOUR WISHLIST",
-        showConfirmButton: false,
-        timer: 2000,
-        customClass: {
-          popup: "no-rounded-corners small-popup",
-        },
+      // Swal.fire({
+      //   background: "#cb808b",
+      //   color: "white",
+      //   toast: false,
+      //   iconColor: "#473728",
+      //   position: "center",
+      //   text: "YOUR PRODUCT HAS BEEN ADDED TO YOUR WISHLIST",
+      //   showConfirmButton: false,
+      //   timer: 2000,
+      //   customClass: {
+      //     popup: "no-rounded-corners small-popup",
+      //   },
+      // });
+      toast({
+        title: "Added item to Wishlist",
+        description: "Item has been added to your wishlist.",
+        variant: "added"
       });
     } else {
       const newWishList = wishList.filter(
         (item) => item.productId !== product._id
       );
       setWishList(newWishList);
+      toast({
+        title: "Removed item from Wishlist",
+        description: "Item has been removed from your wishlist.",
+        variant:"removed"
+      });
     }
     toggleHeart();
   };
