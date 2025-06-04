@@ -128,7 +128,7 @@ export interface IOrder {
   total?: number;
   currency?: string;
   status?: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
-  payment?: "pending" | "failed" | "confirmed";
+  payment?: "pending" | "failed" |"confirmed";
   billingCountry?: string;
   billingFirstName?: string;
   billingState?: string;
