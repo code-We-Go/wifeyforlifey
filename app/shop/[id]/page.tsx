@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,15 +20,28 @@ import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/shop/ProductCard";
 import { Product, Variant } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
+import axios from "axios";
 
 export default function ProductPage() {
-
+ 
   const params = useParams();
   const productId = params.id as string;
   const { toast } = useToast();
   const { addItem } = useCart();
+  const [product,setProduct] =useState<Product>()
+  useEffect(() => {
+    const  fetchProduct = async () => {
+      const res = await axios(`/api/products?productID=${productId}`)
+      setProduct(res.data.data)
+      setSelectedVariant(res.data.data.variations[0])
+      setSelectedAttribute(res.data.data.variations[0].attributes[0])
+    }
 
-  const product = mockProducts.find((p) => p._id === productId);
+  fetchProduct()
+ 
+  }, [])
+
+  // const product = mockProducts.find((p) => p._id === productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(product?.variations[0]);
   const [selectedImage, setSelectedImage] = useState(0);

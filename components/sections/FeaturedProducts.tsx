@@ -4,17 +4,30 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { wishListContext } from "@/app/context/wishListContext";
+import axios from "axios";
 
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ProductCard from "../shop/ProductCard";
 import { thirdFont } from "@/fonts";
+import { Product } from "@/app/interfaces/interfaces";
 
 const FeaturedProducts = () => {
   const { wishList, setWishList } = useContext(wishListContext);
+  const [featuredProducts,setFeaturedProducts] = useState <Product[]>()
 
-  const featuredProducts = mockProducts
-    .filter((product) => product.featured)
-    .slice(0, 3);
+  // const featuredProducts = mockProducts
+  //   .filter((product) => product.featured)
+  //   .slice(0, 3);
+    useEffect(() => {
+      const  fetchProducts = async () => {
+        const res = await axios("/api/products?featured=true")
+        setFeaturedProducts(res.data.data)
+      }
+
+    fetchProducts()
+   
+    }, [])
+    
   return (
     <section className="  bg-creamey ">
       {/* <div className='inset-0 bg-black/10 backdrop-blur-[4px]'> */}
@@ -42,7 +55,7 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {featuredProducts.map((product) => {
+          {featuredProducts?.map((product) => {
             const productID = product._id;
             const fav = wishList.find(
               (favorite) => favorite.productId === productID
