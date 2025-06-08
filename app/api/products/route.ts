@@ -1,5 +1,5 @@
 import { ConnectDB } from "@/app/config/db";
-import productModel from "@/app/modals/productsModel";
+import productsModel from "@/app/modals/productsModel";
 import { NextResponse } from "next/server";
 
 const loadDB = async () => {
@@ -25,8 +25,8 @@ export async function GET(req: Request) {
 if(productID){
 
     try {
-        const product = await productModel.findById(productID)
-        // const totalProducts = await productModel.countDocuments();
+        const product = await productsModel.findById(productID)
+        // const totalProducts = await productsModel.countDocuments();
 
         return NextResponse.json({
             data: product,
@@ -40,8 +40,8 @@ if(productID){
 }
 else if(moreToShop){
     try {
-        const products = await productModel.find({}).limit(8).skip(0)
-        // const totalProducts = await productModel.countDocuments();
+        const products = await productsModel.find({}).limit(8).skip(0)
+        // const totalProducts = await productsModel.countDocuments();
         console.log("productsLength" + products.length)
         return NextResponse.json({
             data: products,
@@ -56,7 +56,7 @@ else if(moreToShop){
 
 else if(categoryID && season){
     try {
-        const products = await productModel.find({
+        const products = await productsModel.find({
           $or: [
             { categoryID: categoryID, season: season },
             { categoryID: categoryID, season: "all" }
@@ -72,7 +72,7 @@ else if(categoryID && season){
 }
 else if(categoryID){
     try {
-        const products = await productModel.find({ categoryID: categoryID })
+        const products = await productsModel.find({ categoryID: categoryID })
         console.log("productsLength" + products.length)
         return NextResponse.json({
             data: products,
@@ -83,7 +83,7 @@ else if(categoryID){
 }
 else if(season){
     try {
-        const products = await productModel.find({
+        const products = await productsModel.find({
           $or: [
             { season: season },
             { season: "all" }
@@ -99,7 +99,7 @@ else if(season){
 }
 else if (featured){
     try {
-        const products = await productModel.find({
+        const products = await productsModel.find({
             featured : true
         })
         console.log("productsLength" + products.length)

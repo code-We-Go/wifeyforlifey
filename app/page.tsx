@@ -13,6 +13,7 @@ import FeaturedProducts from "@/components/sections/FeaturedProducts";
 import ExclusiveContent from "@/components/sections/ExclusiveContent";
 import Playlists from "@/components/sections/Playlists";
 import { thirdFont } from "@/fonts";
+import BrandCharacters from "@/components/sections/BrandCharacters";
 
 export default function Home() {
   // Filter featured products
@@ -34,7 +35,7 @@ export default function Home() {
 
       {/* Featured Playlists Section */}
 <Playlists/>
-
+ <BrandCharacters/>
       {/* Newsletter Section */}
       <section className="bg-creamey py-16">
         <div className="container-custom text-center ">

@@ -1,8 +1,7 @@
 
-import productModel from "@/app/modals/productsModel";
+import productsModel from "@/app/modals/productsModel"
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
-import collectionsModel from "@/app/modals/categoriesModel";
 import categoriesModel from "@/app/modals/categoriesModel";
 
 const loadDB = async () => {

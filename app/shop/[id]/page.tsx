@@ -126,9 +126,9 @@ export default function ProductPage() {
   };
 
   // Related products (simple implementation: same category but different product)
-  const relatedProducts = mockProducts
-    .filter((p) => p.categoryID === product.categoryID && p._id !== product._id)
-    .slice(0, 4);
+  // const relatedProducts = mockProducts
+  //   .filter((p) => p.categoryID === product.categoryID && p._id !== product._id)
+  //   .slice(0, 4);
 
   return (
     <div className="container-custom py-8 md:py-12">
@@ -159,11 +159,10 @@ export default function ProductPage() {
               <div className="flex items-center">
                 <span className="mx-2 text-muted-foreground">/</span>
                 <Link
-                  href={`/shop?category=${product.categoryID}`}
+                  href={`/shop?category=${product.subCategoryID.categoryID}`}
                   className="text-muted-foreground hover:text-foreground text-sm"
                 >
-                  {product.categoryID.charAt(0).toUpperCase() +
-                    product.categoryID.slice(1)}
+                  {product.subCategoryID.subCategoryName}
                 </Link>
               </div>
             </li>
@@ -397,7 +396,7 @@ export default function ProductPage() {
       </div>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
+      {/* {relatedProducts.length > 0 && (
         <div className="mt-16">
           <h2 className="text-2xl font-display font-medium mb-6">
             You May Also Like
@@ -408,7 +407,7 @@ export default function ProductPage() {
             ))}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

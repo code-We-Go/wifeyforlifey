@@ -1,5 +1,5 @@
 
-import productModel from "@/app/modals/productsModel";
+import productsModel from "@/app/modals/productsModel";
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 import collectionsModel from "@/app/modals/collectionsModel";
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
             const productIDs = collection.products || [];
           
             // Fetch all products with those IDs
-            const products = await productModel.find({ _id: { $in: productIDs } });
+            const products = await productsModel.find({ _id: { $in: productIDs } });
           
             return NextResponse.json({
               data: {

@@ -1,89 +1,135 @@
 .embla {
-    /* max-width: 48rem; */
-    margin: auto;
-    --slide-height: 19rem;
-    --slide-spacing: 1rem;
-    --slide-size: 25%;
-  }
-  @media (max-width: 768px) {
-    .embla {
-      --slide-size: 30.0%; /* 3 per view */
-    }
-  }
+  position: relative; /* Containing block for absolute positioning */
+  margin: auto;
+  --slide-height: 19rem;
+  --slide-spacing: 1rem;
+  --slide-size: 25%;
+}
 
-  @media (max-width: 500px) {
-    .embla {
-      --slide-size: 50%; /* 2 per view */
-    }
+@media (max-width: 768px) {
+  .embla {
+    --slide-size: 30.0%; /* 3 per view */
   }
-  
-  /* Show 2 per view on very small screens (optional tweak) */
+}
 
-  .embla__viewport {
-    overflow: hidden;
+@media (max-width: 500px) {
+  .embla {
+    --slide-size: 50%; /* 2 per view */
   }
-  .embla__container {
-    display: flex;
-    touch-action: pan-y pinch-zoom;
-    margin-left: calc(var(--slide-spacing) * -1);
-  }
-  .embla__slide {
-    transform: translate3d(0, 0, 0);
-    flex: 0 0 var(--slide-size);
-    min-width: 0;
-    padding-left: var(--slide-spacing);
-  }
-  .embla__slide__number {
-    box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
-    border-radius: 1.8rem;
-    font-size: 4rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: var(--slide-height);
-    user-select: none;
-  }
-  .embla__controls {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    justify-content: space-between;
-    gap: 1.2rem;
-    margin-top: 1.8rem;
-  }
+}
+
+.embla__viewport {
+  overflow: hidden;
+}
+
+.embla__container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+
+.embla__slide {
+  transform: translate3d(0, 0, 0);
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+  padding-left: var(--slide-spacing);
+}
+
+/* .embla__slide__number {
+  box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast, #ccc); /* Fallback color */
+  /* border-radius: 1.8rem;
+  font-size: 4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--slide-height);
+  user-select: none; */
+/* } */ */
+
+.embla__controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.8rem;
+}
+
+.embla__buttons {
+  position: absolute;
+  right: 31%;
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%);
+  width: 38%; /* Span the full width of .embla */
+  display: flex;
+  justify-content: space-between; /* Buttons on opposite sides */
+  pointer-events: none; /* Prevent blocking slide interactions */
+  z-index: 10; /* Ensure buttons are above other elements */
+}
+@media (max-width: 767.98px) {
   .embla__buttons {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-    align-items: center;
+      display: none !important;
+      /* width: 85%; */
   }
-  .embla__button {
-    -webkit-tap-highlight-color: rgba(var(--text-high-contrast-rgb-value), 0.5);
-    -webkit-appearance: none;
-    appearance: none;
-    background-color: transparent;
-    touch-action: manipulation;
-    display: inline-flex;
-    text-decoration: none;
-    cursor: pointer;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
-    width: 3.6rem;
-    height: 3.6rem;
-    z-index: 1;
-    border-radius: 50%;
-    color: var(--text-body);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+}
+
+.embla__button {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.5); /* Fallback for --text-high-contrast-rgb-value */
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgba(246, 38, 38, 0.8); /* Semi-transparent background for visibility */
+  touch-action: manipulation;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast, #ccc); /* Fallback color */
+  width: 3.6rem;
+  height: 3.6rem;
+  z-index: 11; /* Higher than .embla__buttons */
+  border-radius: 50%;
+  color: var(--text-body, #ffffff); /* Fallback color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto; /* Make buttons clickable */
+}
+
+.embla__button:disabled {
+  color: var(--detail-high-contrast, #999); /* Fallback color */
+  opacity: 0.5;
+}
+
+.embla__button__svg {
+  width: 35%;
+  height: 35%;
+  fill: currentColor; /* Ensure SVG inherits button color */
+}
+
+/* Adjusted margins to keep buttons closer to slides */
+.embla__button--prev {
+  margin-left: -0.5rem; /* Reduced to stay within view */
+}
+
+.embla__button--next {
+  margin-right: -0.5rem; /* Reduced to stay within view */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .embla__button--prev {
+    margin-left: -0.3rem;
   }
-  .embla__button:disabled {
-    color: var(--detail-high-contrast);
+  .embla__button--next {
+    margin-right: -0.3rem;
   }
-  .embla__button__svg {
-    width: 35%;
-    height: 35%;
+}
+
+@media (max-width: 500px) {
+  .embla__button--prev {
+    margin-left: -0.2rem;
   }
-  
+  .embla__button--next {
+    margin-right: -0.2rem;
+  }
+}
