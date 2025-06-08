@@ -1,116 +1,92 @@
-import { ConnectDB } from "@/app/config/db";
-import productsModel from "@/app/modals/productsModel";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import productsModel from '@/app/modals/productsModel';
+import { ConnectDB } from '@/app/config/db';
+import mongoose from 'mongoose';
 
 const loadDB = async () => {
-    console.log('hna');
-    await ConnectDB();
-}
+  await ConnectDB();
+};
 
 loadDB();
 
-export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const productID = searchParams.get("productID")!;
-    const categoryID = searchParams.get("categoryID")!;
-    const season = searchParams.get("season")!;
-    const featured = searchParams.get("featured")!;
-    console.log('productID'+productID)
-    const moreToShop = searchParams.get("moreToShop")!;
-    console.log('moreToShop'+moreToShop)
-    
-    // const page = parseInt(searchParams.get("page") || "1", 10);
-    // const limit = 10;
-    // const skip = (page - 1) * limit;
-if(productID){
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const subcategory = searchParams.get('subcategory');
+    const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
+    const sortBy = searchParams.get('sortBy');
+    const search = searchParams.get('search');
 
-    try {
-        const product = await productsModel.findById(productID)
-        // const totalProducts = await productsModel.countDocuments();
+    let query: any = {};
 
-        return NextResponse.json({
-            data: product,
-            // total: totalProducts,
-            // currentPage: page,
-            // totalPages: Math.ceil(totalProducts / limit),
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    // Apply category filter (through subcategory)
+    if (category) {
+      // First find all subcategories that belong to this category
+      const subcategories = await mongoose.model('subCategories').find({
+        categoryID: new mongoose.Types.ObjectId(category)
+      });
+      
+      // Then find products that have any of these subcategories
+      query.subCategoryID = {
+        $in: subcategories.map(sub => sub._id)
+      };
     }
-}
-else if(moreToShop){
-    try {
-        const products = await productsModel.find({}).limit(8).skip(0)
-        // const totalProducts = await productsModel.countDocuments();
-        console.log("productsLength" + products.length)
-        return NextResponse.json({
-            data: products,
-            // total: totalProducts,
-            // currentPage: page,
-            // totalPages: Math.ceil(totalProducts / limit),
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
-    }
-}
 
-else if(categoryID && season){
-    try {
-        const products = await productsModel.find({
-          $or: [
-            { categoryID: categoryID, season: season },
-            { categoryID: categoryID, season: "all" }
-          ]
-        })
-        console.log("productsLength" + products.length)
-        return NextResponse.json({
-            data: products,
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch products season" }, { status: 500 });
+    // Apply subcategory filter
+    if (subcategory) {
+      query.subCategoryID = new mongoose.Types.ObjectId(subcategory);
     }
-}
-else if(categoryID){
-    try {
-        const products = await productsModel.find({ categoryID: categoryID })
-        console.log("productsLength" + products.length)
-        return NextResponse.json({
-            data: products,
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+
+    // Apply price range filter
+    if (minPrice || maxPrice) {
+      query['price.local'] = {};
+      if (minPrice) query['price.local'].$gte = parseFloat(minPrice);
+      if (maxPrice) query['price.local'].$lte = parseFloat(maxPrice);
     }
-}
-else if(season){
-    try {
-        const products = await productsModel.find({
-          $or: [
-            { season: season },
-            { season: "all" }
-          ]
-        })
-        console.log("productsLength" + products.length)
-        return NextResponse.json({
-            data: products,
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch products by season" }, { status: 500 });
+
+    // Apply search filter
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
-}
-else if (featured){
-    try {
-        const products = await productsModel.find({
-            featured : true
-        })
-        console.log("productsLength" + products.length)
-        return NextResponse.json({
-            data: products,
-        }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch featured products" }, { status: 500 });
+
+    // Build sort object
+    let sort: any = {};
+    switch (sortBy) {
+      case 'price_asc':
+        sort = { 'price.local': 1 };
+        break;
+      case 'price_desc':
+        sort = { 'price.local': -1 };
+        break;
+      case 'popular':
+        sort = { ratings: -1 };
+        break;
+      default:
+        sort = { createdAt: -1 }; // Default to newest
     }
-}
-else{
-    return NextResponse.json({ error: "productID or moreToShop not found" }, { status: 500 });
-}
+
+    const products = await productsModel
+      .find(query)
+      .populate({
+        path: 'subCategoryID',
+        populate: {
+          path: 'categoryID',
+          model: 'categories'
+        }
+      })
+      .sort(sort);
+
+    return NextResponse.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch products' },
+      { status: 500 }
+    );
+  }
 }

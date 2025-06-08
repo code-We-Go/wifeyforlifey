@@ -24,78 +24,93 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { mockProducts, productCategories, ProductFilters } from "@/models/Product";
 import { Product } from '../interfaces/interfaces';
 import ProductCard from "@/components/shop/ProductCard";
 import { lifeyFont, thirdFont } from '@/fonts';
 import { wishListContext } from "@/app/context/wishListContext";
 
+interface Category {
+  _id: string;
+  name: string;
+  subcategories: Subcategory[];
+}
+
+interface Subcategory {
+  _id: string;
+  name: string;
+  categoryID: string;
+}
 
 function Fullback (){
   return <div>Loading ...</div>
 }
 
- function ShopPage() {
+function ShopPage() {
   const { wishList, setWishList } = useContext(wishListContext);
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
-  const [filters, setFilters] = useState<ProductFilters>({
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
     category: initialCategory,
+    subcategory: "",
     minPrice: 0,
     maxPrice: 100,
     sortBy: "newest",
     search: "",
   });
 
-  // Apply filters whenever they change
+  // Fetch categories and subcategories
   useEffect(() => {
-    let result = [...mockProducts];
-    
-    // Filter by category
-    // if (filters.category) {
-    //   result = result.filter(product => product.category === filters.category);
-    // }
-    
-    // Filter by price range
-    result = result.filter(
-      product => product.price.local >= (filters.minPrice || 0) && product.price.local <= (filters.maxPrice || 100)
-    );
-    
-    // Filter by search term
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      result = result.filter(
-        product => 
-          product.title.toLowerCase().includes(searchLower) || 
-          product.description.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    // Sort products
-    if (filters.sortBy === "price_asc") {
-      result.sort((a, b) => a.price.local - b.price.local);
-    } else if (filters.sortBy === "price_desc") {
-      result.sort((a, b) => b.price.local - a.price.local);
-    } else if (filters.sortBy === "popular") {
-      result.sort((a, b) => (b.ratings || 0) - (a.ratings || 0));
-    } else {
-      // Default to newest (could use createdAt in a real app)
-      result.sort((a, b) => (b._id || "").localeCompare(a._id || ""));
-    }
-    
-    setFilteredProducts(result);
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Fetch products with filters
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+        if (filters.category) queryParams.append('category', filters.category);
+        if (filters.subcategory) queryParams.append('subcategory', filters.subcategory);
+        if (filters.minPrice) queryParams.append('minPrice', filters.minPrice.toString());
+        if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice.toString());
+        if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+        if (filters.search) queryParams.append('search', filters.search);
+
+        const response = await fetch(`/api/products?${queryParams.toString()}`);
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, [filters]);
 
-  const updateFilter = (key: keyof ProductFilters, value: any) => {
+  const updateFilter = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const resetFilters = () => {
     setFilters({
       category: "",
+      subcategory: "",
       minPrice: 0,
       maxPrice: 100,
       sortBy: "newest",
@@ -103,9 +118,9 @@ function Fullback (){
     });
   };
 
-  // Find min and max price in the product list
+  // Find max price in the product list
   const maxProductPrice = Math.ceil(
-    Math.max(...mockProducts.map(product => product.price.local))
+    Math.max(...products.map(product => product.price.local))
   );
 
   return (
@@ -113,7 +128,7 @@ function Fullback (){
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="flex flex-col space-y-4">
-          <h1 className={`${thirdFont.className} text-4xl md:text-5xl  text-everGreen font-semibold`}>Shop</h1>
+          <h1 className={`${thirdFont.className} text-4xl md:text-5xl text-everGreen font-semibold`}>Shop</h1>
           <p className="text-muted-foreground">
             Discover our curated collection of products designed just for you.
           </p>
@@ -178,21 +193,45 @@ function Fullback (){
                   <div className="space-y-4">
                     <h3 className="font-medium">Categories</h3>
                     <div className="grid gap-2">
-                      {productCategories.map((category) => (
-                        <div key={category.id} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`category-${category.id}`}
-                            checked={filters.category === category.id}
-                            onCheckedChange={(checked) => 
-                              updateFilter("category", checked ? category.id : "")
-                            }
-                          />
-                          <label
-                            htmlFor={`category-${category.id}`}
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {category.name}
-                          </label>
+                      {categories.map((category) => (
+                        <div key={category._id} className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`category-${category._id}`}
+                              checked={filters.category === category._id}
+                              onCheckedChange={(checked) => {
+                                updateFilter("category", checked ? category._id : "");
+                                updateFilter("subcategory", ""); // Reset subcategory when category changes
+                              }}
+                            />
+                            <label
+                              htmlFor={`category-${category._id}`}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {category.name}
+                            </label>
+                          </div>
+                          {filters.category === category._id && category.subcategories.length > 0 && (
+                            <div className="ml-6 space-y-2">
+                              {category.subcategories.map((subcategory) => (
+                                <div key={subcategory._id} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`subcategory-${subcategory._id}`}
+                                    checked={filters.subcategory === subcategory._id}
+                                    onCheckedChange={(checked) => 
+                                      updateFilter("subcategory", checked ? subcategory._id : "")
+                                    }
+                                  />
+                                  <label
+                                    htmlFor={`subcategory-${subcategory._id}`}
+                                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                  >
+                                    {subcategory.name}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -206,7 +245,7 @@ function Fullback (){
                       </span>
                     </div>
                     <Slider
-                      defaultValue={[filters.minPrice || 0, filters.maxPrice || maxProductPrice]}
+                      defaultValue={[filters.minPrice, filters.maxPrice]}
                       max={maxProductPrice}
                       step={1}
                       onValueChange={(value) => {
@@ -226,19 +265,33 @@ function Fullback (){
         </div>
 
         {/* Active Filters */}
-        {(filters.category || filters.minPrice? filters.minPrice:1 > 0 || filters.maxPrice ? filters.maxPrice:1 < maxProductPrice) && (
+        {(filters.category || filters.subcategory || filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {filters.category && (
               <Badge 
-                onClick={() => updateFilter("category", "")} 
+                onClick={() => {
+                  updateFilter("category", "");
+                  updateFilter("subcategory", "");
+                }} 
                 className="cursor-pointer bg-pinkey"
               >
-                {productCategories.find(c => c.id === filters.category)?.name}
+                {categories.find(c => c._id === filters.category)?.name}
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
-            {(filters.minPrice ? filters.minPrice:1  > 0 || filters.maxPrice? filters.maxPrice:1 < maxProductPrice) && (
+            {filters.subcategory && (
+              <Badge 
+                onClick={() => updateFilter("subcategory", "")} 
+                className="cursor-pointer bg-pinkey"
+              >
+                {categories
+                  .find(c => c._id === filters.category)
+                  ?.subcategories.find(s => s._id === filters.subcategory)?.name}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
+            )}
+            {(filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
               <Badge 
                 onClick={() => {
                   updateFilter("minPrice", 0);
@@ -254,21 +307,26 @@ function Fullback (){
         )}
 
         {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-everGreen mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading products...</p>
+          </div>
+        ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => {
-                 const productID = product._id;
-                 const fav = wishList.find(
-                   (favorite) => favorite.productId === productID
-                 );
-                 return (
-                   <ProductCard
-                     key={product._id}
-                     product={product}
-                     favorite={fav ? true : false}
-                   />
-                 );
- })}
+            {products.map((product) => {
+              const productID = product._id;
+              const fav = wishList.find(
+                (favorite) => favorite.productId === productID
+              );
+              return (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  favorite={fav ? true : false}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">
@@ -290,9 +348,11 @@ function Fullback (){
 }
 
 export default function ShopPageWrapper(){
- return  <Suspense fallback={<Fullback/>}>
-  <ShopPage/>
-  </Suspense>
+  return (
+    <Suspense fallback={<Fullback/>}>
+      <ShopPage/>
+    </Suspense>
+  );
 }
 
 // Badge component for active filters
@@ -304,7 +364,7 @@ function Badge({
   return (
     <div 
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-pinkey text-lovely ", 
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-pinkey text-lovely", 
         className
       )} 
       {...props}

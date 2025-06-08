@@ -1,35 +1,45 @@
-
-import productsModel from "@/app/modals/productsModel"
-import { ConnectDB } from "@/app/config/db";
-import { NextResponse } from "next/server";
-import categoriesModel from "@/app/modals/categoriesModel";
+import { NextResponse } from 'next/server';
+import categoriesModel from '@/app/modals/categoriesModel';
+import subCategoryModel from '@/app/modals/subCategoryModel';
+import { ConnectDB } from '@/app/config/db';
 
 const loadDB = async () => {
-    await ConnectDB();
+  await ConnectDB();
 };
 
 loadDB();
 
-export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const categoryID = searchParams.get("categoryID")!;
-    console.log('categoryID'+categoryID)
+export async function GET() {
+  try {
+    // Fetch categories
+    const categories = await categoriesModel.find().sort({ categoryName: 1 });
 
+    // Fetch subcategories for each category
+    const categoriesWithSubcategories = await Promise.all(
+      categories.map(async (category:Category) => {
+        const subcategories = await subCategoryModel
+          .find({ categoryID: category._id })
+          .sort({ subCategoryName: 1 });
 
-    try {
-        if (categoryID === "all") {
-            const categories = await categoriesModel.find().sort({ createdAt: -1 });
-            return NextResponse.json({
-                data: categories,
-            }, { status: 200 });
-        }
-        else{
-            const categories = await categoriesModel.findById(categoryID)
-            return NextResponse.json({
-                data: categories,
-            }, { status: 200 });
-        }
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
-    }
+        return {
+          _id: category._id,
+          name: category.categoryName,
+          description: category.description,
+          subcategories: subcategories.map(sub => ({
+            _id: sub._id,
+            name: sub.subCategoryName,
+            description: sub.description
+          }))
+        };
+      })
+    );
+
+    return NextResponse.json(categoriesWithSubcategories);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch categories' },
+      { status: 500 }
+    );
+  }
 }
