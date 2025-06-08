@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const featured = searchParams.get('featured');
     const subcategory = searchParams.get('subcategory');
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
@@ -33,7 +34,10 @@ export async function GET(request: Request) {
         $in: subcategories.map(sub => sub._id)
       };
     }
-
+if(featured){
+    const featuredProducts = await productsModel.find({featured : "true"})
+    return NextResponse.json({data:featuredProducts},{status:200})
+}
     // Apply subcategory filter
     if (subcategory) {
       query.subCategoryID = new mongoose.Types.ObjectId(subcategory);

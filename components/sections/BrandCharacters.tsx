@@ -25,7 +25,7 @@ const SLIDES = characters
 const BrandCharacters = () => {
   return (
     
- <div className='relative w-full  h-auto pt-16  space-y-2 text-start bg-creamey container-custom'>
+ <div className='relative w-full  h-auto pt-16  space-y-2 text-start bg-pinkey container-custom'>
 <h2 className={`${thirdFont.className} text-4xl md:text-5xl  font-semibold lg:text-6xl text-lovely`}>Brand&apos;s Characters</h2>
      <EmblaScaleCarousel slides={SLIDES} options={OPTIONS} />
      <div 

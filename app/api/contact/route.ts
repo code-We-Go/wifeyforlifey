@@ -1,5 +1,5 @@
-import { sendContactMail } from "@/app/lib/contactMail";
-import { sendMail } from "@/app/lib/email";
+import { sendContactMail } from "@/lib/contactMail";
+// import { sendMail } from "@/app/lib/email";
 import { NextResponse } from "next/server";
 
 export async function POST(request:Request) {
