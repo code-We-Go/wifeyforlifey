@@ -1,5 +1,4 @@
 "use client";
-import { mockProducts } from "@/models/Product";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
 import Link from "next/link";

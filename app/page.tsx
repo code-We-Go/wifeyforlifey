@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
-import { mockProducts } from "@/models/Product";
+// import { mockProducts } from "@/models/Product";
 import { mockPlaylists } from "@/models/VideoPlaylist";
 import ProductCard from "@/components/shop/ProductCard";
 import VideoCard from "@/components/playlists/VideoCard";
@@ -14,6 +14,7 @@ import ExclusiveContent from "@/components/sections/ExclusiveContent";
 import Playlists from "@/components/sections/Playlists";
 import { thirdFont } from "@/fonts";
 import BrandCharacters from "@/components/sections/BrandCharacters";
+import Newsletters from "@/components/sections/Newsletters";
 
 export default function Home() {
   // Filter featured products
@@ -37,27 +38,7 @@ export default function Home() {
 <Playlists/>
  <BrandCharacters/>
       {/* Newsletter Section */}
-      <section className="bg-creamey py-16">
-        <div className="container-custom text-center ">
-          <h2 className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl font-semibold text-accent-foreground mb-4`}>
-            Join Our Community
-          </h2>
-          <p className="text-muted-foreground mb-8">
-            Subscribe to our newsletter for the latest product drops, exclusive
-            content, and special offers.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-            <Input
-              type="email"
-              placeholder="Your email address"
-              className="rounded-full flex-1"
-            />
-            <Button type="submit" className="bg-everGreen hover:bg-lovely text-creamey rounded-full">
-              Subscribe
-            </Button>
-          </form>
-        </div>
-      </section>
+<Newsletters/>
     </div>
   );
 }

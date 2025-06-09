@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { mockProducts } from "@/models/Product";
 import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/shop/ProductCard";
