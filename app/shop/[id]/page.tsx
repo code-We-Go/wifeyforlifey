@@ -40,7 +40,6 @@ export default function ProductPage() {
  
   }, [])
 
-  // const product = mockProducts.find((p) => p._id === productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(product?.variations[0]);
   const [selectedImage, setSelectedImage] = useState(0);
