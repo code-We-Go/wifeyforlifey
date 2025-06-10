@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import UserModel from '@/app/models/userModel';
-import { ConnectDB } from '@/config/db';
+import UserModel from '@/app/modals/userModel';
+import { ConnectDB } from '@/app/config/db';
 import { generateToken } from '@/utils/auth';
 
 export async function POST(request: Request) {

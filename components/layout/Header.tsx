@@ -50,7 +50,7 @@ const rightNavigation = [
   { name: "Club", href: "/club", icon: <PartyPopper /> },
   { name: "Wishlist", href: "/wishlist", icon: <Heart /> },
   { name: "Cart", href: "/cart", icon: <ShoppingBag /> },
-  { name: "Account", href: "/Gehaz", icon: <User /> },
+  { name: "Account", href: "/account", icon: <User /> },
 ];
 
 export default function Header() {
@@ -73,7 +73,7 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 10) {
+      if (currentScrollY > lastScrollY && currentScrollY > 128) {
         // Scrolling down, hide header
         setIsVisible(false);
       } else {
