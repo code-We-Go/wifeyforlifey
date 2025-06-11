@@ -34,7 +34,7 @@ const FeaturedProducts = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-12">
           <div>
             <h2
-              className={`${thirdFont.className} tracking-normal text-4xl md:text-5xl  lg:text-6xl  font-display font-semibold text-everGreen mb-2`}
+              className={`${thirdFont.className} tracking-normal text-4xl md:text-5xl  lg:text-6xl   font-semibold text-everGreen mb-2`}
             >
               Featured Products
             </h2>
