@@ -1,12 +1,59 @@
+'use client'
 import Link from "next/link";
 import { Instagram, Facebook, Twitter, Youtube, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
 import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/newSletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email, // Using email as number since the model expects a number field
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "You've been subscribed to our newsletter.",
+          variant: "added",
+        });
+        setEmail('');
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to subscribe. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <footer className="bg-card border-t bg-lovely text-creamey">
       <div className="container-custom py-12 md:py-16">
@@ -153,12 +200,15 @@ export default function Footer() {
               Get the latest updates, sales, and exclusive content straight to
               your inbox.
             </p>
-            <form className="space-y-2">
-              <div className="flex">
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <div className="flex text-gray-600">
                 <Input
+                
+                value={email}
                   type="email"
                   placeholder="Your email"
-                  className="rounded-r-none"
+                  className="rounded-r-none  focus-within::ring-0"
+                  onChange={(e)=>setEmail(e.target.value)}
                 />
                 <Button
                   type="submit"
