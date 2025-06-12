@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const productID = searchParams.get('productID')
     const featured = searchParams.get('featured');
     const subcategory = searchParams.get('subcategory');
     const minPrice = searchParams.get('minPrice');
@@ -42,7 +43,11 @@ if(featured){
     if (subcategory) {
       query.subCategoryID = new mongoose.Types.ObjectId(subcategory);
     }
-
+if(productID){
+  const res = await productsModel.findById(productID)
+  console.log("product"+res.title)
+  return NextResponse.json({data:res},{status:200})
+}
     // Apply price range filter
     if (minPrice || maxPrice) {
       query['price.local'] = {};

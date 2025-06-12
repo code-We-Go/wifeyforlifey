@@ -120,7 +120,7 @@ function ShopPage() {
 
   // Find max price in the product list
   const maxProductPrice = Math.ceil(
-    Math.max(...products.map(product => product.price.local))
+    Math.max(...products?.map(product => product.price.local))
   );
 
   return (
@@ -193,7 +193,7 @@ function ShopPage() {
                   <div className="space-y-4">
                     <h3 className="font-medium">Categories</h3>
                     <div className="grid gap-2">
-                      {categories.map((category) => (
+                      {categories?.map((category) => (
                         <div key={category._id} className="space-y-2">
                           <div className="flex items-center space-x-2">
                             <Checkbox 
@@ -213,7 +213,7 @@ function ShopPage() {
                           </div>
                           {filters.category === category._id && category.subcategories.length > 0 && (
                             <div className="ml-6 space-y-2">
-                              {category.subcategories.map((subcategory) => (
+                              {category.subcategories?.map((subcategory) => (
                                 <div key={subcategory._id} className="flex items-center space-x-2">
                                   <Checkbox 
                                     id={`subcategory-${subcategory._id}`}
@@ -314,7 +314,7 @@ function ShopPage() {
           </div>
         ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => {
+            {products?.map((product) => {
               const productID = product._id;
               const fav = wishList.find(
                 (favorite) => favorite.productId === productID

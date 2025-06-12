@@ -31,6 +31,7 @@ export default function ProductPage() {
   useEffect(() => {
     const  fetchProduct = async () => {
       const res = await axios(`/api/products?productID=${productId}`)
+      console.log("product"+res.data.data)
       setProduct(res.data.data)
       setSelectedVariant(res.data.data.variations[0])
       setSelectedAttribute(res.data.data.variations[0].attributes[0])
