@@ -1,6 +1,6 @@
 'use client'
 import PolicyTab from './components/PolicyTab'
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { NextRequest } from 'next/server';
 import React, { useEffect, useState } from 'react'
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -12,16 +12,18 @@ import { thirdFont } from '@/fonts';
 const PoliciesPage = () => {
   const [activeTab, setActiveTab] = useState("privacy-policy");
   const [title, setTitle] = useState('PRIVACY POLICY');
-  useEffect(() => {
-    // الحصول على المعلمات من URL
-    const searchParams = new URLSearchParams(window.location.search);
-    const firstParam = searchParams.keys().next().value;
+  const validTabs = ['terms-and-conditions', 'privacy-policy', 'return-and-exchange'];
 
-    // تحديث التبويب النشط إذا كانت القيمة موجودة وصحيحة
-    if (firstParam) {
-      setActiveTab(firstParam);
+  const searchParams = useSearchParams();
+
+
+  useEffect(() => {
+    const firstKey = Array.from(searchParams.keys())[0];
+    if (firstKey && validTabs.includes(firstKey)) {
+      setActiveTab(firstKey);
     }
-  }, []);
+  }, [searchParams]); // ✅ Re-run when the URL changes
+
   useEffect(() => {
     const title = profileTabs.find(tab=>tab.value ===activeTab)
     if(title) setTitle(title.title)

@@ -11,10 +11,9 @@ import { lifeyFont, thirdFont } from '@/fonts';
 const PolicyTab = ({title,value,activeTab,setActiveTab}:{title:string,value:string,activeTab:string,setActiveTab:React.Dispatch<React.SetStateAction<string>>}) => {
  const router = useRouter();
 
-  const handleClick =async () => {
-
-      setActiveTab(value); // Otherwise, just set the active tab
-
+  const handleClick = async () => {
+    setActiveTab(value);
+    router.push(`/policies?${value}`);
   };
 
   return (

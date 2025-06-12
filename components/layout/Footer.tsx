@@ -227,11 +227,14 @@ export default function Footer() {
             reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <Link href="/privacy" className="hover:text-foreground">
+            <Link href="/policies?privacy-policy" className="hover:text-foreground">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-foreground">
+            <Link href="/policies?terms-and-conditions" className="hover:text-foreground">
               Terms of Service
+            </Link>
+            <Link href="/policies?return-and-exchange" className="hover:text-foreground">
+              Return & Exchange
             </Link>
             <Link href="/contact" className="hover:text-foreground">
               Contact Us
