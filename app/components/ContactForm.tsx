@@ -1,22 +1,22 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-const schema = yup.object().shape({
-  name: yup.string().required("Your Name is required"),
-  email: yup.string().email("Invalid email address").required("Email is required"),
-  phone: yup
+const schema = z.object({
+  name: z.string().min(1, "Your Name is required"),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  phone: z
     .string()
-    .matches(/^[0-9]+$/, "Phone number must be digits only")
+    .regex(/^[0-9]+$/, "Phone number must be digits only")
     .min(10, "Phone number must be at least 10 digits")
     .max(15, "Phone number must be at most 15 digits")
-    .required("Phone Number is required"),
-  message: yup.string().required("Message is required"),
+    .min(1, "Phone Number is required"),
+  message: z.string().min(1, "Message is required"),
 });
 
-type FormData = yup.InferType<typeof schema>;
+type FormData = z.infer<typeof schema>;
 
 export default function ContactForm() {
   const {
@@ -24,7 +24,7 @@ export default function ContactForm() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: yupResolver(schema),
+    resolver: zodResolver(schema),
   });
 
   const onSubmit = (data: FormData) => {
