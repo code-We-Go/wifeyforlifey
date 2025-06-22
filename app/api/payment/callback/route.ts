@@ -1,5 +1,4 @@
-import { ConnectDB } from "@/config/db";
-import newSletterModel from "@/models/newSletterModel";
+import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 
 const loadDB = async () => {
@@ -12,6 +11,7 @@ loadDB();
 export async function POST(request: Request) {
     const { data } = await request.json();
     console.log(data);
+    return NextResponse.json({data:data})
 
     // try {
     //     const res = await newSletterModel.create({ email });
