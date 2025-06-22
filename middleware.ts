@@ -1,55 +1,45 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from '@/utils/auth';
+import { isAuthFromRequest } from '@/utils/auth';
 
 export function middleware(request: NextRequest) {
-  const protectedRoutes = ["/account"];
-  const publicRoutes = ["/","/login", "/create-admin"];
   const path = request.nextUrl.pathname;
 
-  // Allow access to static files and API routes
-  if (
-    path.startsWith('/_next') ||
-    path.startsWith('/static') ||
-    path.startsWith('/images') ||
-    path.startsWith('/api/auth') ||
-    path === '/favicon.ico'
-  ) {
-    return NextResponse.next();
-  }
-
-  const token = request.cookies.get('token')?.value;
+  // Only check authentication for specific protected routes
+  const protectedRoutes = ["/account"];
+  const publicRoutes = ["/","/login", "/signin", "/signup", "/create-admin"];
+  
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
   const isPublicRoute = publicRoutes.includes(path);
 
+  // Skip authentication check for non-protected routes
+  if (!isProtectedRoute && !isPublicRoute) {
+    return NextResponse.next();
+  }
+
+  // Only run authentication check when needed
+  const { isAuth } = isAuthFromRequest(request);
+
   // If trying to access protected route without token
-  if (isProtectedRoute && !token) {
+  if (isProtectedRoute && !isAuth) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If trying to access public route with token
-  if (isPublicRoute && token) {
+  // If trying to access public route with token, redirect to home
+  if (isPublicRoute && isAuth) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Protect homepage (/) if no token
-  // if (path === '/' && !token) {
-  //   return NextResponse.redirect(new URL('/login', request.url));
-  // }
-
-  // Allow access to all other routes
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (auth API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+    // Only run middleware on specific routes that need authentication
+    '/account/:path*',
+    '/login',
+    '/signin',
+    '/signup',
+    '/create-admin'
   ],
 }; 

@@ -93,6 +93,27 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+        <div className="relative flex my-6">
+          <div className="w-full inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 text-creamey whitespace-nowrap">Or continue with</span>
+          </div>
+          <div className="w-full inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+        </div>
+        <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Signing in...' : 'Sign in with Google'}
+              <span>google logo</span>
+            </button>
+          </div>
       </div>
       </div>
     </div>

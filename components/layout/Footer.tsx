@@ -195,7 +195,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h6 className="font-medium mb-4">Subscribe to our Newsletter</h6>
+            <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Subscribe to our Newsletter</h6>
             <p className=" text-sm mb-4">
               Get the latest updates, sales, and exclusive content straight to
               your inbox.

@@ -35,6 +35,7 @@ export type mediaType = "image" | "video";
 
 export type price = {
   local: number;
+  global:number;
 };
 export interface Category {
   _id: string;
@@ -161,5 +162,8 @@ export interface IOrder {
 export interface ShippingZone {
   _id: string;
   zone_name: string;
-  zone_rate: number;
+  zone_rate: price;
+  localGlobal: "local" | "global";
+  states: string[];
+  countries: string[];
 }

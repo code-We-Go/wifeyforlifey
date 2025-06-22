@@ -1,21 +1,22 @@
 type ShippingZone = {
-    _id: string;
-    zone_name: string
-    zone_rate: number;
-  };
+  _id: string;
+  zone_name: string;
+  zone_rate: number;
+  localGlobal: string; // 'local' or 'global'
+};
 
-  type Country = {
-    id: number; // or string, depending on your data
-    name: string;
-    shipping_zone:number; // other properties, if any
-  };
+type Country = {
+  _id: string; // or string, depending on your data
+  id:number;
+  name: string;
+  shipping_zone: ShippingZone; // other properties, if any
+};
 
-  type Category = {
-    _id: string;
-    categoryName: string;
-    description?: string;
-  }
-  
+type Category = {
+  _id: string;
+  categoryName: string;
+  description?: string;
+};
 
 // type category={id:string,
 //     categoryName:string,
@@ -23,7 +24,7 @@ type ShippingZone = {
 // }
 
 // type subCategory={
-//     id:string, 
+//     id:string,
 //     subCategoryName:string,
 //     categoryId:string,
 //     imageURL:string

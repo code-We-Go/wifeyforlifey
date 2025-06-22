@@ -37,10 +37,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => (i.productId === item.productId && i.attributes.name === item.attributes.name));
+      const existingItem = prevItems.find((i) => 
+        i.productId === item.productId && 
+        i.attributes.name === item.attributes.name &&
+        i.variant.name === item.variant.name
+      );
       if (existingItem) {
         return prevItems.map((i) =>
-          i.productId === item.productId
+          (i.productId === item.productId &&
+           i.attributes.name === item.attributes.name &&
+           i.variant.name === item.variant.name)
             ? { ...i, quantity: i.quantity + item.quantity }
             : i
         );
@@ -49,25 +55,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string,variant:Variant ,attribute:attribute) => {
+  const removeItem = (productId: string, variant: Variant, attribute: attribute) => {
     setItems((prevItems) =>
       prevItems.filter(
         (i) =>
-          i.productId !== productId ||
-          i.attributes !== attribute ||
-          i.variant !== variant
+          !(i.productId === productId &&
+            i.attributes.name === attribute.name &&
+            i.variant.name === variant.name)
       )
-    );  };
+    );
+  };
 
-  const updateQuantity = (productId: string, quantity: number,variant:Variant ,attribute:attribute) => {
+  const updateQuantity = (productId: string, quantity: number, variant: Variant, attribute: attribute) => {
     if (quantity <= 0) {
-      removeItem(productId,variant,attribute);
+      removeItem(productId, variant, attribute);
       return;
     }
     
     setItems((prevItems) =>
       prevItems.map((item) =>
-       ( item.productId === productId  && item.attributes === attribute && item.variant === variant)? { ...item, quantity } : item
+        (item.productId === productId && 
+         item.attributes.name === attribute.name &&
+         item.variant.name === variant.name)
+          ? { ...item, quantity } 
+          : item
       )
     );
   };

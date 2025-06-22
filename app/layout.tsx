@@ -21,15 +21,19 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
 });
+
 export const wifeyFont = localFonts({
   src: "./fonts/AcuminVariableConcept.otf",
 });
+
 export const lifeyFont = localFonts({
   src: "./fonts/Nickainley.otf",
 });
+
 export const Gluten = localFonts({
   src: "./fonts/Gluten.ttf",
 });
+
 export const metadata: Metadata = {
   title: "Wifey For Lifey",
   description: "Shop trendy products and subscribe to exclusive video content",

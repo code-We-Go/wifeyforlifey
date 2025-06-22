@@ -9,10 +9,12 @@ import React, { useContext, useEffect, useState } from "react";
 import ProductCard from "../shop/ProductCard";
 import { thirdFont } from "@/fonts";
 import { Product } from "@/app/interfaces/interfaces";
+import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 
 const FeaturedProducts = () => {
   const { wishList, setWishList } = useContext(wishListContext);
   const [featuredProducts,setFeaturedProducts] = useState <Product[]>()
+  const [loading,setLoading]=useState(true);
 
   // const featuredProducts = mockProducts
   //   .filter((product) => product.featured)
@@ -21,6 +23,7 @@ const FeaturedProducts = () => {
       const  fetchProducts = async () => {
         const res = await axios("/api/products?featured=true")
         setFeaturedProducts(res.data.data)
+        setLoading(false)
       }
 
     fetchProducts()
@@ -53,7 +56,16 @@ const FeaturedProducts = () => {
           </Button>
         </div>
 
+        {loading ? (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+    {[...Array(6)].map((_, index) => (
+      <ProductCardSkeleton key={index} />
+    ))}
+  </div>
+) : (
+  // Your actual ProductCard grid
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        
           {featuredProducts?.map((product) => {
             const productID = product._id;
             const fav = wishList.find(
@@ -68,6 +80,7 @@ const FeaturedProducts = () => {
             );
           })}
         </div>
+)}
         {/* </div> */}
       </div>
     </section>

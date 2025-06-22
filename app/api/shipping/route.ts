@@ -1,9 +1,8 @@
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
-import clientPromise from '@/lib/mongodb';
+import shippingZonesModel from "@/app/modals/shippingZones";
 
-
-const loadDB =async()=>{
+const loadDB = async () => {
     console.log('hna');
     await ConnectDB();
 }
@@ -11,22 +10,18 @@ const loadDB =async()=>{
 loadDB();
 
 export async function GET(request: Request) {
-    const client = await clientPromise;
-    const db = client.db('mamilk'); // Replace with your database name
-
     try {
-      console.log("zonezzzz")
-      const zones = await db.collection('shipping_zones').find({})
-      .toArray();
+      console.log("Fetching shipping zones...")
+      const zones = await shippingZonesModel.find({}).lean();
   
       if (!zones) {
-        return NextResponse.json({ message: "Products not found" }, { status: 404 });
+        return NextResponse.json({ message: "Shipping zones not found" }, { status: 404 });
       }
   
-      // console.log("Zones found:", zones);
+      console.log("Zones found:", zones);
       return NextResponse.json(zones);
     } catch (err) {
-      console.error("Error fetching product:", err);
+      console.error("Error fetching shipping zones:", err);
       return NextResponse.json({ message: "Server error" }, { status: 500 });
     }
-  }
+}

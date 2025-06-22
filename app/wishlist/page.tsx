@@ -50,7 +50,7 @@ const WishlistPage = () => {
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             Looks like you haven&apos;t added anything to your wishlist yet. Explore our products and find something you&apos;ll love!
           </p>
-          <Button asChild size="lg" className="rounded-full">
+          <Button asChild size="lg" className="rounded-2xl bg-lovely text-creamey hover:bg-lovely/90">
             <Link href="/shop">Continue Shopping</Link>
           </Button>
         </div>
