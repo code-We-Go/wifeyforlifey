@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { mockPlaylists, videoCategories, VideoPlaylist } from "@/models/VideoPlaylist";
 import VideoCard from "@/components/playlists/VideoCard";
+import { thirdFont } from '@/fonts';
 
 interface PlaylistFilters {
   category?: string;
@@ -108,7 +109,7 @@ function PlaylistsPage() {
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="space-y-4">
-          <h1 className="text-3xl md:text-4xl font-display font-medium">Video Playlists</h1>
+          <h1 className={`${thirdFont.className} text-4xl md:text-6xl font-semibold tracking-normal text-lovely`}> Playlists</h1>
           <p className="text-muted-foreground">
             Explore our collection of curated video playlists for tutorials, inspiration, and more.
           </p>
@@ -268,13 +269,13 @@ function PlaylistsPage() {
         )}
 
         {/* Subscription CTA */}
-        <div className="bg-pink-gradient rounded-xl p-6 md:p-8 shadow-md">
+        <div className="bg-everGreen text-creamey rounded-xl p-6 md:p-8 shadow-md">
           <div className="grid md:grid-cols-3 gap-6 items-center">
             <div className="md:col-span-2 space-y-4">
               <h2 className="text-2xl font-display font-medium">
                 Unlock Premium Content
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-creamey/90">
                 Subscribe today to access our exclusive premium video playlists and tutorials.
               </p>
               <div className="flex space-x-2">
@@ -288,8 +289,8 @@ function PlaylistsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center md:justify-end">
-              <Button size="lg" className="rounded-full">
+            <div className="flex   justify-center md:justify-end">
+              <Button size="lg" className="rounded-full bg-lovely hover:bg-lovely/80 text-creamey border border-creamey">
                 Subscribe Now
               </Button>
             </div>

@@ -5,8 +5,8 @@ async function VerificationPage () {
 
 
   return (
-    <div className='h-screen w-full justify-center bg-white items-center flex text-primary'>
-      <div className='p-8 border border-primary'>
+    <div className='h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] w-full justify-center bg-creamey items-center flex text-lovely'>
+      <div className='p-8 border border-lovely'>
       PLEASE CHECKOUT YOUR EMAIL FOR VERIFICATION LINK
         </div>
         </div>
