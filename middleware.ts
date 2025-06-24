@@ -55,10 +55,7 @@ export const config = {
   matcher: [
     // Only run middleware on specific routes that need authentication
     '/account/:path*',
-    '/login',
-    '/signin',
-    '/signup',
+
     '/create-admin',
-    '/register'
   ],
 }; 
