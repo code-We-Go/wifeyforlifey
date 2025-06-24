@@ -113,7 +113,7 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
   const handleLogout = async() => {
-const res = await axios('api/auth/logout')
+    await logout();
   }
 
   return (
@@ -196,13 +196,29 @@ const res = await axios('api/auth/logout')
                         {item.label}
                       </Link>
                     )):<div></div>}
-                    <div className="border-t border-gray-200 mt-2 pt-2">
+                   
+                   {
+
+              isAuthenticated ?   
+               <div className="border-t border-gray-200 mt-2 pt-2">
                       <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
                       onClick={handleLogout}>
                         <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
                         Sign Out
                       </button>
                     </div>
+                    :
+                    <div className="">
+                    <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors">
+                   
+                      Sign In
+                    </Link>
+                    <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors">
+                   
+                      Sign up
+                    </Link>
+                  </div>
+}
                   </nav>
                 </div>
               </HoverCardContent>

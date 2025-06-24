@@ -2,13 +2,21 @@
 
 import { UserCircle, Heart, ShoppingBag, Gift } from 'lucide-react';
 import { useEffect } from 'react';
-import { ConnectDB } from '../config/db';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import axios from 'axios'
 
 export default function AccountPage() {
-  useEffect(() => {
-    
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
     const testDB = async () => {
       try {
         const res = await axios(`/api/db`);
@@ -16,22 +24,24 @@ export default function AccountPage() {
       } catch (error) {
         console.error( error);
       }
-      // try {
-      //   const res = await axios(`/api/categoryProducts?categoryID=${categoryID}`);
-      //   const data = res.data.data;
-      //   console.log('categoryProducts'+data.length)
-      //   setProductList(data);
-      // } catch (error) {
-      //   console.error("Error fetching category data:", error);
-      // }
     };
     testDB()
   }, [])
   
+  // Show loading state while session is loading
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  // Show loading state while session is loading
+  if (!session?.user) {
+    return <div>Not authenticated</div>;
+  }
+
   // This would typically come from your authentication system
   const user = {
-    name: 'John Doe',
-    email: 'john@example.com',
+    name: session.user.name || 'User',
+    email: session.user.email || 'user@example.com',
     loyaltyPoints: 1250,
     wishlistItems: 8,
     orders: 12,

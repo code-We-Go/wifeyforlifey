@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer';
 export async function sendMail({
   to,
   name,
@@ -12,11 +12,26 @@ export async function sendMail({
 }) {
   const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
 
+  // Check if environment variables are loaded
+  if (!SMTP_EMAIL || !SMTP_PASSWORD) {
+    console.error("SMTP_EMAIL or SMTP_PASSWORD environment variables are not set.");
+    throw new Error("Missing SMTP configuration.");
+  }
+
+  // const transport = nodemailer.createTransport({
+  //   service: "gmail",
+  //   auth: {
+  //     user: SMTP_EMAIL,
+  //     pass: SMTP_PASSWORD,
+  //   },
+  // });
   const transport = nodemailer.createTransport({
-    service: "gmail",
+    host: "mail.smtp2go.com",
+    port: 587,
+    secure: false,
     auth: {
-      user: SMTP_EMAIL,
-      pass: SMTP_PASSWORD,
+      user: process.env.SMTP_EMAIL,
+      pass: process.env.SMTP_PASSWORD,
     },
   });
   try {
@@ -26,10 +41,9 @@ export async function sendMail({
     console.error({ error });
     return;
   }
-
   try {
     const sendResult = await transport.sendMail({
-      from: SMTP_EMAIL,
+      from: 'authentication@shopwifeyforlifey.com',
       to,
       subject,
       html: body,

@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
-import { removeToken } from '@/utils/auth';
-import { Router } from 'next/router';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../[...nextauth]/route';
 
-export async function GET(request:Request) {
+export async function GET(request: Request) {
   try {
-    // Remove token from cookies
-    removeToken();
+    const session = await getServerSession(authOptions);
+    
+    if (session) {
+      // NextAuth will handle the session cleanup
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    
     return NextResponse.redirect(new URL('/login', request.url));
-
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(

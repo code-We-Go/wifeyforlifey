@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { CartProvider } from "@/providers/CartProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -47,27 +48,29 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="w-full">
       <body className={`w-full min-h-screen ${wifeyFont.className} bg-creamey`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-        >
-          <UserProvider>
-            <CartProvider>
-              <WishListProvider>
-                <ModalProvider>
-                  <div className="relative flex min-h-screen flex-col">
-                    <Header />
-                    <main className="flex-1">{children}</main>
-                    <Footer />
-                  </div>
-                  <ProductModal />
-                  <Toaster />
-                </ModalProvider>
-              </WishListProvider>
-            </CartProvider>
-          </UserProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+          >
+            <UserProvider>
+              <CartProvider>
+                <WishListProvider>
+                  <ModalProvider>
+                    <div className="relative flex min-h-screen flex-col">
+                      <Header />
+                      <main className="flex-1">{children}</main>
+                      <Footer />
+                    </div>
+                    <ProductModal />
+                    <Toaster />
+                  </ModalProvider>
+                </WishListProvider>
+              </CartProvider>
+            </UserProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

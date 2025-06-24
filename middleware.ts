@@ -1,37 +1,55 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isAuthFromRequest } from '@/utils/auth';
+import { withAuth } from 'next-auth/middleware';
 
-export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
+export default withAuth(
+  function middleware(request: NextRequest) {
+    const path = request.nextUrl.pathname;
+    
+    // Define protected and public routes
+    const protectedRoutes = ["/account"];
+    const publicRoutes = ["/", "/login", "/signin", "/signup", "/create-admin", "/register"];
+    
+    const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
+    const isPublicRoute = publicRoutes.includes(path);
 
-  // Only check authentication for specific protected routes
-  const protectedRoutes = ["/account"];
-  const publicRoutes = ["/","/login", "/signin", "/signup", "/create-admin"];
-  
-  const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
-  const isPublicRoute = publicRoutes.includes(path);
+    // If it's a protected route, NextAuth will handle authentication
+    // If it's a public route, allow access
+    if (!isProtectedRoute && !isPublicRoute) {
+      return NextResponse.next();
+    }
 
-  // Skip authentication check for non-protected routes
-  if (!isProtectedRoute && !isPublicRoute) {
+    // For public routes, allow access regardless of auth status
+    if (isPublicRoute) {
+      return NextResponse.next();
+    }
+
+    // For protected routes, NextAuth will handle the authentication
     return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const path = req.nextUrl.pathname;
+        
+        // Define protected routes
+        const protectedRoutes = ["/account"];
+        const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
+        
+        // If it's a protected route, require authentication
+        if (isProtectedRoute) {
+          return !!token;
+        }
+        
+        // For all other routes, allow access
+        return true;
+      },
+    },
+    pages: {
+      signIn: '/login',
+    },
   }
-
-  // Only run authentication check when needed
-  const { isAuth } = isAuthFromRequest(request);
-
-  // If trying to access protected route without token
-  if (isProtectedRoute && !isAuth) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // If trying to access public route with token, redirect to home
-  if (isPublicRoute && isAuth) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  return NextResponse.next();
-}
+);
 
 export const config = {
   matcher: [
@@ -40,6 +58,7 @@ export const config = {
     '/login',
     '/signin',
     '/signup',
-    '/create-admin'
+    '/create-admin',
+    '/register'
   ],
 }; 
