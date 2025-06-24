@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = `mongodb+srv://wifeyforlifey:${process.env.MONGO_PASSWORD}@wifeyforlifey.j0pm4vx.mongodb.net/wifeyforlifey?retryWrites=true&w=majority&appName=WifeyForLifey`;
 
-if (!MONGODB_URI) {
+if (!process.env.MONGO_PASSWORD) {
   throw new Error("Please define the MONGO_PASSWORD environment variable");
 }
 
@@ -15,10 +15,23 @@ export const ConnectDB = async () => {
       return;
     }
 
-    await mongoose.connect(MONGODB_URI);
+    // Add connection options to handle timeouts and retries
+    const options = {
+      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds instead of 30
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 1, // Maintain at least 1 socket connection
+      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
+      retryWrites: true,
+      retryReads: true,
+    };
+
+    await mongoose.connect(MONGODB_URI, options);
     console.log("MongoDB Connected...");
   } catch (error) {
     console.error("MongoDB connection error:", error);
-    process.exit(1);
+    // Don't exit the process, just throw the error
+    throw error;
   }
 };
