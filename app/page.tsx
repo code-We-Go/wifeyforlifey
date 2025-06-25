@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
 // import { mockProducts } from "@/models/Product";
-import { mockPlaylists } from "@/models/VideoPlaylist";
+// import { mockPlaylists } from "@/models/VideoPlaylist";
 import ProductCard from "@/components/shop/ProductCard";
 import VideoCard from "@/components/playlists/VideoCard";
 import HeroSection from "@/components/sections/HeroSection";
@@ -19,7 +19,7 @@ import Newsletters from "@/components/sections/Newsletters";
 export default function Home() {
   // Filter featured products
 
-  const featuredPlaylists = mockPlaylists.slice(0, 2);
+  // const featuredPlaylists = mockPlaylists.slice(0, 2);
 
   return (
     <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
@@ -35,7 +35,7 @@ export default function Home() {
       <ExclusiveContent/>
 
       {/* Featured Playlists Section */}
-<Playlists/>
+{/* <Playlists/> */}
  <BrandCharacters/>
       {/* Newsletter Section */}
 <Newsletters/>

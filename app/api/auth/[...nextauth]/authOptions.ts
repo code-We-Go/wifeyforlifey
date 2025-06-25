@@ -9,8 +9,8 @@ import UserModel from "@/app/modals/userModel";
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.googleClientId!,
+      clientSecret: process.env.googleClientSecret!,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -43,6 +43,8 @@ export const authOptions: NextAuthOptions = {
           await UserModel.create({
             username: user.name || user.email?.split('@')[0] || 'user',
             email: user.email,
+                      emailVerified:true,
+
           });
         }
       }

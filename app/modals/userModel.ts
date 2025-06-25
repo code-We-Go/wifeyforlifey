@@ -8,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   email:string;
   emailVerified:boolean
+  isSubscribed:boolean
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -23,12 +24,14 @@ const UserSchema = new Schema<IUser>(
     },
     password: { 
       type: String, 
-      required: true,
+      required: false,
       minlength: 6
     }
     ,
     email:{type:String,required:true},
-    emailVerified:{type:Boolean,default:false}
+    emailVerified:{type:Boolean,default:false},
+    isSubscribed:{type:Boolean,default:false}
+
   },
   { timestamps: true }
 );

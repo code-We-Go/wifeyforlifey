@@ -1,5 +1,52 @@
 import mongoose from "mongoose";
 
+export interface Video {
+  _id?: string;
+  title: string;
+  description?: string;
+  url: string;
+  thumbnailUrl: string;
+  isPublic: boolean,
+
+ 
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// types/Playlist.ts
+export interface Playlist {
+  _id?: string;
+  title: string;
+  description?: string;
+  videos: Video[] | string[]; // Can be full Video objects or just IDs
+  thumbnailUrl: string;
+  isPublic: boolean;
+  category?: string;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Add VideoPlaylist type alias for compatibility
+export type VideoPlaylist = Playlist;
+
+// Add PlaylistFilters interface
+export interface PlaylistFilters {
+  category?: string;
+  isPublic?: boolean;
+  search?: string;
+  sortBy?: string;
+}
+
+// Add video categories
+export const videoCategories = [
+  { id: 'tutorials', name: 'Tutorials' },
+  { id: 'lifestyle', name: 'Lifestyle' },
+  { id: 'fashion', name: 'Fashion' },
+  { id: 'beauty', name: 'Beauty' },
+  { id: 'fitness', name: 'Fitness' },
+];
+
 export interface Variant {
   name: string;
   attributeName: string;

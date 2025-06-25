@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { thirdFont } from '@/fonts';
+import { FaGoogle } from "react-icons/fa";
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,13 +39,13 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/' });
+    signIn('google', { callbackUrl: '/account' });
   };
 
   return (
     <div className=" bg-pattern1 ">
-      <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
-      <div className="max-w-md rounded-2xl bg-lovely shadow-2xl w-full py-8 px-6 space-y-8">
+      <div className='md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
+      <div className="max-w-md max-h-[90vh] rounded-2xl bg-lovely shadow-2xl w-full py-8 px-6 space-y-8">
         <div>
           <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-creamey`}>
             Sign in to your account
@@ -118,7 +120,8 @@ export default function LoginPage() {
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in with Google ..' : 'Sign in with Google'}
-              {!loading && <span>google logo</span>}
+              {!loading &&               <span className='ml-2'><FaGoogle />
+                </span>}
             </button>
           </div>
           

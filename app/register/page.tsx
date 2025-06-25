@@ -6,6 +6,7 @@ import axios from 'axios';
 import { thirdFont } from '@/fonts';
 import { FaGoogle } from "react-icons/fa";
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 
 
 export default function RegisterPage() {
@@ -38,6 +39,9 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+  const handleGoogleSignUp= () =>{
+    signIn('google', { callbackUrl: '/account' });
+  } 
 
   return (
     <div className=" bg-pattern1 ">
@@ -129,10 +133,11 @@ export default function RegisterPage() {
         <div>
             <button
               type="button"
+              onClick={handleGoogleSignUp}
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in with Google'}
+              {loading ? 'Creating account with Google...' : 'Create your account with Google'}
               <span className='ml-2'><FaGoogle />
               </span>
             </button>

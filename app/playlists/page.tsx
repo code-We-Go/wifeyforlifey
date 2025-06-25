@@ -22,16 +22,16 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { mockPlaylists, videoCategories, VideoPlaylist } from "@/models/VideoPlaylist";
+import { VideoPlaylist, PlaylistFilters, videoCategories } from "@/app/interfaces/interfaces";
 import VideoCard from "@/components/playlists/VideoCard";
 import { thirdFont } from '@/fonts';
 
-interface PlaylistFilters {
-  category?: string;
-  requiresSubscription?: boolean;
-  search?: string;
-  sortBy?: string;
-}
+// interface PlaylistFilters {
+//   category?: string;
+//   isPublic?: boolean;
+//   search?: string;
+//   sortBy?: string;
+// }
 
 function PlaylistsPageFallback() {
   return <div>Loading...</div>;
@@ -41,18 +41,46 @@ function PlaylistsPage() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
-  const [playlists, setPlaylists] = useState<VideoPlaylist[]>(mockPlaylists);
-  const [filteredPlaylists, setFilteredPlaylists] = useState<VideoPlaylist[]>(mockPlaylists);
+  const [playlists, setPlaylists] = useState<VideoPlaylist[]>([]);
+  const [filteredPlaylists, setFilteredPlaylists] = useState<VideoPlaylist[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<PlaylistFilters>({
     category: initialCategory,
-    requiresSubscription: undefined,
+    isPublic: undefined,
     search: "",
     sortBy: "newest",
   });
 
+  // Fetch playlists from API
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+        if (filters.search) queryParams.append('search', filters.search);
+        queryParams.append('all', 'true'); // Get all playlists for client-side filtering
+
+        const response = await fetch(`/api/playlists?${queryParams.toString()}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch playlists');
+        }
+        
+        const data = await response.json();
+        setPlaylists(data.data || []);
+      } catch (error) {
+        console.error('Error fetching playlists:', error);
+        setPlaylists([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlaylists();
+  }, [filters.search]);
+
   // Apply filters whenever they change
   useEffect(() => {
-    let result = [...mockPlaylists];
+    let result = [...playlists];
     
     // Filter by category
     if (filters.category) {
@@ -60,19 +88,9 @@ function PlaylistsPage() {
     }
     
     // Filter by subscription requirement
-    if (filters.requiresSubscription !== undefined) {
+    if (filters.isPublic !== undefined) {
       result = result.filter(
-        playlist => playlist.requiresSubscription === filters.requiresSubscription
-      );
-    }
-    
-    // Filter by search term
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      result = result.filter(
-        playlist => 
-          playlist.title.toLowerCase().includes(searchLower) || 
-          playlist.description.toLowerCase().includes(searchLower)
+        playlist => playlist.isPublic === filters.isPublic
       );
     }
     
@@ -82,14 +100,14 @@ function PlaylistsPage() {
     } else if (filters.sortBy === "za") {
       result.sort((a, b) => b.title.localeCompare(a.title));
     } else if (filters.sortBy === "most_videos") {
-      result.sort((a, b) => b.videos.length - a.videos.length);
+      result.sort((a, b) => (b.videos?.length || 0) - (a.videos?.length || 0));
     } else {
       // Default to newest
-      result.sort((a, b) => (b._id || "").localeCompare(a._id || ""));
+      result.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
     }
     
     setFilteredPlaylists(result);
-  }, [filters]);
+  }, [playlists, filters]);
 
   const updateFilter = (key: keyof PlaylistFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -98,7 +116,7 @@ function PlaylistsPage() {
   const resetFilters = () => {
     setFilters({
       category: "",
-      requiresSubscription: undefined,
+      isPublic: undefined,
       search: "",
       sortBy: "newest",
     });
@@ -109,7 +127,7 @@ function PlaylistsPage() {
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="space-y-4">
-          <h1 className={`${thirdFont.className} text-4xl md:text-6xl font-semibold tracking-normal text-lovely`}> Playlists</h1>
+          <h1 className={`${thirdFont.className} text-4xl md:text-5xl font-semibold tracking-normal text-lovely`}> Playlists</h1>
           <p className="text-muted-foreground">
             Explore our collection of curated video playlists for tutorials, inspiration, and more.
           </p>
@@ -202,9 +220,9 @@ function PlaylistsPage() {
                       <div className="flex items-center space-x-2">
                         <Checkbox 
                           id="subscription-free"
-                          checked={filters.requiresSubscription === false}
+                          checked={filters.isPublic === false}
                           onCheckedChange={(checked) => 
-                            updateFilter("requiresSubscription", checked ? false : undefined)
+                            updateFilter("isPublic", checked ? false : undefined)
                           }
                         />
                         <label
@@ -217,9 +235,9 @@ function PlaylistsPage() {
                       <div className="flex items-center space-x-2">
                         <Checkbox 
                           id="subscription-premium"
-                          checked={filters.requiresSubscription === true}
+                          checked={filters.isPublic === true}
                           onCheckedChange={(checked) => 
-                            updateFilter("requiresSubscription", checked ? true : undefined)
+                            updateFilter("isPublic", checked ? true : undefined)
                           }
                         />
                         <label
@@ -244,7 +262,7 @@ function PlaylistsPage() {
         </div>
 
         {/* Active Filters */}
-        {(filters.category || filters.requiresSubscription !== undefined) && (
+        {(filters.category || filters.isPublic !== undefined) && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {filters.category && (
@@ -256,12 +274,12 @@ function PlaylistsPage() {
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
-            {filters.requiresSubscription !== undefined && (
+            {filters.isPublic !== undefined && (
               <Badge 
-                onClick={() => updateFilter("requiresSubscription", undefined)} 
+                onClick={() => updateFilter("isPublic", undefined)} 
                 className="cursor-pointer"
               >
-                {filters.requiresSubscription ? "Premium Content" : "Free Content"}
+                {filters.isPublic ? "Premium Content" : "Free Content"}
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
@@ -298,7 +316,12 @@ function PlaylistsPage() {
         </div>
 
         {/* Playlists Grid */}
-        {filteredPlaylists.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-everGreen mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading playlists...</p>
+          </div>
+        ) : filteredPlaylists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPlaylists.map((playlist) => (
               <VideoCard key={playlist._id} playlist={playlist} />

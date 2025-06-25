@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Lock, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { VideoPlaylist } from "@/models/VideoPlaylist";
+import { VideoPlaylist } from "@/app/interfaces/interfaces";
 
 interface VideoCardProps {
   playlist: VideoPlaylist;
@@ -14,14 +14,14 @@ export default function VideoCard({ playlist }: VideoCardProps) {
       <div className="video-card group">
         <div className="relative aspect-video overflow-hidden rounded-t-lg">
           <Image
-            src={playlist.thumbnail}
+            src={playlist.thumbnailUrl}
             alt={playlist.title}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
             <div className="h-14 w-14 rounded-full  flex items-center justify-center">
-              {playlist.requiresSubscription ? (
+              {!playlist.isPublic ? (
                 <Lock className="h-6 w-6 text-primary" />
               ) : (
                 <Play className="h-6 w-6 text-primary ml-1" />
@@ -31,10 +31,12 @@ export default function VideoCard({ playlist }: VideoCardProps) {
         </div>
         <div className="p-4 ">
           <div className="flex items-center justify-between mb-2">
-            <Badge variant="secondary" className="font-normal">
-              {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}
-            </Badge>
-            {playlist.requiresSubscription && (
+            {playlist.category && (
+              <Badge variant="secondary" className="font-normal">
+                {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}
+              </Badge>
+            )}
+            {!playlist.isPublic && (
               <Badge variant="outline" className="font-normal">
                 Premium
               </Badge>
@@ -45,7 +47,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             {playlist.description}
           </p>
           <div className="mt-3 text-sm">
-            {playlist.videos.length} {playlist.videos.length === 1 ? 'video' : 'videos'}
+            {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? 'video' : 'videos'}
           </div>
         </div>
       </div>

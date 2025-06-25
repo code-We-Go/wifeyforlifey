@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,42 +8,74 @@ import { ChevronLeft, Lock, Play, Clock, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { mockPlaylists, VideoPlaylist, Video } from "@/models/VideoPlaylist";
+import { Playlist, Video } from "@/app/interfaces/interfaces";
 import { mockUser } from "@/models/User";
+import axios from "axios";
 
 export default function PlaylistPage() {
   const params = useParams();
   const router = useRouter();
   const playlistId = params.id as string;
   
-  const playlist = mockPlaylists.find((p) => p._id === playlistId);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [relatedPlaylists, setRelatedPlaylists] = useState<Playlist[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // For demo purposes, we'll use the mock user
   const user = mockUser;
   const isSubscribed = user.isSubscribed || false;
 
-  if (!playlist) {
-    return (
-      <div className="container-custom py-16 text-center">
-        <h1 className="text-2xl font-medium mb-4">Playlist not found</h1>
-        <p className="text-muted-foreground mb-6">
-          The playlist you are looking for doesn't exist or has been removed.
-        </p>
-        <Button asChild>
-          <Link href="/playlists">Back to Playlists</Link>
-        </Button>
-      </div>
-    );
-  }
+  // Fetch the specific playlist
+  const fetchPlaylist = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(`/api/playlists/${playlistId}`);
+      console.log("Playlist data:", res.data);
+      setPlaylist(res.data.data);
+      
+      // Set the first video as selected if available
+      if (res.data.data.videos && res.data.data.videos.length > 0) {
+        setSelectedVideo(res.data.data.videos[0]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching playlist:", error);
+      setError(error.response?.data?.error || "Failed to load playlist");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [playlistId]);
 
-  // Set the first video as selected if none is selected
-  if (!selectedVideo && playlist.videos.length > 0) {
-    setSelectedVideo(playlist.videos[0]);
-  }
+  // Fetch related playlists
+  const fetchRelatedPlaylists = useCallback(async () => {
+    try {
+      const res = await axios.get(`/api/playlists?all=true`);
+      const allPlaylists = res.data.data;
+      
+      // Filter related playlists (same category or public ones, excluding current)
+      const related = allPlaylists
+        .filter((p: Playlist) => 
+          p._id !== playlistId && 
+          (p.category === playlist?.category || !p.isPublic)
+        )
+        .slice(0, 3);
+      
+      setRelatedPlaylists(related);
+    } catch (error) {
+      console.error("Error fetching related playlists:", error);
+    }
+  }, [playlistId, playlist?.category]);
 
-  // Check if the selected video requires subscription
-  const videoLocked = selectedVideo?.requiresSubscription && !isSubscribed;
+  useEffect(() => {
+    fetchPlaylist();
+  }, [fetchPlaylist]);
+
+  useEffect(() => {
+    if (playlist) {
+      fetchRelatedPlaylists();
+    }
+  }, [playlist, fetchRelatedPlaylists]);
 
   // Format date
   const formatDate = (date: Date) => {
@@ -53,6 +85,32 @@ export default function PlaylistPage() {
       day: "numeric",
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="container-custom py-16 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Loading playlist...</p>
+      </div>
+    );
+  }
+
+  if (error || !playlist) {
+    return (
+      <div className="container-custom py-16 text-center">
+        <h1 className="text-2xl font-medium mb-4">Playlist not found</h1>
+        <p className="text-muted-foreground mb-6">
+          {error || "The playlist you are looking for doesn't exist or has been removed."}
+        </p>
+        <Button asChild>
+          <Link href="/playlists">Back to Playlists</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // Check if the selected video requires subscription
+  const videoLocked = selectedVideo?.isPublic && !isSubscribed;
 
   return (
     <div className="container-custom py-8 md:py-12">
@@ -101,9 +159,9 @@ export default function PlaylistPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary">
-                {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}
+                {playlist.category ? (playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)) : "Uncategorized"}
               </Badge>
-              {playlist.requiresSubscription && (
+              {playlist.isPublic && (
                 <Badge variant="outline">Premium</Badge>
               )}
             </div>
@@ -128,7 +186,7 @@ export default function PlaylistPage() {
                   </div>
                 ) : (
                   <iframe
-                    src={selectedVideo.url.replace("watch?v=", "embed/")}
+                    src={selectedVideo.url?.replace("watch?v=", "embed/")}
                     title={selectedVideo.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -147,10 +205,6 @@ export default function PlaylistPage() {
                 <h2 className="text-xl font-medium">{selectedVideo.title}</h2>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                   <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {selectedVideo.duration}
-                  </div>
-                  <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
                     {formatDate(new Date())}
                   </div>
@@ -166,14 +220,14 @@ export default function PlaylistPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-medium">Videos in this Playlist</h2>
             <span className="text-sm text-muted-foreground">
-              {playlist.videos.length} {playlist.videos.length === 1 ? "video" : "videos"}
+              {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
             </span>
           </div>
           
           <div className="bg-card rounded-lg overflow-hidden shadow-sm">
             <div className="divide-y">
-              {playlist.videos.map((video) => {
-                const isLocked = video.requiresSubscription && !isSubscribed;
+              {Array.isArray(playlist.videos) && playlist.videos.map((video: any) => {
+                const isLocked = video.isPublic && !isSubscribed;
                 const isActive = selectedVideo?._id === video._id;
                 
                 return (
@@ -187,7 +241,7 @@ export default function PlaylistPage() {
                     <div className="flex gap-3">
                       <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
                         <Image
-                          src={video.thumbnail}
+                          src={video.thumbnailUrl || "/video/1.png"}
                           alt={video.title}
                           fill
                           className="object-cover"
@@ -203,12 +257,8 @@ export default function PlaylistPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium line-clamp-1">{video.title}</h3>
                         <div className="flex items-center mt-1">
-                          <Clock className="h-3 w-3 text-muted-foreground mr-1" />
-                          <span className="text-xs text-muted-foreground">
-                            {video.duration}
-                          </span>
-                          {video.requiresSubscription && (
-                            <span className="ml-2 text-xs bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full">
+                          {video.isPublic && (
+                            <span className="text-xs bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full">
                               Premium
                             </span>
                           )}
@@ -221,7 +271,7 @@ export default function PlaylistPage() {
             </div>
           </div>
           
-          {playlist.requiresSubscription && !isSubscribed && (
+          {playlist.isPublic && !isSubscribed && (
             <div className="bg-accent/50 rounded-lg p-4 text-center">
               <p className="text-sm mb-3">
                 Subscribe to unlock all premium videos in this playlist.
@@ -235,17 +285,11 @@ export default function PlaylistPage() {
       </div>
 
       {/* Related Playlists */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-display font-medium mb-6">You May Also Like</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {mockPlaylists
-            .filter(
-              (p) => 
-                p._id !== playlist._id && 
-                (p.category === playlist.category || !p.requiresSubscription)
-            )
-            .slice(0, 3)
-            .map((relatedPlaylist) => (
+      {relatedPlaylists.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-2xl font-display font-medium mb-6">You May Also Like</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedPlaylists.map((relatedPlaylist) => (
               <Link 
                 key={relatedPlaylist._id} 
                 href={`/playlists/${relatedPlaylist._id}`}
@@ -254,14 +298,14 @@ export default function PlaylistPage() {
                 <div className="video-card group">
                   <div className="relative aspect-video overflow-hidden rounded-t-lg">
                     <Image
-                      src={relatedPlaylist.thumbnail}
+                      src={relatedPlaylist.thumbnailUrl || "/video/1.png"}
                       alt={relatedPlaylist.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
                       <div className="h-12 w-12 rounded-full bg-white/80 flex items-center justify-center">
-                        {relatedPlaylist.requiresSubscription ? (
+                        {relatedPlaylist.isPublic ? (
                           <Lock className="h-5 w-5 text-primary" />
                         ) : (
                           <Play className="h-5 w-5 text-primary ml-0.5" />
@@ -272,9 +316,9 @@ export default function PlaylistPage() {
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant="secondary" className="font-normal">
-                        {relatedPlaylist.category.charAt(0).toUpperCase() + relatedPlaylist.category.slice(1)}
+                        {relatedPlaylist.category ? (relatedPlaylist.category.charAt(0).toUpperCase() + relatedPlaylist.category.slice(1)) : "Uncategorized"}
                       </Badge>
-                      {relatedPlaylist.requiresSubscription && (
+                      {relatedPlaylist.isPublic && (
                         <Badge variant="outline" className="font-normal">
                           Premium
                         </Badge>
@@ -288,8 +332,9 @@ export default function PlaylistPage() {
                 </div>
               </Link>
             ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
