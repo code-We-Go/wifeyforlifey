@@ -1,9 +1,10 @@
 'use client'
 
-import { UserCircle, Heart, ShoppingBag, Gift } from 'lucide-react';
+import { UserCircle, Heart, ShoppingBag, Gift, BadgeCheck, BadgeAlert } from 'lucide-react';
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import axios from 'axios'
 
 export default function AccountPage() {
@@ -42,6 +43,8 @@ export default function AccountPage() {
   const user = {
     name: session.user.name || 'User',
     email: session.user.email || 'user@example.com',
+    isSubscribed:session.user.isSubscribed || false,
+    imgUrl:session.user.image,
     loyaltyPoints: 1250,
     wishlistItems: 8,
     orders: 12,
@@ -72,16 +75,29 @@ export default function AccountPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       {/* Profile Header */}
+      <div className='w-full flex justify-between'>
+
+      
       <div className="flex items-center space-x-4">
+      {user.imgUrl? <div className='rounded-full h-24 w-24 border-2 border-lovely relative'> 
+            <Image
+              className='rounded-full'
+              alt={user.name} src={user.imgUrl}  fill>
+              </Image> </div>  :
         <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
           <UserCircle className="h-16 w-16 text-gray-400" />
+          
         </div>
-        <div>
+}
+        <div className='w-fit'>
           <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
           <p className="text-sm text-gray-500">{user.email}</p>
+          <p className="text-sm flex items-center gap-2 text-gray-500">Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-everGreen' />:<BadgeAlert/>}</span></p>
         </div>
+      </div>
+      <button className='underline text-gray-500'>Edit Info</button>
       </div>
 
       {/* Stats Grid */}

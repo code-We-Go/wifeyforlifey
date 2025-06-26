@@ -13,6 +13,7 @@ const PlaylistSchema = new Schema<Playlist>({
     required: false
   }],
   thumbnailUrl: { type: String, required: true },
+  featured: { type: Boolean, default: false },
 }, {
   timestamps: true // This will automatically add createdAt and updatedAt fields
 });

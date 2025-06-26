@@ -70,10 +70,11 @@ export async function GET(req: Request) {
   const all = searchParams.get("all") === "true";
   const limit = all ? 0 : 10;
   const skip = all ? 0 : (page - 1) * limit;
+  const featured = searchParams.get("featured") === "true";
 
   try {
     // Create search query
-    const searchQuery = search
+    let searchQuery: any = search
       ? { 
           $or: [
             { title: { $regex: search, $options: "i" } },
@@ -82,6 +83,10 @@ export async function GET(req: Request) {
           ]
         }
       : {};
+
+    if (featured) {
+      searchQuery = { ...searchQuery, featured: true };
+    }
 
     // Get total count
     const totalPlaylists = await playlistModel.countDocuments(searchQuery);

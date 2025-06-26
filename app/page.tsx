@@ -35,7 +35,7 @@ export default function Home() {
       <ExclusiveContent/>
 
       {/* Featured Playlists Section */}
-{/* <Playlists/> */}
+<Playlists/>
  <BrandCharacters/>
       {/* Newsletter Section */}
 <Newsletters/>

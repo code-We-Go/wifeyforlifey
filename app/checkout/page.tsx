@@ -16,10 +16,6 @@ import { Discount } from "../types/discount";
 import CartItemSmall from "../cart/CartItemSmall";
 import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
-import LoadingSpinner from "./components/LoadingSpinner";
-import LoadingOverlay from "./components/LoadingOverlay";
-import CheckoutSkeleton from "./components/CheckoutSkeleton";
-import LoadingButton from "./components/LoadingButton";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -123,7 +119,6 @@ const CheckoutClientPage = () => {
   //  const[countries,setCountries]=useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [isPageLoading, setIsPageLoading] = useState(true);
   const calculateTotals = () => {
     // Calculate subtotal first
     const calculatedSubTotal = items.reduce(
@@ -202,7 +197,6 @@ const CheckoutClientPage = () => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
   };// Default to the first state's name or an empty string
-
   useEffect(() => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -296,63 +290,48 @@ const CheckoutClientPage = () => {
     }
   }, [useSameAsShipping]);
   useEffect(() => {
-    const initializeData = async () => {
-      try {
-        console.log('Starting to load checkout data...');
-        
-        const [countriesResponse, shippingZonesResponse, statesResponse] = await Promise.all([
-          axios.get("/api/countries"),
-          axios.get("/api/shipping"),
-          axios.get(`/api/states?countryID=${65}`)
-        ]);
+    const getCountries = async () => {
+      const response = await axios.get("/api/countries");
+      setCountries(response.data);
+    };
+    const getShippingZones = async () => {
+      console.log("testtt");
+      const response = await axios.get("/api/shipping");
+      setShippingZones(response.data);
+    };
+    getShippingZones();
+    const calculateShipping=()=>{
+      if(countryID===65){
+        const selectedState = states.find((state) => state.name === formData.state)
+        const zone =shippingZones.find((zone:ShippingZone) => (zone._id === selectedState?.shipping_zone && zone.localGlobal ==='local'))
+       if(zone){
 
-        console.log('Data loaded successfully:', {
-          countries: countriesResponse.data?.length || 0,
-          shippingZones: shippingZonesResponse.data?.length || 0,
-          states: statesResponse.data?.length || 0
-        });
+         setShipping(zone.zone_rate.local)
+       }
+      }
 
-        setCountries(countriesResponse.data || []);
-        setShippingZones(shippingZonesResponse.data || []);
-        setStates(statesResponse.data || []);
-        
-        if (statesResponse.data?.length > 0 && !state) {
-          setState(statesResponse.data[0].name);
-        }
-        
-        setIsPageLoading(false);
-        console.log('Page loading completed');
-      } catch (error) {
-        console.error('Error loading checkout data:', error);
-        // Set default data to prevent infinite loading
-        setCountries([]);
-        setShippingZones([]);
-        setStates([]);
-        setIsPageLoading(false);
+    };
+    calculateShipping();
+    getCountries();
+    const getStates = async () => {
+      const response = await axios.get(`/api/states?countryID=${65}`);
+      setStates(response.data);
+      // Only set initial state if no state is currently selected
+      if (response.data.length > 0 && !state) {
+        setState(response.data[0].name);
       }
     };
+    getStates();
 
-    // Add a timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      console.log('Data loading timeout - showing form anyway');
-      setIsPageLoading(false);
-    }, 10000); // 10 second timeout
-
-    initializeData();
-
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  // Calculate initial totals
-  useEffect(() => {
     const calculatedSubTotal = items.reduce(
       (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
       0
     );
     setSubTotal(calculatedSubTotal);
     setTotal(calculatedSubTotal + shipping);
-  }, [items, shipping]);
-
+    
+    cartItems();
+  }, [items, countryID, billingState]); // Removed 'state' from dependencies
   useEffect(() => {
     if (countryID !== 65) {
       setPayment("card");
@@ -476,35 +455,12 @@ const CheckoutClientPage = () => {
       }
     }
   };
-
-  // Show skeleton while page is loading
-  if (isPageLoading) {
-    console.log('Showing skeleton, isPageLoading:', isPageLoading);
-    return <CheckoutSkeleton />;
-  }
-
-  console.log('Rendering checkout form, isPageLoading:', isPageLoading, 'items:', items?.length || 0);
-
-  // Show empty cart message if no items
-  if (!items || items.length === 0) {
-    return (
-      <div className="container-custom py-8 md:py-12 min-h-screen bg-creamey flex flex-col items-center justify-center">
-        <h1 className={`${thirdFont.className} text-4xl text-everGreen mb-8`}>Your cart is empty</h1>
-        <p className="text-lg text-gray-600 mb-8">Add some items to your cart to proceed with checkout.</p>
-        <Link href="/shop" className="bg-lovely text-creamey px-6 py-3 rounded-2xl hover:bg-lovely/90">
-          Continue Shopping
-        </Link>
-      </div>
-    );
-  }
-
   return (
     // cart.length > 0 ?
     <div
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}>
                 <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8 font-display font-semibold`}>Checkout</h1>
 
-      
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
         <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
@@ -920,32 +876,27 @@ const CheckoutClientPage = () => {
          </div> */}
             {payment === "cash" || "instapay" ? (
               <div className={`flex justify-end`}>
-                <LoadingButton
-                  loading={loading}
-                  disabled={items.length === 0}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSubmit(e as any);
-                  }}
-                  variant="primary"
-                  size="md"
-                  loadingText="Processing..."
+                <button
+                className="bg-lovely rounded-2xl text-creamey hover:bg-lovely/90 px-4 py-2"
+                  onClick={() => handleSubmit}
+                  disabled={loading || items.length === 0}
                 >
                   Confirm order
-                </LoadingButton>
+                </button>
               </div>
             ) : (
               <div className="flex justify-end">
-                <LoadingButton
-                  loading={loading}
-                  disabled={items.length === 0}
+                <button
+                  disabled={items.length === 0 || loading}
                   type="submit"
-                  variant="outline"
-                  size="md"
-                  loadingText="Processing..."
+                  className={`border transition duration-300 border-lovely p-1 ${
+                    items.length === 0 || loading
+                      ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
+                      : "hover:cursor-pointer hover:bg-lovely hover:text-white text-everGreen"
+                  }`}
                 >
                   PROCEED TO PAYMENT
-                </LoadingButton>
+                </button>
               </div>
             )}
             <div className="text-lg">
@@ -1064,12 +1015,6 @@ const CheckoutClientPage = () => {
             </div>
           </div>
       </div>
-      
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        isVisible={loading} 
-        message={payment === "card" ? "Redirecting to payment gateway..." : "Processing your order..."} 
-      />
     </div>
   );
 };

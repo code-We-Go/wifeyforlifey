@@ -1,15 +1,39 @@
-import React from "react";
+'use client'
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { VideoPlaylist } from "@/app/interfaces/interfaces";
 
 import VideoCard from "@/components/playlists/VideoCard";
-import { mockPlaylists } from "@/models/VideoPlaylist";
 import { thirdFont } from "@/fonts";
 
 const Playlists = () => {
-  const featuredPlaylists = mockPlaylists.slice(0, 2);
+  const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFeaturedPlaylists = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/playlists?featured=true&all=true");
+        const data = await res.json();
+        if (res.ok) {
+          setFeaturedPlaylists(data.data || []);
+        } else {
+          setError(data.error || "Failed to fetch featured playlists");
+        }
+      } catch (err) {
+        setError("Failed to fetch featured playlists");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeaturedPlaylists();
+  }, []);
 
   return (
     <section className="py-16 bg-lovely text-creamey">
@@ -36,11 +60,21 @@ const Playlists = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {featuredPlaylists.map((playlist) => (
-            <VideoCard key={playlist._id} playlist={playlist} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-8">{error}</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredPlaylists.length === 0 ? (
+              <div className="col-span-2 text-center py-8">No featured playlists found.</div>
+            ) : (
+              featuredPlaylists.map((playlist) => (
+                <VideoCard key={playlist._id} playlist={playlist} />
+              ))
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
