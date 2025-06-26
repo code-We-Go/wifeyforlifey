@@ -26,8 +26,8 @@ export async function GET(request: Request) {
       .findById(id)
       .populate({
         path: "videos",
-        model: "videos",
-        select: "title description thumbnailUrl duration isPublished url"
+        // model: "videoModel",
+        select: "title description thumbnailUrl duration isPublic isPublished url"
       });
 
     if (!playlist) {
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         { status: 404 }
       );
     }
-
+    console.log("videos"+ playlist)
     return NextResponse.json({ data: playlist }, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching playlist:", error);

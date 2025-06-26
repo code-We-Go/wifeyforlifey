@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Playlist, Video } from "@/app/interfaces/interfaces";
 import { mockUser } from "@/models/User";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 export default function PlaylistPage() {
   const params = useParams();
@@ -23,8 +24,8 @@ export default function PlaylistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const user = mockUser;
-  const isSubscribed = user.isSubscribed || false;
+  const { data: session, status } = useSession();
+  const isSubscribed = session?.user.isSubscribed || false;
 
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
@@ -110,7 +111,7 @@ export default function PlaylistPage() {
   }
 
   // Check if the selected video requires subscription
-  const videoLocked = selectedVideo?.isPublic && !isSubscribed;
+  const videoLocked = !selectedVideo?.isPublic && !isSubscribed;
 
   return (
     <div className="container-custom py-8 md:py-12">
@@ -226,8 +227,9 @@ export default function PlaylistPage() {
           
           <div className="bg-card rounded-lg overflow-hidden shadow-sm">
             <div className="divide-y">
-              {Array.isArray(playlist.videos) && playlist.videos.map((video: any) => {
-                const isLocked = video.isPublic && !isSubscribed;
+              {Array.isArray(playlist.videos) && playlist.videos.map((video: any,index) => {
+                console.log('isLocked' + video.isPublic +isSubscribed+video.title)
+                const isLocked =  !video.isPublic && !isSubscribed;
                 const isActive = selectedVideo?._id === video._id;
                 
                 return (

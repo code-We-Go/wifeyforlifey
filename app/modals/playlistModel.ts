@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { Playlist } from "@/app/interfaces/interfaces";
+import videoModel from "./videoModel";
 
 // Define the Playlist schema
+console.log("register" + videoModel)
 const PlaylistSchema = new Schema<Playlist>({
   title: { type: String, required: true },
   description: { type: String, required: false },
@@ -10,6 +12,7 @@ const PlaylistSchema = new Schema<Playlist>({
   videos: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "videos",
+    model:"videoModel",
     required: false
   }],
   thumbnailUrl: { type: String, required: true },

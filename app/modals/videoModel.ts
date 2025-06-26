@@ -7,7 +7,7 @@ const VideoSchema = new Schema<Video>({
   description: { type: String, required: false },
   url: { type: String, required: true },
   thumbnailUrl: { type: String, required: true },
-  isPublic: { type: Boolean, default: true },
+  isPublic: { type: Boolean, default: false },
 
 }, {
   timestamps: true // This will automatically add createdAt and updatedAt fields
