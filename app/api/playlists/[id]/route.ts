@@ -7,16 +7,15 @@ const loadDB = async () => {
   await ConnectDB();
 };
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
     await loadDB();
-    
-    const { id } = params;
-    
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+
+    // Extract id from the URL
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop();
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid playlist ID" },
         { status: 400 }
