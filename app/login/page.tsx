@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { thirdFont } from '@/fonts';
 import { FaGoogle } from "react-icons/fa";
+import { BadgeAlert } from 'lucide-react';
 
 
 export default function LoginPage() {
@@ -88,7 +89,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div className="text-creamey flex gap-2 w-full justify-center items-center text-sm text-center">{error} <span className='text-xs'><BadgeAlert className='text-xs w-5'/></span></div>
           )}
 
           <div>
