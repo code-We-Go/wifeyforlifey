@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import productsModel from '@/app/modals/productsModel';
 import { ConnectDB } from '@/app/config/db';
 import mongoose from 'mongoose';
+import subCategoryModel from '@/app/modals/subCategoryModel';
+import categoriesModel from '@/app/modals/categoriesModel';
 
 const loadDB = async () => {
   await ConnectDB();
 };
 
 loadDB();
-
+console.log("registering"+subCategoryModel+categoriesModel)
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

@@ -5,7 +5,7 @@ import { thirdFont } from "@/fonts";
 export default function ContactUsPage() {
   return (
     <div className="flex bg-pattern1 custom-container h-auto  md:min-h-[calc(100vh-128px)] items-center justify-center bg-gray-100">
-      <div className=" inset-0   w-full  flex  py-8 md:px-8 important! justify-center items-center backdrop-blur-[3px] bg-black/20 ">
+      <div className=" inset-0   w-full  flex  py-8 md:px-8 important! justify-center items-center backdrop-blur-[3px] bg-black/10 ">
      
       <div className="mx-auto  flex  flex-col rounded-2xl bg-pinkey p-8 shadow-lg md:flex-row">
         {/* Image Column */}
