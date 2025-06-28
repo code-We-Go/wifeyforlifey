@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { VideoPlaylist } from "@/app/interfaces/interfaces";
 
 import VideoCard from "@/components/playlists/VideoCard";
+import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
 import { thirdFont } from "@/fonts";
 
 const Playlists = () => {
@@ -61,7 +62,11 @@ const Playlists = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, i) => (
+              <VideoCardSkeleton key={i} />
+            ))}
+          </div>
         ) : error ? (
           <div className="text-center text-red-500 py-8">{error}</div>
         ) : (

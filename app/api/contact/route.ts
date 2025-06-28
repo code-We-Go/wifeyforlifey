@@ -7,11 +7,11 @@ export async function POST(request:Request) {
     console.log(data.name)
     try{
         await sendContactMail({
-            to:'orders@mamilk-breastfeeding.com',
+            to:'support@shopwifeyforlifey.com',
             name: data.name,
-            subject: data.subject,
+            subject: 'Contact-Mail',
             from: data.email,
-            body: data.message
+            body: `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\nMessage:\n${data.message}`
     });
     return NextResponse.json({status: 200 })
     }

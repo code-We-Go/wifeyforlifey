@@ -12,6 +12,7 @@ import { Playlist, Video } from "@/app/interfaces/interfaces";
 import { mockUser } from "@/models/User";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { thirdFont } from "@/fonts";
 
 export default function PlaylistPage() {
   const params = useParams();
@@ -26,6 +27,26 @@ export default function PlaylistPage() {
   
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
+
+  const watermarkText = session?.user.email || "user@example.com";
+  // VdoCipher expects watermark config as an array of objects, as a JSON string
+  const watermarkConfig = JSON.stringify([
+    {
+      type: "rtext",
+      text: watermarkText,
+      alpha: "0.7",
+      color: "0xFFFFFF",
+      size: "16",
+      interval: "10000"
+    }
+  ]);
+
+  const [otp, setOtp] = useState<string | null>(null);
+  const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
+  const [videoLoading, setVideoLoading] = useState(false);
+
+  // Check if the selected video requires subscription
+  const videoLocked = !selectedVideo?.isPublic && !isSubscribed;
 
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
@@ -68,6 +89,22 @@ export default function PlaylistPage() {
     }
   }, [playlistId, playlist?.category]);
 
+  // Fetch OTP and playbackInfo for VdoCipher
+  const fetchVdoOtp = useCallback(async (videoId: string, watermark: string | undefined) => {
+    setVideoLoading(true);
+    setOtp(null);
+    setPlaybackInfo(null);
+    try {
+      const res = await axios.post("/api/vdo", { videoID: videoId, annotate: watermark });
+      setOtp(res.data.otp);
+      setPlaybackInfo(res.data.playbackInfo);
+    } catch (error) {
+      console.error("Error fetching VdoCipher OTP:", error);
+    } finally {
+      setVideoLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchPlaylist();
   }, [fetchPlaylist]);
@@ -77,6 +114,17 @@ export default function PlaylistPage() {
       fetchRelatedPlaylists();
     }
   }, [playlist, fetchRelatedPlaylists]);
+
+  // Fetch OTP when selectedVideo changes and is not locked
+  useEffect(() => {
+    if (selectedVideo && !videoLocked && selectedVideo.url) {
+      fetchVdoOtp(selectedVideo.url, watermarkConfig);
+    } else {
+      setOtp(null);
+      setPlaybackInfo(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVideo, videoLocked, watermarkConfig]);
 
   // Format date
   const formatDate = (date: Date) => {
@@ -89,9 +137,9 @@ export default function PlaylistPage() {
 
   if (isLoading) {
     return (
-      <div className="container-custom py-16 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-muted-foreground">Loading playlist...</p>
+      <div className="container-custom flex-col flex w-full justify-center items-center bg-lovely h-auto min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-128px)] py-16 text-center">
+        <div className="animate-spin text-creamey rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-creamey">Loading playlist...</p>
       </div>
     );
   }
@@ -110,11 +158,8 @@ export default function PlaylistPage() {
     );
   }
 
-  // Check if the selected video requires subscription
-  const videoLocked = !selectedVideo?.isPublic && !isSubscribed;
-
   return (
-    <div className="container-custom py-8 md:py-12">
+    <div className="container-custom py-8 md:py-12 h-auto min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-128px)]">
       {/* Breadcrumbs */}
       <div className="mb-6">
         <nav className="flex" aria-label="Breadcrumb">
@@ -162,11 +207,11 @@ export default function PlaylistPage() {
               <Badge variant="secondary">
                 {playlist.category ? (playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)) : "Uncategorized"}
               </Badge>
-              {playlist.isPublic && (
-                <Badge variant="outline">Premium</Badge>
+              {!playlist.isPublic && (
+                <Badge color="bg-everGreen" className="bg-everGreen text-everGreen" variant="outline">Premium</Badge>
               )}
             </div>
-            <h1 className="text-3xl font-display font-medium">{playlist.title}</h1>
+            <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
             <p className="text-muted-foreground mt-2">{playlist.description}</p>
           </div>
 
@@ -185,14 +230,32 @@ export default function PlaylistPage() {
                       Subscribe Now
                     </Button>
                   </div>
+                ) : videoLoading ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p>Loading video...</p>
+                  </div>
+                ) : otp && playbackInfo ? (
+                  <div style={{ paddingTop: "56.25%", position: "relative" }}>
+                    <iframe
+                      src={`https://player.vdocipher.com/v2/?otp=${encodeURIComponent(otp)}&playbackInfo=${encodeURIComponent(playbackInfo)}`}
+                      style={{
+                        border: 0,
+                        maxWidth: "100%",
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        height: "100%",
+                        width: "100%",
+                      }}
+                      allowFullScreen
+                      allow="encrypted-media"
+                    ></iframe>
+                  </div>
                 ) : (
-                  <iframe
-                    src={selectedVideo.url?.replace("watch?v=", "embed/")}
-                    title={selectedVideo.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  ></iframe>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
+                    <p>Unable to load video.</p>
+                  </div>
                 )}
               </div>
             ) : (
@@ -203,7 +266,7 @@ export default function PlaylistPage() {
 
             {selectedVideo && (
               <div>
-                <h2 className="text-xl font-medium">{selectedVideo.title}</h2>
+                <h2 className={`${thirdFont.className} text-3xl text-lovely font-medium`}>{selectedVideo.title}</h2>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
@@ -235,8 +298,8 @@ export default function PlaylistPage() {
                 return (
                   <div 
                     key={video._id} 
-                    className={`cursor-pointer hover:bg-accent/50 transition-colors p-4 ${
-                      isActive ? "bg-accent/50" : ""
+                    className={`cursor-pointer bg-pinkey hover:bg-lovely transition-colors p-4 ${
+                      isActive ? "bg-lovely" : ""
                     }`}
                     onClick={() => setSelectedVideo(video)}
                   >
@@ -259,8 +322,8 @@ export default function PlaylistPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium line-clamp-1">{video.title}</h3>
                         <div className="flex items-center mt-1">
-                          {video.isPublic && (
-                            <span className="text-xs bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full">
+                          {!video.isPublic && (
+                            <span className="text-xs bg-muted text-everGreen px-1.5 py-0.5 rounded-full">
                               Premium
                             </span>
                           )}

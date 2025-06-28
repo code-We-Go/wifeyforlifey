@@ -24,7 +24,9 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { VideoPlaylist, PlaylistFilters, videoCategories } from "@/app/interfaces/interfaces";
 import VideoCard from "@/components/playlists/VideoCard";
+import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
 import { thirdFont } from '@/fonts';
+import { useSession } from 'next-auth/react';
 
 // interface PlaylistFilters {
 //   category?: string;
@@ -38,6 +40,8 @@ function PlaylistsPageFallback() {
 }
 
 function PlaylistsPage() {
+  const { data: session, status } = useSession();
+
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
   
@@ -123,12 +127,12 @@ function PlaylistsPage() {
   };
 
   return (
-    <div className="container-custom py-8 md:py-12">
+    <div className="container-custom bg-lovely min-h-[calc(100vh-64px)] h-auto md:min-h-[calc(100vh-128px)] text-creamey py-8 md:py-12">
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="space-y-4">
-          <h1 className={`${thirdFont.className} text-4xl md:text-5xl font-semibold tracking-normal text-lovely`}> Playlists</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${thirdFont.className} text-4xl md:text-5xl font-semibold tracking-normal text-creamey`}> Playlists</h1>
+          <p className="text-creamey/80">
             Explore our collection of curated video playlists for tutorials, inspiration, and more.
           </p>
         </div>
@@ -158,7 +162,7 @@ function PlaylistsPage() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 text-muted-foreground">
             <Select
               value={filters.sortBy}
               onValueChange={(value) => updateFilter("sortBy", value)}
@@ -287,7 +291,7 @@ function PlaylistsPage() {
         )}
 
         {/* Subscription CTA */}
-        <div className="bg-everGreen text-creamey rounded-xl p-6 md:p-8 shadow-md">
+       {!session?.user.isSubscribed && <div className="bg-everGreen text-creamey rounded-xl p-6 md:p-8 shadow-md">
           <div className="grid md:grid-cols-3 gap-6 items-center">
             <div className="md:col-span-2 space-y-4">
               <h2 className="text-2xl font-display font-medium">
@@ -313,13 +317,14 @@ function PlaylistsPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </div> }
 
         {/* Playlists Grid */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-everGreen mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Loading playlists...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <VideoCardSkeleton key={i} />
+            ))}
           </div>
         ) : filteredPlaylists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -3,6 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const schema = z.object({
   name: z.string().min(1, "Your Name is required"),
@@ -19,17 +21,60 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function ContactForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
-    alert("Message sent successfully!"); // Placeholder for actual submission
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          message: data.message,
+          subject: `Contact Form Submission from ${data.name}`,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          variant:"added",
+          description: "Your message has been sent successfully. We'll get back to you soon!",
+        });
+        reset(); // Reset form after successful submission
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,7 +87,7 @@ export default function ContactForm() {
           type="text"
           id="name"
           {...register("name")}
-          className="w-full rounded-md border border-gray-300 p-2 focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Name"
         />
         {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
@@ -56,7 +101,7 @@ export default function ContactForm() {
           type="email"
           id="email"
           {...register("email")}
-          className="w-full rounded-md border border-gray-300 p-2 focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Email"
         />
         {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
@@ -70,7 +115,7 @@ export default function ContactForm() {
           type="tel"
           id="phone"
           {...register("phone")}
-          className="w-full rounded-md border border-gray-300 p-2 focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Phone"
         />
         {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>}
@@ -84,7 +129,7 @@ export default function ContactForm() {
           id="message"
           {...register("message")}
           rows={4}
-          className="w-full rounded-md border border-gray-300 p-2 focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Message"
         ></textarea>
         {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>}
@@ -92,9 +137,10 @@ export default function ContactForm() {
 
       <button
         type="submit"
-        className="w-full rounded-md bg-indigo-600 p-3 text-lg font-semibold text-white transition duration-300 ease-in-out hover:bg-indigo-700"
+        disabled={isSubmitting}
+        className="w-full rounded-2xl hover:bg-creamey text-creamey bg-lovely p-3 text-lg font-semibold transition duration-300 ease-in-out hover:text-lovely disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Send
+        {isSubmitting ? "Sending..." : "Send"}
       </button>
     </form>
   );
