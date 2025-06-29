@@ -178,6 +178,63 @@
   }
 }
 
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background-color));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D32333;
+  border-radius: 10px;
+  border: 2px solid hsl(var(--background-color));
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b91c2a; /* Slightly darker shade for hover */
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-corner {
+  background: hsl(var(--background-color));
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #D32333 hsl(var(--background-color));
+}
+
+/* For specific elements that should have custom scrollbars */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #D32333 hsl(var(--background-color));
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--background-color));
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #D32333;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--background-color));
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b91c2a; /* Slightly darker shade for hover */
+}
+
 /* Hide scrollbar but keep scrolling functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */

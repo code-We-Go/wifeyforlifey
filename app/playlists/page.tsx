@@ -126,6 +126,7 @@ function PlaylistsPage() {
     });
   };
 
+
   return (
     <div className="container-custom bg-lovely min-h-[calc(100vh-64px)] h-auto md:min-h-[calc(100vh-128px)] text-creamey py-8 md:py-12">
       <div className="flex flex-col space-y-8">
