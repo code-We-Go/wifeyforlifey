@@ -44,10 +44,10 @@ const ExclusiveContent = () => {
           </div>
           <div className="relative border-2 border-creamey h-[400px] rounded-lg overflow-hidden">
             <Image
-              src="/joinNow/SalesAndCollabs.png"
+              src="/joinNow/SalesandcollabsU.png"
               alt="Subscription Banner"
               fill
-              className="aspect-auto  object-top rounded-lg"
+              className="aspect-auto  object-cover rounded-lg"
             />
           </div>
         </div>

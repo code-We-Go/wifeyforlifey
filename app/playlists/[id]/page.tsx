@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -88,6 +88,19 @@ export default function PlaylistPage() {
       console.error("Error fetching related playlists:", error);
     }
   }, [playlistId, playlist?.category]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const handleBlur = () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        alert("Video paused because screen focus was lost.");
+      }
+    };
+
+    window.addEventListener("blur", handleBlur);
+    return () => window.removeEventListener("blur", handleBlur);
+  }, []);
 
   // Fetch OTP and playbackInfo for VdoCipher
   const fetchVdoOtp = useCallback(async (videoId: string, watermark: string | undefined) => {
@@ -161,7 +174,7 @@ export default function PlaylistPage() {
   return (
     <div className="container-custom py-8 md:py-12 h-auto min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-128px)]">
       {/* Breadcrumbs */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
             <li className="inline-flex items-center">
@@ -187,30 +200,30 @@ export default function PlaylistPage() {
             </li>
           </ol>
         </nav>
-      </div>
+      </div> */}
 
       {/* Back button - mobile only */}
-      <div className="md:hidden mb-4">
+      {/* <div className="md:hidden mb-4">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/playlists">
             <ChevronLeft className="mr-1 h-4 w-4" />
             Back to Playlists
           </Link>
         </Button>
-      </div>
+      </div> */}
 
       {/* Playlist Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 relative">
         <div className="lg:col-span-2 space-y-6">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            {/* <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary">
                 {playlist.category ? (playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)) : "Uncategorized"}
               </Badge>
               {!playlist.isPublic && (
                 <Badge color="bg-everGreen" className="bg-everGreen text-everGreen" variant="outline">Premium</Badge>
               )}
-            </div>
+            </div> */}
             <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
             <p className="text-muted-foreground mt-2">{playlist.description}</p>
           </div>
@@ -221,14 +234,14 @@ export default function PlaylistPage() {
               <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
                 {videoLocked ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
-                    <Lock className="h-16 w-16 mb-4 text-primary" />
+                    <Lock className="h-16 w-16 mb-4 text-lovely" />
                     <h3 className="text-xl font-medium mb-2">Premium Content</h3>
                     <p className="mb-4 max-w-md">
                       This video is only available to premium subscribers. Subscribe now to unlock all our premium content.
                     </p>
-                    <Button className="rounded-full" size="lg">
-                      Subscribe Now
-                    </Button>
+     <Button size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely">
+                Subscribe Now
+              </Button>
                   </div>
                 ) : videoLoading ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
@@ -238,6 +251,7 @@ export default function PlaylistPage() {
                 ) : otp && playbackInfo ? (
                   <div style={{ paddingTop: "56.25%", position: "relative" }}>
                     <iframe
+
                       src={`https://player.vdocipher.com/v2/?otp=${encodeURIComponent(otp)}&playbackInfo=${encodeURIComponent(playbackInfo)}`}
                       style={{
                         border: 0,
@@ -280,16 +294,16 @@ export default function PlaylistPage() {
         </div>
 
         {/* Playlist Videos */}
-        <div className="space-y-4">
+        <div className="space-y-4 md:pl-6 sticky top-8 h-fit">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-medium">Videos in this Playlist</h2>
+            <h2 className={`${thirdFont.className} text-3xl tracking-normal text-lovely font-medium`}>Videos in this Playlist</h2>
             <span className="text-sm text-muted-foreground">
               {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
             </span>
           </div>
           
           <div className="bg-card rounded-lg overflow-hidden shadow-sm">
-            <div className="divide-y">
+            <div className="divide-y max-h-[70vh] overflow-y-auto scrollbar-hide">
               {Array.isArray(playlist.videos) && playlist.videos.map((video: any,index) => {
                 console.log('isLocked' + video.isPublic +isSubscribed+video.title)
                 const isLocked =  !video.isPublic && !isSubscribed;
@@ -298,8 +312,8 @@ export default function PlaylistPage() {
                 return (
                   <div 
                     key={video._id} 
-                    className={`cursor-pointer bg-pinkey hover:bg-lovely transition-colors p-4 ${
-                      isActive ? "bg-lovely" : ""
+                    className={`${thirdFont.className} cursor-pointer transition-colors p-4 text-creamey ${
+                      isActive ? "bg-lovely text-creamey" : "bg-pinkey text-lovely  hover:bg-lovely hover:text-creamey "
                     }`}
                     onClick={() => setSelectedVideo(video)}
                   >
@@ -337,11 +351,11 @@ export default function PlaylistPage() {
           </div>
           
           {playlist.isPublic && !isSubscribed && (
-            <div className="bg-accent/50 rounded-lg p-4 text-center">
+            <div className="bg-lovely text-creamey rounded-lg p-4 text-center">
               <p className="text-sm mb-3">
                 Subscribe to unlock all premium videos in this playlist.
               </p>
-              <Button size="sm" className="rounded-full">
+              <Button size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-everGreen">
                 Subscribe Now
               </Button>
             </div>
@@ -371,9 +385,9 @@ export default function PlaylistPage() {
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
                       <div className="h-12 w-12 rounded-full bg-white/80 flex items-center justify-center">
                         {relatedPlaylist.isPublic ? (
-                          <Lock className="h-5 w-5 text-primary" />
+                          <Lock className="h-5 w-5 text-lovely" />
                         ) : (
-                          <Play className="h-5 w-5 text-primary ml-0.5" />
+                          <Play className="h-5 w-5 text-lovely ml-0.5" />
                         )}
                       </div>
                     </div>

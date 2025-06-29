@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "./scrollbar-hide.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { CartProvider } from "@/providers/CartProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
