@@ -119,16 +119,17 @@ export default function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 ease-in-out",
+        "sticky container-custom top-0 z-50 w-full transition-all duration-300 ease-in-out",
         isScrolled ? "bg-lovely/50 backdrop-blur-md shadow-sm" : "bg-lovely",
         isVisible ? "translate-y-0" : "-translate-y-16 md:-translate-y-32"
       )}
     >
       {/* <div className="mx-auto"  > */}
       <div className={`mx-auto ${thirdFont.className} text-6xl font-semibold`}>
-        <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
+        <div className="flex h-16 md:h-32 items-center justify-center gap-8 lg:gap-16 xl:gap-32">
           {/* Desktop Navigation */}
-          <nav className="hidden  text-lovely justify-center items-center md:flex px-2 py-8">
+          <nav className="hidden container-custome md:flex w-full text-lovely  px-2 py-8">
+          <div className="justify-start items-center flex  w-full">
             {leftNavigation.map((item) => (
               <Link
                 key={item.name}
@@ -138,12 +139,13 @@ export default function Header() {
                   pathname === item.href ? "text-red-900 " : "text-creamey"
                 )}
               >
-                <div className="flex md:px-2 lg:px-4 xl:px-8 border-l-2 border-creamey  flex-col gap-2 items-center justify-center">
+                <div className="flex  border-l-2 border-creamey px-2 md:px-4 flex-col gap-2 items-center justify-center">
                   {item.icon}
                   {item.name}
                 </div>
               </Link>
             ))}
+            </div>  
             {/* Logo */}
 
             <Link
@@ -158,6 +160,8 @@ export default function Header() {
                 src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
               />
             </Link>
+            <div className="justify-end items-center flex  w-full">
+
             {rightNavigation.map((item) => (
               <Link
                 key={item.name}
@@ -167,12 +171,13 @@ export default function Header() {
                   pathname === item.href ? "text-red-900 " : "text-creamey"
                 )}
               >
-                <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey  flex-col gap-2 items-center justify-center">
+                <div className="flex  border-r-2 border-creamey  flex-col gap-2 items-center justify-center">
                   {item.icon}
                   {item.name}
                 </div>
               </Link>
             ))}
+            </div>
             {/* Account with Hover Modal */}
             <HoverCard>
               <HoverCardTrigger asChild>
