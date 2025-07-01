@@ -64,13 +64,19 @@ export default function Footer() {
             >
               Wifey for Lifey – Your Bridal Era Bestie
             </h3>
-            <p className=" text-sm">
+           <div className="justify-start text-start text-sm"  >
+
+            <p >
               Wifey for Lifey isn’t just a brand — it’s a full support system
               designed to guide brides through every step of their wedding and
-              home-prep journey. From engagement to honeymoon, we empower brides
+              home-prep journey. 
+            </p>
+            <p>
+              From engagement to honeymoon, we empower brides
               with tools, content, and emotional support to help them feel calm,
               confident, and in control.
             </p>
+           </div>
  
 <div className="flex space-x-4">
   {/* Instagram Button */}

@@ -6,7 +6,7 @@ import videoModel from "./videoModel";
 console.log("register" + videoModel)
 const PlaylistSchema = new Schema<Playlist>({
   title: { type: String, required: true },
-  description: { type: String, required: false },
+  description: { type: [String], required: false },
   category: { type: String, required: false },
   isPublic: { type: Boolean, default: true },
   videos: [{

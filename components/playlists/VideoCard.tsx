@@ -29,10 +29,10 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             </div>
           </div>
         </div>
-        <div className="p-4 ">
+        <div className="p-4  bg-creamey">
           <div className="flex items-center justify-between mb-2">
             {playlist.category && (
-              <Badge variant="secondary" className="font-normal">
+              <Badge variant="destructive" className="font-normal">
                 {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}
               </Badge>
             )}
@@ -46,7 +46,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
             {playlist.description}
           </p>
-          <div className="mt-3 text-sm">
+          <div className="mt-3 text-lovely text-sm">
             {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? 'video' : 'videos'}
           </div>
         </div>

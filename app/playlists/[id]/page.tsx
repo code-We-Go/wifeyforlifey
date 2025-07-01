@@ -225,7 +225,13 @@ export default function PlaylistPage() {
               )}
             </div> */}
             <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
-            <p className="text-muted-foreground mt-2">{playlist.description}</p>
+            {Array.isArray(playlist.description) ? (
+              playlist.description.map((desc: string, idx: number) => (
+                <p key={idx} className="text-muted-foreground mt-2">{desc}</p>
+              ))
+            ) : (
+              <p className="text-muted-foreground mt-2">{playlist.description}</p>
+            )}
           </div>
 
           {/* Video Player Section */}
@@ -366,7 +372,7 @@ export default function PlaylistPage() {
       {/* Related Playlists */}
       {relatedPlaylists.length > 0 && (
         <div className="mt-16">
-          <h2 className="text-2xl font-display font-medium mb-6">You May Also Like</h2>
+          <h2 className={`${thirdFont.className} text-3xl tracking-normal font-meduim text-lovely mb-6`}>You May Also Like</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedPlaylists.map((relatedPlaylist) => (
               <Link 
@@ -392,19 +398,19 @@ export default function PlaylistPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
+                  <div className="p-4 bg-lovely text-creamey">
                     <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary" className="font-normal">
+                      {/* <Badge variant="secondary" className="font-normal">
                         {relatedPlaylist.category ? (relatedPlaylist.category.charAt(0).toUpperCase() + relatedPlaylist.category.slice(1)) : "Uncategorized"}
-                      </Badge>
-                      {relatedPlaylist.isPublic && (
+                      </Badge> */}
+                      {/* {relatedPlaylist.isPublic && (
                         <Badge variant="outline" className="font-normal">
                           Premium
                         </Badge>
-                      )}
+                      )} */}
                     </div>
                     <h3 className="font-medium line-clamp-1">{relatedPlaylist.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    <p className="text-sm text-creamey/70 mt-1 line-clamp-2">
                       {relatedPlaylist.description}
                     </p>
                   </div>
