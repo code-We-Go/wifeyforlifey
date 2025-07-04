@@ -128,9 +128,9 @@ console.log(specialReference);
       const order = await axios.post(
         'https://accept.paymob.com/v1/intention/',
         {
-          "amount": 2000,
+          "amount": data.total*1000,
           "currency": "EGP",
-          "payment_methods": [4911436],
+          "payment_methods": [5173616],
           // "items": [
           //   {
           //     "name": "Item name",
@@ -157,8 +157,8 @@ console.log(specialReference);
           },
           "special_reference": specialReference,
           "expiration": 3600,
-          "notification_url": "https://anchuva.com/api/callback",
-          "redirection_url": "https://anchuva.com/api/callback"
+          "notification_url": `${process.env.testUrl}api/callback`,
+          "redirection_url": `${process.env.testUrl}api/callback`
         }, // Request body
         {
           headers: {

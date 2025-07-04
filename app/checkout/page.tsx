@@ -243,7 +243,8 @@ const CheckoutClientPage = () => {
     billingPhone: "",
     subTotal: subTotal,
     // currency:country===65?'LE':'USD'
-    currency: user.userCountry === "EG" ? "LE" : "USD",
+    currency: "LE"
+    // currency: user.userCountry === "EG" ? "LE" : "USD",
   });
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -446,7 +447,9 @@ const CheckoutClientPage = () => {
     setLoading(false);
 
     if (payment === "card") {
-      const paymobIframeURL = `https://accept.paymob.com/api/acceptance/iframes/890332?payment_token=${res.data.token}`;
+      // const paymobIframeURL = `https://accept.paymob.com/api/acceptance/iframes/890332?payment_token=${res.data.token}`;
+      const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
+
       router.push(paymobIframeURL);
     } else {
       if (res.data.token === "wiig") {
@@ -506,6 +509,7 @@ const CheckoutClientPage = () => {
                 <select
                 onChange={(e) => setCountryID(Number(e.target.value))}
                 name="country"
+                disabled
                   value={countryID}
                   className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
                 >
@@ -725,7 +729,7 @@ const CheckoutClientPage = () => {
                     <input
                       type="checkbox"
                       name="cash"
-                      className="appearance-none h-5 rounded-full w-5 border-2 text-white   checked:bg-everGreen "
+                      className="appearance-none h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely checked:ring-lovely  checked:bg-everGreen "
                       checked={payment === "cash"}
                       onChange={() => {
                         setPayment("cash");
@@ -738,7 +742,7 @@ const CheckoutClientPage = () => {
                   <div className="flex gap-6">
                     <input
                       type="checkbox"
-                      className="appearance-none h-5 w-5 border-2 rounded-full text-white   checked:bg-everGreen "
+                      className="appearance-none h-5 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
                       checked={payment === "card"}
                       onChange={() => {
                         setPayment("card");
@@ -767,8 +771,8 @@ const CheckoutClientPage = () => {
       name="billingAddress"
       checked={useSameAsShipping}
       onChange={() => setUseSameAsShipping(true)}
-      className="h-4 w-4 rounded-full ring-1 ring-gray-500 border-gray-300 focus:ring-everGreen checked:bg-everGreen checked:border-lovely appearance-none cursor-pointer"
-    />
+      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+      />
     <span className=" ">Same as shipping address</span>
   </label>
 </div>
@@ -779,8 +783,8 @@ const CheckoutClientPage = () => {
       name="billingAddress"
       checked={!useSameAsShipping}
       onChange={() => setUseSameAsShipping(false)}
-      className="h-4 w-4 rounded-full ring-1 ring-gray-500 border-gray-300 focus:ring-lovely checked:bg-lovely checked:border-lovely appearance-none cursor-pointer"
-    />
+      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+      />
     <span className="">Use a different billing address</span>
   </label>
 </div>
@@ -789,7 +793,7 @@ const CheckoutClientPage = () => {
 <div className={`flex flex-col gap-2 w-full transition-all duration-500 ease-in-out overflow-hidden
   ${
     !useSameAsShipping
-      ? "max-h-[60vh]  opacity-100"
+      ? "max-h-[70vh]   opacity-100"
       : "max-h-0  opacity-0"
   }
   `}
@@ -798,51 +802,53 @@ const CheckoutClientPage = () => {
   }}
   >
              <div className='flex gap-2 w-full'>
-              <p>COUNTRY</p>
-            {countries?<select  onChange={(e)=>setBillingCountry(Number(e.target.value))} name='billingCountry' value={billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
+              <p>Country</p>
+            {countries?<select 
+            disabled
+            onChange={(e)=>setBillingCountry(Number(e.target.value))} name='billingCountry' value={billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
                     {countries.map((country:any,index:number)=>{
                       return <option key={index} value={country.id}>{country.name}</option>
                     })}              
                          </select> :<select  onChange={handleInputChange} name='billingCountry' value={formData.billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
-              <option value='EG'>EGYPT</option>
-              <option value='SA'>SAUDI ARABIA</option>
+              {/* <option value='EG'>EGYPT</option>
+              <option value='SA'>SAUDI ARABIA</option> */}
              </select> }
               </div>
               <div className='flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center'>
               <div className='flex gap-2 w-full md:w-2/4'>
-                <label className='text-everGreen' >FIRST NAME</label>
+                <label className='text-everGreen' >First Name</label>
                 <input onChange={handleInputChange} name='billingFirstName' value={useSameAsShipping?formData.firstName :formData.billingFirstName} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
 
               </div>
               <div className='flex gap-2 w-full md:w-2/4'>
-                <label className='text-everGreen' >LAST NAME</label>
+                <label className='text-everGreen' >Last Name</label>
                 <input name='billingLastName' onChange={handleInputChange} value={useSameAsShipping?formData.lastName:formData.billingLastName} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
 
               </div>
               </div>
               <div className='flex gap-2 w-full'>
-                <label className='text-everGreen' >ADDRESS</label>
+                <label className='text-everGreen' >Address</label>
                 <input type='text' onChange={handleInputChange} name='billingAddress' value={useSameAsShipping?formData.address :formData.billingAddress} className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
 
               </div>
               <div className='flex w-full  gap-2 items-center'>
-                <label className='text-everGreen text-nowrap' >APARTMENT,SUITE ETC. (OPTIONAL)</label>
+                <label className='text-everGreen text-nowrap' >Apartment,Suite ETC. (Optional)</label>
                 <input onChange={handleInputChange} name='billingApartment' value={useSameAsShipping?formData.apartment:formData.billingApartment} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
               </div>
               <div className='flex w-full gap-2'>
               <div className='flex w-full gap-2 md:w-3/5 items-center'>
-                <label className='text-everGreen' >POSTAL/ZIP CODE (OPTIONAL)</label>
+                <label className='text-everGreen' >Postal/Zip code (Optional)</label>
                 <input onChange={handleInputChange} value={useSameAsShipping?formData.postalZip:formData.billingPostalZip} name='billingPostalZip' type='text' className='border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg'/>
               </div>
 
               <div className='flex w-full  md:w-2/5 gap-2 items-center'>
-                <label className='text-everGreen' >CITY</label>
+                <label className='text-everGreen' >City</label>
                 <input onChange={handleInputChange} name='billingCity' value={useSameAsShipping?formData.city:formData.billingCity} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
               </div>
               </div>
                 
               <div className='flex w-full  gap-2 items-center'>
-                <label className='text-everGreen' >GOVERNATE</label>
+                <label className='text-everGreen' >Governate</label>
                {
                billingCountry ===65?
                <select  onChange={handleInputChange} name='billingState' value={useSameAsShipping?formData.state:formData.billingState} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
@@ -856,7 +862,7 @@ const CheckoutClientPage = () => {
                   }
               </div>
               <div className='flex w-full gap-2 items-center'>
-                <label className='text-everGreen' >PHONE</label>
+                <label className='text-everGreen' >Phone</label>
                 <input onChange={handleInputChange} type='text' value={useSameAsShipping?formData.phone :formData.billingPhone} name='billingPhone' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
               </div>
 
@@ -930,7 +936,8 @@ const CheckoutClientPage = () => {
               />
             </div>
             <h2 className={`${thirdFont.className}`}>
-              {total} {user.userCountry === "EG" ? "LE" : "USD"}{" "}
+              {/* {total} {user.userCountry === "EG" ? "LE" : "USD"}{" "} */}
+              {total} LE
             </h2>
           </div>
           <div
@@ -954,13 +961,16 @@ const CheckoutClientPage = () => {
 
               <div className="flex flex-col gap-1 items-end">
                 <p className="text-[12px] lg:text-lg">
-                  {subTotal} {user.userCountry === "EG" ? "LE" : "USD"}
+                  {subTotal} LE
+                  {/* {subTotal} {user.userCountry === "EG" ? "LE" : "USD"} */}
                 </p>
                 <p className="text-[12px] lg:text-lg">
-                  {shipping} {user.userCountry === "EG" ? "LE" : "USD"}
+                  {shipping} LE
+                  {/* {shipping} {user.userCountry === "EG" ? "LE" : "USD"} */}
                 </p>
                 <p className="text-[12px] mt-6 lg:text-lg">
-                  {total} {user.userCountry === "EG" ? "LE" : "USD"}
+                  {total} LE
+                  {/* {total} {user.userCountry === "EG" ? "LE" : "USD"} */}
                 </p>
                 {/* <p className="text-[12px] lg:text-lg">{subTotal} {country===65?'LE':'USD'}</p>
       <p className="text-[12px] lg:text-lg">{shipping} {country===65?'LE':'USD'}</p>

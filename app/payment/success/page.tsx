@@ -1,9 +1,19 @@
 // pages/success.tsx
+'use client'
 import Fireworks from "./components/Fireworks";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useCart } from "@/providers/CartProvider";
 
 export default function SuccessPage() {
+  const {clearCart} = useCart()
+  useEffect(() => {
+    
+  clearCart()
+
+  }, [])
+  
   return (
     <div className="flex bg-creamey w-full items-center pt-0 md:pt-4 justify-center md:justify-start h-autp md:min-h-[calc(100vh-128px)] min-h-[calc(100vh-64px)]  flex-col gap-6 relative overflow-hidden">
       <Fireworks />

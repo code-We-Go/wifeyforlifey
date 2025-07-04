@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 
     try {
 
-      const countries = await countriesModel.find().populate('shipping_zone').sort({ name: 1 })
+      const countries = await countriesModel.find({id:65}).populate('shipping_zone').sort({ name: 1 })
 
       if (!countries) {
         return NextResponse.json({ message: "countries not found" }, { status: 404 });

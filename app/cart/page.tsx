@@ -200,8 +200,10 @@ export default function CartPage() {
             <div className="col-span-1 text-right">Total</div>
           </div>
 
-          <Separator className="hidden md:block" />
+          <Separator className="hidden md:block bg-lovely" />
+          <div className="w-full flex flex-col gap-4">
 
+         
           {items.map((item,index) => (
             <CartItemSmall item={item} key={index} wishListBool={false}/>
             // <div key={index} className="bg-card bg-everGreen text-creamey rounded-lg p-4 md:p-6 shadow-sm">
@@ -292,23 +294,27 @@ export default function CartPage() {
             //   </div>
             // </div>
           ))}
-
+ </div>
           
+        <div className="flex gap-4">
+
+        
           <div className="mt-6 flex justify-between items-center">
-            <Button asChild variant="outline" className="gap-2 rounded-2xl bg-lovely text-creamey">
+            <Button asChild variant="outline" className="gap-2 rounded-2xl bg-creamey text-lovely hover:bg-lovely hover:text-creamey border-lovely">
               <Link href="/shop">
-                <ArrowLeft className="h-4 w-4" />
+                {/* <ArrowLeft className="h-4 w-4" /> */}
                 Continue Shopping
               </Link>
             </Button>
           </div>
           <div className="mt-6 flex justify-between items-center">
-            <Button asChild variant="outline" className="gap-2 rounded-2xl bg-lovely text-creamey">
+            <Button asChild variant="outline" className="gap-2 rounded-2xl bg-lovely hover:border hover:border-lovely hover:text-lovely text-creamey">
               <Link href="/checkout">
-                <ArrowRight className="h-4 w-4" />
                 Checkout
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
+          </div>
           </div>
         </div>
 

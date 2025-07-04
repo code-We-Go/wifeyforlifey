@@ -66,7 +66,7 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 128);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -75,7 +75,16 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 128) {
+      if( pathname ==="/club" || pathname === "/shop"){
+       if (currentScrollY > 128) {
+          // Scrolling down, hide header
+          setIsVisible(false);
+        } else {
+          // Scrolling up, show header
+          setIsVisible(true);
+        }
+      }
+      else if (currentScrollY > lastScrollY && currentScrollY > 128) {
         // Scrolling down, hide header
         setIsVisible(false);
       } else {

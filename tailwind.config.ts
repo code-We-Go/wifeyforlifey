@@ -9,7 +9,7 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    backgroundImage: {pattern1 : 'url(/patterns/patternCreamey.png)'}
+    backgroundImage: {pattern1 : 'url(/patterns/patternCreamey.png)',expBG:'url(/experience/wifeyExp.jpeg)'}
     ,container: {
       center: true,
       padding: '2rem',
@@ -84,12 +84,23 @@ const config: Config = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        'bounce-slow': {
+          '0%, 100%': {
+            transform: 'translateY(-10%)',
+            animationTimingFunction: 'cubic-bezier(0.8,0,1,1)',
+          },
+          '50%': {
+            transform: 'translateY(0)',
+            animationTimingFunction: 'cubic-bezier(0,0,0.2,1)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'float': 'float 4s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        'bounce-slow': 'bounce-slow 3s infinite',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

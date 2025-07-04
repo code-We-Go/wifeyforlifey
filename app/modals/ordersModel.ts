@@ -32,7 +32,8 @@ const attributeSchema = new Schema({
 
 // Define the Order schema
 const OrderSchema = new Schema(
-    { email:{type: String, required: false}
+    { email:{type: String, required: false},
+    orderID:{type:String , required : false}
         ,country: { type: String, required: false },
         firstName: { type: String, required: false },
         lastName: { type: String, required: false },
