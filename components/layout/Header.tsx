@@ -19,7 +19,11 @@ import {
   Club,
   PartyPopper,
   TicketPercent,
-  BookOpenText,
+  UserCircle,
+  Music,
+  Gift,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +32,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { thirdFont } from "@/fonts";
+import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
+
 const navigation = [
   { name: "Home", href: "/" },
   { name: "Shop", href: "/shop" },
@@ -42,20 +54,28 @@ const navigation = [
 ];
 const leftNavigation = [
   // { name: "Home", href: "/",icon:<ShoppingBag/> },
-  { name: "Experience", href: "/club", icon: <PartyPopper /> },
-
-  { name: "Playlists", href: "/playlists", icon: <ListVideo /> },
   { name: "Shop", href: "/shop", icon: <Store /> },
+  { name: "Playlists", href: "/playlists", icon: <ListVideo /> },
+  { name: "Deals", href: "/deals", icon: <TicketPercent /> },
   { name: "About", href: "/about", icon: <VenetianMask /> },
 ];
 const rightNavigation = [
-  { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
+  { name: "Club", href: "/club", icon: <PartyPopper /> },
   { name: "Wishlist", href: "/wishlist", icon: <Heart /> },
   { name: "Cart", href: "/cart", icon: <ShoppingBag /> },
-  { name: "Account", href: "/account", icon: <User /> },
+];
+
+const accountItems = [
+  { icon: UserCircle, label: 'Profile', href: '/account' },
+  { icon: Heart, label: 'Wishlist', href: '/account/wishlist' },
+  { icon: ShoppingBag, label: 'Orders', href: '/account/orders' },
+  { icon: Music, label: 'Playlists', href: '/account/playlists' },
+  { icon: Gift, label: 'Loyalty Points', href: '/account/loyalty' },
+  { icon: Settings, label: 'Settings', href: '/account/settings' },
 ];
 
 export default function Header() {
+  const { isAuthenticated, user, loading, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -97,6 +117,13 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
+  const handleLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+  const handleLogout = async() => {
+    await logout();
+  }
 
   return (
     <header
@@ -155,6 +182,56 @@ export default function Header() {
                 </div>
               </Link>
             ))}
+            {/* Account with Hover Modal */}
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <div className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer">
+                  <User />
+                  <span className="text-base font-medium  ">Account</span>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-64 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
+                <div className="p-4">
+                  <nav className="space-y-1">
+                    {
+                    
+                    isAuthenticated?accountItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md group transition-colors"
+                      >
+                        <item.icon className="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" />
+                        {item.label}
+                      </Link>
+                    )):<div></div>}
+                   
+                   {
+
+              isAuthenticated ?   
+               <div className="border-t border-gray-200 mt-2 pt-2">
+                      <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
+                      onClick={handleLogout}>
+                        <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                        Sign Out
+                      </button>
+                    </div>
+                    :
+                    <div className="">
+                    <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors">
+                   
+                      Sign In
+                    </Link>
+                    <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors">
+                   
+                      Sign up
+                    </Link>
+                  </div>
+}
+                  </nav>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
           </nav>
 
           {/* Desktop Action Buttons */}
@@ -186,7 +263,7 @@ export default function Header() {
 
           {/* Mobile Menu Toggle */}
           <div className="flex w-full justify-between md:hidden items-center text-creamey">
-            <Sheet>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
@@ -201,7 +278,7 @@ export default function Header() {
                   className={`${thirdFont.className} flex flex-col h-full py-6 `}
                 >
                   <div className="flex items-center justify-between mb-8">
-                    <Link href="/" className="font-display text-xl font-bold">
+                    <Link href="/" className="font-display text-xl font-bold" onClick={handleLinkClick}>
                       <Image
                         className="aspect-auto"
                         alt="logo"
@@ -224,20 +301,21 @@ export default function Header() {
                             ? "text-red-900"
                             : "text-creamey"
                         )}
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        onClick={handleLinkClick}
                       >
                         {item.name}
                       </Link>
                     ))}
                   </nav>
                   <div className="mt-auto text-lg space-y-4">
-                    <Link href="/cart" className="flex items-center space-x-2">
+                    <Link href="/cart" className="flex items-center space-x-2" onClick={handleLinkClick}>
                       <ShoppingBag className="h-5 w-5" />
                       <span>Cart</span>
                     </Link>
                     <Link
                       href="/wishlist"
                       className="flex items-center space-x-2"
+                      onClick={handleLinkClick}
                     >
                       <Heart
                         className={cn(
@@ -250,6 +328,7 @@ export default function Header() {
                     <Link
                       href="/account"
                       className="flex items-center space-x-2"
+                      onClick={handleLinkClick}
                     >
                       <User className="h-5 w-5" />
                       <span>Account</span>
@@ -270,7 +349,14 @@ export default function Header() {
                 src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
               />
             </Link>
-            <div className="w-4"></div>
+            <div className="mr-2 gap-4 flex">
+            <Link href={'/wishlist'}>
+            <Heart />
+            </Link>
+            <Link href={'/cart'}>
+            <ShoppingBag />
+            </Link>
+            </div>
             {/* <Link href="/cart" className="relative mr-4">
               <Button variant="ghost" size="icon" aria-label="Cart">
                 <ShoppingBag className="h-5 w-5" />
