@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import UserModel from "@/app/modals/userModel";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -27,9 +29,15 @@ export async function GET(request: Request) {
 
         // Perform your logic with the GET data here
         if (isSuccess) {
+            const subscription = await subscriptionsModel.findOne({paymentID: data.order});
+            if(subscription){
+                const subscribedUser = await UserModel.findOneAndUpdate({email: subscription.email},{isSubscribed:true});
+            }
+            else{
             console.log("Order2ID"+data.order)
             console.log("Transaction Successful, redirecting to /success...");
             const res= await ordersModel.findOneAndUpdate({orderID:data.order},{payment:"confirmed"})
+            }
             //Update the order status with orderId here
             return NextResponse.redirect(`${process.env.testUrl}payment/success`);
         } else {

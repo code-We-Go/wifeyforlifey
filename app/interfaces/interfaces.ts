@@ -224,3 +224,11 @@ export interface Ipackage {
   items: string[];
   notes:string[];
 }
+
+export interface ISubscription {
+  _id?: string;
+  paymentID: string;
+  email?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

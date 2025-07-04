@@ -3,6 +3,7 @@ import { generateEmailBody } from "@/utils/generateOrderEmail";
 // import { generateEmailInstaBody } from "@/app/utils/generateOrderInstaEmail";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
@@ -125,11 +126,12 @@ export async function POST(request: Request) {
     try {
       const specialReference = `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 console.log(specialReference);
-if(data.subscription === "theWifeyExperiece"){
+console.log("firstDebug" + data.subscription )
+if(data.subscription === "theWifeyExperience"){
   const order = await axios.post(
     'https://accept.paymob.com/v1/intention/',
     {
-      "amount": data.total*1000,
+      "amount": data.total,
       "currency": "EGP",
       "payment_methods": [5173616],
       // "items": [
@@ -171,7 +173,7 @@ if(data.subscription === "theWifeyExperiece"){
   console.log('order'+JSON.stringify(order.data, null, 2))
   console.log('orderData'+order.data.payment_keys[0].order_id)
   
-  
+  await subscriptionsModel.create({ paymentID: order.data.payment_keys[0].order_id,email:data.email })
   // await ordersModel.create({ 
   //   email:data.email,
   //    orderID:order?order.data.payment_keys[0].order_id:''

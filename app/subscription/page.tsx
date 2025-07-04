@@ -231,7 +231,7 @@ const CheckoutClientPage = () => {
     city: "",
     cart: items,
     phone: "",
-    subScription:"theWifeyExperience",
+    subscription:"theWifeyExperience",
     state: state,
     cash: payment,
     total: total,

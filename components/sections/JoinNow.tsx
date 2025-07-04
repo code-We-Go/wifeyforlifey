@@ -33,7 +33,7 @@ const JoinNow = () => {
               variant="outline"
               className="rounded-full bg-creamey text-lovely hover:bg-everGreen hover:text-creamey"
             >
-              <Link href="/playlists">see what&apos;s inside</Link>
+              <Link href="/club">see what&apos;s inside</Link>
             </Button>
           </div>
         </div>

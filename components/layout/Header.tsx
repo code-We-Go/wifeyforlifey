@@ -24,6 +24,7 @@ import {
   Gift,
   Settings,
   LogOut,
+  BookOpenText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,22 +46,21 @@ import axios from "axios";
 
 const navigation = [
   { name: "Home", href: "/" },
-  { name: "Shop", href: "/shop" },
+  { name: "Experience", href: "/club" },
   { name: "Playlists", href: "/playlists" },
-  { name: "Deals", href: "/playlists", icon: <TicketPercent /> },
-
-  { name: "Gehaz", href: "/Gehaz" },
+  { name: "Shop", href: "/shop" },
+  { name: "Blogs", href: "/blogs", icon:<BookOpenText /> },
   { name: "About", href: "/about" },
 ];
 const leftNavigation = [
   // { name: "Home", href: "/",icon:<ShoppingBag/> },
-  { name: "Shop", href: "/shop", icon: <Store /> },
+  { name: "Experience", href: "/club", icon: <PartyPopper /> },
   { name: "Playlists", href: "/playlists", icon: <ListVideo /> },
-  { name: "Deals", href: "/deals", icon: <TicketPercent /> },
+  { name: "Shop", href: "/shop", icon: <Store /> },
   { name: "About", href: "/about", icon: <VenetianMask /> },
 ];
 const rightNavigation = [
-  { name: "Club", href: "/club", icon: <PartyPopper /> },
+  { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
   { name: "Wishlist", href: "/wishlist", icon: <Heart /> },
   { name: "Cart", href: "/cart", icon: <ShoppingBag /> },
 ];
