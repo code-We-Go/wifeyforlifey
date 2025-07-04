@@ -215,3 +215,12 @@ export interface ShippingZone {
   states: string[];
   countries: string[];
 }
+
+export interface Ipackage {
+  name: string;
+  imgUrl: string;
+  price: number;
+  duration: string;
+  items: string[];
+  notes:string[];
+}

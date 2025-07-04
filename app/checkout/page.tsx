@@ -9,13 +9,16 @@ import { thirdFont } from "@/fonts";
 import orderValidation from "@/lib/validations/orderValidation";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useContext, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Discount } from "../types/discount";
 import CartItemSmall from "../cart/CartItemSmall";
 import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
+import { wifeyExperience } from "../constants";
+import Image from "next/image";
+import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -458,6 +461,13 @@ const CheckoutClientPage = () => {
       }
     }
   };
+
+  // Read subscription param from URL
+  const searchParams = useSearchParams();
+  const isSubscription = searchParams.get("subscription") === "true";
+  // You can use 'isSubscription' below to adjust UI/logic for subscription checkouts
+  // Example: if (isSubscription) { /* custom logic */ }
+
   return (
     // cart.length > 0 ?
     <div
@@ -979,6 +989,7 @@ const CheckoutClientPage = () => {
             </div>
           </div>
         </div>
+        {!isSubscription === true? 
         <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
             <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
               <h2 className={`${thirdFont.className} text-[16px] lg:text-4xl  text-everGreen mb-6`}>Order Summary</h2>
@@ -1021,12 +1032,73 @@ const CheckoutClientPage = () => {
                 </div>
               </div>
 
+ 
+
               {/* ... rest of the order summary ... */}
             </div>
-          </div>
+          </div> :
+          <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
+            <div className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}>
+                         {/* Wifey Experience Package Details */}
+                         <div className="wifey-experience-package bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
+                <Image 
+                  src={wifeyExperience.imgUrl} 
+                  width={400} 
+                  height={250} 
+                  alt={wifeyExperience.name} 
+                  className="object-cover object-top aspect-[16/11] rounded-xl mb-4" 
+                />
+                <h2 className={`text-4xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}>{wifeyExperience.name}</h2>
+                <ul className="list-disc w-full items-start justify-start list-inside text-left text-xl tracking-wide text-creamey/95">
+                  {wifeyExperience.items.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+                <div className="flex justify-start gap-4 tracking-wider mt-4 mb-2">
+                  <span className="text-lg   text-creamey">one lifetime subscription fee :</span>
+                  <span className="text-lg  text-creamey">{wifeyExperience.price} LE</span>
+                  {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
+                </div>
+              </div>
+              <div className="mt-6 space-y-2 text-black">
+                <div className="flex justify-between text-lg">
+                  <span>Subtotal</span>
+                  <span>{subTotal} LE</span>
+                </div>
+                {appliedDiscount && appliedDiscount.value !== undefined && (
+                  <div className="flex justify-between text-lg text-green-600">
+                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>
+                      {appliedDiscount.calculationType === 'FREE_SHIPPING' 
+                        ? `-${shipping} LE (Free Shipping)`
+                        : `-${appliedDiscount.calculationType === 'PERCENTAGE' 
+                          ? Math.round((subTotal * appliedDiscount.value) / 100)
+                          : appliedDiscount.value} LE`}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between text-lg">
+                  <span>Shipping</span>
+                  <span>{appliedDiscount?.calculationType === 'FREE_SHIPPING' ? '0' : shipping} LE</span>
+                </div>
+                <div className="flex justify-between font-bold mt-4 pt-4 border-t">
+                  <span>Total</span>
+                  <span>{total} LE</span>
+                </div>
+              </div>
+              </div>
+              
+              </div>
+          }
       </div>
     </div>
   );
 };
 
-export default CheckoutClientPage;
+export default function CheckoutPageWithSuspense(props: any) {
+  return (
+    <Suspense fallback={<div>Loading checkout...</div>}>
+      <CheckoutClientPage {...props} />
+    </Suspense>
+  );
+}
