@@ -9,7 +9,7 @@ import { thirdFont } from "@/fonts";
 import orderValidation from "@/lib/validations/orderValidation";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Discount } from "../types/discount";
@@ -123,10 +123,11 @@ const CheckoutClientPage = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const calculateTotals = () => {
     // Calculate subtotal first
-    const calculatedSubTotal = items.reduce(
-      (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
-      0
-    );
+    const calculatedSubTotal = wifeyExperience.price
+    // items.reduce(
+    //   (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+    //   0
+    // );
     setSubTotal(calculatedSubTotal);
     
     // Calculate discount amount
@@ -182,7 +183,7 @@ const CheckoutClientPage = () => {
    const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
-  const [subTotal, setSubTotal] = useState(0);
+  const [subTotal, setSubTotal] = useState(wifeyExperience.price);
   const [total, setTotal] = useState(0);
   const [formErrors, setFormErrors] = useState<any>({});
   const [countryID, setCountryID] = useState(65);
@@ -230,6 +231,7 @@ const CheckoutClientPage = () => {
     city: "",
     cart: items,
     phone: "",
+    subScription:"theWifeyExperience",
     state: state,
     cash: payment,
     total: total,
@@ -326,10 +328,7 @@ const CheckoutClientPage = () => {
     };
     getStates();
 
-    const calculatedSubTotal = items.reduce(
-      (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
-      0
-    );
+    const calculatedSubTotal = wifeyExperience.price
     setSubTotal(calculatedSubTotal);
     setTotal(calculatedSubTotal + shipping);
     
@@ -388,20 +387,14 @@ const CheckoutClientPage = () => {
       const shippingRate = calculateShippingRate(countryID, state, states, countries, shippingZones);
       console.log("Local shipping rate calculated:", shippingRate);
       setShipping(shippingRate);
-      const calculatedSubTotal = items.reduce(
-        (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
-        0
-      );
+      const calculatedSubTotal = wifeyExperience.price
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     } else if (shippingZones.length > 0) {
       const shippingRate = calculateShippingRate(countryID, state, states, countries, shippingZones);
       console.log("Global shipping rate calculated:", shippingRate);
       setShipping(shippingRate);
-      const calculatedSubTotal = items.reduce(
-        (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
-        0
-      );
+      const calculatedSubTotal = wifeyExperience.price
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     }
@@ -462,8 +455,7 @@ const CheckoutClientPage = () => {
   };
 
   // Read subscription param from URL
-  const searchParams = useSearchParams();
-  const isSubscription = searchParams.get("subscription") === "true";
+
   // You can use 'isSubscription' below to adjust UI/logic for subscription checkouts
   // Example: if (isSubscription) { /* custom logic */ }
 
@@ -471,7 +463,7 @@ const CheckoutClientPage = () => {
     // cart.length > 0 ?
     <div
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}>
-                <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8 font-display font-semibold`}>Checkout</h1>
+                <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8 font-display font-semibold`}>Subscription</h1>
 
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
@@ -931,118 +923,15 @@ const CheckoutClientPage = () => {
           </form>
         </div>
         {/* orderSummaryMob */}
-        <div className="flex flex-col md:hidden">
-          <div
-            onClick={() => setSummary((prevState) => !prevState)}
-            className="flex  justify-between items-center px-1 hover:cursor-pointer"
-          >
-            <div className="flex gap-1  justify-center items-center">
-              <h2 className={`${thirdFont.className}`}>ORDER SUMMARY</h2>
-              <IoIosArrowDown
-                className={`${
-                  summary ? "rotate-180" : ""
-                } transition duration-500`}
-              />
-            </div>
-            <h2 className={`${thirdFont.className}`}>
-              {/* {total} {user.userCountry === "EG" ? "LE" : "USD"}{" "} */}
-              {total} LE
-            </h2>
-          </div>
-          <div
-            className={`transition-all duration-500 ease-in-out overflow-hidden ${
-              summary ? "max-h-[60vh]  opacity-100" : "max-h-0  opacity-0"
-            } px-1 py-1 flex flex-col gap-2`}
-            style={{
-              padding: summary ? "0.25rem 0.25rem" : "0",
-            }}
-          >
-            {items.map((cartItem, index) => (
-              // <div key={index} className="bg-everGreen w-full h-10"> </div>
-              <OrderSummaryItem cartItem={cartItem} key={index} />
-            ))}
-            <div className="flex pb-5 justify-between">
-              <div className="flex flex-col gap-1">
-                <p>SUBTOTAL</p>
-                <p>SHIPPING</p>
-                <p className="mt-6">TOTAL</p>
-              </div>
 
-              <div className="flex flex-col gap-1 items-end">
-                <p className="text-[12px] lg:text-lg">
-                  {subTotal} LE
-                  {/* {subTotal} {user.userCountry === "EG" ? "LE" : "USD"} */}
-                </p>
-                <p className="text-[12px] lg:text-lg">
-                  {shipping} LE
-                  {/* {shipping} {user.userCountry === "EG" ? "LE" : "USD"} */}
-                </p>
-                <p className="text-[12px] mt-6 lg:text-lg">
-                  {total} LE
-                  {/* {total} {user.userCountry === "EG" ? "LE" : "USD"} */}
-                </p>
-                {/* <p className="text-[12px] lg:text-lg">{subTotal} {country===65?'LE':'USD'}</p>
-      <p className="text-[12px] lg:text-lg">{shipping} {country===65?'LE':'USD'}</p>
-      <p className="text-[12px] mt-6 lg:text-lg">{total} {country !==65?'LE':'USD'}</p> */}
-              </div>
-            </div>
-          </div>
-        </div>
-        {!isSubscription === true? 
-        <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
-            <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
-              <h2 className={`${thirdFont.className} text-[16px] lg:text-4xl  text-everGreen mb-6`}>Order Summary</h2>
-              
-              {/* Cart Items */}
-              <div className="flex flex-col gap-4 mb-6">
-                {items.map((item,index) => (
-                  <OrderSummaryItem key={index} cartItem={item}  />
-                ))}
-              </div>
 
-              {/* Discount Section */}
-              <DiscountSection onDiscountApplied={handleDiscountApplied} />
-
-              {/* Order Totals */}
-              <div className="mt-6 space-y-2 text-black">
-                <div className="flex justify-between text-lg">
-                  <span>Subtotal</span>
-                  <span>{subTotal} LE</span>
-                </div>
-                {appliedDiscount && appliedDiscount.value !== undefined && (
-                  <div className="flex justify-between text-lg text-green-600">
-                    <span>Discount ({appliedDiscount.code})</span>
-                    <span>
-                      {appliedDiscount.calculationType === 'FREE_SHIPPING' 
-                        ? `-${shipping} LE (Free Shipping)`
-                        : `-${appliedDiscount.calculationType === 'PERCENTAGE' 
-                          ? Math.round((subTotal * appliedDiscount.value) / 100)
-                          : appliedDiscount.value} LE`}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between text-lg">
-                  <span>Shipping</span>
-                  <span>{appliedDiscount?.calculationType === 'FREE_SHIPPING' ? '0' : shipping} LE</span>
-                </div>
-                <div className="flex justify-between font-bold mt-4 pt-4 border-t">
-                  <span>Total</span>
-                  <span>{total} LE</span>
-                </div>
-              </div>
-
- 
-
-              {/* ... rest of the order summary ... */}
-            </div>
-          </div> :
-          <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
-            <div className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}>
+          <div className="block lg:col-span-3 relative w-full md:w-2/7 py-1">
+            <div className={`${thirdFont.className} md:border-l-2 sticky top-4 w-full border-lovely md:pl-6 shadow-sm h-fit`}>
                          {/* Wifey Experience Package Details */}
-                         <div className="wifey-experience-package bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
+                         <div className=" bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
                 <Image 
                   src={wifeyExperience.imgUrl} 
-                  width={400} 
+                  width={500} 
                   height={250} 
                   alt={wifeyExperience.name} 
                   className="object-cover object-top aspect-[16/11] rounded-xl mb-4" 
@@ -1053,11 +942,20 @@ const CheckoutClientPage = () => {
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
-                <div className="flex justify-start gap-4 tracking-wider mt-4 mb-2">
+                <div className="flex justify-start gap-4 tracking-wider mt-4 ">
                   <span className="text-lg   text-creamey">one lifetime subscription fee :</span>
                   <span className="text-lg  text-creamey">{wifeyExperience.price} LE</span>
                   {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
                 </div>
+                <div className="flex flex-col justify-start items-start w-full font-thin gap-2 tracking-wider mt-2 mb-2">
+                  <span className="text-sm text-creamey font-semibold">Notes :</span>
+                  <ul className="list-disc list-inside pl-4">
+                    {wifeyExperience.notes.map((note, idx) => (
+                      <li key={idx} className="text-sm text-creamey">{note}</li>
+                    ))}
+                  </ul>
+                </div>
+                  
               </div>
               <div className="mt-6 space-y-2 text-black">
                 <div className="flex justify-between text-lg">
@@ -1088,7 +986,7 @@ const CheckoutClientPage = () => {
               </div>
               
               </div>
-          }
+         
       </div>
     </div>
   );
@@ -1096,7 +994,7 @@ const CheckoutClientPage = () => {
 
 export default function CheckoutPageWithSuspense(props: any) {
   return (
-    <Suspense fallback={<div>Loading checkout...</div>}>
+    <Suspense fallback={<div>Loading subsciption...</div>}>
       <CheckoutClientPage {...props} />
     </Suspense>
   );

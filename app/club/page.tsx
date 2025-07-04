@@ -107,7 +107,7 @@ const ClubPage = () => {
             variant="outline"
             className="bg-everGreen hover:text-lovely transition duration-300 border-0 hover:bg-creamey hover:border-creamey hover:border text-creamey  mt-4 "
           >
-            <Link href="/checkout?subscription=true">
+            <Link href="/subscription">
               Join Now <ArrowRight className=" ml-2 h-4 w-4" />
             </Link>
           </Button>

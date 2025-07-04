@@ -1,7 +1,7 @@
 "use client";
 import { Suspense } from 'react';
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect  } from "react";
+import { useSearchParams,useRouter } from "next/navigation";
 import { Play, Lock, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ function PlaylistsPageFallback() {
 }
 
 function PlaylistsPage() {
+  const router = useRouter();
   const { data: session, status } = useSession();
 
   const searchParams = useSearchParams();
@@ -313,7 +314,9 @@ function PlaylistsPage() {
               </div>
             </div>
             <div className="flex   justify-center md:justify-end">
-              <Button size="lg" className="rounded-full bg-lovely hover:bg-lovely/80 text-creamey border border-creamey">
+              <Button
+              onClick={()=>router.push("/subscription")}
+              size="lg" className="rounded-full bg-lovely hover:bg-lovely/80 text-creamey border border-creamey">
                 Subscribe Now
               </Button>
             </div>

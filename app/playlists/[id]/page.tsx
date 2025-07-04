@@ -245,7 +245,10 @@ export default function PlaylistPage() {
                     <p className="mb-4 max-w-md">
                       This video is only available to premium subscribers. Subscribe now to unlock all our premium content.
                     </p>
-     <Button size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely">
+     <Button 
+                   onClick={()=>router.push("/subscription")}
+
+     size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely">
                 Subscribe Now
               </Button>
                   </div>
@@ -361,7 +364,10 @@ export default function PlaylistPage() {
               <p className="text-sm mb-3">
                 Subscribe to unlock all premium videos in this playlist.
               </p>
-              <Button size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-everGreen">
+              <Button
+                            onClick={()=>router.push("/subscription")}
+
+              size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-everGreen">
                 Subscribe Now
               </Button>
             </div>
