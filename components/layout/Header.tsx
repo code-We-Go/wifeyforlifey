@@ -76,7 +76,7 @@ export default function Header() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if( pathname ==="/club" || pathname === "/shop"){
-       if (currentScrollY > 128) {
+       if ( currentScrollY > 128) {
           // Scrolling down, hide header
           setIsVisible(false);
         } else {
