@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from 'axios'
+import ProfileSkeleton from '@/components/skeletons/ProfileSkeleton';
+import { thirdFont } from '@/fonts';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -31,7 +33,7 @@ export default function AccountPage() {
   
   // Show loading state while session is loading
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return <ProfileSkeleton />;
   }
 
   // Show loading state while session is loading
@@ -75,7 +77,7 @@ export default function AccountPage() {
   ];
 
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-6 text-creamey">
       {/* Profile Header */}
       <div className='w-full flex justify-between'>
 
@@ -92,12 +94,12 @@ export default function AccountPage() {
         </div>
 }
         <div className='w-fit'>
-          <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-          <p className="text-sm text-gray-500">{user.email}</p>
-          <p className="text-sm flex items-center gap-2 text-gray-500">Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-everGreen' />:<BadgeAlert/>}</span></p>
+          <h1 className={`text-4xl font-bold text-lovely tracking-normal ${thirdFont.className}`}>{user.name}</h1>
+          <p className="text-sm text-lovely/80">{user.email}</p>
+          <p className="text-sm flex items-center gap-2 text-lovely/80">Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-everGreen' />:<BadgeAlert/>}</span></p>
         </div>
       </div>
-      <button className='underline text-gray-500'>Edit Info</button>
+      <button className='underline text-lovely '>Edit Info</button>
       </div>
 
       {/* Stats Grid */}
@@ -114,7 +116,7 @@ export default function AccountPage() {
               <p className="ml-16 truncate text-sm font-medium text-gray-500">{stat.name}</p>
             </dt>
             <dd className="ml-16 flex items-baseline">
-              <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+              <p className="text-2xl font-semibold text-lovely">{stat.value}</p>
             </dd>
           </div>
         ))}
@@ -122,11 +124,11 @@ export default function AccountPage() {
 
       {/* Recent Activity */}
       <div>
-        <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
+        <h2 className="text-lg font-medium text-lovely">Recent Orders</h2>
         <div className="mt-4 space-y-4">
           <div className="flex items-center justify-between border-b pb-4">
             <div>
-              <p className="text-sm font-medium text-gray-900">Order #12345</p>
+              <p className="text-sm font-medium text-lovely">Order #12345</p>
               <p className="text-sm text-gray-500">Delivered on March 15, 2024</p>
             </div>
             <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
@@ -135,13 +137,13 @@ export default function AccountPage() {
           </div>
           <div className="flex items-center justify-between border-b pb-4">
             <div>
-              <p className="text-sm font-medium text-gray-900">Added to Wishlist</p>
+              <p className="text-sm font-medium text-lovely">Added to Wishlist</p>
               <p className="text-sm text-gray-500">Premium Headphones - March 14, 2024</p>
             </div>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Earned Loyalty Points</p>
+              <p className="text-sm font-medium text-lovely">Earned Loyalty Points</p>
               <p className="text-sm text-gray-500">+250 points - March 13, 2024</p>
             </div>
           </div>

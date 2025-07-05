@@ -2,7 +2,7 @@
 // import BigCartItem from '@/app/components/BigCartItem';
 import OrderSummaryItem from "./components/OrderSummaryItem";
 import { cartContext } from "@/app/context/cartContext";
-import { CartProvider,useCart } from "@/providers/CartProvider";
+import { CartProvider, useCart } from "@/providers/CartProvider";
 
 import { userContext } from "@/app/context/userContext";
 import { thirdFont } from "@/fonts";
@@ -32,83 +32,123 @@ const calculateShippingRate = (
     state,
     statesCount: states.length,
     countriesCount: countries.length,
-    shippingZonesCount: shippingZones.length
+    shippingZonesCount: shippingZones.length,
   });
 
   if (countryID === 65 && states.length > 0) {
     // Local shipping - based on state
     const selectedState = states.find((s) => s.name === state);
     console.log("Selected state:", selectedState);
-    
+
     // Try multiple matching strategies
     let zone = null;
-    
+
     // Strategy 1: Match by _id with shipping_zone
-    zone = shippingZones.find(
-      (z) => {
-        console.log("Strategy 1 - Checking zone:", z._id, "against state shipping_zone:", selectedState?.shipping_zone);
-        return z._id === selectedState?.shipping_zone.toString() && z.localGlobal === "local";
-      }
-    );
-    
+    zone = shippingZones.find((z) => {
+      console.log(
+        "Strategy 1 - Checking zone:",
+        z._id,
+        "against state shipping_zone:",
+        selectedState?.shipping_zone
+      );
+      return (
+        z._id === selectedState?.shipping_zone.toString() &&
+        z.localGlobal === "local"
+      );
+    });
+
     // Strategy 2: If not found, try matching by state name in states array
     if (!zone) {
-      zone = shippingZones.find(
-        (z) => {
-          console.log("Strategy 2 - Checking zone states array:", z.states, "for state _id:", selectedState?._id);
-          return z.states && z.states.includes(selectedState?._id) && z.localGlobal === "local";
-        }
-      );
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 2 - Checking zone states array:",
+          z.states,
+          "for state _id:",
+          selectedState?._id
+        );
+        return (
+          z.states &&
+          z.states.includes(selectedState?._id) &&
+          z.localGlobal === "local"
+        );
+      });
     }
-    
+
     // Strategy 3: If still not found, try matching by state ID in states array
     if (!zone) {
-      zone = shippingZones.find(
-        (z) => {
-          console.log("Strategy 3 - Checking zone states array:", z.states, "for state ID:", selectedState?.id);
-          return z.states && z.states.includes(selectedState?.id.toString()) && z.localGlobal === "local";
-        }
-      );
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 3 - Checking zone states array:",
+          z.states,
+          "for state ID:",
+          selectedState?.id
+        );
+        return (
+          z.states &&
+          z.states.includes(selectedState?.id.toString()) &&
+          z.localGlobal === "local"
+        );
+      });
     }
-    
+
     console.log("Found local zone:", zone);
     return zone ? zone.zone_rate.local : 70; // Default local rate
   } else {
     // Global shipping - based on country
     const selectedCountry = countries.find((c) => c.id === countryID);
     console.log("Selected country:", selectedCountry);
-    
+
     // Try multiple matching strategies
     let zone = null;
-    
+
     // Strategy 1: Match by _id with shipping_zone
-    zone = shippingZones.find(
-      (z) => {
-        console.log("Strategy 1 - Checking zone:", z._id, "against country shipping_zone:", selectedCountry?.shipping_zone);
-        return z._id === selectedCountry?.shipping_zone?.toString() && z.localGlobal === "global";
-      }
-    );
-    
+    zone = shippingZones.find((z) => {
+      console.log(
+        "Strategy 1 - Checking zone:",
+        z._id,
+        "against country shipping_zone:",
+        selectedCountry?.shipping_zone
+      );
+      return (
+        z._id === selectedCountry?.shipping_zone?.toString() &&
+        z.localGlobal === "global"
+      );
+    });
+
     // Strategy 2: If not found, try matching by country name in countries array
     if (!zone) {
-      zone = shippingZones.find(
-        (z) => {
-          console.log("Strategy 2 - Checking zone countries array:", z.countries, "for country:", selectedCountry?.name);
-          return z.countries && z.countries.includes(selectedCountry?.name) && z.localGlobal === "global";
-        }
-      );
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 2 - Checking zone countries array:",
+          z.countries,
+          "for country:",
+          selectedCountry?.name
+        );
+        return (
+          z.countries &&
+          z.countries.includes(selectedCountry?.name) &&
+          z.localGlobal === "global"
+        );
+      });
     }
-    
+
     // Strategy 3: If still not found, try matching by country ID in countries array
     if (!zone) {
-      zone = shippingZones.find(
-        (z) => {
-          console.log("Strategy 3 - Checking zone countries array:", z.countries, "for country ID:", selectedCountry?.id);
-          return z.countries && z.countries.includes(selectedCountry?.id.toString()) && z.localGlobal === "global";
-        }
-      );
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 3 - Checking zone countries array:",
+          z.countries,
+          "for country ID:",
+          selectedCountry?.id
+        );
+        return (
+          z.countries &&
+          z.countries.includes(selectedCountry?.id.toString()) &&
+          z.localGlobal === "global"
+        );
+      });
     }
-    
+
     console.log("Found global zone:", zone);
     return zone ? zone.zone_rate.global : 65; // Default global rate
   }
@@ -117,7 +157,7 @@ const calculateShippingRate = (
 const CheckoutClientPage = () => {
   // let subTotal=0;
   // let total = 0;
-  // const []   
+  // const []
   //  const[countries,setCountries]=useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -128,47 +168,48 @@ const CheckoutClientPage = () => {
       0
     );
     setSubTotal(calculatedSubTotal);
-    
+
     // Calculate discount amount
     let newDiscountAmount = 0;
     let effectiveShipping = shipping;
 
     if (appliedDiscount && appliedDiscount.value !== undefined) {
-      if (appliedDiscount.calculationType === 'PERCENTAGE') {
-        newDiscountAmount = Math.round((calculatedSubTotal * appliedDiscount.value) / 100);
-        console.log('Percentage discount:', {
+      if (appliedDiscount.calculationType === "PERCENTAGE") {
+        newDiscountAmount = Math.round(
+          (calculatedSubTotal * appliedDiscount.value) / 100
+        );
+        console.log("Percentage discount:", {
           subtotal: calculatedSubTotal,
           percentage: appliedDiscount.value,
-          discountAmount: newDiscountAmount
+          discountAmount: newDiscountAmount,
         });
-      } else if (appliedDiscount.calculationType === 'FIXED_AMOUNT') {
+      } else if (appliedDiscount.calculationType === "FIXED_AMOUNT") {
         newDiscountAmount = appliedDiscount.value;
-        console.log('Fixed amount discount:', {
+        console.log("Fixed amount discount:", {
           subtotal: calculatedSubTotal,
           fixedAmount: appliedDiscount.value,
-          discountAmount: newDiscountAmount
+          discountAmount: newDiscountAmount,
         });
-      }
-      else if (appliedDiscount.calculationType === 'FREE_SHIPPING'){
+      } else if (appliedDiscount.calculationType === "FREE_SHIPPING") {
         effectiveShipping = 0;
         newDiscountAmount = shipping; // Set the discount amount to the original shipping cost
-        console.log('Free shipping discount applied:', {
+        console.log("Free shipping discount applied:", {
           originalShipping: shipping,
           effectiveShipping: 0,
-          discountAmount: newDiscountAmount
+          discountAmount: newDiscountAmount,
         });
       }
     }
 
     setDiscountAmount(newDiscountAmount);
-    
+
     // Calculate final total
     const finalTotal = calculatedSubTotal + effectiveShipping;
-    console.log('Final calculation:', {
+    console.log("Final calculation:", {
       subtotal: calculatedSubTotal,
       shipping: effectiveShipping,
       discountAmount: newDiscountAmount,
-      finalTotal
+      finalTotal,
     });
     setTotal(finalTotal);
   };
@@ -178,8 +219,15 @@ const CheckoutClientPage = () => {
   const [payment, setPayment] = useState<Payment>("cash");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { items, removeItem, updateQuantity, totalItems, totalPrice,clearCart } = useCart(); 
-   const [countries, setCountries] = useState<Country[]>([]);
+  const {
+    items,
+    removeItem,
+    updateQuantity,
+    totalItems,
+    totalPrice,
+    clearCart,
+  } = useCart();
+  const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
   const [subTotal, setSubTotal] = useState(0);
@@ -194,11 +242,11 @@ const CheckoutClientPage = () => {
 
   // const [state,setState]=useState(states.length>0?states[0].name:'')
   const [state, setState] = useState("Alexandria"); // Default to the first state's name or an empty string
-  const [billingState, setBillingState] = useState("Alexandria"); 
+  const [billingState, setBillingState] = useState("Alexandria");
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
-  };// Default to the first state's name or an empty string
+  }; // Default to the first state's name or an empty string
   useEffect(() => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -245,7 +293,7 @@ const CheckoutClientPage = () => {
     billingPhone: "",
     subTotal: subTotal,
     // currency:country===65?'LE':'USD'
-    currency: "LE"
+    currency: "LE",
     // currency: user.userCountry === "EG" ? "LE" : "USD",
   });
   const handleInputChange = (
@@ -257,9 +305,7 @@ const CheckoutClientPage = () => {
   };
 
   // Separate handler for state changes to ensure shipping calculation triggers
-  const handleStateChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
     setState(value); // Update local state
     setFormData({ ...formData, state: value }); // Update formData
@@ -303,16 +349,20 @@ const CheckoutClientPage = () => {
       setShippingZones(response.data);
     };
     getShippingZones();
-    const calculateShipping=()=>{
-      if(countryID===65){
-        const selectedState = states.find((state) => state.name === formData.state)
-        const zone =shippingZones.find((zone:ShippingZone) => (zone._id === selectedState?.shipping_zone && zone.localGlobal ==='local'))
-       if(zone){
-
-         setShipping(zone.zone_rate.local)
-       }
+    const calculateShipping = () => {
+      if (countryID === 65) {
+        const selectedState = states.find(
+          (state) => state.name === formData.state
+        );
+        const zone = shippingZones.find(
+          (zone: ShippingZone) =>
+            zone._id === selectedState?.shipping_zone &&
+            zone.localGlobal === "local"
+        );
+        if (zone) {
+          setShipping(zone.zone_rate.local);
+        }
       }
-
     };
     calculateShipping();
     getCountries();
@@ -332,7 +382,7 @@ const CheckoutClientPage = () => {
     );
     setSubTotal(calculatedSubTotal);
     setTotal(calculatedSubTotal + shipping);
-    
+
     cartItems();
   }, [items, countryID, billingState]); // Removed 'state' from dependencies
   useEffect(() => {
@@ -346,9 +396,9 @@ const CheckoutClientPage = () => {
 
   // Sync state changes with formData
   useEffect(() => {
-    setFormData(prevFormData => ({
+    setFormData((prevFormData) => ({
       ...prevFormData,
-      state: state
+      state: state,
     }));
   }, [state]);
 
@@ -366,26 +416,42 @@ const CheckoutClientPage = () => {
       state,
       statesLength: states.length,
       shippingZonesLength: shippingZones.length,
-      countriesLength: countries.length
+      countriesLength: countries.length,
     });
-    
+
     // Debug: Log all states and their shipping zones
     if (states.length > 0) {
-      console.log("All states:", states.map(s => ({ name: s.name, shipping_zone: s.shipping_zone, type: typeof s.shipping_zone })));
+      console.log(
+        "All states:",
+        states.map((s) => ({
+          name: s.name,
+          shipping_zone: s.shipping_zone,
+          type: typeof s.shipping_zone,
+        }))
+      );
     }
-    
+
     // Debug: Log all shipping zones
     if (shippingZones.length > 0) {
-      console.log("All shipping zones:", shippingZones.map(z => ({ 
-        _id: z._id, 
-        zone_name: z.zone_name, 
-        localGlobal: z.localGlobal,
-        zone_rate: z.zone_rate 
-      })));
+      console.log(
+        "All shipping zones:",
+        shippingZones.map((z) => ({
+          _id: z._id,
+          zone_name: z.zone_name,
+          localGlobal: z.localGlobal,
+          zone_rate: z.zone_rate,
+        }))
+      );
     }
-    
+
     if (countryID === 65 && states.length > 0 && shippingZones.length > 0) {
-      const shippingRate = calculateShippingRate(countryID, state, states, countries, shippingZones);
+      const shippingRate = calculateShippingRate(
+        countryID,
+        state,
+        states,
+        countries,
+        shippingZones
+      );
       console.log("Local shipping rate calculated:", shippingRate);
       setShipping(shippingRate);
       const calculatedSubTotal = items.reduce(
@@ -395,7 +461,13 @@ const CheckoutClientPage = () => {
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     } else if (shippingZones.length > 0) {
-      const shippingRate = calculateShippingRate(countryID, state, states, countries, shippingZones);
+      const shippingRate = calculateShippingRate(
+        countryID,
+        state,
+        states,
+        countries,
+        shippingZones
+      );
       console.log("Global shipping rate calculated:", shippingRate);
       setShipping(shippingRate);
       const calculatedSubTotal = items.reduce(
@@ -470,9 +542,13 @@ const CheckoutClientPage = () => {
   return (
     // cart.length > 0 ?
     <div
-      className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}>
-                <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8 font-display font-semibold`}>Checkout</h1>
-
+      className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}
+    >
+      <h1
+        className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8 font-display font-semibold`}
+      >
+        Checkout
+      </h1>
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
         <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
@@ -516,9 +592,9 @@ const CheckoutClientPage = () => {
               <p>Country</p>
               {countries ? (
                 <select
-                onChange={(e) => setCountryID(Number(e.target.value))}
-                name="country"
-                disabled
+                  onChange={(e) => setCountryID(Number(e.target.value))}
+                  name="country"
+                  disabled
                   value={countryID}
                   className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
                 >
@@ -545,7 +621,9 @@ const CheckoutClientPage = () => {
             <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full md:w-2/4">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen whitespace-nowrap text-lg">First name</label>
+                  <label className="text-everGreen whitespace-nowrap text-lg">
+                    First name
+                  </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       onChange={handleInputChange}
@@ -569,7 +647,9 @@ const CheckoutClientPage = () => {
               </div>
               <div className="flex flex-col gap-2 w-full md:w-2/4">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">Last name</label>
+                  <label className="text-everGreen text-lg whitespace-nowrap">
+                    Last name
+                  </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       name="lastName"
@@ -592,7 +672,9 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex gap-2 w-full items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">Address</label>
+              <label className="text-everGreen text-lg whitespace-nowrap">
+                Address
+              </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   type="text"
@@ -628,7 +710,9 @@ const CheckoutClientPage = () => {
             <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">Postal/Zip code</label>
+                  <label className="text-everGreen text-lg whitespace-nowrap">
+                    Postal/Zip code
+                  </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       placeholder={`IF UNAVAILABLE PLEASE TYPE 0000`}
@@ -653,7 +737,9 @@ const CheckoutClientPage = () => {
 
               <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">City</label>
+                  <label className="text-everGreen text-lg whitespace-nowrap">
+                    City
+                  </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       onChange={handleInputChange}
@@ -677,7 +763,9 @@ const CheckoutClientPage = () => {
             </div>
 
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">Governate</label>
+              <label className="text-everGreen text-lg whitespace-nowrap">
+                Governate
+              </label>
               {countryID === 65 ? (
                 <select
                   onChange={handleStateChange}
@@ -704,7 +792,9 @@ const CheckoutClientPage = () => {
               )}
             </div>
             <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">Phone</label>
+              <label className="text-everGreen text-lg whitespace-nowrap">
+                Phone
+              </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -771,111 +861,217 @@ const CheckoutClientPage = () => {
             </div> 
               {/* billing */}
 
-              <div className={`${thirdFont.className} mt-6 w-full text-[16px] lg:text-4xl border-b border-lovely`}>billing address</div>
-            <div className="space-y-4">
-            <div>
-  <label className="flex items-center space-x-3">
-    <input
-      type="radio"
-      name="billingAddress"
-      checked={useSameAsShipping}
-      onChange={() => setUseSameAsShipping(true)}
-      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
-      />
-    <span className=" ">Same as shipping address</span>
-  </label>
-</div>
-<div>
-  <label className="flex items-center space-x-3">
-    <input
-      type="radio"
-      name="billingAddress"
-      checked={!useSameAsShipping}
-      onChange={() => setUseSameAsShipping(false)}
-      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
-      />
-    <span className="">Use a different billing address</span>
-  </label>
-</div>
-
-      </div>
-<div className={`flex flex-col gap-2 w-full transition-all duration-500 ease-in-out overflow-hidden
-  ${
-    !useSameAsShipping
-      ? "max-h-[70vh]   opacity-100"
-      : "max-h-0  opacity-0"
-  }
+              <div
+                className={`${thirdFont.className} mt-6 w-full text-[16px] lg:text-4xl border-b border-lovely`}
+              >
+                billing address
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="billingAddress"
+                      checked={useSameAsShipping}
+                      onChange={() => setUseSameAsShipping(true)}
+                      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                    />
+                    <span className=" ">Same as shipping address</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="billingAddress"
+                      checked={!useSameAsShipping}
+                      onChange={() => setUseSameAsShipping(false)}
+                      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                    />
+                    <span className="">Use a different billing address</span>
+                  </label>
+                </div>
+              </div>
+              <div
+                className={`flex flex-col gap-2 w-full transition-all duration-500 ease-in-out overflow-hidden
+  ${!useSameAsShipping ? "max-h-[70vh]   opacity-100" : "max-h-0  opacity-0"}
   `}
-  style={{
-    padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
-  }}
-  >
-             <div className='flex gap-2 w-full'>
-              <p>Country</p>
-            {countries?<select 
-            disabled
-            onChange={(e)=>setBillingCountry(Number(e.target.value))} name='billingCountry' value={billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
-                    {countries.map((country:any,index:number)=>{
-                      return <option key={index} value={country.id}>{country.name}</option>
-                    })}              
-                         </select> :<select  onChange={handleInputChange} name='billingCountry' value={formData.billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
-              {/* <option value='EG'>EGYPT</option>
+                style={{
+                  padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
+                }}
+              >
+                <div className="flex gap-2 w-full">
+                  <p>Country</p>
+                  {countries ? (
+                    <select
+                      disabled
+                      onChange={(e) =>
+                        setBillingCountry(Number(e.target.value))
+                      }
+                      name="billingCountry"
+                      value={billingCountry}
+                      className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                    >
+                      {countries.map((country: any, index: number) => {
+                        return (
+                          <option key={index} value={country.id}>
+                            {country.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : (
+                    <select
+                      onChange={handleInputChange}
+                      name="billingCountry"
+                      value={formData.billingCountry}
+                      className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                    >
+                      {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
-             </select> }
-              </div>
-              <div className='flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center'>
-              <div className='flex gap-2 w-full md:w-2/4'>
-                <label className='text-everGreen' >First Name</label>
-                <input onChange={handleInputChange} name='billingFirstName' value={useSameAsShipping?formData.firstName :formData.billingFirstName} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                    </select>
+                  )}
+                </div>
+                <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
+                  <div className="flex gap-2 w-full md:w-2/4">
+                    <label className="text-everGreen">First Name</label>
+                    <input
+                      onChange={handleInputChange}
+                      name="billingFirstName"
+                      value={
+                        useSameAsShipping
+                          ? formData.firstName
+                          : formData.billingFirstName
+                      }
+                      type="text"
+                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    />
+                  </div>
+                  <div className="flex gap-2 w-full md:w-2/4">
+                    <label className="text-everGreen">Last Name</label>
+                    <input
+                      name="billingLastName"
+                      onChange={handleInputChange}
+                      value={
+                        useSameAsShipping
+                          ? formData.lastName
+                          : formData.billingLastName
+                      }
+                      type="text"
+                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2 w-full">
+                  <label className="text-everGreen">Address</label>
+                  <input
+                    type="text"
+                    onChange={handleInputChange}
+                    name="billingAddress"
+                    value={
+                      useSameAsShipping
+                        ? formData.address
+                        : formData.billingAddress
+                    }
+                    className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                  />
+                </div>
+                <div className="flex w-full  gap-2 items-center">
+                  <label className="text-everGreen text-nowrap">
+                    Apartment,Suite ETC. (Optional)
+                  </label>
+                  <input
+                    onChange={handleInputChange}
+                    name="billingApartment"
+                    value={
+                      useSameAsShipping
+                        ? formData.apartment
+                        : formData.billingApartment
+                    }
+                    type="text"
+                    className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                  />
+                </div>
+                <div className="flex w-full gap-2">
+                  <div className="flex w-full gap-2 md:w-3/5 items-center">
+                    <label className="text-everGreen">
+                      Postal/Zip code (Optional)
+                    </label>
+                    <input
+                      onChange={handleInputChange}
+                      value={
+                        useSameAsShipping
+                          ? formData.postalZip
+                          : formData.billingPostalZip
+                      }
+                      name="billingPostalZip"
+                      type="text"
+                      className="border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg"
+                    />
+                  </div>
 
-              </div>
-              <div className='flex gap-2 w-full md:w-2/4'>
-                <label className='text-everGreen' >Last Name</label>
-                <input name='billingLastName' onChange={handleInputChange} value={useSameAsShipping?formData.lastName:formData.billingLastName} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                  <div className="flex w-full  md:w-2/5 gap-2 items-center">
+                    <label className="text-everGreen">City</label>
+                    <input
+                      onChange={handleInputChange}
+                      name="billingCity"
+                      value={
+                        useSameAsShipping ? formData.city : formData.billingCity
+                      }
+                      type="text"
+                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    />
+                  </div>
+                </div>
 
+                <div className="flex w-full  gap-2 items-center">
+                  <label className="text-everGreen">Governate</label>
+                  {billingCountry === 65 ? (
+                    <select
+                      onChange={handleInputChange}
+                      name="billingState"
+                      value={
+                        useSameAsShipping
+                          ? formData.state
+                          : formData.billingState
+                      }
+                      className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                    >
+                      {states.map((state: any, index: number) => {
+                        return (
+                          <option key={index} value={state.name}>
+                            {state.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : (
+                    <input
+                      onChange={handleInputChange}
+                      value={
+                        useSameAsShipping
+                          ? formData.state
+                          : formData.billingState
+                      }
+                      name="billingState"
+                      type="text"
+                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    />
+                  )}
+                </div>
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-everGreen">Phone</label>
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={
+                      useSameAsShipping ? formData.phone : formData.billingPhone
+                    }
+                    name="billingPhone"
+                    className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                  />
+                </div>
               </div>
-              </div>
-              <div className='flex gap-2 w-full'>
-                <label className='text-everGreen' >Address</label>
-                <input type='text' onChange={handleInputChange} name='billingAddress' value={useSameAsShipping?formData.address :formData.billingAddress} className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
-
-              </div>
-              <div className='flex w-full  gap-2 items-center'>
-                <label className='text-everGreen text-nowrap' >Apartment,Suite ETC. (Optional)</label>
-                <input onChange={handleInputChange} name='billingApartment' value={useSameAsShipping?formData.apartment:formData.billingApartment} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
-              </div>
-              <div className='flex w-full gap-2'>
-              <div className='flex w-full gap-2 md:w-3/5 items-center'>
-                <label className='text-everGreen' >Postal/Zip code (Optional)</label>
-                <input onChange={handleInputChange} value={useSameAsShipping?formData.postalZip:formData.billingPostalZip} name='billingPostalZip' type='text' className='border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg'/>
-              </div>
-
-              <div className='flex w-full  md:w-2/5 gap-2 items-center'>
-                <label className='text-everGreen' >City</label>
-                <input onChange={handleInputChange} name='billingCity' value={useSameAsShipping?formData.city:formData.billingCity} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
-              </div>
-              </div>
-                
-              <div className='flex w-full  gap-2 items-center'>
-                <label className='text-everGreen' >Governate</label>
-               {
-               billingCountry ===65?
-               <select  onChange={handleInputChange} name='billingState' value={useSameAsShipping?formData.state:formData.billingState} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
-                    {states.map((state:any,index:number)=>{
-                      return <option key={index} value={state.name}>{state.name}</option>
-                    })}              
-                         </select>
-               :
-               
-               <input onChange={handleInputChange} value={useSameAsShipping?formData.state:formData.billingState} name='billingState' type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
-                  }
-              </div>
-              <div className='flex w-full gap-2 items-center'>
-                <label className='text-everGreen' >Phone</label>
-                <input onChange={handleInputChange} type='text' value={useSameAsShipping?formData.phone :formData.billingPhone} name='billingPhone' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
-              </div>
-
-            </div>
             </div>
             {/* <div className='flex pb-5 justify-between'>
            <div className='flex flex-col gap-1'><p>SUBTOTAL</p>
@@ -892,7 +1088,7 @@ const CheckoutClientPage = () => {
             {payment === "cash" || "instapay" ? (
               <div className={`flex justify-end`}>
                 <button
-                className="bg-lovely rounded-2xl text-creamey hover:bg-lovely/90 px-4 py-2"
+                  className="bg-lovely rounded-2xl text-creamey hover:bg-lovely/90 px-4 py-2"
                   onClick={() => handleSubmit}
                   disabled={loading || items.length === 0}
                 >
@@ -988,15 +1184,19 @@ const CheckoutClientPage = () => {
             </div>
           </div>
         </div>
-        {!isSubscription === true? 
-        <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
+        {!isSubscription === true ? (
+          <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
             <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
-              <h2 className={`${thirdFont.className} text-[16px] lg:text-4xl  text-everGreen mb-6`}>Order Summary</h2>
-              
+              <h2
+                className={`${thirdFont.className} text-[16px] lg:text-4xl  text-everGreen mb-6`}
+              >
+                Order Summary
+              </h2>
+
               {/* Cart Items */}
               <div className="flex flex-col gap-4 mb-6">
-                {items.map((item,index) => (
-                  <OrderSummaryItem key={index} cartItem={item}  />
+                {items.map((item, index) => (
+                  <OrderSummaryItem key={index} cartItem={item} />
                 ))}
               </div>
 
@@ -1013,17 +1213,26 @@ const CheckoutClientPage = () => {
                   <div className="flex justify-between text-lg text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
-                      {appliedDiscount.calculationType === 'FREE_SHIPPING' 
+                      {appliedDiscount.calculationType === "FREE_SHIPPING"
                         ? `-${shipping} LE (Free Shipping)`
-                        : `-${appliedDiscount.calculationType === 'PERCENTAGE' 
-                          ? Math.round((subTotal * appliedDiscount.value) / 100)
-                          : appliedDiscount.value} LE`}
+                        : `-${
+                            appliedDiscount.calculationType === "PERCENTAGE"
+                              ? Math.round(
+                                  (subTotal * appliedDiscount.value) / 100
+                                )
+                              : appliedDiscount.value
+                          } LE`}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg">
                   <span>Shipping</span>
-                  <span>{appliedDiscount?.calculationType === 'FREE_SHIPPING' ? '0' : shipping} LE</span>
+                  <span>
+                    {appliedDiscount?.calculationType === "FREE_SHIPPING"
+                      ? "0"
+                      : shipping}{" "}
+                    LE
+                  </span>
                 </div>
                 <div className="flex justify-between font-bold mt-4 pt-4 border-t">
                   <span>Total</span>
@@ -1031,31 +1240,40 @@ const CheckoutClientPage = () => {
                 </div>
               </div>
 
- 
-
               {/* ... rest of the order summary ... */}
             </div>
-          </div> :
+          </div>
+        ) : (
           <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
-            <div className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}>
-                         {/* Wifey Experience Package Details */}
-                         <div className="wifey-experience-package bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
-                <Image 
-                  src={wifeyExperience.imgUrl} 
-                  width={400} 
-                  height={250} 
-                  alt={wifeyExperience.name} 
-                  className="object-cover object-top aspect-[16/11] rounded-xl mb-4" 
+            <div
+              className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}
+            >
+              {/* Wifey Experience Package Details */}
+              <div className="wifey-experience-package bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
+                <Image
+                  src={wifeyExperience.imgUrl}
+                  width={400}
+                  height={250}
+                  alt={wifeyExperience.name}
+                  className="object-cover object-top aspect-[16/11] rounded-xl mb-4"
                 />
-                <h2 className={`text-4xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}>{wifeyExperience.name}</h2>
+                <h2
+                  className={`text-4xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}
+                >
+                  {wifeyExperience.name}
+                </h2>
                 <ul className="list-disc w-full items-start justify-start list-inside text-left text-xl tracking-wide text-creamey/95">
                   {wifeyExperience.items.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
                 <div className="flex justify-start gap-4 tracking-wider mt-4 mb-2">
-                  <span className="text-lg   text-creamey">one lifetime subscription fee :</span>
-                  <span className="text-lg  text-creamey">{wifeyExperience.price} LE</span>
+                  <span className="text-lg   text-creamey">
+                    one lifetime subscription fee :
+                  </span>
+                  <span className="text-lg  text-creamey">
+                    {wifeyExperience.price} LE
+                  </span>
                   {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
                 </div>
               </div>
@@ -1068,27 +1286,35 @@ const CheckoutClientPage = () => {
                   <div className="flex justify-between text-lg text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
-                      {appliedDiscount.calculationType === 'FREE_SHIPPING' 
+                      {appliedDiscount.calculationType === "FREE_SHIPPING"
                         ? `-${shipping} LE (Free Shipping)`
-                        : `-${appliedDiscount.calculationType === 'PERCENTAGE' 
-                          ? Math.round((subTotal * appliedDiscount.value) / 100)
-                          : appliedDiscount.value} LE`}
+                        : `-${
+                            appliedDiscount.calculationType === "PERCENTAGE"
+                              ? Math.round(
+                                  (subTotal * appliedDiscount.value) / 100
+                                )
+                              : appliedDiscount.value
+                          } LE`}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg">
                   <span>Shipping</span>
-                  <span>{appliedDiscount?.calculationType === 'FREE_SHIPPING' ? '0' : shipping} LE</span>
+                  <span>
+                    {appliedDiscount?.calculationType === "FREE_SHIPPING"
+                      ? "0"
+                      : shipping}{" "}
+                    LE
+                  </span>
                 </div>
                 <div className="flex justify-between font-bold mt-4 pt-4 border-t">
                   <span>Total</span>
                   <span>{total} LE</span>
                 </div>
               </div>
-              </div>
-              
-              </div>
-          }
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
