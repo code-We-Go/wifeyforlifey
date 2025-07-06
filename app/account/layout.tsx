@@ -25,21 +25,20 @@ const sidebarItems = [
 
 export default function AccountLayout({ children }: AccountLayoutProps) {
   return (
-    <div className="min-h-screen  bg-gray-50 bg-pattern1 ">
+    <div className="min-h-screen bg-gray-50 bg-pattern1">
       <div className='w-full min-h-screen h-full backdrop-blur-[3px] bg-black/5'>
-      <div className="max-w-7xl  mx-auto h-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar */}
+        <div className="mx-auto h-full px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+          <div className="flex gap-8 min-w-0">
+            {/* Sidebar */}
 
-
-          {/* Main Content */}
-          <div className="flex-1 ">
-            <div className="bg-creamey border-lovely border-2 text-lovely  rounded-2xl shadow-sm p-6">
-              {children}
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              <div className="bg-creamey border-lovely border-2 text-lovely rounded-2xl shadow-sm p-6 overflow-hidden">
+                {children}
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

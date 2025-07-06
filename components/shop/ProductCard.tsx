@@ -140,9 +140,10 @@ export default function ProductCard({
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-          <del className="text-gray-400 text-sm">
+        {product.comparedPrice>0 &&  <del className="text-gray-400 text-sm">
   LE{product.comparedPrice.toFixed(2)}
-</del>          <p className="price-tag">LE{product.price.local.toFixed(2)}</p>
+</del> }         
+ <p className="price-tag">LE{product.price.local.toFixed(2)}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Button

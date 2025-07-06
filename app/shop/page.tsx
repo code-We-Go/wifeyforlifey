@@ -57,7 +57,7 @@ function ShopPage() {
     category: initialCategory,
     subcategory: "",
     minPrice: 0,
-    maxPrice: 100,
+    maxPrice: 100000,
     sortBy: "newest",
     search: "",
   });
