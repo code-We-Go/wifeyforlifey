@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter,useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { thirdFont } from '@/fonts';
 import { FaGoogle } from "react-icons/fa";
@@ -10,13 +10,20 @@ import { signIn } from 'next-auth/react';
 import { BadgeAlert } from 'lucide-react';
 
 
-export default function RegisterPage() {
+ function RegisterPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    const redirect = searchParams.get('redirect');
+    setRedirectPath(redirect);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,3 +164,9 @@ export default function RegisterPage() {
     </div>
   );
 } 
+
+export default function PlaylistPageWrapper(){
+  return <Suspense fallback={<div>Loading</div>}>
+       <RegisterPage />
+     </Suspense>
+ }

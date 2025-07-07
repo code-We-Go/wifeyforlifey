@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import HeroCarousel from "./components/HeroCarouselPL";
 import { CarouselTransition } from "./components/MaterialCarousel";
 import { BottomBlurOut } from "./components/ButtomBlurOut";
+import FlipCard from "./components/FlipCard";
 
 const OPTIONS: EmblaOptionsType = { loop: true }
 
@@ -22,27 +23,13 @@ const OPTIONS: EmblaOptionsType = { loop: true }
 const ClubPage = () => {
   const MotionSection = motion<'section'>('section');
   const bgSectionRef = useRef<HTMLDivElement>(null);
-  const [showBlur, setShowBlur] = useState(false);
 
-  useEffect(() => {
-    const section = bgSectionRef.current;
-    if (!section) return;
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        setShowBlur(entry.isIntersecting);
-      },
-      {
-        threshold: 0.1,
-      }
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
+
 
   return (
 
    
-    <div className="relative container-custom py-16 max-lg:max-w-6xl xl:max-w-7xl mx-auto  overflow-x-hidden">
+    <div className="relative container-custom flex flex-col justify-start items-center w-full py-16 max-lg:max-w-6xl xl:max-w-7xl mx-auto  overflow-x-hidden">
   
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
@@ -62,31 +49,18 @@ const ClubPage = () => {
 
         </motion.div>
 
-<HeroCarousel/>
-<div ref={bgSectionRef} className=" h-[60vh] sm:h-[80vh]  lg:h-[180vh] aspect-auto bg-no-repeat bg-contain bg-expBG mb-10">
-<BottomBlurOut />
-</div>
-{/* {showBlur && (
-  <div
-    className="fixed bottom-0 bg-transparent left-0 w-full h-[10vh] pointer-events-none z-50"
-    style={{
-      // background: "linear-gradient(to top, rgba(255,255,255,0.7) 60%, rgba(255,255,255,0))",
-      backdropFilter: "blur(8px)",
-      WebkitBackdropFilter: "blur(8px)"
-    }}
-  />
-)} */}
-
-    
-
-
-
-
-
-     
-
-  
-      <MotionSection className="text-center bg-lovely p-8 rounded-2xl animate-bounce-slow">
+        <div className="w-full  max-w-4xl px-4">
+        <div className="relative   w-full" style={{ paddingTop: "56.25%" }}>
+          <iframe 
+            src="https://drive.google.com/file/d/1DoGEuz8e1GCmzytt3N3acAWF1u4NkfaA/preview"
+            className="absolute top-0 left-0 w-full h-full border-0"
+            allowFullScreen={true} 
+            allow="encrypted-media"
+          />
+        </div>
+      </div>
+        
+      <MotionSection className="text-center mt-20 md:mt-16 bg-lovely p-8 rounded-2xl animate-bounce-slow">
         <h2 className={`${thirdFont.className} tracking-wide text-4xl font-bold mb-4 text-creamey`}>
           ✨ This is the Wifey Experience
         </h2>
@@ -112,6 +86,25 @@ const ClubPage = () => {
             </Link>
           </Button>
       </MotionSection>
+        {/* <div className="grid  gap-4 md:gap-8 lg:gap-12 min-h-[140vh] h-auto pt-16 pb-20 grid-cols-1 md:grid-cols-2 ">
+
+        <FlipCard/>
+        <FlipCard/>
+        <FlipCard/>
+        <FlipCard/>
+        </div> */}
+
+
+
+    
+
+
+
+
+
+     
+
+
     </div>
   );
 };

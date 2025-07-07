@@ -105,7 +105,7 @@ const WishlistPage = () => {
 
                 {/* Price */}
                 <div className="md:col-span-1 hidden md:block text-center">
-                  ${item.price.toFixed(2)}
+                  LE{item.price.toFixed(2)}
                 </div>
 
                 {/* Actions */}

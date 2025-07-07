@@ -20,6 +20,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import { Product, Variant } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
+import ProductPageSkeleton from "./ProductPageSkeleton";
 
 export default function ProductPage() {
  
@@ -27,19 +28,27 @@ export default function ProductPage() {
   const productId = params.id as string;
   const { toast } = useToast();
   const { addItem } = useCart();
-  const [product,setProduct] =useState<Product>()
+  const [product, setProduct] = useState<Product | null | undefined>();
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const  fetchProduct = async () => {
-      const res = await axios(`/api/products?productID=${productId}`)
-      console.log("product"+res.data.data)
-      setProduct(res.data.data)
-      setSelectedVariant(res.data.data.variations[0])
-      setSelectedAttribute(res.data.data.variations[0].attributes[0])
-    }
-
-  fetchProduct()
- 
-  }, [])
+    const fetchProduct = async () => {
+      try {
+        const res = await axios(`/api/products?productID=${productId}`);
+        if (res.data.data) {
+          setProduct(res.data.data);
+          setSelectedVariant(res.data.data.variations[0]);
+          setSelectedAttribute(res.data.data.variations[0].attributes[0]);
+        } else {
+          setProduct(null);
+        }
+      } catch (e) {
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, []);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(product?.variations[0]);
@@ -66,6 +75,9 @@ export default function ProductPage() {
     }
   };
 
+  if (loading) {
+    return <ProductPageSkeleton />;
+  }
   if (!product) {
     return (
       <div className="container-custom py-16 text-center">
@@ -154,7 +166,7 @@ export default function ProductPage() {
                 </Link>
               </div>
             </li>
-            <li>
+            {/* <li>
               <div className="flex items-center">
                 <span className="mx-2 text-muted-foreground">/</span>
                 <Link
@@ -164,7 +176,7 @@ export default function ProductPage() {
                   {product.subCategoryID.subCategoryName}
                 </Link>
               </div>
-            </li>
+            </li> */}
             <li aria-current="page">
               <div className="flex items-center">
                 <span className="mx-2 text-muted-foreground">/</span>
@@ -267,7 +279,7 @@ export default function ProductPage() {
                     key={index}
                     variant={selectedVariant === variant ? "default" : "outline"}
                     onClick={() => handleVariantChange(variant)}
-                    className="rounded-full"
+                    className="rounded-full text-lovely bg-pinkey"
                   >
                     {variant.name}
                   </Button>
@@ -284,7 +296,7 @@ export default function ProductPage() {
                       key={index}
                       variant={selectedAttribute === attr ? "default" : "outline"}
                       onClick={() => handleAttributeChange(attr)}
-                      className="rounded-full"
+                      className="rounded-full text-lovely bg-pinkey"
                       disabled={attr.stock <= 0}
                     >
                       {attr.name} 
@@ -299,6 +311,7 @@ export default function ProductPage() {
             <div className="text-sm font-medium mb-2">Quantity</div>
             <div className="flex items-center space-x-2">
               <Button
+              className="text-lovely bg-pinkey"
                 variant="outline"
                 size="icon"
                 onClick={decrementQuantity}
@@ -309,6 +322,7 @@ export default function ProductPage() {
               </Button>
               <div className="w-12 text-center">{quantity}</div>
               <Button
+                            className="text-lovely bg-pinkey"
                 variant="outline"
                 size="icon"
                 onClick={incrementQuantity}
@@ -317,11 +331,11 @@ export default function ProductPage() {
                 <span className="sr-only">Increase quantity</span>
                 <span aria-hidden>+</span>
               </Button>
-              {selectedAttribute && (
+              {/* {selectedAttribute && (
                 <span className="text-sm text-muted-foreground ml-2">
                   {selectedAttribute.stock} available
                 </span>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -344,10 +358,10 @@ export default function ProductPage() {
           <Separator />
 
           <div className="space-y-2">
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <Truck className="h-5 w-5 mr-2 text-muted-foreground" />
               <span className="text-sm">Free shipping on orders over $50</span>
-            </div>
+            </div> */}
             <div className="flex items-center hover:cursor-pointer"
             onClick={handleShare}>
               <Share2 className="h-5 w-5 mr-2 text-muted-foreground" />
@@ -359,36 +373,36 @@ export default function ProductPage() {
 
       {/* Product Tabs */}
       <div className="mt-12">
-        <Tabs defaultValue="description">
-          <TabsList className="w-full justify-start border-b rounded-none">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
+        <Tabs defaultValue="details">
+          <TabsList className="w-full justify-start border-b bg-creamey rounded-none">
+            {/* <TabsTrigger value="description">Description</TabsTrigger> */}
+            <TabsTrigger className="bg-creamey text-lovely" value="details">Product details</TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="py-4">
+          {/* <TabsContent value="description" className="py-4">
             <div className="prose max-w-none">
               <p>{product.description}</p>
             </div>
-          </TabsContent>
-          <TabsContent value="details" className="py-4">
+          </TabsContent> */}
+          <TabsContent value="details"  className="bg-creamey text-lovely py-4">
             <div className="space-y-4">
-              <h3 className="font-medium">Product Details</h3>
+              {/* <h3 className="font-medium">Product Details</h3> */}
               <ul className="list-disc pl-5 space-y-2">
                 {product.productDetails.map((detail, index) => (
                   <li key={index}>{detail}</li>
                 ))}
               </ul>
-              <h3 className="font-medium mt-6">Product Care</h3>
+              {/* <h3 className="font-medium mt-6">Product Care</h3>
               <ul className="list-disc pl-5 space-y-2">
                 {product.productCare.map((care, index) => (
                   <li key={index}>{care}</li>
                 ))}
-              </ul>
-              <h3 className="font-medium mt-6">Dimensions</h3>
+              </ul> */}
+              {/* <h3 className="font-medium mt-6">Dimensions</h3>
               <ul className="list-disc pl-5 space-y-2">
                 {product.productDimensions.map((dimension, index) => (
                   <li key={index}>{dimension}</li>
                 ))}
-              </ul>
+              </ul> */}
             </div>
           </TabsContent>
         </Tabs>

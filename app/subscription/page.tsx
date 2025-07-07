@@ -3,6 +3,7 @@
 import OrderSummaryItem from "./components/OrderSummaryItem";
 import { cartContext } from "@/app/context/cartContext";
 import { CartProvider,useCart } from "@/providers/CartProvider";
+import { useSession } from 'next-auth/react';
 
 import { userContext } from "@/app/context/userContext";
 import { thirdFont } from "@/fonts";
@@ -18,6 +19,7 @@ import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
 import { wifeyExperience } from "../constants";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -121,6 +123,10 @@ const CheckoutClientPage = () => {
   //  const[countries,setCountries]=useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
+  const { data: session, status } = useSession();
+  const { isAuthenticated } = useAuth();
+
+
   const calculateTotals = () => {
     // Calculate subtotal first
     const calculatedSubTotal = wifeyExperience.price
@@ -176,7 +182,7 @@ const CheckoutClientPage = () => {
   type Payment = "cash" | "card" | "instapay";
   const { user } = useContext(userContext);
   const [shipping, setShipping] = useState(70);
-  const [payment, setPayment] = useState<Payment>("cash");
+  const [payment, setPayment] = useState<Payment>("card");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { items, removeItem, updateQuantity, totalItems, totalPrice,clearCart } = useCart(); 
@@ -463,11 +469,11 @@ const CheckoutClientPage = () => {
     // cart.length > 0 ?
     <div
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}>
-                <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8 font-display font-semibold`}>Subscription</h1>
+                <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8  font-semibold`}>Subscription</h1>
 
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
-        <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
+       {isAuthenticated? <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
           <form
             onSubmit={handleSubmit}
             className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
@@ -726,7 +732,7 @@ const CheckoutClientPage = () => {
 
               {countryID === 65 && (
                 <div className="flex flex-col gap-2">
-                  <div className="flex gap-6">
+                  {/* <div className="flex gap-6">
                     <input
                       type="checkbox"
                       name="cash"
@@ -738,8 +744,7 @@ const CheckoutClientPage = () => {
                       }}
                     />
                     <label> Cash on delivery </label>
-                  </div>
-                  {/* paymob */}
+                  </div> */}
                   <div className="flex gap-6">
                     <input
                       type="checkbox"
@@ -921,7 +926,19 @@ const CheckoutClientPage = () => {
               </p>
             </div>
           </form>
+        </div>:<div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-center w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap"> 
+        <div className="relative w-full bg-creamey h-[250px] md:h-[400px] rounded-lg overflow-hidden animate-float">
+          <Image
+            src="/joinNow/Brid and Bridesmaids.png"
+            alt="Hero Image"
+            fill
+            priority
+            className="object-contain aspect-auto rounded-lg"
+          />
         </div>
+        <p>You need to create an account firstly <span onClick={()=>router.push('/register?redirect=subscription')} className="underline hover:cursor-pointer">create account !</span></p>
+        <p>Already have an account <span onClick={()=>router.push('/login?redirect=subscription')} className="underline hover:cursor-pointer">login</span></p>
+        </div>}
         {/* orderSummaryMob */}
 
 
