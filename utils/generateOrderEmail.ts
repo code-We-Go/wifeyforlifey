@@ -254,7 +254,7 @@ export function generateEmailBody(items: any[],firstName:string,lastName:string 
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
 																<div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:center;mso-line-height-alt:22.5px;">
-																	<p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #808389;">Thank you for choosing ANCHUVA! We sincerely appreciate your trust in our products.</span></p>
+																	<p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #808389;">Thank you for choosing Wifey For Lifey! We sincerely appreciate your trust in our products.</span></p>
 																</div>
 															</td>
 														</tr>
