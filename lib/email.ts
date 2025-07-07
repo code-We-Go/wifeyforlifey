@@ -3,12 +3,13 @@ export async function sendMail({
   to,
   name,
   subject,
-  body,
+  body,from,
 }: {
   to: string;
   name: string;
   subject: string;
   body: string;
+  from:string;
 }) {
   const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
 
@@ -43,7 +44,7 @@ export async function sendMail({
   }
   try {
     const sendResult = await transport.sendMail({
-      from: 'authentication@shopwifeyforlifey.com',
+      from: from,
       to,
       subject,
       html: body,

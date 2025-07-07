@@ -237,7 +237,7 @@ export function generateEmailBody(items: any[],firstName:string,lastName:string 
 														<tr>
 															<td class="pad" style="width:100%;padding-right:0px;padding-left:0px;">
 																<div class="alignment" align="center" style="line-height:10px">
-																	<div style="max-width: 128px;"><img src="https://259071beb2.imgdist.com/pub/bfra/ai5ijq1c/1la/zd1/qr5/ANCHUVALogoMark.png" style="display: block; height: auto; border: 0; width: 100%;" width="128" alt title height="auto"></div>
+																	<div style="max-width: 128px;"><img src="https://www.shopwifeyforlifey.com/WifeyforLifeyPrimaryLogoRed.png" style="display: block; height: auto; border: 0; width: 100%;" width="128" alt title height="auto"></div>
 																</div>
 															</td>
 														</tr>
@@ -282,7 +282,7 @@ export function generateEmailBody(items: any[],firstName:string,lastName:string 
 																<div class="alignment" align="center">
 																	<table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 																		<tr>
-																			<td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 4px solid #473728;"><span style="word-break: break-word;">&#8202;</span></td>
+																			<td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 4px solid #D32333;"><span style="word-break: break-word;">&#8202;</span></td>
 																		</tr>
 																	</table>
 																</div>

@@ -67,6 +67,7 @@ export async function POST(req: Request) {
      name: "wiiga",
      subject: "Please click on link to verify your account",
      body:`${verificationEmailTemplate(verificationLink)}`
+     ,from:"authintication@shopwifeyforlifey.com"
      // body: `<a href=${verificationLink}> click here to verify your account</a>`,
    //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
    });
