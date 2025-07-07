@@ -70,7 +70,7 @@ export function generateEmailBody(items: any[],firstName:string,lastName:string 
 														<tr>
 															<td class="pad">
 																<div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:20px;line-height:150%;text-align:left;mso-line-height-alt:30px;">
-																	<p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"><strong>${item.productName} IN ${item.color} <br>${item.price}</strong></span></p>
+																	<p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"><strong>${item.productName}  <br>${item.price}</strong></span></p>
 																</div>
 															</td>
 														</tr>
@@ -81,7 +81,6 @@ export function generateEmailBody(items: any[],firstName:string,lastName:string 
 																<div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:14px;line-height:150%;text-align:left;mso-line-height-alt:21px;">
 							
 																	<p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #808389;">Quantity: ${item.quantity}</span></p>
-																	<p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #808389;">Color: ${item.color}</span></p>
 																</div>
 															</td>
 														</tr>
@@ -237,7 +236,7 @@ export function generateEmailBody(items: any[],firstName:string,lastName:string 
 														<tr>
 															<td class="pad" style="width:100%;padding-right:0px;padding-left:0px;">
 																<div class="alignment" align="center" style="line-height:10px">
-																	<div style="max-width: 128px;"><img src="https://www.shopwifeyforlifey.com/WifeyforLifeyPrimaryLogoRed.png" style="display: block; height: auto; border: 0; width: 100%;" width="128" alt title height="auto"></div>
+																	<div style="max-width: 128px;"><img src="https://www.shopwifeyforlifey.com/logo/WifeyforLifeyPrimaryLogoRed.png" style="display: block; height: auto; border: 0; width: 100%;" width="128" alt title height="auto"></div>
 																</div>
 															</td>
 														</tr>
