@@ -296,7 +296,7 @@ function PlaylistsPage() {
        {!session?.user.isSubscribed && <div className="bg-everGreen text-creamey rounded-xl p-6 md:p-8 shadow-md">
           <div className="grid md:grid-cols-3 gap-6 items-center">
             <div className="md:col-span-2 space-y-4">
-              <h2 className="text-2xl font-display font-medium">
+              <h2 className="text-2xl  font-medium">
                 Unlock Premium Content
               </h2>
               <p className="text-creamey/90">

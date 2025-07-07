@@ -241,7 +241,7 @@ export default function ProductPage() {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className={`${thirdFont.className} text-everGreen tracking-normal text-4xl font-display font-medium`}>
+            <h1 className={`${thirdFont.className} text-everGreen tracking-normal text-4xl  font-medium`}>
               {product.title}
             </h1>
             {/* <div className="flex items-center mt-2">

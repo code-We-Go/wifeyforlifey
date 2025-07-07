@@ -61,7 +61,7 @@ const WishlistPage = () => {
   return (
     <div className="container-custom py-8 md:py-12">
       <div className="flex items-center mb-8">
-        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl font-display font-semibold`}>Wishlist</h1>
+        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl  font-semibold`}>Wishlist</h1>
         <span className="ml-2 text-muted-foreground">
           ({wishList.length} {wishList.length === 1 ? "item" : "items"})
         </span>

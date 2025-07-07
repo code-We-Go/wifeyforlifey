@@ -165,7 +165,7 @@ export default function CartPage() {
           <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
             <ShoppingBag className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-display font-medium mb-4">Your Cart is Empty</h1>
+          <h1 className="text-2xl md:text-3xl  font-medium mb-4">Your Cart is Empty</h1>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             Looks like you haven&apos;t added anything to your cart yet. Explore our products and find something you&apos;ll love!
           </p>
@@ -183,7 +183,7 @@ export default function CartPage() {
   return (
     <div className="container-custom py-8 min-h-screen md:py-12">
       <div className="flex items-center mb-8">
-        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl font-display font-semibold`}>Shopping Cart</h1>
+        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl  font-semibold`}>Shopping Cart</h1>
         <span className="ml-2 text-creamey">
           ({totalItems} {totalItems === 1 ? "item" : "items"})
         </span>
