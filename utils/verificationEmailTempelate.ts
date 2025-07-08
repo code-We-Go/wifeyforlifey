@@ -58,7 +58,17 @@ export const verificationEmailTemplate = (verificationLink: string) => {
     </head>
     <body>
       <div class="container">
-        <h1>Verify Your Email Address</h1>
+ 													<table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+														<tr>
+															<td class="pad" style="width:100%;padding-right:0px;padding-left:0px;">
+																<div class="alignment" align="center" style="line-height:10px">
+																	<div style="max-width: 128px;"><img src="https://www.shopwifeyforlifey.com/logo/WifeyforLifeyPrimaryLogoRed.png" style="display: block; height: auto; border: 0; width: 100%;" width="128" alt title height="auto"></div>
+																</div>
+															</td>
+														</tr>
+													</table>
+
+        <h1>Please verify Your Email Address</h1>
         <p>
           Thank you for signing up! To complete your registration, please click
           the button below to verify your email address.
