@@ -138,7 +138,7 @@
 
 @layer components {
   .container-custom {
-    @apply   px-4 md:px-6 xl:px-[10vw];
+    @apply   px-4 md:px-6 xl:px-12;
   }
 
   .btn-primary {

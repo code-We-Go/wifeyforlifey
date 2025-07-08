@@ -19,7 +19,7 @@ export default function SuccessPage() {
       <Fireworks />
 
       <div className="text-center z-10">
-      <div className="relative h-[400px] md:h-[300px] rounded-lg overflow-hidden">
+      <div className="relative h-[400px] md:h-[300px] lg:h-[330px] rounded-lg overflow-hidden">
           <Image
             src="/joinNow/Brid and Bridesmaids.png"
             alt="Hero Image"
@@ -30,7 +30,7 @@ export default function SuccessPage() {
         </div>
 
         {/* <h1 className="text-5xl font-bold text-green-600">🎉 Success!</h1> */}
-        <h1 className="mt-2 text-xl sm:text-2xl md:text-4xl font-bold text-lovely">🎉 Your Order was purshased successfully. 🎉</h1>
+        <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">🎉 Your Order was created successfully. 🎉</h1>
         <div className="mt-6 flex gap-4 justify-center">
           <Link href="/" passHref>
             <button className="px-6 border-2 border-lovely py-2   text-lovely rounded-2xl font-semibold  transition">
