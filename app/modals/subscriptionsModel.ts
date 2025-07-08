@@ -8,6 +8,8 @@ const SubscriptionSchema = new Schema(
             required: true 
         },
         email:{type:String},
+        subscriped:{type:Boolean,default:false},
+        expiryDate:{type:Date,default:Date.now},
         createdAt: { 
             type: Date, 
             default: Date.now,// 30 minutes in seconds

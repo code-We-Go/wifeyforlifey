@@ -29,9 +29,18 @@ export async function GET(request: Request) {
 
         // Perform your logic with the GET data here
         if (isSuccess) {
-            const subscription = await subscriptionsModel.findOne({paymentID: data.order});
-            if(subscription){
-                const subscribedUser = await UserModel.findOneAndUpdate({email: subscription.email},{isSubscribed:true});
+            const expiryDate = new Date();
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+            const subscription = await subscriptionsModel.findOneAndUpdate(
+                { paymentID: data.order },
+                { subscriped: true, expiryDate :expiryDate}
+            );
+            if (subscription) {
+                const subscribedUser = await UserModel.findOneAndUpdate(
+                    { email: subscription.email },
+                    { isSubscribed: true }
+                );
             }
             else{
             console.log("Order2ID"+data.order)

@@ -123,7 +123,6 @@ const CheckoutClientPage = () => {
   //  const[countries,setCountries]=useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const { data: session, status } = useSession();
   const { isAuthenticated } = useAuth();
 
 
@@ -469,22 +468,22 @@ const CheckoutClientPage = () => {
     // cart.length > 0 ?
     <div
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}>
-                <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8  font-semibold`}>Subscription</h1>
+                <h1 className={`${thirdFont.className} tracking-normal text-2xl text-everGreen md:text-4xl mb-4 md:mb-8  font-semibold`}>Subscription</h1>
 
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
-       {isAuthenticated? <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
+       <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
           <form
             onSubmit={handleSubmit}
             className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
           >
             <div
-              className={`${thirdFont.className} w-full text-[16px] lg:text-4xl  border-b border-lovely`}
+              className={`${thirdFont.className} w-full text-base lg:text-2xl  border-b border-lovely`}
             >
               contact
             </div>
             <div className="flex  items-center gap-2 w-full ">
-              <label className="text-everGreen text-lg">Email</label>
+              <label className="text-everGreen text-base">Email</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -493,7 +492,7 @@ const CheckoutClientPage = () => {
                   type="email"
                   className={`border ${
                     formErrors.email ? "border-red-500" : ""
-                  } w-full h-10 bg-white rounded-2xl  px-2 text-lg`}
+                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl  px-2 text-base`}
                 />
                 {formErrors.email ? (
                   <p className="uppercase text-xs text-red-500">
@@ -505,12 +504,12 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div
-              className={`${thirdFont.className} w-full mt-6 text-[16px] lg:text-4xl border-b border-lovely`}
+              className={`${thirdFont.className} w-full mt-6 text-base lg:text-2xl border-b border-lovely`}
             >
               delivery
             </div>
 
-            <div className="flex gap-2 items-center text-lg w-full">
+            <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -518,7 +517,7 @@ const CheckoutClientPage = () => {
                 name="country"
                 disabled
                   value={countryID}
-                  className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
                 >
                   {countries.map((country: any, index: number) => {
                     return (
@@ -533,7 +532,7 @@ const CheckoutClientPage = () => {
                   onChange={handleInputChange}
                   name="country"
                   value={formData.country}
-                  className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
                 >
                   <option value="EG">EGYPT</option>
                   <option value="SA">SAUDI ARABIA</option>
@@ -543,7 +542,7 @@ const CheckoutClientPage = () => {
             <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full md:w-2/4">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen whitespace-nowrap text-lg">First name</label>
+                  <label className="text-everGreen whitespace-nowrap text-base">First name</label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       onChange={handleInputChange}
@@ -552,7 +551,7 @@ const CheckoutClientPage = () => {
                       type="text"
                       className={`border ${
                         formErrors.firstName ? "border-red-500" : ""
-                      } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                      } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
                     />
 
                     {formErrors.firstName ? (
@@ -567,7 +566,7 @@ const CheckoutClientPage = () => {
               </div>
               <div className="flex flex-col gap-2 w-full md:w-2/4">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">Last name</label>
+                  <label className="text-everGreen text-base whitespace-nowrap">Last name</label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       name="lastName"
@@ -576,7 +575,7 @@ const CheckoutClientPage = () => {
                       type="text"
                       className={`border ${
                         formErrors.lastName ? "border-red-500" : ""
-                      } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                      } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
                     />
                     {formErrors.lastName ? (
                       <p className="uppercase text-xs text-red-500">
@@ -590,7 +589,7 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex gap-2 w-full items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">Address</label>
+              <label className="text-everGreen text-base whitespace-nowrap">Address</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   type="text"
@@ -599,7 +598,7 @@ const CheckoutClientPage = () => {
                   value={formData.address}
                   className={`border ${
                     formErrors.address ? "border-red-500" : ""
-                  } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
                 />
 
                 {formErrors.address ? (
@@ -612,7 +611,7 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">
+              <label className="text-everGreen text-base whitespace-nowrap">
                 Apartment,Suite etc. (Optional)
               </label>
               <input
@@ -620,23 +619,23 @@ const CheckoutClientPage = () => {
                 name="apartment"
                 value={formData.apartment}
                 type="text"
-                className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                className="border w-full h-10 bg-creamey border-everGreen  rounded-2xl py-2 px-2 text-base"
               />
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">Postal/Zip code</label>
+                  <label className="text-everGreen text-base whitespace-nowrap">Postal/Zip code</label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
-                      placeholder={`IF UNAVAILABLE PLEASE TYPE 0000`}
+                      placeholder={``}
                       onChange={handleInputChange}
                       value={formData.postalZip}
                       name="postalZip"
                       type="text"
                       className={`${
                         formErrors.postalZip ? "border-red-500" : ""
-                      } border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg`}
+                      } border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2  px-2 text-base`}
                     />
                     {formErrors.postalZip ? (
                       <p className="uppercase text-xs text-red-500">
@@ -651,14 +650,14 @@ const CheckoutClientPage = () => {
 
               <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">City</label>
+                  <label className="text-everGreen text-base whitespace-nowrap">City</label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
                       onChange={handleInputChange}
                       name="city"
                       value={formData.city}
                       type="text"
-                      className={`border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg ${
+                      className={`border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base ${
                         formErrors.city ? "border-red-500" : ""
                       }`}
                     />
@@ -675,13 +674,13 @@ const CheckoutClientPage = () => {
             </div>
 
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">Governate</label>
+              <label className="text-everGreen text-base whitespace-nowrap">Governate</label>
               {countryID === 65 ? (
                 <select
                   onChange={handleStateChange}
                   name="state"
                   value={formData.state}
-                  className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
                 >
                   {states.map((state: any, index: number) => {
                     return (
@@ -697,12 +696,12 @@ const CheckoutClientPage = () => {
                   value={formData.state}
                   name="state"
                   type="text"
-                  className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                  className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
                 />
               )}
             </div>
             <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">Phone</label>
+              <label className="text-everGreen text-base whitespace-nowrap">Phone</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -711,7 +710,7 @@ const CheckoutClientPage = () => {
                   name="phone"
                   className={`border ${
                     formErrors.phone ? "border-red-500" : ""
-                  } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
                 />
                 {formErrors.phone ? (
                   <p className="uppercase text-xs text-red-500">
@@ -725,7 +724,7 @@ const CheckoutClientPage = () => {
 
             <div className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 text-nowrap">
               <div
-                className={`${thirdFont.className} mt-6 w-full text-[16px] lg:text-4xl border-b border-lovely`}
+                className={`${thirdFont.className} mt-6 w-full text-base lg:text-2xl border-b border-lovely`}
               >
                 payment
               </div>
@@ -745,17 +744,17 @@ const CheckoutClientPage = () => {
                     />
                     <label> Cash on delivery </label>
                   </div> */}
-                  <div className="flex gap-6">
+                  <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
-                      className="appearance-none h-5 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
                       checked={payment === "card"}
                       onChange={() => {
                         setPayment("card");
                         formData.cash = "card";
                       }}
                     />
-                    <label> Pay with card</label>
+                    <label className="text-base"> Pay with card</label>
                   </div>
                 </div>
               )}
@@ -768,7 +767,7 @@ const CheckoutClientPage = () => {
             </div> 
               {/* billing */}
 
-              <div className={`${thirdFont.className} mt-6 w-full text-[16px] lg:text-4xl border-b border-lovely`}>billing address</div>
+              <div className={`${thirdFont.className} mt-6 w-full text-base lg:text-2xl border-b border-lovely`}>billing address</div>
             <div className="space-y-4">
             <div>
   <label className="flex items-center space-x-3">
@@ -777,9 +776,9 @@ const CheckoutClientPage = () => {
       name="billingAddress"
       checked={useSameAsShipping}
       onChange={() => setUseSameAsShipping(true)}
-      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
       />
-    <span className=" ">Same as shipping address</span>
+    <span className=" text-base">Same as shipping address</span>
   </label>
 </div>
 <div>
@@ -789,9 +788,9 @@ const CheckoutClientPage = () => {
       name="billingAddress"
       checked={!useSameAsShipping}
       onChange={() => setUseSameAsShipping(false)}
-      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
       />
-    <span className="">Use a different billing address</span>
+    <span className="text-base">Use a different billing address</span>
   </label>
 </div>
 
@@ -811,11 +810,11 @@ const CheckoutClientPage = () => {
               <p>Country</p>
             {countries?<select 
             disabled
-            onChange={(e)=>setBillingCountry(Number(e.target.value))} name='billingCountry' value={billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
+            onChange={(e)=>setBillingCountry(Number(e.target.value))} name='billingCountry' value={billingCountry} className='px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2'>
                     {countries.map((country:any,index:number)=>{
                       return <option key={index} value={country.id}>{country.name}</option>
                     })}              
-                         </select> :<select  onChange={handleInputChange} name='billingCountry' value={formData.billingCountry} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
+                         </select> :<select  onChange={handleInputChange} name='billingCountry' value={formData.billingCountry} className='px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2'>
               {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
              </select> }
@@ -823,33 +822,33 @@ const CheckoutClientPage = () => {
               <div className='flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center'>
               <div className='flex gap-2 w-full md:w-2/4'>
                 <label className='text-everGreen' >First Name</label>
-                <input onChange={handleInputChange} name='billingFirstName' value={useSameAsShipping?formData.firstName :formData.billingFirstName} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                <input onChange={handleInputChange} name='billingFirstName' value={useSameAsShipping?formData.firstName :formData.billingFirstName} type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
 
               </div>
               <div className='flex gap-2 w-full md:w-2/4'>
                 <label className='text-everGreen' >Last Name</label>
-                <input name='billingLastName' onChange={handleInputChange} value={useSameAsShipping?formData.lastName:formData.billingLastName} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                <input name='billingLastName' onChange={handleInputChange} value={useSameAsShipping?formData.lastName:formData.billingLastName} type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
 
               </div>
               </div>
               <div className='flex gap-2 w-full'>
                 <label className='text-everGreen' >Address</label>
-                <input type='text' onChange={handleInputChange} name='billingAddress' value={useSameAsShipping?formData.address :formData.billingAddress} className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                <input type='text' onChange={handleInputChange} name='billingAddress' value={useSameAsShipping?formData.address :formData.billingAddress} className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
 
               </div>
               <div className='flex w-full  gap-2 items-center'>
                 <label className='text-everGreen text-nowrap' >Apartment,Suite ETC. (Optional)</label>
-                <input onChange={handleInputChange} name='billingApartment' value={useSameAsShipping?formData.apartment:formData.billingApartment} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                <input onChange={handleInputChange} name='billingApartment' value={useSameAsShipping?formData.apartment:formData.billingApartment} type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
               </div>
               <div className='flex w-full gap-2'>
               <div className='flex w-full gap-2 md:w-3/5 items-center'>
                 <label className='text-everGreen' >Postal/Zip code (Optional)</label>
-                <input onChange={handleInputChange} value={useSameAsShipping?formData.postalZip:formData.billingPostalZip} name='billingPostalZip' type='text' className='border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg'/>
+                <input onChange={handleInputChange} value={useSameAsShipping?formData.postalZip:formData.billingPostalZip} name='billingPostalZip' type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2  px-2 text-base'/>
               </div>
 
               <div className='flex w-full  md:w-2/5 gap-2 items-center'>
                 <label className='text-everGreen' >City</label>
-                <input onChange={handleInputChange} name='billingCity' value={useSameAsShipping?formData.city:formData.billingCity} type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                <input onChange={handleInputChange} name='billingCity' value={useSameAsShipping?formData.city:formData.billingCity} type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
               </div>
               </div>
                 
@@ -857,19 +856,19 @@ const CheckoutClientPage = () => {
                 <label className='text-everGreen' >Governate</label>
                {
                billingCountry ===65?
-               <select  onChange={handleInputChange} name='billingState' value={useSameAsShipping?formData.state:formData.billingState} className='px-2 text-lg h-10 w-full bg-white rounded-2xl py-2'>
+               <select  onChange={handleInputChange} name='billingState' value={useSameAsShipping?formData.state:formData.billingState} className='px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2'>
                     {states.map((state:any,index:number)=>{
                       return <option key={index} value={state.name}>{state.name}</option>
                     })}              
                          </select>
                :
                
-               <input onChange={handleInputChange} value={useSameAsShipping?formData.state:formData.billingState} name='billingState' type='text' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+               <input onChange={handleInputChange} value={useSameAsShipping?formData.state:formData.billingState} name='billingState' type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
                   }
               </div>
               <div className='flex w-full gap-2 items-center'>
                 <label className='text-everGreen' >Phone</label>
-                <input onChange={handleInputChange} type='text' value={useSameAsShipping?formData.phone :formData.billingPhone} name='billingPhone' className='border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg'/>
+                <input onChange={handleInputChange} type='text' value={useSameAsShipping?formData.phone :formData.billingPhone} name='billingPhone' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
               </div>
 
             </div>
@@ -891,7 +890,7 @@ const CheckoutClientPage = () => {
                 <button
                   disabled={loading}
                   type="submit"
-                  className={`border transition duration-300 border-lovely p-1 ${
+                  className={`border text-base transition duration-300 border-lovely p-1 ${
                      loading
                       ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl" // Styles for disabled state
                       : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
@@ -901,7 +900,7 @@ const CheckoutClientPage = () => {
                 </button>
               </div>
             
-            <div className="text-lg">
+            <div className="text-base">
               <p>
                 By clicking &quot;CONFIRM ORDER&quot;, you accept the{" "}
                 <Link
@@ -916,19 +915,8 @@ const CheckoutClientPage = () => {
               </p>
             </div>
           </form>
-        </div>:<div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-center w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap"> 
-        <div className="relative w-full bg-creamey h-[250px] md:h-[400px] rounded-lg overflow-hidden animate-float">
-          <Image
-            src="/joinNow/Brid and Bridesmaids.png"
-            alt="Hero Image"
-            fill
-            priority
-            className="object-contain aspect-auto rounded-lg"
-          />
         </div>
-        <p>You need to create an account firstly <span onClick={()=>router.push('/register?redirect=subscription')} className="underline hover:cursor-pointer">create account !</span></p>
-        <p>Already have an account <span onClick={()=>router.push('/login?redirect=subscription')} className="underline hover:cursor-pointer">login</span></p>
-        </div>}
+
         {/* orderSummaryMob */}
 
 
@@ -936,15 +924,18 @@ const CheckoutClientPage = () => {
             <div className={`${thirdFont.className} md:border-l-2 sticky top-4 w-full border-lovely md:pl-6 shadow-sm h-fit`}>
                          {/* Wifey Experience Package Details */}
                          <div className=" bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
+                <div className="relative w-[95%] h-[40vh] md:h-[25vh] lg:h-[30vh] xl:h-[40vh]">
+
+                
                 <Image 
                   src={wifeyExperience.imgUrl} 
-                  width={500} 
-                  height={250} 
+                 fill
                   alt={wifeyExperience.name} 
                   className="object-cover object-top aspect-[16/11] rounded-xl mb-4" 
                 />
-                <h2 className={`text-4xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}>{wifeyExperience.name}</h2>
-                <ul className="list-disc w-full items-start justify-start list-inside text-left text-xl tracking-wide text-creamey/95">
+                </div>
+                <h2 className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey my-2`}>{wifeyExperience.name}</h2>
+                <ul className="list-disc w-full items-start justify-start list-inside text-left text-base md:text-lg tracking-wide text-creamey/95">
                   {wifeyExperience.items.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
@@ -965,12 +956,12 @@ const CheckoutClientPage = () => {
                   
               </div>
               <div className="mt-6 space-y-2 text-black">
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>
                 </div>
                 {appliedDiscount && appliedDiscount.value !== undefined && (
-                  <div className="flex justify-between text-lg text-green-600">
+                  <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
                       {appliedDiscount.calculationType === 'FREE_SHIPPING' 
@@ -981,7 +972,7 @@ const CheckoutClientPage = () => {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between text-base">
                   <span>Shipping</span>
                   <span>{appliedDiscount?.calculationType === 'FREE_SHIPPING' ? '0' : shipping} LE</span>
                 </div>
