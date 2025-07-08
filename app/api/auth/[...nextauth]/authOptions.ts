@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { ConnectDB } from "@/app/config/db";
 import { compare } from "bcryptjs";
 import UserModel from "@/app/modals/userModel";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 // Extend NextAuth types to include isSubscribed
 declare module "next-auth" {
@@ -65,11 +66,12 @@ export const authOptions: NextAuthOptions = {
           await ConnectDB();
           const existingUser = await UserModel.findOne({ email: user.email });
           if (!existingUser) {
+            const subscribed = await subscriptionsModel.findOne({email:user.email,subscribed:true})
             await UserModel.create({
               username: user.name || user.email?.split('@')[0] || 'user',
               email: user.email,
               emailVerified: true,
-              isSubscribed: false, // Default value for new users
+              isSubscribed: subscribed?true:false, // Default value for new users
             });
           }
         } catch (error) {
@@ -84,8 +86,12 @@ export const authOptions: NextAuthOptions = {
         await ConnectDB();
         const email = user?.email || token.email;
         if (email) {
-          const dbUser = await UserModel.findOne({ email });
-          token.isSubscribed = dbUser?.isSubscribed ?? false;
+          console.log("Querying for email:", email);
+          const subscription = await subscriptionsModel.findOne({email});
+          console.log("subscription" + subscription)
+          token.isSubscribed = subscription?.subscribed ?? false;
+          // const dbUser = await UserModel.findOne({ email });
+          // token.isSubscribed = dbUser?.isSubscribed ?? false;
         }
       } catch (error) {
         console.error("JWT callback error:", error);

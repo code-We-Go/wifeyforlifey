@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
             const subscription = await subscriptionsModel.findOneAndUpdate(
                 { paymentID: data.order },
-                { subscriped: true, expiryDate :expiryDate}
+                { subscribed: true, expiryDate :expiryDate}
             );
             if (subscription) {
                 const subscribedUser = await UserModel.findOneAndUpdate(
