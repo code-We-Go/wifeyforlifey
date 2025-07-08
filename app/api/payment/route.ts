@@ -133,7 +133,7 @@ if(data.subscription === "theWifeyExperience"){
   const order = await axios.post(
     'https://accept.paymob.com/v1/intention/',
     {
-      "amount": data.total*1000,
+      "amount": data.total*100,
       "currency": "EGP",
       "payment_methods": [5173616],
       // "items": [
@@ -208,7 +208,7 @@ else{
   const order = await axios.post(
     'https://accept.paymob.com/v1/intention/',
     {
-      "amount": data.total*1000,
+      "amount": data.total*100,
       "currency": "EGP",
       "payment_methods": [5173616],
       // "items": [

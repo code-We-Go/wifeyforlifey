@@ -69,7 +69,7 @@ export default function ProductModal() {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] bg-creamey">
         <DialogHeader>
           <DialogTitle>Quick Add</DialogTitle>
         </DialogHeader>
