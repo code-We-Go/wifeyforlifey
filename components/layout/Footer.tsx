@@ -218,7 +218,7 @@ export default function Footer() {
                 />
                 <Button
                   type="submit"
-                  className="bg-pinkey text-lovely rounded-l-none"
+                  className="bg-everGreen text-creamey hover:bg-everGreen/80 rounded-l-none"
                 >
                   Subscribe
                 </Button>

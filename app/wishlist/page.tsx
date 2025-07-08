@@ -42,15 +42,15 @@ const WishlistPage = () => {
   if (wishList.length === 0) {
     return (
       <div className="container-custom py-16 max-w-4xl mx-auto text-center">
-        <div className="bg-card rounded-lg p-8 md:p-12 shadow-sm">
-          <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart className="h-12 w-12 text-muted-foreground" />
+        <div className="bg-lovely text-creamey rounded-lg p-8 md:p-12 shadow-sm">
+          <div className="w-24 h-24 bg-creamey rounded-full flex items-center justify-center mx-auto mb-6">
+            <Heart className="h-12 w-12 text-lovely" />
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-medium mb-4">Your Wishlist is Empty</h1>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+          <p className=" mb-8 max-w-md mx-auto">
             Looks like you haven&apos;t added anything to your wishlist yet. Explore our products and find something you&apos;ll love!
           </p>
-          <Button asChild size="lg" className="rounded-2xl bg-lovely text-creamey hover:bg-lovely/90">
+          <Button asChild size="lg" className="rounded-2xl bg-everGreen text-creamey hover:bg-everGreen/90">
             <Link href="/shop">Continue Shopping</Link>
           </Button>
         </div>

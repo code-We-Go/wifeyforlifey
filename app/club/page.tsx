@@ -29,21 +29,21 @@ const ClubPage = () => {
   return (
 
    
-    <div className="relative container-custom flex flex-col justify-start items-center w-full py-16 max-lg:max-w-6xl xl:max-w-7xl mx-auto  overflow-x-hidden">
+    <div className="relative container-custom flex flex-col justify-start  items-center w-full py-16   overflow-x-hidden">
   
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-center mb-16">
-        <h1 className={`${thirdFont.className} tracking-normal text-4xl md:text-5xl font-bold mb-6 text-lovely`}>
+      className="text-start mb-16">
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-4xl font-bold mb-6 text-lovely`}>
           Welcome to The Wifey Experience 💖
         </h1>
-        <p className="text-xl md:text-2xl text-lovely/90 mb-8">
+        <p className="text-base md:text-lg text-lovely/95 mb-8">
           More than just a planner — it&apos;s your full bridal-era support system.
         </p>
-        <p className="text-lg text-gray-600 leading-relaxed">
+        <p className="text-base text-lovely/95 leading-relaxed">
           Planning your wedding and building your home shouldn&apos;t feel overwhelming or lonely. That&apos;s why Wifey for Lifey offers every bride a personalized experience that guides, supports, and celebrates you through every step — from confusion to confidence, from &quot;I don&apos;t know where to start&quot; to &quot;I&apos;ve got this!&quot;
         </p>
 
@@ -60,20 +60,20 @@ const ClubPage = () => {
         </div>
       </div>
         
-      <MotionSection className="text-center mt-20 md:mt-16 bg-lovely p-8 rounded-2xl animate-bounce-slow">
-        <h2 className={`${thirdFont.className} tracking-wide text-4xl font-bold mb-4 text-creamey`}>
+      <MotionSection className="text-center mt-20 md:mt-16 bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
+        <h2 className={`${thirdFont.className} tracking-wide text-2xl pr-4  font-bold mb-4 text-creamey`}>
           ✨ This is the Wifey Experience
         </h2>
-        <p className="text-xl text-creamey/70 mb-4">
+        <p className="text-lg text-creamey/90 mb-4">
           Organized. Supportive. Real.
         </p>
-        <p className="text-xl text-creamey/70 mb-8">
+        <p className="text-lg text-creamey/90 mb-8">
           And always wrapped in love.
         </p>
-        <h3 className="text-2xl font-semibold mb-4 text-creamey/90">
+        <h3 className="text-lg  mb-4 text-creamey/90">
           Ready to feel held, heard, and hyped up for your bridal era?
         </h3>
-        <p className="text-lg text-creamey/90">
+        <p className="text-base text-creamey/90">
           You&apos;re one click away from joining your new favorite club
         </p>
         <Button

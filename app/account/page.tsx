@@ -235,23 +235,23 @@ export default function AccountPage() {
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="relative overflow-hidden rounded-lg bg-pinkey px-4 py-5 shadow sm:px-6"
+            className="relative overflow-hidden rounded-lg bg-lovely px-4 py-5 shadow sm:px-6"
           >
             <dt>
               <div className={`absolute rounded-md ${stat.bgColor} p-3`}>
                 <stat.icon className={`h-6 w-6 ${stat.color}`} aria-hidden="true" />
               </div>
-              <p className="ml-16 truncate text-sm text-lovely font-semibold">{stat.name}</p>
+              <p className="ml-16 truncate text-sm text-creamey font-semibold">{stat.name}</p>
             </dt>
             <dd className="ml-16 flex items-baseline">
-              <p className="text-2xl font-semibold text-lovely">{stat.value}</p>
+              <p className="text-2xl font-semibold text-creamey">{stat.value}</p>
             </dd>
           </div>
         ))}
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 overflow-x-auto">
+      <div className="border-b border-pinkey overflow-x-auto">
         <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
@@ -259,8 +259,8 @@ export default function AccountPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-lovely text-lovely'
-                  : 'border-transparent text-gray-500 hover:text-lovely duration-300 hover:border-lovely'
+                  ? 'border-lovely text-lovely font-semibold'
+                  : 'border-transparent text-lovely/90 hover:text-lovely duration-300 hover:border-lovely'
               }`}
             >
               <tab.icon className="h-4 w-4" />
@@ -353,11 +353,11 @@ export default function AccountPage() {
 
         {activeTab === 'wishlist' && (
           <div>
-            <h2 className="text-lg font-medium text-lovely mb-4">Wishlist Items</h2>
+            <h2 className="text-lg  text-lovely mb-4 font-semibold">Wishlist Items</h2>
             {wishList.length === 0 ? (
               <div className="text-center py-8">
-                <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Your wishlist is empty</p>
+                <Heart className="h-12 w-12 text-lovely mx-auto mb-4" />
+                <p className="text-lovely font-semibold">Your wishlist is empty</p>
               </div>
             ) : (
               <div className="grid w-full gap-4">
@@ -422,9 +422,9 @@ export default function AccountPage() {
 
         {activeTab === 'Loyality' && (
           <div className=''>
-            <h2 className="text-lg font-medium text-lovely mb-4">Loyality Points</h2>
+            <h2 className="text-lg font-semibold text-lovely mb-4">Loyality Points</h2>
             <div className='w-full justify-center items-center'>
-            <h3 className={`${lifeyFont.className} text-lovely`}>Comming Soon</h3>
+            <h3 className={`${lifeyFont.className} text-lovely`}>coming soon</h3>
             </div>
             {/* <div className="bg-lovely rounded-lg shadow p-6">
               <div className="text-center">
@@ -650,7 +650,7 @@ export default function AccountPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-creamey scrollbar-hide h-[95%] overflow-y-scroll rounded-2xl p-6 shadow-lg w-[90%] max-w-3xl text-everGreen"
+            className="bg-creamey scrollbar-hide h-[90vh] overflow-y-scroll rounded-2xl p-6 shadow-lg w-[90%] max-w-3xl text-everGreen"
           >
             <div className="flex mb-2 w-full items-center justify-end">
               <span className="hover:cursor-pointer" onClick={() => setDetailsModal(false)}>x</span>
