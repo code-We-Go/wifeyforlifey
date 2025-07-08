@@ -124,6 +124,7 @@ export async function POST(request: Request) {
     //   return NextResponse.json({token:'wiig'}, { status: 200 })
     // }
     else if(data.cash ==="card"){
+      console.log("amount" + data.total)
     try {
       const specialReference = `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 console.log(specialReference);
@@ -132,7 +133,7 @@ if(data.subscription === "theWifeyExperience"){
   const order = await axios.post(
     'https://accept.paymob.com/v1/intention/',
     {
-      "amount": data.total,
+      "amount": data.total*1000,
       "currency": "EGP",
       "payment_methods": [5173616],
       // "items": [

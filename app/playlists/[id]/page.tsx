@@ -28,7 +28,7 @@ export default function PlaylistPage() {
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
 
-  const watermarkText = session?.user.email || "user@example.com";
+  const watermarkText = session?.user.email || "";
   // VdoCipher expects watermark config as an array of objects, as a JSON string
   const watermarkConfig = JSON.stringify([
     {
@@ -36,8 +36,8 @@ export default function PlaylistPage() {
       text: watermarkText,
       alpha: "0.7",
       color: "0xFFFFFF",
-      size: "16",
-      interval: "10000"
+      size: "4",
+      interval: "60000"
     }
   ]);
 

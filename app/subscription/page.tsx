@@ -886,31 +886,21 @@ const CheckoutClientPage = () => {
              <p className='text-[12px] mt-6 lg:text-lg'>{total} LE</p>
            </div>
          </div> */}
-            {payment === "cash" || "instapay" ? (
-              <div className={`flex justify-end`}>
-                <button
-                className="bg-lovely rounded-2xl text-creamey hover:bg-lovely/90 px-4 py-2"
-                  onClick={() => handleSubmit}
-                  disabled={loading || items.length === 0}
-                >
-                  Confirm order
-                </button>
-              </div>
-            ) : (
+ 
               <div className="flex justify-end">
                 <button
-                  disabled={items.length === 0 || loading}
+                  disabled={loading}
                   type="submit"
                   className={`border transition duration-300 border-lovely p-1 ${
-                    items.length === 0 || loading
-                      ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
-                      : "hover:cursor-pointer hover:bg-lovely hover:text-white text-everGreen"
+                     loading
+                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl" // Styles for disabled state
+                      : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
                   }`}
                 >
                   PROCEED TO PAYMENT
                 </button>
               </div>
-            )}
+            
             <div className="text-lg">
               <p>
                 By clicking &quot;CONFIRM ORDER&quot;, you accept the{" "}

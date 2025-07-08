@@ -85,14 +85,22 @@ if(productID){
       .find(query)
       .populate({
         path: 'subCategoryID',
+        options: { strictPopulate: false },
+
         populate: {
           path: 'categoryID',
-          model: 'categories'
+          model: 'categories',
+          options: { strictPopulate: false },
+
         }
       })
       .sort(sort);
-
-    return NextResponse.json(products);
+      const validProducts = products.filter(product => 
+        product.subCategoryID && 
+        product.subCategoryID._id && 
+        product.subCategoryID.categoryID
+      );
+    return NextResponse.json(validProducts);
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
