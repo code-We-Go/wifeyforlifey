@@ -42,11 +42,11 @@ export async function GET(request: Request) {
                     { isSubscribed: true }
                 );
                 if(subscribedUser){
-                    return NextResponse.redirect(`${process.env.testUrl}payment/success&subscription=true&account=true`);
+                    return NextResponse.redirect(`${process.env.testUrl}payment/success?subscription=true&account=true`);
 
                 }
                 else{
-                    return NextResponse.redirect(`${process.env.testUrl}payment/success&subscription=true`);
+                    return NextResponse.redirect(`${process.env.testUrl}payment/success?subscription=true`);
 
                 }
             }

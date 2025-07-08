@@ -13,8 +13,8 @@ import { useSearchParams } from 'next/navigation';
   const {clearCart} = useCart()
   const [subscription,setSubscription]=useState<string | null>(null)
   const [account,setAccount]=useState<string | null>(null)
+  const searchParams = useSearchParams();
   useEffect(() => {
-    const searchParams = useSearchParams();
     const subscription = searchParams.get('subscription');
     const account = searchParams.get('account');
     if(subscription){
