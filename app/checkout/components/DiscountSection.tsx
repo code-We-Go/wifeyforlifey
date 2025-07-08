@@ -82,15 +82,15 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({ onDiscountApplied }) 
 
   return (
     <div className="mt-6">
-      <h3 className={`text-[16px] lg:text-4xl ${thirdFont.className}  text-everGreen mb-4`}>Discounts</h3>
+      <h3 className={`text-lg lg:text-2xl ${thirdFont.className}  text-everGreen mb-4`}>Discounts</h3>
       
       {/* Active Automatic Discounts */}
       {activeDiscounts.length > 0 && (
         <div className="mb-4">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">Available Discounts:</h4>
+          <h4 className="text-sm font-medium text-lovely/90 mb-2">Available Discounts:</h4>
           <div className="space-y-2">
             {activeDiscounts.map((discount, index) => (
-              <div key={index} className="text-sm text-gray-600">
+              <div key={index} className="text-sm text-lovely/90">
                 • {discount.code}
               </div>
             ))}
@@ -105,7 +105,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({ onDiscountApplied }) 
           value={discountCode}
           onChange={(e) => setDiscountCode(e.target.value)}
           placeholder="Enter discount code"
-          className="flex-1 px-2 py-2 border bg-white text-everGreen border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent"
+          className="flex-1 px-2 py-2 border bg-creamey text-everGreen border-everGreen rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent"
           disabled={loading}
         />
         <button

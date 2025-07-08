@@ -545,24 +545,24 @@ const CheckoutClientPage = () => {
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}
     >
       <h1
-        className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl mb-4 md:mb-8  font-semibold`}
+        className={`${thirdFont.className} tracking-normal text-xl text-everGreen md:text-3xl mb-4 md:mb-8  font-semibold`}
       >
         Checkout
       </h1>
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
-        <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
+        <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-3/7 text-[12px] lg:text-base gap-6 text-nowrap">
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
+            className="flex flex-col items-start w-full text-[12px] lg:text-base gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
           >
             <div
-              className={`${thirdFont.className} w-full text-[16px] lg:text-4xl  border-b border-lovely`}
+              className={`${thirdFont.className} w-full text-lg lg:text-2xl  border-b border-lovely`}
             >
               contact
             </div>
             <div className="flex  items-center gap-2 w-full ">
-              <label className="text-everGreen text-lg">Email</label>
+              <label className="text-everGreen text-base">Email</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -571,7 +571,7 @@ const CheckoutClientPage = () => {
                   type="email"
                   className={`border ${
                     formErrors.email ? "border-red-500" : ""
-                  } w-full h-10 bg-white rounded-2xl  px-2 text-lg`}
+                  } w-full h-10 bg-creamey rounded-2xl  px-2 text-base`}
                 />
                 {formErrors.email ? (
                   <p className="uppercase text-xs text-red-500">
@@ -583,12 +583,12 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div
-              className={`${thirdFont.className} w-full mt-6 text-[16px] lg:text-4xl border-b border-lovely`}
+              className={`${thirdFont.className} w-full mt-6 text-lg lg:text-2xl border-b border-lovely`}
             >
               delivery
             </div>
 
-            <div className="flex gap-2 items-center text-lg w-full">
+            <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -596,7 +596,7 @@ const CheckoutClientPage = () => {
                   name="country"
                   disabled
                   value={countryID}
-                  className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                 >
                   {countries.map((country: any, index: number) => {
                     return (
@@ -611,7 +611,7 @@ const CheckoutClientPage = () => {
                   onChange={handleInputChange}
                   name="country"
                   value={formData.country}
-                  className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                 >
                   <option value="EG">EGYPT</option>
                   <option value="SA">SAUDI ARABIA</option>
@@ -621,7 +621,7 @@ const CheckoutClientPage = () => {
             <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full md:w-2/4">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen whitespace-nowrap text-lg">
+                  <label className="text-everGreen whitespace-nowrap text-base">
                     First name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -632,7 +632,7 @@ const CheckoutClientPage = () => {
                       type="text"
                       className={`border ${
                         formErrors.firstName ? "border-red-500" : ""
-                      } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                      } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
                     />
 
                     {formErrors.firstName ? (
@@ -647,7 +647,7 @@ const CheckoutClientPage = () => {
               </div>
               <div className="flex flex-col gap-2 w-full md:w-2/4">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">
+                  <label className="text-everGreen text-base whitespace-nowrap">
                     Last name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -658,7 +658,7 @@ const CheckoutClientPage = () => {
                       type="text"
                       className={`border ${
                         formErrors.lastName ? "border-red-500" : ""
-                      } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                      } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
                     />
                     {formErrors.lastName ? (
                       <p className="uppercase text-xs text-red-500">
@@ -672,7 +672,7 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex gap-2 w-full items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">
+              <label className="text-everGreen text-base whitespace-nowrap">
                 Address
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -683,7 +683,7 @@ const CheckoutClientPage = () => {
                   value={formData.address}
                   className={`border ${
                     formErrors.address ? "border-red-500" : ""
-                  } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                  } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
                 />
 
                 {formErrors.address ? (
@@ -696,7 +696,7 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">
+              <label className="text-everGreen text-base whitespace-nowrap">
                 Apartment,Suite etc. (Optional)
               </label>
               <input
@@ -704,25 +704,25 @@ const CheckoutClientPage = () => {
                 name="apartment"
                 value={formData.apartment}
                 type="text"
-                className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
               />
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">
+                  <label className="text-everGreen text-base whitespace-nowrap">
                     Postal/Zip code
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
-                      placeholder={`IF UNAVAILABLE PLEASE TYPE 0000`}
+                      placeholder={``}
                       onChange={handleInputChange}
                       value={formData.postalZip}
                       name="postalZip"
                       type="text"
                       className={`${
                         formErrors.postalZip ? "border-red-500" : ""
-                      } border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg`}
+                      } border w-full h-10 bg-creamey rounded-2xl py-2  px-2 text-base`}
                     />
                     {formErrors.postalZip ? (
                       <p className="uppercase text-xs text-red-500">
@@ -737,7 +737,7 @@ const CheckoutClientPage = () => {
 
               <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-lg whitespace-nowrap">
+                  <label className="text-everGreen text-base whitespace-nowrap">
                     City
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -746,7 +746,7 @@ const CheckoutClientPage = () => {
                       name="city"
                       value={formData.city}
                       type="text"
-                      className={`border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg ${
+                      className={`border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base ${
                         formErrors.city ? "border-red-500" : ""
                       }`}
                     />
@@ -763,7 +763,7 @@ const CheckoutClientPage = () => {
             </div>
 
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">
+              <label className="text-everGreen text-base whitespace-nowrap">
                 Governate
               </label>
               {countryID === 65 ? (
@@ -771,7 +771,7 @@ const CheckoutClientPage = () => {
                   onChange={handleStateChange}
                   name="state"
                   value={formData.state}
-                  className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                 >
                   {states.map((state: any, index: number) => {
                     return (
@@ -787,12 +787,12 @@ const CheckoutClientPage = () => {
                   value={formData.state}
                   name="state"
                   type="text"
-                  className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                  className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                 />
               )}
             </div>
             <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-lg whitespace-nowrap">
+              <label className="text-everGreen text-base whitespace-nowrap">
                 Phone
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -803,7 +803,7 @@ const CheckoutClientPage = () => {
                   name="phone"
                   className={`border ${
                     formErrors.phone ? "border-red-500" : ""
-                  } w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg`}
+                  } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
                 />
                 {formErrors.phone ? (
                   <p className="uppercase text-xs text-red-500">
@@ -815,20 +815,20 @@ const CheckoutClientPage = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 text-nowrap">
+            <div className="flex flex-col items-start w-full text-[12px] lg:text-base gap-2 text-nowrap">
               <div
-                className={`${thirdFont.className} mt-6 w-full text-[16px] lg:text-4xl border-b border-lovely`}
+                className={`${thirdFont.className} mt-6 w-full text-lg lg:text-2xl border-b border-lovely`}
               >
                 payment
               </div>
 
               {countryID === 65 && (
                 <div className="flex flex-col gap-2">
-                  <div className="flex gap-6">
+                  <div className="flex items-center gap-6">
                     <input
                       type="checkbox"
                       name="cash"
-                      className="appearance-none h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely checked:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely checked:ring-lovely  checked:bg-everGreen "
                       checked={payment === "cash"}
                       onChange={() => {
                         setPayment("cash");
@@ -838,10 +838,10 @@ const CheckoutClientPage = () => {
                     <label> Cash on delivery </label>
                   </div>
                   {/* paymob */}
-                  <div className="flex gap-6">
+                  <div className="flex items-center gap-6">
                     <input
                       type="checkbox"
-                      className="appearance-none h-5 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
                       checked={payment === "card"}
                       onChange={() => {
                         setPayment("card");
@@ -855,14 +855,14 @@ const CheckoutClientPage = () => {
               {/* paymob */}
               {/* <div className='flex gap-6'>
            <input  type='checkbox'
-    className="appearance-none h-5 w-5 border-2 text-white   checked:bg-lovely "
+    className="appearance-none h-3 w-3 border-2 text-white   checked:bg-lovely "
     checked={!cash} onChange={()=>setCash((prev)=>!prev)}/>
            <label> PAY WITH THE CARD</label>
             </div> 
               {/* billing */}
 
               <div
-                className={`${thirdFont.className} mt-6 w-full text-[16px] lg:text-4xl border-b border-lovely`}
+                className={`${thirdFont.className} mt-6 w-full text-lg lg:text-2xl border-b border-lovely`}
               >
                 billing address
               </div>
@@ -874,7 +874,7 @@ const CheckoutClientPage = () => {
                       name="billingAddress"
                       checked={useSameAsShipping}
                       onChange={() => setUseSameAsShipping(true)}
-                      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
                     />
                     <span className=" ">Same as shipping address</span>
                   </label>
@@ -886,7 +886,7 @@ const CheckoutClientPage = () => {
                       name="billingAddress"
                       checked={!useSameAsShipping}
                       onChange={() => setUseSameAsShipping(false)}
-                      className="appearance-none checked:ring-lovely h-5 ring-1 ring-gray-500 rounded-full w-5 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
                     />
                     <span className="">Use a different billing address</span>
                   </label>
@@ -910,7 +910,7 @@ const CheckoutClientPage = () => {
                       }
                       name="billingCountry"
                       value={billingCountry}
-                      className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                      className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                     >
                       {countries.map((country: any, index: number) => {
                         return (
@@ -925,7 +925,7 @@ const CheckoutClientPage = () => {
                       onChange={handleInputChange}
                       name="billingCountry"
                       value={formData.billingCountry}
-                      className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                      className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                     >
                       {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
@@ -944,7 +944,7 @@ const CheckoutClientPage = () => {
                           : formData.billingFirstName
                       }
                       type="text"
-                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                   <div className="flex gap-2 w-full md:w-2/4">
@@ -958,7 +958,7 @@ const CheckoutClientPage = () => {
                           : formData.billingLastName
                       }
                       type="text"
-                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
@@ -973,7 +973,7 @@ const CheckoutClientPage = () => {
                         ? formData.address
                         : formData.billingAddress
                     }
-                    className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full  gap-2 items-center">
@@ -989,7 +989,7 @@ const CheckoutClientPage = () => {
                         : formData.billingApartment
                     }
                     type="text"
-                    className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full gap-2">
@@ -1006,7 +1006,7 @@ const CheckoutClientPage = () => {
                       }
                       name="billingPostalZip"
                       type="text"
-                      className="border w-full h-10 bg-white rounded-2xl py-2  px-2 text-lg"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2  px-2 text-base"
                     />
                   </div>
 
@@ -1019,7 +1019,7 @@ const CheckoutClientPage = () => {
                         useSameAsShipping ? formData.city : formData.billingCity
                       }
                       type="text"
-                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
@@ -1035,7 +1035,7 @@ const CheckoutClientPage = () => {
                           ? formData.state
                           : formData.billingState
                       }
-                      className="px-2 text-lg h-10 w-full bg-white rounded-2xl py-2"
+                      className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                     >
                       {states.map((state: any, index: number) => {
                         return (
@@ -1055,7 +1055,7 @@ const CheckoutClientPage = () => {
                       }
                       name="billingState"
                       type="text"
-                      className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                     />
                   )}
                 </div>
@@ -1068,7 +1068,7 @@ const CheckoutClientPage = () => {
                       useSameAsShipping ? formData.phone : formData.billingPhone
                     }
                     name="billingPhone"
-                    className="border w-full h-10 bg-white rounded-2xl py-2 px-2 text-lg"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
               </div>
@@ -1080,9 +1080,9 @@ const CheckoutClientPage = () => {
            </div>
            
            <div className='flex flex-col gap-1 items-end'>
-             <p className='text-[12px] lg:text-lg'>{subTotal} LE</p>
-             <p className='text-[12px] lg:text-lg'>{shipping} LE</p>
-             <p className='text-[12px] mt-6 lg:text-lg'>{total} LE</p>
+             <p className='text-[12px] lg:text-base'>{subTotal} LE</p>
+             <p className='text-[12px] lg:text-base'>{shipping} LE</p>
+             <p className='text-[12px] mt-6 lg:text-base'>{total} LE</p>
            </div>
          </div> */}
             {payment === "cash" || "instapay" ? (
@@ -1110,7 +1110,7 @@ const CheckoutClientPage = () => {
                 </button>
               </div>
             )}
-            <div className="text-lg">
+            <div className="text-base">
               <p>
                 By clicking &quot;CONFIRM ORDER&quot;, you accept the{" "}
                 <Link
@@ -1165,21 +1165,21 @@ const CheckoutClientPage = () => {
               </div>
 
               <div className="flex flex-col gap-1 items-end">
-                <p className="text-[12px] lg:text-lg">
+                <p className="text-[12px] lg:text-base">
                   {subTotal} LE
                   {/* {subTotal} {user.userCountry === "EG" ? "LE" : "USD"} */}
                 </p>
-                <p className="text-[12px] lg:text-lg">
+                <p className="text-[12px] lg:text-base">
                   {shipping} LE
                   {/* {shipping} {user.userCountry === "EG" ? "LE" : "USD"} */}
                 </p>
-                <p className="text-[12px] mt-6 lg:text-lg">
+                <p className="text-[12px] mt-6 lg:text-base">
                   {total} LE
                   {/* {total} {user.userCountry === "EG" ? "LE" : "USD"} */}
                 </p>
-                {/* <p className="text-[12px] lg:text-lg">{subTotal} {country===65?'LE':'USD'}</p>
-      <p className="text-[12px] lg:text-lg">{shipping} {country===65?'LE':'USD'}</p>
-      <p className="text-[12px] mt-6 lg:text-lg">{total} {country !==65?'LE':'USD'}</p> */}
+                {/* <p className="text-[12px] lg:text-base">{subTotal} {country===65?'LE':'USD'}</p>
+      <p className="text-[12px] lg:text-base">{shipping} {country===65?'LE':'USD'}</p>
+      <p className="text-[12px] mt-6 lg:text-base">{total} {country !==65?'LE':'USD'}</p> */}
               </div>
             </div>
           </div>
@@ -1188,7 +1188,7 @@ const CheckoutClientPage = () => {
           <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
             <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
               <h2
-                className={`${thirdFont.className} text-[16px] lg:text-4xl  text-everGreen mb-6`}
+                className={`${thirdFont.className} text-lg lg:text-2xl  text-everGreen mb-6`}
               >
                 Order Summary
               </h2>
@@ -1205,12 +1205,12 @@ const CheckoutClientPage = () => {
 
               {/* Order Totals */}
               <div className="mt-6 space-y-2 text-black">
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>
                 </div>
                 {appliedDiscount && appliedDiscount.value !== undefined && (
-                  <div className="flex justify-between text-lg text-green-600">
+                  <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
                       {appliedDiscount.calculationType === "FREE_SHIPPING"
@@ -1225,7 +1225,7 @@ const CheckoutClientPage = () => {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between text-base">
                   <span>Shipping</span>
                   <span>
                     {appliedDiscount?.calculationType === "FREE_SHIPPING"
@@ -1258,32 +1258,32 @@ const CheckoutClientPage = () => {
                   className="object-cover object-top aspect-[16/11] rounded-xl mb-4"
                 />
                 <h2
-                  className={`text-4xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}
+                  className={`text-2xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}
                 >
                   {wifeyExperience.name}
                 </h2>
-                <ul className="list-disc w-full items-start justify-start list-inside text-left text-xl tracking-wide text-creamey/95">
+                <ul className="list-disc w-full items-start justify-start list-inside text-left text-lg tracking-wide text-creamey/95">
                   {wifeyExperience.items.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
                 <div className="flex justify-start gap-4 tracking-wider mt-4 mb-2">
-                  <span className="text-lg   text-creamey">
+                  <span className="text-base   text-creamey">
                     one lifetime subscription fee :
                   </span>
-                  <span className="text-lg  text-creamey">
+                  <span className="text-base  text-creamey">
                     {wifeyExperience.price} LE
                   </span>
                   {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
                 </div>
               </div>
               <div className="mt-6 space-y-2 text-black">
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>
                 </div>
                 {appliedDiscount && appliedDiscount.value !== undefined && (
-                  <div className="flex justify-between text-lg text-green-600">
+                  <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
                       {appliedDiscount.calculationType === "FREE_SHIPPING"
@@ -1298,7 +1298,7 @@ const CheckoutClientPage = () => {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between text-base">
                   <span>Shipping</span>
                   <span>
                     {appliedDiscount?.calculationType === "FREE_SHIPPING"

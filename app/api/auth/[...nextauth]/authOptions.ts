@@ -1,4 +1,3 @@
-
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -16,6 +15,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isSubscribed: boolean;
+      subscriptionExpiryDate?:Date | null
     };
   }
 }
@@ -90,6 +90,10 @@ export const authOptions: NextAuthOptions = {
           const subscription = await subscriptionsModel.findOne({email});
           console.log("subscription" + subscription)
           token.isSubscribed = subscription?.subscribed ?? false;
+          token.subscriptionExpiryDate = subscription?.expiryDate // <-- Add this line
+          ? subscription.expiryDate.toISOString() // Store as string for serialization
+          : null;
+          
           // const dbUser = await UserModel.findOne({ email });
           // token.isSubscribed = dbUser?.isSubscribed ?? false;
         }
@@ -104,6 +108,9 @@ export const authOptions: NextAuthOptions = {
       }
       if (session.user) {
         session.user.isSubscribed = token.isSubscribed ?? false;
+        session.user.subscriptionExpiryDate = token.subscriptionExpiryDate
+          ? new Date(token.subscriptionExpiryDate as string)
+          : null;
       }
       return session;
     },

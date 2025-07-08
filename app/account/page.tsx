@@ -165,6 +165,7 @@ export default function AccountPage() {
     name: session.user.name || 'User',
     email: session.user.email || 'user@example.com',
     isSubscribed: session.user.isSubscribed || false,
+    subscriptionExpiryDate:session.user.subscriptionExpiryDate,
     imgUrl: session.user.image,
     loyaltyPoints: 1250,
     wishlistItems: wishList.length,
@@ -225,6 +226,7 @@ export default function AccountPage() {
             <p className="text-sm font-semibold text-lovely/80 break-all">{user.email}</p>
             <p className="text-sm font-semibold flex items-center gap-2 text-lovely/80">
               Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-everGreen' /> : <BadgeAlert />}</span>
+              <p>{user.subscriptionExpiryDate?.toString()}</p>
             </p>
           </div>
         </div>

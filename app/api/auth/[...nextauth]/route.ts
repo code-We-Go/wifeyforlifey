@@ -16,6 +16,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isSubscribed:boolean ;
+      subscriptionExpiryDate?:Date | null
     };
   }
 }
