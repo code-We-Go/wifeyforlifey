@@ -41,6 +41,14 @@ export async function GET(request: Request) {
                     { email: subscription.email },
                     { isSubscribed: true }
                 );
+                if(subscribedUser){
+                    return NextResponse.redirect(`${process.env.testUrl}payment/success&subscription=true&account=true`);
+
+                }
+                else{
+                    return NextResponse.redirect(`${process.env.testUrl}payment/success&subscription=true`);
+
+                }
             }
             else{
             console.log("Order2ID"+data.order)

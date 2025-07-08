@@ -3,12 +3,28 @@
 import Fireworks from "./components/Fireworks";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useCart } from "@/providers/CartProvider";
+import { useSearchParams } from 'next/navigation';
 
-export default function SuccessPage() {
+
+
+ function SuccessPage() {
   const {clearCart} = useCart()
+  const [subscription,setSubscription]=useState<string | null>(null)
+  const [account,setAccount]=useState<string | null>(null)
   useEffect(() => {
+    const searchParams = useSearchParams();
+    const subscription = searchParams.get('subscription');
+    const account = searchParams.get('account');
+    if(subscription){
+
+      setSubscription(subscription)
+    }
+    if(account){
+setAccount(account)
+    }
+  
     
   clearCart()
 
@@ -30,20 +46,61 @@ export default function SuccessPage() {
         </div>
 
         {/* <h1 className="text-5xl font-bold text-green-600">🎉 Success!</h1> */}
-        <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">🎉 Your Order was created successfully. 🎉</h1>
-        <div className="mt-6 flex gap-4 justify-center">
-          <Link href="/" passHref>
+        {
+          subscription?
+         <div> <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">🎉 Your Subscription was created successfully. 🎉</h1>
+                {!account && <p>Now you are a step a way from using your experience</p>}            
+            </div>
+       :<h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">🎉 Your Order was created successfully. 🎉</h1>
+       
+      }
+     {  (account && subscription)&& 
+       <div className="mt-6 flex gap-4 justify-center">
+          <Link href="/account" passHref>
             <button className="px-6 border-2 border-lovely py-2   text-lovely rounded-2xl font-semibold  transition">
-              Go to Home
+              Go to Account
             </button>
           </Link>
-          <Link href="/shop" passHref>
+          <Link href="/playlists" passHref>
             <button className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition">
-              Continue Shopping
+              Go to Playlists
+            </button>
+          </Link>
+        </div>}
+        
+         {!subscription && <div className="mt-6 flex gap-4 justify-center">
+         <Link href="/" passHref>
+           <button className="px-6 border-2 border-lovely py-2   text-lovely rounded-2xl font-semibold  transition">
+             Go to Home
+           </button>
+         </Link>
+         <Link href="/shop" passHref>
+           <button className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition">
+             Continue Shopping
+           </button>
+         </Link>
+       </div>
+        }
+        {
+          (!account && subscription) && <div className="mt-6 flex gap-4 justify-center">
+          <Link href="/register" passHref>
+            <button className="px-6 border-2 border-lovely py-2   text-lovely rounded-2xl font-semibold  transition">
+              Register Now
+            </button>
+          </Link>
+          <Link href="/register" passHref>
+            <button className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition">
+            Register Now
             </button>
           </Link>
         </div>
+        }
       </div>
     </div>
   );
+}
+export default function SuccessPageInSusspense(){
+  return <Suspense fallback={ <div className="w-full h-[calc(100vh-128)]"> ...Loading</div>}>
+  <SuccessPage/>
+  </Suspense>
 }
