@@ -15,10 +15,10 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-lovely`}>
         ❤️ About Wifey for Lifey
         </h1>
-        <h5>We&apos;re not just here for your wedding—we&apos;re here for your womanhood.
+        <h5 className='font-semibold'>We&apos;re not just here for your wedding—we&apos;re here for your womanhood.
         </h5>
         <p className="text-base md:text-lg text-lovely/90 mb-4">
         <span className='font-extrabold'>Wifey for Lifey</span> was born from one deep truth: planning a wedding is one of the most emotional journeys a woman takes—and no one was doing enough to emotionally support her through it. So we stepped in—not just with pretty planners, but with genuine guidance, heartfelt sisterhood, and practical tools that help her feel calm, clear, and confident.        </p>
@@ -43,7 +43,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
         🌸 Why We&apos;re Here
         </h1>
 
@@ -60,7 +60,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
         ✨ What We Offer
         </h1>
 
@@ -85,7 +85,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
         💖 Our Brand Values
         </h1>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
@@ -128,7 +128,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
         💫 Our Promise
         </h1>
 

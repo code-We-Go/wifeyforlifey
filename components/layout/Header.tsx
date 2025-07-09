@@ -296,9 +296,9 @@ export default function Header() {
                         key={item.name}
                         href={item.href}
                         className={cn(
-                          "text-lg font-medium  hover:text-red-900",
+                          "text-xl font-medium  hover:underline transition duration-300",
                           pathname === item.href
-                            ? "text-red-900"
+                            ? "underline"
                             : "text-creamey"
                         )}
                         onClick={handleLinkClick}

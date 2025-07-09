@@ -6,6 +6,7 @@ import { signIn } from 'next-auth/react';
 import { thirdFont } from '@/fonts';
 import { FaGoogle } from "react-icons/fa";
 import { BadgeAlert } from 'lucide-react';
+import { bgRedButton } from '../constants';
 
 
  function LoginPage() {
@@ -76,7 +77,7 @@ import { BadgeAlert } from 'lucide-react';
                   name="email"
                   type="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border bg-creamey/90 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -92,7 +93,7 @@ import { BadgeAlert } from 'lucide-react';
                   name="password"
                   type="password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 bg-creamey/90 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -109,7 +110,7 @@ import { BadgeAlert } from 'lucide-react';
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`group relative  w-full flex justify-center py-2 px-4 border border-transparent text-sm  rounded-md ${bgRedButton} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>
@@ -131,7 +132,7 @@ import { BadgeAlert } from 'lucide-react';
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`group relative  w-full flex justify-center py-2 px-4 border border-transparent  rounded-md ${bgRedButton} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {loading ? 'Signing in with Google ..' : 'Sign in with Google'}
                 {!loading &&               <span className='ml-2'><FaGoogle />
@@ -142,7 +143,7 @@ import { BadgeAlert } from 'lucide-react';
             <div className="text-center">
               <p className="text-sm text-creamey">
                 Don&apos;t have an account?{' '}
-                <a href="/register" className="font-medium text-everGreen hover:text-everGreen/90">
+                <a href="/register" className="font-medium underline">
                   Sign up here
                 </a>
               </p>

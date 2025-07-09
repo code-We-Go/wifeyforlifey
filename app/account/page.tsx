@@ -1,6 +1,6 @@
 'use client'
 
-import { UserCircle, Heart, ShoppingBag, Gift, BadgeCheck, BadgeAlert, Package, Truck, CheckCircle, Edit, Camera, ShoppingCart, Trash2 } from 'lucide-react';
+import { UserCircle, Heart, ShoppingBag, Gift, BadgeCheck, BadgeAlert, Package, Truck, CheckCircle, Edit, Camera, ShoppingCart, Trash2, Crown } from 'lucide-react';
 import { useEffect, useState, useContext } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -225,13 +225,9 @@ export default function AccountPage() {
             <h1 className={`text-2xl sm:text-4xl font-bold text-lovely tracking-normal break-words ${thirdFont.className}`}>{user.name}</h1>
             <p className="text-sm font-semibold text-lovely/80 break-all">{user.email}</p>
             <p className="text-sm font-semibold flex items-center gap-2 text-lovely/80">
-              Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-everGreen' /> : <BadgeAlert />}</span>
+              Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-lovely/80' /> : <BadgeAlert />}</span>
             </p>
-            <p className='text-lovely/80 text-sm font-semibold'>
-          Expires at :     {user.subscriptionExpiryDate
-                ? new Date(user.subscriptionExpiryDate).toLocaleDateString()
-                : ''}
-            </p>
+          {user.isSubscribed && <p className='text-lovely/80 text-sm font-semibold'>Expires at : {user.subscriptionExpiryDate ? (() => { const expiry = new Date(user.subscriptionExpiryDate); const now = new Date(); const tenYearsFromNow = new Date(now.setFullYear(now.getFullYear() + 10)); return expiry > tenYearsFromNow ? <span className='inline-flex gap-2 items-end'>Lifetime Wifey <Crown/></span> : expiry.toLocaleDateString(); })() : ''}</p>}
           </div>
         </div>
       </div>

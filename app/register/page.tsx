@@ -72,7 +72,7 @@ import { BadgeAlert } from 'lucide-react';
                 name="username"
                 type="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300  text-gray-900 rounded-t-md focus:outline-none focus:ring-primary bg-white focus:border-primary focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300  text-gray-900 rounded-t-md focus:outline-none focus:ring-primary bg-creamey/90 focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -88,7 +88,7 @@ import { BadgeAlert } from 'lucide-react';
                 name="email"
                 type="email"
                 required
-                className="appearance-none bg-white rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className="appearance-none bg-creamey/90 rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -121,7 +121,7 @@ import { BadgeAlert } from 'lucide-react';
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border-2 border-creamey text-sm  rounded-md text-creamey bg-lovely font-semibold hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Create account'}
             </button>
@@ -144,7 +144,7 @@ import { BadgeAlert } from 'lucide-react';
               type="button"
               onClick={handleGoogleSignUp}
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-creamey bg-everGreen hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border-2 border-creamey text-sm  rounded-md text-creamey bg-lovely font-semibold hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account with Google...' : 'Create your account with Google'}
               <span className='ml-2'><FaGoogle />

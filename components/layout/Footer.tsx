@@ -7,6 +7,7 @@ import { thirdFont } from "@/fonts";
 import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { bgRedButton } from "@/app/constants";
 
 
 export default function Footer() {
@@ -207,18 +208,17 @@ export default function Footer() {
               your inbox.
             </p>
             <form onSubmit={handleSubmit} className="space-y-2">
-              <div className="flex text-gray-600">
+              <div className="flex items-center">
                 <Input
-                
-                value={email}
+                  value={email}
                   type="email"
                   placeholder="Your email"
-                  className="rounded-r-none  focus-within::ring-0"
+                  className="rounded-r-none bg-creamey border-r py-5 border-lovely"
                   onChange={(e)=>setEmail(e.target.value)}
                 />
                 <Button
                   type="submit"
-                  className="bg-everGreen text-creamey hover:bg-everGreen/80 rounded-l-none"
+                  className={`${bgRedButton} rounded-l-none border-l-0`}
                 >
                   Subscribe
                 </Button>
