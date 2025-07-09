@@ -31,10 +31,11 @@ export async function GET(request: Request) {
         if (isSuccess) {
             const expiryDate = new Date();
             expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
             const expiryDateLifeTime = new Date();
-            expiryDate.setFullYear(expiryDate.getFullYear() + 100);
+            expiryDateLifeTime.setFullYear(expiryDateLifeTime.getFullYear() + 100);
             const subscribtions =await subscriptionsModel.countDocuments({subscribed:true})
-            
+            console.log('lifeTime'+expiryDateLifeTime)
             const subscription = await subscriptionsModel.findOneAndUpdate(
                 { paymentID: data.order },
                 { subscribed: true, expiryDate :subscribtions>50?expiryDate:expiryDateLifeTime}
