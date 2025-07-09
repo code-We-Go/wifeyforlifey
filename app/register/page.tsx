@@ -38,7 +38,8 @@ import { BadgeAlert } from 'lucide-react';
       });
 
       if (response.status === 201) {
-        // Use router.push for client-side navigation
+        //
+        //  Use router.push for client-side navigation
         router.push('/verification');
       }
     } catch (error: any) {

@@ -226,7 +226,11 @@ export default function AccountPage() {
             <p className="text-sm font-semibold text-lovely/80 break-all">{user.email}</p>
             <p className="text-sm font-semibold flex items-center gap-2 text-lovely/80">
               Subscription : <span>{user.isSubscribed ? <BadgeCheck className='text-everGreen' /> : <BadgeAlert />}</span>
-              <p>{user.subscriptionExpiryDate?.toString()}</p>
+            </p>
+            <p className='text-lovely/80 text-sm font-semibold'>
+          Expires at :     {user.subscriptionExpiryDate
+                ? new Date(user.subscriptionExpiryDate).toLocaleDateString()
+                : ''}
             </p>
           </div>
         </div>

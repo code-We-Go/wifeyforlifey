@@ -89,10 +89,11 @@ export const authOptions: NextAuthOptions = {
           console.log("Querying for email:", email);
           const subscription = await subscriptionsModel.findOne({email});
           console.log("subscription" + subscription)
-          token.isSubscribed = subscription?.subscribed ?? false;
-          token.subscriptionExpiryDate = subscription?.expiryDate // <-- Add this line
-          ? subscription.expiryDate.toISOString() // Store as string for serialization
-          : null;
+          console.log("expiryDateGetTime"+subscription.expiryDate.getTime())
+          token.isSubscribed = (subscription?.expiryDate && subscription.expiryDate.getTime() > Date.now());
+          token.subscriptionExpiryDate = subscription?.expiryDate
+            ? subscription.expiryDate.toISOString()
+            : null;
           
           // const dbUser = await UserModel.findOne({ email });
           // token.isSubscribed = dbUser?.isSubscribed ?? false;
