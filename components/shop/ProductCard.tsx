@@ -95,7 +95,7 @@ export default function ProductCard({
 
   return (
     <div 
-      className="relative product-card bg-creamey p-2 pt-4 border-everGreen border-2 group cursor-pointer"
+      className="relative product-card bg-lovely p-2 pt-4 border-everGreen border-2 group cursor-pointer"
       onClick={handleProductClick}
     >
       <Image

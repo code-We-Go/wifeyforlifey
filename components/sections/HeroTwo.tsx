@@ -11,17 +11,17 @@ const HeroTwo = () => {
   const mainImageOpacity = useTransform(scrollYProgress, [0, 0.2], [0.5, 1])
   const textY = useTransform(scrollYProgress, [0, 0.2], [100, 0])
   const textOpacity = useTransform(scrollYProgress, [0, 0.1], [0.5, 1])
-  const ringY = useTransform(scrollYProgress, [0, 0.15], [200, 0])
+  const ringY = useTransform(scrollYProgress, [-0.2, 0.15], [160, 0])
 
   const ringRotation = useTransform(scrollYProgress, [0, 0.2], [90, -30])
   const glassesRotation = useTransform(scrollYProgress, [0, 0.3], [60, -20])
   const fyonkaRotation = useTransform(scrollYProgress, [0, 0.2], [-60, 30])
   const ringScale = useTransform(scrollYProgress, [0, 0.15], [0.5, 1])
-  const textX = useTransform(scrollYProgress, [0, 0.2], [200, 0])
-  const textXr = useTransform(scrollYProgress, [-0.2, 0.15], [-200, 0])
+  const textX = useTransform(scrollYProgress, [-0.3, 0.1], [170, 0])
+  const textXr = useTransform(scrollYProgress, [-0.5, 0.15], [-150, 0])
   const glassesXr = useTransform(scrollYProgress, [0, 0.2], [-200, 0])
   const paragraphX = useTransform(scrollYProgress, [-0.2, 0.01], [40, 0])
-  const partyX =useTransform(scrollYProgress,[0,0.15],[200,0])
+  const partyX =useTransform(scrollYProgress,[-0.2,0.15],[150,0])
   const sectionY = useTransform(scrollYProgress, [0, 0.4], [30, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.1], [30, 0])
   const rightRingRotation = useTransform(scrollYProgress, [0, 0.5], [30, 12])
@@ -62,7 +62,7 @@ const HeroTwo = () => {
             x: textXr,
             opacity: textOpacity
           }}
-          className={`text-lovely text-5xl md:text-7xl lg:text-9xl font-normal ${lifeyFont.className}`}>plan</motion.h1>
+          className={`  text-lovely text-5xl md:text-7xl lg:text-9xl font-normal ${lifeyFont.className}`}>plan</motion.h1>
         <motion.h1 
           style={{
             x: textXr,
