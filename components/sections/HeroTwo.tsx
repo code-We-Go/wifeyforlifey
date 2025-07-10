@@ -20,7 +20,7 @@ const HeroTwo = () => {
   const textX = useTransform(scrollYProgress, [-0.3, 0.1], [170, 0])
   const textXr = useTransform(scrollYProgress, [-0.6, 0.1], [-140, 0])
   const glassesXr = useTransform(scrollYProgress, [0, 0.2], [-200, 0])
-  const paragraphX = useTransform(scrollYProgress, [-0.2, 0.01], [40, 0])
+  const paragraphX = useTransform(scrollYProgress, [-0.2, 0.01], [40, 10])
   const partyX =useTransform(scrollYProgress,[-0.2,0.15],[150,0])
   const sectionY = useTransform(scrollYProgress, [0, 0.4], [30, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.1], [30, 0])
@@ -42,7 +42,7 @@ const HeroTwo = () => {
             scale: mainImageScale,
             opacity: mainImageOpacity
           }}
-          className='absolute bottom-[10vh] md:top-[20vh] -right-[30vw] md:-right-[200px]'>
+          className='absolute bottom-[10vh] md:top-[20vh] -right-[28vw] md:-right-[200px]'>
             <Image className='aspect-auto' src={"/hero/Bride 2_The Efficeint Planner.png"} alt={"ultimate best friend"} width={400} height={50}/>
         </motion.div>
         <motion.div 
