@@ -18,7 +18,7 @@ const HeroTwo = () => {
   const fyonkaRotation = useTransform(scrollYProgress, [0, 0.2], [-60, 30])
   const ringScale = useTransform(scrollYProgress, [0, 0.15], [0.5, 1])
   const textX = useTransform(scrollYProgress, [-0.3, 0.1], [170, 0])
-  const textXr = useTransform(scrollYProgress, [-0.5, 0.15], [-150, 0])
+  const textXr = useTransform(scrollYProgress, [-0.6, 0.1], [-140, 0])
   const glassesXr = useTransform(scrollYProgress, [0, 0.2], [-200, 0])
   const paragraphX = useTransform(scrollYProgress, [-0.2, 0.01], [40, 0])
   const partyX =useTransform(scrollYProgress,[-0.2,0.15],[150,0])
@@ -35,7 +35,7 @@ const HeroTwo = () => {
   ]
 
   return (
-    <div className='w-full bg-creamey min-h-screen md:h-[150vh] flex px-4 md:px-12 py-24 md:py-32'>
+    <div className='w-full bg-creamey min-h-screen md:h-[150vh] flex  md:px-12 py-24 md:py-32'>
         <div className=' max-sm:w-[40%] w-1/2 flex pl-8 lg:pl-16 xl:pl-32 flex-col justify-start md:items-start relative'>
         <motion.div 
           style={{
