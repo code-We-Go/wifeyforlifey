@@ -95,7 +95,7 @@ export default function ProductCard({
 
   return (
     <div 
-      className="relative product-card bg-lovely p-2 pt-4 border-everGreen border-2 group cursor-pointer"
+      className="relative product-card bg-lovely p-2 pt-4 border-lovely border-2 group cursor-pointer"
       onClick={handleProductClick}
     >
       <Image
@@ -103,7 +103,7 @@ export default function ProductCard({
         height={50}
         className="absolute -top-5 -rotate-45 -left-5 z-20"
         alt="fyonka"
-        src={"/fyonka.png"}
+        src={"/fyonkaCreamey.png"}
       />
       <div className="relative aspect-square overflow-hidden">
         <Image
@@ -135,21 +135,21 @@ export default function ProductCard({
         </Button>
       </div>
       <div className="p-4">
-        <h4 className={`${thirdFont.className} tracking-normal font-medium text-everGreen line-clamp-1`}>
+        <h4 className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}>
           {product.title}
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-        {product.comparedPrice>0 &&  <del className="text-gray-400 text-sm">
+        {product.comparedPrice>0 &&  <del className="text-creamey text-sm">
   LE{product.comparedPrice.toFixed(2)}
 </del> }         
- <p className="price-tag">LE{product.price.local.toFixed(2)}</p>
+ <p className="price-tag text-creamey">LE{product.price.local.toFixed(2)}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Button
               size="sm"
               variant="secondary"
-              className="h-8 hover:bg-lovely text-creamey bg-everGreen rounded-full"
+              className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="h-4 w-4 mr-1" />

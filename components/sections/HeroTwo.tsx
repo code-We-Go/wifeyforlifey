@@ -36,7 +36,7 @@ const HeroTwo = () => {
 
   return (
     <div className='w-full bg-creamey min-h-screen md:h-[150vh] flex  md:px-12 py-24 md:py-32'>
-        <div className=' max-sm:w-[40%] w-1/2 flex pl-8 lg:pl-16 xl:pl-32 flex-col justify-start md:items-start relative'>
+        <div className=' max-sm:w-[40%] w-1/2 flex  lg:pl-16 xl:pl-32 flex-col justify-start md:items-start relative'>
         <motion.div 
           style={{
             scale: mainImageScale,

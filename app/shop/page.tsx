@@ -128,8 +128,8 @@ function ShopPage() {
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="flex flex-col space-y-4">
-          <h1 className={`${thirdFont.className} text-4xl md:text-5xl text-everGreen font-semibold`}>Shop</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`${thirdFont.className} text-4xl md:text-5xl text-lovely font-semibold`}>Shop</h1>
+          <p className="text-lovely/90">
             Discover our curated collection of products designed just for you.
           </p>
         </div>
@@ -141,7 +141,7 @@ function ShopPage() {
               placeholder="Search products..."
               value={filters.search}
               onChange={(e) => updateFilter("search", e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-creamey border-everGreen"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
               <svg
