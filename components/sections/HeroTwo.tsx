@@ -103,39 +103,41 @@ const HeroTwo = () => {
               </motion.p>
 
         </motion.div>
-        <motion.div 
-          style={{
-            y: sectionY,
-            opacity: textOpacity
-          }}
-          className='text-lovely max-sm:text-sm uppercase text-sm ml-[9vw] md:ml-[10vw] sm:ml-[10vw] lg:ml-[8vw]'>
-                <motion.h1 
-                  style={{
-                    x:partyX,
-                    // y: headingY,
-                    opacity: textOpacity,
-                    transform: 'scaleY(1.3)'
-                  }}
-                  className='italic text-2xl md:text-4xl lg:text-5xl  font-light'>party like A</motion.h1>
-                <motion.h1 
-                  style={{
-                    x:partyX,
-                    opacity: textOpacity,
-                    transform: 'scaleY(1.3)'
-                  }}
-                  className={`${lifeyFont.className} italic text-5xl md:text-7xl lg:text-9xl font-normal lowercase`}>bride</motion.h1>
-        </motion.div>
-        <motion.div 
-          style={{
-            y:ringY,
-            rotate: fyonkaRotation,
-            scale: ringScale,
-            opacity: textOpacity
-          }}
-          className='rotate-12 absolute lg:bottom-[25vh] bottom-[30vh] right-[6vw]  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]'>
-          {/* // className='rotate-12  -top-[5vh] -right-[30vw]  md:right-[5vw] sm:right-[5vw] lg:right-[6vw]'> */}
-                  <Image className='aspect-auto' width={120} height={50} alt='fyonka' src={'/hero/WifeyForLifey Illustrations-28.png'}></Image>
-        </motion.div>
+        {/* Group these two in a relative parent */}
+        <div className="relative w-full">
+          <motion.div 
+            style={{
+              y: sectionY,
+              opacity: textOpacity
+            }}
+            className='text-lovely max-sm:text-sm uppercase text-sm ml-[9vw] md:ml-[10vw] sm:ml-[10vw] lg:ml-[8vw]'>
+                  <motion.h1 
+                    style={{
+                      x:partyX,
+                      // y: headingY,
+                      opacity: textOpacity,
+                      transform: 'scaleY(1.3)'
+                    }}
+                    className='italic text-2xl md:text-4xl lg:text-5xl  font-light'>party like A</motion.h1>
+                  <motion.h1 
+                    style={{
+                      x:partyX,
+                      opacity: textOpacity,
+                      transform: 'scaleY(1.3)'
+                    }}
+                    className={`${lifeyFont.className} italic text-5xl md:text-7xl lg:text-9xl font-normal lowercase`}>bride</motion.h1>
+          </motion.div>
+          <motion.div 
+            style={{
+              y:ringY,
+              rotate: fyonkaRotation,
+              scale: ringScale,
+              opacity: textOpacity
+            }}
+            className='rotate-12 absolute lg:bottom-[25vh] -bottom-[120px] right-[6vw]  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]'>
+                    <Image className='aspect-auto' width={120} height={50} alt='fyonka' src={'/hero/WifeyForLifey Illustrations-28.png'}></Image>
+          </motion.div>
+        </div>
         </div>
     </div>
   )
