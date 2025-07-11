@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
 import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { bgRedButton } from "@/app/constants";
 
@@ -13,6 +13,44 @@ import { bgRedButton } from "@/app/constants";
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [playlists, setPlaylists] = useState<{ _id: string, title: string }[]>([]);
+  const [playlistsLoading, setPlaylistsLoading] = useState(false);
+  const [playlistsError, setPlaylistsError] = useState<string | null>(null);
+  const [shopCategories, setShopCategories] = useState<{ _id: string, name: string }[]>([]);
+  const [shopCategoriesLoading, setShopCategoriesLoading] = useState(false);
+  const [shopCategoriesError, setShopCategoriesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPlaylistsLoading(true);
+    setPlaylistsError(null);
+    fetch("/api/playlists?all=true")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.data)) {
+          setPlaylists(data.data.map((p: any) => ({ _id: p._id, title: p.title })));
+        } else {
+          setPlaylists([]);
+        }
+      })
+      .catch(() => setPlaylistsError("Failed to load playlists."))
+      .finally(() => setPlaylistsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setShopCategoriesLoading(true);
+    setShopCategoriesError(null);
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setShopCategories(data.slice(0, 5).map((cat: any) => ({ _id: cat._id, name: cat.name })));
+        } else {
+          setShopCategories([]);
+        }
+      })
+      .catch(() => setShopCategoriesError("Failed to load categories."))
+      .finally(() => setShopCategoriesLoading(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,92 +150,50 @@ export default function Footer() {
           <div>
             <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Shop</h6>
             <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/shop?category=clothing"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Clothing
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=accessories"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Accessories
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=home"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Home Decor
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=bath"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Bath & Body
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=stationery"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Stationery
-                </Link>
-              </li>
+              {shopCategoriesLoading && (
+                <li className="text-sm text-muted-foreground">Loading...</li>
+              )}
+              {shopCategoriesError && (
+                <li className="text-sm text-red-500">{shopCategoriesError}</li>
+              )}
+              {!shopCategoriesLoading && !shopCategoriesError && shopCategories.length === 0 && (
+                <li className="text-sm text-muted-foreground">No categories found.</li>
+              )}
+              {shopCategories.map((cat) => (
+                <li key={cat._id}>
+                  <Link
+                    href={`/shop?category=${cat._id}`}
+                    className=" hover:text-foreground text-sm"
+                  >
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
             <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Playlists</h6>
             <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/playlists?category=tutorials"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Tutorials
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/playlists?category=lifestyle"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Lifestyle
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/playlists?category=fashion"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Fashion
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/playlists?category=beauty"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Beauty
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/playlists?category=fitness"
-                  className=" hover:text-foreground text-sm"
-                >
-                  Fitness
-                </Link>
-              </li>
+              {playlistsLoading && (
+                <li className="text-sm text-muted-foreground">Loading...</li>
+              )}
+              {playlistsError && (
+                <li className="text-sm text-red-500">{playlistsError}</li>
+              )}
+              {!playlistsLoading && !playlistsError && playlists.length === 0 && (
+                <li className="text-sm text-muted-foreground">No playlists found.</li>
+              )}
+              {playlists.slice(0, 5).map((playlist) => (
+                <li key={playlist._id}>
+                  <Link
+                    href={`/playlists/${playlist._id}`}
+                    className=" hover:text-foreground text-sm"
+                  >
+                    {playlist.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

@@ -6,7 +6,7 @@ import { signIn } from 'next-auth/react';
 import { thirdFont } from '@/fonts';
 import { FaGoogle } from "react-icons/fa";
 import { BadgeAlert } from 'lucide-react';
-import { bgRedButton } from '../constants';
+import { bgCreameyButton, bgRedButton } from '../constants';
 
 
  function LoginPage() {
@@ -60,9 +60,9 @@ import { bgRedButton } from '../constants';
   return (
       <div className=" bg-pattern1 ">
         <div className='md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
-        <div className="max-w-md max-h-[90vh] rounded-2xl bg-lovely shadow-2xl w-full py-8 px-6 space-y-8">
+        <div className="max-w-md max-h-[90vh] rounded-2xl bg-creamey shadow-2xl w-full py-8 px-6 space-y-8">
           <div>
-            <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-creamey`}>
+            <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-lovely`}>
               Sign in to your account
             </h2>
           </div>
@@ -77,7 +77,7 @@ import { bgRedButton } from '../constants';
                   name="email"
                   type="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border bg-creamey/90 border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="placeholder:text-pinkey rounded-none border-pinkey relative block w-full px-3 py-2 border-2 bg-creamey/90  text-lovely/90 rounded-t-md focus:outline-none focus:ring-everGreen focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -93,7 +93,7 @@ import { bgRedButton } from '../constants';
                   name="password"
                   type="password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 bg-creamey/90 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="placeholder:text-pinkey rounded-none border-pinkey relative block w-full px-3 py-2 border-2 bg-creamey/90  text-lovely/90 rounded-t-md focus:outline-none focus:ring-everGreen focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -103,14 +103,14 @@ import { bgRedButton } from '../constants';
             </div>
 
             {error && (
-              <div className="text-creamey flex gap-2 w-full justify-center items-center text-sm text-center">{error} <span className='text-xs'><BadgeAlert className='text-xs w-5'/></span></div>
+              <div className="text-lovely flex gap-2 w-full justify-center items-center text-sm text-center">{error} <span className='text-xs'><BadgeAlert className='text-xs w-5'/></span></div>
             )}
 
             <div>
               <button
                 type="submit"
                 disabled={loading}
-                className={`group relative  w-full flex justify-center py-2 px-4 border border-transparent text-sm  rounded-md ${bgRedButton} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`group relative  w-full flex justify-center py-2 px-4 border border-transparent text-sm  rounded-md ${bgCreameyButton} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>
@@ -121,10 +121,10 @@ import { bgRedButton } from '../constants';
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-creamey whitespace-nowrap">Or</span>
+              <span className="px-2 text-lovely whitespace-nowrap">Or</span>
             </div>
             <div className="w-full inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-lovely/95"></div>
             </div>
           </div>
           <div>
@@ -132,7 +132,7 @@ import { bgRedButton } from '../constants';
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className={`group relative  w-full flex justify-center py-2 px-4 border border-transparent  rounded-md ${bgRedButton} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`group relative  w-full flex justify-center py-2 px-4 border border-transparent  rounded-md ${bgCreameyButton} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {loading ? 'Signing in with Google ..' : 'Sign in with Google'}
                 {!loading &&               <span className='ml-2'><FaGoogle />
@@ -141,7 +141,7 @@ import { bgRedButton } from '../constants';
             </div>
             
             <div className="text-center">
-              <p className="text-sm text-creamey">
+              <p className="text-sm text-lovely">
                 Don&apos;t have an account?{' '}
                 <a href="/register" className="font-medium underline">
                   Sign up here

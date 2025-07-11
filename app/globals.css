@@ -243,3 +243,7 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+input::placeholder {
+  color: #34a853e6;
+}

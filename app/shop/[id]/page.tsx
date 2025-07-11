@@ -150,17 +150,17 @@ export default function ProductPage() {
             <li className="inline-flex items-center">
               <Link
                 href="/"
-                className="text-muted-foreground hover:text-foreground text-sm"
+                className="text-lovely/80 hover:text-lovely text-sm"
               >
                 Home
               </Link>
             </li>
             <li>
               <div className="flex items-center">
-                <span className="mx-2 text-muted-foreground">/</span>
+                <span className="mx-2 text-pinkey">/</span>
                 <Link
                   href="/shop"
-                  className="text-muted-foreground hover:text-foreground text-sm"
+                  className="text-lovely/80 hover:text-lovely text-sm"
                 >
                   Shop
                 </Link>
@@ -171,7 +171,7 @@ export default function ProductPage() {
                 <span className="mx-2 text-muted-foreground">/</span>
                 <Link
                   href={`/shop?category=${product.subCategoryID.categoryID}`}
-                  className="text-muted-foreground hover:text-foreground text-sm"
+                  className="text-lovely/80 hover:text-lovely text-sm"
                 >
                   {product.subCategoryID.subCategoryName}
                 </Link>
@@ -179,8 +179,8 @@ export default function ProductPage() {
             </li> */}
             <li aria-current="page">
               <div className="flex items-center">
-                <span className="mx-2 text-muted-foreground">/</span>
-                <span className="text-sm font-medium text-foreground line-clamp-1">
+                <span className="mx-2 text-pinkey">/</span>
+                <span className="text-sm font-medium text-lovely line-clamp-1">
                   {product.title}
                 </span>
               </div>
@@ -241,7 +241,7 @@ export default function ProductPage() {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className={`${thirdFont.className} text-everGreen tracking-normal text-4xl  font-medium`}>
+            <h1 className={`${thirdFont.className} text-lovely tracking-normal text-4xl  font-medium`}>
               {product.title}
             </h1>
             {/* <div className="flex items-center mt-2">
@@ -263,16 +263,16 @@ export default function ProductPage() {
             </div> */}
           </div>
 
-          <div className="text-2xl font-medium">
+          <div className="text-2xl text-lovely font-medium">
             LE{product.price.local.toFixed(2)}
           </div>
 
-          <p className="text-muted-foreground">{product.description}</p>
+          <p className="text-lovely/90">{product.description}</p>
 
           {/* Variants Selection */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium mb-2">Variants</h3>
+              <h3 className="text-sm text-lovely font-medium mb-2">Variants</h3>
               <div className="flex flex-wrap gap-2">
                 {product.variations.map((variant, index) => (
                   <Button
@@ -289,7 +289,7 @@ export default function ProductPage() {
 
             {selectedVariant && (
               <div>
-                <h3 className="text-sm font-medium mb-2">{selectedVariant.attributeName}</h3>
+                <h3 className="text-sm text-lovely font-medium mb-2">{selectedVariant.attributeName}</h3>
                 <div className="flex flex-wrap gap-2">
                   {selectedVariant.attributes.map((attr, index) => (
                     <Button
@@ -308,7 +308,7 @@ export default function ProductPage() {
           </div>
 
           <div>
-            <div className="text-sm font-medium mb-2">Quantity</div>
+            <div className="text-sm text-lovely font-medium mb-2">Quantity</div>
             <div className="flex items-center space-x-2">
               <Button
               className="text-lovely bg-pinkey"
@@ -362,9 +362,9 @@ export default function ProductPage() {
               <Truck className="h-5 w-5 mr-2 text-muted-foreground" />
               <span className="text-sm">Free shipping on orders over $50</span>
             </div> */}
-            <div className="flex items-center hover:cursor-pointer"
+            <div className="flex items-center text-lovely hover:cursor-pointer"
             onClick={handleShare}>
-              <Share2 className="h-5 w-5 mr-2 text-muted-foreground" />
+              <Share2 className="h-5 w-5 mr-2 " />
               <span className="text-sm">Share this product</span>
             </div>
           </div>

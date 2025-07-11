@@ -42,7 +42,7 @@ interface Subcategory {
 }
 
 function Fullback (){
-  return <div>Loading ...</div>
+  return <div className='w-full h-[calc(100vh-128px)]'>Loading ...</div>
 }
 
 function ShopPage() {
@@ -92,7 +92,9 @@ function ShopPage() {
 
         const response = await fetch(`/api/products?${queryParams.toString()}`);
         const data = await response.json();
-        setProducts(data);
+        // setProducts(data);
+        setProducts(Array.isArray(data) ? data : []); // Always set an array
+
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -112,7 +114,7 @@ function ShopPage() {
       category: "",
       subcategory: "",
       minPrice: 0,
-      maxPrice: 100,
+      maxPrice: 100000,
       sortBy: "newest",
       search: "",
     });
@@ -175,17 +177,17 @@ function ShopPage() {
               </SelectContent>
             </Select>
 
-            <Sheet>
-              <SheetTrigger asChild>
+            <Sheet >
+              <SheetTrigger asChild className='bg-creamey border border-everGreen/90 text-everGreen/90'>
                 <Button variant="outline">
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
                 </Button>
               </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                  <SheetDescription>
+              <SheetContent className='bg-creamey text-everGreen'>
+                <SheetHeader className='text-everGreen'>
+                  <SheetTitle className='text-everGreen'>Filters</SheetTitle>
+                  <SheetDescription className='text-everGreen'>
                     Refine your product search with these filters.
                   </SheetDescription>
                 </SheetHeader>
@@ -240,11 +242,12 @@ function ShopPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <h3 className="font-medium">Price Range</h3>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-everGreen">
                         ${filters.minPrice} - ${filters.maxPrice}
                       </span>
                     </div>
                     <Slider
+                    className='bg-pinkey'
                       defaultValue={[filters.minPrice, filters.maxPrice]}
                       max={maxProductPrice}
                       step={1}
@@ -255,7 +258,7 @@ function ShopPage() {
                     />
                   </div>
                   <Separator />
-                  <Button onClick={resetFilters} variant="outline" className="w-full">
+                  <Button onClick={resetFilters} variant="outline" className="w-full bg-lovely text-creamey hover:text-creamey hover:bg-lovely/90">
                     Reset Filters
                   </Button>
                 </div>
@@ -330,14 +333,14 @@ function ShopPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 mb-4 text-muted-foreground">
+            <div className="mx-auto w-24 h-24 mb-4 text-lovely">
               <SlidersHorizontal className="w-full h-full" />
             </div>
-            <h3 className="text-lg font-medium">No products found</h3>
-            <p className="text-muted-foreground mt-2">
+            <h3 className="text-lg text-lovely font-semibold">No products found</h3>
+            <p className="text-lovely mt-2">
               Try adjusting your filters or search term.
             </p>
-            <Button onClick={resetFilters} variant="outline" className="mt-4">
+            <Button onClick={resetFilters} variant="outline" className="mt-4 bg-lovely/90 text-creamey hover:text-creamey hover:bg-lovely">
               Reset Filters
             </Button>
           </div>

@@ -35,7 +35,7 @@ const HeroTwo = () => {
   ]
 
   return (
-    <div className='w-full bg-creamey min-h-screen md:h-[150vh] flex  md:px-12 py-24 md:py-32'>
+    <div className='w-full bg-creamey min-h-screen md:h-[150vh] flex max-md:ml-8  md:px-12 py-24 md:py-32'>
         <div className=' max-sm:w-[40%] w-1/2 flex  lg:pl-16 xl:pl-32 flex-col justify-start md:items-start relative'>
         <motion.div 
           style={{
@@ -62,14 +62,14 @@ const HeroTwo = () => {
             x: textXr,
             opacity: textOpacity
           }}
-          className={`  text-lovely text-5xl md:text-7xl lg:text-9xl font-normal ${lifeyFont.className}`}>plan</motion.h1>
+          className={`  text-lovely text-5xl md:text-7xl lg:text-9xl max-sm:ml-[5vw] font-normal ${lifeyFont.className}`}>plan</motion.h1>
         <motion.h1 
           style={{
             x: textXr,
             opacity: textOpacity,
             transform: 'scaleY(1.3)'
           }}
-          className='text-lovely italic text-2xl md:text-4xl lg:text-5xl  font-light'>LIKE A PRO ..</motion.h1>
+          className='text-lovely italic text-2xl max-sm:ml-[4vw] md:text-4xl lg:text-5xl  font-light'>LIKE A PRO ..</motion.h1>
         <motion.div 
           style={{
             y:ringY,
@@ -108,7 +108,7 @@ const HeroTwo = () => {
             y: sectionY,
             opacity: textOpacity
           }}
-          className='text-lovely max-sm:text-sm uppercase text-sm ml-[15vw] md:ml-[10vw] sm:ml-[10vw] lg:ml-[8vw]'>
+          className='text-lovely max-sm:text-sm uppercase text-sm ml-[9vw] md:ml-[10vw] sm:ml-[10vw] lg:ml-[8vw]'>
                 <motion.h1 
                   style={{
                     x:partyX,
@@ -132,7 +132,7 @@ const HeroTwo = () => {
             scale: ringScale,
             opacity: textOpacity
           }}
-          className='rotate-12 absolute lg:bottom-[25vh] bottom-[30vh] right-[2vw]  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]'>
+          className='rotate-12 absolute lg:bottom-[25vh] bottom-[30vh] right-[6vw]  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]'>
           {/* // className='rotate-12  -top-[5vh] -right-[30vw]  md:right-[5vw] sm:right-[5vw] lg:right-[6vw]'> */}
                   <Image className='aspect-auto' width={120} height={50} alt='fyonka' src={'/hero/WifeyForLifey Illustrations-28.png'}></Image>
         </motion.div>
