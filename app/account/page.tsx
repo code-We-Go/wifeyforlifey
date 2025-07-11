@@ -167,7 +167,7 @@ export default function AccountPage() {
     isSubscribed: session.user.isSubscribed || false,
     subscriptionExpiryDate:session.user.subscriptionExpiryDate,
     imgUrl: session.user.image,
-    loyaltyPoints: 1250,
+    loyaltyPoints: 0,
     wishlistItems: wishList.length,
     orders: orders.length,
   };

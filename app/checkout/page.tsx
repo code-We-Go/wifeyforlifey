@@ -18,6 +18,7 @@ import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
 import { wifeyExperience } from "../constants";
 import Image from "next/image";
+import { Spinner } from "@material-tailwind/react";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -543,7 +544,10 @@ const CheckoutClientPage = () => {
     // cart.length > 0 ?
     <div
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}
-    >
+      >
+      {loading &&<div className="fixed z-20 inset-0 bg-black/40 flex w-full h-[100vh] justify-center items-center">
+      <div className="w-12 animate-spin border-lovely border-b-2 h-12 rounded-full  "></div>
+      </div>}
       <h1
         className={`${thirdFont.className} tracking-normal text-xl text-everGreen md:text-3xl mb-4 md:mb-8  font-semibold`}
       >
@@ -1088,8 +1092,8 @@ const CheckoutClientPage = () => {
             {payment === "cash" || "instapay" ? (
               <div className={`flex justify-end`}>
                 <button
-                  className="bg-lovely rounded-2xl text-creamey hover:bg-lovely/90 px-4 py-2"
-                  onClick={() => handleSubmit}
+                  className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
+                  onClick={handleSubmit}
                   disabled={loading || items.length === 0}
                 >
                   Confirm order

@@ -110,7 +110,7 @@ const HeroTwo = () => {
               y: sectionY,
               opacity: textOpacity
             }}
-            className='text-lovely max-sm:text-sm uppercase text-sm ml-[9vw] md:ml-[10vw] sm:ml-[10vw] lg:ml-[8vw]'>
+            className='text-lovely max-sm:text-sm uppercase text-sm ml-[9vw] md:ml-[10vw] sm:ml-[10vw] lg:ml-[10vw]'>
                   <motion.h1 
                     style={{
                       x:partyX,
@@ -134,7 +134,7 @@ const HeroTwo = () => {
               scale: ringScale,
               opacity: textOpacity
             }}
-            className='rotate-12 absolute lg:bottom-[25vh] -bottom-[120px] right-[6vw]  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]'>
+            className='rotate-12 absolute  -bottom-[120px] right-[6vw]  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]'>
                     <Image className='aspect-auto' width={120} height={50} alt='fyonka' src={'/hero/WifeyForLifey Illustrations-28.png'}></Image>
           </motion.div>
         </div>

@@ -6,6 +6,7 @@ import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import axios from "axios";
 import { NextResponse } from "next/server";
+import productsModel from "@/app/modals/productsModel";
 
 const loadDB = async () => {
     console.log('hna');
@@ -13,6 +14,50 @@ const loadDB = async () => {
 }
 
 loadDB();
+
+async function decreaseStock(cart: any[]) {
+  // product(variants)=>variant (attribures)=>attribute
+  for (const item of cart) {
+    const product = await productsModel.findById(item.productId);
+    if (!product) {
+        return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 404 });
+    }
+console.log("productFound")
+    // Find the variation with matching color
+    const variatiant = product.variations.find(
+        (v: any) => v.name === item.variant.name
+    );
+    
+    
+    if (!variatiant) {
+      return NextResponse.json({ error: ` variant not found: ${item.color}` }, { status: 404 });
+    }
+    console.log("variantFound")
+  const attribute = variatiant.attributes.find(
+    (a: any) => a.name === item.attributes.name
+  )
+  console.log("attributesFound")
+
+
+
+    // Find the size within the variation
+
+
+    // Check if enough stock is available
+    if (attribute.stock < item.quantity) {
+      console.log('stock problem')
+        return NextResponse.json({ 
+            error: `Insufficient stock for ${item.productID} )` 
+        }, { status: 400 });
+    }
+
+    // Decrease stock
+    attribute.stock -= item.quantity;
+
+    // Save the updated product
+    await product.save();
+}
+}
 
 export async function POST(request: Request) {
     const data = await request.json();
@@ -33,6 +78,9 @@ export async function POST(request: Request) {
     console.log('items'+items.length)
 
     if(data.cash==="cash"){
+      try {
+        await decreaseStock(items); // <-- Decrease stock before order creation
+
       const res = await ordersModel.create({ 
         email:data.email,
          orderID:''
@@ -82,6 +130,9 @@ export async function POST(request: Request) {
                   //     //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
                   // });
       return NextResponse.json({token:'wiig'}, { status: 200 })
+      } catch (err: any) {
+        return NextResponse.json({ message: err.message }, { status: 400 });
+      }
     }
     // else if(data.cash==="instapay"){
     //   const res = await ordersModel.create({ 
@@ -126,6 +177,7 @@ export async function POST(request: Request) {
     else if(data.cash ==="card"){
       console.log("amount" + data.total)
     try {
+
       const specialReference = `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 console.log(specialReference);
 console.log("firstDebug" + data.subscription )
@@ -205,6 +257,7 @@ if(data.subscription === "theWifeyExperience"){
   return NextResponse.json({token:order.data.client_secret}, { status: 200 })
 }
 else{
+
   const order = await axios.post(
     'https://accept.paymob.com/v1/intention/',
     {
@@ -251,7 +304,8 @@ else{
   console.log('orderData'+order.data.payment_keys[0].order_id)
   console.log('orderID '+order.data.payment_keys[0].order_id)
   console.log('subTotal '+order.data.payment_keys[0].order_id)
-  
+  await decreaseStock(items); // <-- Decrease stock before order creation
+
   await ordersModel.create({ 
     email:data.email,
      orderID:order?order.data.payment_keys[0].order_id:''

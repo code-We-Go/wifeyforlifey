@@ -130,7 +130,7 @@ export default function ProductModal() {
                       key={index}
                       variant={selectedVariant === variant ? "default" : "outline"}
                       onClick={() => handleVariantChange(variant)}
-                      className="rounded-full"
+                      className="rounded-full bg-pinkey text-lovely hover:bg-lovely/90 hover:text-creamey"
                     >
                       {variant.name}
                     </Button>
@@ -147,7 +147,7 @@ export default function ProductModal() {
                         key={index}
                         variant={selectedAttribute === attr ? "default" : "outline"}
                         onClick={() => handleAttributeChange(attr)}
-                        className="rounded-full"
+                        className="rounded-full bg-pinkey text-lovely hover:bg-lovely/90 hover:text-creamey"
                         disabled={attr.stock <= 0}
                       >
                         {attr.name}
@@ -163,6 +163,7 @@ export default function ProductModal() {
               <div className="text-sm font-medium mb-2">Quantity</div>
               <div className="flex items-center space-x-2">
                 <Button
+                className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
                   variant="outline"
                   size="icon"
                   onClick={decrementQuantity}
@@ -173,6 +174,7 @@ export default function ProductModal() {
                 </Button>
                 <div className="w-12 text-center">{quantity}</div>
                 <Button
+                className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
                   variant="outline"
                   size="icon"
                   onClick={incrementQuantity}
