@@ -34,6 +34,7 @@ const WishlistPage = () => {
     addItem(item);
     handleRemoveFromWishlist(item.productId, item.variant, item.attributes);
     toast({
+      
       title: "Added to cart",
       description: `${item.productName} has been moved to your cart.`,
     });
@@ -62,24 +63,20 @@ const WishlistPage = () => {
     <div className="container-custom py-8 md:py-12">
       <div className="flex items-center mb-8">
         <h1 className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl  font-semibold`}>Wishlist</h1>
-        <span className="ml-2 ">
+        <span className="ml-2 text-lovely/90">
           ({wishList.length} {wishList.length === 1 ? "item" : "items"})
         </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Wishlist Items */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="hidden md:grid grid-cols-12 gap-4 text-sm text-lovely/90 mb-2">
-            <div className="col-span-5 text-center">Product</div>
-            <div className="col-span-2 text-center">Variants</div>
-            <div className="col-span-1 text-center">Price</div>
-          </div>
+        <div className="lg:col-span-3 space-y-6">
+
 
           <Separator className="hidden md:block" />
 
           {wishList.map((item, index) => (
-            <div key={index} className="bg-card bg-everGreen text-creamey rounded-lg p-4 md:p-6 shadow-sm">
+            <div key={index} className="bg-card bg-lovely border-lovely border-2  text-creamey rounded-lg p-4 md:p-6 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 {/* Product */}
                 <div className="md:col-span-5 flex items-center space-x-4">
@@ -113,7 +110,7 @@ const WishlistPage = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-creamey  hover:text-creamey hover:border hover:border-creamey bg-lovely hover:bg-saga"
+                    className="text-lovely  hover:text-lovely hover:border hover:border-creamey bg-creamey hover:font-semibold hover:bg-creamey"
                     onClick={() => handleMoveToCart(item)}
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
@@ -122,10 +119,10 @@ const WishlistPage = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    className="h-8 w-8 text-creamey hover:text-lovely hover:bg-creamey"
                     onClick={() => handleRemoveFromWishlist(item.productId, item.variant, item.attributes)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4  w-4" />
                     <span className="sr-only">Remove item</span>
                   </Button>
                 </div>
@@ -134,7 +131,7 @@ const WishlistPage = () => {
           ))}
 
           <div className="mt-6 flex justify-between items-center">
-            <Button asChild variant="outline" className="gap-2">
+            <Button asChild variant="outline" className="gap-2 bg-lovely text-creamey hover:text-creamey hover:bg-lovely hover:font-semibold">
               <Link href="/shop">
                 <ArrowLeft className="h-4 w-4" />
                 Continue Shopping
