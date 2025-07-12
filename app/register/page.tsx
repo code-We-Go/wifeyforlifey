@@ -53,11 +53,12 @@ import { BadgeAlert } from 'lucide-react';
   } 
 
   return (
-    <div className=" bg-pattern1 ">
-      <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
-      <div className="max-w-md rounded-2xl bg-lovely shadow-2xl w-full py-3 px-6 space-y-4">
+    <div className=" bg-pinkey ">
+      <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)]  flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
+      {/* <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'> */}
+      <div className="max-w-md rounded-2xl bg-creamey shadow-2xl w-full py-3 px-6 space-y-4">
         <div>
-          <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-creamey`}>
+          <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-lovely`}>
             Create an account
           </h2>
         </div>
@@ -72,7 +73,7 @@ import { BadgeAlert } from 'lucide-react';
                 name="username"
                 type="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300  text-gray-900 rounded-t-md focus:outline-none focus:ring-primary bg-creamey/90 focus:border-primary focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none placeholder:text-lovely/90 relative block w-full px-3 py-2 border border-pinkey  text-lovely/90 rounded-t-md focus:outline-none focus:ring-primary bg-creamey/90 focus:border-pinkey focus:z-10 sm:text-sm"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -88,7 +89,7 @@ import { BadgeAlert } from 'lucide-react';
                 name="email"
                 type="email"
                 required
-                className="appearance-none bg-creamey/90 rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className="appearance-none placeholder:text-lovely/90 bg-creamey/90 rounded-none relative block w-full px-3 py-2 border border-pinkey placeholder-gray-500 text-lovely/90 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -104,7 +105,7 @@ import { BadgeAlert } from 'lucide-react';
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none placeholder:text-lovely/90 relative block w-full px-3 py-2 border border-pinkey bg-creamey text-lovely/90 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -129,13 +130,13 @@ import { BadgeAlert } from 'lucide-react';
         </form>
         <div className="relative flex my-6">
           <div className="w-full inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-pinkey"></div>
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 text-creamey whitespace-nowrap">Or</span>
           </div>
           <div className="w-full inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-pinkey"></div>
           </div>
         </div>
         
@@ -153,9 +154,9 @@ import { BadgeAlert } from 'lucide-react';
           </div>
           
           <div className="text-center">
-            <p className="text-sm text-creamey">
+            <p className="text-sm text-lovely">
               Already have an account?{' '}
-              <Link  href="/login" className="font-medium underline text-everGreen hover:text-everGreen/90">
+              <Link  href="/login" className="font-medium underline text-lovely/90 hover:text-lovely/90">
                 Sign in here
               </Link>
             </p>

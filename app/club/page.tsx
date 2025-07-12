@@ -15,6 +15,7 @@ import HeroCarousel from "./components/HeroCarouselPL";
 import { CarouselTransition } from "./components/MaterialCarousel";
 import { BottomBlurOut } from "./components/ButtomBlurOut";
 import FlipCard from "./components/FlipCard";
+import FlipingCardNew from "./components/FlipingCardNew";
 
 const OPTIONS: EmblaOptionsType = { loop: true }
 
@@ -60,6 +61,14 @@ const ClubPage = () => {
         </div>
       </div>
         
+        <div className=" grid w-full lg:grid-cols-4 gap-4 md:gap-8 lg:gap-12  h-auto pt-16 pb-20 grid-cols-1 md:grid-cols-2 ">
+
+        <FlipingCardNew exp="/experience/exp1.jpeg" sol="/experience/exp3.jpeg"/>
+        <FlipingCardNew exp="/experience/exp2.jpeg" sol="/experience/exp3.jpeg"/>
+        <FlipingCardNew exp="/experience/exp3.jpeg" sol="/experience/exp3.jpeg"/>
+        <FlipingCardNew exp="/experience/exp4.jpeg" sol="/experience/exp4.jpeg"/>
+ 
+        </div>
       <MotionSection className="text-center mt-20 md:mt-16 bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
         <h2 className={`${thirdFont.className} tracking-wide text-2xl pr-4  font-bold mb-4 text-creamey`}>
           ✨ This is the Wifey Experience
@@ -79,20 +88,13 @@ const ClubPage = () => {
         <Button
             asChild
             variant="outline"
-            className="bg-everGreen hover:text-lovely transition duration-300 border-0 hover:bg-creamey hover:border-creamey hover:border text-creamey  mt-4 "
+            className="bg-creamey hover:text-lovely hover:font-semibold transition duration-300 border-0 hover:bg-creamey hover:border-creamey hover:border text-lovely  mt-4 "
           >
             <Link href="/subscription">
               Join Now <ArrowRight className=" ml-2 h-4 w-4" />
             </Link>
           </Button>
       </MotionSection>
-        {/* <div className="grid  gap-4 md:gap-8 lg:gap-12 min-h-[140vh] h-auto pt-16 pb-20 grid-cols-1 md:grid-cols-2 ">
-
-        <FlipCard/>
-        <FlipCard/>
-        <FlipCard/>
-        <FlipCard/>
-        </div> */}
 
 
 

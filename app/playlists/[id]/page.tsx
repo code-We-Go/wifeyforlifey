@@ -161,7 +161,7 @@ export default function PlaylistPage() {
     return (
       <div className="container-custom py-16 text-center">
         <h1 className="text-2xl font-medium mb-4">Playlist not found</h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-lovely/90 mb-6">
           {error || "The playlist you are looking for doesn't exist or has been removed."}
         </p>
         <Button asChild>
@@ -178,21 +178,21 @@ export default function PlaylistPage() {
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
             <li className="inline-flex items-center">
-              <Link href="/" className="text-muted-foreground hover:text-foreground text-sm">
+              <Link href="/" className="text-lovely/90 hover:text-foreground text-sm">
                 Home
               </Link>
             </li>
             <li>
               <div className="flex items-center">
-                <span className="mx-2 text-muted-foreground">/</span>
-                <Link href="/playlists" className="text-muted-foreground hover:text-foreground text-sm">
+                <span className="mx-2 text-lovely/90">/</span>
+                <Link href="/playlists" className="text-lovely/90 hover:text-foreground text-sm">
                   Playlists
                 </Link>
               </div>
             </li>
             <li aria-current="page">
               <div className="flex items-center">
-                <span className="mx-2 text-muted-foreground">/</span>
+                <span className="mx-2 text-lovely/90">/</span>
                 <span className="text-sm font-medium text-foreground line-clamp-1">
                   {playlist.title}
                 </span>
@@ -227,10 +227,10 @@ export default function PlaylistPage() {
             <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
             {Array.isArray(playlist.description) ? (
               playlist.description.map((desc: string, idx: number) => (
-                <p key={idx} className="text-muted-foreground mt-2">{desc}</p>
+                <p key={idx} className="text-lovely/90 mt-2">{desc}</p>
               ))
             ) : (
-              <p className="text-muted-foreground mt-2">{playlist.description}</p>
+              <p className="text-lovely/90 mt-2">{playlist.description}</p>
             )}
           </div>
 
@@ -283,20 +283,20 @@ export default function PlaylistPage() {
               </div>
             ) : (
               <div className="relative aspect-video overflow-hidden rounded-lg bg-muted flex items-center justify-center">
-                <p className="text-muted-foreground">No videos available in this playlist.</p>
+                <p className="text-lovely/90">No videos available in this playlist.</p>
               </div>
             )}
 
             {selectedVideo && (
               <div>
                 <h2 className={`${thirdFont.className} text-3xl text-lovely font-medium`}>{selectedVideo.title}</h2>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                <div className="flex items-center gap-4 text-sm text-lovely/90 mt-2">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
                     {formatDate(new Date())}
                   </div>
                 </div>
-                <p className="text-muted-foreground mt-2">{selectedVideo.description}</p>
+                <p className="text-lovely/90 mt-2">{selectedVideo.description}</p>
               </div>
             )}
           </div>
@@ -306,7 +306,7 @@ export default function PlaylistPage() {
         <div className="space-y-4 md:pl-6 sticky top-8 h-fit">
           <div className="flex items-center justify-between">
             <h2 className={`${thirdFont.className} text-3xl tracking-normal text-lovely font-medium`}>Videos in this Playlist</h2>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-lovely/90">
               {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
             </span>
           </div>

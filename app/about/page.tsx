@@ -15,7 +15,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-3xl md:text-4xl font-bold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-3xl md:text-4xl font-bold mb-2 md:mb-4 text-lovely`}>
         ❤️ About Wifey for Lifey
         </h1>
         <h5 className='font-semibold'>We&apos;re not just here for your wedding—we&apos;re here for your womanhood.
@@ -28,7 +28,7 @@ const AboutPage = () => {
         </p>
 
         </motion.div>     
-        <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+        <div className="relative w-full md:w-[80vw] lg:w-[70vw]  aspect-video" >
 
           <iframe 
             src="https://drive.google.com/file/d/1Iyeq7D5_9NFjjM-0lJONHp4XuXggmOng/preview"
@@ -43,7 +43,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
         🌸 Why We&apos;re Here
         </h1>
 
@@ -60,7 +60,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
         ✨ What We Offer
         </h1>
 
@@ -85,7 +85,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
         💖 Our Brand Values
         </h1>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
@@ -128,7 +128,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-4 md:mb-6 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
         💫 Our Promise
         </h1>
 

@@ -174,7 +174,7 @@
   }
 
   .price-tag {
-    @apply text-lg font-semibold text-lovely;
+    @apply text-base md:text-lg font-semibold text-lovely;
   }
 }
 

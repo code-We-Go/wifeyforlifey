@@ -143,9 +143,9 @@ function ShopPage() {
               placeholder="Search products..."
               value={filters.search}
               onChange={(e) => updateFilter("search", e.target.value)}
-              className="pl-10 bg-creamey border-everGreen"
+              className="pl-10 bg-creamey placeholder:text-lovely/90 border-lovely/90"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lovely/90">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -178,7 +178,7 @@ function ShopPage() {
             </Select>
 
             <Sheet >
-              <SheetTrigger asChild className='bg-creamey border border-everGreen/90 text-everGreen/90'>
+              <SheetTrigger asChild className='bg-creamey border border-lovely/90 text-lovely/90'>
                 <Button variant="outline">
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
@@ -270,7 +270,7 @@ function ShopPage() {
         {/* Active Filters */}
         {(filters.category || filters.subcategory || filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-muted-foreground">Active filters:</span>
+            <span className="text-sm text-lovely/90">Active filters:</span>
             {filters.category && (
               <Badge 
                 onClick={() => {
@@ -313,7 +313,7 @@ function ShopPage() {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-everGreen mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Loading products...</p>
+            <p className="mt-4 text-lovely/90">Loading products...</p>
           </div>
         ) : products.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

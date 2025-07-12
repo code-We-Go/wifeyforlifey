@@ -407,7 +407,7 @@ export default function AccountPage() {
                <Button
                  variant="ghost"
                  size="icon"
-                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                 className="h-8 w-8 text-lovely/90 hover:font-semibold"
                  onClick={() => handleRemoveFromWishlist(item.productId, item.variant, item.attributes)}
                >
                  <Trash2 className="h-4 w-4" />

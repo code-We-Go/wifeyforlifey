@@ -50,7 +50,7 @@ const WishlistPage = () => {
           <p className=" mb-8 max-w-md mx-auto">
             Looks like you haven&apos;t added anything to your wishlist yet. Explore our products and find something you&apos;ll love!
           </p>
-          <Button asChild size="lg" className="rounded-2xl bg-everGreen text-creamey hover:bg-everGreen/90">
+          <Button asChild size="lg" className="rounded-2xl bg-creamey text-lovely hover:bg-creamey hover:font-semibold">
             <Link href="/shop">Continue Shopping</Link>
           </Button>
         </div>
@@ -61,8 +61,8 @@ const WishlistPage = () => {
   return (
     <div className="container-custom py-8 md:py-12">
       <div className="flex items-center mb-8">
-        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-everGreen md:text-5xl  font-semibold`}>Wishlist</h1>
-        <span className="ml-2 text-muted-foreground">
+        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl  font-semibold`}>Wishlist</h1>
+        <span className="ml-2 ">
           ({wishList.length} {wishList.length === 1 ? "item" : "items"})
         </span>
       </div>
@@ -70,7 +70,7 @@ const WishlistPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Wishlist Items */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="hidden md:grid grid-cols-12 gap-4 text-sm text-muted-foreground mb-2">
+          <div className="hidden md:grid grid-cols-12 gap-4 text-sm text-lovely/90 mb-2">
             <div className="col-span-5 text-center">Product</div>
             <div className="col-span-2 text-center">Variants</div>
             <div className="col-span-1 text-center">Price</div>

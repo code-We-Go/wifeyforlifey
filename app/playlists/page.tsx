@@ -146,9 +146,9 @@ function PlaylistsPage() {
               placeholder="Search playlists..."
               value={filters.search}
               onChange={(e) => updateFilter("search", e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-creamey placeholder:text-lovely/90"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lovely/90">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -164,25 +164,26 @@ function PlaylistsPage() {
             </div>
           </div>
 
-          <div className="flex gap-4 text-muted-foreground">
+          <div className="flex gap-4 text-lovely/90">
             <Select
               value={filters.sortBy}
               onValueChange={(value) => updateFilter("sortBy", value)}
+            
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
+              <SelectContent className='text-lovely/90'>
+                <SelectItem className='text-lovely/90' value="newest">Newest</SelectItem>
                 <SelectItem value="az">A-Z</SelectItem>
                 <SelectItem value="za">Z-A</SelectItem>
-                <SelectItem value="most_videos">Most Videos</SelectItem>
               </SelectContent>
             </Select>
 
-            <Sheet>
+            {/* <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline"
+                className='bg-creamey'>
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
                 </Button>
@@ -263,14 +264,14 @@ function PlaylistsPage() {
                   </Button>
                 </div>
               </SheetContent>
-            </Sheet>
+            </Sheet> */}
           </div>
         </div>
 
         {/* Active Filters */}
         {(filters.category || filters.isPublic !== undefined) && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-muted-foreground">Active filters:</span>
+            <span className="text-sm text-lovely/90">Active filters:</span>
             {filters.category && (
               <Badge 
                 onClick={() => updateFilter("category", "")} 
@@ -293,22 +294,22 @@ function PlaylistsPage() {
         )}
 
         {/* Subscription CTA */}
-       {!session?.user.isSubscribed && <div className="bg-everGreen text-creamey rounded-xl p-6 md:p-8 shadow-md">
+       {!session?.user.isSubscribed && <div className="bg-creamey text-lovely rounded-xl p-6 md:p-8 shadow-md">
           <div className="grid md:grid-cols-3 gap-6 items-center">
             <div className="md:col-span-2 space-y-4">
               <h2 className="text-2xl  font-medium">
                 Unlock Premium Content
               </h2>
-              <p className="text-creamey/90">
+              <p className="text-lovely/90">
                 Subscribe today to access our exclusive premium video playlists and tutorials.
               </p>
               <div className="flex space-x-2">
                 <div className="flex items-center text-sm">
-                  <Play className="h-4 w-4 mr-1 text-primary" />
+                  <Play className="h-4 w-4 mr-1 text-lovely/90" />
                   <span>Unlimited access</span>
                 </div>
                 <div className="flex items-center text-sm">
-                  <Lock className="h-4 w-4 mr-1 text-primary" />
+                  <Lock className="h-4 w-4 mr-1 text-lovely/90" />
                   <span>Exclusive content</span>
                 </div>
               </div>
@@ -316,7 +317,7 @@ function PlaylistsPage() {
             <div className="flex   justify-center md:justify-end">
               <Button
               onClick={()=>router.push("/subscription")}
-              size="lg" className="rounded-full bg-lovely hover:bg-lovely/80 text-creamey border border-creamey">
+              size="lg" className="rounded-full  hover:font-semibold bg-lovely hover:bg-lovely text-creamey border border-creamey">
                 Subscribe Now
               </Button>
             </div>
@@ -338,14 +339,14 @@ function PlaylistsPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 mb-4 text-muted-foreground">
+            <div className="mx-auto w-24 h-24 mb-4 text-lovely/90">
               <Filter className="w-full h-full" />
             </div>
             <h3 className="text-lg font-medium">No playlists found</h3>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-lovely/90 mt-2">
               Try adjusting your filters or search term.
             </p>
-            <Button onClick={resetFilters} variant="outline" className="mt-4">
+            <Button onClick={resetFilters} variant="outline" className="mt-4 bg-creamey text-lovely/90 hover:bg-everGreen hover:text-creamey">
               Reset Filters
             </Button>
           </div>

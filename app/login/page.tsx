@@ -58,8 +58,9 @@ import { bgCreameyButton, bgRedButton } from '../constants';
   };
 
   return (
-      <div className=" bg-pattern1 ">
-        <div className='md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
+      <div className=" bg-pinkey ">
+        <div className='md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)]  flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
+        {/* <div className='md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'> */}
         <div className="max-w-md max-h-[90vh] rounded-2xl bg-creamey shadow-2xl w-full py-8 px-6 space-y-8">
           <div>
             <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-lovely`}>
@@ -118,13 +119,13 @@ import { bgCreameyButton, bgRedButton } from '../constants';
           </form>
           <div className="relative flex my-6">
             <div className="w-full inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-lovely"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 text-lovely whitespace-nowrap">Or</span>
             </div>
             <div className="w-full inset-0 flex items-center">
-              <div className="w-full border-t border-lovely/95"></div>
+              <div className="w-full border-t border-lovely"></div>
             </div>
           </div>
           <div>

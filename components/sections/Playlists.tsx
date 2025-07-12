@@ -53,7 +53,7 @@ const Playlists = () => {
           <Button
             asChild
             variant="outline"
-            className="mt-4 hover:bg-saga bg-everGreen hover:text-creamey border-0  text-creamey md:mt-0"
+            className="mt-4 hover:bg-everGreen bg-creamey hover:text-creamey border-0  text-lovely md:mt-0"
           >
             <Link href="/playlists">
               View All <ArrowRight className="ml-2 h-4 w-4" />

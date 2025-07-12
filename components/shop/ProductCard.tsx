@@ -134,7 +134,7 @@ export default function ProductCard({
           />
         </Button>
       </div>
-      <div className="p-4">
+      <div className="md:p-4">
         <h4 className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}>
           {product.title}
         </h4>
@@ -152,7 +152,7 @@ export default function ProductCard({
               className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="h-4 w-4 mr-1" />
+              <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1" />
               <span className="text-xs">Add</span>
             </Button>
           </div>

@@ -151,19 +151,19 @@ export default function Footer() {
             <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Shop</h6>
             <ul className="space-y-2">
               {shopCategoriesLoading && (
-                <li className="text-sm text-muted-foreground">Loading...</li>
+                <li className="text-sm text-creamey">Loading...</li>
               )}
               {shopCategoriesError && (
                 <li className="text-sm text-red-500">{shopCategoriesError}</li>
               )}
               {!shopCategoriesLoading && !shopCategoriesError && shopCategories.length === 0 && (
-                <li className="text-sm text-muted-foreground">No categories found.</li>
+                <li className="text-sm text-creamey">No categories found.</li>
               )}
               {shopCategories.map((cat) => (
                 <li key={cat._id}>
                   <Link
                     href={`/shop?category=${cat._id}`}
-                    className=" hover:text-foreground text-sm"
+                    className=" hover:cursor-pointer hover:underline transition duration-500 text-sm"
                   >
                     {cat.name}
                   </Link>
@@ -176,19 +176,19 @@ export default function Footer() {
             <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Playlists</h6>
             <ul className="space-y-2">
               {playlistsLoading && (
-                <li className="text-sm text-muted-foreground">Loading...</li>
+                <li className="text-sm text-creamey">Loading...</li>
               )}
               {playlistsError && (
                 <li className="text-sm text-red-500">{playlistsError}</li>
               )}
               {!playlistsLoading && !playlistsError && playlists.length === 0 && (
-                <li className="text-sm text-muted-foreground">No playlists found.</li>
+                <li className="text-sm text-creamey">No playlists found.</li>
               )}
               {playlists.slice(0, 5).map((playlist) => (
                 <li key={playlist._id}>
                   <Link
                     href={`/playlists/${playlist._id}`}
-                    className=" hover:text-foreground text-sm"
+                    className=" hover:cursor-pointer hover:underline transition duration-500 text-sm"
                   >
                     {playlist.title}
                   </Link>

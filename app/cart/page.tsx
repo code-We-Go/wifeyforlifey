@@ -162,14 +162,14 @@ export default function CartPage() {
     return (
       <div className="container-custom py-16 max-w-4xl  mx-auto text-center">
         <div className="bg-card rounded-2xl bg-lovely text-creamey border-2 border-lovely  p-8 md:p-12 shadow-sm">
-          <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-24 h-24  rounded-full flex bg-creamey items-center justify-center mx-auto mb-6">
             <ShoppingBag className="h-12 w-12 text-lovely" />
           </div>
           <h1 className="text-2xl md:text-3xl text-creamey  font-medium mb-4">Your Cart is Empty</h1>
           <p className=" mb-8 max-w-md mx-auto">
             Looks like you haven&apos;t added anything to your cart yet. Explore our products and find something you&apos;ll love!
           </p>
-          <Button asChild size="lg" className="rounded-2xl bg-everGreen text-creamey hover:bg-everGreen/90">
+          <Button asChild size="lg" className="rounded-2xl bg-creamey text-lovely hover:bg-creamey hover:font-semibold">
             <Link href="/shop">Continue Shopping</Link>
           </Button>
         </div>

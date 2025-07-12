@@ -56,7 +56,7 @@ const Newsletters = () => {
         <h2 className={`${thirdFont.className} text-4xl md:text-5xl lg:text-6xl font-semibold text-lovely mb-4`}>
           Join Our Community
         </h2>
-        <p className="text-muted-foreground mb-8">
+        <p className="text-lovely/90 mb-8">
           Subscribe to our newsletter for the latest product drops, exclusive
           content, and special offers.
         </p>
@@ -64,7 +64,7 @@ const Newsletters = () => {
           <Input
             type="email"
             placeholder="Your email address"
-            className="rounded-full flex-1"
+            className="rounded-full bg-creamey border-lovely placeholder:text-lovely/90 flex-1"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
