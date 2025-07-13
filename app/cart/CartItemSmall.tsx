@@ -88,7 +88,7 @@ const CartItemSmall = ({item,wishListBool}:{item:CartItem,wishListBool:boolean})
      height={80}
           src={item.imageUrl}
           alt=""
-          className="aspect-auto rounded object-cover"
+          className="aspect-square rounded object-cover"
         />
         </div>
     

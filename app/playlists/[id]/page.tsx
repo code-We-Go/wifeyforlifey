@@ -367,7 +367,7 @@ export default function PlaylistPage() {
               <Button
                             onClick={()=>router.push("/subscription")}
 
-              size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-everGreen">
+              size="sm" className="rounded-2xl bg-creamey hover:text-lovely text-lovely hover:bg-creamey hover:font-semibold">
                 Subscribe Now
               </Button>
             </div>

@@ -8,7 +8,7 @@ const FlipingCardNew = ({exp,sol}:{exp:string,sol:string}) => {
         <div className='fixed inset-0'>
             <Image alt='exp1' src={exp} width={300} height={800} className='object-cover'></Image>
         </div>
-        <div className='fixed inset-0 bg-black/80 h-full w-full  [transform:rotateY(180deg)] [backface-visbility:hidden]'>
+        <div className='fixed inset-0 bg-black/80 h-full w-full  [transform:rotateY(180deg)] [backface-visibility:hidden]'>
         <Image alt='exp1' src={sol} width={300} height={800} className='object-cover'></Image>
 
         </div>

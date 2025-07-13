@@ -42,7 +42,7 @@ const WishlistPage = () => {
 
   if (wishList.length === 0) {
     return (
-      <div className="container-custom py-16 max-w-4xl mx-auto text-center">
+      <div className="container-custom py-16 max-w-4xl min-h-[calc(100vh-128px)] mx-auto text-center">
         <div className="bg-lovely text-creamey rounded-lg p-8 md:p-12 shadow-sm">
           <div className="w-24 h-24 bg-creamey rounded-full flex items-center justify-center mx-auto mb-6">
             <Heart className="h-12 w-12 text-lovely" />
@@ -60,7 +60,7 @@ const WishlistPage = () => {
   }
 
   return (
-    <div className="container-custom py-8 md:py-12">
+    <div className="container-custom py-8 md:py-12 min-h-[calc(100vh-128px)]">
       <div className="flex items-center mb-8">
         <h1 className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl  font-semibold`}>Wishlist</h1>
         <span className="ml-2 text-lovely/90">

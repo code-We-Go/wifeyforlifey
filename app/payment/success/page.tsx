@@ -49,7 +49,7 @@ setAccount(account)
         {
           subscription?
          <div className="text-lovely"> <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">🎉 Your Subscription was created successfully. 🎉</h1>
-                {!account && <p>Now you are a step a way from using your experience</p>}            
+                {!account && <p>Your subsciption was created successfuly, now create your account to enjoy our exclusive educational channel and partnerships</p>}            
             </div>
        :<h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">🎉 Your Order was created successfully. 🎉</h1>
        

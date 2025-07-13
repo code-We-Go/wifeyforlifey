@@ -50,7 +50,7 @@ const OrderSummaryItem = ({ cartItem }: { cartItem: CartItem }) => {
       <div className="flex  w-full bg-everGreen gap-4 items-start text-creamey">
         <div className="relative rounded-2xl w-[60px] h-[70px] md:w-[120px] md:h-[120px]">
           <Image
-          className="rounded-2xl aspect-auto"
+          className="rounded-2xl aspect-square"
             fill
             alt={cartItem.productName}
             src={cartItem.imageUrl}
