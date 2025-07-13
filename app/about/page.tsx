@@ -6,7 +6,7 @@ import React from 'react'
 
 const AboutPage = () => {
   return (
-    <div className={`container-custom flex w-full justify-center  items-center min-h-[calc(100vh-128px)]  h-auto font-semibold text-lovely bg-creamey`}>
+    <div className={`container-custom flex w-full justify-center  items-center min-h-[calc(100vh-128px)]  h-auto  text-lovely bg-creamey`}>
       <div className="w-full  py-8 lg:py-16 flex flex-col justify-center items-center gap-4 md:gap-8 lg:gap-16">
         {/* <h1 className={`${thirdFont.className} tracking-normal text-4xl text-lovely  md:text-5xl mb-4 md:mb-8  font-semibold`}>About <span className={`${lifeyFont.className}`}>Us</span></h1> */}
         <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
