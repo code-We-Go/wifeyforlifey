@@ -116,7 +116,17 @@ const ClubPage = () => {
         <p className="text-base text-lovely/95 leading-relaxed">
         Interviews with experts from different industries who are here to give you all the tips you didn’t know you need! 
         ✅ Real bride-tested. Expert-approved. No overwhelm, just clarity        </p>
+        <div className="grid grid-cols-1 gap-4 mt-8">
+          <div className="relative w-full h-[400px] md:h-[900px] rounded-lg overflow-hidden">
+            <Image
+              src="/experience/playlists1.png"
+              alt="Gehaz Planner Preview 1"
+              fill
+              className="object-contain "
+            />
+          </div>
 
+        </div>
         </motion.div>
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
@@ -137,7 +147,17 @@ const ClubPage = () => {
         <p className="text-base font-bold text-lovely/95 leading-relaxed">
         We’ve got brands you love, and we’ll keep adding more!
         </p>
+        <div className="grid grid-cols-1 gap-4 mt-8">
+          <div className="relative w-full h-[400px] md:h-[900px] rounded-lg overflow-hidden">
+            <Image
+              src="/experience/partners1.png"
+              alt="Gehaz Planner Preview 1"
+              fill
+              className="object-contain "
+            />
+          </div>
 
+        </div>
         </motion.div>
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
@@ -179,7 +199,24 @@ const ClubPage = () => {
 
   You’re joining a full experience — made for brides, by a bride, to make sure you never feel lost, alone, or unsure again.        </h2>
 
-
+  <div className="grid grid-cols-2 gap-2 mt-8">
+          <div className="relative w-full h-64 md:h-[400px] rounded-lg overflow-hidden">
+            <Image
+              src="/experience/support1.png"
+              alt="Gehaz Planner Preview 1"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="relative w-full h-64 md:h-[400px] rounded-lg overflow-hidden">
+            <Image
+              src="/experience/support2.png"
+              alt="Gehaz Planner Preview 2"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
         </motion.div>
         
         {/* <div className=" grid w-full lg:grid-cols-4 gap-4 md:gap-8 lg:gap-12  h-auto pt-16 pb-20 grid-cols-1 md:grid-cols-2 ">
@@ -190,22 +227,24 @@ const ClubPage = () => {
         <FlipingCardNew exp="/experience/exp4.jpeg" sol="/experience/exp4.jpeg"/>
  
         </div> */}
-      <MotionSection className="text-center mt-20 md:mt-16 bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
-        <h2 className={`${thirdFont.className} tracking-wide text-2xl pr-4  font-bold mb-4 text-creamey`}>
+      <MotionSection className="text-start mt-20 md:mt-16 bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
+        <h2 className={`${thirdFont.className} w-full text-center tracking-wide text-2xl pr-4  font-bold mb-4 text-creamey`}>
           ✨ This is the Wifey Experience
         </h2>
-        <p className="text-lg text-creamey/90 mb-4">
+        <p className="text-lg text-creamey/90 mb-2">
           Organized. Supportive. Real.
         </p>
-        <p className="text-lg text-creamey/90 mb-8">
+        <p className="text-lg text-creamey/90 mb-2">
           And always wrapped in love.
         </p>
-        <h3 className="text-lg  mb-4 text-creamey/90">
+        <h3 className="text-lg  mb-2 text-creamey/90">
           Ready to feel held, heard, and hyped up for your bridal era?
         </h3>
         <p className="text-base text-creamey/90">
           You&apos;re one click away from joining your new favorite club
         </p>
+       <div className="flex w-full justify-center">
+
         <Button
             asChild
             variant="outline"
@@ -215,6 +254,7 @@ const ClubPage = () => {
               Join Now <ArrowRight className=" ml-2 h-4 w-4" />
             </Link>
           </Button>
+       </div>
       </MotionSection>
 
 
