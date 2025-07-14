@@ -30,16 +30,13 @@ export async function POST(req: Request) {
     await ConnectDB();
 
     // Check if user already exists
-    const existingUser = await UserModel.findOne({ 
-      $or: [{ email }, { username }] 
-    });
+    const existingUser = await UserModel.findOne(
+    {"email":email}  
+    );
     
     if (existingUser) {
-      if (existingUser.email === email) {
         return new Response(JSON.stringify({ error: "Email already used" }), { status: 400 });
-      } else {
-        return new Response(JSON.stringify({ error: "Username already taken" }), { status: 400 });
-      }
+
     }
 
     const hashedPassword = await hash(password, 10);

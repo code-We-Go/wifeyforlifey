@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         // Fetch orders for the specific user email
         const orders = await ordersModel.find({ email: email })
             .sort({ createdAt: -1 }) // Sort by newest first
-            .limit(20); // Limit to 20 most recent orders
+            ; // Limit to 20 most recent orders
 
         return NextResponse.json({
             orders: orders,

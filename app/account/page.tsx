@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import CartItemSmall from '../cart/CartItemSmall';
 import { IOrder } from '../interfaces/interfaces';
 import { useCart } from '@/providers/CartProvider';
+import { UploadDropzone } from '@/utils/uploadthing';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -29,6 +30,8 @@ export default function AccountPage() {
   const [showAllOrders, setShowAllOrders] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     imageUrl: ''
   });
@@ -36,6 +39,7 @@ export default function AccountPage() {
   const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
   const [modalStatus, setModalStatus] = useState<string>('pending');
   const [modalPayment, setModalPayment] = useState<string>('pending');
+  const [showUploader, setShowUploader] = useState(false);
   const handleRemoveFromWishlist = (productId: string, variant: any, attributes: any) => {
     setWishList((prevList) => 
       prevList.filter(
@@ -70,14 +74,38 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (session?.user) {
-      setUserInfo({
-        name: session.user.name || 'User',
-        email: session.user.email || 'user@example.com',
-        imageUrl: session.user.image || ''
-      });
+      fetchUserData();
       fetchUserOrders();
     }
   }, [session]);
+
+  const fetchUserData = async () => {
+    if (!session?.user?.email) return;
+    
+    try {
+      const response = await axios.get(`/api/user/profile?email=${session.user.email}`);
+      const userData = response.data.user;
+      console.log("userFront"+userData.lastName)
+      
+      setUserInfo({
+        name: userData.username || 'User',
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        email: userData.email || 'user@example.com',
+        imageUrl: userData.imageURL || ''
+      });
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Fallback to session data if API call fails
+      setUserInfo({
+        name: session.user.name || 'User',
+        firstName: session.user.firstName || '',
+        lastName: session.user.lastName || '',
+        email: session.user.email || 'user@example.com',
+        imageUrl: session.user.image || ''
+      });
+    }
+  };
 
   const fetchUserOrders = async () => {
     if (!session?.user?.email) return;
@@ -124,25 +152,28 @@ export default function AccountPage() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Here you would typically upload to your server/cloud storage
-      // For now, we'll create a local URL
-      const imageUrl = URL.createObjectURL(file);
-      setUserInfo(prev => ({ ...prev, imageUrl }));
-    }
-  };
-
   const handleSaveInfo = async () => {
+    if (!session?.user?.email) return;
+    
     try {
-      // Here you would typically save to your backend
-      toast({
-        title: "Success",
-        description: "Profile information updated successfully",
+      const response = await axios.put(`/api/user/profile`, {
+        email: session.user.email,
+        username: userInfo.name,
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        imageURL: userInfo.imageUrl
       });
-      setEditingInfo(false);
+      
+      if (response.data.success) {
+        toast({
+          variant:"added",
+          title: "Success",
+          description: "Profile information updated successfully",
+        });
+        setEditingInfo(false);
+      }
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update profile information",
@@ -200,7 +231,7 @@ export default function AccountPage() {
     { id: 'orders', label: 'Recent Orders', icon: ShoppingBag },
     { id: 'wishlist', label: 'Wishlist', icon: Heart },
     { id: 'Loyality', label: 'Loyality', icon: Gift },
-    // { id: 'info', label: 'Info', icon: UserCircle },
+    { id: 'info', label: 'Info', icon: UserCircle },
   ];
 
   return (
@@ -208,12 +239,12 @@ export default function AccountPage() {
       {/* Profile Header */}
       <div className='w-full flex flex-col sm:flex-row sm:justify-between gap-4'>
         <div className="flex items-center space-x-4 min-w-0">
-          {user.imgUrl ? 
+          {userInfo.imageUrl ? 
             <div className='rounded-full h-24 w-24 border-2 border-lovely relative flex-shrink-0'> 
               <Image
-                className='rounded-full'
+                className='rounded-full object-cover'
                 alt={user.name} 
-                src={user.imgUrl}  
+                src={userInfo.imageUrl}  
                 fill
               /> 
             </div> :
@@ -470,60 +501,103 @@ export default function AccountPage() {
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     {userInfo.imageUrl ? (
-                      <div className="relative h-20 w-20 rounded-full overflow-hidden">
+                      <div className="relative h-20 w-20 rounded-full overflow-hidden group">
                         <Image
                           src={userInfo.imageUrl}
                           alt="Profile"
                           fill
                           className="object-cover"
                         />
+                        {editingInfo && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={() => setShowUploader(true)}>
+                            <Camera className="h-8 w-8 text-creamey" />
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                      <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center relative group">
                         <UserCircle className="h-12 w-12 text-gray-400" />
+                        {editingInfo && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={() => setShowUploader(true)}>
+                            <Camera className="h-8 w-8 text-creamey" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {editingInfo && (
-                      <label className="absolute bottom-0 right-0 bg-lovely text-white p-1 rounded-full cursor-pointer">
-                        <Camera className="h-3 w-3" />
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                        />
-                      </label>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Profile Picture</p>
+                    <p className="text-sm text-lovely/80">Profile Picture</p>
                     {editingInfo && (
-                      <p className="text-xs text-gray-400">Click the camera icon to change</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-lovely/80">Click the camera icon to change</p>
+                        <button
+                          type="button"
+                          className="p-1 rounded-full bg-lovely hover:bg-lovely/80 transition"
+                          onClick={() => setShowUploader(true)}
+                          aria-label="Change profile picture"
+                        >
+                          <Camera className="h-4 w-4 text-creamey" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Name */}
-                <div>
-                  <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                    Full Name
+                {/* User Name */}
+                <div className='flex gap-2 max-md:flex-col items-center'>
+                  <Label htmlFor="name" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
+                    User Name :
                   </Label>
                   {editingInfo ? (
                     <Input
                       id="name"
                       value={userInfo.name}
                       onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                      className="mt-1"
+                      className="bg-creamey border-lovely text-lovely"
                     />
                   ) : (
-                    <p className="mt-1 text-sm text-gray-900">{userInfo.name}</p>
+                    <p className=" text-sm text-lovely">{userInfo.name}</p>
+                  )}
+                </div>
+
+                {/* First Name */}
+                <div className='flex  max-md:flex-col items-center gap-2'>
+                  <Label htmlFor="firstName" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
+                    First Name :
+                  </Label>
+                  {editingInfo ? (
+                    <Input
+                      id="firstName"
+                      value={userInfo.firstName}
+                      onChange={(e) => setUserInfo(prev => ({ ...prev, firstName: e.target.value }))}
+                      className="bg-creamey border-lovely text-lovely"
+                    />
+                  ) : (
+                    <p className="text-sm text-lovely">{userInfo.firstName}</p>
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div className='flex max-md:flex-col items-center gap-2'>
+                  <Label htmlFor="lastName" className="text-sm font-medium whitespace-nowrap text-lovely/90">
+                    Last Name :
+                  </Label>
+                  {editingInfo ? (
+                    <Input
+                      id="lastName"
+                      value={userInfo.lastName}
+                      onChange={(e) => setUserInfo(prev => ({ ...prev, lastName: e.target.value }))}
+                      className="bg-creamey border-lovely text-lovely"
+                    />
+                  ) : (
+                    <p className=" text-sm text-lovely">{userInfo.lastName}</p>
                   )}
                 </div>
 
                 {/* Email */}
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email Address
+                <div className='flex max-md:flex-col items-center gap-2'>
+                  <Label htmlFor="email" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
+                    Email Address :
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -531,28 +605,28 @@ export default function AccountPage() {
                       type="email"
                       value={userInfo.email}
                       onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
-                      className="mt-1"
+                      className="bg-creamey border-lovely text-lovely"
                     />
                   ) : (
-                    <p className="mt-1 text-sm text-gray-900">{userInfo.email}</p>
+                    <p className=" text-sm text-lovely">{userInfo.email}</p>
                   )}
                 </div>
 
                 {/* Subscription Status */}
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">
-                    Subscription Status
+                <div className='flex max-md:flex-col items-center gap-2'>
+                  <Label className="text-sm font-medium text-lovely/90">
+                    Subscription Status :
                   </Label>
-                  <div className="mt-1 flex items-center space-x-2">
+                  <div className=" flex items-center space-x-1">
                     {user.isSubscribed ? (
                       <>
-                        <BadgeCheck className="h-4 w-4 text-everGreen" />
-                        <span className="text-sm text-everGreen">Active Subscription</span>
+                        <BadgeCheck className="h-4 w-4 text-lovely" />
+                        <span className="text-sm text-lovely">Active Subscription</span>
                       </>
                     ) : (
                       <>
-                        <BadgeAlert className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-500">No Active Subscription</span>
+                        <BadgeAlert className="h-4 w-4 text-lovely/80" />
+                        <span className="text-sm text-lovely/80">No Active Subscription</span>
                       </>
                     )}
                   </div>
@@ -562,12 +636,6 @@ export default function AccountPage() {
                   <div className="flex space-x-3 pt-4">
                     <Button onClick={handleSaveInfo} className="bg-lovely text-creamey hover:bg-lovely/90">
                       Save Changes
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setEditingInfo(false)}
-                    >
-                      Cancel
                     </Button>
                   </div>
                 )}
@@ -592,7 +660,7 @@ export default function AccountPage() {
           ) : orders.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+              <h3 className="text-lg font-medium text-lovely mb-2">No orders yet</h3>
               <p className="text-gray-500">Start shopping to see your order history here</p>
             </div>
           ) : (
@@ -700,6 +768,36 @@ export default function AccountPage() {
               <p><strong>Total:</strong> {selectedOrder.total !== undefined ? selectedOrder.total.toFixed(2) : 'N/A'} LE</p>
               <p><strong>Created At:</strong> {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString("en-EG", { timeZone: "Africa/Cairo" }) : 'N/A'}</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for UploadDropzone */}
+      {showUploader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowUploader(false)}>
+          <div className="bg-creamey p-6 rounded-lg shadow-lg" onClick={e => e.stopPropagation()}>
+            <UploadDropzone
+            
+              endpoint="mediaUploader"
+              onClientUploadComplete={(res) => {
+                if (res && res[0] && res[0].url) {
+                  setUserInfo(prev => ({ ...prev, imageUrl: res[0].url }));
+                  setShowUploader(false);
+                }
+              }}
+              onUploadError={(error) => {
+                console.error('Image upload failed:', error);
+              }}
+              appearance={{
+              uploadIcon:"text-lovely",
+
+              allowedContent:"text-lovely/90",
+                button: 'bg-lovely text-creamey rounded-full px-6 py-2 font-bold hover:bg-lovely/80 transition hover:cursor-pointer',
+                container: 'flex text-lovely/80 flex-col items-center gap-4',
+              }}
+              className="w-64"
+            />
+            <button className="mt-4 text-lovely underline text-sm" onClick={() => setShowUploader(false)}>Cancel</button>
           </div>
         </div>
       )}

@@ -11,6 +11,8 @@ declare module "next-auth" {
   interface Session {
     user: {
       id?: string;
+      firstName?:string
+      lastName?:string
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -71,6 +73,7 @@ export const authOptions: NextAuthOptions = {
               username: user.name || user.email?.split('@')[0] || 'user',
               email: user.email,
               emailVerified: true,
+              imageURL:user.image,
               isSubscribed: subscribed?true:false, // Default value for new users
             });
           }

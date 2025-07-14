@@ -1,14 +1,18 @@
 import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
+import { string } from "zod";
 
 // Define the User interface
 export interface IUser extends Document {
   _id :string
   username: string;
+  firstName?:string;
+  lastName?:string;
   password: string;
   email:string;
-  emailVerified:boolean
-  isSubscribed:boolean
+  emailVerified:boolean;
+  isSubscribed:boolean;
+  imageURL?:string;
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -18,9 +22,25 @@ const UserSchema = new Schema<IUser>(
     username: { 
       type: String, 
       required: true, 
-      unique: true,
-      trim: true,
+      unique: false,
+      // trim: true,
       minlength: 3
+    },
+    
+    firstName:{
+      type: String,
+      required: false,
+      default: ""
+    },
+    lastName:{
+      type: String,
+      required: false,
+      default: ""
+    },
+    imageURL:{
+      type: String,
+      required: false,
+      default: ""
     },
     password: { 
       type: String, 

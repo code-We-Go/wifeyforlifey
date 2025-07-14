@@ -190,7 +190,7 @@ export default function Header() {
                   <span className="text-base font-medium  ">Account</span>
                 </div>
               </HoverCardTrigger>
-              <HoverCardContent className="w-64 p-0 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <HoverCardContent className="w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg">
                 <div className="p-4">
                   <nav className="space-y-1">
                     {
@@ -199,9 +199,9 @@ export default function Header() {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md group transition-colors"
+                        className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                       >
-                        <item.icon className="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" />
+                        <item.icon className="mr-3 h-4 w-4 text-lovely " />
                         {item.label}
                       </Link>
                     )):<div></div>}
@@ -218,11 +218,11 @@ export default function Header() {
                     </div>
                     :
                     <div className="">
-                    <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors">
+                    <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors">
                    
                       Sign In
                     </Link>
-                    <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors">
+                    <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors">
                    
                       Sign up
                     </Link>
@@ -263,8 +263,8 @@ export default function Header() {
 
           {/* Mobile Menu Toggle */}
           <div className="flex w-full justify-between md:hidden items-center text-creamey">
-            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-              <SheetTrigger asChild>
+            <Sheet open={isMobileMenuOpen}  onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild className="">
                 <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
                 </Button>
