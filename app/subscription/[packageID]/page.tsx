@@ -487,10 +487,10 @@ const CheckoutClientPage = () => {
   }, [packageID]);
 
   if (loadingPackage) {
-    return <div className="container-custom py-16 text-center">Loading package...</div>;
+    return <div className="container-custom w-full min-h-[calc(100vh-128px)] py-16 text-center text-lovely justify-center items-center">Loading ...</div>;
   }
   if (notFound || !packageData) {
-    return <div className="container-custom py-16 text-center">Package not found.</div>;
+    return <div className="container-custom py-16 text-center">Subscription not found.</div>;
   }
 
   return (

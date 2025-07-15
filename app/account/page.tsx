@@ -17,6 +17,7 @@ import CartItemSmall from '../cart/CartItemSmall';
 import { IOrder } from '../interfaces/interfaces';
 import { useCart } from '@/providers/CartProvider';
 import { UploadDropzone } from '@/utils/uploadthing';
+import { compressImage } from '@/utils/imageCompression';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -78,6 +79,29 @@ export default function AccountPage() {
       fetchUserOrders();
     }
   }, [session]);
+  const [isUploading, setIsUploading] = useState(false);
+
+const handleComperession =async (files: File[]) => {
+  setIsUploading(true);  
+  try {
+    const compressedFiles = await Promise.all(
+      files.map(async (file) => {
+        if (file.type.startsWith('image/')) {
+          return await compressImage(file);
+        }
+        return file;
+      })
+    );
+    return compressedFiles;
+  } catch (error) {
+    console.error('Error during compression:', error);
+    return files;
+  } 
+  finally {
+    setIsUploading(false);
+  }
+
+}
 
   const fetchUserData = async () => {
     if (!session?.user?.email) return;
@@ -776,9 +800,27 @@ export default function AccountPage() {
       {showUploader && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowUploader(false)}>
           <div className="bg-creamey p-6 rounded-lg shadow-lg" onClick={e => e.stopPropagation()}>
+            {/* Loading Overlay */}
+            {isUploading && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 transition-opacity">
+                <div className="bg-creamey rounded-2xl shadow-xl flex flex-col items-center px-8 py-8 min-w-[280px] animate-fadeIn">
+                  <div className="animate-spin rounded-full h-14 w-14 border-t-4 border-lovely border-b-4 mb-4"></div>
+                  <span className="text-lg text-lovely font-bold mb-2">Hang tight!</span>
+                  <span className="text-sm text-lovely/80 text-center mb-4">We&apos;re compressing your image for a faster upload.</span>
+                  {/* Optional: Cancel button */}
+                  {/* <button
+                    className="mt-2 text-lovely underline text-xs hover:text-pinkey"
+                    onClick={() => setIsUploading(false)}
+                  >
+                    Cancel
+                  </button> */}
+                </div>
+              </div>
+            )}
             <UploadDropzone
             
               endpoint="mediaUploader"
+              onBeforeUploadBegin={handleComperession}
               onClientUploadComplete={(res) => {
                 if (res && res[0] && res[0].url) {
                   setUserInfo(prev => ({ ...prev, imageUrl: res[0].url }));
