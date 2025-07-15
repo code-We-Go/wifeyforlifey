@@ -246,7 +246,7 @@ export default function PlaylistPage() {
                       This video is only available to premium subscribers. Subscribe now to unlock all our premium content.
                     </p>
      <Button 
-                   onClick={()=>router.push("/subscription")}
+                   onClick={()=>router.push("/subscription/687396821b4da119eb1c13fe")}
 
      size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely">
                 Subscribe Now
@@ -365,7 +365,7 @@ export default function PlaylistPage() {
                 Subscribe to unlock all premium videos in this playlist.
               </p>
               <Button
-                            onClick={()=>router.push("/subscription")}
+                            onClick={()=>router.push("/subscription/687396821b4da119eb1c13fe")}
 
               size="sm" className="rounded-2xl bg-creamey hover:text-lovely text-lovely hover:bg-creamey hover:font-semibold">
                 Subscribe Now

@@ -39,7 +39,7 @@ const ExclusiveContent = () => {
               </div>
             </div>
             <Button asChild size="lg" className="bg-lovely hover:bg-creamey text-creamey transition duration-300 hover:text-lovely rounded-full">
-              <Link href="/subscription">Subscribe Now</Link>
+              <Link href="/subscription/687396821b4da119eb1c13fe">Subscribe Now</Link>
             </Button>
           </div>
           <div className="relative border-2 border-creamey h-[400px] rounded-lg overflow-hidden">

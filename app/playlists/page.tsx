@@ -316,7 +316,7 @@ function PlaylistsPage() {
             </div>
             <div className="flex   justify-center md:justify-end">
               <Button
-              onClick={()=>router.push("/subscription")}
+              onClick={()=>router.push("/subscription/687396821b4da119eb1c13fe")}
               size="lg" className="rounded-full  hover:font-semibold bg-lovely hover:bg-lovely text-creamey border border-creamey">
                 Subscribe Now
               </Button>

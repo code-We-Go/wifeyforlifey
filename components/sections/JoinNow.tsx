@@ -25,7 +25,7 @@ const JoinNow = () => {
               size="lg"
               className="rounded-full bg-lovely hover:bg-everGreen text-creamey"
             >
-              <Link href="/subscription">Subscribe</Link>
+              <Link href="/subscription/687396821b4da119eb1c13fe">Subscribe</Link>
             </Button>
             <Button
               asChild
