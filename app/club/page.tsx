@@ -184,22 +184,7 @@ const ClubPage = () => {
         <p className="text-base text-lovely/95 leading-relaxed">
         ✨ A space where you’re seen, supported, and celebrated.
         </p>
-
-        </motion.div>
-  <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
-
-      className="text-start my-16 w-full">
-        <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
-        ❤️ You’re not just buying a planner.
-        </h1> 
-  <h2 className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-lovely`}>
-
-  You’re joining a full experience — made for brides, by a bride, to make sure you never feel lost, alone, or unsure again.        </h2>
-
-  <div className="grid grid-cols-2 gap-2 mt-8">
+        <div className="grid grid-cols-2 gap-2 mt-8">
           <div className="relative w-full h-64 md:h-[400px] rounded-lg overflow-hidden">
             <Image
               src="/experience/support1.png"
@@ -217,6 +202,21 @@ const ClubPage = () => {
             />
           </div>
         </div>
+        </motion.div>
+  <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
+    initial="hidden"
+    whileInView="show"
+    viewport={{ once: true, amount: 0.3 }}
+
+      className="text-start my-16 w-full">
+        <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
+        ❤️ You’re not just buying a planner.
+        </h1> 
+  <h2 className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-lovely`}>
+
+  You’re joining a full experience — made for brides, by a bride, to make sure you never feel lost, alone, or unsure again.        </h2>
+
+
         </motion.div>
         
         {/* <div className=" grid w-full lg:grid-cols-4 gap-4 md:gap-8 lg:gap-12  h-auto pt-16 pb-20 grid-cols-1 md:grid-cols-2 ">
