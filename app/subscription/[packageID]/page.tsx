@@ -1,6 +1,6 @@
 "use client";
 // import BigCartItem from '@/app/components/BigCartItem';
-import OrderSummaryItem from "./components/OrderSummaryItem";
+import OrderSummaryItem from "./../components/OrderSummaryItem";
 import { cartContext } from "@/app/context/cartContext";
 import { CartProvider,useCart } from "@/providers/CartProvider";
 import { useSession } from 'next-auth/react';
@@ -13,13 +13,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { Discount } from "../types/discount";
-import CartItemSmall from "../cart/CartItemSmall";
-import DiscountSection from "./components/DiscountSection";
-import { ShippingZone } from "../interfaces/interfaces";
-import { wifeyExperience } from "../constants";
+import { Discount } from "../../types/discount";
+import CartItemSmall from "../../cart/CartItemSmall";
+import DiscountSection from "./../components/DiscountSection";
+import { ShippingZone } from "../../interfaces/interfaces";
+import { wifeyExperience } from "../../constants";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import { useParams } from "next/navigation";
+import { Ipackage } from "@/app/interfaces/interfaces";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -121,6 +123,10 @@ const CheckoutClientPage = () => {
   // let total = 0;
   // const []   
   //  const[countries,setCountries]=useState([]);
+  const { packageID } = useParams();
+  const [packageData, setPackageData] = useState<Ipackage | null>(null);
+  const [loadingPackage, setLoadingPackage] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const { isAuthenticated } = useAuth();
@@ -128,11 +134,7 @@ const CheckoutClientPage = () => {
 
   const calculateTotals = () => {
     // Calculate subtotal first
-    const calculatedSubTotal = wifeyExperience.price
-    // items.reduce(
-    //   (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
-    //   0
-    // );
+    const calculatedSubTotal = packageData?.price ?? 0;
     setSubTotal(calculatedSubTotal);
     
     // Calculate discount amount
@@ -188,7 +190,7 @@ const CheckoutClientPage = () => {
    const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
-  const [subTotal, setSubTotal] = useState(wifeyExperience.price);
+  const [subTotal, setSubTotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [formErrors, setFormErrors] = useState<any>({});
   const [countryID, setCountryID] = useState(65);
@@ -236,7 +238,7 @@ const CheckoutClientPage = () => {
     city: "",
     cart: items,
     phone: "",
-    subscription:"theWifeyExperience",
+    subscription:packageID,
     state: state,
     cash: payment,
     total: total,
@@ -333,12 +335,12 @@ const CheckoutClientPage = () => {
     };
     getStates();
 
-    const calculatedSubTotal = wifeyExperience.price
+    const calculatedSubTotal = packageData?.price ?? 0;
     setSubTotal(calculatedSubTotal);
     setTotal(calculatedSubTotal + shipping);
     
     cartItems();
-  }, [items, countryID, billingState]); // Removed 'state' from dependencies
+  }, [items, countryID, billingState, packageData]); // Add packageData to dependencies
   useEffect(() => {
     if (countryID !== 65) {
       setPayment("card");
@@ -392,18 +394,18 @@ const CheckoutClientPage = () => {
       const shippingRate = calculateShippingRate(countryID, state, states, countries, shippingZones);
       console.log("Local shipping rate calculated:", shippingRate);
       setShipping(shippingRate);
-      const calculatedSubTotal = wifeyExperience.price
+      const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     } else if (shippingZones.length > 0) {
       const shippingRate = calculateShippingRate(countryID, state, states, countries, shippingZones);
       console.log("Global shipping rate calculated:", shippingRate);
       setShipping(shippingRate);
-      const calculatedSubTotal = wifeyExperience.price
+      const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     }
-  }, [countryID, states, shippingZones, state, countries, items]);
+  }, [countryID, states, shippingZones, state, countries, items, packageData]);
 
   let cartItems = () => {
     return items.map((cartItem, index) => (
@@ -463,6 +465,33 @@ const CheckoutClientPage = () => {
 
   // You can use 'isSubscription' below to adjust UI/logic for subscription checkouts
   // Example: if (isSubscription) { /* custom logic */ }
+
+  useEffect(() => {
+    const fetchPackage = async () => {
+      setLoadingPackage(true);
+      setNotFound(false);
+      try {
+        const res = await axios.get(`/api/packages?packageID=${packageID}`);
+        if (res.data.data) {
+          setPackageData(res.data.data);
+        } else {
+          setNotFound(true);
+        }
+      } catch (e) {
+        setNotFound(true);
+      } finally {
+        setLoadingPackage(false);
+      }
+    };
+    if (packageID) fetchPackage();
+  }, [packageID]);
+
+  if (loadingPackage) {
+    return <div className="container-custom py-16 text-center">Loading package...</div>;
+  }
+  if (notFound || !packageData) {
+    return <div className="container-custom py-16 text-center">Package not found.</div>;
+  }
 
   return (
     // cart.length > 0 ?
@@ -848,7 +877,7 @@ const CheckoutClientPage = () => {
 
               <div className='flex w-full  md:w-2/5 gap-2 items-center'>
                 <label className='text-everGreen' >City</label>
-                <input onChange={handleInputChange} name='billingCity' value={useSameAsShipping?formData.city:formData.billingCity} type='text' className=' w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
+                <input onChange={handleInputChange} name='billingCity' value={useSameAsShipping?formData.city:formData.billingCity} type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
               </div>
               </div>
                 
@@ -863,7 +892,7 @@ const CheckoutClientPage = () => {
                          </select>
                :
                
-               <input onChange={handleInputChange} value={useSameAsShipping?formData.state:formData.billingState} name='billingState' type='text' className=' w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
+               <input onChange={handleInputChange} value={useSameAsShipping?formData.state:formData.billingState} name='billingState' type='text' className='border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base'/>
                   }
               </div>
               <div className='flex w-full gap-2 items-center'>
@@ -928,29 +957,29 @@ const CheckoutClientPage = () => {
 
                 
                 <Image 
-                  src={wifeyExperience.imgUrl} 
+                  src={packageData.imgUrl} 
                  fill
-                  alt={wifeyExperience.name} 
+                  alt={packageData.name} 
                   className="object-cover object-top aspect-[16/11] rounded-xl mb-4" 
                 />
                 </div>
-                <h2 className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey my-2`}>{wifeyExperience.name}</h2>
+                <h2 className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey my-2`}>{packageData.name}</h2>
                 <ul className="list-disc w-full items-start justify-start list-inside text-left text-base md:text-lg tracking-wide text-creamey/95">
-                  {wifeyExperience.items.map((item, idx) => (
+                  {packageData.items.map((item: string, idx: number) => (
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
                 <div className="flex justify-start gap-4 tracking-wider mt-4 ">
-                  <span className="text-lg   text-creamey">one lifetime subscription fee :</span>
-                  <span className="text-lg  text-creamey">{wifeyExperience.price} LE</span>
+                  <span className="text-lg   text-creamey">subscription fee :</span>
+                  <span className="text-lg  text-creamey">{packageData.price} LE</span>
                   {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
                 </div>
                 <div className="flex flex-col justify-start items-start w-full font-thin gap-2 tracking-wider mt-2 mb-2">
                   <span className="text-sm text-creamey font-semibold">Notes :</span>
                   <ul className="list-disc list-inside pl-4">
-                    {wifeyExperience.notes.map((note, idx) => (
-                      <li key={idx} className="text-sm text-creamey">{note}</li>
-                    ))}
+                     {packageData.notes.map((note: string, idx: number) => (
+                        <li key={idx} className="text-sm text-creamey">{note}</li>
+                      ))}
                   </ul>
                 </div>
                   
@@ -992,7 +1021,7 @@ const CheckoutClientPage = () => {
 
 export default function CheckoutPageWithSuspense(props: any) {
   return (
-    <Suspense fallback={<div>Loading subsciption...</div>}>
+    <Suspense fallback={<div className="min-h-[calc(100vh-128px)] flex w-full justify-center items-center text-lovely">Loading ...</div>}>
       <CheckoutClientPage {...props} />
     </Suspense>
   );

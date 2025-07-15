@@ -7,6 +7,7 @@ const SubscriptionSchema = new Schema(
             type: String, 
             required: true 
         },
+        packageID:{type:String},
         email:{type:String},
         subscribed:{type:Boolean,default:false},
         expiryDate:{type:Date,default:Date.now},

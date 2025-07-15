@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       const specialReference = `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 console.log(specialReference);
 console.log("firstDebug" + data.subscription )
-if(data.subscription === "theWifeyExperience"){
+if(data.subscription){
   const order = await axios.post(
     'https://accept.paymob.com/v1/intention/',
     {
@@ -227,7 +227,7 @@ if(data.subscription === "theWifeyExperience"){
   console.log('order'+JSON.stringify(order.data, null, 2))
   console.log('orderData'+order.data.payment_keys[0].order_id)
   
-  await subscriptionsModel.create({ paymentID: order.data.payment_keys[0].order_id,email:data.email })
+  await subscriptionsModel.create({ paymentID: order.data.payment_keys[0].order_id,email:data.email ,packageID:data.subscription})
   // await ordersModel.create({ 
   //   email:data.email,
   //    orderID:order?order.data.payment_keys[0].order_id:''

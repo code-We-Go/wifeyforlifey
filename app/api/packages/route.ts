@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import packageModel from "@/app/models/packageModel";
-import { ConnectDB } from "@/config/db";
+import packageModel from "@/app/modals/packageModel";
+import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 
 const loadDB = async () => {
@@ -30,8 +30,17 @@ export async function GET(req: Request) {
   const all = searchParams.get("all") === "true";
   const limit = all ? 0 : 10;
   const skip = all ? 0 : (page - 1) * limit;
+  const packageID = searchParams.get("packageID");
 
   try {
+    if (packageID) {
+      // Fetch a single package by ID
+      const singlePackage = await packageModel.findById(packageID);
+      if (!singlePackage) {
+        return NextResponse.json({ error: "Package not found" }, { status: 404 });
+      }
+      return NextResponse.json({ data: singlePackage }, { status: 200 });
+    }
     // Create search query
     const searchQuery = search
       ? { name: { $regex: search, $options: "i" } }
