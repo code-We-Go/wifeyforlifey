@@ -227,10 +227,10 @@ export default function PlaylistPage() {
             <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
             {Array.isArray(playlist.description) ? (
               playlist.description.map((desc: string, idx: number) => (
-                <p key={idx} className="text-lovely/90 mt-2">{desc}</p>
+                <p key={idx} className="text-lovely/90 mt-2 whitespace-pre-line">{desc}</p>
               ))
             ) : (
-              <p className="text-lovely/90 mt-2">{playlist.description}</p>
+              <p className="text-lovely/90 mt-2 whitespace-pre-line">{playlist.description}</p>
             )}
           </div>
 
@@ -296,7 +296,7 @@ export default function PlaylistPage() {
                     {formatDate(new Date())}
                   </div>
                 </div>
-                <p className="text-lovely/90 mt-2">{selectedVideo.description}</p>
+                <p className="text-lovely/90 mt-2 whitespace-pre-line">{selectedVideo.description}</p>
               </div>
             )}
           </div>
