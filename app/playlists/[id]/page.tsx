@@ -24,6 +24,7 @@ export default function PlaylistPage() {
   const [relatedPlaylists, setRelatedPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [seeMore, setSeeMore] = useState(false); // <-- Add this line
   
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
@@ -215,7 +216,7 @@ export default function PlaylistPage() {
       {/* Playlist Info */}
       <div className="grid grid-cols-1 lg:grid-cols-3 relative">
         <div className="lg:col-span-2 space-y-6">
-          <div>
+          <div className=" ">
             {/* <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary">
                 {playlist.category ? (playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)) : "Uncategorized"}
@@ -225,6 +226,8 @@ export default function PlaylistPage() {
               )}
             </div> */}
             <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
+         <div className={`${seeMore ? 'h-auto' : "max-h-[30vh]"}  overflow-hidden transition-all duration-300`}>
+
             {Array.isArray(playlist.description) ? (
               playlist.description.map((desc: string, idx: number) => (
                 <p key={idx} className="text-lovely/90 mt-2 whitespace-pre-line">{desc}</p>
@@ -232,6 +235,16 @@ export default function PlaylistPage() {
             ) : (
               <p className="text-lovely/90 mt-2 whitespace-pre-line">{playlist.description}</p>
             )}
+            </div>
+            {/* Add the See More / See Less button */}
+            <div className="mt-2">
+              <button
+                className="text-lovely underline cursor-pointer focus:outline-none"
+                onClick={() => setSeeMore((prev) => !prev)}
+              >
+                {seeMore ? "See Less" : "See More"}
+              </button>
+            </div>
           </div>
 
           {/* Video Player Section */}
@@ -239,7 +252,7 @@ export default function PlaylistPage() {
             {selectedVideo ? (
               <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
                 {videoLocked ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
+                  <div className="absolute aspect-video w-full inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
                     {/* Thumbnail as background */}
                     {selectedVideo?.thumbnailUrl && (
                       <Image
@@ -251,18 +264,18 @@ export default function PlaylistPage() {
                       />
                     )}
                     {/* Black overlay */}
-                    <div className="absolute inset-0 bg-black/70 z-10" />
+                    <div className="absolute inset-0 w-full bg-black/70 z-10" />
                     {/* Lock icon and message */}
-                    <div className="relative z-20 flex flex-col items-center">
-                      <Lock className="h-16 w-16 mb-4 text-creamey" />
-                      <h3 className="text-xl font-medium mb-2">Premium Content</h3>
-                      <p className="mb-4 max-w-md">
+                    <div className="relative w-full z-20 justify-center flex flex-col items-center">
+                      <Lock className="h-10 w-10 md:h-16 md:w-16 mb-1 md:mb-4 text-creamey" />
+                      <h3 className="text-base md:text-xl font-medium mb-1 md:mb-4">Premium Content</h3>
+                      <p className="mb-1 text-xs md:text-base md:mb-4 max-w-md">
                         This video is only available to premium subscribers. Subscribe now to unlock all our premium content.
                       </p>
                       <Button
                         onClick={() => router.push("/subscription/687396821b4da119eb1c13fe")}
                         size="sm"
-                        className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely"
+                        className="rounded-2xl text-xs md:text-base hover:bg-creamey hover:text-lovely text-creamey bg-lovely"
                       >
                         Subscribe Now
                       </Button>
@@ -348,7 +361,7 @@ export default function PlaylistPage() {
                           src={video.thumbnailUrl || "/video/1.png"}
                           alt={video.title}
                           fill
-                          className="object-cover"
+                          className="object-cover aspect-video"
                         />
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                           {isLocked ? (
@@ -359,7 +372,7 @@ export default function PlaylistPage() {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium line-clamp-1">{video.title}</h3>
+                        <h5 className="font-medium line-clamp-2">{video.title}</h5>
                         <div className="flex items-center mt-1">
                           {!video.isPublic && (
                             <span className="text-xs bg-muted text-everGreen px-1.5 py-0.5 rounded-full">
