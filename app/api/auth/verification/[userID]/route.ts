@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import userModel from "@/app/modals/userModel";
 import sessionsModel from "@/app/modals/sessionModel";
+import subscriptionsModel from '@/app/modals/subscriptionsModel';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -19,8 +20,16 @@ export async function GET(_request: NextRequest) {
 
     if (getSession) {
       try {
+        const subscription = await subscriptionsModel.findOne({email:data?.email,subscribed:true})
         // Update the user's emailVerified status
-        await userModel.findByIdAndUpdate(userID, { emailVerified: true });
+    if(subscription){
+
+      await userModel.findByIdAndUpdate(userID, { emailVerified: true ,subscription:subscription._id});
+    }
+    else{
+      
+      await userModel.findByIdAndUpdate(userID, { emailVerified: true });
+    }
 
         // Redirect to the login page for the user to sign in with NextAuth
         return NextResponse.redirect(new URL('/login', _request.url));

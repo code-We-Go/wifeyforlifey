@@ -74,7 +74,8 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
               emailVerified: true,
               imageURL:user.image,
-              isSubscribed: subscribed?true:false, // Default value for new users
+              isSubscribed: subscribed?true:false,
+              subscription:subscribed._id // Default value for new users
             });
           }
         } catch (error) {
