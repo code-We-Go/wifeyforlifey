@@ -43,7 +43,7 @@ export async function GET(request: Request) {
             if (subscription) {
                 const subscribedUser = await UserModel.findOneAndUpdate(
                     { email: subscription.email },
-                    { isSubscribed: true }
+                    { isSubscribed: true,subscription:subscription._id },
                 );
                 if(subscribedUser){
                     return NextResponse.redirect(`${process.env.testUrl}payment/success?subscription=true&account=true`);

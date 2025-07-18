@@ -1,7 +1,16 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 import bcrypt from "bcryptjs";
 import { string } from "zod";
-
+import subscriptionsModel from "./subscriptionsModel";
+export interface ISubscription extends Document {
+  paymentID: string;
+  packageID: Types.ObjectId;
+  email?: string;
+  subscribed: boolean;
+  expiryDate: Date;
+  createdAt: Date;
+  updatedAt: Date; // Because of timestamps: true
+}
 // Define the User interface
 export interface IUser extends Document {
   _id :string
@@ -15,10 +24,13 @@ export interface IUser extends Document {
   emailVerified:boolean;
   isSubscribed:boolean;
   imageURL?:string;
+  subscription:ISubscription;
+
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 // Define the User schema
+console.log("here"+subscriptionsModel)
 const UserSchema = new Schema<IUser>(
   {
     username: { 
@@ -57,7 +69,12 @@ const UserSchema = new Schema<IUser>(
     ,
     email:{type:String,required:true},
     emailVerified:{type:Boolean,default:false},
-    isSubscribed:{type:Boolean,default:false}
+    isSubscribed:{type:Boolean,default:false},
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "subscriptions",
+      required: false,
+    },
 
   },
   { timestamps: true }
