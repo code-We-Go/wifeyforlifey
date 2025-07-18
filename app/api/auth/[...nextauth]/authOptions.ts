@@ -74,7 +74,7 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
               emailVerified: true,
               imageURL:user.image,
-              isSubscribed: subscribed?true:false,
+              // isSubscribed: subscribed?true:false,
               subscription:subscribed._id // Default value for new users
             });
           }
@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
         const email = user?.email || token.email;
         if (email) {
           console.log("Querying for email:", email);
-          const subscription = await subscriptionsModel.findOne({email});
+          const subscription = await subscriptionsModel.findOne({email:email,subscribed:true});
           console.log("subscription" + subscription)
           console.log("expiryDateGetTime"+subscription.expiryDate.getTime())
           token.isSubscribed = (subscription?.expiryDate && subscription.expiryDate.getTime() > Date.now());
