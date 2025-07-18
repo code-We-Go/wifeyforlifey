@@ -239,18 +239,34 @@ export default function PlaylistPage() {
             {selectedVideo ? (
               <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
                 {videoLocked ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
-                    <Lock className="h-16 w-16 mb-4 text-lovely" />
-                    <h3 className="text-xl font-medium mb-2">Premium Content</h3>
-                    <p className="mb-4 max-w-md">
-                      This video is only available to premium subscribers. Subscribe now to unlock all our premium content.
-                    </p>
-     <Button 
-                   onClick={()=>router.push("/subscription/687396821b4da119eb1c13fe")}
-
-     size="sm" className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely">
-                Subscribe Now
-              </Button>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
+                    {/* Thumbnail as background */}
+                    {selectedVideo?.thumbnailUrl && (
+                      <Image
+                        src={selectedVideo.thumbnailUrl}
+                        alt={selectedVideo.title}
+                        fill
+                        className="object-cover z-0"
+                        style={{ pointerEvents: "none" }}
+                      />
+                    )}
+                    {/* Black overlay */}
+                    <div className="absolute inset-0 bg-black/70 z-10" />
+                    {/* Lock icon and message */}
+                    <div className="relative z-20 flex flex-col items-center">
+                      <Lock className="h-16 w-16 mb-4 text-creamey" />
+                      <h3 className="text-xl font-medium mb-2">Premium Content</h3>
+                      <p className="mb-4 max-w-md">
+                        This video is only available to premium subscribers. Subscribe now to unlock all our premium content.
+                      </p>
+                      <Button
+                        onClick={() => router.push("/subscription/687396821b4da119eb1c13fe")}
+                        size="sm"
+                        className="rounded-2xl hover:bg-creamey hover:text-lovely text-creamey bg-lovely"
+                      >
+                        Subscribe Now
+                      </Button>
+                    </div>
                   </div>
                 ) : videoLoading ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
