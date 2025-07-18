@@ -3,6 +3,7 @@ import sessionsModel from "@/app/modals/sessionModel";
 import UserModel from "@/app/modals/userModel";
 import { sendMail } from "@/lib/email";
 import { User } from "@/models/User";
+import { SubscriprtionMail } from "@/utils/subscriptionMail";
 import { verificationEmailTemplate } from "@/utils/verificationEmailTempelate";
 import { hash } from "bcryptjs";
 
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
      to: email,
      name: "wiiga",
      subject: "Please click on link to verify your account",
-     body:`${verificationEmailTemplate(verificationLink)}`
+     body:`${SubscriprtionMail(verificationLink)}`
      ,from:"authintication@shopwifeyforlifey.com"
      // body: `<a href=${verificationLink}> click here to verify your account</a>`,
    //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
