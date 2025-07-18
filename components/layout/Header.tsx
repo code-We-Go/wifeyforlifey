@@ -185,10 +185,14 @@ export default function Header() {
             {/* Account with Hover Modal */}
             <HoverCard>
               <HoverCardTrigger asChild>
-                <div className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer">
+                <button
+                  type="button"
+                  className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer bg-transparent border-0"
+                  aria-label="Account"
+                >
                   <User />
-                  <span className="text-base font-medium  ">Account</span>
-                </div>
+                  <span className="text-base font-medium">Account</span>
+                </button>
               </HoverCardTrigger>
               <HoverCardContent className="w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg">
                 <div className="p-4">

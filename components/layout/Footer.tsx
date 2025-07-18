@@ -93,6 +93,20 @@ export default function Footer() {
       setIsLoading(false);
     }
   };
+  const PLAYLISTS_PLACEHOLDER = [
+    { _id: "686007d8bacf36b32ede9531", title: "Fashion" },
+    { _id: "68600bc2dfe9d20434366bf8", title: "Decor" },
+    { _id: "6860103c49b3ce972cede653", title: "Self care" },
+    { _id: "6860137de6f2df88e5805d69", title: "Groceries" },
+    { _id: "68601688c9d854f63af8a403", title: "Toilet Essentials " },
+    { _id: "686617235a1506075be76c41", title: "Makeup" },
+    { _id: "686617935a1506075be76c45", title: "Bedding" },
+    { _id: "686617c05a1506075be76c4a", title: "Dinning & Kitchen" },
+    { _id: "686617ef5a1506075be76c4e", title: "Appliances" },
+    { _id: "6866181ed57c8789806a6914", title: "Furniture" },
+    { _id: "68661a16d57c8789806a691a", title: "Meet your bridal era bestie!" },
+    { _id: "68661ac05a1506075be76c73", title: "Experience graduation! " },
+  ];
   return (
     <footer className="bg-card border-t bg-lovely text-creamey">
       <div className="container-custom py-12 md:py-16">
@@ -156,9 +170,9 @@ export default function Footer() {
               {shopCategoriesError && (
                 <li className="text-sm text-red-500">{shopCategoriesError}</li>
               )}
-              {!shopCategoriesLoading && !shopCategoriesError && shopCategories.length === 0 && (
+              {/* {!shopCategoriesLoading && !shopCategoriesError && shopCategories.length === 0 && (
                 <li className="text-sm text-creamey">No categories found.</li>
-              )}
+              )} */}
               {shopCategories.map((cat) => (
                 <li key={cat._id}>
                   <Link
@@ -176,7 +190,13 @@ export default function Footer() {
             <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Playlists</h6>
             <ul className="space-y-2">
               {playlistsLoading && (
-                <li className="text-sm text-creamey">Loading...</li>
+                <>
+                  {PLAYLISTS_PLACEHOLDER.map((playlist) => (
+                    <li key={playlist._id} className="text-sm text-creamey  ">
+                      {playlist.title}
+                    </li>
+                  ))}
+                </>
               )}
               {playlistsError && (
                 <li className="text-sm text-red-500">{playlistsError}</li>
@@ -184,7 +204,7 @@ export default function Footer() {
               {!playlistsLoading && !playlistsError && playlists.length === 0 && (
                 <li className="text-sm text-creamey">No playlists found.</li>
               )}
-              {playlists.slice(0, 5).map((playlist) => (
+              {playlists.map((playlist) => (
                 <li key={playlist._id}>
                   <Link
                     href={`/playlists/${playlist._id}`}
