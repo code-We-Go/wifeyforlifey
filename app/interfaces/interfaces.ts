@@ -26,6 +26,7 @@ export interface Playlist {
   featured:boolean;
   createdAt: Date;
   updatedAt: Date;
+  order?:number;
 }
 
 // Add VideoPlaylist type alias for compatibility

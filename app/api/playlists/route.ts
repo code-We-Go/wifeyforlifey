@@ -94,15 +94,16 @@ export async function GET(req: Request) {
     // Get playlists with populated videos and pagination
     const playlists = await playlistModel
       .find(searchQuery)
+      
       .populate({
         path: "videos",
         model: "videos",
         select: "title description thumbnailUrl duration isPublished"
       })
-      .sort({ createdAt: -1 })
+      .sort({ order: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
+console.log("sort" + playlists[0].title)
     return NextResponse.json(
       {
         data: playlists,

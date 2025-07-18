@@ -53,7 +53,7 @@ function PlaylistsPage() {
     category: initialCategory,
     isPublic: undefined,
     search: "",
-    sortBy: "newest",
+    // sortBy: "",
   });
 
   // Fetch playlists from API
@@ -106,10 +106,11 @@ function PlaylistsPage() {
       result.sort((a, b) => b.title.localeCompare(a.title));
     } else if (filters.sortBy === "most_videos") {
       result.sort((a, b) => (b.videos?.length || 0) - (a.videos?.length || 0));
-    } else {
-      // Default to newest
-      result.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
-    }
+    } 
+    // else {
+    //   // Default to newest
+    //   // result.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
+    // }
     
     setFilteredPlaylists(result);
   }, [playlists, filters]);
@@ -123,7 +124,7 @@ function PlaylistsPage() {
       category: "",
       isPublic: undefined,
       search: "",
-      sortBy: "newest",
+      // sortBy: "",
     });
   };
 
@@ -164,7 +165,7 @@ function PlaylistsPage() {
             </div>
           </div>
 
-          <div className="flex gap-4 text-lovely/90">
+          {/* <div className="flex gap-4 text-lovely/90">
             <Select
               value={filters.sortBy}
               onValueChange={(value) => updateFilter("sortBy", value)}
@@ -265,7 +266,7 @@ function PlaylistsPage() {
                 </div>
               </SheetContent>
             </Sheet> */}
-          </div>
+          {/* </div>  */}
         </div>
 
         {/* Active Filters */}
