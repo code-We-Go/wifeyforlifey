@@ -237,14 +237,14 @@ export default function PlaylistPage() {
             )}
             </div>
             {/* Add the See More / See Less button */}
-            <div className="mt-2">
+           {(playlist?.description?.length > 1 || playlist.description[0] !== "")  && <div className="mt-2">
               <button
                 className="text-lovely underline cursor-pointer focus:outline-none"
                 onClick={() => setSeeMore((prev) => !prev)}
               >
                 {seeMore ? "See Less" : "See More"}
               </button>
-            </div>
+            </div>}
           </div>
 
           {/* Video Player Section */}
