@@ -33,11 +33,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { thirdFont } from "@/fonts";
@@ -78,6 +73,8 @@ export default function Header() {
   const { isAuthenticated, user, loading, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const pathname = usePathname();
   const { totalItems } = useCart();
   const { wishList } = useContext(wishListContext);
@@ -92,6 +89,7 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -118,11 +116,43 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Add effect to close account dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.account-dropdown')) {
+        setIsAccountOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Add timeout for hover behavior
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (!isHovering && window.innerWidth >= 768) {
+      timeoutId = setTimeout(() => {
+        setIsAccountOpen(false);
+      }, 150); // Small delay to allow moving mouse to dropdown
+    }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isHovering]);
+
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
   };
+  
   const handleLogout = async() => {
     await logout();
+    setIsMobileMenuOpen(false);
   }
 
   return (
@@ -182,60 +212,97 @@ export default function Header() {
                 </div>
               </Link>
             ))}
-            {/* Account with Hover Modal */}
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <button
-                  type="button"
-                  className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer bg-transparent border-0"
-                  aria-label="Account"
+            
+            {/* Account with custom dropdown that works on both desktop and touch devices */}
+            <div className="relative account-dropdown">
+              <button
+                type="button"
+                className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer bg-transparent border-0"
+                aria-label="Account"
+                onClick={() => setIsAccountOpen(!isAccountOpen)}
+                onMouseEnter={() => {
+                  // On desktop, show on hover
+                  if (window.innerWidth >= 768) {
+                    setIsHovering(true);
+                    setIsAccountOpen(true);
+                  }
+                }}
+                onMouseLeave={() => {
+                  // On desktop, set hovering to false (dropdown will close after delay)
+                  if (window.innerWidth >= 768) {
+                    setIsHovering(false);
+                  }
+                }}
+              >
+                <User />
+                <span className="text-base font-medium">Account</span>
+              </button>
+              
+              {/* Dropdown Content */}
+              {isAccountOpen && (
+                <div 
+                  className="absolute right-0 top-full mt-2 w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg z-50"
+                  onMouseEnter={() => {
+                    // Keep dropdown open when hovering over content
+                    if (window.innerWidth >= 768) {
+                      setIsHovering(true);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    // Close dropdown when leaving content
+                    if (window.innerWidth >= 768) {
+                      setIsHovering(false);
+                    }
+                  }}
                 >
-                  <User />
-                  <span className="text-base font-medium">Account</span>
-                </button>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg">
-                <div className="p-4">
-                  <nav className="space-y-1">
-                    {
-                    
-                    isAuthenticated?accountItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                      >
-                        <item.icon className="mr-3 h-4 w-4 text-lovely " />
-                        {item.label}
-                      </Link>
-                    )):<div></div>}
-                   
-                   {
+                  <div className="p-4">
+                    <nav className="space-y-1">
+                      {
+                      
+                      isAuthenticated?accountItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                          onClick={() => setIsAccountOpen(false)}
+                        >
+                          <item.icon className="mr-3 h-4 w-4 text-lovely " />
+                          {item.label}
+                        </Link>
+                      )):<div></div>}
+                     
+                     {
 
-              isAuthenticated ?   
-               <div className="border-t border-gray-200 mt-2 pt-2">
-                      <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
-                      onClick={handleLogout}>
-                        <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
-                        Sign Out
-                      </button>
+                isAuthenticated ?   
+                 <div className="border-t border-gray-200 mt-2 pt-2">
+                        <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
+                        onClick={() => {
+                          handleLogout();
+                          setIsAccountOpen(false);
+                        }}>
+                          <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                          Sign Out
+                        </button>
+                      </div>
+                      :
+                      <div className="">
+                      <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                      onClick={() => setIsAccountOpen(false)}>
+                     
+                        Sign In
+                      </Link>
+                      <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                      onClick={() => setIsAccountOpen(false)}>
+                     
+                        Sign up
+                      </Link>
                     </div>
-                    :
-                    <div className="">
-                    <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors">
-                   
-                      Sign In
-                    </Link>
-                    <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors">
-                   
-                      Sign up
-                    </Link>
-                  </div>
 }
-                  </nav>
+                    </nav>
+                  </div>
                 </div>
-              </HoverCardContent>
-            </HoverCard>
+              )}
+            </div>
           </nav>
 
           {/* Desktop Action Buttons */}
@@ -323,13 +390,12 @@ export default function Header() {
                     >
                       <Heart
                         className={cn(
-                          wishList.length > 0 ? "bg-red-900" : "",
                           "h-5 w-5"
                         )}
                       />
                       <span>Wishlist</span>
                     </Link>
-                    <Link
+                   <Link
                       href="/account"
                       className="flex items-center space-x-2"
                       onClick={handleLinkClick}
@@ -337,6 +403,11 @@ export default function Header() {
                       <User className="h-5 w-5" />
                       <span>Account</span>
                     </Link>
+                    { isAuthenticated &&  <button className="w-full flex items-center gap-2 space-x-2 py-2 text-creamey hover:underline rounded-md group transition-colors"
+                      onClick={handleLogout}>
+                        <LogOut className=" h-5 w-5 " />
+                        Sign Out
+                      </button> }
                   </div>
                 </div>
               </SheetContent>

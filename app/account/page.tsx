@@ -254,7 +254,7 @@ const handleComperession =async (files: File[]) => {
   const tabs = [
     { id: 'orders', label: 'Recent Orders', icon: ShoppingBag },
     { id: 'wishlist', label: 'Wishlist', icon: Heart },
-    { id: 'Loyality', label: 'Loyality', icon: Gift },
+    { id: 'Loyality', label: 'Loyalty', icon: Gift },
     { id: 'info', label: 'Info', icon: UserCircle },
   ];
 
@@ -479,7 +479,7 @@ const handleComperession =async (files: File[]) => {
 
         {activeTab === 'Loyality' && (
           <div className=''>
-            <h2 className="text-lg font-semibold text-lovely mb-4">Loyality Points</h2>
+            <h2 className="text-lg font-semibold text-lovely mb-4">Loyalty Points</h2>
             <div className='w-full justify-center items-center'>
             <h3 className={`${lifeyFont.className} text-lovely`}>coming soon</h3>
             </div>

@@ -252,7 +252,7 @@ export default function PlaylistPage() {
             {selectedVideo ? (
               <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
                 {videoLocked ? (
-                  <div className="absolute aspect-video w-full inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
+                  <div className=" aspect-video w-full h-full inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
                     {/* Thumbnail as background */}
                     {selectedVideo?.thumbnailUrl && (
                       <Image
