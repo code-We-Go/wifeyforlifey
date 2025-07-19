@@ -53,9 +53,9 @@ import { BadgeAlert } from 'lucide-react';
   } 
 
   return (
-    <div className=" bg-pinkey ">
-      <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)]  flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'>
-      {/* <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'> */}
+    <div className=" bg-patternPinkey ">
+    <div className='md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)]  flex items-center justify-center bg-black/30 backdrop-blur-[3px] py-12 px-4 sm:px-6 lg:px-8'>
+  {/* <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'> */}
       <div className="max-w-md rounded-2xl bg-creamey shadow-2xl w-full py-3 px-6 space-y-4">
         <div>
           <h2 className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-lovely`}>
@@ -115,7 +115,7 @@ import { BadgeAlert } from 'lucide-react';
           </div>
 
           {error && (
-            <div className="text-creamey flex gap-2 w-full justify-center items-center text-sm text-center">{error} <span className='text-xs'><BadgeAlert className='text-xs w-5'/></span></div>
+            <div className="text-lovely flex gap-2 w-full justify-center items-center text-sm text-center">{error} <span className='text-xs'><BadgeAlert className='text-xs w-5'/></span></div>
           )}
 
           <div>
@@ -133,7 +133,7 @@ import { BadgeAlert } from 'lucide-react';
             <div className="w-full border-t border-pinkey"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-creamey whitespace-nowrap">Or</span>
+            <span className="px-2 text-lovely whitespace-nowrap">Or</span>
           </div>
           <div className="w-full inset-0 flex items-center">
             <div className="w-full border-t border-pinkey"></div>

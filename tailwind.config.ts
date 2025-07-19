@@ -9,7 +9,7 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    backgroundImage: {pattern1 : 'url(/patterns/patternCreamey.png)',expBG:'url(/experience/wifeyExp.jpeg)'}
+    backgroundImage: {pattern1 : 'url(/patterns/patternCreamey.png)',expBG:'url(/experience/wifeyExp.jpeg)',patternPinkey : 'url(/patterns/patternPinkey.png)',patternLovely : 'url(/patterns/patternLovely.png)'}
     ,container: {
       center: true,
       padding: '2rem',
