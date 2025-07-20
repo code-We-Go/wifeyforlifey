@@ -22,6 +22,7 @@ import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useParams } from "next/navigation";
 import { Ipackage } from "@/app/interfaces/interfaces";
+import WiigSpinner from "@/app/components/WiigSpinner";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -199,6 +200,7 @@ const CheckoutClientPage = () => {
     { name: string; shipping_zone: string }[]
   >([]);
   const [useSameAsShipping, setUseSameAsShipping] = useState(true);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // const [state,setState]=useState(states.length>0?states[0].name:'')
   const [state, setState] = useState("Alexandria"); // Default to the first state's name or an empty string
@@ -487,7 +489,9 @@ const CheckoutClientPage = () => {
   }, [packageID]);
 
   if (loadingPackage) {
-    return <div className="container-custom w-full min-h-[calc(100vh-128px)] py-16 text-center text-lovely justify-center items-center">Loading ...</div>;
+    return <div className="container-custom w-full min-h-[calc(100vh-128px)] py-16 text-center text-lovely flex justify-center items-center">
+      <WiigSpinner/>
+      </div>;
   }
   if (notFound || !packageData) {
     return <div className="container-custom py-16 text-center">Subscription not found.</div>;
@@ -914,14 +918,37 @@ const CheckoutClientPage = () => {
              <p className='text-[12px] mt-6 lg:text-lg'>{total} LE</p>
            </div>
          </div> */}
- 
+                          <div className="flex items-center gap-2 text-base mt-2">
+  <label className="relative flex items-center">
+    <input
+      color="#FBF3E0"
+      type="checkbox"
+      id="accept-terms"
+      checked={acceptedTerms}
+      onChange={() => setAcceptedTerms(!acceptedTerms)}
+      className="peer appearance-none bg-creamey checked:bg-everGreen border border-everGreen w-4 h-4 rounded transition-colors"
+    />
+    {/* Custom checkmark */}
+    <span className="pointer-events-none absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs peer-checked:opacity-100 opacity-0">
+      ✔
+    </span>
+  </label>
+  <p className="ml-2">I accept the {''}                <Link
+                  href="/policies?terms-and-conditions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-everGreen underline"
+                >
+                  terms and conditions
+                </Link></p>
+</div>
               <div className="flex justify-end">
                 <button
-                  disabled={loading}
+                  disabled={loading || !acceptedTerms}
                   type="submit"
                   className={`border text-base transition duration-300 border-lovely p-1 ${
-                     loading
-                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl" // Styles for disabled state
+                     loading || !acceptedTerms
+                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
                       : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
                   }`}
                 >
@@ -929,20 +956,7 @@ const CheckoutClientPage = () => {
                 </button>
               </div>
             
-            <div className="text-base">
-              <p>
-                By clicking &quot;CONFIRM ORDER&quot;, you accept the{" "}
-                <Link
-                  href="/policies?terms-and-conditions"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-everGreen underline"
-                >
-                  terms and conditions
-                </Link>
-                .
-              </p>
-            </div>
+
           </form>
         </div>
 
@@ -984,7 +998,7 @@ const CheckoutClientPage = () => {
                 </div>
                   
               </div>
-              <div className="mt-6 space-y-2 text-black">
+              <div className="mt-6 space-y-2 text-everGreen">
                 <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>

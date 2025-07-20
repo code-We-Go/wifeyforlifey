@@ -16,6 +16,7 @@ import { CarouselTransition } from "./components/MaterialCarousel";
 import { BottomBlurOut } from "./components/ButtomBlurOut";
 import FlipCard from "./components/FlipCard";
 import FlipingCardNew from "./components/FlipingCardNew";
+import { wifeyFont } from "@/fonts";
 
 const OPTIONS: EmblaOptionsType = { loop: true }
 
@@ -37,11 +38,13 @@ const ClubPage = () => {
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-start mb-16 container-custom">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-4xl font-bold mb-6 text-lovely`}>
-          Welcome to The Wifey Experience 💖
+      className="text-start mb-8 container-custom">
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-4xl font-bold mb-2 text-lovely`}>
+          Welcome to The 
+          <span className={`${lifeyFont.className} mx-1`}>Wifey</span> Experience 💖
+          {/* <span className={`${lifeyFont.className}`}>W</span><span style={{ transform: "scaleY(1.5)" }} className={`${wifeyFont.className} uppercase tracking-tighter font-light italic mr-1`}>ifey </span> Experience 💖 */}
         </h1>
-        <p className="text-base md:text-lg text-lovely/95 mb-2">
+        <p className="text-base md:text-lg text-lovely/95 mb-1">
           More than just a planner — it&apos;s your full bridal-era support system.
         </p>
         <p className="text-base text-lovely/95 leading-relaxed">
@@ -67,7 +70,7 @@ const ClubPage = () => {
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-start container-custom my-16 py-16 w-full bg-lovely text-creamey">
+      className="text-start container-custom  my-16 py-16 w-full bg-lovely text-creamey">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}>
           😵‍💫 Don&apos;t know what to buy or where to start?
         </h1>
@@ -107,7 +110,7 @@ const ClubPage = () => {
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-start my-16 container-custom">
+      className="text-start mb-16 container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
         ❓Confused about which type to choose?
         </h1>
@@ -135,7 +138,7 @@ const ClubPage = () => {
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-start my-16  py-16 bg-lovely container-custom">
+      className="text-start mb-16 py-16   bg-lovely container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}>
         😰 Overwhelmed by too many options & don’t know who to trust or where to shop?        </h1>
         <h2 className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-creamey`}>
@@ -166,7 +169,7 @@ const ClubPage = () => {
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-start my-16 container-custom">
+      className="text-start mb-16 container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
 😩 Feeling stressed, emotional, or just need someone who gets it?     </h1> 
   <h2 className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-lovely`}>
@@ -210,7 +213,7 @@ const ClubPage = () => {
     whileInView="show"
     viewport={{ once: true, amount: 0.3 }}
 
-      className="text-start my-16 w-full container-custom">
+      className="text-start mb-16 w-full container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
         ❤️ You’re not just buying a planner.
         </h1> 
@@ -229,7 +232,7 @@ const ClubPage = () => {
         <FlipingCardNew exp="/experience/exp4.jpeg" sol="/experience/exp4.jpeg"/>
  
         </div> */}
-      <MotionSection className=" text-start mt-20 md:mt-16 bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
+      <MotionSection className=" text-start   bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
         <h2 className={`${thirdFont.className} w-full text-center tracking-wide text-2xl pr-4  font-bold mb-4 text-creamey`}>
           ✨ This is the Wifey Experience
         </h2>
