@@ -233,3 +233,21 @@ export interface ISubscription {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface ILoyaltyTransaction {
+  _id?: string;
+  userId: string; // or mongoose.Types.ObjectId
+  type: 'earn' | 'spend';
+  reason: string;
+  amount: number;
+  timestamp: Date;
+  bonusId?: string; // optional, if related to a reward redemption
+}
+
+export interface ILoyaltyBonus {
+  _id?: string;
+  title: string;
+  description: string;
+  bonusPoints: number;
+  active: boolean;
+}
