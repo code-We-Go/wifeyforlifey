@@ -4,6 +4,7 @@ import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import UserModel from "@/app/modals/userModel";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
+import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
                 { subscribed: true, expiryDate :subscribtions>50?expiryDate:expiryDateLifeTime}
             );
             if (subscription) {
-                const loyaltyBonus =await LoyaltyPointsModel.create({email:subscription.email,type:"earn",bonusID:"687d67f459e6ba857a54ed53"})
+                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",bonusID:"687d67f459e6ba857a54ed53"})
                 const subscribedUser = await UserModel.findOneAndUpdate(
                     { email: subscription.email },
                     { isSubscribed: true,subscription:subscription._id },
