@@ -7,6 +7,7 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import axios from "axios";
 import { NextResponse } from "next/server";
 import productsModel from "@/app/modals/productsModel";
+import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 
 const loadDB = async () => {
     console.log('hna');
@@ -108,6 +109,12 @@ export async function POST(request: Request) {
         billingApartment: data.billingApartment, 
         billingPostalZip: data.billingPostalZip, 
       })
+      const loyalty = await LoyaltyTransactionModel.create({
+        email: data.email,
+        type: "earn",
+        reason: "purchase",
+        amount: data.subTotal / 20,
+      });
       console.log('orderID' + res._id)
       console.log(data.subTotal)
       console.log(data.shipping)

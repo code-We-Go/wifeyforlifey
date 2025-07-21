@@ -43,7 +43,7 @@ export async function GET(request: Request) {
                 { subscribed: true, expiryDate :subscribtions>50?expiryDate:expiryDateLifeTime}
             );
             if (subscription) {
-                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",bonusID:"687d67f459e6ba857a54ed53"})
+                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:subscription.packageID.price/20,bonusID:"687d67f459e6ba857a54ed53"})
                 const subscribedUser = await UserModel.findOneAndUpdate(
                     { email: subscription.email },
                     { isSubscribed: true,subscription:subscription._id },
