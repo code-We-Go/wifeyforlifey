@@ -8,7 +8,7 @@ const SubscriptionSchema = new Schema(
             required: true 
         },
         packageID:{type:mongoose.Schema.Types.ObjectId,
-            refer: "packages",
+            ref: "packages",
         },
         email:{type:String},
         subscribed:{type:Boolean,default:false},

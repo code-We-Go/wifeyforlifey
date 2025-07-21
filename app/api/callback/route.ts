@@ -38,17 +38,13 @@ export async function GET(request: Request) {
             expiryDateLifeTime.setFullYear(expiryDateLifeTime.getFullYear() + 100);
             const subscribtions =await subscriptionsModel.countDocuments({subscribed:true})
             console.log('lifeTime'+expiryDateLifeTime)
-            // 1. Update the document and get the updated version
-            const updatedSubscription = await subscriptionsModel.findOneAndUpdate(
+            const subscription = await subscriptionsModel.findOneAndUpdate(
                 { paymentID: data.order },
-                { subscribed: true, expiryDate: subscribtions > 50 ? expiryDate : expiryDateLifeTime },
-                { new: true } // <-- This is important!
-            );
-
-            // 2. Populate the necessary fields
-            const subscription = await subscriptionsModel.findOne({paymentID: data.order}).populate({ path: "packageID",  options: { strictPopulate: false } });
+                { subscribed: true, expiryDate :subscribtions>50?expiryDate:expiryDateLifeTime},
+                { new: true }
+            ).populate({path:"packageID",strictPopulate:false});
             if (subscription) {
-                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:subscription.packageID.price,bonusID:"687d67f459e6ba857a54ed53"})
+                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:(subscription.packageID.price)/20,bonusID:"687d67f459e6ba857a54ed53"})
                 const subscribedUser = await UserModel.findOneAndUpdate(
                     { email: subscription.email },
                     { isSubscribed: true,subscription:subscription._id },
