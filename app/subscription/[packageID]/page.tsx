@@ -919,28 +919,19 @@ const CheckoutClientPage = () => {
            </div>
          </div> */}
                           <div className="flex items-center gap-2 text-base mt-2">
-  <label className="relative flex items-center">
-    <input
-      color="#FBF3E0"
-      type="checkbox"
-      id="accept-terms"
-      checked={acceptedTerms}
-      onChange={() => setAcceptedTerms(!acceptedTerms)}
-      className="peer appearance-none bg-creamey checked:bg-everGreen border border-everGreen w-4 h-4 rounded transition-colors"
-    />
-    {/* Custom checkmark */}
-    <span className="pointer-events-none absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs peer-checked:opacity-100 opacity-0">
-      ✔
-    </span>
-  </label>
-  <p className="ml-2">I accept the {''}                <Link
-                  href="/policies?terms-and-conditions"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-everGreen underline"
-                >
-                  terms and conditions
-                </Link></p>
+  <input
+  
+    color="#FBF3E0"
+    type="checkbox"
+    id="accept-terms"
+    checked={acceptedTerms}
+    onChange={() => setAcceptedTerms(!acceptedTerms)}
+    className="peer appearance-none bg-creamey checked:bg-everGreen border border-everGreen w-4 h-4 rounded transition-colors"
+  />
+  {/* Custom checkmark */}
+  <span className="pointer-events-none absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs peer-checked:opacity-100 opacity-0">
+    ✔
+  </span>
 </div>
               <div className="flex justify-end">
                 <button

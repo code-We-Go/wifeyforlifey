@@ -285,9 +285,9 @@ else{
         "floor": "floor",
         "state": data.state
       },
-      "extras": {
-        "ee": 22
-      },
+"extras": {
+  "subtotal": data.subtotal, // e.g., total without delivery
+},
       "special_reference": specialReference,
       "expiration": 3600,
       "notification_url": `${process.env.testUrl}api/callback`,

@@ -122,14 +122,15 @@ const ClubPage = () => {
         Interviews with experts from different industries who are here to give you all the tips you didn’t know you need! 
         ✅ Real bride-tested. Expert-approved. No overwhelm, just clarity        </p>
         <div className="grid grid-cols-1 gap-4 mt-8">
-          <div className="relative w-full h-[400px] md:h-[900px] rounded-lg overflow-hidden">
+          {/* <div className="relative w-full h-[400px] md:h-[900px] rounded-lg overflow-hidden">
             <Image
               src="/experience/playlists1.png"
               alt="Gehaz Planner Preview 1"
               fill
               className="object-contain "
             />
-          </div>
+          </div> */}
+          
 
         </div>
         </motion.div>
