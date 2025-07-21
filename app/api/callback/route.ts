@@ -40,7 +40,8 @@ export async function GET(request: Request) {
             console.log('lifeTime'+expiryDateLifeTime)
             const subscription = await subscriptionsModel.findOneAndUpdate(
                 { paymentID: data.order },
-                { subscribed: true, expiryDate :subscribtions>50?expiryDate:expiryDateLifeTime}
+                { subscribed: true, expiryDate :subscribtions>50?expiryDate:expiryDateLifeTime},
+                { new: true }
             ).populate({path:"packageID",strictPopulate:false});
             if (subscription) {
                 const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:(subscription.packageID.price)/20,bonusID:"687d67f459e6ba857a54ed53"})
