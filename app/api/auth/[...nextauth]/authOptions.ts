@@ -5,8 +5,14 @@ import { ConnectDB } from "@/app/config/db";
 import { compare } from "bcryptjs";
 import UserModel from "@/app/modals/userModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
+import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
 
+
+console.log("registering" + LoyaltyPointsModel);
 // Extend NextAuth types to include isSubscribed
+let loyaltyPoints = 0;
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -17,7 +23,8 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isSubscribed: boolean;
-      subscriptionExpiryDate?:Date | null
+      subscriptionExpiryDate?:Date | null;
+      loyaltyPoints?:number ;
     };
   }
 }
@@ -25,9 +32,28 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     isSubscribed?: boolean;
+    loyaltyPonits?:number;
   }
 }
 
+// Helper function to calculate loyalty points
+async function calculateLoyaltyPoints(email: string) {
+  let loyaltyPoints = 0;
+  const transactions = await LoyaltyTransactionModel
+    .find({ email })
+    .populate('bonusID'); // Populate bonusID for non-purchase transactions
+
+  for (const tx of transactions) {
+    if (tx.reason === "purchase") {
+      loyaltyPoints += tx.amount;
+    } else if (tx.bonusID && tx.bonusID.amount) {
+      loyaltyPoints += tx.bonusID.bonusPoints;
+    }
+  }
+  return loyaltyPoints;
+}
+
+console.log("registering" + LoyaltyPointsModel);
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -49,10 +75,17 @@ export const authOptions: NextAuthOptions = {
           const isValid = await compare(credentials!.password, user.password);
           if (!isValid) throw new Error("Wrong password");
 
+          // Ensure email is defined
+          if (!credentials?.email) {
+            throw new Error("Email is required for loyalty points calculation");
+          }
+          const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
+
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.username,
+            loyaltyPoints, // Pass the calculated points
           };
         } catch (error) {
           console.error("Authorize error:", error);
@@ -98,6 +131,8 @@ export const authOptions: NextAuthOptions = {
           token.subscriptionExpiryDate = subscription?.expiryDate
             ? subscription.expiryDate.toISOString()
             : null;
+            token.loyaltyPonits =  await calculateLoyaltyPoints(subscription.email);
+
           
           // const dbUser = await UserModel.findOne({ email });
           // token.isSubscribed = dbUser?.isSubscribed ?? false;
@@ -116,6 +151,7 @@ export const authOptions: NextAuthOptions = {
         session.user.subscriptionExpiryDate = token.subscriptionExpiryDate
           ? new Date(token.subscriptionExpiryDate as string)
           : null;
+          session.user.loyaltyPoints= token.loyaltyPonits
       }
       return session;
     },

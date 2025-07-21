@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { LoyaltyPointsModel } from "./rewardModel";
+console.log("registering" + LoyaltyPointsModel);
 
 export interface ILoyaltyTransaction extends Document {
   email: string;
@@ -15,7 +17,7 @@ const LoyaltyTransactionSchema = new Schema<ILoyaltyTransaction>({
   timestamp: { type: Date, default: Date.now },
   amount:{type :Number ,required:false},
   reason:{type:String,required:false, enum:["purchase","subscription","birthday","wedding day","social media" ]},
-  bonusID: { type: mongoose.Schema.Types.ObjectId, ref: "LoyalityPoints" },
+  bonusID: { type: mongoose.Schema.Types.ObjectId, ref: "loyaltyPoints" },
 });
 
 export const LoyaltyTransactionModel = mongoose.models.LoyaltyTransaction || mongoose.model<ILoyaltyTransaction>("LoyaltyTransaction", LoyaltyTransactionSchema); 

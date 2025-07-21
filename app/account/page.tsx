@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import CartItemSmall from '../cart/CartItemSmall';
+import { useAuth } from '@/hooks/useAuth'; 
 import { IOrder } from '../interfaces/interfaces';
 import { useCart } from '@/providers/CartProvider';
 import { UploadDropzone } from '@/utils/uploadthing';
@@ -29,6 +30,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
+  const {loyaltyPoints} =useAuth()
   const [userInfo, setUserInfo] = useState({
     name: '',
     firstName: '',
@@ -222,7 +224,7 @@ const handleComperession =async (files: File[]) => {
     isSubscribed: session.user.isSubscribed || false,
     subscriptionExpiryDate:session.user.subscriptionExpiryDate,
     imgUrl: session.user.image,
-    loyaltyPoints: 0,
+    loyaltyPoints: loyaltyPoints,
     wishlistItems: wishList.length,
     orders: orders.length,
   };

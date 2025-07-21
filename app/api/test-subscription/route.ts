@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import packageModel from "@/app/modals/packageModel";
+import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -22,7 +23,8 @@ export async function GET(request: Request) {
         //     return NextResponse.json({ error: "Missing paymentID query parameter" }, { status: 400 });
         // }
         console.log("registering" + packageModel)
-        const subscription = await subscriptionsModel.findOne({ paymentID:358840801 }).populate({ path: "packageID", options: { strictPopulate: false } });
+        const subscription = await LoyaltyPointsModel.find()
+        // .populate({ path: "packageID", options: { strictPopulate: false } });
         if (!subscription) {
             return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
         }

@@ -19,6 +19,7 @@ declare module "next-auth" {
       image?: string | null;
       isSubscribed:boolean ;
       subscriptionExpiryDate?:Date | null
+      loyaltyPoints?:number ;
     };
   }
 }
