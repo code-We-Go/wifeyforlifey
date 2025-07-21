@@ -113,7 +113,7 @@ export async function POST(request: Request) {
         email: data.email,
         type: "earn",
         reason: "purchase",
-        amount: data.subTotal / 20,
+        amount: data.subTotal ,
       });
       console.log('orderID' + res._id)
       console.log(data.subTotal)

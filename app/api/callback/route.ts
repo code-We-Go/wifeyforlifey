@@ -5,6 +5,8 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import UserModel from "@/app/modals/userModel";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
+import { register } from "node:module";
+import packageModel from "@/app/modals/packageModel";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -46,9 +48,10 @@ export async function GET(request: Request) {
             );
 
             // 2. Populate the necessary fields
-            const subscription = await subscriptionsModel.populate(updatedSubscription, { path: "packageID", strictPopulate: false });
+            console.log("register"+packageModel)
+            const subscription = await subscriptionsModel.findOne({ paymentID:data.order }).populate({ path: "packageID", options: { strictPopulate: false } });
             if (subscription) {
-                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:(subscription.packageID.price)/20,bonusID:"687d67f459e6ba857a54ed53"})
+                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:subscription.packageID.price,bonusID:"687d67f459e6ba857a54ed53"})
                 const subscribedUser = await UserModel.findOneAndUpdate(
                     { email: subscription.email },
                     { isSubscribed: true,subscription:subscription._id },
