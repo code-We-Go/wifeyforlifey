@@ -341,7 +341,7 @@ export default function PlaylistPage() {
           </div>
           
           <div className="bg-card rounded-lg overflow-hidden shadow-sm">
-            <div className="divide-y max-h-[70vh] overflow-y-auto scrollbar-hide">
+            <div className="divide-y max-h-[70vh] overflow-y-auto ">
               {Array.isArray(playlist.videos) && playlist.videos.map((video: any,index) => {
                 console.log('isLocked' + video.isPublic +isSubscribed+video.title)
                 const isLocked =  !video.isPublic && !isSubscribed;

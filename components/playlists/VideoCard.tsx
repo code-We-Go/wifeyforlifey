@@ -11,7 +11,7 @@ interface VideoCardProps {
 export default function VideoCard({ playlist }: VideoCardProps) {
   return (
     <Link href={`/playlists/${playlist._id}`}>
-      <div className="video-card group">
+      <div className="video-card group border border-lovely">
         <div className="relative aspect-video overflow-hidden rounded-t-lg">
           <Image
             src={playlist.thumbnailUrl}

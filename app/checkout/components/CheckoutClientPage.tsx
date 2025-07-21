@@ -14,6 +14,9 @@ import { Discount } from "../../types/discount";
 import CartItemSmall from "../../cart/CartItemSmall";
 import DiscountSection from "./DiscountSection";
 import { ShippingZone } from "../../interfaces/interfaces";
+import { useAuth } from '@/hooks/useAuth';
+import { Info } from 'lucide-react';
+import { Tooltip } from '@/components/ui/tooltip';
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -186,6 +189,23 @@ const CheckoutClientPage = () => {
     { name: string; shipping_zone: number }[]
   >([]);
   const [useSameAsShipping, setUseSameAsShipping] = useState(true);
+  const { loyaltyPoints } = useAuth();
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  // Handler for redeeming points
+  const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = parseInt(e.target.value) || 0;
+    value = Math.max(0, Math.min(value - (value % 20), loyaltyPoints));
+    setRedeemPoints(value);
+    setLoyaltyDiscount(Math.floor(value / 20));
+  };
+
+  // Update total to include loyalty discount
+  useEffect(() => {
+    setTotal((prevTotal) => Math.max(0, prevTotal - loyaltyDiscount));
+  }, [loyaltyDiscount]);
 
   // const [state,setState]=useState(states.length>0?states[0].name:'')
   const [state, setState] = useState("Alexandria"); // Default to the first state's name or an empty string
@@ -437,7 +457,14 @@ const CheckoutClientPage = () => {
       formData.billingCity = formData.city;
       formData.billingPhone = formData.phone;
     }
-    const res = await axios.post("/api/payment/", formData);
+    const orderPayload = {
+      ...formData,
+      loyalty: {
+        redeemedPoints: redeemPoints,
+        discount: loyaltyDiscount,
+      },
+    };
+    const res = await axios.post("/api/payment/", orderPayload);
     console.log(res.data.token);
     setLoading(false);
 
@@ -959,6 +986,61 @@ const CheckoutClientPage = () => {
       <p className="text-[12px] mt-6 lg:text-lg">{total} {country !==65?'LE':'USD'}</p> */}
               </div>
             </div>
+
+            {/* Loyalty Points Section for mobile */}
+            <div className="mt-6 space-y-2 text-black bg-white/80 rounded-lg p-4 shadow-sm border border-lovely">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-semibold text-everGreen">Loyalty Points</span>
+                <button
+                  type="button"
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                  className="ml-1 text-lovely"
+                >
+                  <Info size={18} />
+                </button>
+                {showTooltip && (
+                  <div className="absolute z-10 bg-white border border-lovely rounded p-2 text-xs shadow-lg mt-2">
+                    Redeem your points for a discount! Every 20 points = 1 LE off your order. Points can only be redeemed in multiples of 20.
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-lovely">{loyaltyPoints}</span>
+                <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
+                  <div
+                    className="h-2 bg-lovely rounded-full"
+                    style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints) * 100 || 0)}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs text-gray-500">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <label htmlFor="redeemPointsMobile" className="text-everGreen font-medium">Redeem:</label>
+                <input
+                  id="redeemPointsMobile"
+                  type="number"
+                  min={0}
+                  step={20}
+                  max={loyaltyPoints - (loyaltyPoints % 20)}
+                  value={redeemPoints}
+                  onChange={handleRedeemChange}
+                  className="border rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
+                />
+                <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
+                <button
+                  type="button"
+                  className="ml-2 px-3 py-1 rounded bg-everGreen text-creamey hover:bg-lovely transition"
+                  onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
+                  disabled={loyaltyPoints < 20}
+                >
+                  Max
+                </button>
+              </div>
+              {redeemPoints > 0 && (
+                <div className="text-xs text-green-700 mt-1">You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.</div>
+              )}
+            </div>
           </div>
         </div>
         <div className="lg:col-span-2 max-lg:order-2 p-6">
@@ -1003,7 +1085,60 @@ const CheckoutClientPage = () => {
                 </div>
               </div>
 
-              {/* ... rest of the order summary ... */}
+              {/* Loyalty Points Section */}
+              <div className="mt-6 space-y-2 text-black bg-white/80 rounded-lg p-4 shadow-sm border border-lovely">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-everGreen">Loyalty Points</span>
+                  <button
+                    type="button"
+                    onMouseEnter={() => setShowTooltip(true)}
+                    onMouseLeave={() => setShowTooltip(false)}
+                    className="ml-1 text-lovely"
+                  >
+                    <Info size={18} />
+                  </button>
+                  {showTooltip && (
+                    <div className="absolute z-10 bg-white border border-lovely rounded p-2 text-xs shadow-lg mt-2">
+                      Redeem your points for a discount! Every 20 points = 1 LE off your order. Points can only be redeemed in multiples of 20.
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-lovely">{loyaltyPoints}</span>
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
+                    <div
+                      className="h-2 bg-lovely rounded-full"
+                      style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints) * 100 || 0)}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-gray-500">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <label htmlFor="redeemPoints" className="text-everGreen font-medium">Redeem:</label>
+                  <input
+                    id="redeemPoints"
+                    type="number"
+                    min={0}
+                    step={20}
+                    max={loyaltyPoints - (loyaltyPoints % 20)}
+                    value={redeemPoints}
+                    onChange={handleRedeemChange}
+                    className="border rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
+                  />
+                  <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
+                  <button
+                    type="button"
+                    className="ml-2 px-3 py-1 rounded bg-everGreen text-creamey hover:bg-lovely transition"
+                    onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
+                    disabled={loyaltyPoints < 20}
+                  >
+                    Max
+                  </button>
+                </div>
+                {redeemPoints > 0 && (
+                  <div className="text-xs text-green-700 mt-1">You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.</div>
+                )}
+              </div>
             </div>
           </div>
       </div>

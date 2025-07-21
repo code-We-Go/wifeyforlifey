@@ -17,6 +17,8 @@ import { BottomBlurOut } from "./components/ButtomBlurOut";
 import FlipCard from "./components/FlipCard";
 import FlipingCardNew from "./components/FlipingCardNew";
 import { wifeyFont } from "@/fonts";
+import { VideoPlaylist } from "../interfaces/interfaces";
+import VideoCard from "@/components/playlists/VideoCard";
 
 const OPTIONS: EmblaOptionsType = { loop: true }
 
@@ -26,12 +28,34 @@ const ClubPage = () => {
   const MotionSection = motion<'section'>('section');
   const bgSectionRef = useRef<HTMLDivElement>(null);
 
-
+  const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchFeaturedPlaylists = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/playlists?featured=true&all=true");
+        const data = await res.json();
+        if (res.ok) {
+          setFeaturedPlaylists(data.data || []);
+        } else {
+          setError(data.error || "Failed to fetch featured playlists");
+        }
+      } catch (err) {
+        setError("Failed to fetch featured playlists");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeaturedPlaylists();
+  }, []);
 
   return (
 
    
-    <div className="relative  flex flex-col justify-start  items-center w-full py-16   overflow-x-hidden">
+    <div className="relative   flex flex-col justify-start  items-center w-full py-16   overflow-x-hidden">
   
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
@@ -41,7 +65,7 @@ const ClubPage = () => {
       className="text-start mb-8 container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-4xl font-bold mb-2 text-lovely`}>
           Welcome to The 
-          <span className={`${lifeyFont.className} mx-1`}>Wifey</span> Experience 💖
+          <span className={`${lifeyFont.className} mx-1`}>Wifey Experience 💖</span>
           {/* <span className={`${lifeyFont.className}`}>W</span><span style={{ transform: "scaleY(1.5)" }} className={`${wifeyFont.className} uppercase tracking-tighter font-light italic mr-1`}>ifey </span> Experience 💖 */}
         </h1>
         <p className="text-base md:text-lg text-lovely/95 mb-1">
@@ -103,6 +127,16 @@ const ClubPage = () => {
             />
           </div>
         </div>
+          <div className="grid grid-cols-1  gap-4 mt-4">
+          <div className="relative w-full h-64 md:min-h-[800px]  rounded-lg overflow-hidden">
+            <Image
+              src="/experience/planner3.jpeg"
+              alt="planner 3"
+              fill
+              className="object-cover"
+            />
+          </div>
+</div>
 
         </motion.div>
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
@@ -122,6 +156,16 @@ const ClubPage = () => {
         Interviews with experts from different industries who are here to give you all the tips you didn’t know you need! 
         ✅ Real bride-tested. Expert-approved. No overwhelm, just clarity        </p>
         <div className="grid grid-cols-1 gap-4 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredPlaylists.length === 0 ? (
+              <div className="col-span-2 text-center py-8">No featured playlists found.</div>
+            ) : (
+              featuredPlaylists.slice(0,3).map((playlist) => (
+                <VideoCard key={playlist._id} playlist={playlist} />
+              ))
+            )}
+          </div>
+          
           {/* <div className="relative w-full h-[400px] md:h-[900px] rounded-lg overflow-hidden">
             <Image
               src="/experience/playlists1.png"

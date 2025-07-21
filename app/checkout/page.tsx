@@ -19,6 +19,8 @@ import { ShippingZone } from "../interfaces/interfaces";
 import { wifeyExperience } from "../constants";
 import Image from "next/image";
 import { Spinner } from "@material-tailwind/react";
+import { useAuth } from '@/hooks/useAuth';
+import { Info } from 'lucide-react';
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -161,14 +163,12 @@ const CheckoutClientPage = () => {
   // const []
   //  const[countries,setCountries]=useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
-  const [discountAmount, setDiscountAmount] = useState(0);
   const calculateTotals = () => {
     // Calculate subtotal first
     const calculatedSubTotal = items.reduce(
       (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
       0
     );
-    setSubTotal(calculatedSubTotal);
 
     // Calculate discount amount
     let newDiscountAmount = 0;
@@ -202,8 +202,6 @@ const CheckoutClientPage = () => {
       }
     }
 
-    setDiscountAmount(newDiscountAmount);
-
     // Calculate final total
     const finalTotal = calculatedSubTotal + effectiveShipping;
     console.log("Final calculation:", {
@@ -212,7 +210,6 @@ const CheckoutClientPage = () => {
       discountAmount: newDiscountAmount,
       finalTotal,
     });
-    setTotal(finalTotal);
   };
   type Payment = "cash" | "card" | "instapay";
   const { user } = useContext(userContext);
@@ -485,6 +482,54 @@ const CheckoutClientPage = () => {
       <OrderSummaryItem cartItem={cartItem} key={index} />
     ));
   };
+  const { loyaltyPoints } = useAuth();
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  // const [total, setTotal] = useState(0);
+
+  // Handler for redeeming points (allow any value, clamp in effect)
+  const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = parseInt(e.target.value) ||0;
+    setRedeemPoints(value);
+  };
+
+  // Recalculate all totals and discounts together
+  useEffect(() => {
+    // Calculate subtotal
+    const calculatedSubTotal = items.reduce(
+      (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+      0
+    );
+    setSubTotal(calculatedSubTotal);
+
+    // Calculate discount amount
+    let newDiscountAmount = 0;
+    let effectiveShipping = shipping;
+    if (appliedDiscount && appliedDiscount.value !== undefined) {
+      if (appliedDiscount.calculationType === "PERCENTAGE") {
+        newDiscountAmount = Math.round(
+          (calculatedSubTotal * appliedDiscount.value) / 100
+        );
+      } else if (appliedDiscount.calculationType === "FIXED_AMOUNT") {
+        newDiscountAmount = appliedDiscount.value;
+      } else if (appliedDiscount.calculationType === "FREE_SHIPPING") {
+        effectiveShipping = 0;
+        newDiscountAmount = shipping;
+      }
+    }
+    setDiscountAmount(newDiscountAmount);
+
+    // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
+    let validRedeem = Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints));
+    const loyaltyLE = Math.floor(validRedeem / 20);
+    setLoyaltyDiscount(loyaltyLE);
+
+    // Calculate final total
+    const finalTotal = Math.max(0, calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping);
+    setTotal(finalTotal);
+  }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -517,7 +562,14 @@ const CheckoutClientPage = () => {
       formData.billingCity = formData.city;
       formData.billingPhone = formData.phone;
     }
-    const res = await axios.post("/api/payment/", formData);
+    const orderPayload = {
+      ...formData,
+      loyalty: {
+        redeemedPoints: redeemPoints,
+        discount: loyaltyDiscount,
+      },
+    };
+    const res = await axios.post("/api/payment/", orderPayload);
     console.log(res.data.token);
     setLoading(false);
 
@@ -1137,17 +1189,12 @@ const CheckoutClientPage = () => {
             className="flex  justify-between items-center px-1 hover:cursor-pointer"
           >
             <div className="flex gap-1  justify-center items-center">
-              <h2 className={`${thirdFont.className}`}>ORDER SUMMARY</h2>
+              <h6 className={`${thirdFont.className}`}>ORDER SUMMARY</h6>
               <IoIosArrowDown
-                className={`${
-                  summary ? "rotate-180" : ""
-                } transition duration-500`}
+                className={`${summary ? "rotate-180" : ""} transition duration-500`}
               />
             </div>
-            <h2 className={`${thirdFont.className}`}>
-              {/* {total} {user.userCountry === "EG" ? "LE" : "USD"}{" "} */}
-              {total} LE
-            </h2>
+            <h6 className={`${thirdFont.className}`}>{total} LE</h6>
           </div>
           <div
             className={`transition-all duration-500 ease-in-out overflow-hidden ${
@@ -1158,33 +1205,81 @@ const CheckoutClientPage = () => {
             }}
           >
             {items.map((cartItem, index) => (
-              // <div key={index} className="bg-everGreen w-full h-10"> </div>
               <OrderSummaryItem cartItem={cartItem} key={index} />
             ))}
             <div className="flex pb-5 justify-between">
               <div className="flex flex-col gap-1">
                 <p>SUBTOTAL</p>
+                {/* {redeemPoints > 0 && (
+                  <p className="text-[12px] lg:text-base text-green-700">-{loyaltyDiscount} LE (Loyalty Discount)</p>
+                )} */}
                 <p>SHIPPING</p>
                 <p className="mt-6">TOTAL</p>
               </div>
-
               <div className="flex flex-col gap-1 items-end">
-                <p className="text-[12px] lg:text-base">
-                  {subTotal} LE
-                  {/* {subTotal} {user.userCountry === "EG" ? "LE" : "USD"} */}
-                </p>
-                <p className="text-[12px] lg:text-base">
-                  {shipping} LE
-                  {/* {shipping} {user.userCountry === "EG" ? "LE" : "USD"} */}
-                </p>
-                <p className="text-[12px] mt-6 lg:text-base">
-                  {total} LE
-                  {/* {total} {user.userCountry === "EG" ? "LE" : "USD"} */}
-                </p>
-                {/* <p className="text-[12px] lg:text-base">{subTotal} {country===65?'LE':'USD'}</p>
-      <p className="text-[12px] lg:text-base">{shipping} {country===65?'LE':'USD'}</p>
-      <p className="text-[12px] mt-6 lg:text-base">{total} {country !==65?'LE':'USD'}</p> */}
+                <p className="text-[12px] lg:text-base">{subTotal} LE</p>
+                {redeemPoints > 0 && (
+                  <p className="text-[12px] lg:text-base text-green-700">-{loyaltyDiscount} LE</p>
+                )}
+                <p className="text-[12px] lg:text-base">{shipping} LE</p>
+                <p className="text-[12px] mt-6 lg:text-base">{total} LE</p>
               </div>
+            </div>
+            {/* Loyalty Points Section for mobile */}
+            <div className="mt-6 space-y-2 text-everGreen bg-creamey/80 rounded-lg p-4 shadow-sm border border-lovely">
+              <div
+                className="flex items-center gap-2 mb-2 relative"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                <span className="font-semibold text-everGreen">Loyalty Points</span>
+                <button
+                  type="button"
+                  className="ml-1 text-lovely"
+                  tabIndex={-1} // optional: prevent focus
+                >
+                  <Info size={18} />
+                </button>
+                {showTooltip && (
+                  <div className="absolute z-10 bg-white border border-lovely rounded p-2 text-xs shadow-lg mt-2 left-0">
+                    Redeem your points for a discount! Every 20 points = 1 LE off your order. Points can only be redeemed in multiples of 20.
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-lovely">{loyaltyPoints}</span>
+                <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
+                  <div
+                    className="h-2 bg-lovely rounded-full"
+                    style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints) * 100 || 0)}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs text-lovely/90">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <label htmlFor="redeemPointsMobile" className="text-everGreen font-medium">Redeem:</label>
+                <input
+                  id="redeemPointsMobile"
+                  type="number"
+                  min={0}
+                  max={loyaltyPoints - (loyaltyPoints % 20)}
+                  value={redeemPoints}
+                  onChange={handleRedeemChange}
+                  className="border rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
+                />
+                <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
+                <button
+                  type="button"
+                  className="ml-2 px-3 py-1 rounded bg-everGreen text-creamey hover:bg-lovely transition"
+                  onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
+                  disabled={loyaltyPoints < 20}
+                >
+                  Max
+                </button>
+              </div>
+              {redeemPoints > 0 && (
+                <div className="text-xs text-green-700 mt-1">You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.</div>
+              )}
             </div>
           </div>
         </div>
@@ -1208,11 +1303,17 @@ const CheckoutClientPage = () => {
               <DiscountSection onDiscountApplied={handleDiscountApplied} />
 
               {/* Order Totals */}
-              <div className="mt-6 space-y-2 text-black">
+              <div className="mt-6 space-y-2 text-everGreen">
                 <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>
                 </div>
+                {redeemPoints > 0 && (
+                  <div className="flex justify-between text-base text-green-700">
+                    <span>Loyalty Discount</span>
+                    <span>-{loyaltyDiscount} LE</span>
+                  </div>
+                )}
                 {appliedDiscount && appliedDiscount.value !== undefined && (
                   <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
@@ -1229,12 +1330,13 @@ const CheckoutClientPage = () => {
                     </span>
                   </div>
                 )}
+                {/* {redeemPoints > 0 && <div>{redeemPoints}</div>} */}
                 <div className="flex justify-between text-base">
                   <span>Shipping</span>
                   <span>
                     {appliedDiscount?.calculationType === "FREE_SHIPPING"
                       ? "0"
-                      : shipping}{" "}
+                      : shipping} {" "}
                     LE
                   </span>
                 </div>
@@ -1243,8 +1345,59 @@ const CheckoutClientPage = () => {
                   <span>{total} LE</span>
                 </div>
               </div>
-
-              {/* ... rest of the order summary ... */}
+              {/* Loyalty Points Section */}
+              <div className="mt-6 space-y-2 text-everGreen bg-creamey/80 rounded-lg p-4 shadow-sm border border-lovely">
+                {/* <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-everGreen">Loyalty Points</span>
+                  <button
+                    type="button"
+                    onMouseEnter={() => setShowTooltip(true)}
+                    onMouseLeave={() => setShowTooltip(false)}
+                    className="ml-1 text-lovely"
+                  >
+                    <Info size={18} />
+                  </button>
+                  {showTooltip && (
+                    <div className="absolute z-10 bg-white border border-lovely rounded p-2 text-xs shadow-lg mt-2">
+                      Redeem your points for a discount! Every 20 points = 1 LE off your order. Points can only be redeemed in multiples of 20.
+                    </div>
+                  )}
+                </div> */}
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-lovely">{loyaltyPoints}</span>
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
+                    <div
+                      className="h-2 bg-lovely rounded-full"
+                      style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints) * 100 || 0)}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-lovely/90">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <label htmlFor="redeemPoints" className="text-everGreen font-medium">Redeem:</label>
+                  <input
+                    id="redeemPoints"
+                    type="number"
+                    min={0}
+                    max={loyaltyPoints - (loyaltyPoints % 20)}
+                    value={redeemPoints}
+                    onChange={handleRedeemChange}
+                    className="border border-lovely bg-creamey rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
+                  />
+                  <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
+                  <button
+                    type="button"
+                    className="ml-2 px-3 py-1 rounded bg-everGreen text-creamey hover:bg-lovely transition"
+                    onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
+                    disabled={loyaltyPoints < 20}
+                  >
+                    Max
+                  </button>
+                </div>
+                {redeemPoints > 0 && (
+                  <div className="text-xs text-green-700 mt-1">You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.</div>
+                )}
+              </div>
             </div>
           </div>
         ) : (
@@ -1281,11 +1434,17 @@ const CheckoutClientPage = () => {
                   {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
                 </div>
               </div>
-              <div className="mt-6 space-y-2 text-black">
+              <div className="mt-6 space-y-2 text-everGreen">
                 <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>
                 </div>
+                {redeemPoints > 0 && (
+                  <div className="flex justify-between text-base text-green-700">
+                    <span>Loyalty Discount</span>
+                    <span>-{loyaltyDiscount} LE</span>
+                  </div>
+                )}
                 {appliedDiscount && appliedDiscount.value !== undefined && (
                   <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
@@ -1302,6 +1461,7 @@ const CheckoutClientPage = () => {
                     </span>
                   </div>
                 )}
+                {/* {redeemPoints > 0 && <div>{redeemPoints}</div>} */}
                 <div className="flex justify-between text-base">
                   <span>Shipping</span>
                   <span>
