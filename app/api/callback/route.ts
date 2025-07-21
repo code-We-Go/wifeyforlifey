@@ -46,9 +46,9 @@ export async function GET(request: Request) {
             );
 
             // 2. Populate the necessary fields
-            const subscription = await subscriptionsModel.populate(updatedSubscription, { path: "packageID", strictPopulate: false });
+            const subscription = await subscriptionsModel.findOne({paymentID: data.order}).populate({ path: "packageID", strictPopulate: false });
             if (subscription) {
-                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:(subscription.packageID.price)/20,bonusID:"687d67f459e6ba857a54ed53"})
+                const loyaltyBonus =await LoyaltyTransactionModel.create({email:subscription.email,type:"earn",reason:"subscription",amount:subscription.packageID.price,bonusID:"687d67f459e6ba857a54ed53"})
                 const subscribedUser = await UserModel.findOneAndUpdate(
                     { email: subscription.email },
                     { isSubscribed: true,subscription:subscription._id },
