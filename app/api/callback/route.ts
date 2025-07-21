@@ -61,21 +61,12 @@ export async function GET(request: Request) {
             console.log("Order2ID"+data.order)
             console.log("Transaction Successful, redirecting to /success...");
             const res= await ordersModel.findOneAndUpdate({orderID:data.order},{payment:"confirmed"})
-            let subtotal = 0;
-            // if (data.extras) {
-            //   try {
-            //     const extrasObj = JSON.parse(data.extras);
-            //     subtotal = extrasObj.subtotal ? Number(extrasObj.subtotal) : 0;
-            //   } catch (e) {
-            //     console.error("Failed to parse extras:", e);
-            //   }
-            // }
             const loyalty = await LoyaltyTransactionModel.create({
-              email: res.email,
-              type: "earn",
-              reason: "purchase",
-              amount: res.subtotal / 20,
-            });
+                email: res.email,
+                type: "earn",
+                reason: "purchase",
+                amount: res.subTotal / 20,
+              });
             }
             //Update the order status with orderId here
             return NextResponse.redirect(`${process.env.testUrl}payment/success`);
