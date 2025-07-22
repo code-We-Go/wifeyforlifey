@@ -47,9 +47,10 @@ const OrderSchema = new Schema(
         cart: {
             type: [CartItemSchema],required:false // Array of cart items
         },
+        redeemedLoyaltyPoints:{type:Number,required:false},
         subTotal: { type: Number, required: false}, 
         shipping: { type: Number, required: false}, 
-
+        redeemedloyaltyPoints :{type:Number,required:false},
         total: { type: Number, required: false}, 
         currency: { type: String, required: false}, 
         status: {

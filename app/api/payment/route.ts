@@ -45,7 +45,7 @@ console.log("productFound")
 
 
     // Check if enough stock is available
-    if (attribute.stock < item.quantity) {
+    if (attribute?.stock < item.quantity) {
       console.log('stock problem')
         return NextResponse.json({ 
             error: `Insufficient stock for ${item.productID} )` 
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     if(data.cash==="cash"){
       try {
         await decreaseStock(items); // <-- Decrease stock before order creation
-
+        console.log("redeemedLoyaltyPoints"+data.loyalty.redeemedPoints)
       const res = await ordersModel.create({ 
         email:data.email,
          orderID:''
@@ -94,6 +94,7 @@ export async function POST(request: Request) {
         city: data.city ,
         state:data.state ,
         phone:data.phone ,
+        redeemedLoyaltyPoints:data.loyalty.redeemedPoints,
         cash: data.cash, // Payment method: Cash or not
         cart: items,
         subTotal:data.subTotal,
@@ -109,12 +110,22 @@ export async function POST(request: Request) {
         billingApartment: data.billingApartment, 
         billingPostalZip: data.billingPostalZip, 
       })
+
       const loyalty = await LoyaltyTransactionModel.create({
         email: data.email,
         type: "earn",
         reason: "purchase",
         amount: data.subTotal ,
       });
+      if(data.loyalty.redeemedPoints>0){
+        const loyalty = await LoyaltyTransactionModel.create({
+          email: data.email,
+          type: "spend",
+          reason: "purchase",
+          amount: data.loyalty.redeemedPoints ,
+        });
+
+      }
       console.log('orderID' + res._id)
       console.log(data.subTotal)
       console.log(data.shipping)
@@ -329,6 +340,7 @@ else{
     cart: items,
     total: data.total,
     subTotal:data.subTotal,
+    redeemedLoyaltyPoints:data.loyalty.redeemedPoints,
     billingCountry: data.billingCountry,
     billingFirstName: data.billingFirstName,
     billingState:data.billingState,

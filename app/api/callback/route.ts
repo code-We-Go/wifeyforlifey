@@ -73,7 +73,8 @@ export async function GET(request: Request) {
                 email: res.email,
                 type: "earn",
                 reason: "purchase",
-                amount: res.subTotal / 20,
+                amount: res.redeemedloyaltyPoints
+
               });
             }
             //Update the order status with orderId here

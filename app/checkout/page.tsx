@@ -241,6 +241,8 @@ const CheckoutClientPage = () => {
   // const [state,setState]=useState(states.length>0?states[0].name:'')
   const [state, setState] = useState("Alexandria"); // Default to the first state's name or an empty string
   const [billingState, setBillingState] = useState("Alexandria");
+  const [redeemPoints, setRedeemPoints] = useState(0);
+
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
@@ -265,6 +267,7 @@ const CheckoutClientPage = () => {
       country: countryName ? countryName.name : "",
     }));
   }, [total, countryID, countries]);
+  const { loyaltyPoints } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     country: "",
@@ -278,6 +281,7 @@ const CheckoutClientPage = () => {
     phone: "",
     state: state,
     cash: payment,
+    redeemedLoyaltyPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints)),
     total: total,
     shipping: shipping,
     billingCountry: "",
@@ -482,8 +486,6 @@ const CheckoutClientPage = () => {
       <OrderSummaryItem cartItem={cartItem} key={index} />
     ));
   };
-  const { loyaltyPoints } = useAuth();
-  const [redeemPoints, setRedeemPoints] = useState(0);
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -564,8 +566,12 @@ const CheckoutClientPage = () => {
     }
     const orderPayload = {
       ...formData,
+      total, // use the latest state value
+      shipping,
+      subTotal,
+      cart: items,
       loyalty: {
-        redeemedPoints: redeemPoints,
+        redeemedPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints)),
         discount: loyaltyDiscount,
       },
     };
@@ -1346,7 +1352,7 @@ const CheckoutClientPage = () => {
                 </div>
               </div>
               {/* Loyalty Points Section */}
-              <div className="mt-6 space-y-2 text-everGreen bg-creamey/80 rounded-lg p-4 shadow-sm border border-lovely">
+              <div className="mt-6 space-y-2 bg-pinkey text-lovely rounded-lg p-4 shadow-sm border border-lovely">
                 {/* <div className="flex items-center gap-2 mb-2">
                   <span className="font-semibold text-everGreen">Loyalty Points</span>
                   <button
@@ -1373,8 +1379,8 @@ const CheckoutClientPage = () => {
                   </div>
                   <span className="text-xs text-lovely/90">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
                 </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <label htmlFor="redeemPoints" className="text-everGreen font-medium">Redeem:</label>
+                <div className="flex items-center  gap-2 mt-2">
+                  <label htmlFor="redeemPoints" className="text-lovely font-medium">Redeem Loyalty Points:</label>
                   <input
                     id="redeemPoints"
                     type="number"
@@ -1387,7 +1393,7 @@ const CheckoutClientPage = () => {
                   <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
                   <button
                     type="button"
-                    className="ml-2 px-3 py-1 rounded bg-everGreen text-creamey hover:bg-lovely transition"
+                    className="ml-2 px-3 py-1 rounded bg-lovely/90 text-creamey hover:bg-lovely transition"
                     onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
                     disabled={loyaltyPoints < 20}
                   >
@@ -1395,7 +1401,7 @@ const CheckoutClientPage = () => {
                   </button>
                 </div>
                 {redeemPoints > 0 && (
-                  <div className="text-xs text-green-700 mt-1">You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.</div>
+                  <div className="text-xs text-lovely/80 mt-1">You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.</div>
                 )}
               </div>
             </div>
