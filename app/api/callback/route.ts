@@ -73,7 +73,7 @@ export async function GET(request: Request) {
                 email: res.email,
                 type: "earn",
                 reason: "purchase",
-                amount: res.redeemedloyaltyPoints
+                amount: res.redeemedLoyaltyPoints
 
               });
             }
