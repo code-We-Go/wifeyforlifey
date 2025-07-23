@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import CartItemSmall from '../cart/CartItemSmall';
 import { useAuth } from '@/hooks/useAuth'; 
-import { IOrder } from '../interfaces/interfaces';
+import { ILoyaltyTransaction, IOrder } from '../interfaces/interfaces';
 import { useCart } from '@/providers/CartProvider';
 import { UploadDropzone } from '@/utils/uploadthing';
 import { compressImage } from '@/utils/imageCompression';
@@ -59,6 +59,34 @@ export default function AccountPage() {
   };
   const { addItem } = useCart();
   const { toast } = useToast();
+  const [loyaltyTransactions, setLoyaltyTransactions] = useState<ILoyaltyTransaction[]>([]);
+  const [loadingLoyalty, setLoadingLoyalty] = useState(false);
+
+  const fetchLoyaltyTransactions = async () => {
+    if (!session?.user?.email) return;
+    setLoadingLoyalty(true);
+    try {
+      const response = await axios.post('/api/loyalty/transactions', { email: session.user.email });
+      console.log("responseAccount" + response.data.transactions.length);
+      setLoyaltyTransactions(response.data.transactions || []);
+    } catch (error) {
+      console.error('Error fetching loyalty transactions:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch loyalty transactions',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingLoyalty(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'Loyality') {
+      fetchLoyaltyTransactions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, session]);
 
   const handleMoveToCart = (item: any) => {
     addItem(item);
@@ -232,7 +260,7 @@ const handleComperession =async (files: File[]) => {
   const stats = [
     {
       name: 'Loyalty Points',
-      value: user.loyaltyPoints,
+      value: user.loyaltyPoints.lifeTimePoints,
       icon: Gift,
       color: 'text-lovely',
       bgColor: 'bg-creamey',
@@ -483,26 +511,37 @@ const handleComperession =async (files: File[]) => {
           <div className=''>
             <h2 className="text-lg font-semibold text-lovely mb-4">Loyalty Points</h2>
             <div className='w-full justify-center items-center'>
-            <h3 className={`${lifeyFont.className} text-lovely`}>coming soon</h3>
-            </div>
-            {/* <div className="bg-lovely rounded-lg shadow p-6">
-              <div className="text-center">
-                <Gift className="h-16 w-16 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-creamey mb-2">Loyalty Points</h3>
-                <p className="text-3xl font-bold text-purple-600 mb-4">{user.loyaltyPoints}</p>
-                <p className="text-gray-500 mb-4">Earn points with every purchase and unlock exclusive rewards!</p>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-purple-50 p-3 rounded-lg">
-                    <p className="font-medium text-purple-800">Next Reward</p>
-                    <p className="text-purple-600">1500 points</p>
-                  </div>
-                  <div className="bg-purple-50 p-3 rounded-lg">
-                    <p className="font-medium text-purple-800">Points to Go</p>
-                    <p className="text-purple-600">{1500 - user.loyaltyPoints}</p>
-                  </div>
+              {loadingLoyalty ? (
+                <div className="text-center py-8">Loading transactions...</div>
+              ) : loyaltyTransactions.length === 0 ? (
+                <div className="text-center py-8 text-lovely">No loyalty transactions found.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-lovely/20">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">Date</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">Type</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">Amount</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">Reason</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">Bonus</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-lovely/10">
+                      {loyaltyTransactions.map((tx, idx) => (
+                        <tr className='text-lovely' key={idx}>
+                          <td className="px-4 py-2 whitespace-nowrap">{tx.timestamp ? new Date(tx.timestamp).toLocaleDateString() : '-'}</td>
+                          <td className="px-4 py-2 whitespace-nowrap capitalize">{tx.type}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">{tx.type==="earn" ? `+${tx.amount}` : `-${tx.amount}`}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">{tx.reason || '-'}</td>
+                          <td className="px-4 py-2 whitespace-nowrap">{tx.bonusID && tx.bonusID?.bonusPoints ? `+${tx.bonusID.bonusPoints}` : `${tx.type==="earn" ? `+${tx.amount}` : "-"}`}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
-            </div> */}
+              )}
+            </div>
           </div>
         )}
 

@@ -19,6 +19,7 @@ import FlipingCardNew from "./components/FlipingCardNew";
 import { wifeyFont } from "@/fonts";
 import { VideoPlaylist } from "../interfaces/interfaces";
 import VideoCard from "@/components/playlists/VideoCard";
+import OurPartnersExp from "@/components/sections/OurPartnersExp";
 
 const OPTIONS: EmblaOptionsType = { loop: true }
 
@@ -60,7 +61,7 @@ const ClubPage = () => {
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
+    viewport={{ once: true, amount: 0.15 }}
 
       className="text-start mb-8 container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-4xl font-bold mb-2 text-lovely`}>
@@ -92,7 +93,7 @@ const ClubPage = () => {
   variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
+    viewport={{ once: true, amount: 0.15 }}
 
       className="text-start container-custom  my-16 py-16 w-full bg-lovely text-creamey">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}>
@@ -142,7 +143,7 @@ const ClubPage = () => {
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
+    viewport={{ once: true, amount: 0.15 }}
 
       className="text-start mb-16 container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
@@ -181,9 +182,9 @@ const ClubPage = () => {
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
+    viewport={{ once: true, amount: 0.15 }}
 
-      className="text-start mb-16 py-16   bg-lovely container-custom">
+      className="text-start mb-16 py-16   bg-lovely container-custom text-creamey">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}>
         😰 Overwhelmed by too many options & don’t know who to trust or where to shop?        </h1>
         <h2 className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-creamey`}>
@@ -197,7 +198,12 @@ const ClubPage = () => {
         <p className="text-base font-bold text-creamey/95 leading-relaxed">
         We’ve got brands you love, and we’ll keep adding more!
         </p>
-        <div className="grid grid-cols-1 gap-4 mt-8">
+        <h3 className={`${thirdFont.className} mt-4 mb-2 font-semibold tracking-wider text-base md:text-xl`}>What you are getting :</h3>
+        <p>❤️ Trusted partner list.</p>
+        <p>❤️ Exclusive discounts just for experience subscribers.</p>
+        <p>❤️ Guidance on every purchase.</p>
+        <OurPartnersExp/>
+        {/* <div className="grid grid-cols-1 gap-4 mt-8">
           <div className="relative w-full h-[400px] md:h-[900px] rounded-lg overflow-hidden">
             <Image
               src="/experience/partners1.png"
@@ -207,12 +213,12 @@ const ClubPage = () => {
             />
           </div>
 
-        </div>
+        </div> */}
         </motion.div>
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
+    viewport={{ once: true, amount: 0.15 }}
 
       className="text-start mb-16 container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
@@ -235,20 +241,20 @@ const ClubPage = () => {
         ✨ A space where you’re seen, supported, and celebrated.
         </p>
         <div className="grid grid-cols-2 gap-2 mt-8">
-          <div className="relative w-full h-64 md:h-[400px] rounded-lg overflow-hidden">
+          <div className="relative w-full h-[300px] sm:h-[500px] md:h-[600px] lg:h-[800px] xl:h-[900px] rounded-lg overflow-hidden">
             <Image
               src="/experience/support1.png"
               alt="Gehaz Planner Preview 1"
               fill
-              className="object-cover"
+              className="object-contain"
             />
           </div>
-          <div className="relative w-full h-64 md:h-[400px] rounded-lg overflow-hidden">
+          <div className="relative w-full h-[300px] sm:h-[500px] md:h-[600px] lg:h-[800px] xl:h-[900px] rounded-lg overflow-hidden">
             <Image
               src="/experience/support2.png"
               alt="Gehaz Planner Preview 2"
               fill
-              className="object-cover"
+              className="object-contain"
             />
           </div>
         </div>
@@ -256,7 +262,7 @@ const ClubPage = () => {
   <motion.div  variants={fadeIn({ direction: "up", delay: 0.2 })}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, amount: 0.3 }}
+    viewport={{ once: true, amount: 0.15 }}
 
       className="text-start mb-16 w-full container-custom">
         <h1 className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}>
@@ -277,7 +283,7 @@ const ClubPage = () => {
         <FlipingCardNew exp="/experience/exp4.jpeg" sol="/experience/exp4.jpeg"/>
  
         </div> */}
-      <MotionSection className=" text-start   bg-lovely p-8 w-full max-w-lg  rounded-2xl animate-bounce-slow" >
+      <MotionSection className=" text-start   bg-lovely p-8 w-full max-w-2xl  rounded-2xl animate-bounce-slow" >
         <h2 className={`${thirdFont.className} w-full text-center tracking-wide text-2xl pr-4  font-bold mb-4 text-creamey`}>
           ✨ This is the Wifey Experience
         </h2>
@@ -298,7 +304,7 @@ const ClubPage = () => {
         <Button
             asChild
             variant="outline"
-            className="bg-creamey hover:text-lovely hover:font-semibold transition duration-300 border-0 hover:bg-creamey hover:border-creamey hover:border text-lovely  mt-4 "
+            className="bg-creamey text-base font-semibold hover:text-lovely hover:font-bold tracking-wide transition duration-300 border-0 hover:bg-creamey hover:border-creamey hover:border text-lovely  mt-4 "
           >
             <Link href="/subscription/687396821b4da119eb1c13fe">
               Join Now <ArrowRight className=" ml-2 h-4 w-4" />

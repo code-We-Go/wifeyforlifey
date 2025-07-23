@@ -15,6 +15,8 @@ import Playlists from "@/components/sections/Playlists";
 import { thirdFont } from "@/fonts";
 import BrandCharacters from "@/components/sections/BrandCharacters";
 import Newsletters from "@/components/sections/Newsletters";
+import OurPartners from "@/components/sections/OurPartners";
+import OurPartners2 from "@/components/partners2/OurPartners2";
 
 export default function Home() {
   // Filter featured products
@@ -38,20 +40,25 @@ export default function Home() {
 <Playlists/>
  {/* <BrandCharacters/> */}
       {/* Newsletter Section */}
+<OurPartners/>
+{/* <div className="relative h-32">
+
+<OurPartners2/>
+</div> */}
 <Newsletters/>
     </div>
   );
 }
 
 // Input component for the newsletter form
-function Input({
-  className,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      className={`px-4 py-2 border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary ${className}`}
-      {...props}
-    />
-  );
-}
+// function Input({
+//   className,
+//   ...props
+// }: React.InputHTMLAttributes<HTMLInputElement>) {
+//   return (
+//     <input
+//       className={`px-4 py-2 border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary ${className}`}
+//       {...props}
+//     />
+//   );
+// }

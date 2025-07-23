@@ -281,7 +281,7 @@ const CheckoutClientPage = () => {
     phone: "",
     state: state,
     cash: payment,
-    redeemedLoyaltyPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints)),
+    redeemedLoyaltyPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints)),
     total: total,
     shipping: shipping,
     billingCountry: "",
@@ -524,7 +524,7 @@ const CheckoutClientPage = () => {
     setDiscountAmount(newDiscountAmount);
 
     // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
-    let validRedeem = Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints));
+    let validRedeem = Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints));
     const loyaltyLE = Math.floor(validRedeem / 20);
     setLoyaltyDiscount(loyaltyLE);
 
@@ -571,7 +571,7 @@ const CheckoutClientPage = () => {
       subTotal,
       cart: items,
       loyalty: {
-        redeemedPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints)),
+        redeemedPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints)),
         discount: loyaltyDiscount,
       },
     };
@@ -1232,14 +1232,14 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             {/* Loyalty Points Section for mobile */}
-            <div className="mt-6 space-y-2 text-everGreen bg-creamey/80 rounded-lg p-4 shadow-sm border border-lovely">
+            <div className="mt-6 space-y-2 text-lovely bg-pinkey rounded-lg p-4 shadow-sm border border-lovely">
               <div
                 className="flex items-center gap-2 mb-2 relative"
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
               >
-                <span className="font-semibold text-everGreen">Loyalty Points</span>
-                <button
+                <span className="font-semibold text-lovely">Loyalty Points</span>
+                {/* <button
                   type="button"
                   className="ml-1 text-lovely"
                   tabIndex={-1} // optional: prevent focus
@@ -1247,38 +1247,38 @@ const CheckoutClientPage = () => {
                   <Info size={18} />
                 </button>
                 {showTooltip && (
-                  <div className="absolute z-10 bg-white border border-lovely rounded p-2 text-xs shadow-lg mt-2 left-0">
+                  <div className="absolute z-10 bg-creamey text-lovely/90 border border-lovely rounded p-2 text-xs shadow-lg mt-2 left-0">
                     Redeem your points for a discount! Every 20 points = 1 LE off your order. Points can only be redeemed in multiples of 20.
                   </div>
-                )}
+                )} */}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-lovely">{loyaltyPoints}</span>
+                <span className="text-lg font-bold text-lovely">{loyaltyPoints.realLoyaltyPoints}</span>
                 <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
                   <div
                     className="h-2 bg-lovely rounded-full"
-                    style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints) * 100 || 0)}%` }}
+                    style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints.realLoyaltyPoints) * 100 || 0)}%` }}
                   ></div>
                 </div>
-                <span className="text-xs text-lovely/90">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
+                <span className="text-xs text-lovely/90">max: {loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20)}</span>
               </div>
               <div className="flex items-center gap-2 mt-2">
-                <label htmlFor="redeemPointsMobile" className="text-everGreen font-medium">Redeem:</label>
+                <label htmlFor="redeemPointsMobile" className="text-lovely font-medium">Redeem:</label>
                 <input
                   id="redeemPointsMobile"
                   type="number"
                   min={0}
-                  max={loyaltyPoints - (loyaltyPoints % 20)}
+                  max={loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20)}
                   value={redeemPoints}
                   onChange={handleRedeemChange}
-                  className="border rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
+                  className="border bg-creamey rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
                 />
                 <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
                 <button
                   type="button"
-                  className="ml-2 px-3 py-1 rounded bg-everGreen text-creamey hover:bg-lovely transition"
-                  onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
-                  disabled={loyaltyPoints < 20}
+                  className="ml-2 px-3 py-1 rounded bg-lovely/90 text-creamey hover:bg-lovely transition"
+                  onClick={() => setRedeemPoints(loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20))}
+                  disabled={loyaltyPoints.realLoyaltyPoints < 20}
                 >
                   Max
                 </button>
@@ -1370,14 +1370,14 @@ const CheckoutClientPage = () => {
                   )}
                 </div> */}
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-lovely">{loyaltyPoints}</span>
+                  <span className="text-lg font-bold text-lovely">{loyaltyPoints.realLoyaltyPoints}</span>
                   <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
                     <div
                       className="h-2 bg-lovely rounded-full"
-                      style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints) * 100 || 0)}%` }}
+                      style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints.realLoyaltyPoints) * 100 || 0)}%` }}
                     ></div>
                   </div>
-                  <span className="text-xs text-lovely/90">max: {loyaltyPoints - (loyaltyPoints % 20)}</span>
+                  <span className="text-xs text-lovely/90">max: {loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20)}</span>
                 </div>
                 <div className="flex items-center  gap-2 mt-2">
                   <label htmlFor="redeemPoints" className="text-lovely font-medium">Redeem Loyalty Points:</label>
@@ -1385,7 +1385,7 @@ const CheckoutClientPage = () => {
                     id="redeemPoints"
                     type="number"
                     min={0}
-                    max={loyaltyPoints - (loyaltyPoints % 20)}
+                    max={loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20)}
                     value={redeemPoints}
                     onChange={handleRedeemChange}
                     className="border border-lovely bg-creamey rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
@@ -1394,8 +1394,8 @@ const CheckoutClientPage = () => {
                   <button
                     type="button"
                     className="ml-2 px-3 py-1 rounded bg-lovely/90 text-creamey hover:bg-lovely transition"
-                    onClick={() => setRedeemPoints(loyaltyPoints - (loyaltyPoints % 20))}
-                    disabled={loyaltyPoints < 20}
+                    onClick={() => setRedeemPoints(loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20))}
+                    disabled={loyaltyPoints.realLoyaltyPoints < 20}
                   >
                     Max
                   </button>

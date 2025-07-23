@@ -241,7 +241,8 @@ export interface ILoyaltyTransaction {
   reason: string;
   amount: number;
   timestamp: Date;
-  bonusId?: string; // optional, if related to a reward redemption
+  bonusID?: ILoyaltyBonus;
+  createdAt:Date; // optional, if related to a reward redemption
 }
 
 export interface ILoyaltyBonus {

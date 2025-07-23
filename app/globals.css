@@ -141,6 +141,7 @@
     @apply   px-4 md:px-6 xl:px-12;
   }
 
+
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 py-2 font-medium transition-all duration-200;
   }
@@ -245,5 +246,9 @@
 }
 
 input::placeholder {
-  color: #34a853e6;
+  color: #81C8BB;
+}
+
+.animation-pause {
+  animation-play-state: paused;
 }

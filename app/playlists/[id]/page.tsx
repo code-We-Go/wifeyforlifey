@@ -226,7 +226,7 @@ export default function PlaylistPage() {
               )}
             </div> */}
             <h1 className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}>{playlist.title}</h1>
-         <div className={`${seeMore ? 'h-auto' : "max-h-[30vh]"}  overflow-hidden transition-all duration-300`}>
+         <div className={`${seeMore ? 'h-auto' : "max-h-[10vh]"}  overflow-hidden transition-all duration-300`}>
 
             {Array.isArray(playlist.description) ? (
               playlist.description.map((desc: string, idx: number) => (

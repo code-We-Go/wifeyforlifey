@@ -12,7 +12,10 @@ export function useAuth() {
   const isAuthenticated = status === 'authenticated';
   const loading = status === 'loading';
   const user = session?.user || null;
-  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [loyaltyPoints, setLoyaltyPoints] = useState({
+    lifeTimePoints:0,
+    realLoyaltyPoints:0,
+  });
 
   useEffect(() => {
     async function fetchLoyaltyPoints(email: string) {
@@ -25,7 +28,10 @@ export function useAuth() {
         const data = await res.json();
         setLoyaltyPoints(data.loyaltyPoints || 0);
       } catch (error) {
-        setLoyaltyPoints(0);
+        setLoyaltyPoints({
+          lifeTimePoints:0,
+          realLoyaltyPoints:0,
+        });
       }
     }
     if (session?.user?.email) {

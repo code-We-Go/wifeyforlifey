@@ -11,7 +11,7 @@ interface VideoCardProps {
 export default function VideoCard({ playlist }: VideoCardProps) {
   return (
     <Link href={`/playlists/${playlist._id}`}>
-      <div className="video-card group border border-lovely">
+      <div className="video-card  group border border-lovely">
         <div className="relative aspect-video overflow-hidden rounded-t-lg">
           <Image
             src={playlist.thumbnailUrl}
@@ -29,8 +29,8 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             </div>
           </div>
         </div>
-        <div className="p-4  bg-creamey">
-          <div className="flex items-center justify-between mb-2">
+        <div className="px-4 min-h-[15vh] flex flex-col w-full h-full justify-between md:min-h-[25vh] bg-creamey">
+          <div className="flex items-center h-full justify-between mb-2">
             {playlist.category && (
               <Badge variant="destructive" className="font-normal">
                 {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}
@@ -43,9 +43,11 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             )}
           </div>
           <h3 className="font-medium text-lovely line-clamp-1">{playlist.title}</h3>
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+          <div className="text-sm min-h-[4vh] md:min-h-[10vh] text-lovely/90 mt-1 line-clamp-2">
+          <p >
             {playlist.description}
           </p>
+          </div>
           <div className="mt-3 text-lovely text-sm">
             {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? 'video' : 'videos'}
           </div>

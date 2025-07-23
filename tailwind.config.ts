@@ -22,6 +22,8 @@ const config: Config = {
         sans: ['var(--font-inter)'],
         display: ['var(--font-playfair)'],
       },
+
+
       colors: {
         pinkey:"#FFB6C7",
         creamey:"#FBF3E0",
@@ -68,6 +70,10 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       keyframes: {
+        'slide-left': {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-100%)' },
+        },
         'accordion-down': {
           from: { height: '0' },
           to: { height: 'var(--radix-accordion-content-height)' },
@@ -96,6 +102,8 @@ const config: Config = {
         },
       },
       animation: {
+        'slide-left-infinite': 'slide-left 15s linear infinite',
+
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'float': 'float 4s ease-in-out infinite',

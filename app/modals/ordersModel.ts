@@ -50,7 +50,6 @@ const OrderSchema = new Schema(
         redeemedLoyaltyPoints:{type:Number,required:false},
         subTotal: { type: Number, required: false}, 
         shipping: { type: Number, required: false}, 
-        redeemedloyaltyPoints :{type:Number,required:false},
         total: { type: Number, required: false}, 
         currency: { type: String, required: false}, 
         status: {

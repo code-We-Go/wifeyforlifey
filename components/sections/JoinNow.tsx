@@ -13,17 +13,17 @@ const JoinNow = () => {
           <h1
             className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl  font-bold `}
           >
-            Subscribe Now & Join Our Club .
+            Subscribe Now & Join Our Club.
           </h1>
-          <p className="text-lg md:text-xl ">
-            unlock exclusive content ,Planning Tips, and Insider Deals! .
+          <p className="text-lg font-semibold md:text-xl ">
+            unlock exclusive content,Planning Tips, and Insider Deals!
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               asChild
               size="lg"
-              className="rounded-full bg-lovely hover:bg-everGreen text-creamey"
+              className="rounded-full font-bold tracking-wide bg-lovely hover:bg-everGreen text-creamey"
             >
               <Link href="/subscription/687396821b4da119eb1c13fe">Subscribe</Link>
             </Button>
@@ -31,7 +31,7 @@ const JoinNow = () => {
               asChild
               size="lg"
               variant="outline"
-              className="rounded-full bg-creamey text-lovely hover:bg-everGreen hover:text-creamey"
+              className="rounded-full font-bold tracking-wide bg-creamey text-lovely hover:bg-everGreen hover:text-creamey"
             >
               <Link href="/club">see what&apos;s inside</Link>
             </Button>
@@ -39,11 +39,11 @@ const JoinNow = () => {
         </div>
         <div className="relative bg-creamey h-[300px] md:h-[500px] rounded-lg overflow-hidden animate-float">
           <Image
-            src="/joinNow/Brid and Bridesmaids.png"
-            alt="Hero Image"
+            src="/experience/exclusiveContent.png"
+            alt="Exclusive content"
             fill
             priority
-            className="object-contain aspect-auto rounded-lg"
+            className="object-cover aspect-auto rounded-lg"
           />
         </div>
       </div>

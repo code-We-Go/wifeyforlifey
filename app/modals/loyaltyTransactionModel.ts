@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 import { LoyaltyPointsModel } from "./rewardModel";
 console.log("registering" + LoyaltyPointsModel);
 
-export interface ILoyaltyTransaction extends Document {
+export interface ILoyaltyTransactionSchema extends Document {
   email: string;
   type: 'earn' | 'spend';
   reason?: string;
@@ -11,7 +11,7 @@ export interface ILoyaltyTransaction extends Document {
   bonusID?: mongoose.Schema.Types.ObjectId;
 }
 
-const LoyaltyTransactionSchema = new Schema<ILoyaltyTransaction>({
+const LoyaltyTransactionSchema = new Schema<ILoyaltyTransactionSchema>({
   email: { type: String, required: true },
   type: { type: String, enum: ["earn", "spend"], required: true },
   timestamp: { type: Date, default: Date.now },
@@ -20,4 +20,4 @@ const LoyaltyTransactionSchema = new Schema<ILoyaltyTransaction>({
   bonusID: { type: mongoose.Schema.Types.ObjectId, ref: "loyaltyPoints" },
 });
 
-export const LoyaltyTransactionModel = mongoose.models.LoyaltyTransaction || mongoose.model<ILoyaltyTransaction>("LoyaltyTransaction", LoyaltyTransactionSchema); 
+export const LoyaltyTransactionModel = mongoose.models.LoyaltyTransaction || mongoose.model<ILoyaltyTransactionSchema>("LoyaltyTransaction", LoyaltyTransactionSchema); 

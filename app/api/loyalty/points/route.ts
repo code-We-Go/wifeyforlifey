@@ -11,17 +11,29 @@ export async function POST(req: NextRequest) {
   }
 
 
-  let loyaltyPoints = 0;
+  let lifeTimePoints = 0;
+  let SpentLoyaltyPoints = 0;
   const transactions = await LoyaltyTransactionModel
     .find({ "email":email })
     .populate({path:'bonusID',options: { strictPopulate: false }});
 console.log("Transactions" + transactions.length )
   for (const tx of transactions) {
-    if (tx.reason === "purchase") {
-      loyaltyPoints += tx.amount;
-    } else if (tx.bonusID && tx.bonusID.bonusPoints) {
-      loyaltyPoints += tx.bonusID.bonusPoints;
+    if(tx.type==="earn"){
+
+      if (tx.reason === "purchase") {
+        lifeTimePoints += tx.amount;
+      } else if (tx.bonusID && tx.bonusID.bonusPoints) {
+        lifeTimePoints += tx.bonusID.bonusPoints;
+      }
     }
+    else if(tx.type==="spend"){
+      SpentLoyaltyPoints += tx.amount;
+    }
+  }
+
+  const loyaltyPoints = {
+    lifeTimePoints:lifeTimePoints,
+    realLoyaltyPoints:lifeTimePoints-SpentLoyaltyPoints,
   }
 
   return NextResponse.json({ loyaltyPoints });
