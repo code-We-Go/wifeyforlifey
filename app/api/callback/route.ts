@@ -7,6 +7,7 @@ import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { register } from "node:module";
 import packageModel from "@/app/modals/packageModel";
+import { DiscountModel } from "@/app/modals/Discount";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -76,6 +77,11 @@ export async function GET(request: Request) {
                 amount: res.redeemedLoyaltyPoints
 
               });
+              if(res.appliedDiscountAmount>0){
+                await DiscountModel.findByIdAndUpdate(data.appliedDiscount, {
+        $inc: { usageCount: 1 }
+        });
+          }
             }
             //Update the order status with orderId here
             return NextResponse.redirect(`${process.env.testUrl}payment/success`);

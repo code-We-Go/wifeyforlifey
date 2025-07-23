@@ -96,12 +96,13 @@ export async function POST(req: Request) {
     const finalTotal = cartTotal - discountAmount;
 
     // Update discount usage
-    await DiscountModel.findByIdAndUpdate(discount._id, {
-      $inc: { usageCount: 1 }
-    });
+    // await DiscountModel.findByIdAndUpdate(discount._id, {
+    //   $inc: { usageCount: 1 }
+    // });
     return NextResponse.json({
       success: true,
       discount: {
+        _id:discount._id,
         code: discount.code,
         calculationType: discount.calculationType,
         value: discount.value,

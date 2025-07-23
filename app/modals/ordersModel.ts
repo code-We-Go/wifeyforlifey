@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { object } from "zod";
 
 // Define the Cart Item schema
 
@@ -48,6 +49,8 @@ const OrderSchema = new Schema(
             type: [CartItemSchema],required:false // Array of cart items
         },
         redeemedLoyaltyPoints:{type:Number,required:false},
+        appliedDiscount:{type:mongoose.Schema.Types.ObjectId,required:false,ref:'discounts'},
+        appliedDiscountAmount:{type:Number,required:false},
         subTotal: { type: Number, required: false}, 
         shipping: { type: Number, required: false}, 
         total: { type: Number, required: false}, 

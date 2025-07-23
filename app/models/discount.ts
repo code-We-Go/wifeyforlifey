@@ -42,6 +42,11 @@ const discountSchema = new Schema({
   maxDiscountAmount: {
     type: Number,
   },
+  redeemType:{
+    type:String,
+    enum:["Purchase","Subscription","All"],
+    required:false
+  },
   startDate: {
     type: Date,
     required: true,

@@ -27,6 +27,11 @@ const discountSchema = new Schema<Discount>({
     enum: ['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_SHIPPING', 'BUY_X_GET_Y'],
     required: true,
   },
+  redeemType:{
+    type:String,
+    enum:["Purchase","Subscription","All"],
+    required:false
+  },
   value: {
     type: Number,
     required: function(this: Discount) {

@@ -60,7 +60,7 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${lifeyFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
+        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
         ✨ What We Offer
         </h1>
 

@@ -8,6 +8,7 @@ import axios from "axios";
 import { NextResponse } from "next/server";
 import productsModel from "@/app/modals/productsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
+import { DiscountModel } from "@/app/modals/Discount";
 
 const loadDB = async () => {
     console.log('hna');
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
       try {
         await decreaseStock(items); // <-- Decrease stock before order creation
         console.log("redeemedLoyaltyPoints"+data.loyalty.redeemedPoints)
+        console.log("appliedDiscount"+data.appliedDiscount)
       const res = await ordersModel.create({ 
         email:data.email,
          orderID:''
@@ -95,6 +97,8 @@ export async function POST(request: Request) {
         state:data.state ,
         phone:data.phone ,
         redeemedLoyaltyPoints:data.loyalty.redeemedPoints,
+        appliedDiscount:data.appliedDiscount,
+        appliedDiscountAmount:data.appliedDiscountAmount,
         cash: data.cash, // Payment method: Cash or not
         cart: items,
         subTotal:data.subTotal,
@@ -126,6 +130,11 @@ export async function POST(request: Request) {
         });
 
       }
+      if(data.appliedDiscountAmount>0){
+        await DiscountModel.findByIdAndUpdate(data.appliedDiscount, {
+$inc: { usageCount: 1 }
+});
+  }
       console.log('orderID' + res._id)
       console.log(data.subTotal)
       console.log(data.shipping)
@@ -139,6 +148,8 @@ export async function POST(request: Request) {
                       // body: `<a href=${verificationLink}> click here to verify your account</a>`,
                       //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
                   });
+
+   
                   // await sendMail({
                   //     to: "anchuva.store@gmail.com",
                   //     name: "Order Confirmation",
@@ -341,6 +352,8 @@ else{
     total: data.total,
     subTotal:data.subTotal,
     redeemedLoyaltyPoints:data.loyalty.redeemedPoints,
+    appliedDiscount:data.appliedDiscount,
+    appliedDiscountAmount:data.appliedDiscountAmount,
     billingCountry: data.billingCountry,
     billingFirstName: data.billingFirstName,
     billingState:data.billingState,

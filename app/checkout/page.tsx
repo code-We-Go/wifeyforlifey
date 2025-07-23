@@ -246,6 +246,11 @@ const CheckoutClientPage = () => {
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
+//     setFormData((prevFormData)=>({
+// ...prevFormData,
+// appliedDiscount:discount?._id,
+// // appliedDiscountAmount:
+//     }));
   }; // Default to the first state's name or an empty string
   useEffect(() => {
     setFormData((prevFormData) => ({
@@ -277,6 +282,8 @@ const CheckoutClientPage = () => {
     apartment: "",
     postalZip: "",
     city: "",
+    appliedDiscount:"",
+    appliedDiscountAmount:0,
     cart: items,
     phone: "",
     state: state,
@@ -570,6 +577,16 @@ const CheckoutClientPage = () => {
       shipping,
       subTotal,
       cart: items,
+      appliedDiscount:appliedDiscount?._id,
+      appliedDiscountAmount: appliedDiscount?.calculationType === "FREE_SHIPPING"
+        ? shipping 
+        : 
+            appliedDiscount?.calculationType === "PERCENTAGE"
+              ? Math.round(
+                  (subTotal * appliedDiscount?.value!) / 100
+                )
+              : appliedDiscount?.value
+           ,
       loyalty: {
         redeemedPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints)),
         discount: loyaltyDiscount,
