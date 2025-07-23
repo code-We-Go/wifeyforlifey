@@ -60,20 +60,20 @@ const AboutPage = () => {
     viewport={{ once: true, amount: 0.3 }}
 
       className="text-start ">
-        <h1 className={`${thirdFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
+        <h1 className={`${lifeyFont.className} tracking-normal text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-lovely`}>
         ✨ What We Offer
         </h1>
 
         <p className="text-base md:text-lg text-lovely/90 mb-4">
-        <span className='font-extrabold'>Stress-Free Wedding Support</span>: Through our detailed planners and heartfelt content, we help brides navigate the chaos with calm, clarity, and confidence.        </p>
+        <span className='font-bold tracking-wide scale-y-125'>Stress-Free Wedding Support</span>: Through our detailed planners and heartfelt content, we help brides navigate the chaos with calm, clarity, and confidence.        </p>
         <p className="text-base md:text-lg text-lovely/90 mb-4">
-        <span className='font-extrabold'>Emotional Empowerment</span>: We listen deeply and create tools that support not just logistics—but also her heart.
+        <span className='font-bold tracking-wide scale-y-125'>Emotional Empowerment</span>: We listen deeply and create tools that support not just logistics—but also her heart.
         </p>
         <p className="text-base md:text-lg text-lovely/90 mb-4">
-        <span className='font-extrabold'>Women-Owned, Women-Loved</span>: We collaborate with local women-owned businesses and spotlight their magic.
+        <span className='font-bold tracking-wide scale-y-125'>Women-Owned, Women-Loved</span>: We collaborate with local women-owned businesses and spotlight their magic.
         </p>
         <p className="text-base md:text-lg text-lovely/90 mb-4">
-        <span className='font-extrabold'>Lifelong Sisterhood</span>: From planning a wedding to planning her baby shower, <span className='font-extrabold'>Wifey for Lifey</span> grows with her.
+        <span className='font-bold tracking-wide scale-y-125'>Lifelong Sisterhood</span>: From planning a wedding to planning her baby shower, <span className='font-extrabold'>Wifey for Lifey</span> grows with her.
         </p>
  
     
