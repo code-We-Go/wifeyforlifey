@@ -1,7 +1,8 @@
 "use client";
 import { thirdFont } from "@/fonts";
-import React from "react";
+import React, { useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { TestimonialCard } from "./testomonials/TestomonialsCard";
 const testimonials = [
   {
@@ -50,8 +51,30 @@ const testimonials = [
 
 const Testimonials = () => {
   const router = useRouter();
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Parallax transforms for each card (tweak values for desired effect)
+  const leftY1 = useTransform(scrollYProgress, [-0.1, 0.3], [-250, 0]);
+  const leftY2 = useTransform(scrollYProgress, [-0.1, 0.4], [-200, 0]);
+  const leftY3 = useTransform(scrollYProgress, [0, 0.45], [-180, 0]);
+  const rightY1 = useTransform(scrollYProgress, [-0.1, 0.3], [250, 0]);
+  const rightY2 = useTransform(scrollYProgress, [-0.1, 0.4], [200, 0]);
+  const rightY3 = useTransform(scrollYProgress, [0, 0.45], [180, 0]);
+
+  const paragraphOpacities = [
+    useTransform(scrollYProgress, [0, 0.3], [0.4, 1]),
+    useTransform(scrollYProgress, [0, 0.4], [0.3, 1]),
+    useTransform(scrollYProgress, [0, 0.45], [0.3, 1]),
+  ];
   return (
-    <section className="relative w-full flex min-h-[75vh] md:min-h-[100vh] flex-col items-center md:justify-center justify-end py-16 bg-creamey">
+    <section
+      ref={sectionRef}
+      className="relative w-full flex min-h-[75vh] md:min-h-[100vh] flex-col items-center md:justify-center justify-end py-16 bg-creamey"
+    >
       <div className="flex md:hidden gap-4 w-full max-w-full mx-auto overflow-x-auto py-8 scrollbar-hide snap-x snap-mandatory">
         {testimonials.map((t, i) => (
           <div key={i} className="">
@@ -77,23 +100,35 @@ const Testimonials = () => {
         </p>
       </div>
       <div className=" w-full flex justify-center">
-        {/* Cards left */}
+        {/* Cards left with parallax */}
         <div
           className="hidden md:flex flex-col gap-6 absolute left-3 top-8 h-full justify-center items-start"
           style={{ width: "320px" }}
         >
-          {testimonials.slice(0, 3).map((t, i) => (
-            <TestimonialCard key={i} {...t} index={i} />
-          ))}
+          <motion.div style={{ x: leftY1, opacity: paragraphOpacities[0] }}>
+            <TestimonialCard {...testimonials[0]} index={0} />
+          </motion.div>
+          <motion.div style={{ x: leftY2, opacity: paragraphOpacities[1] }}>
+            <TestimonialCard {...testimonials[1]} index={1} />
+          </motion.div>
+          <motion.div style={{ x: leftY3, opacity: paragraphOpacities[2] }}>
+            <TestimonialCard {...testimonials[2]} index={2} />
+          </motion.div>
         </div>
-        {/* Cards right */}
+        {/* Cards right with parallax */}
         <div
           className="hidden md:flex flex-col gap-6 absolute right-3 top-10 h-full justify-center items-end"
           style={{ width: "320px" }}
         >
-          {testimonials.slice(3).map((t, i) => (
-            <TestimonialCard key={i + 3} {...t} index={i + 3} />
-          ))}
+          <motion.div style={{ x: rightY1, opacity: paragraphOpacities[0] }}>
+            <TestimonialCard {...testimonials[3]} index={3} />
+          </motion.div>
+          <motion.div style={{ x: rightY2, opacity: paragraphOpacities[1] }}>
+            <TestimonialCard {...testimonials[4]} index={4} />
+          </motion.div>
+          <motion.div style={{ x: rightY3, opacity: paragraphOpacities[2] }}>
+            <TestimonialCard {...testimonials[5]} index={5} />
+          </motion.div>
         </div>
         {/* Center content for mobile */}
 
