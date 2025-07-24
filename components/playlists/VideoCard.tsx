@@ -33,7 +33,8 @@ export default function VideoCard({ playlist }: VideoCardProps) {
           <div className="flex items-center h-full justify-between mb-2">
             {playlist.category && (
               <Badge variant="destructive" className="font-normal">
-                {playlist.category.charAt(0).toUpperCase() + playlist.category.slice(1)}
+                {playlist.category.charAt(0).toUpperCase() +
+                  playlist.category.slice(1)}
               </Badge>
             )}
             {!playlist.isPublic && (
@@ -42,14 +43,15 @@ export default function VideoCard({ playlist }: VideoCardProps) {
               </Badge>
             )}
           </div>
-          <h3 className="font-medium text-lovely line-clamp-1">{playlist.title}</h3>
+          <h3 className="font-medium text-lovely line-clamp-1">
+            {playlist.title}
+          </h3>
           <div className="text-sm min-h-[4vh] md:min-h-[10vh] text-lovely/90 mt-1 line-clamp-2">
-          <p >
-            {playlist.description}
-          </p>
+            <p>{playlist.description}</p>
           </div>
-          <div className="mt-3 text-lovely text-sm">
-            {playlist.videos?.length || 0} {(playlist.videos?.length || 0) === 1 ? 'video' : 'videos'}
+          <div className="mt-3 mb-2 text-lovely text-sm">
+            {playlist.videos?.length || 0}{" "}
+            {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
           </div>
         </div>
       </div>
