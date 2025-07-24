@@ -8,7 +8,7 @@ import DiscountUsage from '@/app/models/discountUsage';
 export async function POST(req: Request) {
   try {
     // const session = await getServerSession(authOptions);
-    const { cart, discountCode } = await req.json();
+    const { cart, discountCode ,redeemType} = await req.json();
 
     if (!cart || !Array.isArray(cart)) {
       return NextResponse.json(
@@ -26,6 +26,8 @@ export async function POST(req: Request) {
     const discount = await DiscountModel.findOne({
       code: discountCode,
       isActive: true,
+      redeemType: { $in: [redeemType, "All"] },
+
     //   startDate: { $lte: new Date() },
     //   endDate: { $gte: new Date() },
     });

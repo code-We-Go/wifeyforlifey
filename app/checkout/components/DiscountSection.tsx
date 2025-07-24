@@ -8,10 +8,11 @@ import { thirdFont } from '@/fonts';
 import LoadingSpinner from './LoadingSpinner';
 
 interface DiscountSectionProps {
+  redeemType:string;
   onDiscountApplied: (discount: Discount | null) => void;
 }
 
-const DiscountSection: React.FC<DiscountSectionProps> = ({ onDiscountApplied }) => {
+const DiscountSection: React.FC<DiscountSectionProps> = ({ onDiscountApplied,redeemType }) => {
   const [discountCode, setDiscountCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({ onDiscountApplied }) 
   const fetchActiveDiscounts = async () => {
     try {
       const cartTotal = cart.reduce((total: number, item: CartItem) => total + (item.price * item.quantity), 0);
-      const response = await fetch(`/api/active-discounts?cartTotal=${cartTotal}`);
+      const response = await fetch(`/api/active-discounts?cartTotal=${cartTotal}&redeemType=${redeemType}`);
       const data = await response.json();
       
       if (data.success && data.discounts.length > 0) {
@@ -54,12 +55,13 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({ onDiscountApplied }) 
     setError('');
 
     try {
-      const response = await fetch('/api/apply-discount', {
+      const response = await fetch(`/api/apply-discount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          redeemType,
           cart,
           discountCode: discountCode.trim(),
         }),

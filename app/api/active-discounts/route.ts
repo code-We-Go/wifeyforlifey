@@ -8,11 +8,13 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const cartTotal = parseFloat(searchParams.get('cartTotal') || '0');
+    const redeemType = searchParams.get('redeemType');
 
     // Find all active automatic discounts
     const activeDiscounts = await discount.find({
       isActive: true,
       applicationType: "AUTOMATIC",
+      redeemType: { $in: [redeemType, "All"] },
     //   startDate: { $lte: new Date() },
     //   endDate: { $gte: new Date() },
       $or: [
