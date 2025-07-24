@@ -1160,17 +1160,29 @@ const SubscriptionPage = () => {
            </div>
          </div> */}
             <div className="flex items-center gap-2 text-base mt-2">
-              <input
-                color="#FBF3E0"
-                type="checkbox"
-                id="accept-terms"
-                checked={acceptedTerms}
-                onChange={() => setAcceptedTerms(!acceptedTerms)}
-                className="peer appearance-none bg-creamey checked:bg-everGreen border border-everGreen w-4 h-4 rounded transition-colors"
-              />
-              {/* Custom checkmark */}
-              <span className="pointer-events-none absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs peer-checked:opacity-100 opacity-0">
-                ✔
+              <label className="flex items-center gap-2 cursor-pointer relative">
+                <input
+                  color="#FBF3E0"
+                  type="checkbox"
+                  id="accept-terms"
+                  checked={acceptedTerms}
+                  onChange={() => setAcceptedTerms(!acceptedTerms)}
+                  className="peer appearance-none bg-creamey checked:bg-everGreen border border-everGreen w-4 h-4 rounded transition-colors flex-shrink-0"
+                />
+                <span className="absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs pointer-events-none peer-checked:opacity-100 opacity-0">
+                  ✔
+                </span>
+              </label>
+              <span className="pl-2 text-everGreen text-base">
+                By checking, you agree to the{" "}
+                <Link
+                  href="/policies?terms-and-conditions"
+                  className="underline hover:cursor-pointer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  terms and conditions
+                </Link>
               </span>
             </div>
             <div className="flex justify-end">
