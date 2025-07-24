@@ -17,6 +17,7 @@ import BrandCharacters from "@/components/sections/BrandCharacters";
 import Newsletters from "@/components/sections/Newsletters";
 import OurPartners from "@/components/sections/OurPartners";
 import OurPartners2 from "@/components/partners2/OurPartners2";
+import Testimonials from "@/components/sections/Testimonials";
 
 export default function Home() {
   // Filter featured products
@@ -26,26 +27,27 @@ export default function Home() {
   return (
     <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <HeroSection/>
-      <HeroTwo/>
-      <JoinNow/>
+      <HeroSection />
+      <HeroTwo />
+      <JoinNow />
 
       {/* Featured Products Section */}
-<FeaturedProducts/>
+      <FeaturedProducts />
 
       {/* Subscription Banner */}
-      <ExclusiveContent/>
+      <ExclusiveContent />
 
       {/* Featured Playlists Section */}
-<Playlists/>
- {/* <BrandCharacters/> */}
+      <Playlists />
+      {/* <BrandCharacters/> */}
       {/* Newsletter Section */}
-<OurPartners/>
-{/* <div className="relative h-32">
+      <OurPartners />
+      <Testimonials />
+      {/* <div className="relative h-32">
 
 <OurPartners2/>
 </div> */}
-<Newsletters/>
+      <Newsletters />
     </div>
   );
 }
