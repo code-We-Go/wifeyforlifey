@@ -7,9 +7,10 @@ import UserModel from "@/app/modals/userModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
+import { v4 as uuidv4 } from "uuid";
+import SessionModel from "@/app/modals/sessionsModel";
+import { Types } from "mongoose"; // For ObjectId
 
-
-console.log("registering" + LoyaltyPointsModel);
 // Extend NextAuth types to include isSubscribed
 let loyaltyPoints = 0;
 
@@ -17,14 +18,15 @@ declare module "next-auth" {
   interface Session {
     user: {
       id?: string;
-      firstName?:string
-      lastName?:string
+      firstName?: string;
+      lastName?: string;
       name?: string | null;
       email?: string | null;
       image?: string | null;
       isSubscribed: boolean;
-      subscriptionExpiryDate?:Date | null;
-      loyaltyPoints?:number ;
+      subscriptionExpiryDate?: Date | null;
+      loyaltyPoints?: number;
+      sessionId?: string; // Add sessionId here
     };
   }
 }
@@ -32,16 +34,17 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     isSubscribed?: boolean;
-    loyaltyPonits?:number;
+    loyaltyPoints?: number;
+    sessionId?: string; // Add sessionId here
   }
 }
 
 // Helper function to calculate loyalty points
 async function calculateLoyaltyPoints(email: string) {
   let loyaltyPoints = 0;
-  const transactions = await LoyaltyTransactionModel
-    .find({ email })
-    .populate('bonusID'); // Populate bonusID for non-purchase transactions
+  const transactions = await LoyaltyTransactionModel.find({ email }).populate(
+    "bonusID"
+  ); // Populate bonusID for non-purchase transactions
 
   for (const tx of transactions) {
     if (tx.reason === "purchase") {
@@ -53,7 +56,6 @@ async function calculateLoyaltyPoints(email: string) {
   return loyaltyPoints;
 }
 
-console.log("registering" + LoyaltyPointsModel);
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -75,17 +77,25 @@ export const authOptions: NextAuthOptions = {
           const isValid = await compare(credentials!.password, user.password);
           if (!isValid) throw new Error("Wrong password");
 
-          // Ensure email is defined
           if (!credentials?.email) {
             throw new Error("Email is required for loyalty points calculation");
           }
           const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
 
+          // Generate and store sessionId for single-session enforcement
+          const sessionId = uuidv4();
+          await SessionModel.findOneAndUpdate(
+            { userId: user._id.toString() },
+            { sessionId, createdAt: new Date() },
+            { upsert: true }
+          );
+
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.username,
-            loyaltyPoints, // Pass the calculated points
+            loyaltyPoints,
+            sessionId, // Attach sessionId for JWT
           };
         } catch (error) {
           console.error("Authorize error:", error);
@@ -96,52 +106,80 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      await ConnectDB();
+      let userId: string | undefined;
+
       if (account?.provider === "google") {
-        try {
-          await ConnectDB();
-          const existingUser = await UserModel.findOne({ email: user.email });
-          if (!existingUser) {
-            const subscribed = await subscriptionsModel.findOne({email:user.email,subscribed:true})
-            await UserModel.create({
-              username: user.name || user.email?.split('@')[0] || 'user',
-              email: user.email,
-              emailVerified: true,
-              imageURL:user.image,
-              // isSubscribed: subscribed?true:false,
-              subscription:subscribed._id // Default value for new users
-            });
-          }
-        } catch (error) {
-          console.error("SignIn callback error:", error);
-          return false; // Prevent sign-in if DB operation fails
+        let existingUser = await UserModel.findOne({ email: user.email });
+        if (!existingUser) {
+          const subscribed = await subscriptionsModel.findOne({
+            email: user.email,
+            subscribed: true,
+          });
+          existingUser = await UserModel.create({
+            username: user.name || user.email?.split("@")[0] || "user",
+            email: user.email,
+            emailVerified: true,
+            imageURL: user.image,
+            subscription: subscribed ? (subscribed._id as string) : undefined,
+          });
         }
+        userId = (existingUser as any)._id?.toString();
+        user.id = userId ?? ""; // Always set user.id for NextAuth
+      } else {
+        // Credentials provider
+        userId = user.id || (user as any)._id?.toString();
+        user.id = userId ?? ""; // Always set user.id for NextAuth
+      }
+
+      // Generate and store sessionId for single-session enforcement
+      if (user?.email && userId) {
+        const sessionId = uuidv4();
+        await SessionModel.findOneAndUpdate(
+          { userId },
+          { sessionId, createdAt: new Date() },
+          { upsert: true }
+        );
+        (user as any).sessionId = sessionId; // Attach to user for JWT
       }
       return true;
     },
+
     async jwt({ token, user }) {
       try {
         await ConnectDB();
         const email = user?.email || token.email;
         if (email) {
-          console.log("Querying for email:", email);
-          const subscription = await subscriptionsModel.findOne({email:email,subscribed:true});
-          console.log("subscription" + subscription)
-          console.log("expiryDateGetTime"+subscription.expiryDate.getTime())
-          token.isSubscribed = (subscription?.expiryDate && subscription.expiryDate.getTime() > Date.now());
+          const subscription = await subscriptionsModel.findOne({
+            email,
+            subscribed: true,
+          });
+          token.isSubscribed = !!(
+            subscription?.expiryDate &&
+            subscription.expiryDate.getTime() > Date.now()
+          );
           token.subscriptionExpiryDate = subscription?.expiryDate
             ? subscription.expiryDate.toISOString()
             : null;
-            token.loyaltyPonits =  await calculateLoyaltyPoints(subscription.email);
-
-          
-          // const dbUser = await UserModel.findOne({ email });
-          // token.isSubscribed = dbUser?.isSubscribed ?? false;
+          token.loyaltyPoints = await calculateLoyaltyPoints(email);
         }
       } catch (error) {
         console.error("JWT callback error:", error);
       }
+      // Attach sessionId to token
+      if ((user as any)?.sessionId) {
+        token.sessionId = (user as any).sessionId;
+      }
+      // Check session validity
+      if (token.sub && token.sessionId) {
+        const dbSession = await SessionModel.findOne({ userId: token.sub });
+        if (!dbSession || dbSession.sessionId !== token.sessionId) {
+          throw new Error("Session invalidated: logged in elsewhere.");
+        }
+      }
       return token;
     },
+
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
@@ -151,7 +189,10 @@ export const authOptions: NextAuthOptions = {
         session.user.subscriptionExpiryDate = token.subscriptionExpiryDate
           ? new Date(token.subscriptionExpiryDate as string)
           : null;
-          session.user.loyaltyPoints= token.loyaltyPonits
+        session.user.loyaltyPoints = token.loyaltyPoints;
+      }
+      if (session.user && token.sessionId) {
+        session.user.sessionId = token.sessionId;
       }
       return session;
     },

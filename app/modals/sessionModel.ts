@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Define the session schema
 const sessionSchema = new mongoose.Schema({
@@ -18,7 +18,8 @@ sessionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 1200 }); // Expire a
 
 // Create and export the Session model
 // const Session = mongoose.model('Session', sessionSchema);
-const sessionsModel= mongoose.models.sessions || mongoose.model('sessions', sessionSchema)
+const verificationsModel =
+  mongoose.models.verifications ||
+  mongoose.model("verifications", sessionSchema);
 
-
-export default sessionsModel;
+export default verificationsModel;
