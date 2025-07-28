@@ -25,7 +25,7 @@ declare module "next-auth" {
       image?: string | null;
       isSubscribed: boolean;
       subscriptionExpiryDate?: Date | null;
-      loyaltyPoints?: number;
+      // loyaltyPoints?: number;
       sessionId?: string; // Add sessionId here
     };
   }
@@ -34,27 +34,27 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     isSubscribed?: boolean;
-    loyaltyPoints?: number;
+    // loyaltyPoints?: number;
     sessionId?: string; // Add sessionId here
   }
 }
 
 // Helper function to calculate loyalty points
-async function calculateLoyaltyPoints(email: string) {
-  let loyaltyPoints = 0;
-  const transactions = await LoyaltyTransactionModel.find({ email }).populate(
-    "bonusID"
-  ); // Populate bonusID for non-purchase transactions
+// async function calculateLoyaltyPoints(email: string) {
+//   let loyaltyPoints = 0;
+//   const transactions = await LoyaltyTransactionModel.find({ email }).populate(
+//     "bonusID"
+//   ); // Populate bonusID for non-purchase transactions
 
-  for (const tx of transactions) {
-    if (tx.reason === "purchase") {
-      loyaltyPoints += tx.amount;
-    } else if (tx.bonusID && tx.bonusID.amount) {
-      loyaltyPoints += tx.bonusID.bonusPoints;
-    }
-  }
-  return loyaltyPoints;
-}
+//   for (const tx of transactions) {
+//     if (tx.reason === "purchase") {
+//       loyaltyPoints += tx.amount;
+//     } else if (tx.bonusID && tx.bonusID.amount) {
+//       loyaltyPoints += tx.bonusID.bonusPoints;
+//     }
+//   }
+//   return loyaltyPoints;
+// }
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
           if (!credentials?.email) {
             throw new Error("Email is required for loyalty points calculation");
           }
-          const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
+          // const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
 
           // Generate and store sessionId for single-session enforcement
           const sessionId = uuidv4();
@@ -94,7 +94,7 @@ export const authOptions: NextAuthOptions = {
             id: user._id.toString(),
             email: user.email,
             name: user.username,
-            loyaltyPoints,
+            // loyaltyPoints,
             sessionId, // Attach sessionId for JWT
           };
         } catch (error) {
@@ -161,7 +161,7 @@ export const authOptions: NextAuthOptions = {
           token.subscriptionExpiryDate = subscription?.expiryDate
             ? subscription.expiryDate.toISOString()
             : null;
-          token.loyaltyPoints = await calculateLoyaltyPoints(email);
+          // token.loyaltyPoints = await calculateLoyaltyPoints(email);
         }
       } catch (error) {
         console.error("JWT callback error:", error);
@@ -189,7 +189,7 @@ export const authOptions: NextAuthOptions = {
         session.user.subscriptionExpiryDate = token.subscriptionExpiryDate
           ? new Date(token.subscriptionExpiryDate as string)
           : null;
-        session.user.loyaltyPoints = token.loyaltyPoints;
+        // session.user.loyaltyPoints = token.loyaltyPoints;
       }
       if (session.user && token.sessionId) {
         session.user.sessionId = token.sessionId;

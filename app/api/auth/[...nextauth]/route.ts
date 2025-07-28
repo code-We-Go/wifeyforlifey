@@ -19,7 +19,7 @@ declare module "next-auth" {
       image?: string | null;
       isSubscribed: boolean;
       subscriptionExpiryDate?: Date | null;
-      loyaltyPoints?: number;
+      // loyaltyPoints?: number;
       sessionId?: string; // Add sessionId here
     };
   }

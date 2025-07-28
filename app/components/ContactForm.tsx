@@ -23,7 +23,7 @@ type FormData = z.infer<typeof schema>;
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  
+
   const {
     register,
     handleSubmit,
@@ -35,7 +35,7 @@ export default function ContactForm() {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -54,8 +54,9 @@ export default function ContactForm() {
       if (response.ok) {
         toast({
           title: "Success!",
-          variant:"added",
-          description: "Your message has been sent successfully. We'll get back to you soon!",
+          variant: "added",
+          description:
+            "Your message has been sent successfully. We'll get back to you soon!",
         });
         reset(); // Reset form after successful submission
       } else {
@@ -80,59 +81,79 @@ export default function ContactForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="name"
+          className="mb-1 block text-sm font-medium text-lovely"
+        >
           Your Name <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           id="name"
           {...register("name")}
-          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
+          className="w-full rounded-2xl placeholder:text-pinkey bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Name"
         />
-        {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+        )}
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="email"
+          className="mb-1 block text-sm font-medium text-lovely"
+        >
           Email <span className="text-red-500">*</span>
         </label>
         <input
           type="email"
           id="email"
           {...register("email")}
-          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
+          className="w-full rounded-2xl placeholder:text-pinkey bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Email"
         />
-        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+        )}
       </div>
 
       <div>
-        <label htmlFor="phone" className="mb-1 block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="phone"
+          className="mb-1 block text-sm font-medium text-lovely"
+        >
           Phone Number <span className="text-red-500">*</span>
         </label>
         <input
           type="tel"
           id="phone"
           {...register("phone")}
-          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
+          className="w-full rounded-2xl placeholder:text-pinkey bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Phone"
         />
-        {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>}
+        {errors.phone && (
+          <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
+        )}
       </div>
 
       <div>
-        <label htmlFor="message" className="mb-1 block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="message"
+          className="mb-1 placeholder:text-pinkey block text-sm font-medium text-lovely"
+        >
           Description <span className="text-red-500">*</span>
         </label>
         <textarea
           id="message"
           {...register("message")}
           rows={4}
-          className="w-full rounded-2xl bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
+          className="w-full rounded-2xl placeholder:text-pinkey bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
           placeholder="Message"
         ></textarea>
-        {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>}
+        {errors.message && (
+          <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>
+        )}
       </div>
 
       <button
@@ -144,4 +165,4 @@ export default function ContactForm() {
       </button>
     </form>
   );
-} 
+}
