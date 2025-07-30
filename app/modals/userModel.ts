@@ -13,69 +13,77 @@ export interface ISubscription extends Document {
 }
 // Define the User interface
 export interface IUser extends Document {
-  _id :string
+  _id: string;
   username: string;
-  firstName?:string;
-  lastName?:string;
+  firstName?: string;
+  lastName?: string;
   password: string;
   role: "admin" | "moderator" | "customer";
 
-  email:string;
-  emailVerified:boolean;
-  isSubscribed:boolean;
-  imageURL?:string;
-  subscription:ISubscription;
+  email: string;
+  emailVerified: boolean;
+  isSubscribed: boolean;
+  imageURL?: string;
+  subscription: ISubscription;
+  birthDate?: Date;
+  weddingDate?: Date;
 
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 // Define the User schema
-console.log("here"+subscriptionsModel)
+console.log("here" + subscriptionsModel);
 const UserSchema = new Schema<IUser>(
   {
-    username: { 
-      type: String, 
-      required: true, 
+    username: {
+      type: String,
+      required: true,
       unique: false,
       // trim: true,
-      minlength: 3
+      minlength: 3,
     },
-    
-    firstName:{
+
+    firstName: {
       type: String,
       required: false,
-      default: ""
+      default: "",
     },
-    lastName:{
+    lastName: {
       type: String,
       required: false,
-      default: ""
+      default: "",
     },
-    imageURL:{
+    imageURL: {
       type: String,
       required: false,
-      default: ""
+      default: "",
     },
     role: {
       type: String,
       default: "customer",
       required: false,
     },
-    password: { 
-      type: String, 
+    password: {
+      type: String,
       required: false,
-      minlength: 6
-    }
-    ,
-    email:{type:String,required:true},
-    emailVerified:{type:Boolean,default:false},
-    isSubscribed:{type:Boolean,default:false},
+      minlength: 6,
+    },
+    email: { type: String, required: true },
+    emailVerified: { type: Boolean, default: false },
+    isSubscribed: { type: Boolean, default: false },
     subscription: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "subscriptions",
       required: false,
     },
-
+    birthDate: {
+      type: Date,
+      required: false,
+    },
+    weddingDate: {
+      type: Date,
+      required: false,
+    },
   },
   { timestamps: true }
 );
@@ -84,7 +92,7 @@ const UserSchema = new Schema<IUser>(
 // UserSchema.pre("save", async function(next) {
 //   // Only hash the password if it's modified or new
 //   if (!this.isModified("password")) return next();
-  
+
 //   try {
 //     const salt = await bcrypt.genSalt(10);
 //     this.password = await bcrypt.hash(this.password, salt);
@@ -105,6 +113,7 @@ const UserSchema = new Schema<IUser>(
 // };
 
 // Create and export the User model
-const UserModel = mongoose.models.users || mongoose.model<IUser>("users", UserSchema);
+const UserModel =
+  mongoose.models.users || mongoose.model<IUser>("users", UserSchema);
 
 export default UserModel;

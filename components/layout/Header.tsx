@@ -62,11 +62,11 @@ const rightNavigation = [
 
 const accountItems = [
   { icon: UserCircle, label: 'Profile', href: '/account' },
-  { icon: Heart, label: 'Wishlist', href: '/account/wishlist' },
-  { icon: ShoppingBag, label: 'Orders', href: '/account/orders' },
-  { icon: Music, label: 'Playlists', href: '/account/playlists' },
-  { icon: Gift, label: 'Loyalty Points', href: '/account/loyalty' },
-  { icon: Settings, label: 'Settings', href: '/account/settings' },
+  // { icon: Heart, label: 'Wishlist', href: '/account/wishlist' },
+  // { icon: ShoppingBag, label: 'Orders', href: '/account/orders' },
+  // { icon: Music, label: 'Playlists', href: '/account/playlists' },
+  // { icon: Gift, label: 'Loyalty Points', href: '/account/loyalty' },
+  // { icon: Settings, label: 'Settings', href: '/account/settings' },
 ];
 
 export default function Header() {

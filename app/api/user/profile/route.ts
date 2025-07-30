@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
         imageURL: user.imageURL,
         emailVerified: user.emailVerified,
         isSubscribed: user.isSubscribed,
+        birthDate: user.birthDate,
+        weddingDate: user.weddingDate,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       }
@@ -55,7 +57,7 @@ export async function PUT(request: NextRequest) {
     await ConnectDB();
     
     const body = await request.json();
-    const { email, username, firstName, lastName, imageURL } = body;
+    const { email, username, firstName, lastName, imageURL, birthDate, weddingDate } = body;
     
     if (!email) {
       return NextResponse.json(
@@ -70,7 +72,9 @@ export async function PUT(request: NextRequest) {
         username,
         firstName,
         lastName,
-        imageURL
+        imageURL,
+        birthDate: birthDate ? new Date(birthDate) : undefined,
+        weddingDate: weddingDate ? new Date(weddingDate) : undefined
       },
       { new: true, runValidators: true }
     ).select('-password');
@@ -93,6 +97,8 @@ export async function PUT(request: NextRequest) {
         imageURL: updatedUser.imageURL,
         emailVerified: updatedUser.emailVerified,
         isSubscribed: updatedUser.isSubscribed,
+        birthDate: updatedUser.birthDate,
+        weddingDate: updatedUser.weddingDate,
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt
       }

@@ -18,6 +18,7 @@ import Newsletters from "@/components/sections/Newsletters";
 import OurPartners from "@/components/sections/OurPartners";
 import OurPartners2 from "@/components/partners2/OurPartners2";
 import Testimonials from "@/components/sections/Testimonials";
+import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
 
 export default function Home() {
   // Filter featured products
@@ -39,6 +40,7 @@ export default function Home() {
 
       {/* Featured Playlists Section */}
       <Playlists />
+      {/* <FeaturedBlogs /> */}
       {/* <BrandCharacters/> */}
       {/* Newsletter Section */}
       <OurPartners />

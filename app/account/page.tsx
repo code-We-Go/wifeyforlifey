@@ -30,13 +30,15 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
-  const {loyaltyPoints} =useAuth()
+  const {loyaltyPoints, refreshLoyaltyPoints} = useAuth()
   const [userInfo, setUserInfo] = useState({
     name: '',
     firstName: '',
     lastName: '',
     email: '',
-    imageUrl: ''
+    imageUrl: '',
+    birthDate: '',
+    weddingDate: ''
   });
   const [isDetailsModalOpen, setDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
@@ -146,7 +148,9 @@ const handleComperession =async (files: File[]) => {
         firstName: userData.firstName || '',
         lastName: userData.lastName || '',
         email: userData.email || 'user@example.com',
-        imageUrl: userData.imageURL || ''
+        imageUrl: userData.imageURL || '',
+        birthDate: userData.birthDate ? new Date(userData.birthDate).toISOString().split('T')[0] : '',
+        weddingDate: userData.weddingDate ? new Date(userData.weddingDate).toISOString().split('T')[0] : ''
       });
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -156,7 +160,9 @@ const handleComperession =async (files: File[]) => {
         firstName: session.user.firstName || '',
         lastName: session.user.lastName || '',
         email: session.user.email || 'user@example.com',
-        imageUrl: session.user.image || ''
+        imageUrl: session.user.image || '',
+        birthDate: '',
+        weddingDate: ''
       });
     }
   };
@@ -210,21 +216,73 @@ const handleComperession =async (files: File[]) => {
     if (!session?.user?.email) return;
     
     try {
+      // Get current user data to check if dates are being added for the first time
+      const currentUserResponse = await axios.get(`/api/user/profile?email=${session.user.email}`);
+      const currentUser = currentUserResponse.data.user;
+      
+      const isFirstTimeBirthDate = !currentUser.birthDate && userInfo.birthDate;
+      const isFirstTimeWeddingDate = !currentUser.weddingDate && userInfo.weddingDate;
+      
       const response = await axios.put(`/api/user/profile`, {
         email: session.user.email,
         username: userInfo.name,
         firstName: userInfo.firstName,
         lastName: userInfo.lastName,
-        imageURL: userInfo.imageUrl
+        imageURL: userInfo.imageUrl,
+        birthDate: userInfo.birthDate,
+        weddingDate: userInfo.weddingDate
       });
       
       if (response.data.success) {
+        // Award loyalty points for first-time date entries
+        if (isFirstTimeBirthDate) {
+          try {
+            const bonusResponse = await axios.post('/api/loyalty/award-bonus', {
+              email: session.user.email,
+              bonusType: 'birthday'
+            });
+            
+            if (bonusResponse.data.success) {
+              toast({
+                variant: "default",
+                title: "🎉 Loyalty Points Earned!",
+                description: bonusResponse.data.message,
+              });
+            }
+          } catch (bonusError) {
+            console.error('Error awarding birthday bonus:', bonusError);
+          }
+        }
+        
+        if (isFirstTimeWeddingDate) {
+          try {
+            const bonusResponse = await axios.post('/api/loyalty/award-bonus', {
+              email: session.user.email,
+              bonusType: 'wedding'
+            });
+            
+            if (bonusResponse.data.success) {
+              toast({
+                variant: "default",
+                title: "🎉 Loyalty Points Earned!",
+                description: bonusResponse.data.message,
+              });
+            }
+          } catch (bonusError) {
+            console.error('Error awarding wedding bonus:', bonusError);
+          }
+        }
+        
         toast({
-          variant:"added",
+          variant: "default",
           title: "Success",
           description: "Profile information updated successfully",
         });
         setEditingInfo(false);
+        
+        // Refresh user data and loyalty points to get updated information
+        fetchUserData();
+        refreshLoyaltyPoints();
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -660,42 +718,82 @@ const handleComperession =async (files: File[]) => {
                 </div>
 
                 {/* Email */}
-                <div className='flex max-md:flex-col items-center gap-2'>
-                  <Label htmlFor="email" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
-                    Email Address :
-                  </Label>
-                  {editingInfo ? (
-                    <Input
-                      id="email"
-                      type="email"
-                      value={userInfo.email}
-                      onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
-                      className="bg-creamey border-lovely text-lovely"
-                    />
-                  ) : (
-                    <p className=" text-sm text-lovely">{userInfo.email}</p>
-                  )}
-                </div>
+               <div className='flex max-md:flex-col items-center gap-2'>
+                 <Label htmlFor="email" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
+                   Email Address :
+                 </Label>
+                 {editingInfo ? (
+                   <Input
+                     id="email"
+                     type="email"
+                     value={userInfo.email}
+                     onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
+                     className="bg-creamey border-lovely text-lovely"
+                   />
+                 ) : (
+                   <p className=" text-sm text-lovely">{userInfo.email}</p>
+                 )}
+               </div>
 
-                {/* Subscription Status */}
-                <div className='flex max-md:flex-col items-center gap-2'>
-                  <Label className="text-sm font-medium text-lovely/90">
-                    Subscription Status :
-                  </Label>
-                  <div className=" flex items-center space-x-1">
-                    {user.isSubscribed ? (
-                      <>
-                        <BadgeCheck className="h-4 w-4 text-lovely" />
-                        <span className="text-sm text-lovely">Active Subscription</span>
-                      </>
-                    ) : (
-                      <>
-                        <BadgeAlert className="h-4 w-4 text-lovely/80" />
-                        <span className="text-sm text-lovely/80">No Active Subscription</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+               {/* Birth Date */}
+               <div className='flex max-md:flex-col items-center gap-2'>
+                 <Label htmlFor="birthDate" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
+                   Birth Date :
+                 </Label>
+                 {editingInfo ? (
+                   <Input
+                     id="birthDate"
+                     type="date"
+                     value={userInfo.birthDate}
+                     onChange={(e) => setUserInfo(prev => ({ ...prev, birthDate: e.target.value }))}
+                     className="bg-creamey border-lovely text-lovely"
+                   />
+                 ) : (
+                   <p className="text-sm text-lovely">
+                     {userInfo.birthDate ? new Date(userInfo.birthDate).toLocaleDateString() : 'Not set'}
+                   </p>
+                 )}
+               </div>
+
+               {/* Wedding Date */}
+               <div className='flex max-md:flex-col items-center gap-2'>
+                 <Label htmlFor="weddingDate" className="text-sm font-medium text-lovely/90 whitespace-nowrap">
+                   Wedding Date :
+                 </Label>
+                 {editingInfo ? (
+                   <Input
+                     id="weddingDate"
+                     type="date"
+                     value={userInfo.weddingDate}
+                     onChange={(e) => setUserInfo(prev => ({ ...prev, weddingDate: e.target.value }))}
+                     className="bg-creamey border-lovely text-lovely"
+                   />
+                 ) : (
+                   <p className="text-sm text-lovely">
+                     {userInfo.weddingDate ? new Date(userInfo.weddingDate).toLocaleDateString() : 'Not set'}
+                   </p>
+                 )}
+               </div>
+
+               {/* Subscription Status */}
+               <div className='flex max-md:flex-col items-center gap-2'>
+                 <Label className="text-sm font-medium text-lovely/90">
+                   Subscription Status :
+                 </Label>
+                 <div className=" flex items-center space-x-1">
+                   {user.isSubscribed ? (
+                     <>
+                       <BadgeCheck className="h-4 w-4 text-lovely" />
+                       <span className="text-sm text-lovely">Active Subscription</span>
+                     </>
+                   ) : (
+                     <>
+                       <BadgeAlert className="h-4 w-4 text-lovely/80" />
+                       <span className="text-sm text-lovely/80">No Active Subscription</span>
+                     </>
+                   )}
+                 </div>
+               </div>
 
                 {editingInfo && (
                   <div className="flex space-x-3 pt-4">

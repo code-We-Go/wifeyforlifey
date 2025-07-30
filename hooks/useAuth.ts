@@ -17,27 +17,34 @@ export function useAuth() {
     realLoyaltyPoints:0,
   });
 
-  useEffect(() => {
-    async function fetchLoyaltyPoints(email: string) {
-      try {
-        const res = await fetch('/api/loyalty/points', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-        setLoyaltyPoints(data.loyaltyPoints || 0);
-      } catch (error) {
-        setLoyaltyPoints({
-          lifeTimePoints:0,
-          realLoyaltyPoints:0,
-        });
-      }
+  const fetchLoyaltyPoints = async (email: string) => {
+    try {
+      const res = await fetch('/api/loyalty/points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      setLoyaltyPoints(data.loyaltyPoints || 0);
+    } catch (error) {
+      setLoyaltyPoints({
+        lifeTimePoints:0,
+        realLoyaltyPoints:0,
+      });
     }
+  };
+
+  useEffect(() => {
     if (session?.user?.email) {
       fetchLoyaltyPoints(session.user.email);
     }
   }, [session?.user?.email]);
+
+  const refreshLoyaltyPoints = () => {
+    if (session?.user?.email) {
+      fetchLoyaltyPoints(session.user.email);
+    }
+  };
 
   const logout = async () => {
     try {
@@ -60,5 +67,6 @@ export function useAuth() {
     loading,
     logout,
     refreshAuth,
+    refreshLoyaltyPoints,
   };
 } 
