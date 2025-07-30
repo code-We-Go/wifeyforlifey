@@ -46,10 +46,10 @@ export async function GET(
 // PATCH - Update view count
 export async function PATCH(
   req: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const { action } = await req.json();
 
     if (!slug) {
