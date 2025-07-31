@@ -1,7 +1,7 @@
 "use client";
 import PolicyTab from "./PolicyTab";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useState } from "react";
 import PrivacyPolicy from "./PrivacyPolicy";
 import TermsAndConditions from "./TermsAndConditions";
 import CookiePolicy from "./CookiePolicy";
