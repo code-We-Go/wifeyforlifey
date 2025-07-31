@@ -1,24 +1,29 @@
-'use client'
+"use client";
 import Link from "next/link";
 import { Instagram, Facebook, Twitter, Youtube, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
-import { FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa';
+import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { bgRedButton } from "@/app/constants";
 
-
 export default function Footer() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [playlists, setPlaylists] = useState<{ _id: string, title: string }[]>([]);
+  const [playlists, setPlaylists] = useState<{ _id: string; title: string }[]>(
+    []
+  );
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState<string | null>(null);
-  const [shopCategories, setShopCategories] = useState<{ _id: string, name: string }[]>([]);
+  const [shopCategories, setShopCategories] = useState<
+    { _id: string; name: string }[]
+  >([]);
   const [shopCategoriesLoading, setShopCategoriesLoading] = useState(false);
-  const [shopCategoriesError, setShopCategoriesError] = useState<string | null>(null);
+  const [shopCategoriesError, setShopCategoriesError] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     setPlaylistsLoading(true);
@@ -27,7 +32,9 @@ export default function Footer() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.data)) {
-          setPlaylists(data.data.map((p: any) => ({ _id: p._id, title: p.title })));
+          setPlaylists(
+            data.data.map((p: any) => ({ _id: p._id, title: p.title }))
+          );
         } else {
           setPlaylists([]);
         }
@@ -43,7 +50,11 @@ export default function Footer() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setShopCategories(data.slice(0, 5).map((cat: any) => ({ _id: cat._id, name: cat.name })));
+          setShopCategories(
+            data
+              .slice(0, 5)
+              .map((cat: any) => ({ _id: cat._id, name: cat.name }))
+          );
         } else {
           setShopCategories([]);
         }
@@ -57,10 +68,10 @@ export default function Footer() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/newSletter', {
-        method: 'POST',
+      const response = await fetch("/api/newSletter", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: email, // Using email as number since the model expects a number field
@@ -75,7 +86,7 @@ export default function Footer() {
           description: "You've been subscribed to our newsletter.",
           variant: "added",
         });
-        setEmail('');
+        setEmail("");
       } else {
         toast({
           title: "Error",
@@ -117,52 +128,66 @@ export default function Footer() {
             >
               Wifey for Lifey – Your Bridal Era Bestie
             </h3>
-           <div className="justify-start text-start text-sm"  >
+            <div className="justify-start text-start text-sm">
+              <p>
+                Wifey for Lifey isn’t just a brand — it’s a full support system
+                designed to guide brides through every step of their wedding and
+                home-prep journey.
+              </p>
+              <p>
+                From engagement to honeymoon, we empower brides with tools,
+                content, and emotional support to help them feel calm,
+                confident, and in control.
+              </p>
+            </div>
 
-            <p >
-              Wifey for Lifey isn’t just a brand — it’s a full support system
-              designed to guide brides through every step of their wedding and
-              home-prep journey. 
-            </p>
-            <p>
-              From engagement to honeymoon, we empower brides
-              with tools, content, and emotional support to help them feel calm,
-              confident, and in control.
-            </p>
-           </div>
- 
-<div className="flex space-x-4">
-  {/* Instagram Button */}
-  <Button variant="ghost" size="icon" aria-label="Instagram" asChild>
-    <a href="https://www.instagram.com/wifeyforlifey.community?igsh=MjFhNm1seGExd3A%3D&utm_source=qr" 
-       target="_blank" 
-       rel="noopener noreferrer">
-      <FaInstagram className="h-5 w-5" />
-    </a>
-  </Button>
-  
-  {/* Facebook Button */}
-  <Button variant="ghost" size="icon" aria-label="Facebook" asChild>
-    <a href="https://www.facebook.com/share/19Sxh9rdt2/?mibextid=wwXIfr" 
-       target="_blank" 
-       rel="noopener noreferrer">
-      <FaFacebook className="h-5 w-5" />
-    </a>
-  </Button>
-  
-  {/* TikTok Button */}
-  <Button variant="ghost" size="icon" aria-label="TikTok" asChild>
-    <a href="https://www.tiktok.com/@wifey.for.lifey.c?_t=ZS-8wqV9Z4AVPk&_r=1" 
-       target="_blank" 
-       rel="noopener noreferrer">
-      <FaTiktok className="h-5 w-5" />
-    </a>
-  </Button>
-</div>
+            <div className="flex space-x-4">
+              {/* Instagram Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Instagram"
+                asChild
+              >
+                <a
+                  href="https://www.instagram.com/wifeyforlifey.community?igsh=MjFhNm1seGExd3A%3D&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaInstagram className="h-5 w-5" />
+                </a>
+              </Button>
+
+              {/* Facebook Button */}
+              <Button variant="ghost" size="icon" aria-label="Facebook" asChild>
+                <a
+                  href="https://www.facebook.com/share/19Sxh9rdt2/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaFacebook className="h-5 w-5" />
+                </a>
+              </Button>
+
+              {/* TikTok Button */}
+              <Button variant="ghost" size="icon" aria-label="TikTok" asChild>
+                <a
+                  href="https://www.tiktok.com/@wifey.for.lifey.c?_t=ZS-8wqV9Z4AVPk&_r=1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaTiktok className="h-5 w-5" />
+                </a>
+              </Button>
+            </div>
           </div>
 
           <div>
-            <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Shop</h6>
+            <h6
+              className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}
+            >
+              Shop
+            </h6>
             <ul className="space-y-2">
               {shopCategoriesLoading && (
                 <li className="text-sm text-creamey">Loading...</li>
@@ -187,7 +212,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Playlists</h6>
+            <h6
+              className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}
+            >
+              Playlists
+            </h6>
             <ul className="space-y-2">
               {playlistsLoading && (
                 <>
@@ -201,9 +230,11 @@ export default function Footer() {
               {playlistsError && (
                 <li className="text-sm text-red-500">{playlistsError}</li>
               )}
-              {!playlistsLoading && !playlistsError && playlists.length === 0 && (
-                <li className="text-sm text-creamey">No playlists found.</li>
-              )}
+              {!playlistsLoading &&
+                !playlistsError &&
+                playlists.length === 0 && (
+                  <li className="text-sm text-creamey">No playlists found.</li>
+                )}
               {playlists.map((playlist) => (
                 <li key={playlist._id}>
                   <Link
@@ -218,7 +249,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h6 className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}>Subscribe to our Newsletter</h6>
+            <h6
+              className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}
+            >
+              Subscribe to our Newsletter
+            </h6>
             <p className=" text-sm mb-4">
               Get the latest updates, sales, and exclusive content straight to
               your inbox.
@@ -230,7 +265,7 @@ export default function Footer() {
                   type="email"
                   placeholder="Your email"
                   className="rounded-r-none placeholder:text-lovely/80 bg-creamey border-r py-5 border-lovely"
-                  onChange={(e)=>setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <Button
                   type="submit"
@@ -249,14 +284,29 @@ export default function Footer() {
             reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <Link href="/policies?privacy-policy" className="hover:text-foreground">
+            <Link
+              href="/policies?privacy-policy"
+              className="hover:text-foreground"
+            >
               Privacy Policy
             </Link>
-            <Link href="/policies?terms-and-conditions" className="hover:text-foreground">
+            <Link
+              href="/policies?terms-and-conditions"
+              className="hover:text-foreground"
+            >
               Terms of Service
             </Link>
-            <Link href="/policies?return-and-exchange" className="hover:text-foreground">
+            <Link
+              href="/policies?return-and-exchange"
+              className="hover:text-foreground"
+            >
               Return & Exchange
+            </Link>
+            <Link
+              href="/policies?shipping-policy"
+              className="hover:text-foreground"
+            >
+              Shipping Details
             </Link>
             <Link href="/contact" className="hover:text-foreground">
               Contact Us
