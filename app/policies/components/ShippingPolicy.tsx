@@ -14,12 +14,14 @@ const ShippingPolicy = ({
       areas:
         "Cairo & Giza: Madinat Nasr, El Obour, El Shorouk, New Cairo, 15th May City, Alexandria Desert Road (up to Kilo 28), Maadi, Shubra El Kheima, 6th of October",
       deliveryTime: "1 day",
+      price: "65 EGP",
     },
     {
       zone: "Zone 2",
       region: "Alexandria",
       areas: "Alexandria: Alexandria Desert Road (up to Kilo 21)",
       deliveryTime: "1–2 days",
+      price: "70 EGP",
     },
     {
       zone: "Zone 3",
@@ -27,12 +29,14 @@ const ShippingPolicy = ({
       areas:
         "Tanta, Mahalla, Zefta, Zagazig, El-Menya El-Qadima, El-Salam City, El-Fayoum, El-Qanater, Banha, Kafr El-Sheikh, Damietta, Mansoura, Port Said, Ismailia, Suez",
       deliveryTime: "1–3 days",
+      price: "75 EGP",
     },
     {
       zone: "Zone 4",
       region: "Upper Egypt",
       areas: "Beni Suef, Minya, Assiut, Mallawi",
       deliveryTime: "2–4 days",
+      price: "85 EGP",
     },
     {
       zone: "Zone 5",
@@ -40,6 +44,7 @@ const ShippingPolicy = ({
       areas:
         "Qena, Luxor, Aswan, Farafra Oasis, Ras Gharib, Safaga, North Coast, Marsa Matruh",
       deliveryTime: "3–5 days",
+      price: "90 EGP",
     },
     {
       zone: "Zone 6",
@@ -47,6 +52,7 @@ const ShippingPolicy = ({
       areas:
         "New Valley, North Sinai, Marsa Alam, Abu Simbel, Salloum, Halayeb, Shalateen, El-Wahat, South Sinai",
       deliveryTime: "5 days",
+      price: "105 EGP",
     },
   ];
   return (
@@ -94,6 +100,9 @@ We collect personal data you provide directly to us, such as:
               <th className="p-3 border border-lovely/90 text-left font-semibold">
                 Delivery Time
               </th>
+              <th className="p-3 border border-lovely/90 text-left font-semibold">
+                price
+              </th>
             </tr>
           </thead>
           <tbody className="bg-pinkey   divide-lovely/90">
@@ -107,6 +116,9 @@ We collect personal data you provide directly to us, such as:
                 <td className="p-3 border border-lovely/90">
                   {zone.deliveryTime}
                 </td>
+                <td className="p-3 border whitespace-nowrap border-lovely/90">
+                  {zone.price}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -118,6 +130,7 @@ We collect personal data you provide directly to us, such as:
           🕒 Delivery times are based on business days from order confirmation.
         </p>
         <p>🚧 Some rural or remote areas may experience additional delays.</p>
+        <p>🥂 Free Shipping for subscription/orders +2k</p>
       </section>
     </div>
   );
