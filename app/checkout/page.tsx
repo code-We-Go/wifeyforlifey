@@ -19,8 +19,8 @@ import { ShippingZone } from "../interfaces/interfaces";
 import { wifeyExperience } from "../constants";
 import Image from "next/image";
 import { Spinner } from "@material-tailwind/react";
-import { useAuth } from '@/hooks/useAuth';
-import { Info } from 'lucide-react';
+import { useAuth } from "@/hooks/useAuth";
+import { Info } from "lucide-react";
 import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
 
 // Utility function to calculate shipping rate
@@ -250,11 +250,14 @@ const CheckoutClientPage = () => {
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
-//     setFormData((prevFormData)=>({
-// ...prevFormData,
-// appliedDiscount:discount?._id,
-// // appliedDiscountAmount:
-//     }));
+    if (discount && discount.calculationType === "FREE_SHIPPING") {
+      setShipping(0);
+    }
+    //     setFormData((prevFormData)=>({
+    // ...prevFormData,
+    // appliedDiscount:discount?._id,
+    // // appliedDiscountAmount:
+    //     }));
   }; // Default to the first state's name or an empty string
   useEffect(() => {
     setFormData((prevFormData) => ({
@@ -285,13 +288,19 @@ const CheckoutClientPage = () => {
     apartment: "",
     postalZip: "",
     city: "",
-    appliedDiscount:"",
-    appliedDiscountAmount:0,
+    appliedDiscount: "",
+    appliedDiscountAmount: 0,
     cart: items,
     phone: "",
     state: state,
     cash: payment,
-    redeemedLoyaltyPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints)),
+    redeemedLoyaltyPoints: Math.max(
+      0,
+      Math.min(
+        redeemPoints - (redeemPoints % 20),
+        loyaltyPoints.realLoyaltyPoints
+      )
+    ),
     total: total,
     shipping: shipping,
     billingCountry: "",
@@ -362,6 +371,14 @@ const CheckoutClientPage = () => {
     };
     getShippingZones();
     const calculateShipping = () => {
+      // Prevent recalculation if FREE_SHIPPING discount is active
+      if (
+        appliedDiscount &&
+        appliedDiscount.calculationType === "FREE_SHIPPING"
+      ) {
+        setShipping(0);
+        return;
+      }
       if (countryID === 65) {
         const selectedState = states.find(
           (state) => state.name === formData.state
@@ -465,7 +482,11 @@ const CheckoutClientPage = () => {
         shippingZones
       );
       console.log("Local shipping rate calculated:", shippingRate);
-      setShipping(shippingRate);
+      if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+        setShipping(0);
+      } else {
+        setShipping(shippingRate);
+      }
       const calculatedSubTotal = items.reduce(
         (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
         0
@@ -481,7 +502,11 @@ const CheckoutClientPage = () => {
         shippingZones
       );
       console.log("Global shipping rate calculated:", shippingRate);
-      setShipping(shippingRate);
+      if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+        setShipping(0);
+      } else {
+        setShipping(shippingRate);
+      }
       const calculatedSubTotal = items.reduce(
         (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
         0
@@ -501,7 +526,7 @@ const CheckoutClientPage = () => {
 
   // Handler for redeeming points (allow any value, clamp in effect)
   const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = parseInt(e.target.value) ||0;
+    let value = parseInt(e.target.value) || 0;
     setRedeemPoints(value);
   };
 
@@ -514,7 +539,7 @@ const CheckoutClientPage = () => {
     );
     setSubTotal(calculatedSubTotal);
 
-    // Calculate discount amount
+    // Calculate discount amount and effective shipping
     let newDiscountAmount = 0;
     let effectiveShipping = shipping;
     if (appliedDiscount && appliedDiscount.value !== undefined) {
@@ -525,19 +550,29 @@ const CheckoutClientPage = () => {
       } else if (appliedDiscount.calculationType === "FIXED_AMOUNT") {
         newDiscountAmount = appliedDiscount.value;
       } else if (appliedDiscount.calculationType === "FREE_SHIPPING") {
-        effectiveShipping = 0;
+        // Always use the latest shipping value for discount and set shipping to 0
         newDiscountAmount = shipping;
+        effectiveShipping = 0;
       }
     }
     setDiscountAmount(newDiscountAmount);
 
     // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
-    let validRedeem = Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints));
+    let validRedeem = Math.max(
+      0,
+      Math.min(
+        redeemPoints - (redeemPoints % 20),
+        loyaltyPoints.realLoyaltyPoints
+      )
+    );
     const loyaltyLE = Math.floor(validRedeem / 20);
     setLoyaltyDiscount(loyaltyLE);
 
-    // Calculate final total
-    const finalTotal = Math.max(0, calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping);
+    // Calculate final total, always using effectiveShipping
+    const finalTotal = Math.max(
+      0,
+      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
+    );
     setTotal(finalTotal);
   }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
   const handleSubmit = async (e: React.FormEvent) => {
@@ -575,21 +610,20 @@ const CheckoutClientPage = () => {
     const orderPayload = {
       ...formData,
       total, // use the latest state value
-      shipping,
+      shipping:
+        appliedDiscount?.calculationType === "FREE_SHIPPING" ? 0 : shipping,
       subTotal,
       cart: items,
-      appliedDiscount:appliedDiscount?._id,
-      appliedDiscountAmount: appliedDiscount?.calculationType === "FREE_SHIPPING"
-        ? shipping 
-        : 
-            appliedDiscount?.calculationType === "PERCENTAGE"
-              ? Math.round(
-                  (subTotal * appliedDiscount?.value!) / 100
-                )
-              : appliedDiscount?.value
-           ,
+      appliedDiscount: appliedDiscount?._id,
+      appliedDiscountAmount: discountAmount,
       loyalty: {
-        redeemedPoints: Math.max(0, Math.min(redeemPoints - (redeemPoints % 20), loyaltyPoints.realLoyaltyPoints)),
+        redeemedPoints: Math.max(
+          0,
+          Math.min(
+            redeemPoints - (redeemPoints % 20),
+            loyaltyPoints.realLoyaltyPoints
+          )
+        ),
         discount: loyaltyDiscount,
       },
     };
@@ -620,10 +654,12 @@ const CheckoutClientPage = () => {
     // cart.length > 0 ?
     <div
       className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}
-      >
-      {loading &&<div className="fixed z-20 inset-0 bg-black/40 flex w-full h-[100vh] justify-center items-center">
-      <div className="w-12 animate-spin border-lovely border-b-2 h-12 rounded-full  "></div>
-      </div>}
+    >
+      {loading && (
+        <div className="fixed z-20 inset-0 bg-black/40 flex w-full h-[100vh] justify-center items-center">
+          <div className="w-12 animate-spin border-lovely border-b-2 h-12 rounded-full  "></div>
+        </div>
+      )}
       <h1
         className={`${thirdFont.className} tracking-normal text-xl text-everGreen md:text-3xl mb-4 md:mb-8  font-semibold`}
       >
@@ -1215,14 +1251,18 @@ const CheckoutClientPage = () => {
             <div className="flex gap-1  justify-center items-center">
               <h6 className={`${thirdFont.className}`}>ORDER SUMMARY</h6>
               <IoIosArrowDown
-                className={`${summary ? "rotate-180" : ""} transition duration-500`}
+                className={`${
+                  summary ? "rotate-180" : ""
+                } transition duration-500`}
               />
             </div>
             <h6 className={`${thirdFont.className}`}>{total} LE</h6>
           </div>
           <div
             className={`transition-all duration-500 ease-in-out overflow-hidden ${
-              summary ? "max-h-[90vh] h-auto  opacity-100" : "max-h-0  opacity-0"
+              summary
+                ? "max-h-[90vh] h-auto  opacity-100"
+                : "max-h-0  opacity-0"
             } px-1 py-1 flex flex-col gap-2`}
             style={{
               padding: summary ? "0.25rem 0.25rem" : "0",
@@ -1231,7 +1271,10 @@ const CheckoutClientPage = () => {
             {items.map((cartItem, index) => (
               <OrderSummaryItem cartItem={cartItem} key={index} />
             ))}
-            <DiscountSection onDiscountApplied={handleDiscountApplied} redeemType="Purchase" />
+            <DiscountSection
+              onDiscountApplied={handleDiscountApplied}
+              redeemType="Purchase"
+            />
             {/* Loyalty Points Section for mobile */}
             <LoyaltyPointsSection
               loyaltyPoints={loyaltyPoints}
@@ -1248,7 +1291,9 @@ const CheckoutClientPage = () => {
               <div className="flex flex-col gap-1 text-sm">
                 <p>SUBTOTAL</p>
                 {redeemPoints > 0 && (
-                  <p className="text-[12px] lg:text-base text-green-700">-{loyaltyDiscount} LE (Loyalty Discount)</p>
+                  <p className="text-[12px] lg:text-base text-green-700">
+                    -{loyaltyDiscount} LE (Loyalty Discount)
+                  </p>
                 )}
                 <p>SHIPPING</p>
                 <p className="mt-6">TOTAL</p>
@@ -1256,13 +1301,14 @@ const CheckoutClientPage = () => {
               <div className="flex flex-col gap-1 items-end">
                 <p className="text-[12px] lg:text-base">{subTotal} LE</p>
                 {redeemPoints > 0 && (
-                  <p className="text-[12px] lg:text-base text-green-700">-{loyaltyDiscount} LE</p>
+                  <p className="text-[12px] lg:text-base text-green-700">
+                    -{loyaltyDiscount} LE
+                  </p>
                 )}
                 <p className="text-[12px] lg:text-base">{shipping} LE</p>
                 <p className="text-[12px] mt-6 lg:text-base">{total} LE</p>
               </div>
             </div>
-            
           </div>
         </div>
         {!isSubscription === true ? (
@@ -1282,7 +1328,10 @@ const CheckoutClientPage = () => {
               </div>
 
               {/* Discount Section */}
-              <DiscountSection redeemType="Purchase" onDiscountApplied={handleDiscountApplied} />
+              <DiscountSection
+                redeemType="Purchase"
+                onDiscountApplied={handleDiscountApplied}
+              />
 
               {/* Order Totals */}
               <div className="mt-6 space-y-2 text-everGreen">
@@ -1300,15 +1349,10 @@ const CheckoutClientPage = () => {
                   <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
+                      -{discountAmount} LE
                       {appliedDiscount.calculationType === "FREE_SHIPPING"
-                        ? `-${shipping} LE (Free Shipping)`
-                        : `-${
-                            appliedDiscount.calculationType === "PERCENTAGE"
-                              ? Math.round(
-                                  (subTotal * appliedDiscount.value) / 100
-                                )
-                              : appliedDiscount.value
-                          } LE`}
+                        ? " (Free Shipping)"
+                        : ""}
                     </span>
                   </div>
                 )}
@@ -1318,7 +1362,7 @@ const CheckoutClientPage = () => {
                   <span>
                     {appliedDiscount?.calculationType === "FREE_SHIPPING"
                       ? "0"
-                      : shipping} {" "}
+                      : shipping}{" "}
                     LE
                   </span>
                 </div>
@@ -1389,15 +1433,10 @@ const CheckoutClientPage = () => {
                   <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
+                      -{discountAmount} LE
                       {appliedDiscount.calculationType === "FREE_SHIPPING"
-                        ? `-${shipping} LE (Free Shipping)`
-                        : `-${
-                            appliedDiscount.calculationType === "PERCENTAGE"
-                              ? Math.round(
-                                  (subTotal * appliedDiscount.value) / 100
-                                )
-                              : appliedDiscount.value
-                          } LE`}
+                        ? " (Free Shipping)"
+                        : ""}
                     </span>
                   </div>
                 )}

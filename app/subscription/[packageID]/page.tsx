@@ -173,6 +173,7 @@ const SubscriptionPage = () => {
   const [discountAmount, setDiscountAmount] = useState(0);
   const { isAuthenticated, loyaltyPoints } = useAuth();
   const [loading, setLoading] = useState(false);
+  // const [shipping, setShipping] = useState(0);
   const [shipping, setShipping] = useState(70);
   const [payment, setPayment] = useState<"card" | "cash">("card");
   const [redeemPoints, setRedeemPoints] = useState(0);
@@ -334,6 +335,7 @@ const SubscriptionPage = () => {
             zone.localGlobal === "local"
         );
         if (zone) {
+          // setShipping(0);
           setShipping(zone.zone_rate.local);
         }
       }
@@ -352,7 +354,8 @@ const SubscriptionPage = () => {
 
     const calculatedSubTotal = packageData?.price ?? 0;
     setSubTotal(calculatedSubTotal);
-    setTotal(calculatedSubTotal + shipping);
+    setTotal(calculatedSubTotal);
+    // setTotal(calculatedSubTotal + shipping);
 
     cartItems();
   }, [items, countryID, billingState, packageData]); // Add packageData to dependencies
@@ -424,10 +427,16 @@ const SubscriptionPage = () => {
         shippingZones
       );
       console.log("Local shipping rate calculated:", shippingRate);
-      setShipping(shippingRate);
+      if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+        setShipping(0);
+      } else {
+        setShipping(shippingRate);
+      }
       const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
-      setTotal(calculatedSubTotal + shippingRate);
+      setTotal(calculatedSubTotal);
+      // setTotal(calculatedSubTotal + shippingRate);
+      //Efective One
     } else if (shippingZones.length > 0) {
       const shippingRate = calculateShippingRate(
         countryID,
@@ -437,7 +446,11 @@ const SubscriptionPage = () => {
         shippingZones
       );
       console.log("Global shipping rate calculated:", shippingRate);
-      setShipping(shippingRate);
+      if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+        setShipping(0);
+      } else {
+        setShipping(shippingRate);
+      }
       const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
@@ -583,13 +596,15 @@ const SubscriptionPage = () => {
     // Calculate final total
     const finalTotal = Math.max(
       0,
-      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
+      // calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
+      calculatedSubTotal - newDiscountAmount - loyaltyLE
     );
     setTotal(finalTotal);
   }, [
     packageData,
     shipping,
     appliedDiscount,
+    appliedDiscount?.calculationType,
     loyaltyPoints,
     redeemPoints,
     state,
