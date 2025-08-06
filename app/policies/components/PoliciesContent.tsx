@@ -8,6 +8,7 @@ import CookiePolicy from "./CookiePolicy";
 import ReturnAndExchange from "./ReturnAndExchange";
 import { thirdFont } from "@/fonts";
 import ShippingPolicy from "./ShippingPolicy";
+import LoyaltyPolicy from "./LoyaltyPolicy";
 
 const PoliciesContent = () => {
   const [activeTab, setActiveTab] = useState("privacy-policy");
@@ -17,6 +18,7 @@ const PoliciesContent = () => {
     "privacy-policy",
     "return-and-exchange",
     "shipping-policy",
+    "loyalty-policy",
   ];
 
   const searchParams = useSearchParams();
@@ -33,6 +35,7 @@ const PoliciesContent = () => {
     { title: "TERMS AND CONDITIONS", value: "terms-and-conditions" },
     { title: "RETURN AND EXCHANGE", value: "return-and-exchange" },
     { title: "SHIPMENT INFO", value: "shipping-policy" },
+    { title: "LOYALTY POLICY", value: "loyalty" },
   ];
 
   useEffect(() => {
@@ -98,6 +101,10 @@ const PoliciesContent = () => {
             setSelectedTab={setActiveTab}
           />
           <ShippingPolicy
+            selectedTab={activeTab}
+            setSelectedTab={setSelectedTab}
+          />
+          <LoyaltyPolicy
             selectedTab={activeTab}
             setSelectedTab={setSelectedTab}
           />

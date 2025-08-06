@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import userModel from "@/app/modals/userModel";
 import verificationsModel from "@/app/modals/sessionModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import { ConnectDB } from "@/app/config/db";
+
 
 export async function GET(_request: NextRequest) {
+await ConnectDB();
+
   try {
     // Extract userID from the URL using nextUrl.pathname
     const userID = _request.nextUrl.pathname.split("/")[4]; // Assuming the URL structure is /api/auth/verification/[userID]

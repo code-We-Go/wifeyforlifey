@@ -1247,7 +1247,7 @@ const SubscriptionPage = () => {
                   subscription fee :
                 </span>
                 <span className="text-lg  text-creamey">
-                  {packageData.price} LE
+                  {packageData.price} LE (yearly)
                 </span>
                 {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
               </div>
