@@ -13,11 +13,38 @@ import { mockUser } from "@/models/User";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { thirdFont } from "@/fonts";
+import VdoPlayer from "./components/VdoPlayer";
 
 export default function PlaylistPage() {
   const params = useParams();
   const router = useRouter();
   const playlistId = params.id as string;
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleVideoEnd = () => {
+    console.log("Video ended, triggering next video...");
+    nextVideo(); // autoplay next video on end
+  };
+
+  const nextVideo = () => {
+    if (!playlist?.videos || playlist.videos.length === 0) return;
+    const nextIndex = (currentIndex + 1) % playlist.videos.length;
+    setCurrentIndex(nextIndex);
+    const nextVideo = playlist.videos[nextIndex];
+    if (typeof nextVideo === 'object' && nextVideo !== null) {
+      setSelectedVideo(nextVideo);
+    }
+  };
+  
+  const prevVideo = () => {
+    if (!playlist?.videos || playlist.videos.length === 0) return;
+    const prevIndex = (currentIndex - 1 + playlist.videos.length) % playlist.videos.length;
+    setCurrentIndex(prevIndex);
+    const prevVideo = playlist.videos[prevIndex];
+    if (typeof prevVideo === 'object' && prevVideo !== null) {
+      setSelectedVideo(prevVideo);
+    }
+  };
 
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
@@ -25,6 +52,7 @@ export default function PlaylistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seeMore, setSeeMore] = useState(false); // <-- Add this line
+  const [isVideoHovered, setIsVideoHovered] = useState(false);
 
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
@@ -136,6 +164,16 @@ export default function PlaylistPage() {
     }
   }, [playlist, fetchRelatedPlaylists]);
 
+  // Sync selectedVideo with currentIndex when playlist loads
+  useEffect(() => {
+    if (playlist?.videos && playlist.videos.length > 0 && currentIndex < playlist.videos.length) {
+      const video = playlist.videos[currentIndex];
+      if (typeof video === 'object' && video !== null) {
+        setSelectedVideo(video);
+      }
+    }
+  }, [playlist, currentIndex]);
+
   // Fetch OTP when selectedVideo changes and is not locked
   useEffect(() => {
     if (selectedVideo && !videoLocked && selectedVideo.url) {
@@ -154,6 +192,15 @@ export default function PlaylistPage() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  // Add hover handlers
+  const handleVideoMouseEnter = () => {
+    setIsVideoHovered(true);
+  };
+
+  const handleVideoMouseLeave = () => {
+    setIsVideoHovered(false);
   };
 
   if (isLoading) {
@@ -316,25 +363,38 @@ export default function PlaylistPage() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <p>Loading video...</p>
                   </div>
-                ) : otp && playbackInfo ? (
-                  <div style={{ paddingTop: "56.25%", position: "relative" }}>
-                    <iframe
-                      src={`https://player.vdocipher.com/v2/?otp=${encodeURIComponent(
-                        otp
-                      )}&playbackInfo=${encodeURIComponent(playbackInfo)}`}
-                      style={{
-                        border: 0,
-                        maxWidth: "100%",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        height: "100%",
-                        width: "100%",
-                      }}
-                      allowFullScreen
-                      allow="encrypted-media"
-                    ></iframe>
-                  </div>
+                                 ) : otp && playbackInfo ? (
+  <div 
+    className="relative"
+    onMouseEnter={handleVideoMouseEnter}
+    onMouseLeave={handleVideoMouseLeave}
+  >
+    <VdoPlayer
+      otp={otp}
+      playbackInfo={playbackInfo}
+      autoplay={currentIndex === 0 ? false : true}
+      muted={false}
+      volume={0.8}
+      onVideoEnd={handleVideoEnd}
+    />
+    {/* Navigation buttons - positioned to avoid video controls */}
+    <div className={`absolute top-[45%] left-4 right-4 flex justify-between items-center transition-opacity duration-300 pointer-events-none ${
+      isVideoHovered ? 'opacity-100 ' : 'opacity-0'
+    }`}>
+      <button 
+        onClick={prevVideo}
+        className="bg-black/50 hover:bg-lovely/90 text-white rounded-full px-3 py-1.5  transition-colors duration-200 pointer-events-auto text-sm"
+      >
+        ⏮ 
+      </button>
+      <button 
+        onClick={nextVideo}
+        className="bg-black/50 hover:bg-lovely/90 text-white px-3 py-1.5 rounded-full transition-colors duration-200 pointer-events-auto text-sm"
+      >
+         ⏭
+      </button>
+    </div>
+  </div>
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
                     <p>Unable to load video.</p>
@@ -404,7 +464,13 @@ export default function PlaylistPage() {
                           ? "bg-lovely text-creamey"
                           : "bg-pinkey text-lovely  hover:bg-lovely hover:text-creamey "
                       }`}
-                      onClick={() => setSelectedVideo(video)}
+                                             onClick={() => {
+                         const videoIndex = playlist.videos.findIndex((v: any) => v._id === video._id);
+                         if (videoIndex !== -1) {
+                           setCurrentIndex(videoIndex);
+                           setSelectedVideo(video);
+                         }
+                       }}
                     >
                       <div className="flex gap-3">
                         <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
