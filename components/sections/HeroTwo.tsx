@@ -62,7 +62,7 @@ const HeroTwo = () => {
             x: textXr,
             opacity: textOpacity
           }}
-          className={`  text-lovely text-5xl md:text-7xl lg:text-9xl max-sm:ml-[5vw] font-normal ${lifeyFont.className}`}>plan</motion.h1>
+          className={` text-center text-lovely text-5xl md:text-7xl lg:text-9xl max-sm:mr-[10vw] font-normal ${lifeyFont.className}`}>plan</motion.h1>
         <motion.h1 
           style={{
             x: textXr,

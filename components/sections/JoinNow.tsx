@@ -15,6 +15,11 @@ const JoinNow = () => {
           >
             Subscribe Now & Join Our Club.
           </h1>
+          {/* <h1
+            className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl  font-bold `}
+          >
+            Looking For The Gehaz Bestie Planner !?
+          </h1> */}
           <p className="text-lg font-semibold md:text-xl ">
             unlock exclusive content,Planning Tips, and Insider Deals!
           </p>
