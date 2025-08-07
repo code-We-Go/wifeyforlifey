@@ -48,6 +48,37 @@ const testimonials = [
     direction: "right",
   },
 ];
+const mobTestimonials = [
+  {
+    name: "sandy_wadea",
+    text: "y3ni msh 3arfa mngher el guide bta3k ya nariman kont amlt a amtn bhbk ❤❤ ",
+    supporters: "8,780 supporters",
+    logo: "C",
+    direction: "left",
+  },
+  {
+    name: "a_y_muhammed",
+    text: "سؤال بس ازاي معرفتكيش من قبل كد 😍😍سهولة في توصيل المعلومة وفعلاً معلومات مفيدة👏 غير انك ماشاء الله قمر ومريحة جداً .. شكرااا ❤",
+    supporters: "4,488 supporters",
+    img: "https://yt3.ggpht.com/ytc/AKedOLQwKaleighCohen=s88-c-k-c0x00ffffff-no-rj",
+    direction: "right", // Example image
+  },
+
+  {
+    name: "dr_nadine_rashed",
+    text: "انا دكتورة جلدية وتجميل وبجد بشكرك علي المعلومات الصحيحة اللي بتقدميها بطريقة جميلة ✨❤",
+    supporters: "1,805 supporters",
+    img: "https://randomuser.me/api/portraits/men/34.jpg",
+    direction: "left",
+  },
+  {
+    name: "misnn21399",
+    text: "ياه  كان نفسي في المراتب وانواعها بجد شكراً 😂❤❤",
+    supporters: "",
+    logo: "SP",
+    direction: "right",
+  },
+];
 
 const Testimonials = () => {
   const router = useRouter();
@@ -76,7 +107,7 @@ const Testimonials = () => {
       className="relative w-full flex min-h-[75vh] md:min-h-[100vh] flex-col items-center md:justify-center justify-end py-16 bg-creamey"
     >
       <div className="flex md:hidden gap-4 w-full max-w-full mx-auto overflow-x-auto py-8 scrollbar-hide snap-x snap-mandatory">
-        {testimonials.map((t, i) => (
+        {mobTestimonials.slice(0, 2).map((t, i) => (
           <div key={i} className="">
             <TestimonialCard {...t} index={i} />
           </div>
@@ -91,7 +122,7 @@ const Testimonials = () => {
         <h2
           className={`${thirdFont.className} text-lovely tracking-normal text-4xl md:text-6xl font-bold text-center mb-4 `}
         >
-          Think Wifey&apos;s Tiktok was helpful?
+          Think Wifey&apos;s Tiktok is helpful?
           <br />
           This is 10x the tea
         </h2>
@@ -99,6 +130,7 @@ const Testimonials = () => {
           Subscribe now and be a part of your favorite community.
         </p>
       </div>
+
       <div className=" w-full flex justify-center">
         {/* Cards left with parallax */}
         <div
@@ -146,6 +178,13 @@ const Testimonials = () => {
             It’s free and takes less than a minute!
           </span> */}
         </div>
+      </div>
+      <div className="flex md:hidden gap-4 w-full max-w-full mx-auto overflow-x-auto pt-20 py-8 scrollbar-hide snap-x snap-mandatory">
+        {mobTestimonials.slice(2, 4).map((t, i) => (
+          <div key={i} className="">
+            <TestimonialCard {...t} index={i} />
+          </div>
+        ))}
       </div>
     </section>
   );
