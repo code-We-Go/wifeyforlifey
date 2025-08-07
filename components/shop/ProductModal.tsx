@@ -1,7 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/app/context/ModalContext";
 import { useCart } from "@/providers/CartProvider";
@@ -12,7 +17,9 @@ export default function ProductModal() {
   const { isModalOpen, closeModal, modalProduct } = useModal();
   const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>();
-  const [selectedAttribute, setSelectedAttribute] = useState<{ name: string; stock: number } | undefined>();
+  const [selectedAttribute, setSelectedAttribute] = useState<
+    { name: string; stock: number } | undefined
+  >();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -36,7 +43,10 @@ export default function ProductModal() {
     setSelectedImage(0);
   };
 
-  const handleAttributeChange = (attribute: { name: string; stock: number }) => {
+  const handleAttributeChange = (attribute: {
+    name: string;
+    stock: number;
+  }) => {
     setSelectedAttribute(attribute);
     setQuantity(1);
   };
@@ -58,10 +68,10 @@ export default function ProductModal() {
       productId: modalProduct._id,
       productName: modalProduct.title,
       price: modalProduct.price.local,
-      attributes:selectedAttribute,
-      variant:selectedVariant,
+      attributes: selectedAttribute,
+      variant: selectedVariant,
       imageUrl: selectedVariant.images[0].url,
-      quantity
+      quantity,
     });
 
     closeModal();
@@ -122,7 +132,7 @@ export default function ProductModal() {
 
             {/* Variants Selection */}
             <div className="space-y-4">
-              <div>
+              {/* <div>
                 <h3 className="text-sm font-medium mb-2">Variants</h3>
                 <div className="flex flex-wrap gap-2">
                   {modalProduct.variations.map((variant, index) => (
@@ -136,16 +146,20 @@ export default function ProductModal() {
                     </Button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {selectedVariant && (
                 <div>
-                  <h3 className="text-sm font-medium mb-2">{selectedVariant.attributeName}</h3>
+                  <h3 className="text-sm font-medium mb-2">
+                    {selectedVariant.attributeName}
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedVariant.attributes.map((attr, index) => (
                       <Button
                         key={index}
-                        variant={selectedAttribute === attr ? "default" : "outline"}
+                        variant={
+                          selectedAttribute === attr ? "default" : "outline"
+                        }
                         onClick={() => handleAttributeChange(attr)}
                         className="rounded-full bg-pinkey text-lovely hover:bg-lovely/90 hover:text-creamey"
                         disabled={attr.stock <= 0}
@@ -163,7 +177,7 @@ export default function ProductModal() {
               <div className="text-sm font-medium mb-2">Quantity</div>
               <div className="flex items-center space-x-2">
                 <Button
-                className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
+                  className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
                   variant="outline"
                   size="icon"
                   onClick={decrementQuantity}
@@ -174,11 +188,13 @@ export default function ProductModal() {
                 </Button>
                 <div className="w-12 text-center">{quantity}</div>
                 <Button
-                className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
+                  className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
                   variant="outline"
                   size="icon"
                   onClick={incrementQuantity}
-                  disabled={!selectedAttribute || quantity >= selectedAttribute.stock}
+                  disabled={
+                    !selectedAttribute || quantity >= selectedAttribute.stock
+                  }
                 >
                   <span className="sr-only">Increase quantity</span>
                   <span aria-hidden>+</span>
@@ -206,4 +222,4 @@ export default function ProductModal() {
       </DialogContent>
     </Dialog>
   );
-} 
+}

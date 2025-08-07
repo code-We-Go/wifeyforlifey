@@ -23,7 +23,6 @@ import axios from "axios";
 import ProductPageSkeleton from "./ProductPageSkeleton";
 
 export default function ProductPage() {
- 
   const params = useParams();
   const productId = params.id as string;
   const { toast } = useToast();
@@ -51,11 +50,13 @@ export default function ProductPage() {
   }, []);
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(product?.variations[0]);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedAttribute, setSelectedAttribute] = useState<{ name: string; stock: number } | undefined>(
-    selectedVariant?.attributes[0]
+  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
+    product?.variations[0]
   );
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedAttribute, setSelectedAttribute] = useState<
+    { name: string; stock: number } | undefined
+  >(selectedVariant?.attributes[0]);
   const handleShare = async () => {
     const productUrl = `${window.location.origin}/shop/${productId}`;
 
@@ -110,7 +111,10 @@ export default function ProductPage() {
     setQuantity(1);
   };
 
-  const handleAttributeChange = (attribute: { name: string; stock: number }) => {
+  const handleAttributeChange = (attribute: {
+    name: string;
+    stock: number;
+  }) => {
     setSelectedAttribute(attribute);
     setQuantity(1);
   };
@@ -122,10 +126,10 @@ export default function ProductPage() {
       productId: product._id,
       productName: product.title,
       price: product.price.local,
-      attributes:selectedAttribute,
-      variant:selectedVariant,
+      attributes: selectedAttribute,
+      variant: selectedVariant,
       imageUrl: selectedVariant.images[0].url,
-      quantity
+      quantity,
     });
 
     toast({
@@ -241,7 +245,9 @@ export default function ProductPage() {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className={`${thirdFont.className} text-lovely tracking-normal text-4xl  font-medium`}>
+            <h1
+              className={`${thirdFont.className} text-lovely tracking-normal text-4xl  font-medium`}
+            >
               {product.title}
             </h1>
             {/* <div className="flex items-center mt-2">
@@ -271,7 +277,7 @@ export default function ProductPage() {
 
           {/* Variants Selection */}
           <div className="space-y-4">
-            <div>
+            {/* <div>
               <h3 className="text-sm text-lovely font-medium mb-2">Variants</h3>
               <div className="flex flex-wrap gap-2">
                 {product.variations.map((variant, index) => (
@@ -285,21 +291,25 @@ export default function ProductPage() {
                   </Button>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {selectedVariant && (
               <div>
-                <h3 className="text-sm text-lovely font-medium mb-2">{selectedVariant.attributeName}</h3>
+                <h3 className="text-sm text-lovely font-medium mb-2">
+                  {selectedVariant.attributeName}
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {selectedVariant.attributes.map((attr, index) => (
                     <Button
                       key={index}
-                      variant={selectedAttribute === attr ? "default" : "outline"}
+                      variant={
+                        selectedAttribute === attr ? "default" : "outline"
+                      }
                       onClick={() => handleAttributeChange(attr)}
                       className="rounded-full text-lovely bg-pinkey"
                       disabled={attr.stock <= 0}
                     >
-                      {attr.name} 
+                      {attr.name}
                     </Button>
                   ))}
                 </div>
@@ -311,7 +321,7 @@ export default function ProductPage() {
             <div className="text-sm text-lovely font-medium mb-2">Quantity</div>
             <div className="flex items-center space-x-2">
               <Button
-              className="text-lovely bg-pinkey"
+                className="text-lovely bg-pinkey"
                 variant="outline"
                 size="icon"
                 onClick={decrementQuantity}
@@ -322,11 +332,13 @@ export default function ProductPage() {
               </Button>
               <div className="w-12 text-center">{quantity}</div>
               <Button
-                            className="text-lovely bg-pinkey"
+                className="text-lovely bg-pinkey"
                 variant="outline"
                 size="icon"
                 onClick={incrementQuantity}
-                disabled={!selectedAttribute || quantity >= selectedAttribute.stock}
+                disabled={
+                  !selectedAttribute || quantity >= selectedAttribute.stock
+                }
               >
                 <span className="sr-only">Increase quantity</span>
                 <span aria-hidden>+</span>
@@ -349,7 +361,11 @@ export default function ProductPage() {
               <ShoppingCart className="mr-2 h-5 w-5" />
               Add to Cart
             </Button>
-            <Button size="lg" variant="outline" className="bg-lovely hover:bg-everGreen text-creamey hover:text-creamey rounded-full">
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-lovely hover:bg-everGreen text-creamey hover:text-creamey rounded-full"
+            >
               <Heart className="mr-2 h-5 w-5" />
               Add to Wishlist
             </Button>
@@ -362,8 +378,10 @@ export default function ProductPage() {
               <Truck className="h-5 w-5 mr-2 text-muted-foreground" />
               <span className="text-sm">Free shipping on orders over $50</span>
             </div> */}
-            <div className="flex items-center text-lovely hover:cursor-pointer"
-            onClick={handleShare}>
+            <div
+              className="flex items-center text-lovely hover:cursor-pointer"
+              onClick={handleShare}
+            >
               <Share2 className="h-5 w-5 mr-2 " />
               <span className="text-sm">Share this product</span>
             </div>
@@ -376,14 +394,16 @@ export default function ProductPage() {
         <Tabs defaultValue="details">
           <TabsList className="w-full justify-start border-b bg-creamey rounded-none">
             {/* <TabsTrigger value="description">Description</TabsTrigger> */}
-            <TabsTrigger className="bg-creamey text-lovely" value="details">Product details</TabsTrigger>
+            <TabsTrigger className="bg-creamey text-lovely" value="details">
+              Product details
+            </TabsTrigger>
           </TabsList>
           {/* <TabsContent value="description" className="py-4">
             <div className="prose max-w-none">
               <p>{product.description}</p>
             </div>
           </TabsContent> */}
-          <TabsContent value="details"  className="bg-creamey text-lovely py-4">
+          <TabsContent value="details" className="bg-creamey text-lovely py-4">
             <div className="space-y-4">
               {/* <h3 className="font-medium">Product Details</h3> */}
               <ul className="list-disc pl-5 space-y-2">
