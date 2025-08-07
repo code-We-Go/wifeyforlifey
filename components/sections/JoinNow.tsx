@@ -13,7 +13,7 @@ const JoinNow = () => {
           <h1
             className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl  font-bold `}
           >
-            Subscribe Now & Join Our Club.
+            Psssst… Looking for the Gehaz Bestie Planner? 👀
           </h1>
           {/* <h1
             className={`${thirdFont.className} text-4xl md:text-5xl  lg:text-6xl  font-bold `}
@@ -21,7 +21,9 @@ const JoinNow = () => {
             Looking For The Gehaz Bestie Planner !?
           </h1> */}
           <p className="text-lg font-semibold md:text-xl ">
-            unlock exclusive content,Planning Tips, and Insider Deals!
+            She’s finally here — and she’s part of The Wifey Experience 💗
+            Unlock exclusive planning tools, tips, and surprises made just for
+            brides like you!{" "}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -30,7 +32,9 @@ const JoinNow = () => {
               size="lg"
               className="rounded-full font-bold tracking-wide bg-lovely hover:bg-everGreen text-creamey"
             >
-              <Link href="/subscription/687396821b4da119eb1c13fe">Subscribe</Link>
+              <Link href="/subscription/687396821b4da119eb1c13fe">
+                Subscribe
+              </Link>
             </Button>
             <Button
               asChild
@@ -38,13 +42,13 @@ const JoinNow = () => {
               variant="outline"
               className="rounded-full font-bold tracking-wide bg-creamey text-lovely hover:bg-everGreen hover:text-creamey"
             >
-              <Link href="/club">see what&apos;s inside</Link>
+              <Link href="/club">See what&apos;s inside</Link>
             </Button>
           </div>
         </div>
         <div className="relative bg-creamey h-[300px] md:h-[500px] rounded-lg overflow-hidden animate-float">
           <Image
-            src="/experience/exclusiveContent.png"
+            src="/experience/gehaz1.png"
             alt="Exclusive content"
             fill
             priority
