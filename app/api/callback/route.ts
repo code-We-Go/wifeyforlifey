@@ -48,7 +48,8 @@ export async function GET(request: Request) {
         { paymentID: data.order },
         {
           subscribed: true,
-          expiryDate: subscribtions > 50 ? expiryDate : expiryDateLifeTime,
+          expiryDate: expiryDate,
+          // expiryDate: subscribtions > 50 ? expiryDate : expiryDateLifeTime,
         },
         { new: true } // <-- This is important!
       );
