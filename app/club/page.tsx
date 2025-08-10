@@ -100,16 +100,33 @@ const ClubPage = () => {
           />
         </div>
       </div>
-      <div className="w-full">
+      <div className="w-full text-center text-lovely mt-10 md:mt-24">
+        <h2 className={`${lifeyFont.className} mx-1 font-bold`}>
+          The Wifey Experience
+        </h2>
+
+        <h6 className="text-lovely/90 mt-2">
+          Introducing the first bridal full experience by WIFEY FOR LIFEY.
+        </h6>
         <TimeLine />
+        <Button
+          asChild
+          variant="outline"
+          className="bg-lovely animate-pulse hover:bg-lovely hover:text-creamey text-base font-semibold text-creamey hover:font-bold tracking-wide transition duration-300 border-0   mt-4 "
+        >
+          <Link href="/subscription/687396821b4da119eb1c13fe">
+            Join Now <ArrowRight className=" ml-2 h-4 w-4" />
+          </Link>
+        </Button>
       </div>
 
-      <motion.div
-        variants={fadeIn({ direction: "up", delay: 0.2 })}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.15 }}
-        className="text-start container-custom  my-16 py-16 w-full bg-lovely text-creamey"
+      <div
+        id="gehazPlanner"
+        // variants={fadeIn({ direction: "up", delay: 0.2 })}
+        // initial="hidden"
+        // whileInView="show"
+        // viewport={{ once: true, amount: 0.15 }}
+        className="text-start container-custom  mt-16 py-16 w-full bg-lovely text-creamey"
       >
         <h1
           className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}
@@ -162,13 +179,14 @@ const ClubPage = () => {
             />
           </div>
         </div>
-      </motion.div>
-      <motion.div
-        variants={fadeIn({ direction: "up", delay: 0.2 })}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.15 }}
-        className="text-start mb-16 container-custom"
+      </div>
+      <div
+        id="channel"
+        // variants={fadeIn({ direction: "up", delay: 0.2 })}
+        // initial="hidden"
+        // whileInView="show"
+        // viewport={{ once: true, amount: 0.15 }}
+        className="text-start mb-16 pt-16 container-custom"
       >
         <h1
           className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}
@@ -216,13 +234,14 @@ const ClubPage = () => {
             />
           </div> */}
         </div>
-      </motion.div>
-      <motion.div
-        variants={fadeIn({ direction: "up", delay: 0.2 })}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.15 }}
-        className="text-start mb-16 py-16   bg-lovely container-custom text-creamey"
+      </div>
+      <div
+        id="partnerships"
+        // variants={fadeIn({ direction: "up", delay: 0.2 })}
+        // initial="hidden"
+        // whileInView="show"
+        // viewport={{ once: true, amount: 0.15 }}
+        className="text-start  py-16   bg-lovely container-custom text-creamey"
       >
         <h1
           className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}
@@ -267,13 +286,14 @@ const ClubPage = () => {
           </div>
 
         </div> */}
-      </motion.div>
-      <motion.div
-        variants={fadeIn({ direction: "up", delay: 0.2 })}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.15 }}
-        className="text-start mb-16 container-custom"
+      </div>
+      <div
+        id="support"
+        // variants={fadeIn({ direction: "up", delay: 0.2 })}
+        // initial="hidden"
+        // whileInView="show"
+        // viewport={{ once: true, amount: 0.15 }}
+        className="text-start pt-16 mb-16 container-custom"
       >
         <h1
           className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}
@@ -321,12 +341,12 @@ const ClubPage = () => {
             />
           </div>
         </div>
-      </motion.div>
-      <motion.div
-        variants={fadeIn({ direction: "up", delay: 0.2 })}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.15 }}
+      </div>
+      <div
+        // variants={fadeIn({ direction: "up", delay: 0.2 })}
+        // initial="hidden"
+        // whileInView="show"
+        // viewport={{ once: true, amount: 0.15 }}
         className="text-start mb-16 w-full container-custom"
       >
         <h1
@@ -340,7 +360,7 @@ const ClubPage = () => {
           You’re joining a full experience — made for brides, by a bride, to
           make sure you never feel lost, alone, or unsure again.{" "}
         </h2>
-      </motion.div>
+      </div>
 
       {/* <div className=" grid w-full lg:grid-cols-4 gap-4 md:gap-8 lg:gap-12  h-auto pt-16 pb-20 grid-cols-1 md:grid-cols-2 ">
 
