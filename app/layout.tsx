@@ -13,6 +13,7 @@ import UserProvider from "./UserProvider";
 import WishListProvider from "./WishListProvider";
 import { ModalProvider } from "./context/ModalContext";
 import ProductModal from "@/components/shop/ProductModal";
+import DiscountPopup from "@/components/DiscountPopup";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,6 +66,7 @@ export default function RootLayout({
                       <Footer />
                     </div>
                     <ProductModal />
+                    <DiscountPopup />
                     <Toaster />
                   </ModalProvider>
                 </WishListProvider>
