@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { thirdFont } from "@/fonts";
+import Image from "next/image";
 
 export interface Blog {
   _id: string;
@@ -261,8 +262,9 @@ const BlogListPage = () => {
                 className="bg-lovely/90 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {blog.featuredImage && (
-                  <div className="h-48 md:h-64 bg-gray-200">
-                    <img
+                  <div className="relative w-full aspect-video bg-gray-200">
+                    <Image
+                      fill
                       src={blog.featuredImage}
                       alt={blog.title}
                       className="w-full h-full object-cover"

@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { thirdFont } from "@/fonts";
+import Image from "next/image";
 
 interface Blog {
   _id: string;
@@ -148,10 +149,10 @@ const BlogDetailPage = () => {
             removed.
           </p>
           <Link
-            href="/blog"
+            href="/blogs"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
-            Back to Blog
+            Back to Blogs
           </Link>
         </div>
       </div>
@@ -168,8 +169,8 @@ const BlogDetailPage = () => {
               Home
             </Link>
             <span>/</span>
-            <Link href="/blog" className="hover:text-lovely hover:underline">
-              Blog
+            <Link href="/blogs" className="hover:text-lovely hover:underline">
+              Blogs
             </Link>
             <span>/</span>
             <span className="text-lovely">{blog.title}</span>
@@ -236,8 +237,9 @@ const BlogDetailPage = () => {
 
           {/* Featured Image */}
           {blog.featuredImage && (
-            <div className="mb-8">
-              <img
+            <div className="relative aspect-video w-full mb-8">
+              <Image
+                fill
                 src={blog.featuredImage}
                 alt={blog.title}
                 className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
@@ -282,8 +284,9 @@ const BlogDetailPage = () => {
                 <article key={relatedBlog._id} className="group">
                   <Link href={`/blog/${relatedBlog.slug}`}>
                     {relatedBlog.featuredImage && (
-                      <div className="mb-4">
-                        <img
+                      <div className="w-full aspect-video mb-4">
+                        <Image
+                          fill
                           src={relatedBlog.featuredImage}
                           alt={relatedBlog.title}
                           className="w-full h-40 object-cover rounded-lg group-hover:opacity-90 transition-opacity"
