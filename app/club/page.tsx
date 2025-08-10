@@ -100,9 +100,10 @@ const ClubPage = () => {
           />
         </div>
       </div>
-      {/* <div className="w-full">
+      <div className="w-full">
         <TimeLine />
-      </div> */}
+      </div>
+
       <motion.div
         variants={fadeIn({ direction: "up", delay: 0.2 })}
         initial="hidden"
