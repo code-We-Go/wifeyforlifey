@@ -31,17 +31,18 @@ export default function PlaylistPage() {
     const nextIndex = (currentIndex + 1) % playlist.videos.length;
     setCurrentIndex(nextIndex);
     const nextVideo = playlist.videos[nextIndex];
-    if (typeof nextVideo === 'object' && nextVideo !== null) {
+    if (typeof nextVideo === "object" && nextVideo !== null) {
       setSelectedVideo(nextVideo);
     }
   };
-  
+
   const prevVideo = () => {
     if (!playlist?.videos || playlist.videos.length === 0) return;
-    const prevIndex = (currentIndex - 1 + playlist.videos.length) % playlist.videos.length;
+    const prevIndex =
+      (currentIndex - 1 + playlist.videos.length) % playlist.videos.length;
     setCurrentIndex(prevIndex);
     const prevVideo = playlist.videos[prevIndex];
-    if (typeof prevVideo === 'object' && prevVideo !== null) {
+    if (typeof prevVideo === "object" && prevVideo !== null) {
       setSelectedVideo(prevVideo);
     }
   };
@@ -166,9 +167,13 @@ export default function PlaylistPage() {
 
   // Sync selectedVideo with currentIndex when playlist loads
   useEffect(() => {
-    if (playlist?.videos && playlist.videos.length > 0 && currentIndex < playlist.videos.length) {
+    if (
+      playlist?.videos &&
+      playlist.videos.length > 0 &&
+      currentIndex < playlist.videos.length
+    ) {
       const video = playlist.videos[currentIndex];
-      if (typeof video === 'object' && video !== null) {
+      if (typeof video === "object" && video !== null) {
         setSelectedVideo(video);
       }
     }
@@ -324,7 +329,7 @@ export default function PlaylistPage() {
             {selectedVideo ? (
               <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
                 {videoLocked ? (
-                  <div className=" aspect-video w-full h-full inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
+                  <div className=" aspect-video w-full h-full inset-0 flex flex-col items-center justify-center text-white p-1 sm:p-4 md:p-8 text-center">
                     {/* Thumbnail as background */}
                     {selectedVideo?.thumbnailUrl && (
                       <Image
@@ -341,11 +346,13 @@ export default function PlaylistPage() {
                     <div className="relative w-full z-20 justify-center flex flex-col items-center">
                       <Lock className="h-10 w-10 md:h-16 md:w-16 mb-1 md:mb-4 text-creamey" />
                       <h3 className="text-base md:text-xl font-medium mb-1 md:mb-4">
-                        Premium Content
+                        This video is exclusive to the Wifeys community!
                       </h3>
                       <p className="mb-1 text-xs md:text-base md:mb-4 max-w-md">
-                        This video is only available to premium subscribers.
-                        Subscribe now to unlock all our premium content.
+                        Subscribe now for planning hacks, vendor tips, expert
+                        advices, emotional support, and bridal tea 10x juicier
+                        than anything I’ve shared on TikTok in the last year and
+                        a half ✨.
                       </p>
                       <Button
                         onClick={() =>
@@ -363,38 +370,40 @@ export default function PlaylistPage() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <p>Loading video...</p>
                   </div>
-                                 ) : otp && playbackInfo ? (
-  <div 
-    className="relative"
-    onMouseEnter={handleVideoMouseEnter}
-    onMouseLeave={handleVideoMouseLeave}
-  >
-    <VdoPlayer
-      otp={otp}
-      playbackInfo={playbackInfo}
-      autoplay={currentIndex === 0 ? false : true}
-      muted={false}
-      volume={0.8}
-      onVideoEnd={handleVideoEnd}
-    />
-    {/* Navigation buttons - positioned to avoid video controls */}
-    <div className={`absolute top-[45%] left-4 right-4 flex justify-between items-center transition-opacity duration-300 pointer-events-none ${
-      isVideoHovered ? 'opacity-100 ' : 'opacity-0'
-    }`}>
-      <button 
-        onClick={prevVideo}
-        className="bg-black/50 hover:bg-lovely/90 text-white rounded-full px-3 py-1.5  transition-colors duration-200 pointer-events-auto text-sm"
-      >
-        ⏮ 
-      </button>
-      <button 
-        onClick={nextVideo}
-        className="bg-black/50 hover:bg-lovely/90 text-white px-3 py-1.5 rounded-full transition-colors duration-200 pointer-events-auto text-sm"
-      >
-         ⏭
-      </button>
-    </div>
-  </div>
+                ) : otp && playbackInfo ? (
+                  <div
+                    className="relative"
+                    onMouseEnter={handleVideoMouseEnter}
+                    onMouseLeave={handleVideoMouseLeave}
+                  >
+                    <VdoPlayer
+                      otp={otp}
+                      playbackInfo={playbackInfo}
+                      autoplay={currentIndex === 0 ? false : true}
+                      muted={false}
+                      volume={0.8}
+                      onVideoEnd={handleVideoEnd}
+                    />
+                    {/* Navigation buttons - positioned to avoid video controls */}
+                    <div
+                      className={`absolute top-[45%] left-4 right-4 flex justify-between items-center transition-opacity duration-300 pointer-events-none ${
+                        isVideoHovered ? "opacity-100 " : "opacity-0"
+                      }`}
+                    >
+                      <button
+                        onClick={prevVideo}
+                        className="bg-black/50 hover:bg-lovely/90 text-white rounded-full px-3 py-1.5  transition-colors duration-200 pointer-events-auto text-sm"
+                      >
+                        ⏮
+                      </button>
+                      <button
+                        onClick={nextVideo}
+                        className="bg-black/50 hover:bg-lovely/90 text-white px-3 py-1.5 rounded-full transition-colors duration-200 pointer-events-auto text-sm"
+                      >
+                        ⏭
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
                     <p>Unable to load video.</p>
@@ -464,13 +473,15 @@ export default function PlaylistPage() {
                           ? "bg-lovely text-creamey"
                           : "bg-pinkey text-lovely  hover:bg-lovely hover:text-creamey "
                       }`}
-                                             onClick={() => {
-                         const videoIndex = playlist.videos.findIndex((v: any) => v._id === video._id);
-                         if (videoIndex !== -1) {
-                           setCurrentIndex(videoIndex);
-                           setSelectedVideo(video);
-                         }
-                       }}
+                      onClick={() => {
+                        const videoIndex = playlist.videos.findIndex(
+                          (v: any) => v._id === video._id
+                        );
+                        if (videoIndex !== -1) {
+                          setCurrentIndex(videoIndex);
+                          setSelectedVideo(video);
+                        }
+                      }}
                     >
                       <div className="flex gap-3">
                         <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
