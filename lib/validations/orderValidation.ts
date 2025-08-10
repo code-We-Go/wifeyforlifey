@@ -8,6 +8,7 @@ function orderValidation(formData: any){
     city?: string;
     address?: string;
     phone?: string;
+    whatsAppNumber?: string;
   };
 
   // Initialize error object with the type
@@ -34,6 +35,10 @@ function orderValidation(formData: any){
 
   if (!formData.phone || !/^\+?\d+$/.test(formData.phone.trim())) {
     errors.phone = "Phone number is required.";
+  }
+  
+  if (!formData.whatsAppNumber || !/^\+?\d+$/.test(formData.whatsAppNumber.trim())) {
+    errors.whatsAppNumber = "WhatsApp number is required.";
   }
     
     return errors;

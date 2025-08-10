@@ -244,6 +244,7 @@ const SubscriptionPage = () => {
     city: "",
     cart: items,
     phone: "",
+    whatsAppNumber: "", // Added WhatsApp number field
     subscription: packageID,
     state: state,
     cash: payment,
@@ -266,6 +267,7 @@ const SubscriptionPage = () => {
     billingPostalZip: "",
     billingCity: "",
     billingPhone: "",
+    billingWhatsAppNumber: "", // Added billing WhatsApp number field
     subTotal: subTotal,
     // currency:country===65?'LE':'USD'
     currency: "LE",
@@ -310,6 +312,7 @@ const SubscriptionPage = () => {
         billingPostalZip: prevFormData.postalZip,
         billingCity: prevFormData.city,
         billingPhone: prevFormData.phone,
+        billingWhatsAppNumber: prevFormData.whatsAppNumber,
       }));
     }
   }, [useSameAsShipping]);
@@ -493,6 +496,7 @@ const SubscriptionPage = () => {
       formData.billingPostalZip = formData.postalZip;
       formData.billingCity = formData.city;
       formData.billingPhone = formData.phone;
+      formData.billingWhatsAppNumber = formData.whatsAppNumber;
     }
 
     // Add discount and loyalty info to payload
@@ -902,6 +906,29 @@ const SubscriptionPage = () => {
                 )}
               </div>
             </div>
+            <div className="flex w-full gap-2 items-center">
+              <label className="text-everGreen text-base whitespace-nowrap">
+                WhatsApp Number
+              </label>
+              <div className="flex w-full gap-1 flex-col">
+                <input
+                  onChange={handleInputChange}
+                  type="text"
+                  value={formData.whatsAppNumber}
+                  name="whatsAppNumber"
+                  className={`border ${
+                    formErrors.whatsAppNumber ? "border-red-500" : ""
+                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
+                />
+                {formErrors.whatsAppNumber ? (
+                  <p className="uppercase text-xs text-red-500">
+                    {formErrors.whatsAppNumber}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
 
             <div className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 text-nowrap">
               <div
@@ -1157,6 +1184,18 @@ const SubscriptionPage = () => {
                       useSameAsShipping ? formData.phone : formData.billingPhone
                     }
                     name="billingPhone"
+                    className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-everGreen">WhatsApp Number</label>
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={
+                      useSameAsShipping ? formData.whatsAppNumber : formData.billingWhatsAppNumber
+                    }
+                    name="billingWhatsAppNumber"
                     className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>

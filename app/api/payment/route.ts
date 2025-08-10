@@ -285,6 +285,34 @@ export async function POST(request: Request) {
           redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
           appliedDiscount: data.appliedDiscount,
           appliedDiscountAmount: data.appliedDiscountAmount,
+          // User information
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
+          whatsAppNumber: data.whatsAppNumber,
+          // Address information
+          country: data.country,
+          address: data.address,
+          apartment: data.apartment,
+          city: data.city,
+          state: data.state,
+          postalZip: data.postalZip,
+          // Billing information
+          billingCountry: data.billingCountry,
+          billingFirstName: data.billingFirstName,
+          billingLastName: data.billingLastName,
+          billingState: data.billingState,
+          billingAddress: data.billingAddress,
+          billingApartment: data.billingApartment,
+          billingPostalZip: data.billingPostalZip,
+          billingCity: data.billingCity,
+          billingPhone: data.billingPhone,
+          // Payment information
+          total: data.total,
+          subTotal: data.subTotal,
+          shipping: data.shipping,
+          currency: data.currency,
+          cash: data.cash,
         });
         // await ordersModel.create({
         //   email:data.email,

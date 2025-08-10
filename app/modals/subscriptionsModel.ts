@@ -17,10 +17,37 @@ const SubscriptionSchema = new Schema(
       ref: "discounts",
     },
     appliedDiscountAmount: { type: Number, required: false },
+    // User information
+    firstName: { type: String, required: false },
+    lastName: { type: String, required: false },
+    phone: { type: String, required: false },
+    whatsAppNumber: { type: String, required: false },
+    // Address information
+    country: { type: String, required: false },
+    address: { type: String, required: false },
+    apartment: { type: String, required: false },
+    city: { type: String, required: false },
+    state: { type: String, required: false },
+    postalZip: { type: String, required: false },
+    // Billing information
+    billingCountry: { type: String, required: false },
+    billingFirstName: { type: String, required: false },
+    billingLastName: { type: String, required: false },
+    billingState: { type: String, required: false },
+    billingAddress: { type: String, required: false },
+    billingApartment: { type: String, required: false },
+    billingPostalZip: { type: String, required: false },
+    billingCity: { type: String, required: false },
+    billingPhone: { type: String, required: false },
+    // Payment information
+    total: { type: Number, required: false },
+    subTotal: { type: Number, required: false },
+    shipping: { type: Number, required: false },
+    currency: { type: String, required: false },
     expiryDate: { type: Date, default: Date.now },
     createdAt: {
       type: Date,
-      default: Date.now, // 30 minutes in seconds
+      default: Date.now,
     },
   },
   { timestamps: true }
