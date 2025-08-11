@@ -1,12 +1,13 @@
 import React from "react";
 
-const AnnouncmentBar = () => {
+interface AnnouncmentBarProps {
+  announcementBar: string;
+}
+
+const AnnouncmentBar = ({ announcementBar }: AnnouncmentBarProps) => {
   return (
-    <div className=" bg-gray-creamey h-10 px-4 py-2 text-lovely">
-      <p className="text-center font-medium">
-        Lorem, ipsum dolor
-        {/* <a href="#" className="inline-block underline"> sit amet consectetur </a> */}
-      </p>
+    <div className="bg-pinkey flex justify-center items-center h-8 px-4 py-1 text-lovely">
+      <p className="text-center font-medium">{announcementBar}</p>
     </div>
   );
 };

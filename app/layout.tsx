@@ -14,6 +14,8 @@ import WishListProvider from "./WishListProvider";
 import { ModalProvider } from "./context/ModalContext";
 import ProductModal from "@/components/shop/ProductModal";
 import DiscountPopup from "@/components/DiscountPopup";
+import { AnnouncementProvider } from "../context/announcementContext";
+import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,16 +61,19 @@ export default function RootLayout({
             <UserProvider>
               <CartProvider>
                 <WishListProvider>
-                  <ModalProvider>
-                    <div className="relative flex min-h-screen flex-col">
-                      <Header />
-                      <main className="flex-1">{children}</main>
-                      <Footer />
-                    </div>
-                    <ProductModal />
-                    <DiscountPopup />
-                    <Toaster />
-                  </ModalProvider>
+                  <AnnouncementProvider>
+                    <ModalProvider>
+                      <div className="relative flex min-h-screen flex-col">
+                        <ConditionalAnnouncmentBar />
+                        <Header />
+                        <main className="flex-1">{children}</main>
+                        <Footer />
+                      </div>
+                      <ProductModal />
+                      <DiscountPopup />
+                      <Toaster />
+                    </ModalProvider>
+                  </AnnouncementProvider>
                 </WishListProvider>
               </CartProvider>
             </UserProvider>
@@ -78,3 +83,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+
