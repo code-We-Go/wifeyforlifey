@@ -160,10 +160,10 @@ const BlogDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-creamey">
+    <div className="min-h-screen bg-creamey container-custom">
       {/* Breadcrumb */}
       <div className=" border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="container-custom mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex items-center space-x-2 text-sm text-lovely/90">
             <Link href="/" className="hover:text-lovely hover:underline">
               Home
@@ -178,9 +178,9 @@ const BlogDetailPage = () => {
         </div>
       </div>
 
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <article className=" mx-auto   py-8">
         {/* Article Header */}
-        <header className="mb-8">
+        <header className="mb-8 flex flex-col items-center w-full justify-center">
           {/* Categories */}
           {blog.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
@@ -208,7 +208,7 @@ const BlogDetailPage = () => {
           </p>
 
           {/* Meta Information */}
-          <div className="flex flex-wrap items-center gap-6 text-sm text-lovely/80 mb-6">
+          <div className="flex flex-wrap  items-center gap-6 text-sm text-lovely/80 mb-6">
             {/* <div className="flex items-center">
               {blog.author.imageURL && (
                 <img
@@ -237,7 +237,7 @@ const BlogDetailPage = () => {
 
           {/* Featured Image */}
           {blog.featuredImage && (
-            <div className="relative aspect-video w-full mb-8">
+            <div className="max-w-3xl relative aspect-video w-full mb-8">
               <Image
                 fill
                 src={blog.featuredImage}
@@ -252,7 +252,13 @@ const BlogDetailPage = () => {
         <div className="bg-creamey text-lovely rounded-lg  p-8 mb-8">
           <div
             className="prose prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
+            // dangerouslySetInnerHTML={{ __html: blog.content }}
+            dangerouslySetInnerHTML={{
+              __html: blog.content.replace(
+                /<img /g,
+                '<img style="float:left;max-width:320px;margin:30px 16px 8px 0;display:inline-block;" '
+              ),
+            }}
           />
         </div>
 
