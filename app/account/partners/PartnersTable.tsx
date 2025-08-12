@@ -224,7 +224,7 @@ export default function PartnersTable() {
           <div className="p-2 border">{row.discount}</div>
           <div className="p-2 border">{row.finalPrice}</div>
           <div className="p-2 border">{row.code}</div>
-          <div className="p-2 border text-blue-600 underline">
+          <div className="p-2 border text-blue-600 underline break-words">
             {row.link ? (
               <a href={row.link} target="_blank" rel="noopener noreferrer">
                 {row.link}
