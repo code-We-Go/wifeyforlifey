@@ -1193,7 +1193,9 @@ const SubscriptionPage = () => {
                     onChange={handleInputChange}
                     type="text"
                     value={
-                      useSameAsShipping ? formData.whatsAppNumber : formData.billingWhatsAppNumber
+                      useSameAsShipping
+                        ? formData.whatsAppNumber
+                        : formData.billingWhatsAppNumber
                     }
                     name="billingWhatsAppNumber"
                     className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
@@ -1339,13 +1341,32 @@ const SubscriptionPage = () => {
                 </div>
               )}
               <div className="flex justify-between text-base">
-                <span>Shipping</span>
-                <span>
-                  {appliedDiscount?.calculationType === "FREE_SHIPPING"
-                    ? "0"
-                    : shipping}{" "}
-                  LE
-                </span>
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                  <>
+                    <span className="decoration-dashed line-through">
+                      Shipping
+                    </span>
+                    <span className="line-through">
+                      {(() => {
+                        // Calculate the real shipping before discount
+                        const realShipping = calculateShippingRate(
+                          countryID,
+                          state,
+                          states,
+                          countries,
+                          shippingZones
+                        );
+                        return realShipping;
+                      })()}{" "}
+                      LE
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span>Shipping</span>
+                    <span>{shipping} LE</span>
+                  </>
+                )}
               </div>
               <div className="flex justify-between font-bold mt-4 pt-4 border-t">
                 <span>Total</span>
