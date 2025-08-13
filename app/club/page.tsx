@@ -60,7 +60,7 @@ const ClubPage = () => {
   }, []);
 
   return (
-    <div className="relative   flex flex-col justify-start  items-center w-full py-16   overflow-x-hidden">
+    <div className="relative   flex flex-col justify-start  items-center w-full py-16   ">
       <motion.div
         variants={fadeIn({ direction: "up", delay: 0.2 })}
         initial="hidden"
@@ -78,14 +78,19 @@ const ClubPage = () => {
           {/* <span className={`${lifeyFont.className}`}>W</span><span style={{ transform: "scaleY(1.5)" }} className={`${wifeyFont.className} uppercase tracking-tighter font-light italic mr-1`}>ifey </span> Experience 💖 */}
         </h1>
         <p className="text-base md:text-lg text-lovely/95 mb-1">
-          More than just a planner — it&apos;s your full bridal-era support
-          system.
+          <span className="font-bold">More than just a planner </span> —
+          it&apos;s your full bridal-era support system.
         </p>
         <p className="text-base text-lovely/95 leading-relaxed">
-          Planning your wedding and building your home shouldn&apos;t feel
-          overwhelming or lonely. That&apos;s why Wifey for Lifey offers every
-          bride a personalized experience that guides, supports, and celebrates
-          you through every step — from confusion to confidence, from &quot;I
+          building your home shouldn&apos;t feel{" "}
+          <span className="font-bold">overwhelming</span> or{" "}
+          <span className="font-bold">lonely</span>. That&apos;s why Wifey for
+          Lifey offers every bride a personalized experience that{" "}
+          <span className="font-bold">guides</span>,
+          <span className="font-bold"> supports</span>, and
+          <span className="font-bold">celebrates</span> you through every step —
+          from <span className="font-bold">confusion</span> to
+          <span className="font-bold"> confidence</span>, from &quot;I
           don&apos;t know where to start&quot; to &quot;I&apos;ve got
           this!&quot;
         </p>
@@ -102,7 +107,7 @@ const ClubPage = () => {
         </div>
       </div>
       <div className="w-full  text-center text-lovely mt-10 md:mt-24">
-        <div className="flex flex-col items-center justify-center gap-2">
+        <div className="flex flex-col items-center container-custom justify-center gap-2">
           <h2 className={`${lifeyFont.className} mx-1 font-bold`}>
             The Wifey Experience
           </h2>
@@ -150,19 +155,20 @@ const ClubPage = () => {
         >
           Step 1 — Gehaz Bestie Planner{" "}
         </h1>
-        <h4
-          className={`${thirdFont.className} tracking-wider text-lg md:text-2xl font-semibold mb-2 text-creamey`}
-        >
-          We know you’re overwhelmed — endless lists, conflicting advice, and
-          not knowing where to start can make planning your gehaz stressful
+        <p className={`  text-lg md:text-xl  mb-2 text-creamey`}>
+          We know you’re <span className="font-bold"> overwhelmed</span> —
+          endless lists, <span className="font-bold">conflicting advice</span>,
+          and not knowing where to start can make planning your gehaz{" "}
+          <span className="font-bold">stressful</span>
           instead of exciting.{" "}
-        </h4>
-        <h4
-          className={`${thirdFont.className} tracking-wider text-lg md:text-2xl font-bold mb-2 text-creamey`}
-        >
-          That’s why we created the Gehaz Bestie Planner — your lifelong,
-          organized, and easy-to-follow guide that takes you through:{" "}
-        </h4>
+        </p>
+        <p className={`  text-lg md:text-xl  mb-2 text-creamey`}>
+          That’s why we created the{" "}
+          <span className="font-bold"> Gehaz Bestie Planner </span>— your
+          lifelong,
+          <span className="font-bold"> organized</span>, and easy-to-follow
+          guide that takes you through:{" "}
+        </p>
         <p className="text-base md:text-lg text-creamey/95 mb-2">
           <span className="block">- Every room in your home</span>
           <span className="block">
@@ -216,23 +222,26 @@ const ClubPage = () => {
         >
           Step 2: Exclusive Gehaz Educational Channel
         </h1>
-        <h2
-          className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-2 text-lovely`}
-        >
-          We know you’re staring at hundreds of options — “Should I get a
-          granite or stainless steel cookware set? Is this fabric even good
-          quality?” Google searches only make it more confusing.
-        </h2>
-        <p className="text-base md:text-lg text-lovely/95 mb-2">
-          That&apos;s why we created The Gehaz Educational Channel
+        <p className={`  text-lg md:text-xl  mb-2 text-lovely`}>
+          We know you’re staring at hundreds of options —{" "}
+          <span className="font-bold">“Should I </span>get a granite or
+          stainless steel cookware set? Is this fabric even good quality?”
+          Google searches only make it more{" "}
+          <span className="font-bold">confusing</span>.
+        </p>
+        <p className={`  text-lg md:text-xl  mb-2 text-lovely`}>
+          That&apos;s why we created{" "}
+          <span className="font-bold"> The Gehaz Educational Channel</span>
         </p>
         <ul className="text-base md:text-lg text-lovely/95 mb-2 list-disc pl-6">
           <li>
             Explains the different types of product available in the market
           </li>
           <li>
-            Gives you clear, visual, bite-sized answers so you can make
-            decisions without second-guessing
+            Gives you <span className="font-bold">clear</span>,{" "}
+            <span className="font-bold">visual</span>,{" "}
+            <span className="font-bold">bite-sized answers</span> so you can
+            make decisions without second-guessing
           </li>
           <li>Real-bride demos so you see how products work in real life</li>
           <li>
@@ -258,21 +267,22 @@ const ClubPage = () => {
       </div>
       <div
         id="partnerships"
-        className="text-start py-16 bg-lovely container-custom  text-creamey"
+        className="text-start py-16 w-full bg-lovely container-custom  text-creamey"
       >
         <h1
           className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-creamey`}
         >
           Step 3 — Partnerships & Perks
         </h1>
-        <h2
-          className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-creamey`}
-        >
-          We know it’s easy to feel lost — too many brands, pushy salespeople,
-          and the fear of buying something you’ll regret.
-        </h2>
-        <p className="text-base md:text-lg text-creamey/95 mb-2">
-          That’s why we built our Partnerships & Perks program
+        <p className={`  text-lg md:text-xl  mb-2 text-creamey`}>
+          We know it’s easy to feel <span className="font-bold">lost</span> —
+          <span className="font-bold">too many brands</span>,
+          <span className="font-bold"> pushy salespeople</span>, and the fear of
+          buying something you’ll regret.
+        </p>
+        <p className={`  text-lg md:text-xl  mb-2 text-creamey`}>
+          That’s why we built our{" "}
+          <span className="font-bold"> Partnerships & Perks program</span>
         </p>
         <h3
           className={`${thirdFont.className} mt-4 mb-2 font-semibold tracking-wider text-base md:text-xl`}
@@ -296,15 +306,21 @@ const ClubPage = () => {
         <h1
           className={`${thirdFont.className} tracking-normal text-xl md:text-3xl font-bold mb-6 text-lovely`}
         >
-          We know the bridal journey can feel lonely — the stress, pressure, and
-          questions you can&apos;t always share with family or friends.
+          Step 4 : Support Group{" "}
         </h1>
-        <h2
-          className={`${thirdFont.className} tracking-normal text-lg md:text-2xl font-bold mb-6 text-lovely`}
-        >
+        <p className={`  text-lg md:text-xl  mb-2 text-lovely`}>
+          We know the bridal journey can feel{" "}
+          <span className="font-bold">lonely </span>— the{" "}
+          <span className="font-bold">stress</span>,{" "}
+          <span className="font-bold">pressure</span>, and questions you
+          can&apos;t always share with family or friends.
+        </p>
+        <p className={`  text-lg md:text-xl  mb-2 text-lovely`}>
           That&apos;s why we created the Wifey Support Circle — your safe space
-          to be supported, celebrated, and understood:
-        </h2>
+          to be <span className="font-bold">supported</span>,
+          <span className="font-bold"> celebrated </span>, and
+          <span className="font-bold"> understood </span>.
+        </p>
         <ul className="text-base md:text-lg text-lovely/95 mb-2 list-disc pl-6">
           <li>
             Private WhatsApp community where brides and Wifey&apos;s trusted
