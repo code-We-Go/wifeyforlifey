@@ -70,11 +70,11 @@
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus,
   select:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0px 1000px #FBF3E0 inset !important;
-    box-shadow: 0 0 0px 1000px #FBF3E0 inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #fbf3e0 inset !important;
+    box-shadow: 0 0 0px 1000px #fbf3e0 inset !important;
     -webkit-text-fill-color: #000 !important;
   }
-  
+
   /* .dark {
     --background: 323 30% 10%;
     --foreground: 0 0% 98%;
@@ -138,9 +138,21 @@
 
 @layer components {
   .container-custom {
-    @apply   px-4 md:px-6 xl:px-12;
+    @apply px-4 md:px-6 xl:px-12;
   }
 
+  .blog-content img {
+    float: left;
+    max-width: 320px;
+    margin: 30px 16px 8px 0;
+    display: block;
+    padding-bottom: 100px;
+  }
+
+  .blog-content div {
+    display: inline;
+    margin-bottom: 50px;
+  }
 
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 py-2 font-medium transition-all duration-200;
@@ -190,7 +202,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D32333;
+  background: #d32333;
   border-radius: 10px;
   border: 2px solid hsl(var(--background-color));
   transition: all 0.3s ease;
@@ -208,13 +220,13 @@
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: auto;
-  scrollbar-color: #D32333 hsl(var(--background-color));
+  scrollbar-color: #d32333 hsl(var(--background-color));
 }
 
 /* For specific elements that should have custom scrollbars */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #D32333 hsl(var(--background-color));
+  scrollbar-color: #d32333 hsl(var(--background-color));
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -227,7 +239,7 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #D32333;
+  background: #d32333;
   border-radius: 8px;
   border: 1px solid hsl(var(--background-color));
 }
@@ -238,15 +250,15 @@
 
 /* Hide scrollbar but keep scrolling functionality */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
+  display: none; /* Safari and Chrome */
 }
 
 input::placeholder {
-  color: #81C8BB;
+  color: #81c8bb;
 }
 
 .animation-pause {
