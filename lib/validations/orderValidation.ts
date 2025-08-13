@@ -1,6 +1,5 @@
-function orderValidation(formData: any){
-
-   type ErrorType = {
+function orderValidation(formData: any) {
+  type ErrorType = {
     firstName?: string;
     lastName?: string;
     email?: string;
@@ -18,10 +17,10 @@ function orderValidation(formData: any){
     errors.email = "Please enter a valid email address.";
   }
   if (!formData.firstName.trim()) {
-    errors.firstName = "First name is required.";
+    errors.firstName = "Beautiful Bride First Name is required.";
   }
   if (!formData.lastName.trim()) {
-    errors.lastName = "Last name is required.";
+    errors.lastName = "Beautiful Bride Last Name is required.";
   }
   if (!formData.address.trim()) {
     errors.address = "Address is required.";
@@ -36,14 +35,15 @@ function orderValidation(formData: any){
   if (!formData.phone || !/^\+?\d+$/.test(formData.phone.trim())) {
     errors.phone = "Phone number is required.";
   }
-  
-  if (!formData.whatsAppNumber || !/^\+?\d+$/.test(formData.whatsAppNumber.trim())) {
+
+  if (
+    !formData.whatsAppNumber ||
+    !/^\+?\d+$/.test(formData.whatsAppNumber.trim())
+  ) {
     errors.whatsAppNumber = "WhatsApp number is required.";
   }
-    
-    return errors;
-    
-    
-    }
-    
-    export default orderValidation ;
+
+  return errors;
+}
+
+export default orderValidation;

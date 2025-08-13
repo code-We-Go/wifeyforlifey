@@ -734,11 +734,11 @@ const CheckoutClientPage = () => {
                 </select>
               )}
             </div>
-            <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
-              <div className="flex flex-col gap-2 w-full md:w-2/4">
+            <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
+              <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-everGreen whitespace-nowrap text-base">
-                    First name
+                    Beautiful Bride First Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -761,10 +761,10 @@ const CheckoutClientPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 w-full md:w-2/4">
+              <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-everGreen text-base whitespace-nowrap">
-                    Last name
+                    Beautiful Bride Last Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -789,7 +789,7 @@ const CheckoutClientPage = () => {
             </div>
             <div className="flex gap-2 w-full items-center">
               <label className="text-everGreen text-base whitespace-nowrap">
-                Address
+                Lovely Bride&apos;s address
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
@@ -1079,7 +1079,9 @@ const CheckoutClientPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 w-full">
-                  <label className="text-everGreen">Address</label>
+                  <label className="text-everGreen">
+                    Lovely Bride&apos;s address
+                  </label>
                   <input
                     type="text"
                     onChange={handleInputChange}

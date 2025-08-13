@@ -25,6 +25,7 @@ import { VideoPlaylist } from "../interfaces/interfaces";
 import VideoCard from "@/components/playlists/VideoCard";
 import OurPartnersExp from "@/components/sections/OurPartnersExp";
 import { TimeLine } from "./components/TimeLine";
+import FAQ from "./components/FAQ";
 
 const OPTIONS: EmblaOptionsType = { loop: true };
 
@@ -100,14 +101,30 @@ const ClubPage = () => {
           />
         </div>
       </div>
-      <div className="w-full text-center text-lovely mt-10 md:mt-24">
-        <h2 className={`${lifeyFont.className} mx-1 font-bold`}>
-          The Wifey Experience
-        </h2>
+      <div className="w-full  text-center text-lovely mt-10 md:mt-24">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <h2 className={`${lifeyFont.className} mx-1 font-bold`}>
+            The Wifey Experience
+          </h2>
 
-        <h6 className="text-lovely/90 mt-2">
-          Introducing the first bridal full experience by WIFEY FOR LIFEY.
-        </h6>
+          <h6 className="text-lovely/90 mt-2">
+            Here’s what you get when you’re part of the Wifey’s community{" "}
+          </h6>
+          <h6 className="text-lovely/90 mt-2 text-center">
+            Here’s what happens when you subscribe:{" "}
+          </h6>
+          <p className="text-lovely/90 mt-1 max-w-lg">
+            ✨ You’ll unlock 1 full year of access to The Wifey Experience — our
+            exclusive digital channel, partner discounts, and support circle
+            where brides and experts are just a message away.{" "}
+          </p>
+          <p className="text-lovely/90 mt-1 max-w-lg">
+            ✨ Plus, you’ll receive your Gehaz Bestie Planner — a beautiful
+            keepsake that’s yours for a lifetime, guiding you through every
+            section of your home (see the Shipping Details section for delivery
+            info){" "}
+          </p>
+        </div>
         <TimeLine />
         <Button
           asChild
@@ -400,6 +417,7 @@ const ClubPage = () => {
           </Button>
         </div>
       </MotionSection>
+      <FAQ />
     </div>
   );
 };

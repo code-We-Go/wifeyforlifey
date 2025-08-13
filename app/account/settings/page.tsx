@@ -1,4 +1,4 @@
-import { Bell, Lock, CreditCard, Globe } from 'lucide-react';
+import { Bell, Lock, CreditCard, Globe } from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -23,7 +23,7 @@ export default function SettingsPage() {
                   htmlFor="first-name"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  First name
+                  Beautiful Bride First Name
                 </label>
                 <div className="mt-1">
                   <input
@@ -40,7 +40,7 @@ export default function SettingsPage() {
                   htmlFor="last-name"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Last name
+                  Beautiful Bride Last Name
                 </label>
                 <div className="mt-1">
                   <input
@@ -232,4 +232,4 @@ export default function SettingsPage() {
       </div>
     </div>
   );
-} 
+}

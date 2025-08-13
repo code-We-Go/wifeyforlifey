@@ -710,11 +710,11 @@ const SubscriptionPage = () => {
                 </select>
               )}
             </div>
-            <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
-              <div className="flex flex-col gap-2 w-full md:w-2/4">
+            <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
+              <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-everGreen whitespace-nowrap text-base">
-                    First name
+                    Beautiful Bride First Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -737,10 +737,10 @@ const SubscriptionPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 w-full md:w-2/4">
+              <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-everGreen text-base whitespace-nowrap">
-                    Last name
+                    Beautiful Bride Last Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -765,7 +765,7 @@ const SubscriptionPage = () => {
             </div>
             <div className="flex gap-2 w-full items-center">
               <label className="text-everGreen text-base whitespace-nowrap">
-                Address
+                Lovely Bride&apos;s address
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
@@ -929,6 +929,23 @@ const SubscriptionPage = () => {
                 )}
               </div>
             </div>
+            <div className="flex items-center gap-1 text-xs text-everGreen/80">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-everGreen/80"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                />
+              </svg>
+              to send your private community invite
+            </div>
 
             <div className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 text-nowrap">
               <div
@@ -1079,7 +1096,9 @@ const SubscriptionPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 w-full">
-                  <label className="text-everGreen">Address</label>
+                  <label className="text-everGreen">
+                    Lovely Bride&apos;s address
+                  </label>
                   <input
                     type="text"
                     onChange={handleInputChange}

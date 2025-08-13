@@ -22,7 +22,7 @@ const SubscriptionSchema = new Schema(
     lastName: { type: String, required: false },
     phone: { type: String, required: false },
     whatsAppNumber: { type: String, required: false },
-    // Address information
+    // Lovely Bride's address information
     country: { type: String, required: false },
     address: { type: String, required: false },
     apartment: { type: String, required: false },
