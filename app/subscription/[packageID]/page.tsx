@@ -1293,22 +1293,23 @@ const SubscriptionPage = () => {
                 />
               </div>
               <h2
-                className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey my-2`}
+                className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey  my-4 mt-6`}
               >
-                {packageData.name}
+                ✨ You’re One Click Away From getting :
+                {/* {packageData.name} */}
               </h2>
-              <ul className="list-disc w-full items-start justify-start list-inside text-left text-base md:text-lg tracking-wide text-creamey/95">
+              <ul className="list-disc w-full px-2 md:px-4 space-y-4 items-start justify-start list-outside text-left text-base md:text-lg tracking-wider text-creamey/95">
                 {packageData.items.map((item: string, idx: number) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
               <div className="flex justify-start gap-4 tracking-wider mt-4 ">
                 <span className="text-lg   text-creamey">
-                  subscription fee :
+                  💡 Wifey Experience Membership (subscription 2,500 EGP){" "}
                 </span>
-                <span className="text-lg  text-creamey">
+                {/* <span className="text-lg  text-creamey">
                   {packageData.price} LE (yearly)
-                </span>
+                </span> */}
                 {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
               </div>
               <div className="flex flex-col justify-start items-start w-full font-thin gap-2 tracking-wider mt-2 mb-2">
@@ -1362,9 +1363,7 @@ const SubscriptionPage = () => {
               <div className="flex justify-between text-base">
                 {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
                   <>
-                    <span className="decoration-dashed line-through">
-                      Shipping
-                    </span>
+                    <span className=" line-through">Shipping</span>
                     <span className="line-through">
                       {(() => {
                         // Calculate the real shipping before discount

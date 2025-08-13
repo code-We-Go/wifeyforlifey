@@ -1351,22 +1351,43 @@ const CheckoutClientPage = () => {
                   <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>
-                      -{discountAmount} LE
                       {appliedDiscount.calculationType === "FREE_SHIPPING"
-                        ? " (Free Shipping)"
-                        : ""}
+                        ? `-${shipping} LE (Free Shipping)`
+                        : `-${
+                            appliedDiscount.calculationType === "PERCENTAGE"
+                              ? Math.round(
+                                  (subTotal * appliedDiscount.value) / 100
+                                )
+                              : appliedDiscount.value
+                          } LE`}
                     </span>
                   </div>
                 )}
-                {/* {redeemPoints > 0 && <div>{redeemPoints}</div>} */}
                 <div className="flex justify-between text-base">
-                  <span>Shipping</span>
-                  <span>
-                    {appliedDiscount?.calculationType === "FREE_SHIPPING"
-                      ? "0"
-                      : shipping}{" "}
-                    LE
-                  </span>
+                  {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                    <>
+                      <span className=" line-through">Shipping</span>
+                      <span className="line-through">
+                        {(() => {
+                          // Calculate the real shipping before discount
+                          const realShipping = calculateShippingRate(
+                            countryID,
+                            state,
+                            states,
+                            countries,
+                            shippingZones
+                          );
+                          return realShipping;
+                        })()}{" "}
+                        LE
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Shipping</span>
+                      <span>{shipping} LE</span>
+                    </>
+                  )}
                 </div>
                 <div className="flex justify-between font-bold mt-4 pt-4 border-t">
                   <span>Total</span>
