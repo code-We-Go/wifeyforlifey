@@ -82,14 +82,14 @@ const ClubPage = () => {
           it&apos;s your full bridal-era support system.
         </p>
         <p className="text-base text-lovely/95 leading-relaxed">
-          building your home shouldn&apos;t feel{" "}
+          Building your home shouldn&apos;t feel{" "}
           <span className="font-bold">overwhelming</span> or{" "}
           <span className="font-bold">lonely</span>. That&apos;s why Wifey for
           Lifey offers every bride a personalized experience that{" "}
           <span className="font-bold">guides</span>,
           <span className="font-bold"> supports</span>, and
-          <span className="font-bold">celebrates</span> you through every step —
-          from <span className="font-bold">confusion</span> to
+          <span className="font-bold"> celebrates</span> you through every step
+          — from <span className="font-bold">confusion</span> to
           <span className="font-bold"> confidence</span>, from &quot;I
           don&apos;t know where to start&quot; to &quot;I&apos;ve got
           this!&quot;
@@ -115,9 +115,7 @@ const ClubPage = () => {
           <h6 className="text-lovely/90 mt-2">
             Here’s what you get when you’re part of the Wifey’s community{" "}
           </h6>
-          <h6 className="text-lovely/90 mt-2 text-center">
-            Here’s what happens when you subscribe:{" "}
-          </h6>
+
           <p className="text-lovely/90 mt-1 max-w-lg">
             ✨ You’ll unlock 1 full year of access to The Wifey Experience — our
             exclusive digital channel, partner discounts, and support circle
@@ -223,13 +221,13 @@ const ClubPage = () => {
           Step 2: Exclusive Gehaz Educational Channel
         </h1>
         <p className={`  text-lg md:text-xl  mb-2 text-lovely`}>
-          We know you’re staring at hundreds of options —{" "}
-          <span className="font-bold">“Should I </span>get a granite or
-          stainless steel cookware set? Is this fabric even good quality?”
-          Google searches only make it more{" "}
+          We know you’re staring at hundreds of options — Should I get a{" "}
+          <span className="font-bold">granite </span>or
+          <span className="font-bold">stainless steel</span> cookware set? Is
+          this fabric even good quality?” Google searches only make it more{" "}
           <span className="font-bold">confusing</span>.
         </p>
-        <p className={`  text-lg md:text-xl  mb-2 text-lovely`}>
+        <p className={`  text-lg md:text-xl  my-2 text-lovely`}>
           That&apos;s why we created{" "}
           <span className="font-bold"> The Gehaz Educational Channel</span>
         </p>
@@ -245,8 +243,9 @@ const ClubPage = () => {
           </li>
           <li>Real-bride demos so you see how products work in real life</li>
           <li>
-            Interviews with industry experts (designers, appliances experts)
-            sharing insider tips on what’s worth your money
+            <span className="font-bold"> Interviews with industry experts</span>{" "}
+            (designers, appliances experts) sharing insider tips on what’s worth
+            your money
           </li>
         </ul>
         <div className="grid grid-cols-1 gap-4 mt-8">

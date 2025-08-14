@@ -634,10 +634,10 @@ const SubscriptionPage = () => {
   return (
     // cart.length > 0 ?
     <div
-      className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}
+      className={`relative  container-custom  py-8 md:py-12 justify-between text-lovely min-h-screen  bg-creamey  flex flex-col `}
     >
       <h1
-        className={`${thirdFont.className} tracking-normal text-2xl text-everGreen md:text-4xl mb-4 md:mb-8  font-semibold`}
+        className={`${thirdFont.className} tracking-normal text-2xl text-lovely md:text-4xl mb-4 md:mb-8  font-semibold`}
       >
         Subscription
       </h1>
@@ -654,7 +654,7 @@ const SubscriptionPage = () => {
               contact
             </div>
             <div className="flex  items-center gap-2 w-full ">
-              <label className="text-everGreen text-base">Email</label>
+              <label className="text-lovely text-base">Email</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -663,7 +663,7 @@ const SubscriptionPage = () => {
                   type="email"
                   className={`border ${
                     formErrors.email ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl  px-2 text-base`}
+                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl  px-2 text-base`}
                 />
                 {formErrors.email ? (
                   <p className="uppercase text-xs text-red-500">
@@ -688,7 +688,7 @@ const SubscriptionPage = () => {
                   name="country"
                   disabled
                   value={countryID}
-                  className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
                 >
                   {countries.map((country: any, index: number) => {
                     return (
@@ -703,7 +703,7 @@ const SubscriptionPage = () => {
                   onChange={handleInputChange}
                   name="country"
                   value={formData.country}
-                  className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
                 >
                   <option value="EG">EGYPT</option>
                   <option value="SA">SAUDI ARABIA</option>
@@ -713,7 +713,7 @@ const SubscriptionPage = () => {
             <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen whitespace-nowrap text-base">
+                  <label className="text-lovely whitespace-nowrap text-base">
                     Beautiful Bride First Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -724,7 +724,7 @@ const SubscriptionPage = () => {
                       type="text"
                       className={`border ${
                         formErrors.firstName ? "border-red-500" : ""
-                      } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
+                      } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
                     />
 
                     {formErrors.firstName ? (
@@ -739,7 +739,7 @@ const SubscriptionPage = () => {
               </div>
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-base whitespace-nowrap">
+                  <label className="text-lovely text-base whitespace-nowrap">
                     Beautiful Bride Last Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -750,7 +750,7 @@ const SubscriptionPage = () => {
                       type="text"
                       className={`border ${
                         formErrors.lastName ? "border-red-500" : ""
-                      } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
+                      } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
                     />
                     {formErrors.lastName ? (
                       <p className="uppercase text-xs text-red-500">
@@ -764,7 +764,7 @@ const SubscriptionPage = () => {
               </div>
             </div>
             <div className="flex gap-2 w-full items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Lovely Bride&apos;s address
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -775,7 +775,7 @@ const SubscriptionPage = () => {
                   value={formData.address}
                   className={`border ${
                     formErrors.address ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
+                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
                 />
 
                 {formErrors.address ? (
@@ -788,7 +788,7 @@ const SubscriptionPage = () => {
               </div>
             </div>
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Apartment,Suite etc. (Optional)
               </label>
               <input
@@ -796,13 +796,13 @@ const SubscriptionPage = () => {
                 name="apartment"
                 value={formData.apartment}
                 type="text"
-                className="border w-full h-10 bg-creamey border-everGreen  rounded-2xl py-2 px-2 text-base"
+                className="border w-full h-10 bg-creamey border-pinkey  rounded-2xl py-2 px-2 text-base"
               />
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen text-base whitespace-nowrap">
+                  <label className="text-lovely text-base whitespace-nowrap">
                     Postal/Zip code
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -814,7 +814,7 @@ const SubscriptionPage = () => {
                       type="text"
                       className={`${
                         formErrors.postalZip ? "border-red-500" : ""
-                      } border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2  px-2 text-base`}
+                      } border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2  px-2 text-base`}
                     />
                     {formErrors.postalZip ? (
                       <p className="uppercase text-xs text-red-500">
@@ -829,7 +829,7 @@ const SubscriptionPage = () => {
 
               <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-base whitespace-nowrap">
+                  <label className="text-lovely text-base whitespace-nowrap">
                     City
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -838,7 +838,7 @@ const SubscriptionPage = () => {
                       name="city"
                       value={formData.city}
                       type="text"
-                      className={`border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base ${
+                      className={`border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base ${
                         formErrors.city ? "border-red-500" : ""
                       }`}
                     />
@@ -855,7 +855,7 @@ const SubscriptionPage = () => {
             </div>
 
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Governate
               </label>
               {countryID === 65 ? (
@@ -863,7 +863,7 @@ const SubscriptionPage = () => {
                   onChange={handleStateChange}
                   name="state"
                   value={formData.state}
-                  className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
+                  className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
                 >
                   {states.map((state: any, index: number) => {
                     return (
@@ -879,12 +879,12 @@ const SubscriptionPage = () => {
                   value={formData.state}
                   name="state"
                   type="text"
-                  className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                  className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                 />
               )}
             </div>
             <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Phone
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -895,7 +895,7 @@ const SubscriptionPage = () => {
                   name="phone"
                   className={`border ${
                     formErrors.phone ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
+                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
                 />
                 {formErrors.phone ? (
                   <p className="uppercase text-xs text-red-500">
@@ -907,7 +907,7 @@ const SubscriptionPage = () => {
               </div>
             </div>
             <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 WhatsApp Number
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -918,7 +918,7 @@ const SubscriptionPage = () => {
                   name="whatsAppNumber"
                   className={`border ${
                     formErrors.whatsAppNumber ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base`}
+                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
                 />
                 {formErrors.whatsAppNumber ? (
                   <p className="uppercase text-xs text-red-500">
@@ -929,10 +929,10 @@ const SubscriptionPage = () => {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-1 text-xs text-everGreen/80">
+            <div className="flex items-center gap-1 text-xs text-lovely/80">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-everGreen/80"
+                className="h-4 w-4 text-lovely/80"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1043,7 +1043,7 @@ const SubscriptionPage = () => {
                       }
                       name="billingCountry"
                       value={billingCountry}
-                      className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
+                      className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
                     >
                       {countries.map((country: any, index: number) => {
                         return (
@@ -1058,7 +1058,7 @@ const SubscriptionPage = () => {
                       onChange={handleInputChange}
                       name="billingCountry"
                       value={formData.billingCountry}
-                      className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
+                      className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
                     >
                       {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
@@ -1067,7 +1067,7 @@ const SubscriptionPage = () => {
                 </div>
                 <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
                   <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-everGreen">First Name</label>
+                    <label className="text-lovely">First Name</label>
                     <input
                       onChange={handleInputChange}
                       name="billingFirstName"
@@ -1077,11 +1077,11 @@ const SubscriptionPage = () => {
                           : formData.billingFirstName
                       }
                       type="text"
-                      className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                   <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-everGreen">Last Name</label>
+                    <label className="text-lovely">Last Name</label>
                     <input
                       name="billingLastName"
                       onChange={handleInputChange}
@@ -1091,12 +1091,12 @@ const SubscriptionPage = () => {
                           : formData.billingLastName
                       }
                       type="text"
-                      className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
                 <div className="flex gap-2 w-full">
-                  <label className="text-everGreen">
+                  <label className="text-lovely">
                     Lovely Bride&apos;s address
                   </label>
                   <input
@@ -1108,11 +1108,11 @@ const SubscriptionPage = () => {
                         ? formData.address
                         : formData.billingAddress
                     }
-                    className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full  gap-2 items-center">
-                  <label className="text-everGreen text-nowrap">
+                  <label className="text-lovely text-nowrap">
                     Apartment,Suite ETC. (Optional)
                   </label>
                   <input
@@ -1124,12 +1124,12 @@ const SubscriptionPage = () => {
                         : formData.billingApartment
                     }
                     type="text"
-                    className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full gap-2">
                   <div className="flex w-full gap-2 md:w-3/5 items-center">
-                    <label className="text-everGreen">
+                    <label className="text-lovely">
                       Postal/Zip code (Optional)
                     </label>
                     <input
@@ -1141,12 +1141,12 @@ const SubscriptionPage = () => {
                       }
                       name="billingPostalZip"
                       type="text"
-                      className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2  px-2 text-base"
+                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2  px-2 text-base"
                     />
                   </div>
 
                   <div className="flex w-full  md:w-2/5 gap-2 items-center">
-                    <label className="text-everGreen">City</label>
+                    <label className="text-lovely">City</label>
                     <input
                       onChange={handleInputChange}
                       name="billingCity"
@@ -1154,13 +1154,13 @@ const SubscriptionPage = () => {
                         useSameAsShipping ? formData.city : formData.billingCity
                       }
                       type="text"
-                      className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
 
                 <div className="flex w-full  gap-2 items-center">
-                  <label className="text-everGreen">Governate</label>
+                  <label className="text-lovely">Governate</label>
                   {billingCountry === 65 ? (
                     <select
                       onChange={handleInputChange}
@@ -1170,7 +1170,7 @@ const SubscriptionPage = () => {
                           ? formData.state
                           : formData.billingState
                       }
-                      className="px-2 text-base h-10 w-full bg-creamey border-everGreen border rounded-2xl py-2"
+                      className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
                     >
                       {states.map((state: any, index: number) => {
                         return (
@@ -1190,12 +1190,12 @@ const SubscriptionPage = () => {
                       }
                       name="billingState"
                       type="text"
-                      className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   )}
                 </div>
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen">Phone</label>
+                  <label className="text-lovely">Phone</label>
                   <input
                     onChange={handleInputChange}
                     type="text"
@@ -1203,11 +1203,11 @@ const SubscriptionPage = () => {
                       useSameAsShipping ? formData.phone : formData.billingPhone
                     }
                     name="billingPhone"
-                    className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen">WhatsApp Number</label>
+                  <label className="text-lovely">WhatsApp Number</label>
                   <input
                     onChange={handleInputChange}
                     type="text"
@@ -1217,7 +1217,7 @@ const SubscriptionPage = () => {
                         : formData.billingWhatsAppNumber
                     }
                     name="billingWhatsAppNumber"
-                    className="border w-full h-10 bg-creamey border-everGreen border rounded-2xl py-2 px-2 text-base"
+                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
               </div>
@@ -1242,13 +1242,13 @@ const SubscriptionPage = () => {
                   id="accept-terms"
                   checked={acceptedTerms}
                   onChange={() => setAcceptedTerms(!acceptedTerms)}
-                  className="peer appearance-none bg-creamey checked:bg-everGreen border border-everGreen w-4 h-4 rounded transition-colors flex-shrink-0"
+                  className="peer appearance-none bg-creamey checked:bg-everGreen border border-pinkey w-4 h-4 rounded transition-colors flex-shrink-0"
                 />
                 <span className="absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs pointer-events-none peer-checked:opacity-100 opacity-0">
                   ✔
                 </span>
               </label>
-              <span className="pl-2 text-everGreen text-base">
+              <span className="pl-2 text-lovely text-base">
                 By checking, you agree to the{" "}
                 <Link
                   href="/policies?terms-and-conditions"
@@ -1280,7 +1280,7 @@ const SubscriptionPage = () => {
 
         <div className="block lg:col-span-3 relative w-full md:w-2/7 py-1">
           <div
-            className={`${thirdFont.className} md:border-l-2 sticky top-4 w-full border-lovely md:pl-6 shadow-sm h-fit`}
+            className={` md:border-l-2 sticky top-4 w-full border-lovely md:pl-6 shadow-sm h-fit`}
           >
             {/* Wifey Experience Package Details */}
             <div className=" bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
@@ -1293,32 +1293,35 @@ const SubscriptionPage = () => {
                 />
               </div>
               <h2
-                className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey  my-4 mt-6`}
+                className={`text-lg ${thirdFont.className} md:text-2xl font-bold tracking-normal text-creamey  my-2 mt-4`}
               >
                 ✨ You’re One Click Away From getting :
                 {/* {packageData.name} */}
               </h2>
-              <ul className="list-disc w-full px-2 md:px-4 space-y-4 items-start justify-start list-outside text-left text-base md:text-lg tracking-wider text-creamey/95">
+              <ul className=" w-full px-2 md:px-4 space-y-2 items-start justify-start  text-left text-sm md:text-base text-creamey/95">
                 {packageData.items.map((item: string, idx: number) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
-              <div className="flex justify-start gap-4 tracking-wider mt-4 ">
-                <span className="text-lg   text-creamey">
-                  💡 Wifey Experience Membership (subscription 2,500 EGP){" "}
+              <div className="flex justify-start gap-4 tracking-wider mt-2 ">
+                <span className="text-base   text-creamey">
+                  💗 Wifey Experience Membership (subscription 2,500 EGP){" "}
                 </span>
                 {/* <span className="text-lg  text-creamey">
                   {packageData.price} LE (yearly)
                 </span> */}
                 {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
               </div>
-              <div className="flex flex-col justify-start items-start w-full font-thin gap-2 tracking-wider mt-2 mb-2">
-                <span className="text-sm text-creamey font-semibold">
+              <div className="flex flex-col justify-start items-start w-full font-thin gap-2  mt-2 mb-2">
+                <span className="text-sm text-creamey/80 font-normal">
                   Notes :
                 </span>
-                <ul className="list-disc list-inside pl-4">
+                <ul className="pl-4">
                   {packageData.notes.map((note: string, idx: number) => (
-                    <li key={idx} className="text-sm text-creamey">
+                    <li
+                      key={idx}
+                      className="text-sm font-normal text-creamey/80"
+                    >
                       {note}
                     </li>
                   ))}
@@ -1339,7 +1342,7 @@ const SubscriptionPage = () => {
               showTooltip={showTooltip}
               setShowTooltip={setShowTooltip}
             />
-            <div className="mt-6 space-y-2 text-everGreen">
+            <div className="mt-6 space-y-2 text-lovely">
               <div className="flex justify-between text-base">
                 <span>Subtotal</span>
                 <span>{subTotal} LE</span>

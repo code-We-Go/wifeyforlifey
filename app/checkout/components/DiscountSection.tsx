@@ -93,7 +93,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
   return (
     <div className="mt-6">
       <h3
-        className={`text-lg lg:text-2xl ${thirdFont.className}  text-everGreen mb-4`}
+        className={`text-lg lg:text-2xl ${thirdFont.className}  text-lovely mb-4`}
       >
         Discounts
       </h3>
@@ -121,7 +121,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
           value={discountCode}
           onChange={(e) => setDiscountCode(e.target.value)}
           placeholder="Enter discount code"
-          className="flex-1 px-2 py-2 border bg-creamey text-everGreen border-everGreen rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent"
+          className="flex-1 placeholder:text-lovely/80 px-2 py-2 border bg-creamey text-lovely border-lovely rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent"
           disabled={loading}
         />
         <button
