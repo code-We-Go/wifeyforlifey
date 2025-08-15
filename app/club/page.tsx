@@ -78,21 +78,17 @@ const ClubPage = () => {
           {/* <span className={`${lifeyFont.className}`}>W</span><span style={{ transform: "scaleY(1.5)" }} className={`${wifeyFont.className} uppercase tracking-tighter font-light italic mr-1`}>ifey </span> Experience 💖 */}
         </h1>
         <p className="text-base md:text-lg text-lovely/95 mb-1">
-          <span className="font-bold">More than just a planner </span> —
-          it&apos;s your full bridal-era support system.
+          {/* <span className="font-bold">More than just a planner </span> —
+          it&apos;s your full bridal-era support system. */}
+          So glad you found us — we’ve been looking for you! 💗
         </p>
         <p className="text-base text-lovely/95 leading-relaxed">
           Building your home shouldn&apos;t feel{" "}
-          <span className="font-bold">overwhelming</span> or{" "}
-          <span className="font-bold">lonely</span>. That&apos;s why Wifey for
-          Lifey offers every bride a personalized experience that{" "}
-          <span className="font-bold">guides</span>,
-          <span className="font-bold"> supports</span>, and
-          <span className="font-bold"> celebrates</span> you through every step
-          — from <span className="font-bold">confusion</span> to
-          <span className="font-bold"> confidence</span>, from &quot;I
-          don&apos;t know where to start&quot; to &quot;I&apos;ve got
-          this!&quot;
+          <span className="font-bold">stressful</span> or{" "}
+          <span className="font-bold">lonely</span>. That&apos;s why we created
+          the Wifey experience — your-all-in-one bridal bestie to guide,support
+          and celebrate you from &quot;I don&apos;t know where to start&quot; to
+          &quot;I&apos;ve got this!&quot; 💍✨
         </p>
       </motion.div>
 
@@ -107,26 +103,31 @@ const ClubPage = () => {
         </div>
       </div>
       <div className="w-full  text-center text-lovely mt-10 md:mt-24">
-        <div className="flex flex-col items-center container-custom justify-center gap-2">
-          <h2 className={`${lifeyFont.className} mx-1 font-bold`}>
+        <div className="flex flex-col items-center w-full container-custom justify-center gap-2">
+          {/* <h2 className={`${lifeyFont.className} mx-1 font-bold`}>
             The Wifey Experience
-          </h2>
+          </h2> */}
 
-          <h6 className="text-lovely/90 mt-2">
-            Here’s what you get when you’re part of the Wifey’s community{" "}
+          <h6 className="text-lovely/90 mt-2 font-bold text-left w-full">
+            Here’s what you get when you’re part of the Wifey’s community
           </h6>
 
-          <p className="text-lovely/90 mt-1 max-w-lg">
-            ✨ You’ll unlock 1 full year of access to The Wifey Experience — our
-            exclusive digital channel, partner discounts, and support circle
-            where brides and experts are just a message away.{" "}
-          </p>
-          <p className="text-lovely/90 mt-1 max-w-lg">
-            ✨ Plus, you’ll receive your Gehaz Bestie Planner — a beautiful
-            keepsake that’s yours for a lifetime, guiding you through every
-            section of your home (see the Shipping Details section for delivery
-            info){" "}
-          </p>
+          <div className="text-lovely/90 w-full text-left mt-1">
+            <ol className="list-decimal pl-4">
+              <li className="mb-2">
+                Instant 1 full year access to:
+                <ul className="list-disc pl-6">
+                  <li>Our Exclusive online channel</li>
+                  <li>Partner discounts &amp; trust list</li>
+                  <li>Support Circle — brides &amp; experts by your side</li>
+                </ul>
+              </li>
+              <li>
+                Your Gehaz Bestie Planner - a beautiful keepsake that’s yours
+                for a lifetime
+              </li>
+            </ol>
+          </div>
         </div>
         <TimeLine />
         <Button
@@ -203,7 +204,7 @@ const ClubPage = () => {
             />
           </div>
         </div>
-        <div className="grid grid-cols-1  gap-4 mt-4">
+        {/* <div className="grid grid-cols-1  gap-4 mt-4">
           <div className="relative w-full h-64 md:min-h-[800px]  rounded-lg overflow-hidden">
             <Image
               src="/experience/planner3.jpeg"
@@ -212,7 +213,7 @@ const ClubPage = () => {
               className="object-cover"
             />
           </div>
-        </div>
+        </div> */}
       </div>
       <div id="channel" className="text-start mb-16 pt-16 container-custom">
         <h1

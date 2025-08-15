@@ -253,11 +253,18 @@ const BlogDetailPage = () => {
           <div
             className="prose prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
             // dangerouslySetInnerHTML={{ __html: blog.content }}
+            // dangerouslySetInnerHTML={{
+            //   __html: blog.content.replace(
+            //     /<img /g,
+            //     '<img style="float:left;max-width:320px;margin:30px 16px 8px 0;display:inline-block;" '
+            //   ),
+            // }}
             dangerouslySetInnerHTML={{
-              __html: blog.content.replace(
-                /<img /g,
-                '<img style="float:left;max-width:320px;margin:30px 16px 8px 0;display:inline-block;" '
-              ),
+              __html:
+                blog.content.replace(
+                  /<img /g,
+                  '<div style="clear:both;"></div><img style="float:left;max-width:320px;margin:30px 16px 8px 0;" '
+                ) + '<div style="clear:both;"></div>',
             }}
           />
         </div>
