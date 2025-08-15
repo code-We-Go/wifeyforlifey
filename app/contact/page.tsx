@@ -26,7 +26,7 @@ export default function ContactUsPage() {
               </p>
               <p>
                 <strong>Phone:</strong>{" "}
-                <a href="tel:+1234567890">+20 1007728799</a>
+                <a href="tel:+1234567890">+20 1055691340</a>
               </p>
               <p>
                 <strong>Address:</strong> Cairo,Egypt,Masr EL-Gedida,Salah
@@ -55,7 +55,7 @@ export default function ContactUsPage() {
             </p>
             <p>
               <strong>Phone:</strong>{" "}
-              <a href="tel:+1234567890">+20 1007728799</a>
+              <a href="tel:+1234567890">+20 1055691340</a>
             </p>
             <p>
               <strong>Address:</strong> Cairo,Egypt,Masr EL-Gedida,Salah EL-Din
