@@ -1008,7 +1008,13 @@ export default function AccountPage() {
         )}
         {activeTab === "partners" && (
           <div>
-            <PartnersTable />
+            {user.isSubscribed ? (
+              <PartnersTable />
+            ) : (
+              <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
+                Subscribe to get our partners discounts!
+              </div>
+            )}
           </div>
         )}
       </div>
