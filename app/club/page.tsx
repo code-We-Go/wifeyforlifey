@@ -86,9 +86,12 @@ const ClubPage = () => {
           Building your home shouldn&apos;t feel{" "}
           <span className="font-bold">stressful</span> or{" "}
           <span className="font-bold">lonely</span>. That&apos;s why we created
-          the Wifey experience — your-all-in-one bridal bestie to guide,support
-          and celebrate you from &quot;I don&apos;t know where to start&quot; to
-          &quot;I&apos;ve got this!&quot; 💍✨
+          the Wifey experience — your-all-in-one bridal bestie to{" "}
+          <span className="font-bold">guide</span>,{" "}
+          <span className="font-bold">support</span>
+          and <span className="font-bold">celebrate</span> you from &quot;I
+          don&apos;t know where to start&quot; to &quot;I&apos;ve got
+          this!&quot; 💍✨
         </p>
       </motion.div>
 

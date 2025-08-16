@@ -24,14 +24,18 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
   setShowTooltip,
   mobile = false,
 }) => {
-  const maxRedeem = loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20);
+  const maxRedeem =
+    loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20);
 
   // Handler for redeeming points (allow any value, clamp in effect)
   const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value) || 0;
     setRedeemPoints(value);
     // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
-    let validRedeem = Math.max(0, Math.min(value - (value % 20), loyaltyPoints.realLoyaltyPoints));
+    let validRedeem = Math.max(
+      0,
+      Math.min(value - (value % 20), loyaltyPoints.realLoyaltyPoints)
+    );
     const loyaltyLE = Math.floor(validRedeem / 20);
     setLoyaltyDiscount(loyaltyLE);
   };
@@ -40,23 +44,35 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
     <div className="mt-6">
       {isAuthenticated ? (
         <div className="space-y-2 bg-pinkey text-lovely rounded-lg p-4 shadow-sm border border-lovely">
-          <div className="flex items-center gap-2 mb-2 relative"
+          <div
+            className="flex items-center gap-2 mb-2 relative"
             onMouseEnter={() => setShowTooltip && setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip && setShowTooltip(false)}>
+            onMouseLeave={() => setShowTooltip && setShowTooltip(false)}
+          >
             <span className="font-semibold text-lovely">Loyalty Points</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-lovely">{loyaltyPoints.realLoyaltyPoints}</span>
+            <span className="text-lg font-bold text-lovely">
+              {loyaltyPoints.realLoyaltyPoints}
+            </span>
             <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
               <div
                 className="h-2 bg-lovely rounded-full"
-                style={{ width: `${Math.min(100, (redeemPoints / loyaltyPoints.realLoyaltyPoints) * 100 || 0)}%` }}
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (redeemPoints / loyaltyPoints.realLoyaltyPoints) * 100 || 0
+                  )}%`,
+                }}
               ></div>
             </div>
             <span className="text-xs text-lovely/90">max: {maxRedeem}</span>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <label htmlFor={mobile ? "redeemPointsMobile" : "redeemPoints"} className="text-lovely font-medium">
+            <label
+              htmlFor={mobile ? "redeemPointsMobile" : "redeemPoints"}
+              className="text-lovely font-medium"
+            >
               Redeem{mobile ? ":" : " Loyalty Points:"}
             </label>
             <input
@@ -68,7 +84,9 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
               onChange={handleRedeemChange}
               className="border border-lovely bg-creamey rounded px-2 py-1 w-24 focus:ring-lovely focus:border-lovely"
             />
-            <span className="text-lovely font-semibold">= {loyaltyDiscount} LE</span>
+            <span className="text-lovely font-semibold">
+              = {loyaltyDiscount} LE
+            </span>
             <button
               type="button"
               className="ml-2 px-3 py-1 rounded bg-lovely/90 text-creamey hover:bg-lovely transition"
@@ -83,14 +101,16 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
           </div>
           {redeemPoints > 0 && (
             <div className="text-xs text-green-700 mt-1">
-              You will redeem {redeemPoints} points for a {loyaltyDiscount} LE discount.
+              You will redeem {redeemPoints} points for a {loyaltyDiscount} LE
+              discount.
             </div>
           )}
         </div>
       ) : (
         <div className="space-y-2 bg-pinkey text-lovely rounded-lg p-4 shadow-sm border border-lovely flex flex-col items-center">
           <span className="font-semibold text-lovely mb-2">Loyalty Points</span>
-          <Link href="/login?redirect=checkout">
+          {/* <Link href="/login?redirect=checkout"> */}
+          <Link href="/login">
             <button className="px-4 py-2 bg-lovely text-creamey rounded hover:bg-lovely/90 transition font-semibold">
               Log in to use your loyalty points
             </button>
