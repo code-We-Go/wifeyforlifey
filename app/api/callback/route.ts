@@ -8,6 +8,7 @@ import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { register } from "node:module";
 import packageModel from "@/app/modals/packageModel";
 import { DiscountModel } from "@/app/modals/Discount";
+import { sendMail } from "@/lib/email";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -60,6 +61,41 @@ export async function GET(request: Request) {
         .findOne({ paymentID: data.order })
         .populate({ path: "packageID", options: { strictPopulate: false } });
       if (subscription) {
+        // Send email notification for new subscription
+        try {
+          await sendMail({
+            to: "orders@shopwifeyforlifey.com",
+            name: "NEW BESTIEEE",
+            subject: "NEW BESTIEEEE",
+            body: `
+              <h2>New Subscription Notification</h2>
+              <p>A new subscription has been successfully created:</p>
+              <ul>
+                <li><strong>Email:</strong> ${subscription.email}</li>
+                <li><strong>Package:</strong> ${
+                  subscription.packageID?.name || "N/A"
+                }</li>
+                <li><strong>First Name:</strong> ${
+                  subscription.firstName || "N/A"
+                }</li>
+                <li><strong>Last Name:</strong> ${
+                  subscription.lastName || "N/A"
+                }</li>
+                <li><strong>Phone:</strong> ${subscription.phone || "N/A"}</li>
+                <li><strong>Country:</strong> ${
+                  subscription.country || "N/A"
+                }</li>
+              </ul>
+            `,
+            from: "noreply@shopwifeyforlifey.com",
+          });
+          console.log("Subscription notification email sent successfully");
+        } catch (emailError) {
+          console.error(
+            "Failed to send subscription notification email:",
+            emailError
+          );
+        }
         const loyaltyBonus = await LoyaltyTransactionModel.create({
           email: subscription.email,
           type: "earn",
