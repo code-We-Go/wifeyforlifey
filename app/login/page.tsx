@@ -100,11 +100,11 @@ import { bgCreameyButton, bgRedButton } from '../constants';
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                 />
-                <div className="text-right mt-2">
+                {/* <div className="text-right mt-2">
                   <a href="/login/forgot-password" className="text-xs text-lovely underline hover:text-pinkey transition">
                     Forgot your password?
                   </a>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -164,4 +164,4 @@ export default function PlaylistPageWrapper(){
   return <Suspense fallback={<div>Loading</div>}>
        <LoginPage />
      </Suspense>
- } 
+ }
