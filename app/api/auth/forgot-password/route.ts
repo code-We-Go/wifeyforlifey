@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
   await PasswordResetToken.create({ userId: user._id, token, expiresAt });
   // Send email
-  const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${token}`;
+  const resetUrl = `${process.env.baseUrl}login/reset-password?token=${token}`;
   await sendMail({
     to: email,
     subject: "Password Reset",

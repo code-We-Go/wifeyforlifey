@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  const userModel = await UserModel.findById(record.userModelId);
+  const userModel = await UserModel.findById(record.userId);
   if (!userModel)
     return NextResponse.json(
       { success: false, message: "UserModel not found" },
