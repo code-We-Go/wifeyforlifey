@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const ResetPasswordPage = () => {
+const ResetPasswordForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
@@ -84,6 +84,19 @@ const ResetPasswordPage = () => {
       </form>
       {message && <p className="mt-4 text-lovely">{message}</p>}
     </div>
+  );
+};
+
+const ResetPasswordPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="max-w-md mx-auto py-16 px-4 text-lovely">
+        <h1 className="text-2xl font-bold mb-6">Reset Password</h1>
+        <p>Loading...</p>
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 };
 
