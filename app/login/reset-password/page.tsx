@@ -4,6 +4,7 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
+import { thirdFont } from "@/fonts";
 
 const ResetPasswordForm = () => {
   const router = useRouter();
@@ -61,40 +62,56 @@ const ResetPasswordForm = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto py-16 px-4">
-      <h1 className="text-2xl font-bold mb-6 text-lovely">Reset Password</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Input
-          type="password"
-          placeholder="Confirm new password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Resetting..." : "Reset Password"}
-        </Button>
-      </form>
-      {message && <p className="mt-4 text-lovely">{message}</p>}
+    <div className=" bg-patternPinkey ">
+      <div className="md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)]  flex items-center justify-center bg-black/30 backdrop-blur-[3px] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md max-h-[90vh] rounded-2xl bg-creamey shadow-2xl w-full py-8 px-6 space-y-8">
+          <h2
+            className={`${thirdFont.className} tracking-normal font-bold mb-6 text-lovely`}
+          >
+            Reset Password
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              className="bg-creamey border-lovely/90 border placeholder:text-lovely/80"
+              type="password"
+              placeholder="New password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Input
+              className="bg-creamey border-lovely/90 border placeholder:text-lovely/80"
+              type="password"
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+            <Button
+              type="submit"
+              className="bg-lovely text-creamey w-full"
+              disabled={loading}
+            >
+              {loading ? "Resetting..." : "Reset Password"}
+            </Button>
+          </form>
+          {message && <p className="mt-4 text-lovely">{message}</p>}
+        </div>
+      </div>
     </div>
   );
 };
 
 const ResetPasswordPage = () => {
   return (
-    <Suspense fallback={
-      <div className="max-w-md mx-auto py-16 px-4 text-lovely">
-        <h1 className="text-2xl font-bold mb-6">Reset Password</h1>
-        <p>Loading...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="max-w-md mx-auto py-16 px-4 text-lovely">
+          <h1 className="text-2xl font-bold mb-6">Reset Password</h1>
+          <p>Loading...</p>
+        </div>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

@@ -4,6 +4,7 @@ import PasswordResetToken from "@/models/PasswordResetToken";
 import crypto from "crypto";
 import { sendMail } from "@/lib/email";
 import { ConnectDB } from "@/app/config/db";
+import { resetPasswordEmailTemplate } from "@/utils/resetPasswordEmail";
 
 export async function POST(req: Request) {
   await ConnectDB();
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     to: email,
     subject: "Password Reset",
     name: user.username,
-    body: `<html><p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 1 hour.</p><html>`,
+    body: `${resetPasswordEmailTemplate(resetUrl)}`,
     from: "authintication@shopwifeyforlifey.com",
   });
   return NextResponse.json({ success: true, message: "Reset email sent" });

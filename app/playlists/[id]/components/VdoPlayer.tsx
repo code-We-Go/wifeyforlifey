@@ -19,15 +19,15 @@ interface VdoPlayerProps {
   volume?: number; // 0 to 1
 }
 
-const VdoPlayer = ({ 
-  otp, 
-  playbackInfo, 
-  onVideoEnd, 
+const VdoPlayer = ({
+  otp,
+  playbackInfo,
+  onVideoEnd,
   onVideoStart,
   onVideoReady,
   autoplay = true,
   muted = false,
-  volume = 1
+  volume = 1,
 }: VdoPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -41,19 +41,25 @@ const VdoPlayer = ({
     const handleUserInteraction = () => {
       setUserInteracted(true);
       // Remove listeners after first interaction
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener("click", handleUserInteraction);
+      document.removeEventListener("keydown", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
     };
 
-    document.addEventListener('click', handleUserInteraction, { passive: true });
-    document.addEventListener('keydown', handleUserInteraction, { passive: true });
-    document.addEventListener('touchstart', handleUserInteraction, { passive: true });
+    document.addEventListener("click", handleUserInteraction, {
+      passive: true,
+    });
+    document.addEventListener("keydown", handleUserInteraction, {
+      passive: true,
+    });
+    document.addEventListener("touchstart", handleUserInteraction, {
+      passive: true,
+    });
 
     return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener("click", handleUserInteraction);
+      document.removeEventListener("keydown", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
     };
   }, []);
 
@@ -65,17 +71,18 @@ const VdoPlayer = ({
 
     // Create the iframe element
     const iframe = document.createElement("iframe");
-    
+
     // Build URL with proper parameters
     const urlParams = new URLSearchParams({
       otp,
       playbackInfo,
-      autoplay: autoplay ? 'true' : 'false',
-      muted: muted ? 'true' : 'false'
+      autoplay: autoplay ? "true" : "false",
+      muted: muted ? "true" : "false",
     });
-    
+
     iframe.src = `https://player.vdocipher.com/v2/?${urlParams.toString()}`;
-    iframe.style.cssText = "border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%;";
+    iframe.style.cssText =
+      "border:0;max-width:100%;position:absolute;top:0;left:0;height:100%;width:100%;";
     iframe.setAttribute("allowFullScreen", "true");
     iframe.setAttribute("allow", "encrypted-media; autoplay");
     iframe.setAttribute("id", "vdocipher-player-" + Date.now());
@@ -89,7 +96,7 @@ const VdoPlayer = ({
 
     // Append iframe to wrapper
     wrapper.appendChild(iframe);
-    
+
     // Append wrapper to container
     containerRef.current.appendChild(wrapper);
 
@@ -103,10 +110,14 @@ const VdoPlayer = ({
         }
 
         // Check if script is already being loaded
-        const existingScript = document.querySelector('script[src="https://player.vdocipher.com/v2/api.js"]');
+        const existingScript = document.querySelector(
+          'script[src="https://player.vdocipher.com/v2/api.js"]'
+        );
         if (existingScript) {
-          existingScript.addEventListener('load', () => resolve());
-          existingScript.addEventListener('error', () => reject(new Error('Failed to load VdoCipher API')));
+          existingScript.addEventListener("load", () => resolve());
+          existingScript.addEventListener("error", () =>
+            reject(new Error("Failed to load VdoCipher API"))
+          );
           return;
         }
 
@@ -114,7 +125,8 @@ const VdoPlayer = ({
         script.src = "https://player.vdocipher.com/v2/api.js";
         script.async = true;
         script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Failed to load VdoCipher API'));
+        script.onerror = () =>
+          reject(new Error("Failed to load VdoCipher API"));
         document.head.appendChild(script);
       });
     };
@@ -122,7 +134,7 @@ const VdoPlayer = ({
     try {
       await loadApiScript();
       setIsApiReady(true);
-      
+
       // Wait for iframe to load
       iframe.onload = () => {
         // Small delay to ensure VdoCipher player is fully initialized
@@ -130,13 +142,13 @@ const VdoPlayer = ({
           try {
             if (window.VdoPlayer && iframe) {
               const player = window.VdoPlayer.getInstance(iframe);
-              
+
               if (player) {
                 playerRef.current = player;
-                
+
                 // Set up event listeners
                 setupEventListeners(player);
-                
+
                 // Configure volume if not muted
                 if (!muted && volume !== undefined) {
                   setTimeout(() => {
@@ -145,18 +157,18 @@ const VdoPlayer = ({
                     }
                   }, 500);
                 }
-                
+
                 setIsPlayerReady(true);
                 onVideoReady?.();
               }
             }
           } catch (error) {
-            console.error('Error getting VdoPlayer instance:', error);
+            console.error("Error getting VdoPlayer instance:", error);
           }
         }, 1000);
       };
     } catch (error) {
-      console.error('Error initializing VdoCipher player:', error);
+      console.error("Error initializing VdoCipher player:", error);
     }
   }, [otp, playbackInfo, autoplay, muted, volume, onVideoReady]);
 
@@ -164,21 +176,21 @@ const VdoPlayer = ({
     if (!player.video) return;
 
     // Video end event
-    player.video.addEventListener('ended', () => {
-      console.log('Video ended');
+    player.video.addEventListener("ended", () => {
+      console.log("Video ended");
       onVideoEnd?.();
     });
 
     // Video start event
-    player.video.addEventListener('play', () => {
-      console.log('Video started playing');
+    player.video.addEventListener("play", () => {
+      console.log("Video started playing");
       onVideoStart?.();
     });
 
     // Video ready event
-    player.video.addEventListener('loadeddata', () => {
-      console.log('Video data loaded');
-      
+    player.video.addEventListener("loadeddata", () => {
+      console.log("Video data loaded");
+
       // If autoplay is enabled and user has interacted, try to play with sound
       if (autoplay && userInteracted && !muted) {
         setTimeout(() => {
@@ -186,7 +198,7 @@ const VdoPlayer = ({
             player.video.muted = false;
             player.video.volume = volume;
             player.video.play().catch((error: any) => {
-              console.warn('Autoplay with sound failed, trying muted:', error);
+              console.warn("Autoplay with sound failed, trying muted:", error);
               // Fallback to muted autoplay
               player.video.muted = true;
               player.video.play();
@@ -197,12 +209,12 @@ const VdoPlayer = ({
     });
 
     // Video pause event
-    player.video.addEventListener('pause', () => {
-      console.log('Video paused');
+    player.video.addEventListener("pause", () => {
+      console.log("Video paused");
     });
 
     // Time update event for progress tracking
-    player.video.addEventListener('timeupdate', () => {
+    player.video.addEventListener("timeupdate", () => {
       // Optional: track progress
       // const currentTime = player.video.currentTime;
       // const duration = player.video.duration;
@@ -210,8 +222,13 @@ const VdoPlayer = ({
     });
 
     // Handle volume changes
-    player.video.addEventListener('volumechange', () => {
-      console.log('Volume changed:', player.video.volume, 'Muted:', player.video.muted);
+    player.video.addEventListener("volumechange", () => {
+      console.log(
+        "Volume changed:",
+        player.video.volume,
+        "Muted:",
+        player.video.muted
+      );
     });
   };
 
@@ -299,14 +316,25 @@ const VdoPlayer = ({
       (containerRef.current as any).isApiReady = isApiReady;
       (containerRef.current as any).isPlayerReady = isPlayerReady;
     }
-  }, [isApiReady, isPlayerReady, play, pause, seek, getCurrentTime, getDuration, setVolume, toggleMute, unmute]);
+  }, [
+    isApiReady,
+    isPlayerReady,
+    play,
+    pause,
+    seek,
+    getCurrentTime,
+    getDuration,
+    setVolume,
+    toggleMute,
+    unmute,
+  ]);
 
   return (
     <div
       ref={containerRef}
-      style={{ 
-        width: "100%", 
-        position: "relative"
+      style={{
+        width: "100%",
+        position: "relative",
       }}
     />
   );

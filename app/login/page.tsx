@@ -103,7 +103,7 @@ function LoginPage() {
                 <div className="text-right mt-2">
                   <a
                     href="/login/forgot-password"
-                    className="text-xs text-lovely underline hover:text-pinkey transition"
+                    className="text-xs text-lovely underline hover:cursor-pointer"
                   >
                     Forgot your password?
                   </a>
