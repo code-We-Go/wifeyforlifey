@@ -271,7 +271,7 @@ export default function Footer() {
                   type="submit"
                   className={`${bgRedButton} rounded-l-none border-l-0`}
                 >
-                  Subscribe
+                  Join Now
                 </Button>
               </div>
             </form>

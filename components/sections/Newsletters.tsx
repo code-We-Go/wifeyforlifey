@@ -79,7 +79,7 @@ const Newsletters = () => {
             className="hover:bg-everGreen bg-lovely text-creamey rounded-full"
             disabled={isLoading}
           >
-            {isLoading ? "Subscribing..." : "Subscribe"}
+            {isLoading ? "Joining..." : "Join Now"}
           </Button>
         </form>
       </div>

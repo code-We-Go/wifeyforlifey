@@ -91,8 +91,7 @@ const DiscountPopup = () => {
                 Get 10% Off Your First Order!
               </DialogTitle>
               <DialogDescription className="text-center text-lovely/90">
-                Subscribe to our newsletter and receive a 10% discount code
-                instantly.
+                Join our newsletter and receive a 10% discount code instantly.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -114,7 +113,7 @@ const DiscountPopup = () => {
                       className="w-full bg-lovely hover:bg-everGreen text-creamey rounded-full"
                       disabled={isLoading}
                     >
-                      {isLoading ? "Subscribing..." : "Get My Discount"}
+                      {isLoading ? "Joining..." : "Get My Discount"}
                     </Button>
                   </form>
                   <button
@@ -147,7 +146,9 @@ const DiscountPopup = () => {
                   <div className="bg-everGreen/20 rounded-full p-3 mb-4">
                     <Check className="h-8 w-8 text-everGreen" />
                   </div>
-                  <div className="text-lovely font-bold text-5xl mb-2">WIFEY10</div>
+                  <div className="text-lovely font-bold text-5xl mb-2">
+                    WIFEY10
+                  </div>
                   <p className="text-lovely/80 text-sm mb-6">
                     Use this code at checkout for 10% off your first order
                   </p>
