@@ -19,15 +19,6 @@ const LoyaltyTransactionSchema = new Schema<ILoyaltyTransactionSchema>({
   reason: {
     type: String,
     required: false,
-    enum: [
-      "purchase",
-      "subscription",
-      "birthday",
-      "wedding day",
-      "social media",
-      "first name",
-      "last name",
-    ],
   },
   bonusID: { type: mongoose.Schema.Types.ObjectId, ref: "loyaltyPoints" },
 });
