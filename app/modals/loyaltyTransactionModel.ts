@@ -15,7 +15,7 @@ const LoyaltyTransactionSchema = new Schema<ILoyaltyTransactionSchema>({
   email: { type: String, required: true },
   type: { type: String, enum: ["earn", "spend"], required: true },
   timestamp: { type: Date, default: Date.now },
-  amount: { type: Number, required: false },
+  amount: { type: Number, required: true },
   reason: {
     type: String,
     required: false,
