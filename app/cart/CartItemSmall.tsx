@@ -93,10 +93,12 @@ const CartItemSmall = ({
         <div className="flex w-full h-full  py-2  gap-4">
           <div className="cursor-pointer h-full flex justify-start items-start">
             <span
-              onClick={() =>
-                removeItem(item.productId, item.variant, item.attributes)
-              }
-              className="text-[12px] text-creamey"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                removeItem(item.productId, item.variant, item.attributes);
+              }}
+              className="text-[12px] pt-2 px-4 text-creamey"
             >
               x
             </span>
