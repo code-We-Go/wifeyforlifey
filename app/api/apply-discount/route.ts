@@ -31,8 +31,6 @@ export async function POST(req: Request) {
     //   startDate: { $lte: new Date() },
     //   endDate: { $gte: new Date() },
     });
-    console.log("discount object:", discount);
-    console.log("discount calculationType:", discount?.calculationType);
     if (!discount) {
       return NextResponse.json(
         { error: 'Invalid or expired discount code' },
@@ -74,7 +72,6 @@ export async function POST(req: Request) {
         if(discount.value){
 
           discountAmount = (cartTotal * discount.value) / 100;
-          console.log("discountAmount: "+discountAmount);
         }
         // if (discount.maxDiscountAmount) {
         //   discountAmount = Math.min(discountAmount, discount.maxDiscountAmount);
@@ -120,4 +117,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-} 
+}

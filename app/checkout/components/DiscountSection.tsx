@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useContext } from "react";
-import { cartContext } from "@/app/context/cartContext";
+import { useCart } from "@/providers/CartProvider";
 import { CartItem } from "@/app/interfaces/interfaces";
 import { Discount, DiscountCalculationType } from "@/app/types/discount";
 import { thirdFont } from "@/fonts";
@@ -20,7 +20,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeDiscounts, setActiveDiscounts] = useState<Discount[]>([]);
-  const { cart } = useContext(cartContext);
+  const { items: cart } = useCart();
 
   useEffect(() => {
     fetchActiveDiscounts();

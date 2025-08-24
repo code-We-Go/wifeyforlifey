@@ -82,7 +82,7 @@ const discountSchema = new Schema<Discount>({
 });
 
 // Add indexes for common queries
-discountSchema.index({ code: 1 });
+// Note: code field already has unique index from 'unique: true'
 discountSchema.index({ isActive: 1 });
 discountSchema.index({ 'conditions.validFrom': 1, 'conditions.validUntil': 1 });
 
@@ -91,4 +91,4 @@ if (mongoose.models.Discount) {
   delete mongoose.models.Discount;
 }
 
-export const DiscountModel = mongoose.model<Discount>('Discount', discountSchema); 
+export const DiscountModel = mongoose.model<Discount>('Discount', discountSchema);
