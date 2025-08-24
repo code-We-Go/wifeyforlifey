@@ -196,6 +196,7 @@ export interface IOrder {
   currency?: string;
   status?: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
   payment?: "pending" | "failed" | "confirmed";
+  shipmentID?: string; // Bosta shipment ID
   billingCountry?: string;
   billingFirstName?: string;
   billingState?: string;
