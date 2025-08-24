@@ -1,6 +1,5 @@
 import { sendMail } from "@/lib/email";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
-// import { generateEmailInstaBody } from "@/app/utils/generateOrderInstaEmail";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
@@ -9,6 +8,7 @@ import { NextResponse } from "next/server";
 import productsModel from "@/app/modals/productsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { DiscountModel } from "@/app/modals/Discount";
+import BostaService, { BostaAddress } from "@/app/services/bostaService";
 
 const loadDB = async () => {
   console.log("hna");
@@ -143,6 +143,77 @@ export async function POST(request: Request) {
       console.log(data.subTotal);
       console.log(data.shipping);
       console.log(data.state);
+
+      // Create Bosta delivery if enabled
+      try {
+        if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
+          const bostaService = new BostaService();
+
+          // Default pickup address (you should configure this in your environment)
+          const pickupAddress: BostaAddress = {
+            city: process.env.BOSTA_PICKUP_CITY || "Cairo",
+            zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
+            districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
+            firstLine:
+              process.env.BOSTA_PICKUP_ADDRESS || "Your Business Address",
+            secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "",
+            buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
+            floor: process.env.BOSTA_PICKUP_FLOOR || "1",
+            apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
+          };
+
+          // Default return address
+          const returnAddress: BostaAddress = {
+            city: process.env.BOSTA_RETURN_CITY || "Cairo",
+            zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
+            districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
+            firstLine:
+              process.env.BOSTA_RETURN_ADDRESS || "Your Return Address",
+            secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "",
+            buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
+            floor: process.env.BOSTA_RETURN_FLOOR || "1",
+            apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
+          };
+
+          const webhookUrl = `${
+            process.env.baseUrl || "http://localhost:3000"
+          }/api/webhooks/bosta`;
+
+          const deliveryPayload = bostaService.createDeliveryPayload(
+            res,
+            pickupAddress,
+            returnAddress,
+            webhookUrl
+          );
+
+          console.log("Creating Bosta delivery for order:", res._id);
+          const bostaResult = await bostaService.createDelivery(
+            deliveryPayload
+          );
+
+          if (bostaResult.success && bostaResult.data) {
+            // Update order with shipment ID
+            await ordersModel.findByIdAndUpdate(res._id, {
+              shipmentID: bostaResult.data.deliveryId,
+              status: "confirmed",
+            });
+            console.log(
+              "Bosta delivery created successfully:",
+              bostaResult.data.trackingNumber
+            );
+          } else {
+            console.error(
+              "Failed to create Bosta delivery:",
+              bostaResult.error
+            );
+            // Don't fail the order creation if Bosta fails
+          }
+        }
+      } catch (bostaError) {
+        console.error("Bosta integration error:", bostaError);
+        // Don't fail the order creation if Bosta fails
+      }
+
       await sendMail({
         to: `${data.email}`,
         from: "orders@shopwifeyforlifey.com",

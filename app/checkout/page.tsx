@@ -292,6 +292,7 @@ const CheckoutClientPage = () => {
     appliedDiscountAmount: 0,
     cart: items,
     phone: "",
+    whatsAppNumber: "",
     state: state,
     cash: payment,
     redeemedLoyaltyPoints: Math.max(
@@ -576,6 +577,7 @@ const CheckoutClientPage = () => {
     setTotal(finalTotal);
   }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
   const handleSubmit = async (e: React.FormEvent) => {
+    alert(payment);
     e.preventDefault();
     setLoading(true);
     let errors: any = {};
@@ -930,6 +932,29 @@ const CheckoutClientPage = () => {
                 )}
               </div>
             </div>
+            <div className="flex w-full gap-2 items-center">
+              <label className="text-everGreen text-base whitespace-nowrap">
+                WhatsApp
+              </label>
+              <div className="flex w-full gap-1 flex-col">
+                <input
+                  onChange={handleInputChange}
+                  type="text"
+                  value={formData.whatsAppNumber}
+                  name="whatsAppNumber"
+                  className={`border ${
+                    formErrors.whatsAppNumber ? "border-red-500" : ""
+                  } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                />
+                {formErrors.whatsAppNumber ? (
+                  <p className="uppercase text-xs text-red-500">
+                    {formErrors.whatsAppNumber}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
 
             <div className="flex flex-col items-start w-full text-[12px] lg:text-base gap-2 text-nowrap">
               <div
@@ -1203,11 +1228,14 @@ const CheckoutClientPage = () => {
              <p className='text-[12px] mt-6 lg:text-base'>{total} LE</p>
            </div>
          </div> */}
-            {payment === "cash" || "instapay" ? (
+            {payment === "cash" || payment === "instapay" ? (
               <div className={`flex justify-end`}>
                 <button
                   className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
-                  onClick={handleSubmit}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                  }}
                   disabled={loading || items.length === 0}
                 >
                   Confirm order
@@ -1216,6 +1244,7 @@ const CheckoutClientPage = () => {
             ) : (
               <div className="flex justify-end">
                 <button
+                  onClick={handleSubmit}
                   disabled={items.length === 0 || loading}
                   type="submit"
                   className={`border transition duration-300 border-lovely p-1 ${
