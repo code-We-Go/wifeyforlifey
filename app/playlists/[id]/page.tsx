@@ -485,12 +485,17 @@ export default function PlaylistPage() {
                     >
                       <div className="flex gap-3">
                         <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
-                          <Image
+                          {/* <Image
                             src={video.thumbnailUrl || "/video/1.png"}
                             alt={video.title}
                             fill
                             unoptimized
                             className="object-cover aspect-video"
+                          /> */}
+                          <img
+                            src={video.thumbnailUrl || "/video/1.png"}
+                            alt={video.title}
+                            className="object-cover aspect-video w-full h-full"
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                             {isLocked ? (
