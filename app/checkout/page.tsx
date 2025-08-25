@@ -292,7 +292,6 @@ const CheckoutClientPage = () => {
     appliedDiscountAmount: 0,
     cart: items,
     phone: "",
-    whatsAppNumber: "",
     state: state,
     cash: payment,
     redeemedLoyaltyPoints: Math.max(
@@ -925,29 +924,6 @@ const CheckoutClientPage = () => {
                 {formErrors.phone ? (
                   <p className="uppercase text-xs text-red-500">
                     {formErrors.phone}
-                  </p>
-                ) : (
-                  ""
-                )}
-              </div>
-            </div>
-            <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
-                WhatsApp
-              </label>
-              <div className="flex w-full gap-1 flex-col">
-                <input
-                  onChange={handleInputChange}
-                  type="text"
-                  value={formData.whatsAppNumber}
-                  name="whatsAppNumber"
-                  className={`border ${
-                    formErrors.whatsAppNumber ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
-                />
-                {formErrors.whatsAppNumber ? (
-                  <p className="uppercase text-xs text-red-500">
-                    {formErrors.whatsAppNumber}
                   </p>
                 ) : (
                   ""

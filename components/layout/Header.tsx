@@ -114,7 +114,7 @@ export default function Header() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, pathname]);
 
   // Add effect to close account dropdown when clicking outside
   useEffect(() => {
