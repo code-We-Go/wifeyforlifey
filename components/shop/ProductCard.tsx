@@ -40,11 +40,11 @@ export default function ProductCard({
           productId: product._id,
           productName: product.title,
           price: product.price.local,
-          variant:product.variations[0],
+          variant: product.variations[0],
           quantity: 1,
           attributes: {
             name: product.variations[0].attributeName,
-            stock: product.variations[0].attributes[0].stock
+            stock: product.variations[0].attributes[0].stock,
           },
           imageUrl: product.variations[0].images[0].url,
         },
@@ -65,7 +65,7 @@ export default function ProductCard({
       toast({
         title: "Added item to Wishlist",
         description: "Item has been added to your wishlist.",
-        variant: "added"
+        variant: "added",
       });
     } else {
       const newWishList = wishList.filter(
@@ -75,7 +75,7 @@ export default function ProductCard({
       toast({
         title: "Removed item from Wishlist",
         description: "Item has been removed from your wishlist.",
-        variant:"removed"
+        variant: "removed",
       });
     }
     toggleHeart();
@@ -83,7 +83,7 @@ export default function ProductCard({
 
   const handleProductClick = (e: React.MouseEvent) => {
     // Only navigate if the click wasn't on a button
-    if (!(e.target as HTMLElement).closest('button')) {
+    if (!(e.target as HTMLElement).closest("button")) {
       router.push(`/shop/${product._id}`);
     }
   };
@@ -93,8 +93,11 @@ export default function ProductCard({
     openModal(product);
   };
 
+  // Check if product is out of stock (first variant, first attribute)
+  const isOutOfStock = product.variations[0]?.attributes[0]?.stock === 0;
+
   return (
-    <div 
+    <div
       className="relative product-card bg-lovely p-2 pt-4 border-lovely border-2 group cursor-pointer"
       onClick={handleProductClick}
     >
@@ -110,9 +113,22 @@ export default function ProductCard({
           src={product.variations[0].images[0].url}
           alt={product.title}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
+            isOutOfStock ? " opacity-80" : ""
+          }`}
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+        <div
+          className={`absolute inset-0 transition-colors duration-300 ${
+            isOutOfStock ? "bg-black/30" : "bg-black/0 group-hover:bg-black/10"
+          }`}
+        ></div>
+        {isOutOfStock && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+              Out of Stock
+            </div>
+          </div>
+        )}
         <Button
           onClick={addToWishList}
           size="icon"
@@ -135,26 +151,38 @@ export default function ProductCard({
         </Button>
       </div>
       <div className="md:p-4">
-        <h4 className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}>
+        <h4
+          className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}
+        >
           {product.title}
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-        {product.comparedPrice>0 &&  <del className="text-creamey text-sm">
-  LE{product.comparedPrice.toFixed(2)}
-</del> }         
- <p className="price-tag text-creamey">LE{product.price.local.toFixed(2)}</p>
+            {product.comparedPrice > 0 && (
+              <del className="text-creamey text-sm">
+                LE{product.comparedPrice.toFixed(2)}
+              </del>
+            )}
+            <p className="price-tag text-creamey">
+              LE{product.price.local.toFixed(2)}
+            </p>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-              <span className="text-xs">Add</span>
-            </Button>
+            {isOutOfStock ? (
+              <div className="text-xs text-creamey font-medium">
+                Out of Stock
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                <span className="text-xs">Add</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>

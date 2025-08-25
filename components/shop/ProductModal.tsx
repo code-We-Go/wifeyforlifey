@@ -200,8 +200,17 @@ export default function ProductModal() {
                   <span aria-hidden>+</span>
                 </Button>
                 {selectedAttribute && (
-                  <span className="text-sm text-muted-foreground ml-2">
-                    {selectedAttribute.stock} available
+                  <span className={`text-sm ml-2 ${
+                    selectedAttribute.stock === 0 
+                      ? "text-red-500 font-medium" 
+                      : selectedAttribute.stock <= 5 
+                      ? "text-orange-500 font-medium" 
+                      : "text-muted-foreground"
+                  }`}>
+                    {selectedAttribute.stock === 0 
+                      ? "Out of stock" 
+                      : `${selectedAttribute.stock} available`
+                    }
                   </span>
                 )}
               </div>
@@ -210,12 +219,12 @@ export default function ProductModal() {
             {/* Add to Cart Button */}
             <Button
               size="lg"
-              className="w-full rounded-full bg-lovely hover:bg-everGreen text-creamey"
+              className="w-full rounded-full bg-lovely hover:bg-everGreen text-creamey disabled:bg-gray-400 disabled:cursor-not-allowed"
               onClick={handleAddToCart}
-              disabled={!selectedVariant || !selectedAttribute}
+              disabled={!selectedVariant || !selectedAttribute || (selectedAttribute && selectedAttribute.stock === 0)}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              Add to Cart
+              {selectedAttribute && selectedAttribute.stock === 0 ? "Out of Stock" : "Add to Cart"}
             </Button>
           </div>
         </div>

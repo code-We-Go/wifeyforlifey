@@ -577,6 +577,7 @@ const CheckoutClientPage = () => {
     setTotal(finalTotal);
   }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
   const handleSubmit = async (e: React.FormEvent) => {
+    alert(payment);
     e.preventDefault();
     setLoading(true);
     let errors: any = {};
@@ -1246,7 +1247,11 @@ const CheckoutClientPage = () => {
                   onClick={handleSubmit}
                   disabled={items.length === 0 || loading}
                   type="submit"
-                  className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
+                  className={`border transition duration-300 border-lovely p-1 ${
+                    items.length === 0 || loading
+                      ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
+                      : "hover:cursor-pointer hover:bg-lovely hover:text-white text-everGreen"
+                  }`}
                 >
                   PROCEED TO PAYMENT
                 </button>
