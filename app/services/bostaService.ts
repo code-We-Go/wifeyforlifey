@@ -53,16 +53,18 @@ interface BostaDeliveryResponse {
 class BostaService {
   private baseUrl: string;
   private bearerToken: string;
+  private bostAPI: string;
 
   constructor() {
     this.baseUrl = "http://app.bosta.co/api/v2";
     this.bearerToken = process.env.BOSTA_BEARER_TOKEN || "";
+    this.bostAPI = process.env.BOSTA_API || "";
   }
 
   private getHeaders() {
     return {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.bearerToken}`,
+      Authorization: `Bearer ${this.bostAPI}`,
     };
   }
 
@@ -70,7 +72,7 @@ class BostaService {
     payload: BostaDeliveryPayload
   ): Promise<BostaDeliveryResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/deliveries`, {
+      const response = await fetch(`${this.baseUrl}/deliveries?apiVersion=1`, {
         method: "POST",
         headers: this.getHeaders(),
         body: JSON.stringify(payload),

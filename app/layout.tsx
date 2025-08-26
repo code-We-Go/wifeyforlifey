@@ -70,7 +70,7 @@ export default function RootLayout({
                         <Footer />
                       </div>
                       <ProductModal />
-                      <DiscountPopup />
+                      {/* <DiscountPopup /> */}
                       <Toaster />
                     </ModalProvider>
                   </AnnouncementProvider>
