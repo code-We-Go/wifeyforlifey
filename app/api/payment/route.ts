@@ -175,9 +175,7 @@ export async function POST(request: Request) {
             apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
           };
 
-          const webhookUrl = `${
-            process.env.baseUrl || "http://localhost:3000"
-          }/api/webhooks/bosta`;
+          const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
 
           const deliveryPayload = bostaService.createDeliveryPayload(
             res,

@@ -56,16 +56,9 @@ class BostaService {
   private bostAPI: string;
 
   constructor() {
-    this.baseUrl = "http://app.bosta.co/api/v2";
+    this.baseUrl = "https://app.bosta.co/api/v2";
     this.bearerToken = process.env.BOSTA_BEARER_TOKEN || "";
     this.bostAPI = process.env.BOSTA_API || "";
-  }
-
-  private getHeaders() {
-    return {
-      "Content-Type": "application/json",
-      Authorization: `${this.bostAPI}`,
-    };
   }
 
   async createDelivery(
@@ -74,7 +67,11 @@ class BostaService {
     try {
       const response = await fetch(`${this.baseUrl}/deliveries?apiVersion=1`, {
         method: "POST",
-        headers: this.getHeaders(),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "2adb69c5b8bf76e2d49259310b692dc75ee8cd5ef2b3cbf4ffcf7a693928c439",
+        },
         body: JSON.stringify(payload),
       });
 
@@ -108,7 +105,7 @@ class BostaService {
   // Helper method to create delivery payload from order data
   createDeliveryPayload(
     order: any,
-    webhookUrl: string = `${process.env.baseUrl}api/webhooks/bosta`
+    webhookUrl: string = "https://www.google.com/"
   ): BostaDeliveryPayload {
     const itemsCount =
       order.cart?.reduce(
@@ -135,35 +132,35 @@ class BostaService {
       notes: "Welcome Note",
       cod: order.cash === "cash" ? order.total : 0,
       dropOffAddress: {
-        city: order.city || "Helwan",
-        zoneId: "NQz5sDOeG",
-        districtId: "aiJudRHeOt",
-        firstLine: order.address || "Helwan street x",
-        secondLine: order.apartment || "Near to Bosta school",
-        buildingNumber: "123",
-        floor: "4",
-        apartment: "2",
+        city: order.city || "Cairo",
+   zoneId: "NQz5sDOeG",
+    districtId: "aiJudRHeOt",
+        firstLine: order.address || "Main Street",
+        secondLine: order.apartment || "Apartment details",
+        buildingNumber: "1",
+        floor: "1",
+        apartment: "1",
       },
       pickupAddress: {
-        city: process.env.BOSTA_PICKUP_CITY || "Helwan",
-        zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
-        districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
-        firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Helwan street x",
+        city: process.env.BOSTA_PICKUP_CITY || "Cairo",
+        zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "1",
+        districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "1",
+        firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Main Street",
         secondLine:
-          process.env.BOSTA_PICKUP_ADDRESS_2 || "Near to Bosta school",
-        buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
-        floor: process.env.BOSTA_PICKUP_FLOOR || "4",
-        apartment: process.env.BOSTA_PICKUP_APARTMENT || "2",
+          process.env.BOSTA_PICKUP_ADDRESS_2 || "Pickup location",
+        buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "1",
+        floor: process.env.BOSTA_PICKUP_FLOOR || "1",
+        apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
       },
       returnAddress: {
-        city: process.env.BOSTA_RETURN_CITY || "Helwan",
-        zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
-        districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
-        firstLine: process.env.BOSTA_RETURN_ADDRESS || "Maadi",
-        secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "Nasr City",
-        buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
-        floor: process.env.BOSTA_RETURN_FLOOR || "4",
-        apartment: process.env.BOSTA_RETURN_APARTMENT || "2",
+        city: process.env.BOSTA_RETURN_CITY || "Cairo",
+        zoneId: process.env.BOSTA_RETURN_ZONE_ID || "1",
+        districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "1",
+        firstLine: process.env.BOSTA_RETURN_ADDRESS || "Return Address",
+        secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "Return details",
+        buildingNumber: process.env.BOSTA_RETURN_BUILDING || "1",
+        floor: process.env.BOSTA_RETURN_FLOOR || "1",
+        apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
       },
       businessReference: order._id || "43535252",
       receiver: {
