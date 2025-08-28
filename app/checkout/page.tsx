@@ -653,7 +653,7 @@ const CheckoutClientPage = () => {
   return (
     // cart.length > 0 ?
     <div
-      className={`relative  container-custom  py-8 md:py-12 justify-between text-everGreen min-h-screen  bg-creamey  flex flex-col `}
+      className={`relative  container-custom  py-8 md:py-12 justify-between text-lovely min-h-screen  bg-creamey  flex flex-col `}
     >
       {loading && (
         <div className="fixed z-20 inset-0 bg-black/40 flex w-full h-[100vh] justify-center items-center">
@@ -661,7 +661,7 @@ const CheckoutClientPage = () => {
         </div>
       )}
       <h1
-        className={`${thirdFont.className} tracking-normal text-xl text-everGreen md:text-3xl mb-4 md:mb-8  font-semibold`}
+        className={`${thirdFont.className} tracking-normal text-xl text-lovely md:text-3xl mb-4 md:mb-8  font-semibold`}
       >
         Checkout
       </h1>
@@ -678,7 +678,7 @@ const CheckoutClientPage = () => {
               contact
             </div>
             <div className="flex  items-center gap-2 w-full ">
-              <label className="text-everGreen text-base">Email</label>
+              <label className="text-lovely text-base">Email</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -737,7 +737,7 @@ const CheckoutClientPage = () => {
             <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen whitespace-nowrap text-base">
+                  <label className="text-lovely whitespace-nowrap text-base">
                     Beautiful Bride First Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -763,7 +763,7 @@ const CheckoutClientPage = () => {
               </div>
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-base whitespace-nowrap">
+                  <label className="text-lovely text-base whitespace-nowrap">
                     Beautiful Bride Last Name
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -788,7 +788,7 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex gap-2 w-full items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Lovely Bride&apos;s address
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -812,7 +812,7 @@ const CheckoutClientPage = () => {
               </div>
             </div>
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Apartment,Suite etc. (Optional)
               </label>
               <input
@@ -826,7 +826,7 @@ const CheckoutClientPage = () => {
             <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen text-base whitespace-nowrap">
+                  <label className="text-lovely text-base whitespace-nowrap">
                     Postal/Zip code
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -853,7 +853,7 @@ const CheckoutClientPage = () => {
 
               <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
                 <div className="flex gap-2 w-full items-center">
-                  <label className="text-everGreen text-base whitespace-nowrap">
+                  <label className="text-lovely text-base whitespace-nowrap">
                     City
                   </label>
                   <div className="flex w-full gap-1 flex-col">
@@ -879,7 +879,7 @@ const CheckoutClientPage = () => {
             </div>
 
             <div className="flex w-full  gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Governate
               </label>
               {countryID === 65 ? (
@@ -908,7 +908,7 @@ const CheckoutClientPage = () => {
               )}
             </div>
             <div className="flex w-full gap-2 items-center">
-              <label className="text-everGreen text-base whitespace-nowrap">
+              <label className="text-lovely text-base whitespace-nowrap">
                 Phone
               </label>
               <div className="flex w-full gap-1 flex-col">
@@ -944,7 +944,7 @@ const CheckoutClientPage = () => {
                     <input
                       type="checkbox"
                       name="cash"
-                      className="appearance-none h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely checked:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely checked:ring-lovely  checked:bg-lovely "
                       checked={payment === "cash"}
                       onChange={() => {
                         setPayment("cash");
@@ -957,7 +957,7 @@ const CheckoutClientPage = () => {
                   <div className="flex items-center gap-6">
                     <input
                       type="checkbox"
-                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
                       checked={payment === "card"}
                       onChange={() => {
                         setPayment("card");
@@ -990,7 +990,7 @@ const CheckoutClientPage = () => {
                       name="billingAddress"
                       checked={useSameAsShipping}
                       onChange={() => setUseSameAsShipping(true)}
-                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
                     />
                     <span className=" ">Same as shipping address</span>
                   </label>
@@ -1002,7 +1002,7 @@ const CheckoutClientPage = () => {
                       name="billingAddress"
                       checked={!useSameAsShipping}
                       onChange={() => setUseSameAsShipping(false)}
-                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
                     />
                     <span className="">Use a different billing address</span>
                   </label>
@@ -1050,7 +1050,7 @@ const CheckoutClientPage = () => {
                 </div>
                 <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
                   <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-everGreen">First Name</label>
+                    <label className="text-lovely">First Name</label>
                     <input
                       onChange={handleInputChange}
                       name="billingFirstName"
@@ -1064,7 +1064,7 @@ const CheckoutClientPage = () => {
                     />
                   </div>
                   <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-everGreen">Last Name</label>
+                    <label className="text-lovely">Last Name</label>
                     <input
                       name="billingLastName"
                       onChange={handleInputChange}
@@ -1079,7 +1079,7 @@ const CheckoutClientPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 w-full">
-                  <label className="text-everGreen">
+                  <label className="text-lovely">
                     Lovely Bride&apos;s address
                   </label>
                   <input
@@ -1095,7 +1095,7 @@ const CheckoutClientPage = () => {
                   />
                 </div>
                 <div className="flex w-full  gap-2 items-center">
-                  <label className="text-everGreen text-nowrap">
+                  <label className="text-lovely text-nowrap">
                     Apartment,Suite ETC. (Optional)
                   </label>
                   <input
@@ -1112,7 +1112,7 @@ const CheckoutClientPage = () => {
                 </div>
                 <div className="flex w-full gap-2">
                   <div className="flex w-full gap-2 md:w-3/5 items-center">
-                    <label className="text-everGreen">
+                    <label className="text-lovely">
                       Postal/Zip code (Optional)
                     </label>
                     <input
@@ -1129,7 +1129,7 @@ const CheckoutClientPage = () => {
                   </div>
 
                   <div className="flex w-full  md:w-2/5 gap-2 items-center">
-                    <label className="text-everGreen">City</label>
+                    <label className="text-lovely">City</label>
                     <input
                       onChange={handleInputChange}
                       name="billingCity"
@@ -1143,7 +1143,7 @@ const CheckoutClientPage = () => {
                 </div>
 
                 <div className="flex w-full  gap-2 items-center">
-                  <label className="text-everGreen">Governate</label>
+                  <label className="text-lovely">Governate</label>
                   {billingCountry === 65 ? (
                     <select
                       onChange={handleInputChange}
@@ -1178,7 +1178,7 @@ const CheckoutClientPage = () => {
                   )}
                 </div>
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-everGreen">Phone</label>
+                  <label className="text-lovely">Phone</label>
                   <input
                     onChange={handleInputChange}
                     type="text"
@@ -1203,14 +1203,11 @@ const CheckoutClientPage = () => {
              <p className='text-[12px] mt-6 lg:text-base'>{total} LE</p>
            </div>
          </div> */}
-            {payment === "cash" || payment === "instapay" ? (
+            {payment === "cash" || "instapay" ? (
               <div className={`flex justify-end`}>
                 <button
                   className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSubmit(e as any);
-                  }}
+                  onClick={handleSubmit}
                   disabled={loading || items.length === 0}
                 >
                   Confirm order
@@ -1219,10 +1216,13 @@ const CheckoutClientPage = () => {
             ) : (
               <div className="flex justify-end">
                 <button
-                  onClick={handleSubmit}
                   disabled={items.length === 0 || loading}
                   type="submit"
-                  className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
+                  className={`border transition duration-300 border-lovely p-1 ${
+                    items.length === 0 || loading
+                      ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
+                      : "hover:cursor-pointer hover:bg-lovely hover:text-white text-lovely"
+                  }`}
                 >
                   PROCEED TO PAYMENT
                 </button>
@@ -1235,7 +1235,7 @@ const CheckoutClientPage = () => {
                   href="/policies?terms-and-conditions"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-everGreen underline"
+                  className="text-lovely underline"
                 >
                   terms and conditions
                 </Link>
@@ -1317,7 +1317,7 @@ const CheckoutClientPage = () => {
           <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
             <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
               <h2
-                className={`${thirdFont.className} text-lg lg:text-2xl  text-everGreen mb-6`}
+                className={`${thirdFont.className} text-lg lg:text-2xl  text-lovely mb-6`}
               >
                 Order Summary
               </h2>
@@ -1336,7 +1336,7 @@ const CheckoutClientPage = () => {
               />
 
               {/* Order Totals */}
-              <div className="mt-6 space-y-2 text-everGreen">
+              <div className="mt-6 space-y-2 text-lovely">
                 <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>
@@ -1441,7 +1441,7 @@ const CheckoutClientPage = () => {
                   {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
                 </div>
               </div>
-              <div className="mt-6 space-y-2 text-everGreen">
+              <div className="mt-6 space-y-2 text-lovely">
                 <div className="flex justify-between text-base">
                   <span>Subtotal</span>
                   <span>{subTotal} LE</span>

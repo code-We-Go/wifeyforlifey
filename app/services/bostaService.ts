@@ -64,7 +64,7 @@ class BostaService {
   private getHeaders() {
     return {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.bostAPI}`,
+      Authorization: `${this.bostAPI}`,
     };
   }
 
@@ -108,19 +108,17 @@ class BostaService {
   // Helper method to create delivery payload from order data
   createDeliveryPayload(
     order: any,
-    pickupAddress: BostaAddress,
-    returnAddress: BostaAddress,
-    webhookUrl: string
+    webhookUrl: string = `${process.env.baseUrl}api/webhooks/bosta`
   ): BostaDeliveryPayload {
     const itemsCount =
       order.cart?.reduce(
         (total: number, item: any) => total + item.quantity,
         0
-      ) || 1;
+      ) || 2;
     const description =
       order.cart
         ?.map((item: any) => `${item.productName} (${item.quantity})`)
-        .join(", ") || "Order items";
+        .join(", ") || "Desc.";
 
     return {
       type: 10,
@@ -129,29 +127,47 @@ class BostaService {
         size: "MEDIUM",
         packageDetails: {
           itemsCount,
-          description: description.substring(0, 100), // Limit description length
+          description: description.substring(0, 100) || "Desc.",
         },
       },
-      notes: `Order #${order._id}`,
-      cod: order.cash === "true" ? order.total : 0,
+      notes: "Welcome Note",
+      cod: order.cash === "true" ? order.total : 50,
       dropOffAddress: {
-        city: order.city || "",
-        zoneId: "", // You'll need to map cities to zone IDs
-        districtId: "", // You'll need to map addresses to district IDs
-        firstLine: order.address || "",
-        secondLine: order.apartment || "",
-        buildingNumber: "",
-        floor: "",
-        apartment: order.apartment || "",
+        city: order.city || "Helwan",
+        zoneId: "NQz5sDOeG",
+        districtId: "aiJudRHeOt",
+        firstLine: order.address || "Helwan street x",
+        secondLine: order.apartment || "Near to Bosta school",
+        buildingNumber: "123",
+        floor: "4",
+        apartment: "2",
       },
-      pickupAddress,
-      returnAddress,
-      businessReference: order._id,
+      pickupAddress: {
+        city: process.env.BOSTA_PICKUP_CITY || "Helwan",
+        zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
+        districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
+        firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Helwan street x",
+        secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "Near to Bosta school",
+        buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
+        floor: process.env.BOSTA_PICKUP_FLOOR || "4",
+        apartment: process.env.BOSTA_PICKUP_APARTMENT || "2",
+      },
+      returnAddress: {
+        city: process.env.BOSTA_RETURN_CITY || "Helwan",
+        zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
+        districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
+        firstLine: process.env.BOSTA_RETURN_ADDRESS || "Maadi",
+        secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "Nasr City",
+        buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
+        floor: process.env.BOSTA_RETURN_FLOOR || "4",
+        apartment: process.env.BOSTA_RETURN_APARTMENT || "2",
+      },
+      businessReference: order._id || "43535252",
       receiver: {
-        firstName: order.firstName || "",
-        lastName: order.lastName || "",
-        phone: order.phone || "",
-        email: order.email || "",
+        firstName: order.firstName || "Sasuke",
+        lastName: order.lastName || "Uchiha",
+        phone: order.phone || "01065685435",
+        email: order.email || "ahmed@ahmed.com",
       },
       webhookUrl,
     };
