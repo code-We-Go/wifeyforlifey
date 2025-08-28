@@ -181,8 +181,8 @@ export async function POST(request: Request) {
 
           const deliveryPayload = bostaService.createDeliveryPayload(
             res,
-            pickupAddress,
-            returnAddress,
+            // pickupAddress,
+            // returnAddress,
             webhookUrl
           );
 

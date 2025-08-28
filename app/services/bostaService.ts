@@ -120,6 +120,8 @@ class BostaService {
         ?.map((item: any) => `${item.productName} (${item.quantity})`)
         .join(", ") || "Desc.";
 
+    console.log("description", description);
+
     return {
       type: 10,
       specs: {
@@ -131,7 +133,7 @@ class BostaService {
         },
       },
       notes: "Welcome Note",
-      cod: order.cash === "true" ? order.total : 50,
+      cod: order.cash === "cash" ? order.total : 0,
       dropOffAddress: {
         city: order.city || "Helwan",
         zoneId: "NQz5sDOeG",
@@ -147,7 +149,8 @@ class BostaService {
         zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
         districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
         firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Helwan street x",
-        secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "Near to Bosta school",
+        secondLine:
+          process.env.BOSTA_PICKUP_ADDRESS_2 || "Near to Bosta school",
         buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
         floor: process.env.BOSTA_PICKUP_FLOOR || "4",
         apartment: process.env.BOSTA_PICKUP_APARTMENT || "2",
