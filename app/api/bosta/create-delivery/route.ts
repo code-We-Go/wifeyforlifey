@@ -69,8 +69,6 @@ export async function POST(request: Request) {
     // Create delivery payload
     const deliveryPayload = bostaService.createDeliveryPayload(
       order,
-      pickupAddress || DEFAULT_PICKUP_ADDRESS,
-      returnAddress || DEFAULT_RETURN_ADDRESS,
       webhookUrl
     );
 

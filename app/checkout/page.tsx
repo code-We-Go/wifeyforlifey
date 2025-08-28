@@ -22,6 +22,8 @@ import { Spinner } from "@material-tailwind/react";
 import { useAuth } from "@/hooks/useAuth";
 import { Info } from "lucide-react";
 import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
+import BostaLocationSelector from "./components/BostaLocationSelector";
+import { BostaCity, BostaZone, BostaDistrict } from "@/app/services/bostaLocationService";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -215,6 +217,12 @@ const CheckoutClientPage = () => {
   type Payment = "cash" | "card" | "instapay";
   const { user } = useContext(userContext);
   const [shipping, setShipping] = useState(70);
+  const [bostaLocation, setBostaLocation] = useState<{
+    city: BostaCity | null;
+    zone: BostaZone | null;
+    district: BostaDistrict | null;
+    shippingCost: number;
+  }>({ city: null, zone: null, district: null, shippingCost: 70 });
   const [payment, setPayment] = useState<Payment>("card");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -253,12 +261,22 @@ const CheckoutClientPage = () => {
     if (discount && discount.calculationType === "FREE_SHIPPING") {
       setShipping(0);
     }
-    //     setFormData((prevFormData)=>({
-    // ...prevFormData,
-    // appliedDiscount:discount?._id,
-    // // appliedDiscountAmount:
-    //     }));
-  }; // Default to the first state's name or an empty string
+    //     setFormData((prevFormData)=>({...prevFormData,appliedDiscount:discount?._id,}));
+  };
+
+  // Handle Bosta location changes
+  const handleBostaLocationChange = (location: {
+    city: BostaCity | null;
+    zone: BostaZone | null;
+    district: BostaDistrict | null;
+    shippingCost: number;
+  }) => {
+    setBostaLocation(location);
+    // Update shipping cost if no free shipping discount is applied
+    if (!appliedDiscount || appliedDiscount.calculationType !== "FREE_SHIPPING") {
+      setShipping(location.shippingCost);
+    }
+  };
   useEffect(() => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -266,8 +284,14 @@ const CheckoutClientPage = () => {
       shipping: shipping,
       subTotal: subTotal,
       cart: items,
+      bostaCity: bostaLocation.city?._id || "",
+      bostaCityName: bostaLocation.city?.name || "",
+      bostaZone: bostaLocation.zone?._id || "",
+      bostaZoneName: bostaLocation.zone?.name || "",
+      bostaDistrict: bostaLocation.district?.districtId || "",
+      bostaDistrictName: bostaLocation.district?.districtName || "",
     }));
-  }, [items]);
+  }, [items, bostaLocation, total, shipping, subTotal]);
   useEffect(() => {
     const countryName = countries.find((countryy) => countryy.id === countryID);
 
@@ -313,6 +337,13 @@ const CheckoutClientPage = () => {
     billingCity: "",
     billingPhone: "",
     subTotal: subTotal,
+    // Bosta location data
+    bostaCity: bostaLocation.city?._id || "",
+    bostaCityName: bostaLocation.city?.name || "",
+    bostaZone: bostaLocation.zone?._id || "",
+    bostaZoneName: bostaLocation.zone?.name || "",
+    bostaDistrict: bostaLocation.district?.districtId || "",
+        bostaDistrictName: bostaLocation.district?.districtName || "",
     // currency:country===65?'LE':'USD'
     currency: "LE",
     // currency: user.userCountry === "EG" ? "LE" : "USD",
@@ -878,26 +909,19 @@ const CheckoutClientPage = () => {
               </div>
             </div>
 
-            <div className="flex w-full  gap-2 items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                Governate
-              </label>
-              {countryID === 65 ? (
-                <select
-                  onChange={handleStateChange}
-                  name="state"
-                  value={formData.state}
-                  className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
-                >
-                  {states.map((state: any, index: number) => {
-                    return (
-                      <option key={index} value={state.name}>
-                        {state.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              ) : (
+            {/* Bosta Location Selector for Egyptian customers */}
+            {countryID === 65 ? (
+              <BostaLocationSelector
+                onLocationChange={handleBostaLocationChange}
+                selectedCity={bostaLocation.city?._id}
+                selectedZone={bostaLocation.zone?._id}
+                selectedDistrict={bostaLocation.district?.districtId}
+              />
+            ) : (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  State/Province
+                </label>
                 <input
                   onChange={handleInputChange}
                   value={formData.state}
@@ -905,8 +929,8 @@ const CheckoutClientPage = () => {
                   type="text"
                   className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div className="flex w-full gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
                 Phone

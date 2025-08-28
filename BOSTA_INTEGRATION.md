@@ -5,6 +5,7 @@ This document explains how to set up and use the Bosta shipping integration in y
 ## Overview
 
 The Bosta integration provides:
+
 - Automatic shipment creation when orders are placed
 - Real-time order status updates via webhooks
 - Shipment tracking through Bosta's delivery network
@@ -18,7 +19,7 @@ Copy the Bosta-related variables from `.env.example` to your `.env.local` file a
 
 ```env
 # Bosta API Configuration
-BOSTA_API=http://app.bosta.co/api/v2
+BOSTA_API=https://app.bosta.co/api/v2
 BOSTA_BEARER_TOKEN=your_actual_bearer_token
 
 # Pickup Address (Your warehouse/business location)
@@ -51,6 +52,7 @@ BOSTA_RETURN_APARTMENT=1
 ### 3. Webhook Configuration
 
 In your Bosta dashboard, set up a webhook pointing to:
+
 ```
 https://yourdomain.com/api/webhooks/bosta
 ```
@@ -62,12 +64,14 @@ This webhook will receive real-time updates about shipment status changes.
 ### Order Flow
 
 1. **Order Creation**: When a customer places an order, the system:
+
    - Creates the order in your database
    - Automatically creates a Bosta delivery if Bosta is configured
    - Updates the order with a `shipmentID`
    - Sets order status to 'confirmed'
 
 2. **Status Updates**: Bosta sends webhook notifications when:
+
    - Package is picked up
    - Package is in transit
    - Package is out for delivery
@@ -79,15 +83,19 @@ This webhook will receive real-time updates about shipment status changes.
 ### API Endpoints
 
 #### Create Delivery
+
 ```
 POST /api/bosta/create-delivery
 ```
+
 Manually create a Bosta delivery for an existing order.
 
 #### Webhook Endpoint
+
 ```
 POST /api/webhooks/bosta
 ```
+
 Receives status updates from Bosta and updates order status accordingly.
 
 The webhook receives the following payload structure:
@@ -113,16 +121,16 @@ The webhook receives the following payload structure:
 
 Bosta statuses are mapped to your order statuses as follows:
 
-| Bosta Status | Order Status |
-|--------------|-------------|
-| PENDING | pending |
-| PICKED_UP | confirmed |
-| IN_TRANSIT | shipped |
-| OUT_FOR_DELIVERY | shipped |
-| DELIVERED | delivered |
-| CANCELLED | cancelled |
-| RETURNED | cancelled |
-| EXCEPTION | pending |
+| Bosta Status     | Order Status |
+| ---------------- | ------------ |
+| PENDING          | pending      |
+| PICKED_UP        | confirmed    |
+| IN_TRANSIT       | shipped      |
+| OUT_FOR_DELIVERY | shipped      |
+| DELIVERED        | delivered    |
+| CANCELLED        | cancelled    |
+| RETURNED         | cancelled    |
+| EXCEPTION        | pending      |
 
 ## Database Changes
 
@@ -135,11 +143,13 @@ shipmentID: { type: String, required: false } // Bosta shipment ID
 ## Testing
 
 ### 1. Test Order Creation
+
 1. Place a test order
 2. Check the console logs for Bosta delivery creation
 3. Verify the order has a `shipmentID`
 
 ### 2. Test Webhook
+
 1. Use a tool like ngrok to expose your local server
 2. Configure the webhook URL in Bosta dashboard
 3. Create a test delivery and monitor status updates
@@ -149,14 +159,17 @@ shipmentID: { type: String, required: false } // Bosta shipment ID
 ### Common Issues
 
 1. **Missing Environment Variables**
+
    - Ensure all Bosta environment variables are set
    - Check that `BOSTA_BEARER_TOKEN` is valid
 
 2. **Zone/District ID Issues**
+
    - Contact Bosta support to get correct zone and district IDs
    - Ensure addresses match Bosta's coverage areas
 
 3. **Webhook Not Working**
+
    - Verify webhook URL is accessible from the internet
    - Check webhook endpoint logs for errors
    - Ensure webhook URL is correctly configured in Bosta dashboard
@@ -169,6 +182,7 @@ shipmentID: { type: String, required: false } // Bosta shipment ID
 ### Debug Mode
 
 The integration includes extensive logging. Check your console for:
+
 - Bosta delivery creation attempts
 - API responses from Bosta
 - Webhook payload processing
@@ -177,10 +191,12 @@ The integration includes extensive logging. Check your console for:
 ## Support
 
 For Bosta-specific issues:
+
 - Contact Bosta support at [support@bosta.co](mailto:support@bosta.co)
 - Check Bosta API documentation
 
 For integration issues:
+
 - Check the console logs
 - Verify environment variables
 - Test API endpoints manually

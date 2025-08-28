@@ -85,6 +85,7 @@ export async function POST(request: Request) {
   console.log("items" + items.length);
 
   if (data.cash === "cash") {
+    console.log("BOSTACHECK" + data.bostaZone);
     try {
       await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
@@ -118,6 +119,12 @@ export async function POST(request: Request) {
         billingAddress: data.billingAddress,
         billingApartment: data.billingApartment,
         billingPostalZip: data.billingPostalZip,
+        bostaCity: data.bostaLocation?.city?._id || "",
+        bostaCityName: data.bostaLocation?.city?.name || "",
+        bostaZone: data.bostaLocation?.zone?._id || "",
+        bostaZoneName: data.bostaLocation?.zone?.name || "",
+        bostaDistrict: data.bostaLocation?.district?.districtId || "",
+        bostaDistrictName: data.bostaLocation?.district?.districtName || "",
       });
 
       const loyalty = await LoyaltyTransactionModel.create({
@@ -150,30 +157,30 @@ export async function POST(request: Request) {
           const bostaService = new BostaService();
 
           // Default pickup address (you should configure this in your environment)
-          const pickupAddress: BostaAddress = {
-            city: process.env.BOSTA_PICKUP_CITY || "Cairo",
-            zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
-            districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
-            firstLine:
-              process.env.BOSTA_PICKUP_ADDRESS || "Your Business Address",
-            secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "",
-            buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
-            floor: process.env.BOSTA_PICKUP_FLOOR || "1",
-            apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
-          };
+          // const pickupAddress: BostaAddress = {
+          //   city: process.env.BOSTA_PICKUP_CITY || "Cairo",
+          //   zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
+          //   districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
+          //   firstLine:
+          //     process.env.BOSTA_PICKUP_ADDRESS || "Your Business Address",
+          //   secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "",
+          //   buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
+          //   floor: process.env.BOSTA_PICKUP_FLOOR || "1",
+          //   apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
+          // };
 
-          // Default return address
-          const returnAddress: BostaAddress = {
-            city: process.env.BOSTA_RETURN_CITY || "Cairo",
-            zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
-            districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
-            firstLine:
-              process.env.BOSTA_RETURN_ADDRESS || "Your Return Address",
-            secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "",
-            buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
-            floor: process.env.BOSTA_RETURN_FLOOR || "1",
-            apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
-          };
+          // // Default return address
+          // const returnAddress: BostaAddress = {
+          //   city: process.env.BOSTA_RETURN_CITY || "Cairo",
+          //   zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
+          //   districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
+          //   firstLine:
+          //     process.env.BOSTA_RETURN_ADDRESS || "Your Return Address",
+          //   secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "",
+          //   buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
+          //   floor: process.env.BOSTA_RETURN_FLOOR || "1",
+          //   apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
+          // };
 
           const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
 
@@ -490,6 +497,12 @@ export async function POST(request: Request) {
           billingAddress: data.billingAddress,
           billingApartment: data.billingApartment,
           billingPostalZip: data.billingPostalZip,
+          bostaCity: data.bostaLocation?.city?._id || "",
+          bostaCityName: data.bostaLocation?.city?.name || "",
+          bostaZone: data.bostaLocation?.zone?._id || "",
+          bostaZoneName: data.bostaLocation?.zone?.name || "",
+          bostaDistrict: data.bostaLocation?.district?.districtId || "",
+          bostaDistrictName: data.bostaLocation?.district?.districtName || "",
         });
         return NextResponse.json(
           { token: order.data.client_secret },

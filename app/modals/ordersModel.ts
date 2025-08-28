@@ -75,6 +75,12 @@ const OrderSchema = new Schema(
         billingPostalZip:{ type: String, required: false },
         billingCity:{ type: String, required: false },
         billingPhone:{ type: String, required: false },
+        bostaCity: { type: String, required: false },
+        bostaCityName: { type: String, required: false },
+        bostaZone: { type: String, required: false },
+        bostaZoneName: { type: String, required: false },
+        bostaDistrict: { type: String, required: false },
+        bostaDistrictName: { type: String, required: false },
         createdAt: { type: Date, default: Date.now },
     },
     { timestamps: true } // Automatically adds createdAt and updatedAt fields

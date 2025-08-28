@@ -132,9 +132,9 @@ class BostaService {
       notes: "Welcome Note",
       cod: order.cash === "cash" ? order.total : 0,
       dropOffAddress: {
-        city: order.city || "Cairo",
-   zoneId: "NQz5sDOeG",
-    districtId: "aiJudRHeOt",
+        city: order.bostaCityName || order.city || "Cairo",
+        zoneId: order.bostaZone || "NQz5sDOeG",
+        districtId: order.bostaDistrict || "aiJudRHeOt",
         firstLine: order.address || "Main Street",
         secondLine: order.apartment || "Apartment details",
         buildingNumber: "1",
