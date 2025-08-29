@@ -23,7 +23,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Info } from "lucide-react";
 import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
 import BostaLocationSelector from "./components/BostaLocationSelector";
-import { BostaCity, BostaZone, BostaDistrict } from "@/app/services/bostaLocationService";
+import {
+  BostaCity,
+  BostaZone,
+  BostaDistrict,
+} from "@/app/services/bostaLocationService";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -273,7 +277,10 @@ const CheckoutClientPage = () => {
   }) => {
     setBostaLocation(location);
     // Update shipping cost if no free shipping discount is applied
-    if (!appliedDiscount || appliedDiscount.calculationType !== "FREE_SHIPPING") {
+    if (
+      !appliedDiscount ||
+      appliedDiscount.calculationType !== "FREE_SHIPPING"
+    ) {
       setShipping(location.shippingCost);
     }
   };
@@ -337,13 +344,6 @@ const CheckoutClientPage = () => {
     billingCity: "",
     billingPhone: "",
     subTotal: subTotal,
-    // Bosta location data
-    bostaCity: bostaLocation.city?._id || "",
-    bostaCityName: bostaLocation.city?.name || "",
-    bostaZone: bostaLocation.zone?._id || "",
-    bostaZoneName: bostaLocation.zone?.name || "",
-    bostaDistrict: bostaLocation.district?.districtId || "",
-        bostaDistrictName: bostaLocation.district?.districtName || "",
     // currency:country===65?'LE':'USD'
     currency: "LE",
     // currency: user.userCountry === "EG" ? "LE" : "USD",
@@ -1181,7 +1181,11 @@ const CheckoutClientPage = () => {
                     >
                       {states.map((state: any, index: number) => {
                         return (
-                          <option key={index} value={state.name}>
+                          <option
+                            className="w-full"
+                            key={index}
+                            value={state.name}
+                          >
                             {state.name}
                           </option>
                         );

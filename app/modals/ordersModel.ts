@@ -65,7 +65,7 @@ const OrderSchema = new Schema(
             enum: ["pending","failed" ,"confirmed"],
             default: "pending",
         },
-        shipmentID: { type: String, required: false }, // Bosta shipment ID
+        shipmentID: { type: String, required: false ,default:""}, // Bosta shipment ID
         billingCountry:{ type: String, required: false },
         billingFirstName: { type: String, required: false },
         billingState:{ type: String, required: false },

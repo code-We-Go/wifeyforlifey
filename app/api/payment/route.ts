@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   console.log("items" + items.length);
 
   if (data.cash === "cash") {
-    console.log("BOSTACHECK" + data.bostaZone);
+    console.log("BOSTACHECK" + data.city);
     try {
       await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
@@ -119,12 +119,12 @@ export async function POST(request: Request) {
         billingAddress: data.billingAddress,
         billingApartment: data.billingApartment,
         billingPostalZip: data.billingPostalZip,
-        bostaCity: data.bostaLocation?.city?._id || "",
-        bostaCityName: data.bostaLocation?.city?.name || "",
-        bostaZone: data.bostaLocation?.zone?._id || "",
-        bostaZoneName: data.bostaLocation?.zone?.name || "",
-        bostaDistrict: data.bostaLocation?.district?.districtId || "",
-        bostaDistrictName: data.bostaLocation?.district?.districtName || "",
+        bostaCity: data.bostaCity,
+        bostaCityName: data.bostaCityName,
+        bostaZone: data.bostaZone || "",
+        bostaZoneName: data.bostaZoneName || "",
+        bostaDistrict: data.bostaDistrict || "",
+        bostaDistrictName: data.bostaDistrictName || "",
       });
 
       const loyalty = await LoyaltyTransactionModel.create({
@@ -195,11 +195,13 @@ export async function POST(request: Request) {
           const bostaResult = await bostaService.createDelivery(
             deliveryPayload
           );
-
+          // console.log("bostaResult" + bostaResult);
+          console.log("bostaResult" + JSON.stringify(bostaResult));
           if (bostaResult.success && bostaResult.data) {
             // Update order with shipment ID
+            console.log("shipmentID" + bostaResult.data._id);
             await ordersModel.findByIdAndUpdate(res._id, {
-              shipmentID: bostaResult.data.deliveryId,
+              shipmentID: bostaResult.data._id,
               status: "confirmed",
             });
             console.log(

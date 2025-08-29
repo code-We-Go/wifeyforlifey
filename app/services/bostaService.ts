@@ -42,10 +42,23 @@ interface BostaDeliveryPayload {
 
 interface BostaDeliveryResponse {
   success: boolean;
+  message?: string;
   data?: {
+    _id: string;
     trackingNumber: string;
-    deliveryId: string;
-    state: string;
+    businessReference: string;
+    sender: {
+      _id: string;
+      phone: number;
+      name: string;
+      type: string;
+    };
+    message: string;
+    state: {
+      code: number;
+      value: string;
+    };
+    creationSrc: string;
   };
   error?: string;
 }
@@ -61,9 +74,7 @@ class BostaService {
     this.bostAPI = process.env.BOSTA_API || "";
   }
 
-  async createDelivery(
-    payload: BostaDeliveryPayload
-  ): Promise<BostaDeliveryResponse> {
+  async createDelivery(payload: BostaDeliveryPayload): Promise<any> {
     try {
       const response = await fetch(`${this.baseUrl}/deliveries?apiVersion=1`, {
         method: "POST",
@@ -85,14 +96,7 @@ class BostaService {
         };
       }
 
-      return {
-        success: true,
-        data: {
-          trackingNumber: data.trackingNumber,
-          deliveryId: data._id,
-          state: data.state,
-        },
-      };
+      return data;
     } catch (error) {
       console.error("Bosta Service Error:", error);
       return {
@@ -105,7 +109,7 @@ class BostaService {
   // Helper method to create delivery payload from order data
   createDeliveryPayload(
     order: any,
-    webhookUrl: string = "https://www.google.com/"
+    webhookUrl: string = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`
   ): BostaDeliveryPayload {
     const itemsCount =
       order.cart?.reduce(
@@ -146,8 +150,7 @@ class BostaService {
         zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "1",
         districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "1",
         firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Main Street",
-        secondLine:
-          process.env.BOSTA_PICKUP_ADDRESS_2 || "Pickup location",
+        secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "Pickup location",
         buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "1",
         floor: process.env.BOSTA_PICKUP_FLOOR || "1",
         apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",

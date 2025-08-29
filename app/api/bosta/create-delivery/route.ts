@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     const updatedOrder = await ordersModel.findByIdAndUpdate(
       orderId,
       {
-        shipmentID: result.data?.deliveryId,
+        shipmentID: result.data?._id,
         status: "confirmed", // Update status to confirmed when shipment is created
       },
       { new: true }

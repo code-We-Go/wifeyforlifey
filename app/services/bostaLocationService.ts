@@ -65,7 +65,7 @@ interface BostaDistrictsResponse {
 }
 
 class BostaLocationService {
-  private baseUrl = process.env.BOSTA_API || "http://app.bosta.co/api/v2";
+  private baseUrl = "http://app.bosta.co/api/v2";
   private email = process.env.BOSTA_EMAIL || "";
   private password = process.env.BOSTA_PASSWORD || "";
   private token: string | null = null;
