@@ -24,6 +24,12 @@ import { useParams } from "next/navigation";
 import { Ipackage } from "@/app/interfaces/interfaces";
 import WiigSpinner from "@/app/components/WiigSpinner";
 import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
+import BostaLocationSelector from "../../checkout/components/BostaLocationSelector";
+import {
+  BostaCity,
+  BostaZone,
+  BostaDistrict,
+} from "@/app/services/bostaLocationService";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -175,6 +181,16 @@ const SubscriptionPage = () => {
   const [loading, setLoading] = useState(false);
   // const [shipping, setShipping] = useState(0);
   const [shipping, setShipping] = useState(70);
+  const [bostaLocation, setBostaLocation] = useState<{
+    city: BostaCity | null;
+    zone: BostaZone | null;
+    district: BostaDistrict | null;
+    shippingCost: {
+      priceBeforeVat: number;
+      priceAfterVat: number;
+      shippingFee: number;
+    };
+  }>({ city: null, zone: null, district: null, shippingCost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 } });
   const [payment, setPayment] = useState<"card" | "cash">("card");
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
@@ -233,6 +249,28 @@ const SubscriptionPage = () => {
       country: countryName ? countryName.name : "",
     }));
   }, [total, countryID, countries]);
+
+  // Handle Bosta location changes
+  const handleBostaLocationChange = (location: {
+    city: BostaCity | null;
+    zone: BostaZone | null;
+    district: BostaDistrict | null;
+    shippingCost: {
+      priceBeforeVat: number;
+      priceAfterVat: number;
+      shippingFee: number;
+    };
+  }) => {
+    setBostaLocation(location);
+    // Update shipping cost if no free shipping discount is applied
+    if (
+      !appliedDiscount ||
+      appliedDiscount.calculationType !== "FREE_SHIPPING"
+    ) {
+      setShipping(location.shippingCost.priceBeforeVat);
+    }
+  };
+
   const [formData, setFormData] = useState({
     email: "",
     country: "",
@@ -270,6 +308,13 @@ const SubscriptionPage = () => {
     billingWhatsAppNumber: "", // Added billing WhatsApp number field
     subTotal: subTotal,
     // currency:country===65?'LE':'USD'
+    // Bosta location fields
+    bostaCity: bostaLocation.city?._id || "",
+    bostaCityName: bostaLocation.city?.name || "",
+    bostaZone: bostaLocation.zone?._id || "",
+    bostaZoneName: bostaLocation.zone?.name || "",
+    bostaDistrict: bostaLocation.district?.districtId || "",
+    bostaDistrictName: bostaLocation.district?.districtName || "",
     currency: "LE",
     // currency: user.userCountry === "EG" ? "LE" : "USD",
   });
@@ -316,6 +361,20 @@ const SubscriptionPage = () => {
       }));
     }
   }, [useSameAsShipping]);
+
+  // Update formData when Bosta location changes
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      bostaCity: bostaLocation.city?._id || "",
+      bostaCityName: bostaLocation.city?.name || "",
+      bostaZone: bostaLocation.zone?._id || "",
+      bostaZoneName: bostaLocation.zone?.name || "",
+      bostaDistrict: bostaLocation.district?.districtId || "",
+      bostaDistrictName: bostaLocation.district?.districtName || "",
+    }));
+  }, [bostaLocation]);
+
   useEffect(() => {
     const getCountries = async () => {
       const response = await axios.get("/api/countries");
@@ -421,25 +480,18 @@ const SubscriptionPage = () => {
       );
     }
 
-    if (countryID === 65 && states.length > 0 && shippingZones.length > 0) {
-      const shippingRate = calculateShippingRate(
-        countryID,
-        state,
-        states,
-        countries,
-        shippingZones
-      );
-      console.log("Local shipping rate calculated:", shippingRate);
+    if (countryID === 65) {
+      // For Egyptian customers, shipping is handled by Bosta location selector
+      // Default shipping will be updated when location is selected
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
         setShipping(0);
-      } else {
-        setShipping(shippingRate);
+      } else if (!bostaLocation.city) {
+        // Set default shipping if no Bosta location selected yet
+        setShipping(70);
       }
       const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal);
-      // setTotal(calculatedSubTotal + shippingRate);
-      //Efective One
     } else if (shippingZones.length > 0) {
       const shippingRate = calculateShippingRate(
         countryID,
@@ -458,7 +510,7 @@ const SubscriptionPage = () => {
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     }
-  }, [countryID, states, shippingZones, state, countries, items, packageData]);
+  }, [countryID, states, shippingZones, state, countries, items, packageData, bostaLocation, appliedDiscount]);
 
   let cartItems = () => {
     return items.map((cartItem, index) => (
@@ -600,8 +652,7 @@ const SubscriptionPage = () => {
     // Calculate final total
     const finalTotal = Math.max(
       0,
-      // calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
-      calculatedSubTotal - newDiscountAmount - loyaltyLE
+      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
     );
     setTotal(finalTotal);
   }, [
@@ -854,26 +905,20 @@ const SubscriptionPage = () => {
               </div>
             </div>
 
-            <div className="flex w-full  gap-2 items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                Governate
-              </label>
-              {countryID === 65 ? (
-                <select
-                  onChange={handleStateChange}
-                  name="state"
-                  value={formData.state}
-                  className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
-                >
-                  {states.map((state: any, index: number) => {
-                    return (
-                      <option key={index} value={state.name}>
-                        {state.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              ) : (
+            {/* Bosta Location Selector for Egyptian customers */}
+            {countryID === 65 ? (
+              <BostaLocationSelector
+                onLocationChange={handleBostaLocationChange}
+                selectedCity={bostaLocation.city?._id}
+                selectedZone={bostaLocation.zone?._id}
+                selectedDistrict={bostaLocation.district?.districtId}
+                orderTotal={packageData?.price || 0}
+              />
+            ) : (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  State/Province
+                </label>
                 <input
                   onChange={handleInputChange}
                   value={formData.state}
@@ -881,8 +926,8 @@ const SubscriptionPage = () => {
                   type="text"
                   className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div className="flex w-full gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
                 Phone
@@ -1369,15 +1414,19 @@ const SubscriptionPage = () => {
                     <span className=" line-through">Shipping</span>
                     <span className="line-through">
                       {(() => {
-                        // Calculate the real shipping before discount
-                        const realShipping = calculateShippingRate(
-                          countryID,
-                          state,
-                          states,
-                          countries,
-                          shippingZones
-                        );
-                        return realShipping;
+                        // Show the shipping cost that would have been charged
+                        if (countryID === 65 && bostaLocation.city) {
+                          return bostaLocation.shippingCost?.shippingFee || 70;
+                        } else {
+                          const realShipping = calculateShippingRate(
+                            countryID,
+                            state,
+                            states,
+                            countries,
+                            shippingZones
+                          );
+                          return realShipping;
+                        }
                       })()}{" "}
                       LE
                     </span>

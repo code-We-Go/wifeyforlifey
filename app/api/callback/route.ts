@@ -9,6 +9,8 @@ import { register } from "node:module";
 import packageModel from "@/app/modals/packageModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import { sendMail } from "@/lib/email";
+import BostaService from "@/app/services/bostaService";
+import { generateEmailBody } from "@/utils/generateOrderEmail";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -38,12 +40,12 @@ export async function GET(request: Request) {
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-      const expiryDateLifeTime = new Date();
-      expiryDateLifeTime.setFullYear(expiryDateLifeTime.getFullYear() + 100);
-      const subscribtions = await subscriptionsModel.countDocuments({
-        subscribed: true,
-      });
-      console.log("lifeTime" + expiryDateLifeTime);
+      // const expiryDateLifeTime = new Date();
+      // expiryDateLifeTime.setFullYear(expiryDateLifeTime.getFullYear() + 100);
+      // const subscribtions = await subscriptionsModel.countDocuments({
+      //   subscribed: true,
+      // });
+      // console.log("lifeTime" + expiryDateLifeTime);
       // 1. Update the document and get the updated version
       const updatedSubscription = await subscriptionsModel.findOneAndUpdate(
         { paymentID: data.order },
@@ -61,6 +63,74 @@ export async function GET(request: Request) {
         .findOne({ paymentID: data.order })
         .populate({ path: "packageID", options: { strictPopulate: false } });
       if (subscription) {
+        try {
+          if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
+            const bostaService = new BostaService();
+
+            // Default pickup address (you should configure this in your environment)
+            // const pickupAddress: BostaAddress = {
+            //   city: process.env.BOSTA_PICKUP_CITY || "Cairo",
+            //   zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
+            //   districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
+            //   firstLine:
+            //     process.env.BOSTA_PICKUP_ADDRESS || "Your Business Address",
+            //   secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "",
+            //   buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
+            //   floor: process.env.BOSTA_PICKUP_FLOOR || "1",
+            //   apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
+            // };
+
+            // // Default return address
+            // const returnAddress: BostaAddress = {
+            //   city: process.env.BOSTA_RETURN_CITY || "Cairo",
+            //   zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
+            //   districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
+            //   firstLine:
+            //     process.env.BOSTA_RETURN_ADDRESS || "Your Return Address",
+            //   secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "",
+            //   buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
+            //   floor: process.env.BOSTA_RETURN_FLOOR || "1",
+            //   apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
+            // };
+
+            const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
+
+            const deliveryPayload = bostaService.createDeliveryPayload(
+              subscription,
+              // pickupAddress,
+              // returnAddress,
+              webhookUrl
+            );
+
+            console.log("Creating Bosta delivery for order:", subscription._id);
+            const bostaResult = await bostaService.createDelivery(
+              deliveryPayload
+            );
+            // console.log("bostaResult" + bostaResult);
+            console.log("bostaResult" + JSON.stringify(bostaResult));
+            if (bostaResult.success && bostaResult.data) {
+              // Update order with shipment ID
+              console.log("shipmentID" + bostaResult.data._id);
+              await subscriptionsModel.findByIdAndUpdate(subscription._id, {
+                shipmentID: bostaResult.data._id,
+                status: "confirmed",
+              });
+              console.log(
+                "Bosta delivery created successfully:",
+                bostaResult.data.trackingNumber
+              );
+            } else {
+              console.error(
+                "Failed to create Bosta delivery:",
+                bostaResult.error
+              );
+              // Don't fail the order creation if Bosta fails
+            }
+          }
+        } catch (bostaError) {
+          console.error("Bosta integration error:", bostaError);
+          // Don't fail the order creation if Bosta fails
+        }
         // Send email notification for new subscription
         try {
           await sendMail({
@@ -128,6 +198,127 @@ export async function GET(request: Request) {
           { orderID: data.order },
           { payment: "confirmed" }
         );
+        try {
+          if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
+            const bostaService = new BostaService();
+
+            // Default pickup address (you should configure this in your environment)
+            // const pickupAddress: BostaAddress = {
+            //   city: process.env.BOSTA_PICKUP_CITY || "Cairo",
+            //   zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "NQz5sDOeG",
+            //   districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "aiJudRHeOt",
+            //   firstLine:
+            //     process.env.BOSTA_PICKUP_ADDRESS || "Your Business Address",
+            //   secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "",
+            //   buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "123",
+            //   floor: process.env.BOSTA_PICKUP_FLOOR || "1",
+            //   apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
+            // };
+
+            // // Default return address
+            // const returnAddress: BostaAddress = {
+            //   city: process.env.BOSTA_RETURN_CITY || "Cairo",
+            //   zoneId: process.env.BOSTA_RETURN_ZONE_ID || "NQz5sDOeG",
+            //   districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "aiJudRHeOt",
+            //   firstLine:
+            //     process.env.BOSTA_RETURN_ADDRESS || "Your Return Address",
+            //   secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "",
+            //   buildingNumber: process.env.BOSTA_RETURN_BUILDING || "123",
+            //   floor: process.env.BOSTA_RETURN_FLOOR || "1",
+            //   apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
+            // };
+
+            const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
+
+            const deliveryPayload = bostaService.createDeliveryPayload(
+              res,
+              // pickupAddress,
+              // returnAddress,
+              webhookUrl
+            );
+
+            console.log("Creating Bosta delivery for order:", res._id);
+            const bostaResult = await bostaService.createDelivery(
+              deliveryPayload
+            );
+            // console.log("bostaResult" + bostaResult);
+            console.log("bostaResult" + JSON.stringify(bostaResult));
+            if (bostaResult.success && bostaResult.data) {
+              // Update order with shipment ID
+              console.log("shipmentID" + bostaResult.data._id);
+              await ordersModel.findByIdAndUpdate(res._id, {
+                shipmentID: bostaResult.data._id,
+                status: "confirmed",
+              });
+              console.log(
+                "Bosta delivery created successfully:",
+                bostaResult.data.trackingNumber
+              );
+            } else {
+              console.error(
+                "Failed to create Bosta delivery:",
+                bostaResult.error
+              );
+              // Don't fail the order creation if Bosta fails
+            }
+          }
+        } catch (bostaError) {
+          console.error("Bosta integration error:", bostaError);
+          // Don't fail the order creation if Bosta fails
+        }
+        // Send order confirmation email to customer
+        await sendMail({
+          to: res.email,
+          name: res.firstName + " " + res.lastName,
+          subject: "Order Confirmation",
+          body: generateEmailBody(
+            res.cart,
+            res.firstName,
+            res.lastName,
+            res.phone,
+            res.email,
+            res.total,
+            res.subTotal,
+            res.shipping,
+            res.currency,
+            res.address,
+            res._id,
+            res.cash,
+            res.country,
+            res.state,
+            res.city,
+            res.postalZip,
+            res.apartment
+          ),
+          from: "orders@shopwifeyforlifey.com",
+        });
+
+        // Send a copy to orders@shopwifeyforlifey.com
+        await sendMail({
+          to: "orders@shopwifeyforlifey.com",
+          from: "noreply@shopwifeyforlifey.com",
+          name: "New Order Notification",
+          subject: `New Order #${res._id} - ${res.firstName} ${res.lastName}`,
+          body: generateEmailBody(
+            res.cart,
+            res.firstName,
+            res.lastName,
+            res.phone,
+            res.email,
+            res.total,
+            res.subTotal,
+            res.shipping,
+            res.currency,
+            res.address,
+            res._id,
+            res.cash,
+            res.country,
+            res.state,
+            res.city,
+            res.postalZip,
+            res.apartment
+          ),
+        });
         const loyalty = await LoyaltyTransactionModel.create({
           email: res.email,
           type: "earn",

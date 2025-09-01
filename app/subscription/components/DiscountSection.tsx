@@ -8,11 +8,13 @@ import { thirdFont } from "@/fonts";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface DiscountSectionProps {
+  redeemType: string;
   onDiscountApplied: (discount: Discount | null) => void;
 }
 
 const DiscountSection: React.FC<DiscountSectionProps> = ({
   onDiscountApplied,
+  redeemType,
 }) => {
   const [discountCode, setDiscountCode] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +33,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
         0
       );
       const response = await fetch(
-        `/api/active-discounts?cartTotal=${cartTotal}`
+        `/api/active-discounts?cartTotal=${cartTotal}&redeemType=${redeemType}`
       );
       const data = await response.json();
 

@@ -45,6 +45,19 @@ const SubscriptionSchema = new Schema(
     shipping: { type: Number, required: false },
     currency: { type: String, required: false },
     expiryDate: { type: Date, default: Date.now },
+
+    bostaCity: { type: String, required: false },
+    bostaCityName: { type: String, required: false },
+    bostaZone: { type: String, required: false },
+    bostaZoneName: { type: String, required: false },
+    bostaDistrict: { type: String, required: false },
+    bostaDistrictName: { type: String, required: false },
+    shipmentID: { type: String, required: false, default: "" }, // Bosta shipment ID
+    status: {
+      type: String,
+      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+      default: "pending",
+    },
     createdAt: {
       type: Date,
       default: Date.now,

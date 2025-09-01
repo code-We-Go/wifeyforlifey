@@ -102,14 +102,53 @@ class BostaClientService {
     }
   }
 
-  // Calculate shipping cost based on city sector
-  calculateShippingCost(city: BostaCity): number {
-    // Basic shipping cost calculation based on sector
-    // You can adjust these rates based on your business needs
-    const baseCost = 50;
-    const sectorMultiplier = city.sector || 1;
+  async calculateShippingCost(
+    cod: number,
+    dropOffCity: string,
+    pickupCity: string = 'Cairo',
+    size: string = 'Normal',
+    type: string = 'SEND'
+  ): Promise<{
+    priceBeforeVat: number;
+    priceAfterVat: number;
+    shippingFee: number;
+    vat: number;
+    currency: string;
+  }> {
+    try {
+      const queryParams = new URLSearchParams({
+        cod: cod.toString(),
+        dropOffCity,
+        pickupCity,
+        size,
+        type
+      });
 
-    return baseCost + sectorMultiplier * 10;
+      const response = await fetch(`${this.baseUrl}/pricing?${queryParams}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to calculate shipping cost');
+      }
+      
+      return {
+        priceBeforeVat: data.data.priceBeforeVat || 0,
+        priceAfterVat: data.data.priceAfterVat || 0,
+        shippingFee: data.data.shippingFee || 0,
+        vat: data.data.vat || 0,
+        currency: data.data.currency || 'EGP'
+      };
+    } catch (error) {
+      console.error('Error calculating shipping cost:', error);
+      // Return fallback values
+      return {
+        priceBeforeVat: 50,
+        priceAfterVat: 57,
+        shippingFee: 50,
+        vat: 0.14,
+        currency: 'EGP'
+      };
+    }
   }
 }
 

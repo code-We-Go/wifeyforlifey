@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   console.log("items" + items.length);
 
   if (data.cash === "cash") {
-    console.log("BOSTACHECK" + data.city);
+    console.log("BOSTACHECK" + data.bostaZone);
     try {
       await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
@@ -391,6 +391,12 @@ export async function POST(request: Request) {
           shipping: data.shipping,
           currency: data.currency,
           cash: data.cash,
+          bostaCity: data.bostaCity,
+          bostaCityName: data.bostaCityName,
+          bostaZone: data.bostaZone,
+          bostaZoneName: data.bostaZoneName,
+          bostaDistrict: data.bostaDistrict,
+          bostaDistrictName: data.bostaDistrictName,
         });
         // await ordersModel.create({
         //   email:data.email,
@@ -499,12 +505,12 @@ export async function POST(request: Request) {
           billingAddress: data.billingAddress,
           billingApartment: data.billingApartment,
           billingPostalZip: data.billingPostalZip,
-          bostaCity: data.bostaLocation?.city?._id || "",
-          bostaCityName: data.bostaLocation?.city?.name || "",
-          bostaZone: data.bostaLocation?.zone?._id || "",
-          bostaZoneName: data.bostaLocation?.zone?.name || "",
-          bostaDistrict: data.bostaLocation?.district?.districtId || "",
-          bostaDistrictName: data.bostaLocation?.district?.districtName || "",
+          bostaCity: data.bostaCity,
+          bostaCityName: data.bostaCityName,
+          bostaZone: data.bostaZone || "",
+          bostaZoneName: data.bostaZoneName || "",
+          bostaDistrict: data.bostaDistrict || "",
+          bostaDistrictName: data.bostaDistrictName || "",
         });
         return NextResponse.json(
           { token: order.data.client_secret },

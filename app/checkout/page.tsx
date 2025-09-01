@@ -23,11 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Info } from "lucide-react";
 import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
 import BostaLocationSelector from "./components/BostaLocationSelector";
-import {
-  BostaCity,
-  BostaZone,
-  BostaDistrict,
-} from "@/app/services/bostaLocationService";
+import { BostaCity, BostaZone, BostaDistrict } from "@/app/services/bostaLocationService";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -225,8 +221,17 @@ const CheckoutClientPage = () => {
     city: BostaCity | null;
     zone: BostaZone | null;
     district: BostaDistrict | null;
-    shippingCost: number;
-  }>({ city: null, zone: null, district: null, shippingCost: 70 });
+    shippingCost: {
+      priceBeforeVat: number;
+      priceAfterVat: number;
+      shippingFee: number;
+    };
+  }>({ 
+    city: null, 
+    zone: null, 
+    district: null, 
+    shippingCost: { priceBeforeVat: 70, priceAfterVat: 70, shippingFee: 70 } 
+  });
   const [payment, setPayment] = useState<Payment>("card");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -273,15 +278,16 @@ const CheckoutClientPage = () => {
     city: BostaCity | null;
     zone: BostaZone | null;
     district: BostaDistrict | null;
-    shippingCost: number;
+    shippingCost: {
+      priceBeforeVat: number;
+      priceAfterVat: number;
+      shippingFee: number;
+    };
   }) => {
     setBostaLocation(location);
     // Update shipping cost if no free shipping discount is applied
-    if (
-      !appliedDiscount ||
-      appliedDiscount.calculationType !== "FREE_SHIPPING"
-    ) {
-      setShipping(location.shippingCost);
+    if (!appliedDiscount || appliedDiscount.calculationType !== "FREE_SHIPPING") {
+      setShipping(location.shippingCost.priceBeforeVat);
     }
   };
   useEffect(() => {
@@ -1181,11 +1187,7 @@ const CheckoutClientPage = () => {
                     >
                       {states.map((state: any, index: number) => {
                         return (
-                          <option
-                            className="w-full"
-                            key={index}
-                            value={state.name}
-                          >
+                          <option key={index} value={state.name}>
                             {state.name}
                           </option>
                         );
