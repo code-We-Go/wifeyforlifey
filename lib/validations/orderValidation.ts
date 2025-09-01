@@ -7,6 +7,9 @@ function orderValidation(formData: any) {
     city?: string;
     address?: string;
     phone?: string;
+    bostaCityName?: string;
+    bostaZoneName?: string;
+    bostaDistrictName?: string;
   };
 
   // Initialize error object with the type
@@ -33,6 +36,15 @@ function orderValidation(formData: any) {
 
   if (!formData.phone || !/^\+?\d+$/.test(formData.phone.trim())) {
     errors.phone = "Phone number is required.";
+  }
+  if (!formData.bostaCityName.trim()) {
+    errors.bostaCityName = "City is required.";
+  }
+  if (!formData.bostaZoneName.trim()) {
+    errors.bostaZoneName = "City is required.";
+  }
+  if (!formData.bostaDistrictName.trim()) {
+    errors.bostaDistrictName = "City is required.";
   }
 
   return errors;

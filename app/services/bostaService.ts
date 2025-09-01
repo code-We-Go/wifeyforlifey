@@ -116,12 +116,13 @@ class BostaService {
         (total: number, item: any) => total + item.quantity,
         0
       ) || 2;
-    const description =
-      order.cart
-        ?.map((item: any) => `${item.productName} (${item.quantity})`)
-        .join(", ") || "Desc.";
+      const cash = order.cash ? order.cash : "card";
+    // const description =
+    //   order.cart
+    //     ?.map((item: any) => `${item.productName} (${item.quantity})`)
+    //     .join(", ") || "Desc.";
 
-    console.log("description", description);
+    // console.log("description", description);
 
     return {
       type: 10,
@@ -130,11 +131,11 @@ class BostaService {
         size: "MEDIUM",
         packageDetails: {
           itemsCount,
-          description: description.substring(0, 100) || "Desc.",
+          description:  "Desc.",
         },
       },
       notes: "Welcome Note",
-      cod: order.cash === "cash" ? order.total : 0,
+      cod: cash  === "cash" ? order.total : 0,
       dropOffAddress: {
         city: order.bostaCityName || order.city || "Cairo",
         zoneId: order.bostaZone || "NQz5sDOeG",
