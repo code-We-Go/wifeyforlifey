@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 // Connect to database
 const loadDB = async () => {
@@ -72,10 +73,36 @@ export async function POST(request: Request) {
     const order = await ordersModel.findById(payload.businessReference);
 
     if (!order) {
-      console.error(
-        `Order not found for businessReference: ${payload.businessReference}`
+      // If order not found, check subscriptions
+      const subscription = await subscriptionsModel.findById(payload.businessReference);
+      
+      if (!subscription) {
+        return NextResponse.json(
+          {
+            error: `Order or subscription not found for businessReference: ${payload.businessReference}`,
+          },
+          { status: 404 }
+        );
+      }
+      
+      // Update subscription status
+      await subscriptionsModel.findByIdAndUpdate(
+        payload.businessReference,
+        { status: orderStatus },
+        { new: true }
       );
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+
+      console.log(
+        `Subscription ${payload.businessReference} updated to status: ${orderStatus}`,
+        new Date().toISOString()
+      );
+
+      return NextResponse.json({
+        success: true,
+        message: "Subscription status updated successfully",
+        subscriptionId: payload.businessReference,
+        newStatus: orderStatus,
+      });
     }
 
     // Update the order
