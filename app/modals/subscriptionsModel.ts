@@ -55,7 +55,7 @@ const SubscriptionSchema = new Schema(
     shipmentID: { type: String, required: false, default: "" }, // Bosta shipment ID
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"],
       default: "pending",
     },
     createdAt: {

@@ -57,7 +57,7 @@ const OrderSchema = new Schema(
         currency: { type: String, required: false}, 
         status: {
             type: String,
-            enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+            enum: ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"],
             default: "pending",
         },
         payment:{
