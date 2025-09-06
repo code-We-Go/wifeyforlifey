@@ -288,6 +288,9 @@ const CheckoutClientPage = () => {
     // Update shipping cost if no free shipping discount is applied
     if (!appliedDiscount || appliedDiscount.calculationType !== "FREE_SHIPPING") {
       setShipping(location.shippingCost.priceBeforeVat);
+    } else {
+      // Ensure shipping is set to 0 when free shipping discount is applied
+      setShipping(0);
     }
   };
   useEffect(() => {
@@ -606,9 +609,11 @@ const CheckoutClientPage = () => {
     setLoyaltyDiscount(loyaltyLE);
 
     // Calculate final total, always using effectiveShipping
+    // When free shipping is applied, effectiveShipping should be 0
     const finalTotal = Math.max(
       0,
-      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
+      calculatedSubTotal - newDiscountAmount - loyaltyLE + 
+      (appliedDiscount?.calculationType === "FREE_SHIPPING" ? 0 : effectiveShipping)
     );
     setTotal(finalTotal);
   }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
@@ -1327,7 +1332,11 @@ const CheckoutClientPage = () => {
                     -{loyaltyDiscount} LE (Loyalty Discount)
                   </p>
                 )}
-                <p>SHIPPING</p>
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                  <p className="line-through">SHIPPING</p>
+                ) : (
+                  <p>SHIPPING</p>
+                )}
                 <p className="mt-6">TOTAL</p>
               </div>
               <div className="flex flex-col gap-1 items-end">
@@ -1337,7 +1346,23 @@ const CheckoutClientPage = () => {
                     -{loyaltyDiscount} LE
                   </p>
                 )}
-                <p className="text-[12px] lg:text-base">{shipping} LE</p>
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                  <p className="text-[12px] lg:text-base line-through">
+                    {(() => {
+                      // Calculate the real shipping before discount
+                      const realShipping = calculateShippingRate(
+                        countryID,
+                        state,
+                        states,
+                        countries,
+                        shippingZones
+                      );
+                      return realShipping;
+                    })()} LE
+                  </p>
+                ) : (
+                  <p className="text-[12px] lg:text-base">{shipping} LE</p>
+                )}
                 <p className="text-[12px] mt-6 lg:text-base">{total} LE</p>
               </div>
             </div>

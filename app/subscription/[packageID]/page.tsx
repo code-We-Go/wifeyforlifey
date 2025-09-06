@@ -190,7 +190,12 @@ const SubscriptionPage = () => {
       priceAfterVat: number;
       shippingFee: number;
     };
-  }>({ city: null, zone: null, district: null, shippingCost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 } });
+  }>({
+    city: null,
+    zone: null,
+    district: null,
+    shippingCost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 },
+  });
   const [payment, setPayment] = useState<"card" | "cash">("card");
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
@@ -228,6 +233,9 @@ const SubscriptionPage = () => {
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
+    if (discount && discount.calculationType === "FREE_SHIPPING") {
+      setShipping(0);
+    }
   }; // Default to the first state's name or an empty string
   useEffect(() => {
     setFormData((prevFormData) => ({
@@ -268,6 +276,9 @@ const SubscriptionPage = () => {
       appliedDiscount.calculationType !== "FREE_SHIPPING"
     ) {
       setShipping(location.shippingCost.priceBeforeVat);
+    } else {
+      // Ensure shipping is set to 0 when free shipping discount is applied
+      setShipping(0);
     }
   };
 
@@ -397,8 +408,12 @@ const SubscriptionPage = () => {
             zone.localGlobal === "local"
         );
         if (zone) {
-          // setShipping(0);
-          setShipping(zone.zone_rate.local);
+          // Check if free shipping discount is applied
+          if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+            setShipping(0);
+          } else {
+            setShipping(zone.zone_rate.local);
+          }
         }
       }
     };
@@ -510,7 +525,17 @@ const SubscriptionPage = () => {
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shippingRate);
     }
-  }, [countryID, states, shippingZones, state, countries, items, packageData, bostaLocation, appliedDiscount]);
+  }, [
+    countryID,
+    states,
+    shippingZones,
+    state,
+    countries,
+    items,
+    packageData,
+    bostaLocation,
+    appliedDiscount,
+  ]);
 
   let cartItems = () => {
     return items.map((cartItem, index) => (
@@ -1433,8 +1458,8 @@ const SubscriptionPage = () => {
                   </>
                 ) : (
                   <>
-                    <span>Shipping</span>
-                    <span>{shipping} LE</span>
+                    <span className="line-through">Shipping</span>
+                    <span className="line-through">{shipping} LE</span>
                   </>
                 )}
               </div>
