@@ -14,7 +14,10 @@ const sessionSchema = new mongoose.Schema({
 });
 
 // Create a TTL index on the 'createdAt' field to expire documents after a certain time
-sessionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 1200 }); // Expire after 20 minutes
+sessionSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 60 * 60 * 24 * 30 }
+); // Expire after 30 days
 
 // Create and export the Session model
 // const Session = mongoose.model('Session', sessionSchema);

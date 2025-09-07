@@ -219,6 +219,7 @@ export interface ShippingZone {
 }
 
 export interface Ipackage {
+  _id?: string;
   name: string;
   imgUrl: string;
   price: number;

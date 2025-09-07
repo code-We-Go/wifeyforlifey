@@ -1,9 +1,10 @@
 "use client";
 import {Suspense, useContext} from 'react'
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filter, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -24,8 +25,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Product } from '../interfaces/interfaces';
+import { Product, Ipackage } from '../interfaces/interfaces';
 import ProductCard from "@/components/shop/ProductCard";
+import PackageCard from "@/components/shop/PackageCard";
 import { lifeyFont, thirdFont } from '@/fonts';
 import { wishListContext } from "@/app/context/wishListContext";
 
@@ -51,8 +53,10 @@ function ShopPage() {
   const initialCategory = searchParams.get("category") || "";
   
   const [products, setProducts] = useState<Product[]>([]);
+  const [packages, setPackages] = useState<Ipackage[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [packagesLoading, setPackagesLoading] = useState(true);
   const [filters, setFilters] = useState({
     category: initialCategory,
     subcategory: "",
@@ -104,6 +108,24 @@ function ShopPage() {
 
     fetchProducts();
   }, [filters]);
+
+  // Fetch packages
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setPackagesLoading(true);
+      try {
+        const response = await fetch('/api/packages?all=true');
+        const data = await response.json();
+        setPackages(Array.isArray(data.data) ? data.data : []);
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+      } finally {
+        setPackagesLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   const updateFilter = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -309,14 +331,49 @@ function ShopPage() {
           </div>
         )}
 
+        {/* Packages Section */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className={`${thirdFont.className} text-2xl font-bold text-lovely`}>Our Packages</h2>
+            <Link 
+              href="/packages" 
+              className="text-lovely hover:text-lovely/80 text-sm font-medium flex items-center"
+            >
+              View all packages
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+          {packagesLoading ? (
+            <div className="text-center py-6">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-lovely mx-auto"></div>
+              <p className="mt-3 text-lovely/90">Loading packages...</p>
+            </div>
+          ) : packages.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {packages.slice(0, 3).map((packageItem) => (
+                <PackageCard
+                  key={packageItem._id}
+                  packageItem={packageItem}
+                />
+              ))}
+          </div>
+          ) : (
+            <div className="text-center py-6 bg-creamey/10 rounded-lg">
+              <p className="text-lovely">No packages available at the moment.</p>
+            </div>
+          )}
+        </div>
+
         {/* Products Grid */}
+        <h2 className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}>Our Products</h2>
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-everGreen mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
             <p className="mt-4 text-lovely/90">Loading products...</p>
           </div>
         ) : products.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           
             {products?.map((product) => {
               const productID = product._id;
               const fav = wishList.find(
