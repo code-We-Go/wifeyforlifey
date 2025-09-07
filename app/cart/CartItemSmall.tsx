@@ -89,7 +89,7 @@ const CartItemSmall = ({
 
   return (
     <Link className="w-full" href={`/shop/${item.productId}`}>
-      <div className="text-creamey w-full bg-everGreen rounded-2xl px-2 py-2">
+      <div className="text-lovely w-full bg-pinkey rounded-2xl px-2 py-2">
         <div className="flex w-full h-full  py-2  gap-4">
           <div className="cursor-pointer h-full flex justify-start items-start">
             <span
@@ -98,7 +98,7 @@ const CartItemSmall = ({
                 e.preventDefault();
                 removeItem(item.productId, item.variant, item.attributes);
               }}
-              className="text-[12px] pt-2 px-4 text-creamey"
+              className="text-[12px] pt-2 px-4 text-lovel"
             >
               x
             </span>
@@ -135,7 +135,7 @@ const CartItemSmall = ({
               >
                 QUANTITY :{/* <dt className="inline">Quantity:</dt> */}
                 <span
-                  className="px-3 py-2 bg-creamey rounded-lg text-everGreen cursor-pointer p-3 text-sm"
+                  className="px-3 py-2 bg-creamey rounded-lg text-lovely cursor-pointer p-3 text-sm"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -151,7 +151,7 @@ const CartItemSmall = ({
                     e.stopPropagation();
                     handleQuantity("+", item.productId);
                   }}
-                  className="text-sm px-3 py-2 bg-creamey rounded-lg text-everGreen cursor-pointer"
+                  className="text-sm px-3 py-2 bg-creamey rounded-lg text-lovely cursor-pointer"
                 >
                   {" "}
                   +
