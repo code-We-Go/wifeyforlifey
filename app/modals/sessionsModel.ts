@@ -12,5 +12,8 @@ const SessionSchema = new Schema<ISession>({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Create a TTL index to expire documents after 30 days
+SessionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
+
 export default mongoose.models.Session ||
   mongoose.model<ISession>("Session", SessionSchema);
