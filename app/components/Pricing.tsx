@@ -58,7 +58,7 @@ const PricingCard = ({ packageItem }: { packageItem: Ipackage }) => {
                   />
                 </svg>
               </div>
-              <span className="ml-2 text-lovely text-sm">{item}</span>
+              <span className="ml-2 text-lovely text-sm">{item.value}</span>
             </li>
           ))}
         </ul>
