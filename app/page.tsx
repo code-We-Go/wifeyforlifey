@@ -19,6 +19,7 @@ import OurPartners from "@/components/sections/OurPartners";
 import OurPartners2 from "@/components/partners2/OurPartners2";
 import Testimonials from "@/components/sections/Testimonials";
 import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
+import Pricing from "./components/Pricing";
 
 export default function Home() {
   // Filter featured products
@@ -29,7 +30,8 @@ export default function Home() {
     <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
       <HeroSection />
-      <HeroTwo />
+      {/* <HeroTwo /> */}
+      <Pricing />
       <JoinNow />
 
       {/* Featured Products Section */}
