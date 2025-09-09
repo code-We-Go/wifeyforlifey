@@ -15,7 +15,11 @@ const PackageSchema = new Schema<Ipackage>(
     images: { type: [String], required: false, default: [] },
     price: { type: Number, required: true, min: 0 },
     duration: { type: String, required: true },
-    items: { type: [String], required: true, default: [] },
+    items: {
+      type: [{ value: String, included: Boolean }],
+      required: true,
+      default: [],
+    },
     notes: { type: [String], required: true, default: [] },
     cards: { type: [PackageCardSchema], required: false, default: [] },
   },

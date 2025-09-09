@@ -1368,14 +1368,23 @@ const SubscriptionPage = () => {
                 {/* {packageData.name} */}
               </h2>
               <ul className=" w-full px-2 md:px-4 space-y-2 items-start justify-start  text-left text-sm md:text-base text-creamey/95">
-                {packageData.items.map((item: string, idx: number) => (
-                  <li key={idx}>{item}</li>
-                ))}
+                {packageData.items
+                  .filter((item) => item.included)
+                  .map(
+                    (
+                      item: { value: string; included: boolean },
+                      idx: number
+                    ) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span>{item.value}</span>
+                      </li>
+                    )
+                  )}
               </ul>
               <div className="flex justify-start gap-4 tracking-wider mt-2 ">
-                <span className="text-base   text-creamey">
+                {/* <span className="text-base   text-creamey">
                   💗 Wifey Experience Membership (subscription 2,500 EGP){" "}
-                </span>
+                </span> */}
                 {/* <span className="text-lg  text-creamey">
                   {packageData.price} LE (yearly)
                 </span> */}

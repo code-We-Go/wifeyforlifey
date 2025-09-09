@@ -222,6 +222,11 @@ export interface PackageCard {
   points: string[];
 }
 
+export interface PackageItem {
+  value: string;
+  included: boolean;
+}
+
 export interface Ipackage {
   _id?: string;
   name: string;
@@ -229,7 +234,7 @@ export interface Ipackage {
   images: string[]; // Array of image URLs
   price: number;
   duration: string;
-  items: string[];
+  items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
 }
