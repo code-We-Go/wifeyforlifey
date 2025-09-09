@@ -17,7 +17,6 @@ import { Discount } from "../../types/discount";
 import CartItemSmall from "../../cart/CartItemSmall";
 import DiscountSection from "./../../checkout/components/DiscountSection";
 import { ShippingZone } from "../../interfaces/interfaces";
-import { wifeyExperience } from "../../constants";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useParams } from "next/navigation";
