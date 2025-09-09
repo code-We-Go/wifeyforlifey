@@ -30,7 +30,7 @@ const CalendlyWidget = () => {
     <div className="w-full min-h-screen bg-creamey h-auto flex justify-center items-center">
       <div
         className="calendly-inline-widget"
-        data-url="https://calendly.com/wifeyforlifeycorp/all-about-appliances?hide_gdpr_banner=1&background_color=f9f9ef&primary_color=ff0000"
+        data-url="https://calendly.com/wifeyforlifeycorp/self-care-during-gehaz-planning-period?hide_gdpr_banner=1"
         style={{
           minWidth: "320px",
           height: "700px",
