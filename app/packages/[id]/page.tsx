@@ -179,7 +179,7 @@ export default function PackageDetailPage() {
               {packageData.items.map((item, index) => (
                 <li key={index} className="flex items-start">
                   {/* <Package className="h-5 w-5 text-lovely mr-2 flex-shrink-0 mt-0.5" /> */}
-                  <span className="text-lovely">{item}</span>
+                  <span className="text-lovely">{item.value}</span>
                 </li>
               ))}
             </ul>
