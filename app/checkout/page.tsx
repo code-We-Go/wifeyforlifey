@@ -16,14 +16,17 @@ import { Discount } from "../types/discount";
 import CartItemSmall from "../cart/CartItemSmall";
 import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
-import { wifeyExperience } from "../constants";
 import Image from "next/image";
 import { Spinner } from "@material-tailwind/react";
 import { useAuth } from "@/hooks/useAuth";
 import { Info } from "lucide-react";
 import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
 import BostaLocationSelector from "./components/BostaLocationSelector";
-import { BostaCity, BostaZone, BostaDistrict } from "@/app/services/bostaLocationService";
+import {
+  BostaCity,
+  BostaZone,
+  BostaDistrict,
+} from "@/app/services/bostaLocationService";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -226,11 +229,11 @@ const CheckoutClientPage = () => {
       priceAfterVat: number;
       shippingFee: number;
     };
-  }>({ 
-    city: null, 
-    zone: null, 
-    district: null, 
-    shippingCost: { priceBeforeVat: 70, priceAfterVat: 70, shippingFee: 70 } 
+  }>({
+    city: null,
+    zone: null,
+    district: null,
+    shippingCost: { priceBeforeVat: 70, priceAfterVat: 70, shippingFee: 70 },
   });
   const [payment, setPayment] = useState<Payment>("card");
   const [loading, setLoading] = useState(false);
@@ -286,7 +289,10 @@ const CheckoutClientPage = () => {
   }) => {
     setBostaLocation(location);
     // Update shipping cost if no free shipping discount is applied
-    if (!appliedDiscount || appliedDiscount.calculationType !== "FREE_SHIPPING") {
+    if (
+      !appliedDiscount ||
+      appliedDiscount.calculationType !== "FREE_SHIPPING"
+    ) {
       setShipping(location.shippingCost.priceBeforeVat);
     } else {
       // Ensure shipping is set to 0 when free shipping discount is applied
@@ -612,8 +618,12 @@ const CheckoutClientPage = () => {
     // When free shipping is applied, effectiveShipping should be 0
     const finalTotal = Math.max(
       0,
-      calculatedSubTotal - newDiscountAmount - loyaltyLE + 
-      (appliedDiscount?.calculationType === "FREE_SHIPPING" ? 0 : effectiveShipping)
+      calculatedSubTotal -
+        newDiscountAmount -
+        loyaltyLE +
+        (appliedDiscount?.calculationType === "FREE_SHIPPING"
+          ? 0
+          : effectiveShipping)
     );
     setTotal(finalTotal);
   }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
@@ -1358,7 +1368,8 @@ const CheckoutClientPage = () => {
                         shippingZones
                       );
                       return realShipping;
-                    })()} LE
+                    })()}{" "}
+                    LE
                   </p>
                 ) : (
                   <p className="text-[12px] lg:text-base">{shipping} LE</p>
@@ -1468,34 +1479,7 @@ const CheckoutClientPage = () => {
               className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}
             >
               {/* Wifey Experience Package Details */}
-              <div className="wifey-experience-package bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
-                <Image
-                  src={wifeyExperience.imgUrl}
-                  width={400}
-                  height={250}
-                  alt={wifeyExperience.name}
-                  className="object-cover object-top aspect-[16/11] rounded-xl mb-4"
-                />
-                <h2
-                  className={`text-2xl ${thirdFont.className} font-bold tracking-normal text-creamey mb-2`}
-                >
-                  {wifeyExperience.name}
-                </h2>
-                <ul className="list-disc w-full items-start justify-start list-inside text-left text-lg tracking-wide text-creamey/95">
-                  {wifeyExperience.items.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
-                <div className="flex justify-start gap-4 tracking-wider mt-4 mb-2">
-                  <span className="text-base   text-creamey">
-                    one lifetime subscription fee :
-                  </span>
-                  <span className="text-base  text-creamey">
-                    {wifeyExperience.price} LE
-                  </span>
-                  {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
-                </div>
-              </div>
+
               <div className="mt-6 space-y-2 text-lovely">
                 <div className="flex justify-between text-base">
                   <span>Subtotal</span>
