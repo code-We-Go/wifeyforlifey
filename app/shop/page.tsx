@@ -364,7 +364,7 @@ function ShopPage() {
 
         {/* Products and Packages Grid */}
         {/* Packages Section */}
-        {/* {!packagesLoading && packages.length > 0 && (
+        {!packagesLoading && packages.length > 0 && (
           <div className="mb-12">
             <h2
               className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}
@@ -377,7 +377,7 @@ function ShopPage() {
               ))}
             </div>
           </div>
-        )} */}
+        )}
 
         {/* Products Section */}
         <h2
