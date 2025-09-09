@@ -37,7 +37,7 @@ export default function PartnersGrid() {
       code: "Wifeysbestie10",
       link: "https://www.instagram.com/facefullskincare?igsh=MWx4YWhqaXN6aG16eQ==",
       bookingMethod: "Through Instagram",
-      imagePath: "facefull.jpeg",
+      imagePath: "Facefull.jpeg",
     },
     {
       category: "Wedding Planning",
@@ -49,7 +49,7 @@ export default function PartnersGrid() {
       code: "Wifeysbestie10",
       link: "https://www.instagram.com/skyessamevents?igsh=M2IxZmJsYWRoOWt5",
       bookingMethod: "Through Instagram",
-      imagePath: "sky.jpeg",
+      imagePath: "Sky.jpeg",
     },
     {
       category: "Wedding Planning",
@@ -109,7 +109,7 @@ export default function PartnersGrid() {
       code: "Wifeysbestie10",
       link: "https://www.instagram.com/artimia__?igsh=eWxyMHowZzczenU5",
       bookingMethod: "Through Instagram",
-      imagePath: "artima.jpeg",
+      imagePath: "Artima.jpeg",
     },
     {
       category: "Beauty",
@@ -121,7 +121,7 @@ export default function PartnersGrid() {
       code: "Wifey3",
       link: "https://shosharabia.com",
       bookingMethod: "Through Website",
-      imagePath: "shosh.jpeg",
+      imagePath: "Shosh.jpeg",
     },
     {
       category: "Beauty",
@@ -145,7 +145,7 @@ export default function PartnersGrid() {
       code: "WIFEYLIFEY9",
       link: "https://yesstyle.com",
       bookingMethod: "Through Website",
-      imagePath: "yesStyle.jpeg",
+      imagePath: "YesStyle.jpeg",
     },
     {
       category: "E-Commerce",
