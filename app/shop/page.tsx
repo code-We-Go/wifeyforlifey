@@ -1,5 +1,5 @@
 "use client";
-import {Suspense, useContext} from 'react'
+import { Suspense, useContext } from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -7,12 +7,12 @@ import Image from "next/image";
 import { Filter, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Sheet,
@@ -25,10 +25,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Product, Ipackage } from '../interfaces/interfaces';
+import { Product, Ipackage } from "../interfaces/interfaces";
 import ProductCard from "@/components/shop/ProductCard";
 import PackageCard from "@/components/shop/PackageCard";
-import { lifeyFont, thirdFont } from '@/fonts';
+import { lifeyFont, thirdFont } from "@/fonts";
 import { wishListContext } from "@/app/context/wishListContext";
 
 interface Category {
@@ -43,15 +43,15 @@ interface Subcategory {
   categoryID: string;
 }
 
-function Fullback (){
-  return <div className='w-full h-[calc(100vh-128px)]'>Loading ...</div>
+function Fullback() {
+  return <div className="w-full h-[calc(100vh-128px)]">Loading ...</div>;
 }
 
 function ShopPage() {
   const { wishList, setWishList } = useContext(wishListContext);
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [packages, setPackages] = useState<Ipackage[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -70,11 +70,11 @@ function ShopPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories');
+        const response = await fetch("/api/categories");
         const data = await response.json();
         setCategories(data);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       }
     };
 
@@ -87,20 +87,22 @@ function ShopPage() {
       setLoading(true);
       try {
         const queryParams = new URLSearchParams();
-        if (filters.category) queryParams.append('category', filters.category);
-        if (filters.subcategory) queryParams.append('subcategory', filters.subcategory);
-        if (filters.minPrice) queryParams.append('minPrice', filters.minPrice.toString());
-        if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice.toString());
-        if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
-        if (filters.search) queryParams.append('search', filters.search);
+        if (filters.category) queryParams.append("category", filters.category);
+        if (filters.subcategory)
+          queryParams.append("subcategory", filters.subcategory);
+        if (filters.minPrice)
+          queryParams.append("minPrice", filters.minPrice.toString());
+        if (filters.maxPrice)
+          queryParams.append("maxPrice", filters.maxPrice.toString());
+        if (filters.sortBy) queryParams.append("sortBy", filters.sortBy);
+        if (filters.search) queryParams.append("search", filters.search);
 
         const response = await fetch(`/api/products?${queryParams.toString()}`);
         const data = await response.json();
         // setProducts(data);
         setProducts(Array.isArray(data) ? data : []); // Always set an array
-
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
@@ -114,11 +116,11 @@ function ShopPage() {
     const fetchPackages = async () => {
       setPackagesLoading(true);
       try {
-        const response = await fetch('/api/packages?all=true');
+        const response = await fetch("/api/packages?all=true");
         const data = await response.json();
         setPackages(Array.isArray(data.data) ? data.data : []);
       } catch (error) {
-        console.error('Error fetching packages:', error);
+        console.error("Error fetching packages:", error);
       } finally {
         setPackagesLoading(false);
       }
@@ -128,7 +130,7 @@ function ShopPage() {
   }, []);
 
   const updateFilter = (key: string, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const resetFilters = () => {
@@ -144,7 +146,7 @@ function ShopPage() {
 
   // Find max price in the product list
   const maxProductPrice = Math.ceil(
-    Math.max(...products?.map(product => product.price.local))
+    Math.max(...products?.map((product) => product.price.local))
   );
 
   return (
@@ -152,7 +154,11 @@ function ShopPage() {
       <div className="flex flex-col space-y-8">
         {/* Page Header */}
         <div className="flex flex-col space-y-4">
-          <h1 className={`${thirdFont.className} text-4xl md:text-5xl text-lovely font-semibold`}>Shop</h1>
+          <h1
+            className={`${thirdFont.className} text-4xl md:text-5xl text-lovely font-semibold`}
+          >
+            Shop
+          </h1>
           <p className="text-lovely/90">
             Discover our curated collection of products designed just for you.
           </p>
@@ -199,17 +205,20 @@ function ShopPage() {
               </SelectContent>
             </Select>
 
-            <Sheet >
-              <SheetTrigger asChild className='bg-creamey border border-lovely/90 text-lovely/90'>
+            <Sheet>
+              <SheetTrigger
+                asChild
+                className="bg-creamey border border-lovely/90 text-lovely/90"
+              >
                 <Button variant="outline">
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
                 </Button>
               </SheetTrigger>
-              <SheetContent className='bg-creamey text-everGreen'>
-                <SheetHeader className='text-everGreen'>
-                  <SheetTitle className='text-everGreen'>Filters</SheetTitle>
-                  <SheetDescription className='text-everGreen'>
+              <SheetContent className="bg-creamey text-everGreen">
+                <SheetHeader className="text-everGreen">
+                  <SheetTitle className="text-everGreen">Filters</SheetTitle>
+                  <SheetDescription className="text-everGreen">
                     Refine your product search with these filters.
                   </SheetDescription>
                 </SheetHeader>
@@ -220,11 +229,14 @@ function ShopPage() {
                       {categories?.map((category) => (
                         <div key={category._id} className="space-y-2">
                           <div className="flex items-center space-x-2">
-                            <Checkbox 
+                            <Checkbox
                               id={`category-${category._id}`}
                               checked={filters.category === category._id}
                               onCheckedChange={(checked) => {
-                                updateFilter("category", checked ? category._id : "");
+                                updateFilter(
+                                  "category",
+                                  checked ? category._id : ""
+                                );
                                 updateFilter("subcategory", ""); // Reset subcategory when category changes
                               }}
                             />
@@ -235,27 +247,36 @@ function ShopPage() {
                               {category.name}
                             </label>
                           </div>
-                          {filters.category === category._id && category.subcategories.length > 0 && (
-                            <div className="ml-6 space-y-2">
-                              {category.subcategories?.map((subcategory) => (
-                                <div key={subcategory._id} className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    id={`subcategory-${subcategory._id}`}
-                                    checked={filters.subcategory === subcategory._id}
-                                    onCheckedChange={(checked) => 
-                                      updateFilter("subcategory", checked ? subcategory._id : "")
-                                    }
-                                  />
-                                  <label
-                                    htmlFor={`subcategory-${subcategory._id}`}
-                                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          {filters.category === category._id &&
+                            category.subcategories.length > 0 && (
+                              <div className="ml-6 space-y-2">
+                                {category.subcategories?.map((subcategory) => (
+                                  <div
+                                    key={subcategory._id}
+                                    className="flex items-center space-x-2"
                                   >
-                                    {subcategory.name}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                                    <Checkbox
+                                      id={`subcategory-${subcategory._id}`}
+                                      checked={
+                                        filters.subcategory === subcategory._id
+                                      }
+                                      onCheckedChange={(checked) =>
+                                        updateFilter(
+                                          "subcategory",
+                                          checked ? subcategory._id : ""
+                                        )
+                                      }
+                                    />
+                                    <label
+                                      htmlFor={`subcategory-${subcategory._id}`}
+                                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                      {subcategory.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                         </div>
                       ))}
                     </div>
@@ -269,7 +290,7 @@ function ShopPage() {
                       </span>
                     </div>
                     <Slider
-                    className='bg-pinkey'
+                      className="bg-pinkey"
                       defaultValue={[filters.minPrice, filters.maxPrice]}
                       max={maxProductPrice}
                       step={1}
@@ -280,7 +301,11 @@ function ShopPage() {
                     />
                   </div>
                   <Separator />
-                  <Button onClick={resetFilters} variant="outline" className="w-full bg-lovely text-creamey hover:text-creamey hover:bg-lovely/90">
+                  <Button
+                    onClick={resetFilters}
+                    variant="outline"
+                    className="w-full bg-lovely text-creamey hover:text-creamey hover:bg-lovely/90"
+                  >
                     Reset Filters
                   </Button>
                 </div>
@@ -290,38 +315,44 @@ function ShopPage() {
         </div>
 
         {/* Active Filters */}
-        {(filters.category || filters.subcategory || filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
+        {(filters.category ||
+          filters.subcategory ||
+          filters.minPrice > 0 ||
+          filters.maxPrice < maxProductPrice) && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-sm text-lovely/90">Active filters:</span>
             {filters.category && (
-              <Badge 
+              <Badge
                 onClick={() => {
                   updateFilter("category", "");
                   updateFilter("subcategory", "");
-                }} 
+                }}
                 className="cursor-pointer bg-pinkey"
               >
-                {categories.find(c => c._id === filters.category)?.name}
+                {categories.find((c) => c._id === filters.category)?.name}
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
             {filters.subcategory && (
-              <Badge 
-                onClick={() => updateFilter("subcategory", "")} 
+              <Badge
+                onClick={() => updateFilter("subcategory", "")}
                 className="cursor-pointer bg-pinkey"
               >
-                {categories
-                  .find(c => c._id === filters.category)
-                  ?.subcategories.find(s => s._id === filters.subcategory)?.name}
+                {
+                  categories
+                    .find((c) => c._id === filters.category)
+                    ?.subcategories.find((s) => s._id === filters.subcategory)
+                    ?.name
+                }
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
             {(filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && (
-              <Badge 
+              <Badge
                 onClick={() => {
                   updateFilter("minPrice", 0);
                   updateFilter("maxPrice", maxProductPrice);
-                }} 
+                }}
                 className="cursor-pointer bg-pinkey"
               >
                 Price: ${filters.minPrice} - ${filters.maxPrice}
@@ -331,41 +362,29 @@ function ShopPage() {
           </div>
         )}
 
+        {/* Products and Packages Grid */}
         {/* Packages Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className={`${thirdFont.className} text-2xl font-bold text-lovely`}>Our Packages</h2>
-            <Link 
-              href="/packages" 
-              className="text-lovely hover:text-lovely/80 text-sm font-medium flex items-center"
+        {!packagesLoading && packages.length > 0 && (
+          <div className="mb-12">
+            <h2
+              className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}
             >
-              View all packages
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
-          </div>
-          {packagesLoading ? (
-            <div className="text-center py-6">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-lovely mx-auto"></div>
-              <p className="mt-3 text-lovely/90">Loading packages...</p>
-            </div>
-          ) : packages.length > 0 ? (
+              Our Packages
+            </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {packages.slice(0, 3).map((packageItem) => (
-                <PackageCard
-                  key={packageItem._id}
-                  packageItem={packageItem}
-                />
+              {packages.map((packageItem) => (
+                <PackageCard key={packageItem._id} packageItem={packageItem} />
               ))}
-          </div>
-          ) : (
-            <div className="text-center py-6 bg-creamey/10 rounded-lg">
-              <p className="text-lovely">No packages available at the moment.</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Products Grid */}
-        <h2 className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}>Our Products</h2>
+        {/* Products Section */}
+        <h2
+          className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}
+        >
+          Our Products
+        </h2>
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
@@ -373,8 +392,8 @@ function ShopPage() {
           </div>
         ) : products.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-           
-            {products?.map((product) => {
+            {/* Products grid */}
+            {products.map((product) => {
               const productID = product._id;
               const fav = wishList.find(
                 (favorite) => favorite.productId === productID
@@ -393,11 +412,17 @@ function ShopPage() {
             <div className="mx-auto w-24 h-24 mb-4 text-lovely">
               <SlidersHorizontal className="w-full h-full" />
             </div>
-            <h3 className="text-lg text-lovely font-semibold">No products found</h3>
+            <h3 className="text-lg text-lovely font-semibold">
+              No products found
+            </h3>
             <p className="text-lovely mt-2">
               Try adjusting your filters or search term.
             </p>
-            <Button onClick={resetFilters} variant="outline" className="mt-4 bg-lovely/90 text-creamey hover:text-creamey hover:bg-lovely">
+            <Button
+              onClick={resetFilters}
+              variant="outline"
+              className="mt-4 bg-lovely/90 text-creamey hover:text-creamey hover:bg-lovely"
+            >
               Reset Filters
             </Button>
           </div>
@@ -407,26 +432,26 @@ function ShopPage() {
   );
 }
 
-export default function ShopPageWrapper(){
+export default function ShopPageWrapper() {
   return (
-    <Suspense fallback={<Fullback/>}>
-      <ShopPage/>
+    <Suspense fallback={<Fullback />}>
+      <ShopPage />
     </Suspense>
   );
 }
 
 // Badge component for active filters
-function Badge({ 
-  children, 
-  className, 
-  ...props 
+function Badge({
+  children,
+  className,
+  ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div 
+    <div
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-pinkey text-lovely", 
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-pinkey text-lovely",
         className
-      )} 
+      )}
       {...props}
     >
       {children}

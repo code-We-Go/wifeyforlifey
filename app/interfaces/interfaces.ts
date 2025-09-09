@@ -6,9 +6,8 @@ export interface Video {
   description?: string;
   url: string;
   thumbnailUrl: string;
-  isPublic: boolean,
+  isPublic: boolean;
 
- 
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,10 +22,10 @@ export interface Playlist {
   isPublic: boolean;
   category?: string;
   tags?: string[];
-  featured:boolean;
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
-  order?:number;
+  order?: number;
 }
 
 // Add VideoPlaylist type alias for compatibility
@@ -42,11 +41,11 @@ export interface PlaylistFilters {
 
 // Add video categories
 export const videoCategories = [
-  { id: 'tutorials', name: 'Tutorials' },
-  { id: 'lifestyle', name: 'Lifestyle' },
-  { id: 'fashion', name: 'Fashion' },
-  { id: 'beauty', name: 'Beauty' },
-  { id: 'fitness', name: 'Fitness' },
+  { id: "tutorials", name: "Tutorials" },
+  { id: "lifestyle", name: "Lifestyle" },
+  { id: "fashion", name: "Fashion" },
+  { id: "beauty", name: "Beauty" },
+  { id: "fitness", name: "Fitness" },
 ];
 
 export interface Variant {
@@ -84,7 +83,7 @@ export type mediaType = "image" | "video";
 
 export type price = {
   local: number;
-  global:number;
+  global: number;
 };
 export interface Category {
   _id: string;
@@ -218,14 +217,21 @@ export interface ShippingZone {
   countries: string[];
 }
 
+export interface PackageCard {
+  image: string;
+  points: string[];
+}
+
 export interface Ipackage {
   _id?: string;
   name: string;
-  imgUrl: string;
+  imgUrl: string; // Main image (keeping for backward compatibility)
+  images: string[]; // Array of image URLs
   price: number;
   duration: string;
   items: string[];
-  notes:string[];
+  notes: string[];
+  cards: PackageCard[]; // Array of cards with image and points
 }
 
 export interface ISubscription {
@@ -239,12 +245,12 @@ export interface ISubscription {
 export interface ILoyaltyTransaction {
   _id?: string;
   userId: string; // or mongoose.Types.ObjectId
-  type: 'earn' | 'spend';
+  type: "earn" | "spend";
   reason: string;
   amount: number;
   timestamp: Date;
   bonusID?: ILoyaltyBonus;
-  createdAt:Date; // optional, if related to a reward redemption
+  createdAt: Date; // optional, if related to a reward redemption
 }
 
 export interface ILoyaltyBonus {

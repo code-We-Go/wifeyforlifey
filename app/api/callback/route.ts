@@ -37,31 +37,41 @@ export async function GET(request: Request) {
 
     // Perform your logic with the GET data here
     if (isSuccess) {
-      const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      // Get the subscription to check package details
+      let subscription = await subscriptionsModel
+        .findOne({ paymentID: data.order })
+        .populate({ path: "packageID", options: { strictPopulate: false } });
 
-      // const expiryDateLifeTime = new Date();
-      // expiryDateLifeTime.setFullYear(expiryDateLifeTime.getFullYear() + 100);
-      // const subscribtions = await subscriptionsModel.countDocuments({
-      //   subscribed: true,
-      // });
-      // console.log("lifeTime" + expiryDateLifeTime);
+      // Set expiry date based on package duration
+      const expiryDate = new Date();
+
+      // Check if package exists and has a duration of 0
+      if (
+        subscription?.packageID &&
+        (subscription.packageID as any).duration === "0"
+      ) {
+        // If duration is 0, set expiryDate to current time (now)
+        // No need to modify expiryDate as it's already set to now
+        console.log(
+          "Package with duration 0 detected - setting expiry to current time"
+        );
+      } else {
+        // Default: set expiry to 1 year from now
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      }
+
       // 1. Update the document and get the updated version
-      const updatedSubscription = await subscriptionsModel.findOneAndUpdate(
+      subscription = await subscriptionsModel.findOneAndUpdate(
         { paymentID: data.order },
         {
           subscribed: true,
           expiryDate: expiryDate,
-          // expiryDate: subscribtions > 50 ? expiryDate : expiryDateLifeTime,
         },
         { new: true } // <-- This is important!
       );
 
-      // 2. Populate the necessary fields
+      // Log for debugging
       console.log("register" + packageModel);
-      const subscription = await subscriptionsModel
-        .findOne({ paymentID: data.order })
-        .populate({ path: "packageID", options: { strictPopulate: false } });
       if (subscription) {
         try {
           if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {

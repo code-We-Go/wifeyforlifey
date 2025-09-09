@@ -3,19 +3,27 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Package } from "lucide-react";
+import {
+  ChevronLeft,
+  Package,
+  ChevronRight,
+  ChevronLeft as ChevronLeftIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Ipackage } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import PackageDetailSkeleton from "./PackageDetailSkeleton";
+import PackageCard from "@/app/components/PackageCard";
+import { cn } from "@/lib/utils";
 
 export default function PackageDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [packageData, setPackageData] = useState<Ipackage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchPackageData = async () => {
@@ -75,14 +83,73 @@ export default function PackageDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Package Image */}
-        <div className="relative aspect-square overflow-hidden rounded-lg border-2 border-lovely">
-          <Image
-            src={packageData.imgUrl}
-            alt={packageData.name}
-            fill
-            className="object-cover"
-          />
+        {/* Package Image Carousel */}
+        <div className="space-y-4">
+          <div className="relative aspect-square overflow-hidden rounded-lg border-2 border-lovely">
+            <Image
+              src={
+                packageData.images && packageData.images.length > 0
+                  ? packageData.images[currentImageIndex]
+                  : packageData.imgUrl
+              }
+              alt={packageData.name}
+              fill
+              className="object-cover"
+            />
+
+            {/* Navigation arrows */}
+            {packageData.images && packageData.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentImageIndex((prev) =>
+                      prev === 0 ? packageData.images.length - 1 : prev - 1
+                    );
+                  }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-creamey/80 rounded-full p-1 text-lovely hover:bg-creamey transition-colors z-10"
+                >
+                  <ChevronLeftIcon size={20} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentImageIndex((prev) =>
+                      prev === packageData.images.length - 1 ? 0 : prev + 1
+                    );
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-creamey/80 rounded-full p-1 text-lovely hover:bg-creamey transition-colors z-10"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Thumbnail navigation */}
+          {packageData.images && packageData.images.length > 1 && (
+            <div className="flex space-x-2 overflow-x-auto pb-2">
+              {packageData.images.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={cn(
+                    "relative w-16 h-16 rounded-md overflow-hidden border-2",
+                    currentImageIndex === index
+                      ? "border-lovely"
+                      : "border-lovely/30 hover:border-lovely/60"
+                  )}
+                >
+                  <Image
+                    src={img}
+                    alt={`${packageData.name} thumbnail ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Package Details */}
@@ -92,9 +159,9 @@ export default function PackageDetailPage() {
           >
             {packageData.name}
           </h1>
-          <p className="text-lg font-medium text-lovely mb-4">
+          {/* <p className="text-lg font-medium text-lovely mb-4">
             Duration: {packageData.duration}
-          </p>
+          </p> */}
           <p className="text-2xl font-bold text-lovely mb-6">
             LE {packageData.price.toFixed(2)}
           </p>
@@ -145,6 +212,26 @@ export default function PackageDetailPage() {
           </Button>
         </div>
       </div>
+
+      {/* Package Cards Section */}
+      {packageData.cards && packageData.cards.length > 0 && (
+        <div className="mt-16">
+          <h2
+            className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-8`}
+          >
+            Package Features
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {packageData.cards.map((card, index) => (
+              <PackageCard
+                key={index}
+                card={card}
+                packageId={params.id as string}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

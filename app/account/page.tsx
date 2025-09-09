@@ -16,6 +16,8 @@ import {
   Trash2,
   Crown,
   Handshake,
+  Percent,
+  CirclePercent,
 } from "lucide-react";
 import { useEffect, useState, useContext } from "react";
 import { useSession } from "next-auth/react";
@@ -35,7 +37,7 @@ import { ILoyaltyTransaction, IOrder } from "../interfaces/interfaces";
 import { useCart } from "@/providers/CartProvider";
 import { UploadDropzone } from "@/utils/uploadthing";
 import { compressImage } from "@/utils/imageCompression";
-import PartnersTable from "./partners/PartnersTable";
+import PartnersGrid from "./partners/PartnersGrid";
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -373,7 +375,7 @@ export default function AccountPage() {
     { id: "wishlist", label: "Wishlist", icon: Heart },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
-    { id: "partners", label: "Partners", icon: Handshake },
+    { id: "partners", label: "Discounts", icon: CirclePercent },
   ];
 
   return (
@@ -1009,7 +1011,7 @@ export default function AccountPage() {
         {activeTab === "partners" && (
           <div>
             {user.isSubscribed ? (
-              <PartnersTable />
+              <PartnersGrid />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
                 Subscribe to get our partners discounts!
