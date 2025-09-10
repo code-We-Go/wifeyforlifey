@@ -80,7 +80,7 @@ class BostaService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: this.bearerToken,
+          Authorization: `Bearer ${this.bearerToken}`,
         },
         body: JSON.stringify(payload),
       });

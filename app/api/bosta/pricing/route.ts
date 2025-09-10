@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
     // For testing purposes, use a hardcoded token if the environment variable is not set
     // In production, this should be properly configured in the .env file
     const fallbackToken =
-      "2adb69c5b8bf76e2d49259310b692dc75ee8cd5ef2b3cbf4ffcf7a693928c439";
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IkxiYzNVSEh1b2lkZ2pTQTE1Y0dQRSIsInNlc3Npb25JZCI6IjAxSzREWE1HRkI5UVBIQzNURFJGVFZNV0ZOIiwidG9rZW5UeXBlIjoiUkVGUkVTSCIsInRva2VuVmVyc2lvbiI6IlYyIiwiaWF0IjoxNzU3NTE0MTY0LCJleHAiOjE3NjAxMDYxNjR9.TZVE0kJlJ54Y3GJ9I3l_1BHLgalhRVjQtyW5uZWYYSw";
 
-    const authToken = bearerToken || fallbackToken;
+    const authToken = bearerToken;
 
     if (!authToken) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       {
         method: "GET",
         headers: {
-          Authorization: authToken,
+          Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
       }
