@@ -393,6 +393,9 @@ function ShopPage() {
         ) : products.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {/* Products grid */}
+            {packages.map((packageItem) => (
+              <PackageCard key={packageItem._id} packageItem={packageItem} />
+            ))}
             {products.map((product) => {
               const productID = product._id;
               const fav = wishList.find(
