@@ -44,7 +44,7 @@ export default function AccountPage() {
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
 
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState("partners");
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
@@ -371,11 +371,11 @@ export default function AccountPage() {
   ];
 
   const tabs = [
-    { id: "orders", label: "Recent Orders", icon: ShoppingBag },
-    { id: "wishlist", label: "Wishlist", icon: Heart },
+    { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
-    { id: "partners", label: "Discounts", icon: CirclePercent },
+    { id: "wishlist", label: "Wishlist", icon: Heart },
+    { id: "orders", label: "Recent Orders", icon: ShoppingBag },
   ];
 
   return (

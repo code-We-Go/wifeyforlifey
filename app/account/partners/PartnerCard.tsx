@@ -67,6 +67,7 @@ export default function PartnerCard({ partner }: PartnerCardProps) {
             <p className="text-xs text-creamey">
               {partner.category} - {partner.subCategory}
             </p>
+            <p>{partner.offer}</p>
             {partner.discount && (
               <p className="text-sm font-medium text-creamey">
                 {partner.discount}

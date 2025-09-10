@@ -63,18 +63,7 @@ export default function PartnersGrid() {
       bookingMethod: "Through Wifey for lifey",
       imagePath: "Sweet&Sour.jpeg",
     },
-    {
-      category: "Wedding Planning",
-      subCategory: "Live Painter",
-      brand: "Almeiry",
-      offer:
-        "Almeiry transforms your wedding moments into timeless works of art, capturing your celebration live on canvas so you can relive the magic forever.",
-      discount: "10% off all services",
-      code: "",
-      link: "https://www.instagram.com/el_miryy?igsh=OWZ0ZG4zcGh6OWtw",
-      bookingMethod: "Through Instagram",
-      imagePath: "almery.jpeg",
-    },
+
     {
       category: "Wedding Planning",
       subCategory: "Live Painter",
@@ -88,11 +77,11 @@ export default function PartnersGrid() {
       imagePath: "byRola.jpeg",
     },
     {
-      category: "Home Accessories",
-      subCategory: "Wall Art",
+      category: "Wedding Planning & Home Accessories",
+      subCategory: "Live Painter & Wall Art",
       brand: "Almeiry",
       offer:
-        "El Miry brings sophistication into your new home with original fine art, customized paintings, and wall murals. Each piece is designed to reflect your story and add a unique artistic touch to your bridal home.",
+        "Almeiry transforms your wedding moments into timeless works of art, capturing your celebration live on canvas so you can relive the magic forever. They also bring sophistication into your new home with original fine art, customized paintings, and wall murals. Each piece is designed to reflect your story and add a unique artistic touch to your bridal home.",
       discount: "10% off all services",
       code: "",
       link: "https://www.instagram.com/el_miryy?igsh=OWZ0ZG4zcGh6OWtw",
@@ -311,7 +300,7 @@ export default function PartnersGrid() {
 
       {/* Partners Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
           {[...Array(8)].map((_, index) => (
             <PartnerCardSkeleton key={index} />
           ))}
@@ -325,7 +314,7 @@ export default function PartnersGrid() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-6">
               {filteredPartners.map((partner, index) => (
                 <PartnerCard key={index} partner={partner} />
               ))}
