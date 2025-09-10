@@ -80,8 +80,7 @@ class BostaService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization:
-            "2adb69c5b8bf76e2d49259310b692dc75ee8cd5ef2b3cbf4ffcf7a693928c439",
+          Authorization: this.bearerToken,
         },
         body: JSON.stringify(payload),
       });
@@ -116,7 +115,7 @@ class BostaService {
         (total: number, item: any) => total + item.quantity,
         0
       ) || 2;
-      const cash = order.cash ? order.cash : "card";
+    const cash = order.cash ? order.cash : "card";
     // const description =
     //   order.cart
     //     ?.map((item: any) => `${item.productName} (${item.quantity})`)
@@ -131,11 +130,11 @@ class BostaService {
         size: "MEDIUM",
         packageDetails: {
           itemsCount,
-          description:  "Desc.",
+          description: "Desc.",
         },
       },
       notes: "Welcome Note",
-      cod: cash  === "cash" ? order.total : 0,
+      cod: cash === "cash" ? order.total : 0,
       dropOffAddress: {
         city: order.bostaCityName || order.city || "Cairo",
         zoneId: order.bostaZone || "NQz5sDOeG",

@@ -15,7 +15,6 @@ import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Discount } from "../../types/discount";
 import CartItemSmall from "../../cart/CartItemSmall";
-import DiscountSection from "./../../checkout/components/DiscountSection";
 import { ShippingZone } from "../../interfaces/interfaces";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +28,7 @@ import {
   BostaZone,
   BostaDistrict,
 } from "@/app/services/bostaLocationService";
+import DiscountSection from "../components/DiscountSection";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -1406,10 +1406,11 @@ const SubscriptionPage = () => {
                 </ul>
               </div>
             </div>
-            <DiscountSection
+            {/* <DiscountSection
               redeemType="Subscription"
               onDiscountApplied={handleDiscountApplied}
-            />
+              packagePrice={packageData?.price}
+            /> */}
             <LoyaltyPointsSection
               loyaltyPoints={loyaltyPoints}
               redeemPoints={redeemPoints}
