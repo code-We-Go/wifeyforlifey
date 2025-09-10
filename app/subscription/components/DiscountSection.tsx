@@ -10,11 +10,13 @@ import LoadingSpinner from "./LoadingSpinner";
 interface DiscountSectionProps {
   redeemType: string;
   onDiscountApplied: (discount: Discount | null) => void;
+  packagePrice?: number; // Optional package price for subscription page
 }
 
 const DiscountSection: React.FC<DiscountSectionProps> = ({
   onDiscountApplied,
   redeemType,
+  packagePrice,
 }) => {
   const [discountCode, setDiscountCode] = useState("");
   const [error, setError] = useState("");
@@ -24,14 +26,21 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
 
   useEffect(() => {
     fetchActiveDiscounts();
-  }, [cart]);
+  }, [cart, redeemType, packagePrice]);
 
   const fetchActiveDiscounts = async () => {
     try {
-      const cartTotal = cart.reduce(
-        (total: number, item: CartItem) => total + item.price * item.quantity,
-        0
-      );
+      // For subscription page, we need to pass the package price directly
+      // instead of calculating from cart items
+      const cartTotal = redeemType === "Subscription" && packagePrice !== undefined
+        ? packagePrice // Use packagePrice prop for subscription
+        : cart.reduce(
+            (total: number, item: CartItem) => total + item.price * item.quantity,
+            0
+          );
+      
+      console.log("Discount Section - cartTotal:", cartTotal, "redeemType:", redeemType);
+          
       const response = await fetch(
         `/api/active-discounts?cartTotal=${cartTotal}&redeemType=${redeemType}`
       );

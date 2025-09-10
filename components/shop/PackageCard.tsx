@@ -61,7 +61,7 @@ export default function PackageCard({
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-            <p className="text-xs text-creamey">{packageItem.duration}</p>
+            {/* <p className="text-xs text-creamey">{packageItem.duration}</p> */}
             <p className="price-tag text-creamey">
               LE{packageItem.price.toFixed(2)}
             </p>

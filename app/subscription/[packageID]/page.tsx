@@ -648,10 +648,10 @@ const SubscriptionPage = () => {
     // Calculate discount amount
     let newDiscountAmount = 0;
     let effectiveShipping = shipping;
-    
+
     // Apply free shipping if subtotal is greater than 2000
     const isFreeShipping = calculatedSubTotal > 2000;
-    
+
     if (appliedDiscount && appliedDiscount.value !== undefined) {
       if (appliedDiscount.calculationType === "PERCENTAGE") {
         newDiscountAmount = Math.round(
@@ -664,12 +664,12 @@ const SubscriptionPage = () => {
         newDiscountAmount = shipping;
       }
     }
-    
+
     // Apply free shipping if subtotal > 2000, regardless of discount
     if (isFreeShipping) {
       effectiveShipping = 0;
     }
-    
+
     setDiscountAmount(newDiscountAmount);
 
     // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
@@ -1363,12 +1363,12 @@ const SubscriptionPage = () => {
           >
             {/* Wifey Experience Package Details */}
             <div className=" bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
-              <div className="relative w-[95%] h-[40vh] md:h-[25vh] lg:h-[30vh] xl:h-[40vh]">
+              <div className="relative w-[95%] h-[60vh] md:h-[40vh] lg:h-[50vh] xl:h-[60vh]">
                 <Image
                   src={packageData.imgUrl}
                   fill
                   alt={packageData.name}
-                  className="object-cover object-top aspect-[16/11] rounded-xl mb-4"
+                  className="object-cover object-top aspect-[16/20] rounded-xl mb-4"
                 />
               </div>
               <h2
@@ -1453,7 +1453,8 @@ const SubscriptionPage = () => {
                 </div>
               )}
               <div className="flex justify-between text-base">
-                {appliedDiscount?.calculationType === "FREE_SHIPPING" || subTotal > 2000 ? (
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" ||
+                subTotal > 2000 ? (
                   <>
                     <span className="line-through">Shipping</span>
                     <span className="line-through">

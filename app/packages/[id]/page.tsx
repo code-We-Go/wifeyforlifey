@@ -94,7 +94,7 @@ export default function PackageDetailPage() {
               }
               alt={packageData.name}
               fill
-              className="object-cover"
+              className="object-contain"
             />
 
             {/* Navigation arrows */}
@@ -221,7 +221,7 @@ export default function PackageDetailPage() {
           >
             Package Features
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {packageData.cards.map((card, index) => (
               <PackageCard
                 key={index}

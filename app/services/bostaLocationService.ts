@@ -65,70 +65,26 @@ interface BostaDistrictsResponse {
 }
 
 class BostaLocationService {
-  private baseUrl = "http://app.bosta.co/api/v2";
-  private email = process.env.BOSTA_EMAIL || "";
-  private password = process.env.BOSTA_PASSWORD || "";
-  private token: string | null = null;
-  private refreshToken: string | null = null;
-
-  private async authenticate(): Promise<void> {
-    try {
-      const response = await fetch(`${this.baseUrl}/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: this.email,
-          password: this.password,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.statusText}`);
-      }
-
-      const data: BostaAuthResponse = await response.json();
-      if (data.success) {
-        this.token = data.data.token;
-        this.refreshToken = data.data.refreshToken;
-      } else {
-        throw new Error(`Authentication failed: ${data.message}`);
-      }
-    } catch (error) {
-      console.error("Bosta authentication error:", error);
-      throw error;
-    }
-  }
+  private baseUrl = "https://app.bosta.co/api/v2";
+  public token = "2adb69c5b8bf76e2d49259310b692dc75ee8cd5ef2b3cbf4ffcf7a693928c439";
 
   private getHeaders() {
     return {
       "Content-Type": "application/json",
-      Authorization: this.token || "",
+      Authorization: `Bearer ${this.token}`,
     };
   }
 
   private async makeRequest(
-    endpoint: string,
-    retryOnAuth = true
+    endpoint: string
   ): Promise<any> {
-    if (!this.token) {
-      await this.authenticate();
-    }
-
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: this.token || "",
+          Authorization: `Bearer ${this.token}`,
         },
       });
-
-      if (response.status === 401 && retryOnAuth) {
-        // Token expired, try to refresh
-        await this.authenticate();
-        return this.makeRequest(endpoint, false);
-      }
 
       if (!response.ok) {
         throw new Error(`Bosta API error: ${response.statusText}`);

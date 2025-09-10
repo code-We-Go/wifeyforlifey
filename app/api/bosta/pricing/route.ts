@@ -19,19 +19,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Try to use the bearer token first, then fall back to email/password auth if needed
     const bearerToken = process.env.BOSTA_BEARER_TOKEN;
-
-    // For testing purposes, use a hardcoded token if the environment variable is not set
-    // In production, this should be properly configured in the .env file
-    const fallbackToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IkxiYzNVSEh1b2lkZ2pTQTE1Y0dQRSIsInNlc3Npb25JZCI6IjAxSzREWE1HRkI5UVBIQzNURFJGVFZNV0ZOIiwidG9rZW5UeXBlIjoiUkVGUkVTSCIsInRva2VuVmVyc2lvbiI6IlYyIiwiaWF0IjoxNzU3NTE0MTY0LCJleHAiOjE3NjAxMDYxNjR9.TZVE0kJlJ54Y3GJ9I3l_1BHLgalhRVjQtyW5uZWYYSw";
-
-    const authToken = bearerToken;
-
-    if (!authToken) {
+    if (!bearerToken) {
       return NextResponse.json(
-        { success: false, error: "Bosta authentication not configured" },
+        { success: false, error: "Bosta bearer token not configured" },
         { status: 500 }
       );
     }
@@ -49,7 +40,7 @@ export async function GET(request: NextRequest) {
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${bearerToken}`,
           "Content-Type": "application/json",
         },
       }

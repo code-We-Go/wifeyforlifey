@@ -34,7 +34,7 @@ export default function PackageCard({
         alt="fyonka"
         src={"/fyonkaCreamey.png"}
       />
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative aspect-[12/18] overflow-hidden">
         <Image
           src={card.image}
           alt="Package Card"
