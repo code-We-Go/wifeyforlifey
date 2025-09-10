@@ -648,6 +648,10 @@ const SubscriptionPage = () => {
     // Calculate discount amount
     let newDiscountAmount = 0;
     let effectiveShipping = shipping;
+    
+    // Apply free shipping if subtotal is greater than 2000
+    const isFreeShipping = calculatedSubTotal > 2000;
+    
     if (appliedDiscount && appliedDiscount.value !== undefined) {
       if (appliedDiscount.calculationType === "PERCENTAGE") {
         newDiscountAmount = Math.round(
@@ -660,6 +664,12 @@ const SubscriptionPage = () => {
         newDiscountAmount = shipping;
       }
     }
+    
+    // Apply free shipping if subtotal > 2000, regardless of discount
+    if (isFreeShipping) {
+      effectiveShipping = 0;
+    }
+    
     setDiscountAmount(newDiscountAmount);
 
     // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
@@ -1443,9 +1453,9 @@ const SubscriptionPage = () => {
                 </div>
               )}
               <div className="flex justify-between text-base">
-                {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" || subTotal > 2000 ? (
                   <>
-                    <span className=" line-through">Shipping</span>
+                    <span className="line-through">Shipping</span>
                     <span className="line-through">
                       {(() => {
                         // Show the shipping cost that would have been charged
@@ -1467,8 +1477,8 @@ const SubscriptionPage = () => {
                   </>
                 ) : (
                   <>
-                    <span className="line-through">Shipping</span>
-                    <span className="line-through">{shipping} LE</span>
+                    <span>Shipping</span>
+                    <span>{shipping} LE</span>
                   </>
                 )}
               </div>
