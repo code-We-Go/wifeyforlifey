@@ -69,9 +69,32 @@ export async function GET(request: Request) {
         },
         { new: true } // <-- This is important!
       );
+      console.log("register" + packageModel);
+      if (
+        subscription?.packageID &&
+        typeof subscription.packageID.price === "number"
+      ) {
+        const loyaltyBonus = await LoyaltyTransactionModel.create({
+          email: subscription.email,
+          type: "earn",
+          reason: "subscription",
+          amount: subscription.packageID.price,
+          bonusID:
+            subscription.packageID.duration === "0"
+              ? "68c176b69c1ff0a2ad779c2d"
+              : "687d67f459e6ba857a54ed53",
+        });
+      } else {
+        console.error(
+          "Cannot create loyalty transaction: packageID or price is missing",
+          {
+            hasPackageID: !!subscription?.packageID,
+            packageIDValue: subscription?.packageID,
+          }
+        );
+      }
 
       // Log for debugging
-      console.log("register" + packageModel);
       if (subscription) {
         try {
           if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
