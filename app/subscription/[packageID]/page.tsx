@@ -179,7 +179,7 @@ const SubscriptionPage = () => {
   const { isAuthenticated, loyaltyPoints } = useAuth();
   const [loading, setLoading] = useState(false);
   // const [shipping, setShipping] = useState(0);
-  const [shipping, setShipping] = useState(70);
+  const [shipping, setShipping] = useState(0);
   const [bostaLocation, setBostaLocation] = useState<{
     city: BostaCity | null;
     zone: BostaZone | null;
@@ -289,8 +289,8 @@ const SubscriptionPage = () => {
       // if (location.city && location.zone) {
       //   // Maintain shipping cost when zone is selected
       //   setShipping(location.shippingCost.priceBeforeVat);
-      // } 
-     if (location.city) {
+      // }
+      if (location.city) {
         // Set shipping when only city is selected
         setShipping(location.shippingCost.priceBeforeVat);
       }
@@ -299,6 +299,16 @@ const SubscriptionPage = () => {
       // and package price meets minimum order amount
       setShipping(0);
     }
+    
+    // Update formData with Bosta location details
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      state: location.city?._id || prevFormData.state,
+      city: location.city?.name || prevFormData.city,
+      zone: location.zone?._id || "",
+      district: location.district?.districtId || "",
+      shipping: shipping
+    }));
   };
 
   const [formData, setFormData] = useState({
@@ -314,7 +324,9 @@ const SubscriptionPage = () => {
     phone: "",
     whatsAppNumber: "", // Added WhatsApp number field
     subscription: packageID,
-    state: state,
+    state: bostaLocation.city?._id || "",
+    zone: bostaLocation.zone?._id || "",
+    district: bostaLocation.district?.districtId || "",
     cash: payment,
     total: total,
     shipping: shipping,
@@ -329,7 +341,7 @@ const SubscriptionPage = () => {
     billingCountry: "",
     billingFirstName: "",
     billingLastName: "",
-    billingState: useSameAsShipping ? state : billingState,
+    billingState: bostaLocation.city?._id || "",
     billingAddress: "",
     billingApartment: "",
     billingPostalZip: "",
@@ -536,20 +548,20 @@ const SubscriptionPage = () => {
         }
       } else if (!bostaLocation.city) {
         // Set default shipping if no Bosta location selected yet
-        setShipping(70);
+        setShipping(0);
       }
       const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shipping);
     } else if (shippingZones.length > 0) {
-      const shippingRate = calculateShippingRate(
-        countryID,
-        state,
-        states,
-        countries,
-        shippingZones
-      );
-      console.log("Global shipping rate calculated:", shippingRate);
+      // const shippingRate = calculateShippingRate(
+      //   countryID,
+      //   state,
+      //   states,
+      //   countries,
+      //   shippingZones
+      // );
+      // console.log("Global shipping rate calculated:", shippingRate);
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
         // Check if package price meets minimum order amount required for the discount
         if (
@@ -559,12 +571,13 @@ const SubscriptionPage = () => {
         ) {
           setShipping(0);
         }
-      } else {
-        setShipping(shippingRate);
       }
+      //  else {
+      //   setShipping(shippingRate);
+      // }
       const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
-      setTotal(calculatedSubTotal + shippingRate);
+      setTotal(calculatedSubTotal + shipping);
     }
   }, [
     countryID,
@@ -584,6 +597,7 @@ const SubscriptionPage = () => {
     ));
   };
   const handleSubmit = async (e: React.FormEvent) => {
+    alert("clicked");
     e.preventDefault();
     setLoading(true);
     let errors: any = {};
@@ -594,6 +608,7 @@ const SubscriptionPage = () => {
 
     // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
+      alert(Object.keys(errors)[0] + Object.keys(errors)[1]);
       setLoading(false);
       return;
     }

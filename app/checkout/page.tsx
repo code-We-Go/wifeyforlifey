@@ -271,11 +271,7 @@ const CheckoutClientPage = () => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
     if (discount && discount.calculationType === "FREE_SHIPPING") {
-      // Check if cart total meets minimum order amount required for the discount
-      if (!discount.conditions?.minimumOrderAmount || 
-          subTotal >= discount.conditions.minimumOrderAmount) {
-        setShipping(0);
-      }
+      setShipping(0);
     }
     //     setFormData((prevFormData)=>({...prevFormData,appliedDiscount:discount?._id,}));
   };

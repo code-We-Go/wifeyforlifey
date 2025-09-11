@@ -30,8 +30,8 @@ export default function Home() {
     <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
       <HeroSection />
-      {/* <HeroTwo /> */}
-      <Pricing />
+      <HeroTwo />
+      {/* <Pricing /> */}
       <JoinNow />
 
       {/* Featured Products Section */}
