@@ -233,7 +233,14 @@ const SubscriptionPage = () => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
     if (discount && discount.calculationType === "FREE_SHIPPING") {
-      setShipping(0);
+      // Check if package price meets minimum order amount required for the discount
+      if (
+        !discount.conditions?.minimumOrderAmount ||
+        (packageData?.price &&
+          packageData.price >= discount.conditions.minimumOrderAmount)
+      ) {
+        setShipping(0);
+      }
     }
   }; // Default to the first state's name or an empty string
   useEffect(() => {
@@ -269,14 +276,27 @@ const SubscriptionPage = () => {
     };
   }) => {
     setBostaLocation(location);
-    // Update shipping cost if no free shipping discount is applied
+    // Always maintain shipping cost regardless of Bosta Zone selection
+    // Only apply free shipping if discount is specifically for FREE_SHIPPING
     if (
       !appliedDiscount ||
-      appliedDiscount.calculationType !== "FREE_SHIPPING"
+      appliedDiscount.calculationType !== "FREE_SHIPPING" ||
+      // Check if package price meets minimum order amount required for the discount
+      (appliedDiscount.conditions?.minimumOrderAmount &&
+        packageData?.price! < appliedDiscount.conditions.minimumOrderAmount)
     ) {
-      setShipping(location.shippingCost.priceBeforeVat);
+      // Keep the shipping cost even when Bosta Zone is selected
+      // if (location.city && location.zone) {
+      //   // Maintain shipping cost when zone is selected
+      //   setShipping(location.shippingCost.priceBeforeVat);
+      // } 
+     if (location.city) {
+        // Set shipping when only city is selected
+        setShipping(location.shippingCost.priceBeforeVat);
+      }
     } else {
       // Ensure shipping is set to 0 when free shipping discount is applied
+      // and package price meets minimum order amount
       setShipping(0);
     }
   };
@@ -409,9 +429,17 @@ const SubscriptionPage = () => {
         if (zone) {
           // Check if free shipping discount is applied
           if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
-            setShipping(0);
+            // Check if package price meets minimum order amount required for the discount
+            if (
+              !appliedDiscount.conditions?.minimumOrderAmount ||
+              (packageData?.price &&
+                packageData.price >=
+                  appliedDiscount.conditions.minimumOrderAmount)
+            ) {
+              setShipping(0);
+            }
           } else {
-            setShipping(zone.zone_rate.local);
+            setShipping(80);
           }
         }
       }
@@ -430,8 +458,8 @@ const SubscriptionPage = () => {
 
     const calculatedSubTotal = packageData?.price ?? 0;
     setSubTotal(calculatedSubTotal);
-    setTotal(calculatedSubTotal);
-    // setTotal(calculatedSubTotal + shipping);
+
+    setTotal(calculatedSubTotal + shipping);
 
     cartItems();
   }, [items, countryID, billingState, packageData]); // Add packageData to dependencies
@@ -498,14 +526,21 @@ const SubscriptionPage = () => {
       // For Egyptian customers, shipping is handled by Bosta location selector
       // Default shipping will be updated when location is selected
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
-        setShipping(0);
+        // Check if package price meets minimum order amount required for the discount
+        if (
+          !appliedDiscount.conditions?.minimumOrderAmount ||
+          (packageData?.price &&
+            packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
+        ) {
+          setShipping(0);
+        }
       } else if (!bostaLocation.city) {
         // Set default shipping if no Bosta location selected yet
         setShipping(70);
       }
       const calculatedSubTotal = packageData?.price ?? 0;
       setSubTotal(calculatedSubTotal);
-      setTotal(calculatedSubTotal);
+      setTotal(calculatedSubTotal + shipping);
     } else if (shippingZones.length > 0) {
       const shippingRate = calculateShippingRate(
         countryID,
@@ -516,7 +551,14 @@ const SubscriptionPage = () => {
       );
       console.log("Global shipping rate calculated:", shippingRate);
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
-        setShipping(0);
+        // Check if package price meets minimum order amount required for the discount
+        if (
+          !appliedDiscount.conditions?.minimumOrderAmount ||
+          (packageData?.price &&
+            packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
+        ) {
+          setShipping(0);
+        }
       } else {
         setShipping(shippingRate);
       }

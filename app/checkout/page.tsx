@@ -271,7 +271,11 @@ const CheckoutClientPage = () => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
     if (discount && discount.calculationType === "FREE_SHIPPING") {
-      setShipping(0);
+      // Check if cart total meets minimum order amount required for the discount
+      if (!discount.conditions?.minimumOrderAmount || 
+          subTotal >= discount.conditions.minimumOrderAmount) {
+        setShipping(0);
+      }
     }
     //     setFormData((prevFormData)=>({...prevFormData,appliedDiscount:discount?._id,}));
   };
@@ -288,14 +292,26 @@ const CheckoutClientPage = () => {
     };
   }) => {
     setBostaLocation(location);
-    // Update shipping cost if no free shipping discount is applied
+    // Always maintain shipping cost regardless of Bosta Zone selection
+    // Only apply free shipping if discount is specifically for FREE_SHIPPING
     if (
       !appliedDiscount ||
-      appliedDiscount.calculationType !== "FREE_SHIPPING"
+      appliedDiscount.calculationType !== "FREE_SHIPPING" ||
+      // Check if cart total meets minimum order amount required for the discount
+      (appliedDiscount.conditions?.minimumOrderAmount && 
+       subTotal < appliedDiscount.conditions.minimumOrderAmount)
     ) {
-      setShipping(location.shippingCost.priceBeforeVat);
+      // Keep the shipping cost even when Bosta Zone is selected
+      if (location.city && location.zone) {
+        // Maintain shipping cost when zone is selected
+        setShipping(location.shippingCost.priceBeforeVat);
+      } else if (location.city) {
+        // Set shipping when only city is selected
+        setShipping(location.shippingCost.priceBeforeVat);
+      }
     } else {
       // Ensure shipping is set to 0 when free shipping discount is applied
+      // and cart total meets minimum order amount
       setShipping(0);
     }
   };

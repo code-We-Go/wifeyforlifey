@@ -202,16 +202,16 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
     if (zoneObj && selectedCityObj) {
       loadDistricts(selectedCityObj._id, zoneId);
       // Calculate shipping cost and notify parent
-      const shippingCost = await calculateShippingCost(
-        selectedCityObj,
-        orderTotal
-      );
-      onLocationChange({
-        city: selectedCityObj,
-        zone: zoneObj,
-        district: null,
-        shippingCost,
-      });
+      // const shippingCost = await calculateShippingCost(
+      //   selectedCityObj,
+      //   orderTotal
+      // );
+      // onLocationChange({
+      //   city: selectedCityObj,
+      //   zone: zoneObj,
+      //   district: null,
+      //   shippingCost,
+      // });
     } else {
       setDistricts([]);
       const shippingCost = selectedCityObj
@@ -236,15 +236,15 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
 
     setSelectedDistrictObj(districtObj);
 
-    if (districtObj && selectedCityObj && selectedZoneObj) {
-      const cost = await calculateShippingCost(selectedCityObj, orderTotal);
-      onLocationChange({
-        city: selectedCityObj,
-        zone: selectedZoneObj,
-        district: districtObj,
-        shippingCost: cost,
-      });
-    }
+    // if (districtObj && selectedCityObj && selectedZoneObj) {
+    //   const cost = await calculateShippingCost(selectedCityObj, orderTotal);
+    //   onLocationChange({
+    //     city: selectedCityObj,
+    //     zone: selectedZoneObj,
+    //     district: districtObj,
+    //     shippingCost: cost,
+    //   });
+    // }
   };
 
   return (
