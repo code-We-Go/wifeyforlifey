@@ -221,10 +221,22 @@ export async function GET(request: Request) {
           { isSubscribed: true, subscription: subscription._id }
         );
         if (subscribedUser) {
+          // Check if this is a mini subscription (duration = "0")
+          if (subscription.packageID && subscription.packageID.duration === "0") {
+            return NextResponse.redirect(
+              `${process.env.testUrl}payment/success?subscription=mini&account=true`
+            );
+          }
           return NextResponse.redirect(
             `${process.env.testUrl}payment/success?subscription=true&account=true`
           );
         } else {
+          // Check if this is a mini subscription (duration = "0")
+          if (subscription.packageID && subscription.packageID.duration === "0") {
+            return NextResponse.redirect(
+              `${process.env.testUrl}payment/success?subscription=mini`
+            );
+          }
           return NextResponse.redirect(
             `${process.env.testUrl}payment/success?subscription=true`
           );
