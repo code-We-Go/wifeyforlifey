@@ -61,15 +61,17 @@ export async function GET(request: Request) {
       }
 
       // 1. Update the document and get the updated version
-      subscription = await subscriptionsModel.findOneAndUpdate(
-        { paymentID: data.order },
-        {
-          subscribed: true,
-          expiryDate: expiryDate,
-        },
-        { new: true } // <-- This is important!
-      );
       console.log("register" + packageModel);
+      const updateSubscription = await subscriptionsModel
+        .findOneAndUpdate(
+          { paymentID: data.order },
+          {
+            subscribed: true,
+            expiryDate: expiryDate,
+          },
+          { new: true } // <-- This is important!
+        )
+        .populate({ path: "packageID", options: { strictPopulate: false } });
       if (
         subscription?.packageID &&
         typeof subscription.packageID.price === "number"

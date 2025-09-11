@@ -299,15 +299,15 @@ const SubscriptionPage = () => {
       // and package price meets minimum order amount
       setShipping(0);
     }
-    
+
     // Update formData with Bosta location details
-    setFormData(prevFormData => ({
+    setFormData((prevFormData) => ({
       ...prevFormData,
       state: location.city?._id || prevFormData.state,
       city: location.city?.name || prevFormData.city,
       zone: location.zone?._id || "",
       district: location.district?.districtId || "",
-      shipping: shipping
+      shipping: shipping,
     }));
   };
 
@@ -545,14 +545,17 @@ const SubscriptionPage = () => {
             packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
         ) {
           setShipping(0);
+          const calculatedSubTotal = packageData?.price ?? 0;
+          setSubTotal(calculatedSubTotal);
+          setTotal(calculatedSubTotal);
         }
       } else if (!bostaLocation.city) {
         // Set default shipping if no Bosta location selected yet
         setShipping(0);
+        const calculatedSubTotal = packageData?.price ?? 0;
+        setSubTotal(calculatedSubTotal);
+        setTotal(calculatedSubTotal + shipping);
       }
-      const calculatedSubTotal = packageData?.price ?? 0;
-      setSubTotal(calculatedSubTotal);
-      setTotal(calculatedSubTotal + shipping);
     } else if (shippingZones.length > 0) {
       // const shippingRate = calculateShippingRate(
       //   countryID,
@@ -597,7 +600,7 @@ const SubscriptionPage = () => {
     ));
   };
   const handleSubmit = async (e: React.FormEvent) => {
-    alert("clicked");
+    // alert("clicked");
     e.preventDefault();
     setLoading(true);
     let errors: any = {};
