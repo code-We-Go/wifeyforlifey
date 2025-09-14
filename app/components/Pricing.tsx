@@ -192,7 +192,9 @@ const Pricing = () => {
               <thead>
                 <tr className="bg-lovely text-creamey">
                   <th className="p-5 border border-pinkey text-center w-1/3">
-                    <h3 className={`${thirdFont.className} text-xl font-bold`}>
+                    <h3
+                      className={`${thirdFont.className} text-base md:text-xl font-bold`}
+                    >
                       Features
                     </h3>
                   </th>
@@ -205,7 +207,7 @@ const Pricing = () => {
                       className="p-5 text-center border border-pinkey w-1/3"
                     >
                       <h3
-                        className={`${thirdFont.className} tracking-wide text-xl font-bold whitespace-nowrap overflow-hidden text-ellipsis`}
+                        className={`${thirdFont.className} tracking-wide text-base md:text-xl font-bold md:whitespace-nowrap overflow-hidden text-ellipsis`}
                       >
                         {pkg.title}
                       </h3>
@@ -215,19 +217,19 @@ const Pricing = () => {
               </thead>
               <tbody>
                 {[
-                  "Receiving your Gehaz Bestie Planner at your doorstep",
-                  "access to your exclusive online channel",
-                  "Joining the private WhatsApp Support Circle — brides & experts by your side",
-                  "Unlocking exclusive partners deals",
-                  "Wifey Points",
-                  "Bridal Session",
+                  "Your Gehaz Bestie Planner",
+                  "Access to online educational channel that guides you through every purchase",
+                  "Joining the WhatsApp Support group ",
+                  "Exclusive Discounts for the Wifeys Community",
+
+                  "Mini Support Session",
                 ].map((feature, index) => {
                   // Define package features in the same order as the features array
                   const packageFeatures = [
                     // Full Experience package features (index 0)
-                    [true, true, true, true, true, false],
+                    [true, true, true, true, true],
                     // Mini Experience package features (index 1)
-                    [true, false, false, false, true, true],
+                    [true, false, false, false, true],
                   ];
 
                   // Get inclusion status for each package based on feature index
@@ -241,7 +243,7 @@ const Pricing = () => {
                         index % 2 === 0 ? "bg-creamey" : "bg-creamey/90"
                       }
                     >
-                      <td className="p-1 border border-pinkey font-medium text-lovely w-2/4 overflow-hidden text-ellipsis">
+                      <td className="p-1 border max-md:text-sm border-pinkey font-medium text-lovely w-2/4 overflow-hidden text-ellipsis">
                         {feature}
                       </td>
                       <td className="p-2 text-center w-1/4 border border-pinkey">
@@ -324,7 +326,7 @@ const Pricing = () => {
                   <td className="p-2 text-center w-1/4 border border-pinkey">
                     <Link
                       href="/packages/687396821b4da119eb1c13fe"
-                      className="font-bold text-lovely hover:text-lovely/70 transition-all underline"
+                      className="font-bold max-md:text-base text-lovely hover:text-lovely/70 transition-all underline"
                     >
                       See More
                     </Link>
@@ -332,7 +334,7 @@ const Pricing = () => {
                   <td className="p-2 text-center w-1/4 border border-pinkey">
                     <Link
                       href="/packages/68bf6ae9c4d5c1af12cdcd37"
-                      className="font-bold text-lovely hover:text-lovely/70 transition-all underline"
+                      className="font-bold max-md:text-base text-lovely hover:text-lovely/70 transition-all underline"
                     >
                       See More
                     </Link>
