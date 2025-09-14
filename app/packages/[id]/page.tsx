@@ -78,7 +78,7 @@ export default function PackageDetailPage() {
           onClick={() => router.back()}
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
-          Back to Shop
+          Back
         </Button>
       </div>
 
@@ -176,12 +176,15 @@ export default function PackageDetailPage() {
               What&apos;s Included
             </h2>
             <ul className="space-y-2">
-              {packageData.items.map((item, index) => (
-                <li key={index} className="flex items-start">
-                  {/* <Package className="h-5 w-5 text-lovely mr-2 flex-shrink-0 mt-0.5" /> */}
-                  <span className="text-lovely">{item.value}</span>
-                </li>
-              ))}
+              {packageData.items.map(
+                (item, index) =>
+                  item.included && (
+                    <li key={index} className="flex items-start">
+                      {/* <Package className="h-5 w-5 text-lovely mr-2 flex-shrink-0 mt-0.5" /> */}
+                      <span className="text-lovely">• {item.value}</span>
+                    </li>
+                  )
+              )}
             </ul>
           </div>
 

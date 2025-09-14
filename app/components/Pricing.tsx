@@ -324,7 +324,7 @@ const Pricing = () => {
                   <td className="p-2 text-center w-1/4 border border-pinkey">
                     <Link
                       href="/packages/687396821b4da119eb1c13fe"
-                      className="text-sm text-lovely hover:text-lovely/70 transition-all underline"
+                      className="font-bold text-lovely hover:text-lovely/70 transition-all underline"
                     >
                       See More
                     </Link>
@@ -332,7 +332,7 @@ const Pricing = () => {
                   <td className="p-2 text-center w-1/4 border border-pinkey">
                     <Link
                       href="/packages/68bf6ae9c4d5c1af12cdcd37"
-                      className="text-sm text-lovely hover:text-lovely/70 transition-all underline"
+                      className="font-bold text-lovely hover:text-lovely/70 transition-all underline"
                     >
                       See More
                     </Link>
