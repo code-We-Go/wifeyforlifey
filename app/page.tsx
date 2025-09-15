@@ -31,8 +31,8 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
       {/* <HeroTwo /> */}
-      <Pricing />
       <JoinNow />
+      <Pricing />
 
       {/* Featured Products Section */}
       <FeaturedProducts />

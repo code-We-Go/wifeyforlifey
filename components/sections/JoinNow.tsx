@@ -27,7 +27,7 @@ const JoinNow = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button
+            {/* <Button
               asChild
               size="lg"
               className="rounded-full font-bold tracking-wide bg-lovely hover:bg-everGreen text-creamey"
@@ -35,7 +35,7 @@ const JoinNow = () => {
               <Link href="/subscription/687396821b4da119eb1c13fe">
                 Subscribe
               </Link>
-            </Button>
+            </Button> */}
             <Button
               asChild
               size="lg"
