@@ -16,6 +16,7 @@ import ProductModal from "@/components/shop/ProductModal";
 import DiscountPopup from "@/components/DiscountPopup";
 import { AnnouncementProvider } from "../context/announcementContext";
 import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -51,7 +52,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="w-full">
+      <GoogleTagManager gtmId="GTM-KQMB2B2F" />
+
       <body className={`w-full min-h-screen ${wifeyFont.className} bg-creamey`}>
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-KQMB2B2F"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          ></iframe>
+        </noscript>
         <AuthProvider>
           <ThemeProvider
             attribute="class"
