@@ -28,6 +28,32 @@ export default function PartnersGrid() {
   // Partner data
   const partnersData: Partner[] = [
     {
+      category: "E-Commerce",
+      subCategory: "Furniture",
+      brand: "Homzmart",
+      offer: `Homzmart Egypt is an online marketplace for home goods where you can shop furniture, household items, décor, appliances and more—all in one place.  ￼
+
+They offer a wide selection from multiple vendors, competitive pricing, and delivery plus logistics services especially for bulky/heavy products.
+Get 40% OFF of light furniture, lightning, decorations`,
+      discount: "40% off all services",
+      code: "Axq0",
+      link: "https://homzmart.com/",
+      bookingMethod: "Through Website",
+      imagePath: "homzmart.jpg",
+    },
+    {
+      category: "Beauty",
+      subCategory: "Makeup",
+      brand: "Cheops Bastet",
+      offer:
+        "Cheops Bastet offers luxury lip products including matte liquid lipsticks, plumping formulas, and radiant glosses designed for long-lasting color, comfort, and hydration. Their collections combine bold pigments with nourishing ingredients to enhance every skin tone.",
+      discount: "10% off all services",
+      code: "NARIMAN10",
+      link: "https://cheopsbastet.com",
+      bookingMethod: "Through Website",
+      imagePath: "bastet.jpg",
+    },
+    {
       category: "Beauty",
       subCategory: "Clinics",
       brand: "Facefull Skin Care",
