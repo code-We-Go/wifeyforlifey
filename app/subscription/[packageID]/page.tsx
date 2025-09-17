@@ -942,7 +942,7 @@ const SubscriptionPage = () => {
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely whitespace-nowrap text-base">
-                    Beautiful Bride First Name
+                    {isGift ? "First name" : "Beautiful Bride First Name"}
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -968,7 +968,7 @@ const SubscriptionPage = () => {
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
-                    Beautiful Bride Last Name
+                    {isGift ? "Last name" : "Beautiful Bride Last Name"}
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -993,7 +993,7 @@ const SubscriptionPage = () => {
             </div>
             <div className="flex gap-2 w-full items-center">
               <label className="text-lovely text-base whitespace-nowrap">
-                Lovely Bride&apos;s address
+                {isGift ? "address" : "Lovely Bride's address"}
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
@@ -1130,7 +1130,7 @@ const SubscriptionPage = () => {
             </div>
             <div className="flex w-full gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
-                Bride`&apos;`s WhatsApp Number
+                Bride&apos;s WhatsApp Number
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
