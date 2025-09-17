@@ -22,6 +22,10 @@ const SubscriptionSchema = new Schema(
     lastName: { type: String, required: false },
     phone: { type: String, required: false },
     whatsAppNumber: { type: String, required: false },
+    // Gift information
+    isGift: { type: Boolean, default: false },
+    giftRecipientEmail: { type: String, required: false },
+    specialMessage: { type: String, required: false },
     // Lovely Bride's address information
     country: { type: String, required: false },
     address: { type: String, required: false },

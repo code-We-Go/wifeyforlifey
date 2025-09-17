@@ -368,6 +368,10 @@ export async function POST(request: Request) {
           lastName: data.lastName,
           phone: data.phone,
           whatsAppNumber: data.whatsAppNumber,
+          // Gift information
+          isGift: data.isGift,
+          giftRecipientEmail: data.giftRecipientEmail,
+          specialMessage: data.specialMessage,
           // Address information
           country: data.country,
           address: data.address,

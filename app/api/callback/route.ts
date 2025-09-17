@@ -42,11 +42,18 @@ export async function GET(request: Request) {
         .findOne({ paymentID: data.order })
         .populate({ path: "packageID", options: { strictPopulate: false } });
 
-      // Set expiry date based on package duration
+      // Set expiry date based on package duration or gift status
       const expiryDate = new Date();
 
+      // Check if it's a gift subscription
+      if (subscription?.isGift) {
+        // For gifts, keep expiry date as current time (now)
+        console.log(
+          "Gift subscription detected - setting expiry to current time"
+        );
+      }
       // Check if package exists and has a duration of 0
-      if (
+      else if (
         subscription?.packageID &&
         (subscription.packageID as any).duration === "0"
       ) {
@@ -60,6 +67,11 @@ export async function GET(request: Request) {
         expiryDate.setFullYear(expiryDate.getFullYear() + 1);
       }
 
+      // Determine which email to use for the subscription
+      const subscriptionEmail = subscription.isGift && subscription.giftRecipientEmail
+        ? subscription.giftRecipientEmail
+        : subscription.email;
+
       // 1. Update the document and get the updated version
       console.log("register" + packageModel);
       const updateSubscription = await subscriptionsModel
@@ -72,12 +84,13 @@ export async function GET(request: Request) {
           { new: true } // <-- This is important!
         )
         .populate({ path: "packageID", options: { strictPopulate: false } });
+        
       if (
         subscription?.packageID &&
         typeof subscription.packageID.price === "number"
       ) {
         const loyaltyBonus = await LoyaltyTransactionModel.create({
-          email: subscription.email,
+          email: subscriptionEmail, // Use the determined email (gift recipient or normal)
           type: "earn",
           reason: "subscription",
           amount: subscription.packageID.price,
@@ -177,6 +190,9 @@ export async function GET(request: Request) {
               <p>A new subscription has been successfully created:</p>
               <ul>
                 <li><strong>Email:</strong> ${subscription.email}</li>
+                ${subscription.isGift ? `<li><strong>Gift:</strong> Yes</li>
+                <li><strong>Gift Recipient Email:</strong> ${subscription.giftRecipientEmail || "N/A"}</li>
+                <li><strong>Special Message:</strong> ${subscription.specialMessage || "N/A"}</li>` : ''}
                 <li><strong>Package:</strong> ${
                   subscription.packageID?.name || "N/A"
                 }</li>
@@ -202,7 +218,7 @@ export async function GET(request: Request) {
           );
         }
         const loyaltyBonus = await LoyaltyTransactionModel.create({
-          email: subscription.email,
+          email: subscriptionEmail, // Use the determined email (gift recipient or normal)
           type: "earn",
           reason: "subscription",
           amount: subscription.packageID.price,
@@ -217,7 +233,7 @@ export async function GET(request: Request) {
           });
         }
         const subscribedUser = await UserModel.findOneAndUpdate(
-          { email: subscription.email },
+          { email: subscriptionEmail },
           { isSubscribed: true, subscription: subscription._id }
         );
         if (subscribedUser) {

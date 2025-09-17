@@ -311,6 +311,7 @@ const SubscriptionPage = () => {
     }));
   };
 
+  const [isGift, setIsGift] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     country: "",
@@ -330,6 +331,9 @@ const SubscriptionPage = () => {
     cash: payment,
     total: total,
     shipping: shipping,
+    isGift: false,
+    giftRecipientEmail: "",
+    specialMessage: "",
     redeemedLoyaltyPoints: Math.max(
       0,
       Math.min(
@@ -361,7 +365,9 @@ const SubscriptionPage = () => {
     // currency: user.userCountry === "EG" ? "LE" : "USD",
   });
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     console.log(value);
@@ -819,6 +825,83 @@ const SubscriptionPage = () => {
                 )}
               </div>
             </div>
+
+            <div className="flex items-center gap-2 w-full mt-2">
+              <input
+                type="checkbox"
+                id="giftCheckbox"
+                checked={isGift}
+                onChange={(e) => {
+                  setIsGift(e.target.checked);
+                  setFormData({
+                    ...formData,
+                    isGift: e.target.checked,
+                  });
+                }}
+                className="w-4 h-4 accent-lovely"
+              />
+              <label htmlFor="giftCheckbox" className="text-lovely text-base">
+                This is a gift
+              </label>
+            </div>
+
+            {isGift && (
+              <>
+                <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
+                  <p className="text-sm text-lovely mb-2">
+                    Please enter The Bride&apos;s Email (if it&apos;s available
+                    else let it blank). We will contact her when the package is
+                    delivered through her WhatsApp and activate her account.
+                  </p>
+                  <div className="flex items-center gap-2 w-full">
+                    <label className="text-lovely text-base">
+                      Bride&apos;s Email
+                    </label>
+                    <div className="flex w-full gap-1 flex-col">
+                      <input
+                        onChange={handleInputChange}
+                        name="giftRecipientEmail"
+                        value={formData.giftRecipientEmail}
+                        type="email"
+                        className={`border ${
+                          formErrors.giftRecipientEmail ? "border-red-500" : ""
+                        } w-full h-10 bg-creamey border-pinkey border rounded-2xl px-2 text-base`}
+                      />
+                      {formErrors.giftRecipientEmail ? (
+                        <p className="uppercase text-xs text-red-500">
+                          {formErrors.giftRecipientEmail}
+                        </p>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col w-full mt-2">
+                    <label className="text-lovely text-base mb-1">
+                      Special Message
+                    </label>
+                    <textarea
+                      onChange={handleInputChange}
+                      name="specialMessage"
+                      value={formData.specialMessage}
+                      className={`border ${
+                        formErrors.specialMessage ? "border-red-500" : ""
+                      } w-full h-24 bg-creamey border-pinkey placeholder:text-pinkey border rounded-2xl px-2 py-2 text-base`}
+                      placeholder="Write a special message for the bride..."
+                    />
+                    {formErrors.specialMessage ? (
+                      <p className="uppercase text-xs text-red-500">
+                        {formErrors.specialMessage}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
             <div
               className={`${thirdFont.className} w-full mt-6 text-base lg:text-2xl border-b border-lovely`}
             >
@@ -1047,7 +1130,7 @@ const SubscriptionPage = () => {
             </div>
             <div className="flex w-full gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
-                WhatsApp Number
+                Bride`&apos;`s WhatsApp Number
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
