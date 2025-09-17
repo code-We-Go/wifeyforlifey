@@ -841,7 +841,7 @@ const SubscriptionPage = () => {
                 className="w-4 h-4 accent-lovely"
               />
               <label htmlFor="giftCheckbox" className="text-lovely text-base">
-                This is a gift
+                I&apos;m buying this as a gift 💖
               </label>
             </div>
 
@@ -850,8 +850,9 @@ const SubscriptionPage = () => {
                 <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
                   <p className="text-sm text-lovely mb-2">
                     Please enter The Bride&apos;s Email (if it&apos;s available
-                    else let it blank). We will contact her when the package is
-                    delivered through her WhatsApp and activate her account.
+                    else let it blank).Please let us know once you give this
+                    planner to the bride and We will contact her through her
+                    WhatsApp and activate her account.
                   </p>
                   <div className="flex items-center gap-2 w-full">
                     <label className="text-lovely text-base">
