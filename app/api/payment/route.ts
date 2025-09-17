@@ -358,7 +358,7 @@ export async function POST(request: Request) {
 
         await subscriptionsModel.create({
           paymentID: order.data.payment_keys[0].order_id,
-          email: data.giftRecipientEmail ? data.giftRecipientEmail : data.email,
+          email: data.email,
           packageID: data.subscription,
           redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
           appliedDiscount: data.appliedDiscount,
