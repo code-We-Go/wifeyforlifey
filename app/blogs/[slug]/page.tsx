@@ -251,7 +251,7 @@ const BlogDetailPage = () => {
         {/* Article Content */}
         <div className="bg-creamey text-lovely rounded-lg  p-8 mb-8">
           <div
-            className="prose prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
+            className="prose blog-content  prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
             // dangerouslySetInnerHTML={{ __html: blog.content }}
             // dangerouslySetInnerHTML={{
             //   __html: blog.content.replace(
@@ -267,6 +267,18 @@ const BlogDetailPage = () => {
                 ) + '<div style="clear:both;"></div>',
             }}
           />
+          <style jsx global>{`
+            .blog-content ol {
+              list-style-type: decimal;
+              margin-left: 1.5em;
+              padding-left: 1em;
+            }
+            .blog-content ul {
+              list-style-type: disc;
+              margin-left: 1.5em;
+              padding-left: 1em;
+            }
+          `}</style>
         </div>
 
         {/* Tags */}
