@@ -350,8 +350,6 @@ export async function GET(request: Request) {
         // Send order confirmation email to customer
         await sendMail({
           to: `${res.email}, orders@shopwifeyforlifey.com`,
-
-          to: res.email,
           name: res.firstName + " " + res.lastName,
           subject: "Order Confirmation",
           body: generateEmailBody(
@@ -377,31 +375,31 @@ export async function GET(request: Request) {
         });
 
         // Send a copy to orders@shopwifeyforlifey.com
-        await sendMail({
-          to: "orders@shopwifeyforlifey.com",
-          from: "noreply@shopwifeyforlifey.com",
-          name: "New Order Notification",
-          subject: `New Order #${res._id} - ${res.firstName} ${res.lastName}`,
-          body: generateEmailBody(
-            res.cart,
-            res.firstName,
-            res.lastName,
-            res.phone,
-            res.email,
-            res.total,
-            res.subTotal,
-            res.shipping,
-            res.currency,
-            res.address,
-            res._id,
-            res.cash,
-            res.country,
-            res.state,
-            res.city,
-            res.postalZip,
-            res.apartment
-          ),
-        });
+        // await sendMail({
+        //   to: "orders@shopwifeyforlifey.com",
+        //   from: "noreply@shopwifeyforlifey.com",
+        //   name: "New Order Notification",
+        //   subject: `New Order #${res._id} - ${res.firstName} ${res.lastName}`,
+        //   body: generateEmailBody(
+        //     res.cart,
+        //     res.firstName,
+        //     res.lastName,
+        //     res.phone,
+        //     res.email,
+        //     res.total,
+        //     res.subTotal,
+        //     res.shipping,
+        //     res.currency,
+        //     res.address,
+        //     res._id,
+        //     res.cash,
+        //     res.country,
+        //     res.state,
+        //     res.city,
+        //     res.postalZip,
+        //     res.apartment
+        //   ),
+        // });
         const loyalty = await LoyaltyTransactionModel.create({
           email: res.email,
           type: "earn",
