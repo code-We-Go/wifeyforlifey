@@ -128,7 +128,7 @@ const Pricing = () => {
   // }, []);
 
   return (
-    <div className="w-full min-h-screen h-auto bg-creamey py-16 relative">
+    <div className="w-full md:min-h-screen h-auto bg-creamey py-16 relative">
       <motion.div
         style={{
           rotate: useTransform(
