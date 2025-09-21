@@ -85,8 +85,9 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cart,
+          cart: redeemType === "Subscription" && packagePrice !== undefined ? [{ price: packagePrice, quantity: 1 }] : cart,
           discountCode: discountCode.trim(),
+          redeemType: redeemType
         }),
       });
 
