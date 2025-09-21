@@ -17,7 +17,13 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     title: "",
     dob: "",
     phoneNumber: "",
-    deviceType: "", // Add deviceType to store the device information
+    deviceType: "", // Device type (mobile, desktop, tablet, etc.)
+    deviceBrand: "", // Device manufacturer (Apple, Samsung, etc.)
+    deviceModel: "", // Device model (iPhone 12, Galaxy S21, etc.)
+    browserName: "", // Browser name (Chrome, Firefox, Safari, etc.)
+    browserVersion: "", // Browser version
+    osName: "", // Operating system name (iOS, Android, Windows, etc.)
+    osVersion: "", // Operating system version
   });
 
   useEffect(() => {
@@ -42,10 +48,33 @@ export default function UserProvider({ children }: { children: ReactNode }) {
       console.log("working...");
       const userAgent = navigator.userAgent;
       const deviceDetector = new DeviceDetector();
-      const device = deviceDetector.parse(userAgent);
-      const deviceType = device.device? device.device.type : "desktop"; // Default to desktop if unable to detect
-      console.log("deviceType"+deviceType)
-      setUser((prevUser) => ({ ...prevUser, deviceType }));
+      const result = deviceDetector.parse(userAgent);
+      
+      // Extract device information
+      const deviceType = result.device ? result.device.type : "desktop"; // Default to desktop if unable to detect
+      const deviceBrand = result.device ? result.device.brand || "" : "";
+      const deviceModel = result.device ? result.device.model || "" : "";
+      
+      // Extract browser information
+      const browserName = result.client ? result.client.name || "" : "";
+      const browserVersion = result.client ? result.client.version || "" : "";
+      
+      // Extract OS information
+      const osName = result.os ? result.os.name || "" : "";
+      const osVersion = result.os ? result.os.version || "" : "";
+      
+      console.log("Device Info:", { deviceType, deviceBrand, deviceModel, browserName, browserVersion, osName, osVersion });
+      
+      setUser((prevUser) => ({
+        ...prevUser,
+        deviceType,
+        deviceBrand,
+        deviceModel,
+        browserName,
+        browserVersion,
+        osName,
+        osVersion
+      }));
     };
 
     fetchUserCountry();
@@ -60,8 +89,14 @@ export default function UserProvider({ children }: { children: ReactNode }) {
           await axios.post('/api/visits', {
             countryCode: user.userCountry,
             deviceType: user.deviceType,
+            deviceBrand: user.deviceBrand,
+            deviceModel: user.deviceModel,
+            browserName: user.browserName,
+            browserVersion: user.browserVersion,
+            osName: user.osName,
+            osVersion: user.osVersion
           });
-          console.log('Visit data sent successfully');
+          console.log('Enhanced visit data sent successfully');
         } catch (error) {
           console.error('Error sending visit data:', error);
         }
@@ -69,7 +104,8 @@ export default function UserProvider({ children }: { children: ReactNode }) {
   
       sendVisitData();
     }
-  }, [user.userCountry, user.deviceType]); // Only track necessary dependencies
+  }, [user.userCountry, user.deviceType, user.deviceBrand, user.deviceModel, 
+      user.browserName, user.browserVersion, user.osName, user.osVersion]); // Track all device information
    // Send the data when user state changes
 
   return (

@@ -10,6 +10,7 @@ interface UserContextType {
   
  export  const userContext = createContext<UserContextType>({
     // user: {email:"",userId:""},
-    user: {email:"",userId:"",userCountry:"",firstName:"",lastName:"",phoneNumber:"",address:"",title:"",dob:"",deviceType:""},
+    user: {email:"",userId:"",userCountry:"",firstName:"",lastName:"",phoneNumber:"",address:"",title:"",dob:"",deviceType:"",
+      deviceBrand:"", deviceModel:"", browserName:"", browserVersion:"", osName:"", osVersion:""},
     setUser: () => {},
   });

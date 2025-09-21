@@ -27,6 +27,7 @@ declare module "next-auth" {
       subscriptionExpiryDate?: Date | null;
       // loyaltyPoints?: number;
       sessionId?: string; // Add sessionId here
+      deviceFingerprint?: string; // Add device fingerprint
     };
   }
 }
@@ -36,6 +37,7 @@ declare module "next-auth/jwt" {
     isSubscribed?: boolean;
     // loyaltyPoints?: number;
     sessionId?: string; // Add sessionId here
+    deviceFingerprint?: string; // Add device fingerprint
   }
 }
 
@@ -67,21 +69,23 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: {},
         password: {},
+        deviceFingerprint: {}
       },
+      // In the CredentialsProvider authorize function
       async authorize(credentials) {
         try {
           await ConnectDB();
           const user = await UserModel.findOne({ email: credentials?.email });
           if (!user) throw new Error("No user found");
-
+      
           const isValid = await compare(credentials!.password, user.password);
           if (!isValid) throw new Error("Wrong password");
-
+      
           if (!credentials?.email) {
             throw new Error("Email is required for loyalty points calculation");
           }
           // const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
-
+      
           // Generate and store sessionId for single-session enforcement
           const sessionId = uuidv4();
           await SessionModel.findOneAndUpdate(
@@ -89,13 +93,17 @@ export const authOptions: NextAuthOptions = {
             { sessionId, createdAt: new Date() },
             { upsert: true }
           );
-
+      
+          // Get device fingerprint if provided
+          const deviceFingerprint = credentials?.deviceFingerprint || null;
+      
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.username,
             // loyaltyPoints,
             sessionId, // Attach sessionId for JWT
+            deviceFingerprint, // Attach device fingerprint for JWT
           };
         } catch (error) {
           console.error("Authorize error:", error);
@@ -105,7 +113,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile, credentials }: { user: any; account: any; profile?: any; credentials?: { deviceFingerprint?: string; email?: string; password?: string } }) {
       await ConnectDB();
       let userId: string | undefined;
 
@@ -126,6 +134,9 @@ export const authOptions: NextAuthOptions = {
         }
         userId = (existingUser as any)._id?.toString();
         user.id = userId ?? ""; // Always set user.id for NextAuth
+        
+        // We can't access sessionStorage directly in the server component
+        // The deviceFingerprint will be retrieved in the client component after redirect
       } else {
         // Credentials provider
         userId = user.id || (user as any)._id?.toString();
@@ -170,6 +181,10 @@ export const authOptions: NextAuthOptions = {
       if ((user as any)?.sessionId) {
         token.sessionId = (user as any).sessionId;
       }
+      // Attach device fingerprint to token
+      if ((user as any)?.deviceFingerprint) {
+        token.deviceFingerprint = (user as any).deviceFingerprint;
+      }
       // Check session validity
       if (token.sub && token.sessionId) {
         const dbSession = await SessionModel.findOne({ userId: token.sub });
@@ -193,6 +208,10 @@ export const authOptions: NextAuthOptions = {
       }
       if (session.user && token.sessionId) {
         session.user.sessionId = token.sessionId;
+      }
+      // Add device fingerprint to session if available
+      if (session.user && token.deviceFingerprint) {
+        session.user.deviceFingerprint = token.deviceFingerprint as string;
       }
       return session;
     },

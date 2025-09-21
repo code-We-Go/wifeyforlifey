@@ -2,11 +2,13 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { thirdFont } from "@/fonts";
 import { FaGoogle } from "react-icons/fa";
 import { BadgeAlert } from "lucide-react";
 import { bgCreameyButton, bgRedButton } from "../constants";
+import axios from "axios";
+import { generateDeviceFingerprint } from "@/utils/fingerprint";
 
 function LoginPage() {
   const router = useRouter();
@@ -16,16 +18,29 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
 
-  const handleGoogleSignIn = () => {
-    const callbackUrl = redirectPath ? `/${redirectPath}` : "/account";
-    signIn("google", { callbackUrl });
-  };
+  // Using imported generateDeviceFingerprint from utils/fingerprint.ts
 
   useEffect(() => {
     const redirect = searchParams.get("redirect");
     setRedirectPath(redirect);
   }, [searchParams]);
+
+  // We've moved the login tracking to the account page
+  // This prevents duplicate login records
+  useEffect(() => {
+    if (session?.user?.id) {
+      console.log(
+        "Session detected in login page, user ID:",
+        session.user.id,
+        "email:",
+        session.user.email
+      );
+      // Login tracking is now handled in the account page
+      // No need to clear fingerprint here as it will be handled in account page
+    }
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +48,19 @@ function LoginPage() {
     setLoading(true);
 
     try {
+      // Generate device fingerprint before credential login
+      const deviceInfo = generateDeviceFingerprint();
+      const fingerprint = deviceInfo?.fingerprint || null;
+      console.log("Generated fingerprint for credential login:", fingerprint);
+
+      if (fingerprint) {
+        // Store fingerprint in sessionStorage before credential login
+        sessionStorage.setItem("deviceFingerprint", fingerprint);
+        console.log("Stored fingerprint in sessionStorage for credential login:", fingerprint);
+      } else {
+        console.warn("No fingerprint generated for credential login");
+      }
+
       const result = await signIn("credentials", {
         email,
         password,
@@ -40,18 +68,43 @@ function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
-      } else {
-        if (redirectPath) {
-          router.push(`/${redirectPath}`);
-        } else {
-          router.push("/account");
-        }
+        setError(result.error);
+        setLoading(false);
+        return;
       }
-    } catch (error: any) {
-      setError("Login failed. Please try again.");
-    } finally {
+
+      // Login successful, redirect
+      const redirectTo = redirectPath ? `/${redirectPath}` : "/account";
+      router.push(redirectTo);
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      // Generate device fingerprint before Google sign-in
+      const deviceInfo = generateDeviceFingerprint();
+      const fingerprint = deviceInfo?.fingerprint || null;
+      console.log("Generated fingerprint for Google login:", fingerprint);
+
+      if (fingerprint) {
+        // Store fingerprint in sessionStorage before redirecting to Google
+        sessionStorage.setItem("deviceFingerprint", fingerprint);
+        console.log("Stored fingerprint in sessionStorage:", fingerprint);
+      } else {
+        console.warn("No fingerprint generated for Google login");
+      }
+
+      const callbackUrl = redirectPath ? `/${redirectPath}` : "/account";
+      await signIn("google", {
+        callbackUrl,
+      });
+    } catch (error) {
+      console.error("Error during Google sign-in:", error);
+      setError("An error occurred during Google sign-in. Please try again.");
     }
   };
 

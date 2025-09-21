@@ -172,6 +172,12 @@ export interface User {
   phoneNumber: string;
   address: string;
   deviceType: string;
+  deviceBrand?: string;
+  deviceModel?: string;
+  browserName?: string;
+  browserVersion?: string;
+  osName?: string;
+  osVersion?: string;
   // phoneCode:string;
   dob: string;
 }
