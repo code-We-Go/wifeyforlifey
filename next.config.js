@@ -5,7 +5,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['lh3.googleusercontent.com','utfs.io'],
+    domains: ["lh3.googleusercontent.com", "utfs.io"],
   },
 };
 
