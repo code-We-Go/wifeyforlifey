@@ -1560,11 +1560,11 @@ const SubscriptionPage = () => {
                 </ul>
               </div>
             </div>
-            {/* <DiscountSection
+            <DiscountSection
               redeemType="Subscription"
               onDiscountApplied={handleDiscountApplied}
               packagePrice={packageData?.price}
-            /> */}
+            />
             <LoyaltyPointsSection
               loyaltyPoints={loyaltyPoints}
               redeemPoints={redeemPoints}
