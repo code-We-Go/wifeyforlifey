@@ -270,6 +270,7 @@ const BlogDetailPage = () => {
           <style jsx global>{`
             .blog-content ol {
               list-style-type: decimal;
+              padding-top: 3em;
               margin-left: 1.5em;
               padding-left: 1em;
             }
