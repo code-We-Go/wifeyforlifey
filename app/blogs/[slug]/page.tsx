@@ -251,7 +251,7 @@ const BlogDetailPage = () => {
         {/* Article Content */}
         <div className="bg-creamey text-lovely rounded-lg  p-8 mb-8">
           <div
-            className="prose blog-content  prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
+            className="prose blog-content overflow-x-scroll prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
             // dangerouslySetInnerHTML={{ __html: blog.content }}
             // dangerouslySetInnerHTML={{
             //   __html: blog.content.replace(
