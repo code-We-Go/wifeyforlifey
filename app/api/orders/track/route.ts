@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     await ConnectDB();
-    
+
     // Try to find by MongoDB ObjectId first
     let order: IOrder | null = null;
     try {
@@ -34,10 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!order) {
-      return NextResponse.json(
-        { message: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
     return NextResponse.json(order);

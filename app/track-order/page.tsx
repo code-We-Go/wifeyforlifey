@@ -10,37 +10,21 @@ import { IOrder } from "@/app/interfaces/interfaces";
 
 // Using IOrder interface from interfaces.ts
 
-function SearchParamsWrapper() {
+function TrackOrderPage() {
   const searchParams = useSearchParams();
   const orderIdFromUrl = searchParams.get("orderId");
-  return orderIdFromUrl || null;
-}
 
-export default function TrackOrderPage() {
-  const [orderIdFromUrl, setOrderIdFromUrl] = useState<string | null>(null);
-
-  const [orderId, setOrderId] = useState("");
+  const [orderId, setOrderId] = useState(orderIdFromUrl || "");
   const [orderStatus, setOrderStatus] = useState<IOrder | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Get orderId from URL using Suspense
+  // Fetch order status when component mounts if orderId is in URL
   useEffect(() => {
-    const getOrderIdFromUrl = () => {
-      const urlOrderId = document
-        .querySelector("[data-orderid]")
-        ?.getAttribute("data-orderid");
-      if (urlOrderId) {
-        setOrderIdFromUrl(urlOrderId);
-        setOrderId(urlOrderId);
-        fetchOrderStatus(urlOrderId); // Automatically track when orderId is found
-      }
-    };
-    getOrderIdFromUrl();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // The automatic tracking is now handled in the first useEffect
+    if (orderIdFromUrl) {
+      fetchOrderStatus(orderIdFromUrl);
+    }
+  }, [orderIdFromUrl]);
 
   const fetchOrderStatus = async (id: string) => {
     if (!id.trim()) {
@@ -92,12 +76,6 @@ export default function TrackOrderPage() {
 
   return (
     <div className="container mx-auto py-12 px-4">
-      <Suspense fallback={<div data-orderid=""></div>}>
-        <div className="hidden">
-          <SearchParamsWrapper />
-        </div>
-        <div data-orderid={SearchParamsWrapper()}></div>
-      </Suspense>
       <h1 className="text-3xl font-bold text-lovely mb-8 text-center">
         Track Your Order
       </h1>
@@ -220,5 +198,13 @@ export default function TrackOrderPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TrackingPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading</div>}>
+      <TrackOrderPage />
+    </Suspense>
   );
 }
