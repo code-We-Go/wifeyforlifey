@@ -137,17 +137,20 @@ export default function AccountPage() {
     if (session?.user) {
       fetchUserData();
       fetchUserOrders();
-      
+
       // Check for fingerprint in sessionStorage for Google login tracking
       if (typeof window !== "undefined") {
         const fingerprint = sessionStorage.getItem("deviceFingerprint");
-        console.log("Account page - Retrieved fingerprint from sessionStorage:", fingerprint);
-        
+        console.log(
+          "Account page - Retrieved fingerprint from sessionStorage:",
+          fingerprint
+        );
+
         if (fingerprint) {
           // Clear it after use
           sessionStorage.removeItem("deviceFingerprint");
           console.log("Account page - Cleared fingerprint from sessionStorage");
-          
+
           // Record login with fingerprint
           if (session.user.id) {
             recordLoginAttempt(session.user.id, fingerprint);
@@ -158,22 +161,28 @@ export default function AccountPage() {
       }
     }
   }, [session]);
-  
+
   // Function to record login attempt with device fingerprint
-  const recordLoginAttempt = async (userId: string, customFingerprint: string) => {
+  const recordLoginAttempt = async (
+    userId: string,
+    customFingerprint: string
+  ) => {
     try {
-      console.log("Account page - Recording login with fingerprint:", customFingerprint);
+      console.log(
+        "Account page - Recording login with fingerprint:",
+        customFingerprint
+      );
+
+      // Import the generateDeviceFingerprint utility
+      const { generateDeviceFingerprint } = await import("@/utils/fingerprint");
       
-      // Use provided fingerprint
-      const deviceInfo = {
+      // Get comprehensive device info
+      const deviceInfo = generateDeviceFingerprint() || {
+        // Fallback if fingerprinting fails
         fingerprint: customFingerprint,
         userAgent: navigator.userAgent,
-        language: navigator.language,
-        screenWidth: window.screen.width,
-        screenHeight: window.screen.height,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
-      
+
       // Send to API endpoint
       await axios.post("/api/auth/login-tracking", {
         userId,
@@ -182,13 +191,13 @@ export default function AccountPage() {
         ...deviceInfo,
         timestamp: new Date(),
       });
-      
+
       console.log("Account page - Login tracking data sent successfully");
     } catch (error) {
       console.error("Account page - Error recording login attempt:", error);
     }
   };
-  
+
   const [isUploading, setIsUploading] = useState(false);
 
   const handleComperession = async (files: File[]) => {
