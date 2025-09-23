@@ -226,16 +226,16 @@ export async function GET(request: Request) {
             emailError
           );
         }
-        const loyaltyBonus = await LoyaltyTransactionModel.create({
-          email: subscriptionEmail, // Use the determined email (gift recipient or normal)
-          type: "earn",
-          reason: "subscription",
-          amount: subscription.packageID.price,
-          bonusID:
-            subscription.packageID.duration === "0"
-              ? "68c176b69c1ff0a2ad779c2d"
-              : "687d67f459e6ba857a54ed53",
-        });
+        // const loyaltyBonus = await LoyaltyTransactionModel.create({
+        //   email: subscriptionEmail, // Use the determined email (gift recipient or normal)
+        //   type: "earn",
+        //   reason: "subscription",
+        //   amount: subscription.packageID.price,
+        //   bonusID:
+        //     subscription.packageID.duration === "0"
+        //       ? "68c176b69c1ff0a2ad779c2d"
+        //       : "687d67f459e6ba857a54ed53",
+        // });
         if (subscription.appliedDiscountAmount > 0) {
           await DiscountModel.findByIdAndUpdate(data.appliedDiscount, {
             $inc: { usageCount: 1 },
