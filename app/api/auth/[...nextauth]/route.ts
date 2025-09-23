@@ -8,22 +8,22 @@ import { compare } from "bcryptjs";
 import UserModel from "@/app/modals/userModel";
 
 // Extend NextAuth types
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id?: string;
-      firstName?: string;
-      lastName?: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      isSubscribed: boolean;
-      subscriptionExpiryDate?: Date | null;
-      // loyaltyPoints?: number;
-      sessionId?: string; // Add sessionId here
-    };
-  }
-}
+// declare module "next-auth" {
+//   interface Session {
+//     user: {
+//       id?: string;
+//       firstName?: string;
+//       lastName?: string;
+//       name?: string | null;
+//       email?: string | null;
+//       image?: string | null;
+//       isSubscribed: boolean;
+//       subscriptionExpiryDate?: Date | null;
+//       // loyaltyPoints?: number;
+//       sessionId?: string; // Add sessionId here
+//     };
+//   }
+// }
 
 declare module "next-auth/jwt" {
   interface JWT {
