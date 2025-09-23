@@ -68,9 +68,10 @@ export async function GET(request: Request) {
       }
 
       // Determine which email to use for the subscription
-      const subscriptionEmail = subscription.isGift && subscription.giftRecipientEmail
-        ? subscription.giftRecipientEmail
-        : subscription.email;
+      const subscriptionEmail =
+        subscription.isGift && subscription.giftRecipientEmail
+          ? subscription.giftRecipientEmail
+          : subscription.email;
 
       // 1. Update the document and get the updated version
       console.log("register" + packageModel);
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
           { new: true } // <-- This is important!
         )
         .populate({ path: "packageID", options: { strictPopulate: false } });
-        
+
       if (
         subscription?.packageID &&
         typeof subscription.packageID.price === "number"
@@ -190,9 +191,17 @@ export async function GET(request: Request) {
               <p>A new subscription has been successfully created:</p>
               <ul>
                 <li><strong>Email:</strong> ${subscription.email}</li>
-                ${subscription.isGift ? `<li><strong>Gift:</strong> Yes</li>
-                <li><strong>Gift Recipient Email:</strong> ${subscription.giftRecipientEmail || "N/A"}</li>
-                <li><strong>Special Message:</strong> ${subscription.specialMessage || "N/A"}</li>` : ''}
+                ${
+                  subscription.isGift
+                    ? `<li><strong>Gift:</strong> Yes</li>
+                <li><strong>Gift Recipient Email:</strong> ${
+                  subscription.giftRecipientEmail || "N/A"
+                }</li>
+                <li><strong>Special Message:</strong> ${
+                  subscription.specialMessage || "N/A"
+                }</li>`
+                    : ""
+                }
                 <li><strong>Package:</strong> ${
                   subscription.packageID?.name || "N/A"
                 }</li>
@@ -217,16 +226,16 @@ export async function GET(request: Request) {
             emailError
           );
         }
-        const loyaltyBonus = await LoyaltyTransactionModel.create({
-          email: subscriptionEmail, // Use the determined email (gift recipient or normal)
-          type: "earn",
-          reason: "subscription",
-          amount: subscription.packageID.price,
-          bonusID:
-            subscription.packageID.duration === "0"
-              ? "68c176b69c1ff0a2ad779c2d"
-              : "687d67f459e6ba857a54ed53",
-        });
+        // const loyaltyBonus = await LoyaltyTransactionModel.create({
+        //   email: subscriptionEmail, // Use the determined email (gift recipient or normal)
+        //   type: "earn",
+        //   reason: "subscription",
+        //   amount: subscription.packageID.price,
+        //   bonusID:
+        //     subscription.packageID.duration === "0"
+        //       ? "68c176b69c1ff0a2ad779c2d"
+        //       : "687d67f459e6ba857a54ed53",
+        // });
         if (subscription.appliedDiscountAmount > 0) {
           await DiscountModel.findByIdAndUpdate(data.appliedDiscount, {
             $inc: { usageCount: 1 },
@@ -238,7 +247,10 @@ export async function GET(request: Request) {
         );
         if (subscribedUser) {
           // Check if this is a mini subscription (duration = "0")
-          if (subscription.packageID && subscription.packageID.duration === "0") {
+          if (
+            subscription.packageID &&
+            subscription.packageID.duration === "0"
+          ) {
             return NextResponse.redirect(
               `${process.env.testUrl}payment/success?subscription=mini&account=true`
             );
@@ -248,7 +260,10 @@ export async function GET(request: Request) {
           );
         } else {
           // Check if this is a mini subscription (duration = "0")
-          if (subscription.packageID && subscription.packageID.duration === "0") {
+          if (
+            subscription.packageID &&
+            subscription.packageID.duration === "0"
+          ) {
             return NextResponse.redirect(
               `${process.env.testUrl}payment/success?subscription=mini`
             );
@@ -334,7 +349,7 @@ export async function GET(request: Request) {
         }
         // Send order confirmation email to customer
         await sendMail({
-          to: res.email,
+          to: `${res.email}, orders@shopwifeyforlifey.com`,
           name: res.firstName + " " + res.lastName,
           subject: "Order Confirmation",
           body: generateEmailBody(
@@ -360,31 +375,31 @@ export async function GET(request: Request) {
         });
 
         // Send a copy to orders@shopwifeyforlifey.com
-        await sendMail({
-          to: "orders@shopwifeyforlifey.com",
-          from: "noreply@shopwifeyforlifey.com",
-          name: "New Order Notification",
-          subject: `New Order #${res._id} - ${res.firstName} ${res.lastName}`,
-          body: generateEmailBody(
-            res.cart,
-            res.firstName,
-            res.lastName,
-            res.phone,
-            res.email,
-            res.total,
-            res.subTotal,
-            res.shipping,
-            res.currency,
-            res.address,
-            res._id,
-            res.cash,
-            res.country,
-            res.state,
-            res.city,
-            res.postalZip,
-            res.apartment
-          ),
-        });
+        // await sendMail({
+        //   to: "orders@shopwifeyforlifey.com",
+        //   from: "noreply@shopwifeyforlifey.com",
+        //   name: "New Order Notification",
+        //   subject: `New Order #${res._id} - ${res.firstName} ${res.lastName}`,
+        //   body: generateEmailBody(
+        //     res.cart,
+        //     res.firstName,
+        //     res.lastName,
+        //     res.phone,
+        //     res.email,
+        //     res.total,
+        //     res.subTotal,
+        //     res.shipping,
+        //     res.currency,
+        //     res.address,
+        //     res._id,
+        //     res.cash,
+        //     res.country,
+        //     res.state,
+        //     res.city,
+        //     res.postalZip,
+        //     res.apartment
+        //   ),
+        // });
         const loyalty = await LoyaltyTransactionModel.create({
           email: res.email,
           type: "earn",

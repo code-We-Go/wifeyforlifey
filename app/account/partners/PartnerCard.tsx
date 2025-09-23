@@ -47,7 +47,7 @@ export default function PartnerCard({ partner }: PartnerCardProps) {
       />
       <div className="relative aspect-square overflow-hidden">
         <Image
-          src={`/partners/${getImagePath()}`}
+          src={`${getImagePath()}`}
           alt={partner.brand}
           fill
           className={`object-cover transition-transform duration-300 group-hover:scale-105`}

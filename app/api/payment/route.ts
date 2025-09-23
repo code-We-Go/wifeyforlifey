@@ -222,8 +222,8 @@ export async function POST(request: Request) {
       }
 
       await sendMail({
-        to: `${data.email}`,
-        from: "orders@shopwifeyforlifey.com",
+        to: `${data.email}, orders@shopwifeyforlifey.com`,
+        from: "noreply@shopwifeyforlifey.com",
         name: "Order Confirmation",
         subject: "Order Confirmation",
         body: generateEmailBody(

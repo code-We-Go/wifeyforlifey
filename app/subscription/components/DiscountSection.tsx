@@ -32,15 +32,22 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
     try {
       // For subscription page, we need to pass the package price directly
       // instead of calculating from cart items
-      const cartTotal = redeemType === "Subscription" && packagePrice !== undefined
-        ? packagePrice // Use packagePrice prop for subscription
-        : cart.reduce(
-            (total: number, item: CartItem) => total + item.price * item.quantity,
-            0
-          );
-      
-      console.log("Discount Section - cartTotal:", cartTotal, "redeemType:", redeemType);
-          
+      const cartTotal =
+        redeemType === "Subscription" && packagePrice !== undefined
+          ? packagePrice // Use packagePrice prop for subscription
+          : cart.reduce(
+              (total: number, item: CartItem) =>
+                total + item.price * item.quantity,
+              0
+            );
+
+      console.log(
+        "Discount Section - cartTotal:",
+        cartTotal,
+        "redeemType:",
+        redeemType
+      );
+
       const response = await fetch(
         `/api/active-discounts?cartTotal=${cartTotal}&redeemType=${redeemType}`
       );
@@ -78,8 +85,9 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cart,
+          cart: redeemType === "Subscription" && packagePrice !== undefined ? [{ price: packagePrice, quantity: 1 }] : cart,
           discountCode: discountCode.trim(),
+          redeemType: redeemType
         }),
       });
 
@@ -129,7 +137,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
           value={discountCode}
           onChange={(e) => setDiscountCode(e.target.value)}
           placeholder="Enter discount code"
-          className="flex-1 placeholder:text-lovely/80 px-2 py-2 border bg-white text-lovely border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent"
+          className="flex-1 placeholder:text-lovely/80 px-2 py-2 border bg-creamey text-lovely border-pinkey rounded-2xl focus:outline-none focus:right-1 focus:ring-lovely/30"
           disabled={loading}
         />
         <button
