@@ -301,31 +301,34 @@ const BlogDetailPage = () => {
 
         {/* Related Posts */}
         {relatedBlogs.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-creamey rounded-lg shadow-sm p-6">
             <h3 className="text-2xl font-bold text-lovely mb-6">
-              Related Posts
+              Related Blogs
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedBlogs.map((relatedBlog) => (
-                <article key={relatedBlog._id} className="group">
+                <article
+                  key={relatedBlog._id}
+                  className="bg-lovely rounded-lg text-creamey"
+                >
                   <Link href={`/blog/${relatedBlog.slug}`}>
                     {relatedBlog.featuredImage && (
-                      <div className="w-full aspect-video mb-4">
+                      <div className="relative w-full  aspect-video mb-4">
                         <Image
                           fill
                           src={relatedBlog.featuredImage}
                           alt={relatedBlog.title}
-                          className="w-full h-40 object-cover rounded-lg group-hover:opacity-90 transition-opacity"
+                          className="w-full h-40 object-cover rounded-t-lg group-hover:opacity-90 transition-opacity"
                         />
                       </div>
                     )}
-                    <h4 className="text-lg font-semibold text-lovely mb-2 group-hover:text-blue-600 transition-colors">
+                    <h4 className="text-lg px-2 font-semibold text-creamey mb-2 group-hover:text-blue-600 transition-colors">
                       {relatedBlog.title}
                     </h4>
-                    <p className="text-lovely/90 text-sm mb-3">
+                    <p className="px-2 text-creamey/90 text-sm mb-3">
                       {truncateText(stripHtml(relatedBlog.excerpt), 100)}
                     </p>
-                    <div className="flex items-center text-xs text-lovely/80">
+                    <div className="flex px-2 items-center text-xs text-lovely/80">
                       <span>
                         {formatDate(
                           relatedBlog.publishedAt || relatedBlog.createdAt
