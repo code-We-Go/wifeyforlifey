@@ -311,7 +311,7 @@ const BlogDetailPage = () => {
                   key={relatedBlog._id}
                   className="bg-lovely rounded-lg text-creamey"
                 >
-                  <Link href={`/blog/${relatedBlog.slug}`}>
+                  <Link href={`/blogs/${relatedBlog.slug}`}>
                     {relatedBlog.featuredImage && (
                       <div className="relative w-full  aspect-video mb-4">
                         <Image
