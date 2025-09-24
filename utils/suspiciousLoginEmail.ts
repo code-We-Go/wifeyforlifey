@@ -1,4 +1,4 @@
-export function generateSuspiciousLoginEmail(email: string, loginDetails: any) {
+export function generateSuspiciousLoginEmail(first_name: string, loginDetails: any) {
   return `
 <!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
@@ -110,7 +110,7 @@ export function generateSuspiciousLoginEmail(email: string, loginDetails: any) {
 													<table class="heading_block block-1" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
 															<td class="pad">
-																<h1 style="margin: 0; color: #fbf3e0; direction: ltr; font-family: Arial, Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0;"><span class="tinyMce-placeholder">SECURITY ALERT</span></h1>
+																<h1 style="margin: 0; color: #fbf3e0; direction: ltr; font-family: Arial, Helvetica, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0;"><span class="tinyMce-placeholder">🚨 SECURITY ALERT</span></h1>
 															</td>
 														</tr>
 													</table>
@@ -141,18 +141,20 @@ export function generateSuspiciousLoginEmail(email: string, loginDetails: any) {
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:20px;">
 																<div style="color:#393d47;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:left;mso-line-height-alt:24px;">
-																	<p style="margin: 0;">Dear ${email},</p>
+																	<p style="margin: 0;">Dear ${first_name},</p>
 																	<p style="margin: 0;">&nbsp;</p>
-																	<p style="margin: 0;">We've detected multiple login attempts to your account from different devices in the past 10 days. For your security, we're sending this alert.</p>
+																	<p style="margin: 0;">We've noticed unusual login attempts to your account from different devices in the past 10 days. For your safety, we wanted to reach out right away.</p>
 																	<p style="margin: 0;">&nbsp;</p>
-																	<p style="margin: 0;"><strong>Important:</strong> If you don't recognize these login activities, your account may be compromised. Please take immediate action to secure your account:</p>
+																	<p style="margin: 0;">✨ Here's what you need to do now:</p>
 																	<p style="margin: 0;">&nbsp;</p>
 																	<ul style="margin-top: 0; margin-bottom: 0; padding-left: 20px;">
-																		<li style="margin-bottom: 10px;">Change your password immediately</li>
-																		<li>Contact our support team if you need assistance</li>
+																		<li style="margin-bottom: 10px;">🔒 Change your password immediately</li>
+																		<li style="margin-bottom: 10px;">💌 Reach out to our support team if you need help or didn't request these logins</li>
 																	</ul>
 																	<p style="margin: 0;">&nbsp;</p>
-																	<p style="margin: 0;">Please note that continued suspicious activity may result in temporary account restrictions .</p>
+																	<p style="margin: 0;">⚠️ If these attempts weren't made by you, your account may be at risk. To protect you, continued suspicious activity could result in a temporary account lock until it's secured.</p>
+																	<p style="margin: 0;">&nbsp;</p>
+																	<p style="margin: 0;">🚫 <strong>Important Reminder:</strong> Your Wifey for Lifey account is personal and meant just for you 💗 Sharing your login details with others is not allowed. If account sharing is detected, it may result in cancellation of your subscription — and in serious cases, we may take legal action to protect our community and content.</p>
 																</div>
 															</td>
 														</tr>
@@ -174,10 +176,9 @@ export function generateSuspiciousLoginEmail(email: string, loginDetails: any) {
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
 																<div style="color:#393d47;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:14px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:left;mso-line-height-alt:21px;">
+																	<p style="margin: 0;">Your safety means everything to us 💕 Thank you for acting quickly to keep your account secure.</p>
 																	<p style="margin: 0;">&nbsp;</p>
-																	<p style="margin: 0;">Thank you for your attention to this security matter.</p>
-																	<p style="margin: 0;">&nbsp;</p>
-																	<p style="margin: 0;">Best regards,</p>
+																	<p style="margin: 0;">With care,</p>
 																	<p style="margin: 0;">Wifey For Lifey Security Team</p>
 																</div>
 															</td>

@@ -20,12 +20,14 @@ const transporter = nodemailer.createTransport({
  * @param userId - The user ID to check
  * @param email - The user's email address
  * @param currentFingerprint - The current login fingerprint
+ * @param first_name - The user's first name
  * @returns Promise<boolean> - Returns true if suspicious activity was detected
  */
 export async function checkSuspiciousLoginActivity(
   userId: string,
   email: string,
-  currentFingerprint: string
+  currentFingerprint: string,
+  first_name: string = "User"
 ): Promise<boolean> {
   try {
     // Calculate the date 10 days ago
@@ -51,13 +53,13 @@ export async function checkSuspiciousLoginActivity(
     if (uniqueFingerprints.size > 3) {
       console.log("haramyyyyyyy");
       // Generate suspicious login email content
-      const emailContent = generateSuspiciousLoginEmail(email, {
+      const emailContent = generateSuspiciousLoginEmail(first_name, {
         fingerprintCount: uniqueFingerprints.size,
         currentFingerprint,
       });
 
       // Send email notification
-      await sendSuspiciousLoginEmail(email, emailContent);
+      await sendSuspiciousLoginEmail(email, first_name, emailContent);
 
       return true; // Suspicious activity detected
     }
@@ -73,18 +75,20 @@ export async function checkSuspiciousLoginActivity(
  * Sends a suspicious login notification email
  *
  * @param email - The recipient's email address
+ * @param first_name - The user's first name
  * @param emailContent - The HTML content of the email
  * @returns Promise<void>
  */
 async function sendSuspiciousLoginEmail(
   email: string,
+  first_name: string,
   emailContent: string
 ): Promise<void> {
   try {
     await transporter.sendMail({
       from: `"Wifey For Lifey Security Team" <authentication@shopwifeyforlifey.com>`,
       to: email,
-      subject: "Security Alert: Suspicious Login Activity Detected",
+      subject: "🚨 Security Alert: Suspicious Login Activity Detected",
       html: emailContent,
     });
 

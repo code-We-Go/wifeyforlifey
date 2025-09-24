@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
       suspiciousActivityDetected = await checkSuspiciousLoginActivity(
         data.userId,
         data.email,
-        data.fingerprint
+        data.fingerprint,
+        data.firstName || "User" // Pass first_name parameter, default to "User" if not provided
       );
     }
 
