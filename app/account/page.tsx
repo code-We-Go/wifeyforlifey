@@ -175,7 +175,7 @@ export default function AccountPage() {
 
       // Import the generateDeviceFingerprint utility
       const { generateDeviceFingerprint } = await import("@/utils/fingerprint");
-      
+
       // Get comprehensive device info
       const deviceInfo = generateDeviceFingerprint() || {
         // Fallback if fingerprinting fails
@@ -187,6 +187,7 @@ export default function AccountPage() {
       await axios.post("/api/auth/login-tracking", {
         userId,
         email: session?.user?.email,
+        firstName: session?.user?.firstName || "",
         success: true,
         ...deviceInfo,
         timestamp: new Date(),

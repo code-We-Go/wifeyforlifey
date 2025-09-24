@@ -27,7 +27,7 @@ export async function checkSuspiciousLoginActivity(
   userId: string,
   email: string,
   currentFingerprint: string,
-  first_name: string = "User"
+  first_name: string
 ): Promise<boolean> {
   try {
     // Calculate the date 10 days ago
