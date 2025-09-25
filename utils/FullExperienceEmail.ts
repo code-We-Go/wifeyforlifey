@@ -210,7 +210,7 @@ export function generateWelcomeEmail(
 																	<ol style="margin: 0; padding-left: 20px; margin-bottom: 16px;">
 																		<li style="margin-bottom: 8px;">👭 Join your private WhatsApp group → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
 																		<li style="margin-bottom: 8px;">🎶 Enjoy your bridal playlist → <a href="#" style="color: #d32333; text-decoration: underline; font-weight: bold;">Listen Here</a></li>
-																		<li style="margin-bottom: 8px;">🛒 Shop perks & discounts → <a href="https://ShopWifeyForLifey.com" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a></li>
+																		<li style="margin-bottom: 8px;">🛒 Shop perks & discounts → <a href="https://shopWifeyForLifey.com" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a></li>
 																		<li style="margin-bottom: 8px;">📦 Track your planner → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
 																	</ol>
 																	<p style="margin: 0; margin-bottom: 16px;">Welcome to the Wifeys Community — can't wait to celebrate every step with you! 💗</p>
