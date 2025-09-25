@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import LoginModel from "@/app/modals/loginsModel";
 import { checkSuspiciousLoginActivity } from "@/utils/suspiciousLoginDetection";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../[...nextauth]/authOptions";
+import UserModel from "@/app/modals/userModel";
 
 export async function POST(request: NextRequest) {
   try {
     await ConnectDB();
     const data = await request.json();
+
+    // Get session to access firstName if not provided in request
+    const session = await getServerSession(authOptions);
 
     // Validate required fields - only email is required for failed login attempts
     if (!data.email) {
@@ -32,15 +38,19 @@ export async function POST(request: NextRequest) {
       osVersion: data.osVersion,
       fingerprint: data.fingerprint,
     });
-
+    const user = await UserModel.findById(data.userId).select('firstName -_id');
     // Check for suspicious login activity if login was successful and we have userId and fingerprint
     let suspiciousActivityDetected = false;
     if (data.success !== false && data.userId && data.fingerprint) {
+      // Use firstName from request, session, or default to "User"
+      const firstName =
+        user.firstName || data.firstName || session?.user?.firstName || "User";
+      console.log("firstNameRoute" + firstName);
       suspiciousActivityDetected = await checkSuspiciousLoginActivity(
         data.userId,
         data.email,
         data.fingerprint,
-        data.firstName || "User" // Pass first_name parameter, default to "User" if not provided
+        firstName // Pass first_name parameter from request, session, or default
       );
     }
 

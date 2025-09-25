@@ -59,6 +59,7 @@ export async function checkSuspiciousLoginActivity(
       });
 
       // Send email notification
+      console.log("firstName" + first_name);
       await sendSuspiciousLoginEmail(email, first_name, emailContent);
 
       return true; // Suspicious activity detected

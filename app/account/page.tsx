@@ -153,7 +153,11 @@ export default function AccountPage() {
 
           // Record login with fingerprint
           if (session.user.id) {
-            recordLoginAttempt(session.user.id, fingerprint);
+            recordLoginAttempt(
+              session.user.id,
+              fingerprint,
+              session?.user?.firstName || ""
+            );
           } else {
             console.error("Cannot record login attempt: User ID is undefined");
           }
@@ -165,7 +169,8 @@ export default function AccountPage() {
   // Function to record login attempt with device fingerprint
   const recordLoginAttempt = async (
     userId: string,
-    customFingerprint: string
+    customFingerprint: string,
+    firstName: string
   ) => {
     try {
       console.log(
@@ -187,7 +192,7 @@ export default function AccountPage() {
       await axios.post("/api/auth/login-tracking", {
         userId,
         email: session?.user?.email,
-        firstName: session?.user?.firstName || "",
+        firstName: firstName,
         success: true,
         ...deviceInfo,
         timestamp: new Date(),
