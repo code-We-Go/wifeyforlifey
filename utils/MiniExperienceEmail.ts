@@ -1,6 +1,6 @@
 import { ISubscription } from "@/app/interfaces/interfaces";
 
-export function generateWelcomeEmail(
+export function generateMiniExperienceMail(
   first_name: string,
   subscription: ISubscription
 ) {
@@ -203,17 +203,12 @@ export function generateWelcomeEmail(
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
 																<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:left;mso-line-height-alt:24px;">
-																	<p style="margin: 0; margin-bottom: 16px;">I'm sooo excited to have you here!! 💖 You're not alone anymore — you now have me and your Wifey sisters by your side 🌸</p>
-																	<p style="margin: 0; margin-bottom: 16px;">Your profile already has 70+ videos waiting 🎥✨ Start with "Meet Your Bridal Era Bestie" or dive into any chapter you like 💕</p>
-																	<p style="margin: 0; font-weight: bold; font-size: 20px; margin-bottom: 16px;">Subject: You're in, beautiful! Welcome to the Wifeys community 💗</p>
-																	<p style="margin: 0; font-weight: bold; font-size: 18px; margin-bottom: 16px;">✨ Next steps:</p>
-																	<ol style="margin: 0; padding-left: 20px; margin-bottom: 16px;">
-																		<li style="margin-bottom: 8px;">👭 Join your private WhatsApp group → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
-																		<li style="margin-bottom: 8px;">🎶 Enjoy your bridal playlist → <a href="#" style="color: #d32333; text-decoration: underline; font-weight: bold;">Listen Here</a></li>
-																		<li style="margin-bottom: 8px;">🛒 Shop perks & discounts → <a href="https://ShopWifeyForLifey.com" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a></li>
-																		<li style="margin-bottom: 8px;">📦 Track your planner → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
-																	</ol>
-																	<p style="margin: 0; margin-bottom: 16px;">Welcome to the Wifeys Community — can't wait to celebrate every step with you! 💗</p>
+																	<p style="margin: 0; margin-bottom: 16px;">Yaaay! Congratulations on joining the Mini Wifey Experience 💕 Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸</p>
+																	<p style="margin: 0; margin-bottom: 16px;">📔 Your Gehaz Bestie Planner is packed and ready to be shipped (track it here → <a href="/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's going to be your new bridal era bestie, guiding you every step of the way 💗</p>
+																	<p style="margin: 0; margin-bottom: 16px;">🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!</p>
+																	<p style="margin: 0; margin-bottom: 16px;">👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):</p>
+																	<p style="margin: 0; margin-bottom: 16px;">👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></p>
+																	<p style="margin: 0; margin-bottom: 16px;">So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗</p>
 																	<p style="margin: 0; margin-bottom: 16px;">With love,</p>
 																	<p style="margin: 0; margin-bottom: 16px;">Nareiman ✨</p>
 																	<p style="margin: 0;">Your Bridal Era Bestie</p>

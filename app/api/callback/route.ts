@@ -246,6 +246,30 @@ export async function GET(request: Request) {
             });
 
             console.log("Welcome email sent successfully to", recipientEmail);
+          } else if (
+            subscription.packageID &&
+            subscription.packageID.toString() === "68bf6ae9c4d5c1af12cdcd37"
+          ) {
+            const recipientEmail = subscription.isGift
+              ? subscription.giftRecipientEmail
+              : subscription.email;
+            const firstName = subscription.firstName || "Wifey";
+
+            // Import the Mini Experience email template
+            const { generateMiniExperienceMail } = await import(
+              "@/utils/MiniExperienceEmail"
+            );
+
+            await sendMail({
+              to: recipientEmail,
+              name: firstName,
+              subject:
+                "Welcome to the Mini Wifey Experience! 💕",
+              body: generateMiniExperienceMail(firstName, subscription),
+              from: "noreply@shopwifeyforlifey.com",
+            });
+
+            console.log("Mini Experience email sent successfully to", recipientEmail);
           }
         } catch (emailError) {
           console.error(
