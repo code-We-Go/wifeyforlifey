@@ -203,14 +203,14 @@ export function generateMiniExperienceMail(
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
 																<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:left;mso-line-height-alt:24px;">
-																	<p style="margin: 0; margin-bottom: 16px;">Yaaay! Congratulations on joining the Mini Wifey Experience 💕 Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸</p>
+																	<p style="margin: 0; margin-bottom: 16px;">Yaaay! Congratulations on joining the Mini Wifey Experience 💕 
+																	</p><p style="margin: 0; margin-bottom: 16px;">Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸</p>
 																	<p style="margin: 0; margin-bottom: 16px;">📔 Your Gehaz Bestie Planner is packed and ready to be shipped (track it here → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's going to be your new bridal era bestie, guiding you every step of the way 💗</p>
 																	<p style="margin: 0; margin-bottom: 16px;">🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!</p>
-																	<p style="margin: 0; margin-bottom: 16px;">👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):</p>
-																	<p style="margin: 0; margin-bottom: 16px;">👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></p>
+																	<p style="margin: 0; margin-bottom: 16px;">👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></p>
 																	<p style="margin: 0; margin-bottom: 16px;">So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗</p>
-																	<p style="margin: 0; margin-bottom: 16px;">With love,</p>
-																	<p style="margin: 0; margin-bottom: 16px;">Nareiman ✨</p>
+																	<p style="margin: 0;">With love,</p>
+																	<p style="margin: 0;">Nareiman ✨</p>
 																	<p style="margin: 0;">Your Bridal Era Bestie</p>
 																</div>
 															</td>
