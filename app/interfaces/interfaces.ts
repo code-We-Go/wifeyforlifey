@@ -248,8 +248,60 @@ export interface Ipackage {
 export interface ISubscription {
   _id?: string;
   paymentID: string;
+  packageID?: string;
   email?: string;
-  createdAt: Date;
+  subscribed?: boolean;
+  redeemedLoyaltyPoints?: number;
+  appliedDiscount?: string;
+  appliedDiscountAmount?: number;
+  // User information
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  whatsAppNumber?: string;
+  // Gift information
+  isGift?: boolean;
+  giftRecipientEmail?: string;
+  specialMessage?: string;
+  // Lovely Bride's address information
+  country?: string;
+  address?: string;
+  apartment?: string;
+  city?: string;
+  state?: string;
+  postalZip?: string;
+  // Billing information
+  billingCountry?: string;
+  billingFirstName?: string;
+  billingLastName?: string;
+  billingState?: string;
+  billingAddress?: string;
+  billingApartment?: string;
+  billingPostalZip?: string;
+  billingCity?: string;
+  billingPhone?: string;
+  // Payment information
+  total?: number;
+  subTotal?: number;
+  shipping?: number;
+  currency?: string;
+  expiryDate?: Date;
+  // Bosta shipping information
+  bostaCity?: string;
+  bostaCityName?: string;
+  bostaZone?: string;
+  bostaZoneName?: string;
+  bostaDistrict?: string;
+  bostaDistrictName?: string;
+  shipmentID?: string;
+  status?:
+    | "pending"
+    | "confirmed"
+    | "shipped"
+    | "delivered"
+    | "cancelled"
+    | "returned";
+  createdAt?: Date;
   updatedAt: Date;
 }
 

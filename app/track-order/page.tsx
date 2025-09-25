@@ -6,25 +6,43 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { IOrder } from "@/app/interfaces/interfaces";
+import { IOrder, ISubscription } from "@/app/interfaces/interfaces";
 
-// Using IOrder interface from interfaces.ts
+type TrackingItem = IOrder | ISubscription;
+
+// Type guard to check if item is an order
+const isOrder = (item: TrackingItem): item is IOrder => {
+  return (item as IOrder).cart !== undefined;
+};
+
+// Type guard to check if item is a subscription
+const isSubscription = (item: TrackingItem): item is ISubscription => {
+  return (item as ISubscription).packageID !== undefined;
+};
 
 function TrackOrderPage() {
   const searchParams = useSearchParams();
   const orderIdFromUrl = searchParams.get("orderId");
+  const subscriptionIdFromUrl = searchParams.get("subscriptionId");
+  const emailFromUrl = searchParams.get("email");
 
-  const [orderId, setOrderId] = useState(orderIdFromUrl || "");
-  const [orderStatus, setOrderStatus] = useState<IOrder | null>(null);
+  const [trackingId, setTrackingId] = useState(orderIdFromUrl || subscriptionIdFromUrl || "");
+  const [email, setEmail] = useState(emailFromUrl || "");
+  const [trackingType, setTrackingType] = useState<"order" | "subscription">(subscriptionIdFromUrl ? "subscription" : "order");
+  const [trackingStatus, setTrackingStatus] = useState<TrackingItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch order status when component mounts if orderId is in URL
+  // Fetch status when component mounts if ID or email is in URL
   useEffect(() => {
     if (orderIdFromUrl) {
       fetchOrderStatus(orderIdFromUrl);
+    } else if (subscriptionIdFromUrl) {
+      fetchSubscriptionStatus(subscriptionIdFromUrl);
+    } else if (emailFromUrl) {
+      fetchSubscriptionByEmail(emailFromUrl);
     }
-  }, [orderIdFromUrl]);
+  }, [orderIdFromUrl, subscriptionIdFromUrl, emailFromUrl]);
 
   const fetchOrderStatus = async (id: string) => {
     if (!id.trim()) {
@@ -43,12 +61,71 @@ function TrackOrderPage() {
         throw new Error(data.message || "Failed to fetch order status");
       }
 
-      setOrderStatus(data);
+      setTrackingStatus(data);
+      setTrackingType("order");
     } catch (err: any) {
       setError(
         err.message || "An error occurred while fetching the order status"
       );
-      setOrderStatus(null);
+      setTrackingStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchSubscriptionStatus = async (id: string) => {
+    if (!id.trim()) {
+      setError("Please enter a subscription ID");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/subscriptions/track?subscriptionId=${id}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch subscription status");
+      }
+
+      setTrackingStatus(data);
+      setTrackingType("subscription");
+    } catch (err: any) {
+      setError(
+        err.message || "An error occurred while fetching the subscription status"
+      );
+      setTrackingStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchSubscriptionByEmail = async (emailAddress: string) => {
+    if (!emailAddress.trim()) {
+      setError("Please enter an email address");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/subscriptions/track?email=${encodeURIComponent(emailAddress)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch subscription status");
+      }
+
+      setTrackingStatus(data);
+      setTrackingType("subscription");
+    } catch (err: any) {
+      setError(
+        err.message || "An error occurred while fetching the subscription status"
+      );
+      setTrackingStatus(null);
     } finally {
       setLoading(false);
     }
@@ -56,18 +133,27 @@ function TrackOrderPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchOrderStatus(orderId);
+    if (trackingType === "order") {
+      fetchOrderStatus(trackingId);
+    } else if (email) {
+      fetchSubscriptionByEmail(email);
+    } else {
+      fetchSubscriptionStatus(trackingId);
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "processing":
+      case "pending":
         return "text-yellow-600";
       case "shipped":
+      case "confirmed":
         return "text-blue-600";
       case "delivered":
         return "text-green-600";
       case "cancelled":
+      case "returned":
         return "text-red-600";
       default:
         return "text-creamey";
@@ -77,25 +163,72 @@ function TrackOrderPage() {
   return (
     <div className="container mx-auto py-12 px-4">
       <h1 className="text-3xl font-bold text-lovely mb-8 text-center">
-        Track Your Order
+        Track Your {trackingType === "order" ? "Order" : "Planner"}
       </h1>
 
       <div className="max-w-2xl mx-auto bg-creamey rounded-lg shadow-md p-6 mb-8">
+        <div className="flex justify-center mb-4">
+          <div className="flex rounded-md overflow-hidden">
+            <button
+              onClick={() => setTrackingType("order")}
+              className={`px-4 py-2 ${trackingType === "order" ? "bg-lovely text-creamey" : "bg-gray-200 text-gray-700"}`}
+            >
+              Track Order
+            </button>
+            <button
+              onClick={() => setTrackingType("subscription")}
+              className={`px-4 py-2 ${trackingType === "subscription" ? "bg-lovely text-creamey" : "bg-gray-200 text-gray-700"}`}
+            >
+              Track Planner
+            </button>
+          </div>
+        </div>
+
         <form
           onSubmit={handleSearch}
-          className="flex flex-col sm:flex-row gap-4 mb-6"
+          className="flex flex-col gap-4 mb-6"
         >
-          <Input
-            type="text"
-            placeholder="Enter your order ID"
-            value={orderId}
-            onChange={(e) => setOrderId(e.target.value)}
-            className="flex-grow"
-          />
+          {trackingType === "order" ? (
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Input
+                type="text"
+                placeholder="Enter your order ID"
+                value={trackingId}
+                onChange={(e) => setTrackingId(e.target.value)}
+                className="flex-grow"
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Input
+                  type="text"
+                  placeholder="Enter your subscription ID"
+                  value={trackingId}
+                  onChange={(e) => setTrackingId(e.target.value)}
+                  className="flex-grow"
+                />
+              </div>
+              <div className="flex items-center">
+                <hr className="flex-grow border-gray-300" />
+                <span className="px-4 text-gray-500">OR</span>
+                <hr className="flex-grow border-gray-300" />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-grow"
+                />
+              </div>
+            </div>
+          )}
           <Button
             type="submit"
             disabled={loading}
-            className="bg-lovely text-creamey hover:bg-lovely/90"
+            className="bg-lovely text-creamey hover:bg-lovely/90 w-full"
           >
             {loading ? (
               <>
@@ -103,7 +236,7 @@ function TrackOrderPage() {
                 Searching...
               </>
             ) : (
-              "Track Order"
+              trackingType === "order" ? "Track Order" : "Track Planner"
             )}
           </Button>
         </form>
@@ -114,18 +247,21 @@ function TrackOrderPage() {
           </div>
         )}
 
-        {orderStatus && (
+        {trackingStatus && trackingType === "order" && (
           <div className="border bg-lovely text-creamey rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">
-              Order #{orderStatus.orderID || orderStatus._id}
-            </h2>
+               {isOrder(trackingStatus) ? 
+                 `Order #${trackingStatus.orderID || trackingStatus._id}` : 
+                 `Planner #${trackingStatus.shipmentID || trackingStatus._id}`
+               }
+             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <p className="text-creamey mb-1">Order Date:</p>
                 <p className="font-medium">
-                  {orderStatus.createdAt
-                    ? new Date(orderStatus.createdAt).toLocaleDateString()
+                  {trackingStatus.createdAt
+                    ? new Date(trackingStatus.createdAt).toLocaleDateString()
                     : "N/A"}
                 </p>
               </div>
@@ -133,62 +269,145 @@ function TrackOrderPage() {
                 <p className="text-creamey mb-1">Status:</p>
                 <p
                   className={`font-medium ${getStatusColor(
-                    orderStatus.status || "pending"
+                    trackingStatus.status || "pending"
                   )}`}
                 >
-                  {orderStatus.status || "Pending"}
+                  {trackingStatus.status || "Pending"}
                 </p>
               </div>
-              {orderStatus.shipmentID && (
+              {trackingStatus.shipmentID && (
                 <div>
                   <p className="text-creamey mb-1">Tracking Number:</p>
-                  <p className="font-medium">{orderStatus.shipmentID}</p>
+                  <p className="font-medium">{trackingStatus.shipmentID}</p>
                 </div>
               )}
-              {/* {orderStatus.status && (
+              {/* {trackingStatus.status && (
                 <div>
                   <p className="text-creamey mb-1">Estimated Delivery:</p>
-                  <p className="font-medium">{orderStatus.status}</p>
+                  <p className="font-medium">{trackingStatus.status}</p>
                 </div>
               )} */}
               <div>
                 <p className="text-creamey mb-1">Total Amount:</p>
                 <p className="font-medium">
-                  EGP {orderStatus.total?.toFixed(2) || "0.00"}
+                  EGP {trackingStatus.total?.toFixed(2) || "0.00"}
                 </p>
               </div>
             </div>
 
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Shipping Address:</h3>
-              <p>{orderStatus.address || "N/A"}</p>
+              <p>{trackingStatus.address || "N/A"}</p>
               <p>
-                {orderStatus.city || "N/A"}, {orderStatus.country || "N/A"}
+                {trackingStatus.city || "N/A"}, {trackingStatus.country || "N/A"}
               </p>
-              {orderStatus.postalZip && (
-                <p>Postal Code: {orderStatus.postalZip}</p>
+              {trackingStatus.postalZip && (
+                <p>Postal Code: {trackingStatus.postalZip}</p>
               )}
             </div>
 
             <div>
-              <h3 className="font-semibold mb-2">Order Items:</h3>
-              <ul className="divide-y">
-                {orderStatus.cart && orderStatus.cart.length > 0 ? (
-                  orderStatus.cart.map((item, index) => (
-                    <li key={index} className="py-2">
-                      {item.productName} x {item.quantity} - EGP{" "}
-                      {item.price.toFixed(2)}
-                    </li>
-                  ))
-                ) : (
-                  <li className="py-2">No items available</li>
-                )}
-              </ul>
+                <h3 className="font-semibold mb-2">{trackingType === "order" ? "Order Items:" : "Planner Details:"}</h3>
+                <ul className="divide-y">
+                 {trackingStatus && isOrder(trackingStatus) && trackingStatus.cart && trackingStatus.cart.length > 0 ? (
+                   trackingStatus.cart.map((item, index) => (
+                     <li key={index} className="py-2">
+                       {item.productName} x {item.quantity} - EGP{" "}
+                       {item.price.toFixed(2)}
+                     </li>
+                   ))
+                 ) : trackingStatus && isSubscription(trackingStatus) ? (
+                   <li className="py-2">
+                     <div className="flex flex-col gap-1">
+                       <p>Wifey Planner</p>
+                       {trackingStatus.packageID && <p className="text-sm">Package ID: {trackingStatus.packageID}</p>}
+                       {trackingStatus.subscribed && <p className="text-sm">Subscription Active: {trackingStatus.subscribed ? "Yes" : "No"}</p>}
+                     </div>
+                   </li>
+                 ) : (
+                   <li className="py-2">No items found</li>
+                 )}
+               </ul>
             </div>
 
             <div className="mt-6 pt-4 border-t">
               <p className="text-sm text-creamey">
                 Need help with your order?{" "}
+                <Link href="/contact" className=" hover:underline">
+                  Contact us
+                </Link>
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {trackingStatus && trackingType === "subscription" && (
+          <div className="border bg-lovely text-creamey rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">
+               Planner #{isSubscription(trackingStatus) ? trackingStatus.shipmentID || trackingStatus._id : trackingStatus._id}
+             </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <p className="text-creamey mb-1">Subscription Date:</p>
+                <p className="font-medium">
+                  {trackingStatus.createdAt
+                    ? new Date(trackingStatus.createdAt).toLocaleDateString()
+                    : "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-creamey mb-1">Status:</p>
+                <p
+                  className={`font-medium ${getStatusColor(
+                    trackingStatus.status || "pending"
+                  )}`}
+                >
+                  {trackingStatus.status || "Pending"}
+                </p>
+              </div>
+              {trackingStatus.email && (
+                <div>
+                  <p className="text-creamey mb-1">Email:</p>
+                  <p className="font-medium">{trackingStatus.email}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-creamey mb-1">Total Amount:</p>
+                <p className="font-medium">
+                  EGP {trackingStatus.total?.toFixed(2) || "0.00"}
+                </p>
+              </div>
+              {trackingStatus.shipmentID && (
+                <div>
+                  <p className="text-creamey mb-1">Shipment ID:</p>
+                  <p className="font-medium">{trackingStatus.shipmentID}</p>
+                </div>
+              )}
+              {/* {trackingStatus.packageID && (
+                <div>
+                  <p className="text-creamey mb-1">Package ID:</p>
+                  <p className="font-medium">{trackingStatus.packageID}</p>
+                </div>
+              )} */}
+            </div>
+
+            {trackingStatus.address && (
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">Shipping Address:</h3>
+                <p>{trackingStatus.address || "N/A"}</p>
+                <p>
+                  {trackingStatus.city || "N/A"}, {trackingStatus.country || "N/A"}
+                </p>
+                {trackingStatus.postalZip && (
+                  <p>Postal Code: {trackingStatus.postalZip}</p>
+                )}
+              </div>
+            )}
+
+            <div className="mt-6 pt-4 border-t">
+              <p className="text-sm text-creamey">
+                Need help with your planner?{" "}
                 <Link href="/contact" className=" hover:underline">
                   Contact us
                 </Link>

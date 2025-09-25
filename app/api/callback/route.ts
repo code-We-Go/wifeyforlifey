@@ -220,6 +220,33 @@ export async function GET(request: Request) {
             from: "noreply@shopwifeyforlifey.com",
           });
           console.log("Subscription notification email sent successfully");
+
+          // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
+          if (
+            subscription.packageID &&
+            subscription.packageID.toString() === "687396821b4da119eb1c13fe"
+          ) {
+            const recipientEmail = subscription.isGift
+              ? subscription.giftRecipientEmail
+              : subscription.email;
+            const firstName = subscription.firstName || "Wifey";
+
+            // Import the welcome email template
+            const { generateWelcomeEmail } = await import(
+              "@/utils/FullExperienceEmail"
+            );
+
+            await sendMail({
+              to: recipientEmail,
+              name: firstName,
+              subject:
+                "You're in, beautiful! Welcome to the Wifeys community 💗",
+              body: generateWelcomeEmail(firstName, subscription),
+              from: "noreply@shopwifeyforlifey.com",
+            });
+
+            console.log("Welcome email sent successfully to", recipientEmail);
+          }
         } catch (emailError) {
           console.error(
             "Failed to send subscription notification email:",
