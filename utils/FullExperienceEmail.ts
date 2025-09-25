@@ -207,10 +207,10 @@ export function generateWelcomeEmail(
 																	<p style="margin: 0; margin-bottom: 16px;">Your profile already has 70+ videos waiting 🎥✨ Start with "Meet Your Bridal Era Bestie" or dive into any chapter you like 💕</p>
 																	<p style="margin: 0; font-weight: bold; font-size: 18px; margin-bottom: 16px;">✨ Next steps:</p>
 																	<ol style="margin: 0; padding-left: 20px; margin-bottom: 16px;">
-																		<li style="margin-bottom: 8px;">👭 Join your private WhatsApp group → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
-																		<li style="margin-bottom: 8px;">🎶 Enjoy your bridal playlist → <a href="https://www.shopwifeyforlifey.com/playlists" style="color: #d32333; text-decoration: underline; font-weight: bold;">Watch Hera</a></li>
-																		<li style="margin-bottom: 8px;">🛒 See partnerships & discounts → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a></li>
-																		<li style="margin-bottom: 8px;">📦 Track your planner → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
+																		<li style="margin-bottom: 8px;"><span style="color: #d32333;">👭 Join your private WhatsApp group →</span> <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
+																		<li style="margin-bottom: 8px;"><span style="color: #d32333;">🎶 Enjoy your bridal playlist →</span> <a href="https://www.shopwifeyforlifey.com/playlists" style="color: #d32333; text-decoration: underline; font-weight: bold;">Watch Here</a></li>
+																		<li style="margin-bottom: 8px;"><span style="color: #d32333;">🛒 See partnerships & discounts →</span> <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a></li>
+																		<li style="margin-bottom: 8px;"><span style="color: #d32333;">📦 Track your planner →</span> <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
 																	</ol>
 																	<p style="margin: 0; ">Welcome to the Wifeys Community — can't wait to celebrate every step with you! 💗</p>
 																	<p style="margin: 0; ">With love,</p>
