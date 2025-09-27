@@ -153,7 +153,7 @@ export async function POST(request: Request) {
 
       // Create Bosta delivery if enabled
       try {
-        if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
+        if (process.env.BOSTA_API) {
           const bostaService = new BostaService();
 
           // Default pickup address (you should configure this in your environment)

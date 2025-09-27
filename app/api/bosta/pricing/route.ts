@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import BostaAuthService from "../../../services/bostaAuthService";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,10 +20,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const bearerToken = process.env.BOSTA_BEARER_TOKEN;
-    if (!bearerToken) {
+    // Get token from auth service
+    const authService = BostaAuthService.getInstance();
+    const token = await authService.getToken();
+    
+    if (!token) {
       return NextResponse.json(
-        { success: false, error: "Bosta bearer token not configured" },
+        { success: false, error: "Failed to get Bosta authentication token" },
         { status: 500 }
       );
     }
@@ -40,7 +44,7 @@ export async function GET(request: NextRequest) {
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${bearerToken}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       }

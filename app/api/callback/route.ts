@@ -113,7 +113,7 @@ export async function GET(request: Request) {
       // Log for debugging
       if (subscription) {
         try {
-          if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
+          if (process.env.BOSTA_API) {
             const bostaService = new BostaService();
 
             // Default pickup address (you should configure this in your environment)
@@ -335,7 +335,7 @@ export async function GET(request: Request) {
           { payment: "confirmed" }
         );
         try {
-          if (process.env.BOSTA_API && process.env.BOSTA_BEARER_TOKEN) {
+          if (process.env.BOSTA_API) {
             const bostaService = new BostaService();
 
             // Default pickup address (you should configure this in your environment)

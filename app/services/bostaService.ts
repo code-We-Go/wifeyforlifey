@@ -1,3 +1,5 @@
+import BostaAuthService from './bostaAuthService';
+
 interface BostaAddress {
   city: string;
   zoneId: string;
@@ -65,22 +67,24 @@ interface BostaDeliveryResponse {
 
 class BostaService {
   private baseUrl: string;
-  private bearerToken: string;
+  private authService: BostaAuthService;
   private bostAPI: string;
 
   constructor() {
     this.baseUrl = "https://app.bosta.co/api/v2";
-    this.bearerToken = process.env.BOSTA_BEARER_TOKEN || "";
+    this.authService = BostaAuthService.getInstance();
     this.bostAPI = process.env.BOSTA_API || "";
   }
 
   async createDelivery(payload: BostaDeliveryPayload): Promise<any> {
     try {
+      const token = await this.authService.getToken();
+      
       const response = await fetch(`${this.baseUrl}/deliveries?apiVersion=1`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.bearerToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
