@@ -220,12 +220,14 @@ export async function GET(request: Request) {
             from: "noreply@shopwifeyforlifey.com",
           });
           console.log("Subscription notification email sent successfully");
+          console.log(subscription.packageID._id);
 
           // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
           if (
             subscription.packageID._id &&
             subscription.packageID._id === "687396821b4da119eb1c13fe"
           ) {
+            console.log("fullExp");
             const recipientEmail = subscription.isGift
               ? subscription.giftRecipientEmail
               : subscription.email;
