@@ -220,12 +220,12 @@ export async function GET(request: Request) {
             from: "noreply@shopwifeyforlifey.com",
           });
           console.log("Subscription notification email sent successfully");
-          console.log(subscription.packageID._id);
+          console.log(subscription.packageID._id.toString());
 
           // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
           if (
             subscription.packageID._id &&
-            subscription.packageID._id === "687396821b4da119eb1c13fe"
+            subscription.packageID._id.toString() === "687396821b4da119eb1c13fe"
           ) {
             console.log("fullExp");
             const recipientEmail = subscription.isGift
@@ -250,7 +250,7 @@ export async function GET(request: Request) {
             console.log("Welcome email sent successfully to", recipientEmail);
           } else if (
             subscription.packageID._id &&
-            subscription.packageID._id === "68bf6ae9c4d5c1af12cdcd37"
+            subscription.packageID._id.toString() === "68bf6ae9c4d5c1af12cdcd37"
           ) {
             const recipientEmail = subscription.isGift
               ? subscription.giftRecipientEmail
