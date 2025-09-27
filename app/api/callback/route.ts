@@ -223,8 +223,8 @@ export async function GET(request: Request) {
 
           // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
           if (
-            subscription.packageID &&
-            subscription.packageID.toString() === "687396821b4da119eb1c13fe"
+            subscription.packageID._id &&
+            subscription.packageID._id === "687396821b4da119eb1c13fe"
           ) {
             const recipientEmail = subscription.isGift
               ? subscription.giftRecipientEmail
@@ -247,8 +247,8 @@ export async function GET(request: Request) {
 
             console.log("Welcome email sent successfully to", recipientEmail);
           } else if (
-            subscription.packageID &&
-            subscription.packageID.toString() === "68bf6ae9c4d5c1af12cdcd37"
+            subscription.packageID._id &&
+            subscription.packageID._id === "68bf6ae9c4d5c1af12cdcd37"
           ) {
             const recipientEmail = subscription.isGift
               ? subscription.giftRecipientEmail
@@ -263,13 +263,15 @@ export async function GET(request: Request) {
             await sendMail({
               to: recipientEmail,
               name: firstName,
-              subject:
-                "Welcome to the Mini Wifey Experience! 💕",
+              subject: "Welcome to the Mini Wifey Experience! 💕",
               body: generateMiniExperienceMail(firstName, subscription),
               from: "noreply@shopwifeyforlifey.com",
             });
 
-            console.log("Mini Experience email sent successfully to", recipientEmail);
+            console.log(
+              "Mini Experience email sent successfully to",
+              recipientEmail
+            );
           }
         } catch (emailError) {
           console.error(
