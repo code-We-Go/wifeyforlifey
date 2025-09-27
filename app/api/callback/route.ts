@@ -244,7 +244,7 @@ export async function GET(request: Request) {
               subject:
                 "You're in, beautiful! Welcome to the Wifeys community 💗",
               body: generateWelcomeEmail(firstName, subscription),
-              from: "orders@shopwifeyforlifey.com",
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
 
             console.log("Welcome email sent successfully to", recipientEmail);
@@ -267,7 +267,7 @@ export async function GET(request: Request) {
               name: firstName,
               subject: "Welcome to the Mini Wifey Experience! 💕",
               body: generateMiniExperienceMail(firstName, subscription),
-              from: "orders@shopwifeyforlifey.com",
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
 
             console.log(
