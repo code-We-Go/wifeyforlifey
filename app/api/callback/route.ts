@@ -239,7 +239,7 @@ export async function GET(request: Request) {
             );
 
             await sendMail({
-              to: recipientEmail,
+              to: subscription.email,
               name: firstName,
               subject:
                 "You're in, beautiful! Welcome to the Wifeys community 💗",
@@ -263,7 +263,7 @@ export async function GET(request: Request) {
             );
 
             await sendMail({
-              to: recipientEmail,
+              to: subscription.email,
               name: firstName,
               subject: "Welcome to the Mini Wifey Experience! 💕",
               body: generateMiniExperienceMail(firstName, subscription),

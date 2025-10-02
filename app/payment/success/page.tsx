@@ -26,11 +26,11 @@ function SuccessPage() {
   }, []);
 
   return (
-    <div className="flex bg-creamey w-full items-center pt-0 md:pt-4 justify-center md:justify-start h-autp md:min-h-[calc(100vh-128px)] min-h-[calc(100vh-64px)]  flex-col gap-6 relative overflow-hidden">
+    <div className="flex h-auto py-5 bg-creamey w-full items-center pt-0 md:pt-4 justify-center  h-autp md:min-h-[calc(100vh-128px)] min-h-[calc(100vh-64px)]  flex-col gap-6 relative overflow-hidden">
       <Fireworks />
 
       <div className="text-center z-10">
-        <div className="relative h-[400px] md:h-[300px] lg:h-[330px] rounded-lg overflow-hidden">
+        <div className="relative h-[350px] md:h-[300px] lg:h-[270px] rounded-lg overflow-hidden">
           <Image
             src="/joinNow/Brid and Bridesmaids.png"
             alt="Hero Image"
@@ -60,6 +60,7 @@ function SuccessPage() {
                   now.
                 </p>
               ))}
+            <p>Look out for an email from your bestie 👯‍♀️.</p>
           </div>
         ) : (
           <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">
