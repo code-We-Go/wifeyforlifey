@@ -254,7 +254,7 @@ const BlogListPage = () => {
             <p className="mt-4 text-lovely/80">Loading blogs...</p>
           </div>
         ) : blogs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 xl:gap-6 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6 ">
             {blogs.map((blog) => (
               <Link
                 href={`/blogs/${blog.slug}`}
