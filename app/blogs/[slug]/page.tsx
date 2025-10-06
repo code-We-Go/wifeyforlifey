@@ -13,6 +13,7 @@ interface Blog {
   content: string;
   excerpt: string;
   featuredImage?: string;
+  tikTokVideoUrl?: string;
   // author: {
   //   _id: string;
   //   username: string;
@@ -281,6 +282,75 @@ const BlogDetailPage = () => {
             }
           `}</style>
         </div>
+
+        {/* TikTok Video */}
+        {blog.tikTokVideoUrl && (
+          <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8">
+            <h3 className="text-lg font-semibold text-lovely mb-4">
+              Watch on TikTok
+            </h3>
+            <div className="flex bg-creamey justify-center">
+              {(() => {
+                // Extract video/photo ID from TikTok URL
+                const videoMatch = blog.tikTokVideoUrl.match(/\/video\/(\d+)/);
+                const photoMatch = blog.tikTokVideoUrl.match(/\/photo\/(\d+)/);
+                
+                let embedUrl;
+                if (videoMatch) {
+                  // For video posts
+                  embedUrl = `https://www.tiktok.com/embed/v2/${videoMatch[1]}?lang=en-US&autoplay=0&muted=1`;
+                } else if (photoMatch) {
+                  // For photo posts, use the oembed API approach
+                  embedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(blog.tikTokVideoUrl)}`;
+                } else {
+                  // Fallback: try to extract any numeric ID
+                  const idMatch = blog.tikTokVideoUrl.match(/(\d+)/);
+                  embedUrl = idMatch 
+                    ? `https://www.tiktok.com/embed/v2/${idMatch[0]}?lang=en-US&autoplay=0&muted=1`
+                    : blog.tikTokVideoUrl;
+                }
+                
+                // For photo posts, we'll show a link instead of iframe since they don't embed well
+                if (photoMatch) {
+                  return (
+                    <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
+                      <p className="text-lovely mb-3">This is a TikTok photo post. Click below to view:</p>
+                      <a 
+                        href={blog.tikTokVideoUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-lovely text-white rounded-lg hover:bg-lovely/90 transition-colors"
+                      >
+                        View TikTok Post
+                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <iframe
+                    src={embedUrl}
+                    width="325"
+                    height="580"
+                    frameBorder="0"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="rounded-lg bg-creamey border-none"
+                    style={{
+                      backgroundColor: '#fbf3e0',
+                      maxWidth: '100%',
+                      height: 'auto',
+                      aspectRatio: '9/16'
+                    }}
+                  />
+                );
+              })()}
+            </div>
+          </div>
+        )}
 
         {/* Tags */}
         {blog.tags.length > 0 && (

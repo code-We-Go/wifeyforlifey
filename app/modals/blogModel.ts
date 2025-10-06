@@ -5,6 +5,7 @@ export interface IBlog extends Document {
   _id: string;
   title: string;
   slug: string;
+  tikTokVideoUrl?: string;
   content: string; // Rich text content (HTML)
   excerpt: string;
   featuredImage?: string;
@@ -39,6 +40,10 @@ const BlogSchema = new Schema<IBlog>(
         /^[a-z0-9-]+$/,
         "Slug can only contain lowercase letters, numbers, and hyphens",
       ],
+    },
+    tikTokVideoUrl: {
+      type: String,
+      required: false,
     },
     content: {
       type: String,
