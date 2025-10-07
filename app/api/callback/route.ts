@@ -222,15 +222,30 @@ export async function GET(request: Request) {
           console.log("Subscription notification email sent successfully");
           console.log(subscription.packageID._id.toString());
 
-          // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
+          // If it's a gift, send gift email first
+          if (subscription.isGift) {
+            // Import the gift email template
+            const { giftMail } = await import("@/utils/giftMail");
+            const firstName = subscription.firstName || "Wifey";
+            
+            await sendMail({
+              to: subscription.email, // Send to the gift purchaser
+              name: firstName,
+              subject: "Thank You for Your Gift Purchase! 🎁",
+              body: giftMail(subscription._id.toString()),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            
+            console.log("Gift email sent successfully to", subscription.email);
+          } 
+          else {
+            // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
           if (
             subscription.packageID._id &&
             subscription.packageID._id.toString() === "687396821b4da119eb1c13fe"
           ) {
             console.log("fullExp");
-            const recipientEmail = subscription.isGift
-              ? subscription.giftRecipientEmail
-              : subscription.email;
+            const recipientEmail = subscription.email;
             const firstName = subscription.firstName || "Wifey";
 
             // Import the welcome email template
@@ -252,9 +267,7 @@ export async function GET(request: Request) {
             subscription.packageID._id &&
             subscription.packageID._id.toString() === "68bf6ae9c4d5c1af12cdcd37"
           ) {
-            const recipientEmail = subscription.isGift
-              ? subscription.giftRecipientEmail
-              : subscription.email;
+            const recipientEmail = subscription.email;
             const firstName = subscription.firstName || "Wifey";
 
             // Import the Mini Experience email template
@@ -275,6 +288,7 @@ export async function GET(request: Request) {
               recipientEmail
             );
           }
+        }
         } catch (emailError) {
           console.error(
             "Failed to send subscription notification email:",
