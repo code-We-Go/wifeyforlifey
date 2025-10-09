@@ -18,6 +18,7 @@ import {
   Handshake,
   Percent,
   CirclePercent,
+  Star,
 } from "lucide-react";
 import { useEffect, useState, useContext } from "react";
 import { useSession } from "next-auth/react";
@@ -38,6 +39,7 @@ import { useCart } from "@/providers/CartProvider";
 import { UploadDropzone } from "@/utils/uploadthing";
 import { compressImage } from "@/utils/imageCompression";
 import PartnersGrid from "./partners/PartnersGrid";
+import FavoritesGrid from "./favorites/FavoritesGrid";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 
 export default function AccountPage() {
@@ -438,6 +440,7 @@ export default function AccountPage() {
 
   const tabs = [
     { id: "partners", label: "Discounts", icon: CirclePercent },
+    { id: "favorites", label: "Favorites", icon: Star },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
     { id: "wishlist", label: "Wishlist", icon: Heart },
@@ -1081,6 +1084,18 @@ export default function AccountPage() {
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
                 Subscribe to get our partners discounts!
+              </div>
+            )}
+          </div>
+        )}
+        
+        {activeTab === "favorites" && (
+          <div>
+            {user.isSubscribed ? (
+              <FavoritesGrid />
+            ) : (
+              <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
+                Subscribe to access your favorites!
               </div>
             )}
           </div>

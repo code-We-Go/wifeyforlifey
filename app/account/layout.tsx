@@ -20,6 +20,8 @@ const sidebarItems = [
   { icon: ShoppingBag, label: 'Orders', href: '/account/orders' },
   { icon: Music, label: 'Playlists', href: '/account/playlists' },
   { icon: Gift, label: 'Loyalty Points', href: '/account/loyalty' },
+  { icon: Gift, label: 'Partners', href: '/account/partners' },
+  { icon: Heart, label: 'Favorites', href: '/account/favorites' },
   { icon: Settings, label: 'Settings', href: '/account/settings' },
 ];
 
@@ -43,4 +45,4 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       </div>
     </div>
   );
-} 
+}
