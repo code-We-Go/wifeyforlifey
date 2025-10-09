@@ -8,7 +8,7 @@ import { ConnectDB } from "@/app/config/db";
 // POST /api/favorites/[id]/click - Increment click count for a favorite
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   try {
