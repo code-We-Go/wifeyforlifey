@@ -199,7 +199,10 @@ export async function GET(request: Request) {
                 }</li>
                 <li><strong>Special Message:</strong> ${
                   subscription.specialMessage || "N/A"
-                }</li>`
+                }</li>
+                 <li><strong>Gift Card:</strong> ${
+                   subscription.giftCardName || "N/A"
+                 }</li>`
                     : ""
                 }
                 <li><strong>Package:</strong> ${
@@ -227,7 +230,7 @@ export async function GET(request: Request) {
             // Import the gift email template
             const { giftMail } = await import("@/utils/giftMail");
             const firstName = subscription.firstName || "Wifey";
-            
+
             await sendMail({
               to: subscription.email, // Send to the gift purchaser
               name: firstName,
@@ -235,60 +238,61 @@ export async function GET(request: Request) {
               body: giftMail(subscription._id.toString()),
               from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
-            
+
             console.log("Gift email sent successfully to", subscription.email);
-          } 
-          else {
+          } else {
             // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
-          if (
-            subscription.packageID._id &&
-            subscription.packageID._id.toString() === "687396821b4da119eb1c13fe"
-          ) {
-            console.log("fullExp");
-            const recipientEmail = subscription.email;
-            const firstName = subscription.firstName || "Wifey";
+            if (
+              subscription.packageID._id &&
+              subscription.packageID._id.toString() ===
+                "687396821b4da119eb1c13fe"
+            ) {
+              console.log("fullExp");
+              const recipientEmail = subscription.email;
+              const firstName = subscription.firstName || "Wifey";
 
-            // Import the welcome email template
-            const { generateWelcomeEmail } = await import(
-              "@/utils/FullExperienceEmail"
-            );
+              // Import the welcome email template
+              const { generateWelcomeEmail } = await import(
+                "@/utils/FullExperienceEmail"
+              );
 
-            await sendMail({
-              to: subscription.email,
-              name: firstName,
-              subject:
-                "You're in, beautiful! Welcome to the Wifeys community 💗",
-              body: generateWelcomeEmail(firstName, subscription),
-              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-            });
+              await sendMail({
+                to: subscription.email,
+                name: firstName,
+                subject:
+                  "You're in, beautiful! Welcome to the Wifeys community 💗",
+                body: generateWelcomeEmail(firstName, subscription),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+              });
 
-            console.log("Welcome email sent successfully to", recipientEmail);
-          } else if (
-            subscription.packageID._id &&
-            subscription.packageID._id.toString() === "68bf6ae9c4d5c1af12cdcd37"
-          ) {
-            const recipientEmail = subscription.email;
-            const firstName = subscription.firstName || "Wifey";
+              console.log("Welcome email sent successfully to", recipientEmail);
+            } else if (
+              subscription.packageID._id &&
+              subscription.packageID._id.toString() ===
+                "68bf6ae9c4d5c1af12cdcd37"
+            ) {
+              const recipientEmail = subscription.email;
+              const firstName = subscription.firstName || "Wifey";
 
-            // Import the Mini Experience email template
-            const { generateMiniExperienceMail } = await import(
-              "@/utils/MiniExperienceEmail"
-            );
+              // Import the Mini Experience email template
+              const { generateMiniExperienceMail } = await import(
+                "@/utils/MiniExperienceEmail"
+              );
 
-            await sendMail({
-              to: subscription.email,
-              name: firstName,
-              subject: "Welcome to the Mini Wifey Experience! 💕",
-              body: generateMiniExperienceMail(firstName, subscription),
-              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-            });
+              await sendMail({
+                to: subscription.email,
+                name: firstName,
+                subject: "Welcome to the Mini Wifey Experience! 💕",
+                body: generateMiniExperienceMail(firstName, subscription),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+              });
 
-            console.log(
-              "Mini Experience email sent successfully to",
-              recipientEmail
-            );
+              console.log(
+                "Mini Experience email sent successfully to",
+                recipientEmail
+              );
+            }
           }
-        }
         } catch (emailError) {
           console.error(
             "Failed to send subscription notification email:",

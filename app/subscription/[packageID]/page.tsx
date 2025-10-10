@@ -214,7 +214,7 @@ While you wait for your gehaz bestie to arrive, you can already enjoy:
 ✨ Exclusive partner discounts 
 ✨ Access to supportive Wifey circles 
 
-Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`
+Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
       "68bf6ae9c4d5c1af12cdcd37": {
         header: "Batch 2 is officially SOLD OUT!",
@@ -222,10 +222,10 @@ Thank you for your patience and love — we can't wait for you to unwrap your pl
 
 After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey. 
 
-We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`
-      }
+We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`,
+      },
     };
-    
+
     return packageContents[packageId as keyof typeof packageContents] || null;
   };
   const router = useRouter();
@@ -363,6 +363,7 @@ We're beyond excited to share this experience with you — your planner will be 
     isGift: false,
     giftRecipientEmail: "",
     specialMessage: "",
+    giftCardName: "",
     redeemedLoyaltyPoints: Math.max(
       0,
       Math.min(
@@ -506,7 +507,9 @@ We're beyond excited to share this experience with you — your planner will be 
     const calculatedSubTotal = packageData?.price ?? 0;
     setSubTotal(calculatedSubTotal);
 
-    setTotal(calculatedSubTotal + shipping);
+    // Add 20 EGP to total if a gift card is selected
+    const giftCardCost = formData.giftCardName ? 20 : 0;
+    setTotal(calculatedSubTotal + shipping + giftCardCost);
 
     cartItems();
   }, [items, countryID, billingState, packageData]); // Add packageData to dependencies
@@ -526,6 +529,13 @@ We're beyond excited to share this experience with you — your planner will be 
       state: state,
     }));
   }, [state]);
+
+  // Update total when gift card selection changes
+  useEffect(() => {
+    const calculatedSubTotal = packageData?.price ?? 0;
+    const giftCardCost = formData.giftCardName ? 20 : 0;
+    setTotal(calculatedSubTotal + shipping + giftCardCost);
+  }, [formData.giftCardName, packageData?.price, shipping]);
 
   // Handle country changes
   useEffect(() => {
@@ -582,14 +592,16 @@ We're beyond excited to share this experience with you — your planner will be 
           setShipping(0);
           const calculatedSubTotal = packageData?.price ?? 0;
           setSubTotal(calculatedSubTotal);
-          setTotal(calculatedSubTotal);
+          const giftCardCost = formData.giftCardName ? 20 : 0;
+          setTotal(calculatedSubTotal + giftCardCost);
         }
       } else if (!bostaLocation.city) {
         // Set default shipping if no Bosta location selected yet
         setShipping(0);
         const calculatedSubTotal = packageData?.price ?? 0;
         setSubTotal(calculatedSubTotal);
-        setTotal(calculatedSubTotal + shipping);
+        const giftCardCost = formData.giftCardName ? 20 : 0;
+        setTotal(calculatedSubTotal + shipping + giftCardCost);
       }
     } else if (shippingZones.length > 0) {
       // const shippingRate = calculateShippingRate(
@@ -789,9 +801,10 @@ We're beyond excited to share this experience with you — your planner will be 
     setLoyaltyDiscount(loyaltyLE);
 
     // Calculate final total
+    const giftCardCost = formData.giftCardName ? 20 : 0;
     const finalTotal = Math.max(
       0,
-      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping
+      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping + giftCardCost
     );
     setTotal(finalTotal);
   }, [
@@ -804,6 +817,7 @@ We're beyond excited to share this experience with you — your planner will be 
     state,
     countryID,
     subTotal,
+    formData.giftCardName,
   ]);
 
   if (loadingPackage) {
@@ -917,7 +931,7 @@ We're beyond excited to share this experience with you — your planner will be 
                     </div>
                   </div>
 
-                  <div className="flex flex-col w-full mt-2">
+                  {/* <div className="flex flex-col w-full mt-2">
                     <label className="text-lovely text-base mb-1">
                       Special Message
                     </label>
@@ -937,6 +951,148 @@ We're beyond excited to share this experience with you — your planner will be 
                     ) : (
                       ""
                     )}
+                  </div> */}
+                </div>
+
+                <div className="flex flex-col w-full mt-4">
+                  <label className="text-lovely text-base mb-2">
+                    Optional : Select a Gift Card (+20 EGP)
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName ===
+                        "Born to shine birthday gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName ===
+                          "Born to shine birthday gift card"
+                            ? ""
+                            : "Born to shine birthday gift card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Born to shine birthday card
+                      </div>
+                      <img
+                        src="/giftCard/Born to shine birthday gift card.jpeg"
+                        alt="Birthday Gift Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName ===
+                        "Born to shine birthday gift card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName ===
+                        "The I love you more than words gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName ===
+                          "The I love you more than words gift card"
+                            ? ""
+                            : "The I love you more than words gift card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        I love you more than words card
+                      </div>
+                      <img
+                        src="/giftCard/The I love you more than words gift card.jpeg"
+                        alt="Love Gift Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName ===
+                        "The I love you more than words gift card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName === "The Wifey to be card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName === "The Wifey to be card"
+                            ? ""
+                            : "The Wifey to be card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Wifey to be card
+                      </div>
+                      <img
+                        src="/giftCard/The Wifey to be card.jpeg"
+                        alt="Wifey to be Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName === "The Wifey to be card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>
@@ -1666,12 +1822,19 @@ We're beyond excited to share this experience with you — your planner will be 
                   </>
                 )}
               </div>
+              {formData.giftCardName && (
+                <div className="flex justify-between text-base">
+                  <span>Gift Card </span>
+                  <span>+20 LE</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold mt-4 pt-4 border-t">
                 <span>Total</span>
                 <span>{total} LE</span>
               </div>
             </div>
           </div>
+          {/* </form> */}
         </div>
       </div>
 
@@ -1686,7 +1849,7 @@ We're beyond excited to share this experience with you — your planner will be 
             >
               <X size={24} />
             </button>
-            
+
             {/* Modal content */}
             <div className="p-6 pt-12">
               <div className="text-center">

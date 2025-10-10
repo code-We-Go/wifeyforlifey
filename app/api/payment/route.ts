@@ -401,6 +401,7 @@ export async function POST(request: Request) {
           bostaZoneName: data.bostaZoneName,
           bostaDistrict: data.bostaDistrict,
           bostaDistrictName: data.bostaDistrictName,
+          giftCardName: data.giftCardName,
         });
         // await ordersModel.create({
         //   email:data.email,
