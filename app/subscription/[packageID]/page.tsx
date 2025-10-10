@@ -804,7 +804,11 @@ We're beyond excited to share this experience with you — your planner will be 
     const giftCardCost = formData.giftCardName ? 20 : 0;
     const finalTotal = Math.max(
       0,
-      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping + giftCardCost
+      calculatedSubTotal -
+        newDiscountAmount -
+        loyaltyLE +
+        effectiveShipping +
+        giftCardCost
     );
     setTotal(finalTotal);
   }, [
@@ -958,7 +962,7 @@ We're beyond excited to share this experience with you — your planner will be 
                   <label className="text-lovely text-base mb-2">
                     Optional : Select a Gift Card (+20 EGP)
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div
                       className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
                         formData.giftCardName ===
