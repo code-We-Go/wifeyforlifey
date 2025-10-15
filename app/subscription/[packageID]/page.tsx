@@ -203,31 +203,31 @@ const SubscriptionPage = () => {
   const [showModal, setShowModal] = useState(false);
 
   // Package-specific modal content
-  const getModalContent = (packageId: string) => {
-    const packageContents = {
-      "687396821b4da119eb1c13fe": {
-        header: "Batch 2 is officially SOLD OUT!",
-        content: `Please note that this order is a pre-order, and your planner will be shipped starting October 16th. 
- 
-While you wait for your gehaz bestie to arrive, you can already enjoy: 
-✨ Wifey's curated playlists 
-✨ Exclusive partner discounts 
-✨ Access to supportive Wifey circles 
+  //   const getModalContent = (packageId: string) => {
+  //     const packageContents = {
+  //       "687396821b4da119eb1c13fe": {
+  //         header: "Batch 2 is officially SOLD OUT!",
+  //         content: `Please note that this order is a pre-order, and your planner will be shipped starting October 16th.
 
-Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
-      },
-      "68bf6ae9c4d5c1af12cdcd37": {
-        header: "Batch 2 is officially SOLD OUT!",
-        content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting October 16th. 
+  // While you wait for your gehaz bestie to arrive, you can already enjoy:
+  // ✨ Wifey's curated playlists
+  // ✨ Exclusive partner discounts
+  // ✨ Access to supportive Wifey circles
 
-After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey. 
+  // Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
+  //       },
+  //       "68bf6ae9c4d5c1af12cdcd37": {
+  //         header: "Batch 2 is officially SOLD OUT!",
+  //         content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting October 16th.
 
-We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`,
-      },
-    };
+  // After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey.
 
-    return packageContents[packageId as keyof typeof packageContents] || null;
-  };
+  // We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`,
+  //       },
+  //     };
+
+  //     return packageContents[packageId as keyof typeof packageContents] || null;
+  //   };
   const router = useRouter();
   const {
     items,
@@ -747,14 +747,14 @@ We're beyond excited to share this experience with you — your planner will be 
   }, [packageID]);
 
   // Show modal when package data is loaded for specific packages
-  useEffect(() => {
-    if (packageData && packageID) {
-      const modalContent = getModalContent(packageID as string);
-      if (modalContent) {
-        setShowModal(true);
-      }
-    }
-  }, [packageData, packageID]);
+  // useEffect(() => {
+  //   if (packageData && packageID) {
+  //     const modalContent = getModalContent(packageID as string);
+  //     if (modalContent) {
+  //       setShowModal(true);
+  //     }
+  //   }
+  // }, [packageData, packageID]);
 
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
@@ -1843,42 +1843,6 @@ We're beyond excited to share this experience with you — your planner will be 
       </div>
 
       {/* Modal for specific packages */}
-      {showModal && packageID && getModalContent(packageID as string) && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-creamey rounded-2xl max-w-md w-full mx-4 relative shadow-2xl border-2 border-lovely">
-            {/* Close button */}
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-lovely hover:text-lovely/70 transition-colors"
-            >
-              <X size={24} />
-            </button>
-
-            {/* Modal content */}
-            <div className="p-6 pt-12">
-              <div className="text-center">
-                <div className="text-4xl mb-4">💖</div>
-                {getModalContent(packageID as string) && (
-                  <>
-                    <h2 className="text-lovely text-lg font-bold mb-4">
-                      {getModalContent(packageID as string)?.header}
-                    </h2>
-                    <div className="text-lovely leading-relaxed whitespace-pre-line text-sm font-medium">
-                      {getModalContent(packageID as string)?.content}
-                    </div>
-                  </>
-                )}
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg"
-                >
-                  Got it!
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
