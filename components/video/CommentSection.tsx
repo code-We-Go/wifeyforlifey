@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { VideoComment, VideoReply } from "@/app/interfaces/interfaces";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
+import mongoose from "mongoose";
 
 interface CommentSectionProps {
   videoId: string;
@@ -30,7 +31,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [newReplies, setNewReplies] = useState<{ [key: string]: string }>({});
-  const [videoLikes, setVideoLikes] = useState<string[]>([]);
+  const [videoLikes, setVideoLikes] = useState<mongoose.Types.ObjectId[]>([]);
   const [videoLikesCount, setVideoLikesCount] = useState(0);
 
   // Fetch comments and video likes for the video
@@ -103,25 +104,34 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     }
 
     try {
-      await axios.post(`/api/videos/${videoId}/comments/${commentId}/likes/`);
-
       // Update the comments state to reflect the like
       setComments(
         comments.map((comment) => {
           if (comment._id === commentId) {
             const userId = session.user.id;
-            const alreadyLiked = userId && comment.likes?.includes(userId);
+            const alreadyLiked =
+              userId &&
+              comment.likes?.some((like) =>
+                typeof like === "object" && like._id
+                  ? like._id.toString() === userId
+                  : like.toString() === userId
+              );
 
             return {
               ...comment,
               likes: alreadyLiked
-                ? comment.likes?.filter((id) => id !== userId)
+                ? comment.likes?.filter((like) =>
+                    typeof like === "object" && like._id
+                      ? like._id.toString() !== userId
+                      : like.toString() !== userId
+                  )
                 : [...(comment.likes || []), userId],
             } as VideoComment;
           }
           return comment;
         })
       );
+      await axios.post(`/api/videos/${videoId}/comments/${commentId}/likes/`);
     } catch (err) {
       setError("Failed to like comment");
       console.error("Error liking comment:", err);
@@ -179,10 +189,6 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     }
 
     try {
-      await axios.post(
-        `/api/videos/${videoId}/comments/${commentId}/replies/${replyId}/likes`
-      );
-
       // Update the comments state to reflect the like on the reply
       setComments(
         comments.map((comment) => {
@@ -208,6 +214,9 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           return comment;
         })
       );
+      await axios.post(
+        `/api/videos/${videoId}/comments/${commentId}/replies/${replyId}/likes`
+      );
     } catch (err) {
       setError("Failed to like reply");
       console.error("Error liking reply:", err);
@@ -222,21 +231,20 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     }
 
     try {
-      await axios.post(`/api/videos/${videoId}/likes/`);
-
       // Update the video likes state
       const userId = session.user.id;
       if (userId) {
-        const alreadyLiked = videoLikes.includes(userId);
+        const alreadyLiked = videoLikes.some((id) => id.toString() === userId);
 
         if (alreadyLiked) {
-          setVideoLikes(videoLikes.filter((id) => id !== userId));
+          setVideoLikes(videoLikes.filter((id) => id.toString() !== userId));
           setVideoLikesCount((prev) => prev - 1);
         } else {
-          setVideoLikes([...videoLikes, userId]);
+          setVideoLikes([...videoLikes, new mongoose.Types.ObjectId(userId)]);
           setVideoLikesCount((prev) => prev + 1);
         }
       }
+      await axios.post(`/api/videos/${videoId}/likes/`);
     } catch (err) {
       setError("Failed to like video");
       console.error("Error liking video:", err);
@@ -302,7 +310,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           className={`flex items-center gap-1 px-3 py-1 rounded-full ${
             session?.user &&
             session.user.id &&
-            videoLikes.includes(session.user.id)
+            videoLikes.some((id) => id.toString() === session.user.id)
               ? "bg-lovely text-creamey"
               : "bg-creamey text-lovely border border-lovely"
           }`}
@@ -312,7 +320,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
             className={`h-4 w-4 ${
               session?.user &&
               session.user.id &&
-              videoLikes.includes(session.user.id)
+              videoLikes.some((id) => id.toString() === session.user.id)
                 ? "fill-creamey"
                 : ""
             }`}
@@ -381,7 +389,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
             const isLikedByUser =
               session?.user &&
               session.user.id &&
-              comment.likes?.includes(session.user.id);
+              comment.likes?.some((like) =>
+                typeof like === "object" && like._id
+                  ? like._id.toString() === session.user.id
+                  : like.toString() === session.user.id
+              );
 
             return (
               <div key={comment._id} className="space-y-3">

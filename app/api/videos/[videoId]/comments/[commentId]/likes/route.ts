@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
 import {ConnectDB} from "@/app/config/db";
+import mongoose from "mongoose";
 
 // POST - Like/Unlike a comment
 export async function POST(
@@ -68,17 +69,21 @@ export async function POST(
     }
     
     // Check if user already liked the comment
-    const alreadyLiked = comment.likes && comment.likes.includes(userId);
+    const alreadyLiked = comment.likes && comment.likes.some((like: any) => 
+      like._id ? like._id.toString() === userId : like.toString() === userId
+    );
     
     if (alreadyLiked) {
       // Unlike the comment
-      comment.likes = comment.likes.filter((id: string) => id !== userId);
+      comment.likes = comment.likes.filter((like: any) => 
+        like._id ? like._id.toString() !== userId : like.toString() !== userId
+      );
     } else {
       // Like the comment
       if (!comment.likes) {
         comment.likes = [];
       }
-      comment.likes.push(userId);
+      comment.likes.push(new mongoose.Types.ObjectId(userId));
     }
     
     // Save the updated video
