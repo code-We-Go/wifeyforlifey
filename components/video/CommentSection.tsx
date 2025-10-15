@@ -410,7 +410,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                     <AvatarFallback>
                       {getInitials(
                         `${comment.firstName || comment.username} ${
-                          comment.lastName
+                          comment.lastName || ""
                         }`
                       )}
                     </AvatarFallback>

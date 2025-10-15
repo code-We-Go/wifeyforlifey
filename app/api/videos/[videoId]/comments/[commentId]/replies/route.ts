@@ -8,7 +8,7 @@ import { ConnectDB } from "@/app/config/db";
 // POST - Add a reply to a comment
 export async function POST(
   request: NextRequest,
-  { params }: { params: { videoId: string; commentId: string } }
+  { params }: { params: Promise<{ videoId: string; commentId: string }> }
 ) {
   try {
     await ConnectDB();
@@ -21,7 +21,7 @@ export async function POST(
       );
     }
 
-    const { videoId, commentId } = params;
+    const { videoId, commentId } = await params;
     const { text } = await request.json();
 
     if (!text || typeof text !== "string" || text.trim() === "") {

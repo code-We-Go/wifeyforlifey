@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
+import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
 import { VideoComment } from "@/app/interfaces/interfaces";
 
@@ -69,7 +70,7 @@ export async function GET(
 // POST - Add a comment to a video
 export async function POST(
   request: NextRequest,
-  { params }: { params: { videoId: string } }
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
   try {
     await ConnectDB();
@@ -82,7 +83,7 @@ export async function POST(
       );
     }
 
-    const { videoId } = params;
+    const { videoId } = await params;
     const { text } = await request.json();
 
     if (!text || typeof text !== "string" || text.trim() === "") {
@@ -133,9 +134,39 @@ export async function POST(
       { new: true }
     );
 
+    // Get the newly created comment with its ID
+    const createdComment =
+      updatedVideo.comments[updatedVideo.comments.length - 1];
+
+    // Record the interaction for admin dashboard and notifications
+    await InteractionsModel.create({
+      userId: user._id,
+      targetId: videoId,
+      targetType: "video",
+      actionType: "comment",
+      content: text.trim(),
+      read: false,
+    });
+
+    // Prepare the comment with user data according to VideoComment interface
+    const commentWithUserData = {
+      ...createdComment.toObject(),
+      _id: createdComment._id,
+      userId: {
+        _id: user._id.toString(),
+        username: user.username,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        imageURL: user.imageURL || user.image || "",
+      },
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      userImage: user.imageURL || user.image || "",
+    };
+
     return NextResponse.json({
       success: true,
-      comment: newComment,
+      comment: commentWithUserData,
       commentsCount: updatedVideo.comments ? updatedVideo.comments.length : 0,
     });
   } catch (error: any) {

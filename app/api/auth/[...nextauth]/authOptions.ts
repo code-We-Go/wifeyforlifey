@@ -213,6 +213,17 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
+        
+        // Fetch user data to get firstName and lastName
+        try {
+          const userData = await UserModel.findById(token.sub);
+          if (userData) {
+            session.user.firstName = userData.firstName || userData.username || "";
+            session.user.lastName = userData.lastName || "";
+          }
+        } catch (error) {
+          console.error("Error fetching user data for session:", error);
+        }
       }
       if (session.user) {
         // if(existingUser?.imageURL) {session.user.image=existingUser.imageURL;}

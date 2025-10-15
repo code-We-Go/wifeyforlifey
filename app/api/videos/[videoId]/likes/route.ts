@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
+import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
 import mongoose from "mongoose";
 
@@ -79,6 +80,16 @@ export async function POST(
     while (retries > 0 && !saved) {
       try {
         await video.save();
+        
+        // Record the interaction for admin dashboard and notifications
+        await InteractionsModel.create({
+          userId: userId,
+          targetId: videoId,
+          targetType: "video",
+          actionType: alreadyLiked ? "unlike" : "like",
+          read: false
+        });
+        
         saved = true;
       } catch (saveError: any) {
         if (saveError.name === "VersionError" && retries > 1) {
