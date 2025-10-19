@@ -49,12 +49,12 @@ export async function GET(
 // PATCH: Update a single interaction
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await loadDB();
 
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
