@@ -82,11 +82,14 @@ export async function POST(
         await video.save();
         
         // Record the interaction for admin dashboard and notifications
+        const { parentId, parentType } = await request.json();
         await InteractionsModel.create({
           userId: userId,
           targetId: videoId,
           targetType: "video",
           actionType: alreadyLiked ? "unlike" : "like",
+          parentId: parentId || videoId,
+          parentType: parentType || "video",
           read: false
         });
         

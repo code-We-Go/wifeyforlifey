@@ -18,6 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { VideoComment, VideoReply } from "@/app/interfaces/interfaces";
 import axios from "axios";
+// Configure axios with longer timeout to prevent timeout errors
+axios.defaults.timeout = 30000; // 30 seconds timeout
 import { formatDistanceToNow } from "date-fns";
 import mongoose from "mongoose";
 import {
@@ -52,6 +54,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const [videoLikesCount, setVideoLikesCount] = useState(0);
   const [showLikesModal, setShowLikesModal] = useState(false);
   const [likeUsers, setLikeUsers] = useState<any[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Fetch comments and video likes for the video
   useEffect(() => {
@@ -103,6 +106,8 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     try {
       const response = await axios.post(`/api/videos/${videoId}/comments`, {
         text: newComment.trim(),
+        parentId: videoId,
+        parentType: "video",
       });
 
       // Add the new comment to the list
@@ -126,7 +131,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       setError("You must be logged in to like comments");
       return;
     }
-    
+
     if (!session?.user.isSubscribed) {
       setError("You must be subscribed to like comments");
       return;
@@ -160,7 +165,10 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           return comment;
         })
       );
-      await axios.post(`/api/videos/${videoId}/comments/${commentId}/likes/`);
+      await axios.post(`/api/videos/${videoId}/comments/${commentId}/likes/`, {
+        parentId: videoId,
+        parentType: "video",
+      });
     } catch (err) {
       setError("Failed to like comment");
       console.error("Error liking comment:", err);
@@ -173,7 +181,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       setError("You must be logged in to reply");
       return;
     }
-    
+
     if (!session?.user.isSubscribed) {
       setError("You must be subscribed to reply");
       return;
@@ -247,7 +255,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       setError("You must be logged in to like replies");
       return;
     }
-    
+
     if (!session?.user.isSubscribed) {
       setError("You must be subscribed to like replies");
       return;
@@ -263,12 +271,22 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
               replies: comment.replies?.map((reply) => {
                 if (reply._id === replyId) {
                   const userId = session.user.id;
-                  const alreadyLiked = userId && reply.likes?.includes(userId);
+                  const alreadyLiked =
+                    userId &&
+                    reply.likes?.some((like) =>
+                      typeof like === "object" && like._id
+                        ? like._id.toString() === userId
+                        : like.toString() === userId
+                    );
 
                   return {
                     ...reply,
                     likes: alreadyLiked
-                      ? reply.likes?.filter((id) => id !== userId)
+                      ? reply.likes?.filter((like) =>
+                          typeof like === "object" && like._id
+                            ? like._id.toString() !== userId
+                            : like.toString() !== userId
+                        )
                       : [...(reply.likes || []), userId],
                   } as VideoReply;
                 }
@@ -280,7 +298,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
         })
       );
       await axios.post(
-        `/api/videos/${videoId}/comments/${commentId}/replies/${replyId}/likes`
+        `/api/videos/${videoId}/comments/${commentId}/replies/${replyId}/likes`,
+        {
+          parentId: videoId,
+          parentType: "video",
+        }
       );
     } catch (err) {
       setError("Failed to like reply");
@@ -290,13 +312,16 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
 
   // Fetch users who liked the video
   const fetchLikeUsers = async () => {
+    setIsLoadingUsers(true);
+    setShowLikesModal(true);
     try {
       const response = await axios.get(`/api/videos/${videoId}/likes/users`);
       setLikeUsers(response.data.users || []);
-      setShowLikesModal(true);
     } catch (err) {
       console.error("Error fetching like users:", err);
       setError("Failed to load users who liked this video");
+    } finally {
+      setIsLoadingUsers(false);
     }
   };
 
@@ -321,7 +346,10 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           setVideoLikesCount((prev) => prev + 1);
         }
       }
-      await axios.post(`/api/videos/${videoId}/likes/`);
+      await axios.post(`/api/videos/${videoId}/likes/`, {
+        parentId: videoId,
+        parentType: "video",
+      });
     } catch (err) {
       setError("Failed to like video");
       console.error("Error liking video:", err);
@@ -411,7 +439,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   if (loading && comments.length === 0) {
     return (
       <div className="mt-8 space-y-4">
-        <h3 className="text-xl font-medium">Comments</h3>
+        <h3 className="text-xl font-medium text-lovely">Comments</h3>
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex space-x-4">
@@ -478,12 +506,20 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
             <DialogTitle className="text-lovely">
               People who loved this video
             </DialogTitle>
-            {/* <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-              <span className="sr-only">Close</span>
-            </DialogClose> */}
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto py-4">
-            {likeUsers.length > 0 ? (
+            {isLoadingUsers ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <div className="h-10 w-10 rounded-full bg-lovely/20"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/4 rounded bg-lovely/20"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : likeUsers.length > 0 ? (
               <ul className="space-y-4">
                 {likeUsers.map((user) => (
                   <li key={user._id} className="flex items-center gap-3">
@@ -538,7 +574,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           </Avatar>
           <div className="flex-1 space-y-2">
             <Textarea
-              placeholder={session.user.isSubscribed ? "Add a comment..." : "Subscribe to comment..."}
+              placeholder={
+                session.user.isSubscribed
+                  ? "Add a comment..."
+                  : "Subscribe to comment..."
+              }
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="min-h-[80px] bg-creamey text-lovely placeholder:text-lovely/50"
@@ -547,8 +587,14 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
             <div className="flex justify-end">
               <Button
                 onClick={handleCommentSubmit}
-                disabled={loading || !newComment.trim() || !session.user.isSubscribed}
-                className={`bg-lovely text-creamey hover:bg-lovely/90 ${!session.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={
+                  loading || !newComment.trim() || !session.user.isSubscribed
+                }
+                className={`bg-lovely text-creamey hover:bg-lovely/90 ${
+                  !session.user.isSubscribed
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
                 title={!session.user.isSubscribed ? "Subscribe to comment" : ""}
               >
                 <Send className="mr-2 h-4 w-4" />
@@ -640,14 +686,18 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                             ? "text-lovely"
                             : "text-lovely/60 hover:text-lovely"
                         } ${
-                          !session?.user || !session?.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""
+                          !session?.user || !session?.user.isSubscribed
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                         }`}
                         disabled={!session?.user || !session?.user.isSubscribed}
-                        title={!session?.user 
-                          ? "Login to like" 
-                          : !session?.user.isSubscribed 
-                            ? "Subscribe to like" 
-                            : ""}
+                        title={
+                          !session?.user
+                            ? "Login to like"
+                            : !session?.user.isSubscribed
+                            ? "Subscribe to like"
+                            : ""
+                        }
                       >
                         <ThumbsUp
                           className={`mr-1 h-4 w-4 ${
@@ -659,15 +709,19 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                       <button
                         onClick={() => {
                           if (!session?.user) {
-                            setError("You must be logged in to reply to comments");
+                            setError(
+                              "You must be logged in to reply to comments"
+                            );
                             return;
                           }
-                          
+
                           if (!session?.user.isSubscribed) {
-                            setError("You must be subscribed to reply to comments");
+                            setError(
+                              "You must be subscribed to reply to comments"
+                            );
                             return;
                           }
-                          
+
                           setReplyingTo(
                             replyingTo === comment._id
                               ? null
@@ -675,14 +729,18 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                           );
                         }}
                         className={`flex items-center text-sm text-lovely/60 hover:text-lovely ${
-                          !session?.user || !session?.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""
+                          !session?.user || !session?.user.isSubscribed
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                         }`}
                         disabled={!session?.user || !session?.user.isSubscribed}
-                        title={!session?.user 
-                          ? "Login to reply" 
-                          : !session?.user.isSubscribed 
-                            ? "Subscribe to reply" 
-                            : ""}
+                        title={
+                          !session?.user
+                            ? "Login to reply"
+                            : !session?.user.isSubscribed
+                            ? "Subscribe to reply"
+                            : ""
+                        }
                       >
                         <Reply className="mr-1 h-4 w-4" />
                         Reply
@@ -770,7 +828,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                           const isReplyLikedByUser =
                             session?.user &&
                             session.user.id &&
-                            reply.likes?.includes(session.user.id);
+                            reply.likes?.some((like) =>
+                              typeof like === "object" && like._id
+                                ? like._id.toString() === session.user.id
+                                : like.toString() === session.user.id
+                            );
 
                           return (
                             <div
@@ -841,14 +903,22 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                                         ? "text-lovely"
                                         : "text-lovely/60 hover:text-lovely"
                                     } ${
-                                      !session?.user || !session?.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""
+                                      !session?.user ||
+                                      !session?.user.isSubscribed
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
                                     }`}
-                                    disabled={!session?.user || !session?.user.isSubscribed}
-                                    title={!session?.user 
-                                      ? "Login to like" 
-                                      : !session?.user.isSubscribed 
-                                        ? "Subscribe to like" 
-                                        : ""}
+                                    disabled={
+                                      !session?.user ||
+                                      !session?.user.isSubscribed
+                                    }
+                                    title={
+                                      !session?.user
+                                        ? "Login to like"
+                                        : !session?.user.isSubscribed
+                                        ? "Subscribe to like"
+                                        : ""
+                                    }
                                   >
                                     <ThumbsUp
                                       className={`mr-1 h-3 w-3 ${

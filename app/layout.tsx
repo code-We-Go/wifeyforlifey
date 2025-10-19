@@ -13,7 +13,6 @@ import UserProvider from "./UserProvider";
 import WishListProvider from "./WishListProvider";
 import { ModalProvider } from "./context/ModalContext";
 import ProductModal from "@/components/shop/ProductModal";
-import DiscountPopup from "@/components/DiscountPopup";
 import { AnnouncementProvider } from "../context/announcementContext";
 import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
 import { GoogleTagManager } from "@next/third-parties/google";

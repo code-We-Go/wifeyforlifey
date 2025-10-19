@@ -111,7 +111,7 @@ export async function POST(
     }
 
     const { videoId } = await params;
-    const { text } = await request.json();
+    const { text, parentId, parentType } = await request.json();
 
     if (!text || typeof text !== "string" || text.trim() === "") {
       return NextResponse.json(
@@ -173,6 +173,8 @@ export async function POST(
       actionType: "comment",
       content: text.trim(),
       read: false,
+      parentId: parentId || videoId,
+      parentType: parentType || "video",
     });
 
     // Prepare the comment with user data according to VideoComment interface

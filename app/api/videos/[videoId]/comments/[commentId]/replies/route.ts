@@ -78,33 +78,35 @@ export async function POST(
 
     comment.replies.push(newReply);
     await video.save();
-    
+
     // Get the newly added reply with its ID from the database
     const savedReply = comment.replies[comment.replies.length - 1];
-    
+
     // Record the reply interaction
+    // const { parentId, parentType } = await request.json();
     await InteractionsModel.create({
       userId: session.user.id,
       targetId: commentId,
       targetType: "comment",
       actionType: "reply",
       parentId: videoId,
+      parentType: "video",
       replyId: savedReply._id,
       content: text.trim(),
-      read: false
+      read: false,
     });
-    
+
     // Prepare the response with properly structured user data and the database ID
     const replyWithUserData = {
       ...newReply,
       _id: savedReply._id.toString(), // Include the actual database ID
       userId: {
         _id: session.user.id,
-        username: session.user.name || '',
-        firstName: session.user.firstName || '',
-        lastName: session.user.lastName || '',
-        imageURL: session.user.image || ''
-      }
+        username: session.user.name || "",
+        firstName: session.user.firstName || "",
+        lastName: session.user.lastName || "",
+        imageURL: session.user.image || "",
+      },
     };
 
     return NextResponse.json({
