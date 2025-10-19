@@ -1,5 +1,38 @@
 import mongoose from "mongoose";
 
+export interface CommentUser {
+  _id?: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  imageURL?: string;
+}
+
+export interface VideoReply {
+  _id: string;
+  userId: CommentUser;
+  username: string; // Kept for backward compatibility
+  text: string;
+  firstName?: string;
+  lastName?: string;
+  userImage?: string;
+  likes?: (CommentUser | string)[]; // Array of users or user IDs who liked this reply
+  createdAt: Date;
+}
+
+export interface VideoComment {
+  _id?: string;
+  userId: CommentUser;
+  username: string; // Kept for backward compatibility
+  text: string;
+  firstName?: string;
+  lastName?: string;
+  userImage?: string;
+  likes?: (CommentUser | string)[]; // Array of users or user IDs who liked this comment
+  replies?: VideoReply[]; // Array of replies to this comment
+  createdAt: Date;
+}
+
 export interface Video {
   _id?: string;
   title: string;
@@ -7,6 +40,8 @@ export interface Video {
   url: string;
   thumbnailUrl: string;
   isPublic: boolean;
+  likes?: (CommentUser | string)[]; // Array of users or user IDs who liked the video
+  comments?: VideoComment[]; // Array of comments
 
   createdAt: Date;
   updatedAt: Date;

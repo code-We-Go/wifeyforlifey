@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: {},
         password: {},
-        deviceFingerprint: {}
+        deviceFingerprint: {},
       },
       // In the CredentialsProvider authorize function
       async authorize(credentials) {
@@ -77,15 +77,15 @@ export const authOptions: NextAuthOptions = {
           await ConnectDB();
           const user = await UserModel.findOne({ email: credentials?.email });
           if (!user) throw new Error("No user found");
-      
+
           const isValid = await compare(credentials!.password, user.password);
           if (!isValid) throw new Error("Wrong password");
-      
+
           if (!credentials?.email) {
             throw new Error("Email is required for loyalty points calculation");
           }
           // const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
-      
+
           // Generate and store sessionId for single-session enforcement
           const sessionId = uuidv4();
           await SessionModel.findOneAndUpdate(
@@ -93,10 +93,10 @@ export const authOptions: NextAuthOptions = {
             { sessionId, createdAt: new Date() },
             { upsert: true }
           );
-      
+
           // Get device fingerprint if provided
           const deviceFingerprint = credentials?.deviceFingerprint || null;
-      
+
           return {
             id: user._id.toString(),
             email: user.email,
@@ -113,7 +113,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile, credentials }: { user: any; account: any; profile?: any; credentials?: { deviceFingerprint?: string; email?: string; password?: string } }) {
+    async signIn({
+      user,
+      account,
+      profile,
+      credentials,
+    }: {
+      user: any;
+      account: any;
+      profile?: any;
+      credentials?: {
+        deviceFingerprint?: string;
+        email?: string;
+        password?: string;
+      };
+    }) {
       await ConnectDB();
       let userId: string | undefined;
 
@@ -133,8 +147,9 @@ export const authOptions: NextAuthOptions = {
           });
         }
         userId = (existingUser as any)._id?.toString();
-        user.id = userId ?? ""; // Always set user.id for NextAuth
-        
+        user.id = userId ?? "";
+        user.image = existingUser.imageURL || null; // Always set user.id for NextAuth
+
         // We can't access sessionStorage directly in the server component
         // The deviceFingerprint will be retrieved in the client component after redirect
       } else {
@@ -198,8 +213,20 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
+        
+        // Fetch user data to get firstName and lastName
+        try {
+          const userData = await UserModel.findById(token.sub);
+          if (userData) {
+            session.user.firstName = userData.firstName || userData.username || "";
+            session.user.lastName = userData.lastName || "";
+          }
+        } catch (error) {
+          console.error("Error fetching user data for session:", error);
+        }
       }
       if (session.user) {
+        // if(existingUser?.imageURL) {session.user.image=existingUser.imageURL;}
         session.user.isSubscribed = token.isSubscribed ?? false;
         session.user.subscriptionExpiryDate = token.subscriptionExpiryDate
           ? new Date(token.subscriptionExpiryDate as string)

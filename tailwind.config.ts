@@ -90,6 +90,13 @@ const config: Config = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        'heartbeat': {
+          '0%': { transform: 'scale(1)' },
+          '25%': { transform: 'scale(1.3)' },
+          '50%': { transform: 'scale(1)' },
+          '75%': { transform: 'scale(1.3)' },
+          '100%': { transform: 'scale(1)' },
+        },
         'bounce-slow': {
           '0%, 100%': {
             transform: 'translateY(-10%)',
@@ -103,11 +110,11 @@ const config: Config = {
       },
       animation: {
         'slide-left-infinite': 'slide-left 15s linear infinite',
-
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'float': 'float 4s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        'heartbeat': 'heartbeat 1s ease-in-out',
         'bounce-slow': 'bounce-slow 3s infinite',
       },
       backgroundImage: {

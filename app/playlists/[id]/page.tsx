@@ -14,6 +14,7 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import { thirdFont } from "@/fonts";
 import VdoPlayer from "./components/VdoPlayer";
+import CommentSection from "@/components/video/CommentSection";
 
 export default function PlaylistPage() {
   const params = useParams();
@@ -434,6 +435,11 @@ export default function PlaylistPage() {
                 <p className="text-lovely/90 mt-2 whitespace-pre-line">
                   {selectedVideo.description}
                 </p>
+                
+                {/* Comment Section */}
+                {selectedVideo._id && (
+                  <CommentSection videoId={selectedVideo._id} />
+                )}
               </div>
             )}
           </div>
