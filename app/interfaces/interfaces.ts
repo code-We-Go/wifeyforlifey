@@ -10,9 +10,12 @@ export interface CommentUser {
 
 export interface VideoReply {
   _id: string;
-  userId: CommentUser | string;
+  userId: CommentUser;
   username: string; // Kept for backward compatibility
   text: string;
+  firstName?: string;
+  lastName?: string;
+  userImage?: string;
   likes?: (CommentUser | string)[]; // Array of users or user IDs who liked this reply
   createdAt: Date;
 }

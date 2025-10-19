@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
+import InteractionsModel from "@/app/modals/interactionsModel";
 import {ConnectDB} from "@/app/config/db";
 
 // POST - Like/Unlike a reply
@@ -104,6 +105,16 @@ export async function POST(
     
     // Save the updated video
     await video.save();
+    
+    // Record the interaction
+    await InteractionsModel.create({
+      userId: userId,
+      targetId: replyId,
+      targetType: "reply",
+      actionType: alreadyLiked ? "unlike" : "like",
+      parentId: commentId,
+      read: false
+    });
     
     return NextResponse.json({
       success: true,

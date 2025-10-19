@@ -31,6 +31,18 @@ export async function GET(
         select: "username firstName lastName imageURL",
         options: { strictPopulate: false },
       })
+      .populate({
+        path: "comments.replies.userId",
+        model: "users",
+        select: "username firstName lastName imageURL",
+        options: { strictPopulate: false },
+      })
+      .populate({
+        path: "comments.replies.likes",
+        model: "users",
+        select: "username firstName lastName imageURL",
+        options: { strictPopulate: false },
+      })
       .lean();
 
     if (!video) {
@@ -42,7 +54,20 @@ export async function GET(
     const commentsWithUserDetails = (videoData.comments || []).map(
       (comment: any) => {
         const userData = comment.userId || {};
-        console.log(JSON.stringify(userData) + "userData");
+        
+        // Process replies to add user details
+        const repliesWithUserDetails = (comment.replies || []).map((reply: any) => {
+          const replyUserData = reply.userId || {};
+          return {
+            ...reply,
+            userImage: replyUserData.imageURL || "",
+            firstName: replyUserData.firstName || "",
+            lastName: replyUserData.lastName || "",
+            // Keep userId as a string reference for backward compatibility
+            userId: reply.userId?._id?.toString() || reply.userId,
+          };
+        });
+        
         return {
           ...comment,
           userImage: userData.imageURL || "",
@@ -50,6 +75,8 @@ export async function GET(
           lastName: userData.lastName || "",
           // Keep userId as a string reference for backward compatibility
           userId: comment.userId?._id?.toString() || comment.userId,
+          // Replace replies with the processed ones
+          replies: repliesWithUserDetails,
         };
       }
     );

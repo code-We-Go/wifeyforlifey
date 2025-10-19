@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { ThumbsUp, Reply, Send, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ThumbsUp,
+  Reply,
+  Send,
+  ChevronDown,
+  ChevronUp,
+  Heart,
+  X,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +20,13 @@ import { VideoComment, VideoReply } from "@/app/interfaces/interfaces";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 import mongoose from "mongoose";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface CommentSectionProps {
   videoId: string;
@@ -21,6 +37,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const [comments, setComments] = useState<VideoComment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [replyLoading, setReplyLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedComments, setExpandedComments] = useState<
     Record<string, boolean>
@@ -33,6 +50,8 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const [newReplies, setNewReplies] = useState<{ [key: string]: string }>({});
   const [videoLikes, setVideoLikes] = useState<mongoose.Types.ObjectId[]>([]);
   const [videoLikesCount, setVideoLikesCount] = useState(0);
+  const [showLikesModal, setShowLikesModal] = useState(false);
+  const [likeUsers, setLikeUsers] = useState<any[]>([]);
 
   // Fetch comments and video likes for the video
   useEffect(() => {
@@ -71,6 +90,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       return;
     }
 
+    if (!session?.user.isSubscribed) {
+      setError("You must be subscribed to comment");
+      return;
+    }
+
     if (!newComment.trim()) {
       return;
     }
@@ -100,6 +124,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const handleLikeComment = async (commentId: string) => {
     if (!session?.user) {
       setError("You must be logged in to like comments");
+      return;
+    }
+    
+    if (!session?.user.isSubscribed) {
+      setError("You must be subscribed to like comments");
       return;
     }
 
@@ -144,12 +173,20 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       setError("You must be logged in to reply");
       return;
     }
+    
+    if (!session?.user.isSubscribed) {
+      setError("You must be subscribed to reply");
+      return;
+    }
 
     if (!replyText.trim()) {
       return;
     }
 
     try {
+      // Set loading state for this specific comment
+      setReplyLoading(commentId);
+
       const response = await axios.post(
         `/api/videos/${videoId}/comments/${commentId}/replies`,
         {
@@ -157,8 +194,28 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
         }
       );
 
-      // Cast the reply to VideoReply type
+      // Cast the reply to VideoReply type and ensure it matches the structure of VideoComment
       const newReply = response.data.reply as VideoReply;
+
+      // Enhance the reply with user data to match VideoComment structure
+      const enhancedReply = {
+        ...newReply,
+        userId:
+          typeof newReply.userId === "string"
+            ? {
+                _id: newReply.userId,
+                username: session?.user?.name || newReply.username,
+                firstName: session?.user?.firstName || "",
+                lastName: session?.user?.lastName || "",
+                imageURL: session?.user?.image || "",
+              }
+            : newReply.userId,
+        firstName: session?.user?.firstName || "",
+        lastName: session?.user?.lastName || "",
+        userImage: session?.user?.image || "",
+        likes: newReply.likes || [],
+        createdAt: newReply.createdAt || new Date(),
+      };
 
       // Update the comments state to include the new reply
       setComments(
@@ -166,7 +223,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           if (comment._id === commentId) {
             return {
               ...comment,
-              replies: [...(comment.replies || []), newReply],
+              replies: [...(comment.replies || []), enhancedReply],
             };
           }
           return comment;
@@ -178,6 +235,9 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     } catch (err) {
       setError("Failed to post reply");
       console.error("Error posting reply:", err);
+    } finally {
+      // Clear loading state
+      setReplyLoading(null);
     }
   };
 
@@ -185,6 +245,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   const handleLikeReply = async (commentId: string, replyId: string) => {
     if (!session?.user) {
       setError("You must be logged in to like replies");
+      return;
+    }
+    
+    if (!session?.user.isSubscribed) {
+      setError("You must be subscribed to like replies");
       return;
     }
 
@@ -223,6 +288,18 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     }
   };
 
+  // Fetch users who liked the video
+  const fetchLikeUsers = async () => {
+    try {
+      const response = await axios.get(`/api/videos/${videoId}/likes/users`);
+      setLikeUsers(response.data.users || []);
+      setShowLikesModal(true);
+    } catch (err) {
+      console.error("Error fetching like users:", err);
+      setError("Failed to load users who liked this video");
+    }
+  };
+
   // Toggle like on the video
   const handleLikeVideo = async () => {
     if (!session?.user) {
@@ -248,6 +325,55 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     } catch (err) {
       setError("Failed to like video");
       console.error("Error liking video:", err);
+    }
+  };
+
+  // Delete a comment
+  const handleDeleteComment = async (commentId: string) => {
+    if (!session?.user) {
+      setError("You must be logged in to delete comments");
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/videos/${videoId}/comments/${commentId}/delete`);
+
+      // Update the comments state
+      setComments(comments.filter((comment) => comment._id !== commentId));
+    } catch (err) {
+      setError("Failed to delete comment");
+      console.error("Error deleting comment:", err);
+    }
+  };
+
+  // Delete a reply
+  const handleDeleteReply = async (commentId: string, replyId: string) => {
+    if (!session?.user) {
+      setError("You must be logged in to delete replies");
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `/api/videos/${videoId}/comments/${commentId}/replies/${replyId}/delete`
+      );
+
+      // Update the comments state
+      setComments(
+        comments.map((comment) => {
+          if (comment._id === commentId) {
+            return {
+              ...comment,
+              replies:
+                comment.replies?.filter((reply) => reply._id !== replyId) || [],
+            };
+          }
+          return comment;
+        })
+      );
+    } catch (err) {
+      setError("Failed to delete reply");
+      console.error("Error deleting reply:", err);
     }
   };
 
@@ -305,29 +431,92 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
     <div className="mt-8 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-medium text-lovely">Comments</h3>
-        <button
-          onClick={handleLikeVideo}
-          className={`flex items-center gap-1 px-3 py-1 rounded-full ${
-            session?.user &&
-            session.user.id &&
-            videoLikes.some((id) => id.toString() === session.user.id)
-              ? "bg-lovely text-creamey"
-              : "bg-creamey text-lovely border border-lovely"
-          }`}
-          disabled={!session?.user}
-        >
-          <ThumbsUp
-            className={`h-4 w-4 ${
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleLikeVideo}
+            className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${
               session?.user &&
               session.user.id &&
               videoLikes.some((id) => id.toString() === session.user.id)
-                ? "fill-creamey"
-                : ""
+                ? "bg-lovely text-creamey"
+                : "bg-creamey text-lovely border border-lovely"
             }`}
-          />
-          <span>{videoLikesCount}</span>
-        </button>
+            disabled={!session?.user}
+          >
+            <Heart
+              className={`h-4 w-4 transition-all duration-300 transform ${
+                session?.user &&
+                session.user.id &&
+                videoLikes.some((id) => id.toString() === session.user.id)
+                  ? "fill-creamey animate-heartbeat"
+                  : "hover:scale-125"
+              }`}
+            />
+            {/* <span>Like</span> */}
+          </button>
+          {videoLikesCount === 0 && (
+            <p className="text-lovely">Be the first one to love this video.</p>
+          )}
+          {videoLikesCount > 0 && (
+            <button
+              onClick={fetchLikeUsers}
+              className="text-lovely hover:underline"
+            >
+              {videoLikesCount}{" "}
+              {videoLikesCount === 1
+                ? "person love this video"
+                : "people love this video"}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Likes Modal */}
+      <Dialog open={showLikesModal} onOpenChange={setShowLikesModal}>
+        <DialogContent className="bg-creamey text-lovely max-h-[80vh] overflow-y-scroll max-w-sm md:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lovely">
+              People who loved this video
+            </DialogTitle>
+            {/* <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <span className="sr-only">Close</span>
+            </DialogClose> */}
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto py-4">
+            {likeUsers.length > 0 ? (
+              <ul className="space-y-4">
+                {likeUsers.map((user) => (
+                  <li key={user._id} className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={user.userImage || ""}
+                        alt={user.username || ""}
+                      />
+                      {/* <AvatarFallback>
+                        {getInitials(user.username || user.firstName || "User")}
+                      </AvatarFallback> */}
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">
+                        {user.firstName && user.lastName
+                          ? `${user.firstName} ${user.lastName}`
+                          : user.username || "User"}
+                      </p>
+                      {/* {user.username && user.firstName && (
+                        <p className="text-sm text-lovely/70">
+                          @{user.username}
+                        </p>
+                      )} */}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center py-4">No likes yet</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {error && (
         <div className="p-3 bg-red-100 text-red-700 rounded-md mb-4">
@@ -349,19 +538,21 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           </Avatar>
           <div className="flex-1 space-y-2">
             <Textarea
-              placeholder="Add a comment..."
+              placeholder={session.user.isSubscribed ? "Add a comment..." : "Subscribe to comment..."}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="min-h-[80px] bg-creamey text-lovely placeholder:text-lovely/50"
+              disabled={!session.user.isSubscribed}
             />
             <div className="flex justify-end">
               <Button
                 onClick={handleCommentSubmit}
-                disabled={loading || !newComment.trim()}
-                className="bg-lovely text-creamey hover:bg-lovely/90"
+                disabled={loading || !newComment.trim() || !session.user.isSubscribed}
+                className={`bg-lovely text-creamey hover:bg-lovely/90 ${!session.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={!session.user.isSubscribed ? "Subscribe to comment" : ""}
               >
                 <Send className="mr-2 h-4 w-4" />
-                Comment
+                {session.user.isSubscribed ? "Comment" : "Subscribe to Comment"}
               </Button>
             </div>
           </div>
@@ -448,8 +639,15 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                           isLikedByUser
                             ? "text-lovely"
                             : "text-lovely/60 hover:text-lovely"
+                        } ${
+                          !session?.user || !session?.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""
                         }`}
-                        disabled={!session?.user}
+                        disabled={!session?.user || !session?.user.isSubscribed}
+                        title={!session?.user 
+                          ? "Login to like" 
+                          : !session?.user.isSubscribed 
+                            ? "Subscribe to like" 
+                            : ""}
                       >
                         <ThumbsUp
                           className={`mr-1 h-4 w-4 ${
@@ -459,19 +657,48 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                         {comment.likes?.length || 0}
                       </button>
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          if (!session?.user) {
+                            setError("You must be logged in to reply to comments");
+                            return;
+                          }
+                          
+                          if (!session?.user.isSubscribed) {
+                            setError("You must be subscribed to reply to comments");
+                            return;
+                          }
+                          
                           setReplyingTo(
                             replyingTo === comment._id
                               ? null
                               : comment._id || ""
-                          )
-                        }
-                        className="flex items-center text-sm text-lovely/60 hover:text-lovely"
-                        disabled={!session?.user}
+                          );
+                        }}
+                        className={`flex items-center text-sm text-lovely/60 hover:text-lovely ${
+                          !session?.user || !session?.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={!session?.user || !session?.user.isSubscribed}
+                        title={!session?.user 
+                          ? "Login to reply" 
+                          : !session?.user.isSubscribed 
+                            ? "Subscribe to reply" 
+                            : ""}
                       >
                         <Reply className="mr-1 h-4 w-4" />
                         Reply
                       </button>
+                      {session?.user?.id ===
+                        (typeof comment.userId === "string"
+                          ? comment.userId
+                          : comment.userId?._id) && (
+                        <button
+                          onClick={() => handleDeleteComment(comment._id || "")}
+                          className="flex items-center text-center justify-center text-sm text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="mr-1 h-4 w-4" />
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -490,16 +717,25 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                         <Button
                           variant="outline"
                           onClick={() => setReplyingTo(null)}
-                          className="border-lovely text-lovely hover:bg-lovely/10"
+                          className="border-lovely text-lovely hover:text-lovely hover:bg-lovely/10"
                         >
                           Cancel
                         </Button>
                         <Button
                           onClick={() => handleReplySubmit(comment._id || "")}
-                          disabled={!replyText.trim()}
+                          disabled={
+                            !replyText.trim() || replyLoading === comment._id
+                          }
                           className="bg-lovely text-creamey hover:bg-lovely/90"
                         >
-                          Reply
+                          {replyLoading === comment._id ? (
+                            <>
+                              <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-creamey border-t-transparent"></span>
+                              Replying...
+                            </>
+                          ) : (
+                            "Reply"
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -542,14 +778,48 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                               className="flex gap-3"
                             >
                               <Avatar className="h-8 w-8">
+                                <AvatarImage
+                                  src={
+                                    reply.userImage ||
+                                    reply.userId?.imageURL ||
+                                    ""
+                                  }
+                                  alt={
+                                    reply.username ||
+                                    reply.userId?.username ||
+                                    ""
+                                  }
+                                />
                                 <AvatarFallback>
-                                  {getInitials(reply.username)}
+                                  {getInitials(
+                                    `${
+                                      reply.firstName ||
+                                      reply.userId?.firstName ||
+                                      reply.username ||
+                                      reply.userId?.username ||
+                                      ""
+                                    } ${
+                                      reply.lastName ||
+                                      reply.userId?.lastName ||
+                                      ""
+                                    }`
+                                  )}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                   <h5 className="font-medium text-sm text-lovely">
-                                    {reply.username}
+                                    {`${
+                                      reply.firstName ||
+                                      reply.userId?.firstName ||
+                                      reply.username ||
+                                      reply.userId?.username ||
+                                      ""
+                                    } ${
+                                      reply.lastName ||
+                                      reply.userId?.lastName ||
+                                      ""
+                                    }`}
                                   </h5>
                                   <span className="text-xs text-lovely/60">
                                     {formatDate(reply.createdAt)}
@@ -558,27 +828,54 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                                 <p className="mt-1 text-sm text-lovely/80">
                                   {reply.text}
                                 </p>
-                                <button
-                                  onClick={() =>
-                                    handleLikeReply(
-                                      comment._id || "",
-                                      reply._id || ""
-                                    )
-                                  }
-                                  className={`flex items-center text-xs mt-1 ${
-                                    isReplyLikedByUser
-                                      ? "text-lovely"
-                                      : "text-lovely/60 hover:text-lovely"
-                                  }`}
-                                  disabled={!session?.user}
-                                >
-                                  <ThumbsUp
-                                    className={`mr-1 h-3 w-3 ${
-                                      isReplyLikedByUser ? "fill-lovely" : ""
+                                <div className="flex items-center gap-2 mt-1">
+                                  <button
+                                    onClick={() =>
+                                      handleLikeReply(
+                                        comment._id || "",
+                                        reply._id || ""
+                                      )
+                                    }
+                                    className={`flex items-center text-xs ${
+                                      isReplyLikedByUser
+                                        ? "text-lovely"
+                                        : "text-lovely/60 hover:text-lovely"
+                                    } ${
+                                      !session?.user || !session?.user.isSubscribed ? "opacity-50 cursor-not-allowed" : ""
                                     }`}
-                                  />
-                                  {reply.likes?.length || 0}
-                                </button>
+                                    disabled={!session?.user || !session?.user.isSubscribed}
+                                    title={!session?.user 
+                                      ? "Login to like" 
+                                      : !session?.user.isSubscribed 
+                                        ? "Subscribe to like" 
+                                        : ""}
+                                  >
+                                    <ThumbsUp
+                                      className={`mr-1 h-3 w-3 ${
+                                        isReplyLikedByUser ? "fill-lovely" : ""
+                                      }`}
+                                    />
+                                    {reply.likes?.length || 0}
+                                  </button>
+
+                                  {session?.user?.id ===
+                                    (typeof reply.userId === "string"
+                                      ? reply.userId
+                                      : reply.userId?._id) && (
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteReply(
+                                          comment._id || "",
+                                          reply._id || ""
+                                        )
+                                      }
+                                      className="flex items-center text-xs text-red-500 hover:text-red-700"
+                                    >
+                                      <Trash2 className="mr-1 h-3 w-3" />
+                                      Delete
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );

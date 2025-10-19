@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
+import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
 
 // POST - Add a reply to a comment
@@ -14,7 +15,7 @@ export async function POST(
     await ConnectDB();
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !session?.user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -31,13 +32,8 @@ export async function POST(
       );
     }
 
-    // Check if user is subscribed
-    const user = await UserModel.findOne({ email: session.user.email });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    if (!user.isSubscribed) {
+    // Check if user is subscribed directly from session
+    if (!session.user.isSubscribed) {
       return NextResponse.json(
         { error: "Subscription required to reply to comments" },
         { status: 403 }
@@ -66,10 +62,10 @@ export async function POST(
       return NextResponse.json({ error: "Comment not found" }, { status: 404 });
     }
 
-    // Create the reply
+    // Create the reply with additional fields to match VideoComment structure
     const newReply = {
-      userId: user._id.toString(),
-      username: user.username,
+      userId: session.user.id,
+      username: session.user.name || "",
       text: text.trim(),
       likes: [],
       createdAt: new Date(),
@@ -82,10 +78,38 @@ export async function POST(
 
     comment.replies.push(newReply);
     await video.save();
+    
+    // Get the newly added reply with its ID from the database
+    const savedReply = comment.replies[comment.replies.length - 1];
+    
+    // Record the reply interaction
+    await InteractionsModel.create({
+      userId: session.user.id,
+      targetId: commentId,
+      targetType: "comment",
+      actionType: "reply",
+      parentId: videoId,
+      replyId: savedReply._id,
+      content: text.trim(),
+      read: false
+    });
+    
+    // Prepare the response with properly structured user data and the database ID
+    const replyWithUserData = {
+      ...newReply,
+      _id: savedReply._id.toString(), // Include the actual database ID
+      userId: {
+        _id: session.user.id,
+        username: session.user.name || '',
+        firstName: session.user.firstName || '',
+        lastName: session.user.lastName || '',
+        imageURL: session.user.image || ''
+      }
+    };
 
     return NextResponse.json({
       success: true,
-      reply: newReply,
+      reply: replyWithUserData,
     });
   } catch (error: any) {
     console.error("Error adding reply to comment:", error);
