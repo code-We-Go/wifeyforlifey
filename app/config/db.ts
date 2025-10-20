@@ -17,12 +17,12 @@ export const ConnectDB = async () => {
 
     // Add connection options to handle timeouts and retries
     const options = {
-      serverSelectionTimeoutMS: 10000, // Timeout after 5 seconds instead of 30
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
+      serverSelectionTimeoutMS: 7000, // Timeout after 5 seconds instead of 30
+      socketTimeoutMS: 65000, // Close sockets after 45 seconds of inactivity
+      connectTimeoutMS: 100000, // Give up initial connection after 10 seconds
       maxPoolSize: 10, // Maintain up to 10 socket connections
       minPoolSize: 1, // Maintain at least 1 socket connection
-      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
+      maxIdleTimeMS: 60000, // Close idle connections after 30 seconds
       retryWrites: true,
       retryReads: true,
     };
