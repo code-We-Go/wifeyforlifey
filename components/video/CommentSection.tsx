@@ -28,7 +28,7 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
-axios.defaults.timeout = 30000; // 30 seconds timeout
+// axios.defaults.timeout = 30000; // 30 seconds timeout
 
 interface CommentSectionProps {
   videoId: string;
