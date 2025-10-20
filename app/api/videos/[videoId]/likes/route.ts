@@ -80,7 +80,7 @@ export async function POST(
     while (retries > 0 && !saved) {
       try {
         await video.save();
-        
+
         // Record the interaction for admin dashboard and notifications
         const { parentId, parentType } = await request.json();
         await InteractionsModel.create({
@@ -90,9 +90,9 @@ export async function POST(
           actionType: alreadyLiked ? "unlike" : "like",
           parentId: parentId || videoId,
           parentType: parentType || "video",
-          read: false
+          read: false,
         });
-        
+
         saved = true;
       } catch (saveError: any) {
         if (saveError.name === "VersionError" && retries > 1) {

@@ -14,12 +14,12 @@ export async function GET(
     await ConnectDB();
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
+    // if (!session?.user?.email) {
+    //   return NextResponse.json(
+    //     { error: "Authentication required" },
+    //     { status: 401 }
+    //   );
+    // }
 
     const { videoId } = await params;
 

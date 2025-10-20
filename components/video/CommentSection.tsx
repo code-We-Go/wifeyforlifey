@@ -457,9 +457,49 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
 
   return (
     <div className="mt-8 space-y-4">
+      <div className="flex md:hidden justify-end w-full  items-center gap-2">
+        <button
+          onClick={handleLikeVideo}
+          className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${
+            session?.user &&
+            session.user.id &&
+            videoLikes.some((id) => id.toString() === session.user.id)
+              ? "bg-lovely text-creamey"
+              : "bg-creamey text-lovely border border-lovely"
+          }`}
+          disabled={!session?.user}
+        >
+          <Heart
+            className={`h-4 w-4 transition-all duration-300 transform ${
+              session?.user &&
+              session.user.id &&
+              videoLikes.some((id) => id.toString() === session.user.id)
+                ? "fill-creamey animate-heartbeat"
+                : "hover:scale-125"
+            }`}
+          />
+          {/* <span>Like</span> */}
+        </button>
+        {videoLikesCount === 0 && (
+          <p className="hidden sm:block text-lovely">
+            Be the first one to love this video.
+          </p>
+        )}
+        {videoLikesCount > 0 && (
+          <button
+            onClick={fetchLikeUsers}
+            className="text-lovely hover:underline"
+          >
+            {videoLikesCount}{" "}
+            {videoLikesCount === 1
+              ? "person love this video"
+              : "people love this video"}
+          </button>
+        )}
+      </div>
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-medium text-lovely">Comments</h3>
-        <div className="flex items-center gap-2">
+        <div className="md:flex hidden  items-center gap-2">
           <button
             onClick={handleLikeVideo}
             className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${
