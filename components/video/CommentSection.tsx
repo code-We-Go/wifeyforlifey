@@ -483,7 +483,9 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
             {/* <span>Like</span> */}
           </button>
           {videoLikesCount === 0 && (
-            <p className="text-lovely">Be the first one to love this video.</p>
+            <p className="hidden sm:block text-lovely">
+              Be the first one to love this video.
+            </p>
           )}
           {videoLikesCount > 0 && (
             <button
