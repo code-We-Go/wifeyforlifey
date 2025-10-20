@@ -31,16 +31,17 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
     e.stopPropagation();
     if (favorite.link) {
       // Increment click count
+      window.open(favorite.link, "_blank");
       try {
         await fetch(`/api/favorites/${favorite._id}/click`, {
           method: "POST",
+          keepalive: true,
         });
       } catch (error) {
         console.error("Error incrementing click count:", error);
       }
 
       // Open link in new tab
-      window.open(favorite.link, "_blank");
     }
   };
 
