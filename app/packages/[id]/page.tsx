@@ -145,6 +145,7 @@ export default function PackageDetailPage() {
                     alt={`${packageData.name} thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                 </button>
               ))}

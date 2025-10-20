@@ -44,6 +44,7 @@ export default function PartnerCard({ partner }: PartnerCardProps) {
         className="absolute -top-5 -rotate-45 -left-5 z-20"
         alt="fyonka"
         src={"/fyonkaCreamey.png"}
+        unoptimized
       />
       <div className="relative aspect-square overflow-hidden">
         <Image

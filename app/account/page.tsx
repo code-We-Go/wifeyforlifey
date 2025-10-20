@@ -459,6 +459,7 @@ export default function AccountPage() {
                 alt={user.name}
                 src={userInfo.imageUrl}
                 fill
+                unoptimized
               />
             </div>
           ) : (
@@ -675,12 +676,11 @@ export default function AccountPage() {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                       {/* Product */}
                       <div className="md:col-span-5 flex items-center space-x-4">
-                        <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
-                          <Image
+                        <div className="relative w-16 h-16 overflow-hidden md:h-20 md:w-20 rounded-md  flex-shrink-0">
+                          <img
                             src={item.imageUrl}
                             alt={item.productName}
-                            fill
-                            className="object-cover rounded-md"
+                            className="object-cover "
                           />
                         </div>
                         <div>
@@ -834,6 +834,7 @@ export default function AccountPage() {
                           alt="Profile"
                           fill
                           className="object-cover"
+                          unoptimized
                         />
                         {editingInfo && (
                           <div
@@ -1088,7 +1089,7 @@ export default function AccountPage() {
             )}
           </div>
         )}
-        
+
         {activeTab === "favorites" && (
           <div>
             {user.isSubscribed ? (

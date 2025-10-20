@@ -44,7 +44,7 @@ const navigation = [
   { name: "Experience", href: "/club" },
   { name: "Playlists", href: "/playlists" },
   { name: "Shop", href: "/shop" },
-  { name: "Blogs", href: "/blogs", icon:<BookOpenText /> },
+  { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
   { name: "About", href: "/about" },
 ];
 const leftNavigation = [
@@ -61,7 +61,7 @@ const rightNavigation = [
 ];
 
 const accountItems = [
-  { icon: UserCircle, label: 'Profile', href: '/account' },
+  { icon: UserCircle, label: "Profile", href: "/account" },
   // { icon: Heart, label: 'Wishlist', href: '/account/wishlist' },
   // { icon: ShoppingBag, label: 'Orders', href: '/account/orders' },
   // { icon: Music, label: 'Playlists', href: '/account/playlists' },
@@ -89,20 +89,19 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if( pathname ==="/club" || pathname === "/shop"){
-       if ( currentScrollY > 128) {
+      if (pathname === "/club" || pathname === "/shop") {
+        if (currentScrollY > 128) {
           // Scrolling down, hide header
           setIsVisible(false);
         } else {
           // Scrolling up, show header
           setIsVisible(true);
         }
-      }
-      else if (currentScrollY > lastScrollY && currentScrollY > 128) {
+      } else if (currentScrollY > lastScrollY && currentScrollY > 128) {
         // Scrolling down, hide header
         setIsVisible(false);
       } else {
@@ -120,25 +119,25 @@ export default function Header() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (!target.closest('.account-dropdown')) {
+      if (!target.closest(".account-dropdown")) {
         setIsAccountOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Add timeout for hover behavior
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    
+
     if (!isHovering && window.innerWidth >= 768) {
       timeoutId = setTimeout(() => {
         setIsAccountOpen(false);
       }, 150); // Small delay to allow moving mouse to dropdown
     }
-    
+
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -149,11 +148,11 @@ export default function Header() {
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
   };
-  
-  const handleLogout = async() => {
+
+  const handleLogout = async () => {
     await logout();
     setIsMobileMenuOpen(false);
-  }
+  };
 
   return (
     <header
@@ -190,6 +189,7 @@ export default function Header() {
               className=" border-x-2 lg:flex-shrink-0 border-creamey items-center px-8 lg:px-16 space-x-2"
             >
               <Image
+                unoptimized
                 className="aspect-auto"
                 alt="logo"
                 width={200}
@@ -212,7 +212,7 @@ export default function Header() {
                 </div>
               </Link>
             ))}
-            
+
             {/* Account with custom dropdown that works on both desktop and touch devices */}
             <div className="relative account-dropdown">
               <button
@@ -237,10 +237,10 @@ export default function Header() {
                 <User />
                 <span className="text-base font-medium">Account</span>
               </button>
-              
+
               {/* Dropdown Content */}
               {isAccountOpen && (
-                <div 
+                <div
                   className="absolute right-0 top-full mt-2 w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg z-50"
                   onMouseEnter={() => {
                     // Keep dropdown open when hovering over content
@@ -257,47 +257,53 @@ export default function Header() {
                 >
                   <div className="p-4">
                     <nav className="space-y-1">
-                      {
-                      
-                      isAuthenticated?accountItems.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                          onClick={() => setIsAccountOpen(false)}
-                        >
-                          <item.icon className="mr-3 h-4 w-4 text-lovely " />
-                          {item.label}
-                        </Link>
-                      )):<div></div>}
-                     
-                     {
+                      {isAuthenticated ? (
+                        accountItems.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                            onClick={() => setIsAccountOpen(false)}
+                          >
+                            <item.icon className="mr-3 h-4 w-4 text-lovely " />
+                            {item.label}
+                          </Link>
+                        ))
+                      ) : (
+                        <div></div>
+                      )}
 
-                isAuthenticated ?   
-                 <div className="border-t border-gray-200 mt-2 pt-2">
-                        <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
-                        onClick={() => {
-                          handleLogout();
-                          setIsAccountOpen(false);
-                        }}>
-                          <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
-                          Sign Out
-                        </button>
-                      </div>
-                      :
-                      <div className="">
-                      <Link href={'/login'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                      onClick={() => setIsAccountOpen(false)}>
-                     
-                        Sign In
-                      </Link>
-                      <Link href={'/register'} className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                      onClick={() => setIsAccountOpen(false)}>
-                     
-                        Sign up
-                      </Link>
-                    </div>
-}
+                      {isAuthenticated ? (
+                        <div className="border-t border-gray-200 mt-2 pt-2">
+                          <button
+                            className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
+                            onClick={() => {
+                              handleLogout();
+                              setIsAccountOpen(false);
+                            }}
+                          >
+                            <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                            Sign Out
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="">
+                          <Link
+                            href={"/login"}
+                            className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                            onClick={() => setIsAccountOpen(false)}
+                          >
+                            Sign In
+                          </Link>
+                          <Link
+                            href={"/register"}
+                            className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                            onClick={() => setIsAccountOpen(false)}
+                          >
+                            Sign up
+                          </Link>
+                        </div>
+                      )}
                     </nav>
                   </div>
                 </div>
@@ -334,7 +340,7 @@ export default function Header() {
 
           {/* Mobile Menu Toggle */}
           <div className="flex w-full justify-between md:hidden items-center text-creamey">
-            <Sheet open={isMobileMenuOpen}  onOpenChange={setIsMobileMenuOpen}>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild className="">
                 <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
@@ -349,8 +355,13 @@ export default function Header() {
                   className={`${thirdFont.className} flex flex-col h-full py-6 `}
                 >
                   <div className="flex items-center justify-between mb-8">
-                    <Link href="/" className="font-display text-xl font-bold" onClick={handleLinkClick}>
+                    <Link
+                      href="/"
+                      className="font-display text-xl font-bold"
+                      onClick={handleLinkClick}
+                    >
                       <Image
+                        unoptimized
                         className="aspect-auto"
                         alt="logo"
                         width={200}
@@ -368,9 +379,7 @@ export default function Header() {
                         href={item.href}
                         className={cn(
                           "text-xl font-medium  hover:underline transition duration-300",
-                          pathname === item.href
-                            ? "underline"
-                            : "text-creamey"
+                          pathname === item.href ? "underline" : "text-creamey"
                         )}
                         onClick={handleLinkClick}
                       >
@@ -379,7 +388,11 @@ export default function Header() {
                     ))}
                   </nav>
                   <div className="mt-auto text-lg space-y-4">
-                    <Link href="/cart" className="flex items-center space-x-2" onClick={handleLinkClick}>
+                    <Link
+                      href="/cart"
+                      className="flex items-center space-x-2"
+                      onClick={handleLinkClick}
+                    >
                       <ShoppingBag className="h-5 w-5" />
                       <span>Cart</span>
                     </Link>
@@ -388,14 +401,10 @@ export default function Header() {
                       className="flex items-center space-x-2"
                       onClick={handleLinkClick}
                     >
-                      <Heart
-                        className={cn(
-                          "h-5 w-5"
-                        )}
-                      />
+                      <Heart className={cn("h-5 w-5")} />
                       <span>Wishlist</span>
                     </Link>
-                   <Link
+                    <Link
                       href="/account"
                       className="flex items-center space-x-2"
                       onClick={handleLinkClick}
@@ -403,11 +412,15 @@ export default function Header() {
                       <User className="h-5 w-5" />
                       <span>Account</span>
                     </Link>
-                    { isAuthenticated &&  <button className="w-full flex items-center gap-2 space-x-2 py-2 text-creamey hover:underline rounded-md group transition-colors"
-                      onClick={handleLogout}>
+                    {isAuthenticated && (
+                      <button
+                        className="w-full flex items-center gap-2 space-x-2 py-2 text-creamey hover:underline rounded-md group transition-colors"
+                        onClick={handleLogout}
+                      >
                         <LogOut className=" h-5 w-5 " />
                         Sign Out
-                      </button> }
+                      </button>
+                    )}
                   </div>
                 </div>
               </SheetContent>
@@ -417,6 +430,7 @@ export default function Header() {
               className="  lg:flex-shrink-0  items-center px-8 lg:px-16 space-x-2"
             >
               <Image
+                unoptimized
                 className="aspect-auto"
                 alt="logo"
                 width={200}
@@ -425,12 +439,12 @@ export default function Header() {
               />
             </Link>
             <div className="mr-2 gap-4 flex">
-            <Link href={'/wishlist'}>
-            <Heart />
-            </Link>
-            <Link href={'/cart'}>
-            <ShoppingBag />
-            </Link>
+              <Link href={"/wishlist"}>
+                <Heart />
+              </Link>
+              <Link href={"/cart"}>
+                <ShoppingBag />
+              </Link>
             </div>
             {/* <Link href="/cart" className="relative mr-4">
               <Button variant="ghost" size="icon" aria-label="Cart">

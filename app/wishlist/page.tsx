@@ -1,7 +1,13 @@
 "use client";
 import React, { useContext } from "react";
 import { wishListContext } from "../context/wishListContext";
-import { ArrowLeft, ShoppingBag, Trash2, ShoppingCart, Heart } from "lucide-react";
+import {
+  ArrowLeft,
+  ShoppingBag,
+  Trash2,
+  ShoppingCart,
+  Heart,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { thirdFont } from "@/fonts";
@@ -15,12 +21,16 @@ const WishlistPage = () => {
   const { toast } = useToast();
   const { wishList, setWishList } = useContext(wishListContext);
 
-  const handleRemoveFromWishlist = (productId: string, variant: any, attributes: any) => {
-    setWishList((prevList) => 
+  const handleRemoveFromWishlist = (
+    productId: string,
+    variant: any,
+    attributes: any
+  ) => {
+    setWishList((prevList) =>
       prevList.filter(
-        (item) => 
-          item.productId !== productId || 
-          item.variant !== variant || 
+        (item) =>
+          item.productId !== productId ||
+          item.variant !== variant ||
           item.attributes !== attributes
       )
     );
@@ -34,7 +44,6 @@ const WishlistPage = () => {
     addItem(item);
     handleRemoveFromWishlist(item.productId, item.variant, item.attributes);
     toast({
-      
       title: "Added to cart",
       description: `${item.productName} has been moved to your cart.`,
     });
@@ -47,11 +56,18 @@ const WishlistPage = () => {
           <div className="w-24 h-24 bg-creamey rounded-full flex items-center justify-center mx-auto mb-6">
             <Heart className="h-12 w-12 text-lovely" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-display font-medium mb-4">Your Wishlist is Empty</h1>
+          <h1 className="text-2xl md:text-3xl font-display font-medium mb-4">
+            Your Wishlist is Empty
+          </h1>
           <p className=" mb-8 max-w-md mx-auto">
-            Looks like you haven&apos;t added anything to your wishlist yet. Explore our products and find something you&apos;ll love!
+            Looks like you haven&apos;t added anything to your wishlist yet.
+            Explore our products and find something you&apos;ll love!
           </p>
-          <Button asChild size="lg" className="rounded-2xl bg-creamey text-lovely hover:bg-creamey hover:font-semibold">
+          <Button
+            asChild
+            size="lg"
+            className="rounded-2xl bg-creamey text-lovely hover:bg-creamey hover:font-semibold"
+          >
             <Link href="/shop">Continue Shopping</Link>
           </Button>
         </div>
@@ -62,7 +78,11 @@ const WishlistPage = () => {
   return (
     <div className="container-custom py-8 md:py-12 min-h-[calc(100vh-128px)]">
       <div className="flex items-center mb-8">
-        <h1 className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl  font-semibold`}>Wishlist</h1>
+        <h1
+          className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl  font-semibold`}
+        >
+          Wishlist
+        </h1>
         <span className="ml-2 text-lovely/90">
           ({wishList.length} {wishList.length === 1 ? "item" : "items"})
         </span>
@@ -71,17 +91,19 @@ const WishlistPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Wishlist Items */}
         <div className="lg:col-span-3 space-y-6">
-
-
           <Separator className="hidden md:block" />
 
           {wishList.map((item, index) => (
-            <div key={index} className="bg-card bg-lovely border-lovely border-2  text-creamey rounded-lg p-4 md:p-6 shadow-sm">
+            <div
+              key={index}
+              className="bg-card bg-lovely border-lovely border-2  text-creamey rounded-lg p-4 md:p-6 shadow-sm"
+            >
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 {/* Product */}
                 <div className="md:col-span-5 flex items-center space-x-4">
                   <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
                     <Image
+                      unoptimized
                       src={item.imageUrl}
                       alt={item.productName}
                       fill
@@ -89,7 +111,9 @@ const WishlistPage = () => {
                     />
                   </div>
                   <div>
-                    <h5 className="font-medium line-clamp-1">{item.productName}</h5>
+                    <h5 className="font-medium line-clamp-1">
+                      {item.productName}
+                    </h5>
                   </div>
                 </div>
 
@@ -120,7 +144,13 @@ const WishlistPage = () => {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-creamey hover:text-lovely hover:bg-creamey"
-                    onClick={() => handleRemoveFromWishlist(item.productId, item.variant, item.attributes)}
+                    onClick={() =>
+                      handleRemoveFromWishlist(
+                        item.productId,
+                        item.variant,
+                        item.attributes
+                      )
+                    }
                   >
                     <Trash2 className="h-4  w-4" />
                     <span className="sr-only">Remove item</span>
@@ -131,7 +161,11 @@ const WishlistPage = () => {
           ))}
 
           <div className="mt-6 flex justify-between items-center">
-            <Button asChild variant="outline" className="gap-2 bg-lovely text-creamey hover:text-creamey hover:bg-lovely hover:font-semibold">
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 bg-lovely text-creamey hover:text-creamey hover:bg-lovely hover:font-semibold"
+            >
               <Link href="/shop">
                 <ArrowLeft className="h-4 w-4" />
                 Continue Shopping

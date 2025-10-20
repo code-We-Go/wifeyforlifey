@@ -236,6 +236,7 @@ export default function ProductPage() {
                     alt={`${product.title} - Image ${index + 1}`}
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                 </button>
               ))}

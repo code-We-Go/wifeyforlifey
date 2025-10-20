@@ -68,6 +68,7 @@ const BrandCharacters = () => {
       <div className="rotate-12 md:absolute z-0 md:top-[10vh] max-md:hidden  md:right-[5vw] sm:right-[5vw] lg:right-[15vw]">
         {/* // className='rotate-12  -top-[5vh] -right-[30vw]  md:right-[5vw] sm:right-[5vw] lg:right-[6vw]'> */}
         <Image
+          unoptimized
           className="aspect-auto"
           width={120}
           height={50}
@@ -77,6 +78,7 @@ const BrandCharacters = () => {
       </div>
       <div className="hidden md:block absolute z-0 top-[20vh] left-[8vw] -rotate-12">
         <Image
+          unoptimized
           className=" aspect-auto"
           width={120}
           height={50}

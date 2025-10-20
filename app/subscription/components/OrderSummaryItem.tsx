@@ -50,25 +50,28 @@ const OrderSummaryItem = ({ cartItem }: { cartItem: CartItem }) => {
       <div className="flex  w-full bg-everGreen gap-4 items-start text-creamey">
         <div className="relative rounded-2xl w-[60px] h-[70px] md:w-[120px] md:h-[120px]">
           <Image
-          className="rounded-2xl aspect-auto"
+            unoptimized
+            className="rounded-2xl aspect-auto"
             fill
             alt={cartItem.productName}
             src={cartItem.imageUrl}
           ></Image>
         </div>
         <div className="flex w-full flex-col gap-2">
-
-        <h2 className={`${thirdFont.className} text-lg font-semibold`}>
-          {cartItem.productName}
-        </h2>
-        <div className="justify-between flex items-start">
-        <p>Quantity :</p>
-        <p>{cartItem.quantity}</p>
-        </div>
-        <div className="justify-between flex items-start">
-        <p>Total :</p>
-        <p>{cartItem.quantity * cartItem.price} <span>{user.userCountry==='EG'?'LE':"USD"}</span></p>
-        </div>
+          <h2 className={`${thirdFont.className} text-lg font-semibold`}>
+            {cartItem.productName}
+          </h2>
+          <div className="justify-between flex items-start">
+            <p>Quantity :</p>
+            <p>{cartItem.quantity}</p>
+          </div>
+          <div className="justify-between flex items-start">
+            <p>Total :</p>
+            <p>
+              {cartItem.quantity * cartItem.price}{" "}
+              <span>{user.userCountry === "EG" ? "LE" : "USD"}</span>
+            </p>
+          </div>
         </div>
 
         {/* {modalAppear && <div className='absolute z-20 top-[40%] sm:top-[30%] sm:left-[30%] bg-backgroundColor left-[10%] w-[80vw] sm:w-[40vw] px-2 h-auto min-h-[20vh]'>

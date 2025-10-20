@@ -1,20 +1,22 @@
-'use client'
-import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+"use client";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
 
 const HeroCarousel = () => {
   useEffect(() => {
-const interval = setInterval(() => {
-    setActiveIndex((prev) => prev === (images.length - 1)? 0 : prev + 1);
-}
-    
-, 5000);
-console.log(activeIndex);
-console.log('3000')
+    const interval = setInterval(
+      () => {
+        setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+      },
+
+      5000
+    );
+    console.log(activeIndex);
+    console.log("3000");
 
     return () => clearInterval(interval);
   }, []);
-    
+
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Array of images to display in the carousel
@@ -35,16 +37,21 @@ console.log('3000')
   // };
 
   return (
-    <div id="default-carousel" className=" relative my-4 md:my-16 w-full h-[50vh] sm:h-[60vh] max-h-[95vh] md:h-[calc(100vh-64px)]" data-carousel="slide">
+    <div
+      id="default-carousel"
+      className=" relative my-4 md:my-16 w-full h-[50vh] sm:h-[60vh] max-h-[95vh] md:h-[calc(100vh-64px)]"
+      data-carousel="slide"
+    >
       <div className="relative  overflow-hidden rounded-lg h-full">
         {images.map((src, index) => (
           <div
             key={index}
             className={`absolute max-md:top-0 h-auto max-h-[90vh] md:h-screen inset-0 transition-opacity duration-700 ease-in-out ${
-              index === activeIndex ? 'opacity-100' : 'opacity-0'
+              index === activeIndex ? "opacity-100" : "opacity-0"
             }`}
           >
             <Image
+              unoptimized
               src={src}
               layout="fill"
               className="object-contain"
@@ -95,6 +102,6 @@ console.log('3000')
       </button> */}
     </div>
   );
-}
+};
 
 export default HeroCarousel;

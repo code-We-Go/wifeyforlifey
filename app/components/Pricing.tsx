@@ -146,6 +146,7 @@ const Pricing = () => {
         className=" hidden md:block absolute top-20 left-10 z-10 opacity-30"
       >
         <Image
+          unoptimized
           src="/hero/WifeyForLifey Illustrations-26.png"
           alt="ring"
           width={120}
@@ -170,6 +171,7 @@ const Pricing = () => {
         className="hidden md:block absolute bottom-24 right-10 z-10 opacity-30"
       >
         <Image
+          unoptimized
           src="/hero/WifeyForLifey Illustrations-28.png"
           alt="fyonka"
           width={200}

@@ -129,7 +129,9 @@ const BlogDetailPage = () => {
     setTikTokEmbedData(null);
 
     try {
-      const response = await axios.get(`/api/tiktok-embed?url=${encodeURIComponent(url)}`);
+      const response = await axios.get(
+        `/api/tiktok-embed?url=${encodeURIComponent(url)}`
+      );
       setTikTokEmbedData(response.data);
     } catch (error: any) {
       console.error("Error fetching TikTok embed:", error);
@@ -323,7 +325,7 @@ const BlogDetailPage = () => {
                 // Extract video/photo ID from TikTok URL
                 const videoMatch = blog.tikTokVideoUrl.match(/\/video\/(\d+)/);
                 const photoMatch = blog.tikTokVideoUrl.match(/\/photo\/(\d+)/);
-                
+
                 // Handle photo posts with oEmbed data
                 if (photoMatch) {
                   if (tikTokLoading) {
@@ -338,16 +340,28 @@ const BlogDetailPage = () => {
                   if (tikTokError) {
                     return (
                       <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
-                        <p className="text-lovely mb-3">Unable to load TikTok content. Click below to view:</p>
-                        <a 
-                          href={blog.tikTokVideoUrl} 
-                          target="_blank" 
+                        <p className="text-lovely mb-3">
+                          Unable to load TikTok content. Click below to view:
+                        </p>
+                        <a
+                          href={blog.tikTokVideoUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center px-4 py-2 bg-lovely text-white rounded-lg hover:bg-lovely/90 transition-colors"
                         >
                           View TikTok Post
-                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          <svg
+                            className="ml-2 w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
                           </svg>
                         </a>
                       </div>
@@ -356,9 +370,11 @@ const BlogDetailPage = () => {
 
                   if (tikTokEmbedData?.html) {
                     return (
-                      <div 
+                      <div
                         className="tiktok-embed-container"
-                        dangerouslySetInnerHTML={{ __html: tikTokEmbedData.html }}
+                        dangerouslySetInnerHTML={{
+                          __html: tikTokEmbedData.html,
+                        }}
                       />
                     );
                   }
@@ -366,22 +382,34 @@ const BlogDetailPage = () => {
                   // Fallback for photo posts
                   return (
                     <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
-                      <p className="text-lovely mb-3">This is a TikTok photo post. Click below to view:</p>
-                      <a 
-                        href={blog.tikTokVideoUrl} 
-                        target="_blank" 
+                      <p className="text-lovely mb-3">
+                        This is a TikTok photo post. Click below to view:
+                      </p>
+                      <a
+                        href={blog.tikTokVideoUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center px-4 py-2 bg-lovely text-white rounded-lg hover:bg-lovely/90 transition-colors"
                       >
                         View TikTok Post
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <svg
+                          className="ml-2 w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          />
                         </svg>
                       </a>
                     </div>
                   );
                 }
-                
+
                 // Handle video posts with iframe
                 let embedUrl;
                 if (videoMatch) {
@@ -389,11 +417,11 @@ const BlogDetailPage = () => {
                 } else {
                   // Fallback: try to extract any numeric ID
                   const idMatch = blog.tikTokVideoUrl.match(/(\d+)/);
-                  embedUrl = idMatch 
+                  embedUrl = idMatch
                     ? `https://www.tiktok.com/embed/v2/${idMatch[0]}?lang=en-US&autoplay=0&muted=1`
                     : blog.tikTokVideoUrl;
                 }
-                
+
                 return (
                   <iframe
                     src={embedUrl}
@@ -404,10 +432,10 @@ const BlogDetailPage = () => {
                     allowFullScreen
                     className="rounded-lg bg-creamey border-none"
                     style={{
-                      backgroundColor: '#fbf3e0',
-                      maxWidth: '100%',
-                      height: 'auto',
-                      aspectRatio: '9/16'
+                      backgroundColor: "#fbf3e0",
+                      maxWidth: "100%",
+                      height: "auto",
+                      aspectRatio: "9/16",
                     }}
                   />
                 );
@@ -453,6 +481,7 @@ const BlogDetailPage = () => {
                           src={relatedBlog.featuredImage}
                           alt={relatedBlog.title}
                           className="w-full h-40 object-cover rounded-t-lg group-hover:opacity-90 transition-opacity"
+                          unoptimized
                         />
                       </div>
                     )}

@@ -435,7 +435,7 @@ export default function PlaylistPage() {
                 <p className="text-lovely/90 mt-2 whitespace-pre-line">
                   {selectedVideo.description}
                 </p>
-                
+
                 {/* Comment Section */}
                 {selectedVideo._id && (
                   <CommentSection videoId={selectedVideo._id} />
@@ -567,6 +567,7 @@ export default function PlaylistPage() {
                 <div className="video-card group">
                   <div className="relative aspect-video overflow-hidden rounded-t-lg">
                     <Image
+                      unoptimized
                       src={relatedPlaylist.thumbnailUrl || "/video/1.png"}
                       alt={relatedPlaylist.title}
                       fill

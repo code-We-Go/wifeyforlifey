@@ -1,6 +1,6 @@
-'use client'
+"use client";
 import styles from "./styles.module.css";
-import React, {useRef } from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -39,10 +39,10 @@ function ParallaxText({ children, baseVelocity = 100 }: ParallaxProps) {
   const scrollVelocity = useVelocity(scrollY);
   const smoothVelocity = useSpring(scrollVelocity, {
     damping: 50,
-    stiffness: 400
+    stiffness: 400,
   });
   const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
-    clamp: false
+    clamp: false,
   });
 
   /**
@@ -120,17 +120,17 @@ function ParallaxText({ children, baseVelocity = 100 }: ParallaxProps) {
 
 const ParallaxLogos: React.FC<ParallaxLogosProps> = ({
   logos,
-  baseVelocity = 100
+  baseVelocity = 100,
 }) => {
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
   const smoothVelocity = useSpring(scrollVelocity, {
     damping: 50,
-    stiffness: 400
+    stiffness: 400,
   });
   const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
-    clamp: false
+    clamp: false,
   });
 
   /**
@@ -156,7 +156,6 @@ const ParallaxLogos: React.FC<ParallaxLogosProps> = ({
     moveBy += directionFactor.current * moveBy * velocityFactor.get();
 
     baseX.set(baseX.get() + moveBy);
-
   });
 
   /**
@@ -168,7 +167,10 @@ const ParallaxLogos: React.FC<ParallaxLogosProps> = ({
    */
   return (
     <div className={styles.parallax}>
-      <motion.div className={`${styles.scroller} ${styles['flex-container']}`} style={{ x }}>
+      <motion.div
+        className={`${styles.scroller} ${styles["flex-container"]}`}
+        style={{ x }}
+      >
         {[...Array(4)].flatMap((_, i) =>
           logos.map((logo, index) => (
             <span key={`${i}-${index}`}>
@@ -176,7 +178,7 @@ const ParallaxLogos: React.FC<ParallaxLogosProps> = ({
                 whileHover={{ color: "#000000" }}
                 transition={{ duration: 0.2 }}
               >
-                {React.cloneElement(logo, { className: styles['logo-svg'] })}
+                {React.cloneElement(logo, { className: styles["logo-svg"] })}
               </motion.div>
             </span>
           ))
@@ -187,23 +189,49 @@ const ParallaxLogos: React.FC<ParallaxLogosProps> = ({
 };
 
 export default function App() {
-  const logos = ["Sweet&Sour.jpeg","Sky.jpeg","Artima.jpeg","Vogacloset.jpeg","Shosh.jpeg","YesStyle.jpeg","Facefull.jpeg"];
-  const logos1 = logos.map((logo,index)=> 
-    <div key={index} className='relative overflow-hidden w-52 h-52 rounded-full border-4 border-lovely'>
-    <Image  fill className=" inline object-cover" src={`/partners/${logo}`} alt="" />
+  const logos = [
+    "Sweet&Sour.jpeg",
+    "Sky.jpeg",
+    "Artima.jpeg",
+    "Vogacloset.jpeg",
+    "Shosh.jpeg",
+    "YesStyle.jpeg",
+    "Facefull.jpeg",
+  ];
+  const logos1 = logos.map((logo, index) => (
+    <div
+      key={index}
+      className="relative overflow-hidden w-52 h-52 rounded-full border-4 border-lovely"
+    >
+      <Image
+        unoptimized
+        fill
+        className=" inline object-cover"
+        src={`/partners/${logo}`}
+        alt=""
+      />
     </div>
-    )
+  ));
   // const logos1: JSX.Element[] = [
   //   <img src="/partners/Sweet&Sour.jpeg" alt="Sweet & Sour" className={styles['logo-svg']} key="sweetAndSour1" />,
   //   <img src="/partners/Sky.jpeg" alt="Sky" className={styles['logo-svg']} key="sky1" />,
   //   <img src="/partners/Sweet&Sour.jpeg" alt="Sweet & Sour" className={styles['logo-svg']} key="sweetAndSour2" />,
   //   <img src="/partners/Sky.jpeg" alt="Sky" className={styles['logo-svg']} key="sky2" />,
   // ];
-  const logos2: JSX.Element[] =logos.map((logo,index)=> 
-    <div key={index} className='relative overflow-hidden w-52 h-52 rounded-full border-4 border-lovely'>
-    <Image  fill className=" inline object-cover" src={`/partners/${logo}`} alt="" />
+  const logos2: JSX.Element[] = logos.map((logo, index) => (
+    <div
+      key={index}
+      className="relative overflow-hidden w-52 h-52 rounded-full border-4 border-lovely"
+    >
+      <Image
+        unoptimized
+        fill
+        className=" inline object-cover"
+        src={`/partners/${logo}`}
+        alt=""
+      />
     </div>
-    )
+  ));
   return (
     <section className="h-[90vh]">
       <ParallaxLogos baseVelocity={-2.5} logos={logos1} />
@@ -211,4 +239,3 @@ export default function App() {
     </section>
   );
 }
-

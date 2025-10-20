@@ -116,6 +116,7 @@ const EmblaScaleCarousel: React.FC<PropType> = (props) => {
             <div className="embla__slide py-6 " key={index}>
               <div className="embla__slide__number shadow-xl border-2 px-2 overflow-hidden  border-lovely flex flex-col text-center justify-center gap-4 rounded-2xl bg-creamey text-lovely h-full">
                 <Image
+                  unoptimized
                   src={slide.image}
                   className="aspect-auto"
                   width={180}

@@ -37,6 +37,7 @@ const HeroSection = () => {
           </div>
           <div className="absolute -bottom-[5vh] -left-[5vw] sm:-left-[4vw] lg:-left-[2vw]">
             <Image
+              unoptimized
               className="-rotate-12"
               width={50}
               height={50}
@@ -46,6 +47,7 @@ const HeroSection = () => {
           </div>
           <div className="absolute rotate-12 -top-[5vh] right-[5vw] sm:right-[10vw] lg:right-[6vw]">
             <Image
+              unoptimized
               width={50}
               height={50}
               alt="ring"

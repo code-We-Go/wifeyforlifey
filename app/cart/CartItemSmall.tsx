@@ -105,6 +105,7 @@ const CartItemSmall = ({
           </div>
           <div className="relative min-w-[80px] min-h-[50px]">
             <Image
+              unoptimized
               width={80}
               height={80}
               src={item.imageUrl}

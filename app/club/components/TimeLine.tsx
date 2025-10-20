@@ -65,6 +65,7 @@ export const TimeLine = () => {
                 <div className="relative aspect-video  px-3 py-2 space-y-2  max-w-xs w-full text-lovely text-center">
                   <div className="relative  rounded-md w-full aspect-[9/6] border border-lovely">
                     <Image
+                      unoptimized
                       className="rounded-md object-cover"
                       src={item.image}
                       alt={item.title}
@@ -101,6 +102,7 @@ export const TimeLine = () => {
                 <div className="relative aspect-video  px-3 py-2 space-y-2  max-w-xs w-full text-lovely text-center">
                   <div className="relative rounded-md w-full aspect-[9/6] border border-lovely">
                     <Image
+                      unoptimized
                       className="rounded-md"
                       src={item.image}
                       alt={item.title}

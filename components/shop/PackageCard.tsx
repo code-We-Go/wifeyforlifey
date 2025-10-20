@@ -36,6 +36,7 @@ export default function PackageCard({
       onClick={handlePackageClick}
     >
       <Image
+        unoptimized
         width={80}
         height={50}
         className="absolute -top-5 -rotate-45 -left-5 z-20"
