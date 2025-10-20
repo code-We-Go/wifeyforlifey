@@ -19,7 +19,6 @@ import { Separator } from "@/components/ui/separator";
 import { VideoComment, VideoReply } from "@/app/interfaces/interfaces";
 import axios from "axios";
 // Configure axios with longer timeout to prevent timeout errors
-axios.defaults.timeout = 30000; // 30 seconds timeout
 import { formatDistanceToNow } from "date-fns";
 import mongoose from "mongoose";
 import {
@@ -29,6 +28,7 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+axios.defaults.timeout = 30000; // 30 seconds timeout
 
 interface CommentSectionProps {
   videoId: string;
