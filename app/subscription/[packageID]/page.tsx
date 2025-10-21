@@ -203,31 +203,31 @@ const SubscriptionPage = () => {
   const [showModal, setShowModal] = useState(false);
 
   // Package-specific modal content
-  //   const getModalContent = (packageId: string) => {
-  //     const packageContents = {
-  //       "687396821b4da119eb1c13fe": {
-  //         header: "Batch 2 is officially SOLD OUT!",
-  //         content: `Please note that this order is a pre-order, and your planner will be shipped starting October 16th.
+  const getModalContent = (packageId: string) => {
+    const packageContents = {
+      "687396821b4da119eb1c13fe": {
+        header: "Batch 2 is officially SOLD OUT!",
+        content: `Please note that this order is a pre-order, and your planner will be shipped starting October 16th.
 
-  // While you wait for your gehaz bestie to arrive, you can already enjoy:
-  // ✨ Wifey's curated playlists
-  // ✨ Exclusive partner discounts
-  // ✨ Access to supportive Wifey circles
+  While you wait for your gehaz bestie to arrive, you can already enjoy:
+  ✨ Wifey's curated playlists
+  ✨ Exclusive partner discounts
+  ✨ Access to supportive Wifey circles
 
-  // Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
-  //       },
-  //       "68bf6ae9c4d5c1af12cdcd37": {
-  //         header: "Batch 2 is officially SOLD OUT!",
-  //         content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting October 16th.
+  Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
+      },
+      "68bf6ae9c4d5c1af12cdcd37": {
+        header: "Batch 2 is officially SOLD OUT!",
+        content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting October 16th.
 
-  // After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey.
+  After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey.
 
-  // We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`,
-  //       },
-  //     };
+  We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`,
+      },
+    };
 
-  //     return packageContents[packageId as keyof typeof packageContents] || null;
-  //   };
+    return packageContents[packageId as keyof typeof packageContents] || null;
+  };
   const router = useRouter();
   const {
     items,
@@ -747,14 +747,14 @@ const SubscriptionPage = () => {
   }, [packageID]);
 
   // Show modal when package data is loaded for specific packages
-  // useEffect(() => {
-  //   if (packageData && packageID) {
-  //     const modalContent = getModalContent(packageID as string);
-  //     if (modalContent) {
-  //       setShowModal(true);
-  //     }
-  //   }
-  // }, [packageData, packageID]);
+  useEffect(() => {
+    if (packageData && packageID) {
+      const modalContent = getModalContent(packageID as string);
+      if (modalContent) {
+        setShowModal(true);
+      }
+    }
+  }, [packageData, packageID]);
 
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
