@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IInteraction extends Document {
   userId: mongoose.Types.ObjectId;
+  notifyUserId?: mongoose.Types.ObjectId;
+  broadcast: boolean;
   targetId: mongoose.Types.ObjectId;
   parentId?: mongoose.Types.ObjectId;
   parentType?: "video" | "blog";
@@ -20,6 +22,17 @@ const InteractionSchema = new Schema<IInteraction>(
       ref: "users",
       required: true,
       index: true,
+    },
+    notifyUserId: {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      required: false,
+      index: true,
+    },
+    broadcast: {
+      type: Boolean,
+      default: false,
+      required: false,
     },
     targetId: {
       type: Schema.Types.ObjectId,

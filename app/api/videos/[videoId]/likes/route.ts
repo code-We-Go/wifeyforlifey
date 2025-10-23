@@ -85,6 +85,8 @@ export async function POST(
         const { parentId, parentType } = await request.json();
         await InteractionsModel.create({
           userId: userId,
+          notifyUserId: "687ad92b77b0605a43c92401",
+          broadcast: false,
           targetId: videoId,
           targetType: "video",
           actionType: alreadyLiked ? "unlike" : "like",

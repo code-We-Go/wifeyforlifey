@@ -19,6 +19,10 @@ import {
   Percent,
   CirclePercent,
   Star,
+  Bell,
+  MessageCircle,
+  Reply,
+  User,
 } from "lucide-react";
 import { useEffect, useState, useContext } from "react";
 import { useSession } from "next-auth/react";
@@ -91,6 +95,108 @@ export default function AccountPage() {
     ILoyaltyTransaction[]
   >([]);
   const [loadingLoyalty, setLoadingLoyalty] = useState(false);
+  interface INotification {
+    _id: string;
+    userId: {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      imageURL?: string;
+    };
+    actionType: "like" | "comment" | "reply" | string;
+    targetType: string;
+    read: boolean;
+    createdAt: string;
+    content?: string;
+  }
+
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  // Helper functions for notifications
+  const formatNotificationDate = (dateString: string | Date): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)} days ago`;
+
+    return date.toLocaleDateString();
+  };
+
+  const getNotificationText = (notification: INotification): string => {
+    switch (notification.actionType) {
+      case "like":
+        return `liked your ${notification.targetType}`;
+      case "comment":
+        return `commented on your ${notification.targetType}`;
+      case "reply":
+        return `replied to your comment`;
+      default:
+        return `interacted with your ${notification.targetType}`;
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!session?.user?.id) return;
+    setLoadingNotifications(true);
+    try {
+      const response = await axios.get("/api/notifications");
+      setNotifications(response.data.notifications);
+      const unreadCount = response.data.notifications.filter(
+        (n: INotification) => !n.read
+      ).length;
+      setUnreadNotificationsCount(unreadCount);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load notifications",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      await axios.put("/api/notifications", { notificationId });
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification._id === notificationId
+            ? { ...notification, read: true }
+            : notification
+        )
+      );
+      // Update unread count
+      setUnreadNotificationsCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+  
+  const markAllNotificationsAsRead = async () => {
+    try {
+      await axios.put("/api/notifications", { markAll: true });
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notification) => ({ ...notification, read: true }))
+      );
+      // Reset unread count
+      setUnreadNotificationsCount(0);
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
 
   const fetchLoyaltyTransactions = async () => {
     if (!session?.user?.email) return;
@@ -116,6 +222,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (activeTab === "Loyality") {
       fetchLoyaltyTransactions();
+    } else if (activeTab === "notifications") {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, session]);
@@ -139,6 +246,7 @@ export default function AccountPage() {
     if (session?.user) {
       fetchUserData();
       fetchUserOrders();
+      fetchNotifications();
 
       // Check for fingerprint in sessionStorage for Google login tracking
       if (typeof window !== "undefined") {
@@ -441,6 +549,7 @@ export default function AccountPage() {
   const tabs = [
     { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "favorites", label: "Favorites", icon: Star },
+    { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
     { id: "wishlist", label: "Wishlist", icon: Heart },
@@ -547,14 +656,30 @@ export default function AccountPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.id === "notifications" && unreadNotificationsCount > 0) {
+                  markAllNotificationsAsRead();
+                }
+              }}
               className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-lovely text-lovely font-semibold"
                   : "border-transparent text-lovely/90 hover:text-lovely duration-300 hover:border-lovely"
               }`}
             >
-              <tab.icon className="h-4 w-4" />
+              <div className="relative">
+                <tab.icon className="h-4 w-4" />
+                {tab.id === "notifications" && unreadNotificationsCount > 0 && (
+                  <div className="absolute max-md:-left-2 pt-[2px] -top-2 md:-right-2 bg-lovely text-creamey text-xs rounded-full h-4 w-4 flex items-center text-center justify-center">
+                    <span>
+                      {unreadNotificationsCount > 9
+                        ? "9+"
+                        : unreadNotificationsCount}
+                    </span>
+                  </div>
+                )}
+              </div>
               <span>{tab.label}</span>
             </button>
           ))}
@@ -563,6 +688,131 @@ export default function AccountPage() {
 
       {/* Tab Content */}
       <div className="mt-6">
+        {activeTab === "notifications" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-lovely">
+                Notifications
+              </h2>
+            </div>
+            {loadingNotifications ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50 animate-pulse"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-1/4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-3/4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500">You have no notifications</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notifications.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Bell className="h-12 w-12 text-lovely mx-auto mb-4" />
+                    <p className="text-lovely">No notifications yet</p>
+                  </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      className={`border rounded-lg overflow-hidden ${
+                        notification.read ? "border-gray-200" : "border-lovely"
+                      }`}
+                    >
+                      <div className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3">
+                            <div className="relative">
+                              {notification.userId?.imageURL ? (
+                                <div className="relative ">
+                                  <div className="rounded-full w-10 h-10 overflow-hidden">
+                                    <Image
+                                      src={notification.userId.imageURL}
+                                      alt={
+                                        notification.userId?.firstName || "User"
+                                      }
+                                      width={40}
+                                      height={40}
+                                      className=""
+                                    />
+                                  </div>
+                                  <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                    {notification.actionType === "like" && (
+                                      <Heart className="h-3 w-3 text-white" />
+                                    )}
+                                    {notification.actionType === "comment" && (
+                                      <MessageCircle className="h-3 w-3 text-white" />
+                                    )}
+                                    {notification.actionType === "reply" && (
+                                      <Reply className="h-3 w-3 text-white" />
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="relative">
+                                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <User className="h-6 w-6 text-gray-500" />
+                                  </div>
+                                  <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                    {notification.actionType === "like" && (
+                                      <Heart className="h-3 w-3 text-white" />
+                                    )}
+                                    {notification.actionType === "comment" && (
+                                      <MessageCircle className="h-3 w-3 text-white" />
+                                    )}
+                                    {notification.actionType === "reply" && (
+                                      <Reply className="h-3 w-3 text-white" />
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-lovely font-medium">
+                                {notification.userId.firstName +
+                                  notification.userId.lastName}{" "}
+                                {getNotificationText(notification)}
+                              </p>
+                              {notification.content && (
+                                <p className="text-sm text-lovely/70 mt-1">
+                                  &quot;
+                                  {notification.content.length > 100
+                                    ? notification.content.substring(0, 100) +
+                                      "..."
+                                    : notification.content}
+                                  &quot;
+                                </p>
+                              )}
+                              <p className="text-xs text-lovely/60 mt-2">
+                                {formatNotificationDate(notification.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+                          {!notification.read && (
+                            <div className="h-2 w-2 rounded-full bg-lovely flex-shrink-0"></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}{" "}
+          </div>
+        )}
+
         {activeTab === "orders" && (
           <div>
             <div className="flex items-center justify-between mb-4">

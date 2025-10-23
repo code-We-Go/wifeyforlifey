@@ -54,20 +54,22 @@ export async function GET(
     const commentsWithUserDetails = (videoData.comments || []).map(
       (comment: any) => {
         const userData = comment.userId || {};
-        
+
         // Process replies to add user details
-        const repliesWithUserDetails = (comment.replies || []).map((reply: any) => {
-          const replyUserData = reply.userId || {};
-          return {
-            ...reply,
-            userImage: replyUserData.imageURL || "",
-            firstName: replyUserData.firstName || "",
-            lastName: replyUserData.lastName || "",
-            // Keep userId as a string reference for backward compatibility
-            userId: reply.userId?._id?.toString() || reply.userId,
-          };
-        });
-        
+        const repliesWithUserDetails = (comment.replies || []).map(
+          (reply: any) => {
+            const replyUserData = reply.userId || {};
+            return {
+              ...reply,
+              userImage: replyUserData.imageURL || "",
+              firstName: replyUserData.firstName || "",
+              lastName: replyUserData.lastName || "",
+              // Keep userId as a string reference for backward compatibility
+              userId: reply.userId?._id?.toString() || reply.userId,
+            };
+          }
+        );
+
         return {
           ...comment,
           userImage: userData.imageURL || "",
@@ -168,6 +170,8 @@ export async function POST(
     // Record the interaction for admin dashboard and notifications
     await InteractionsModel.create({
       userId: user._id,
+      notifyUserId: "687ad92b77b0605a43c92401",
+      broadcast: false,
       targetId: videoId,
       targetType: "video",
       actionType: "comment",

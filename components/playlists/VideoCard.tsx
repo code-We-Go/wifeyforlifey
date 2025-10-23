@@ -14,7 +14,6 @@ export default function VideoCard({ playlist }: VideoCardProps) {
       <div className="video-card  group border border-lovely">
         <div className="relative aspect-video overflow-hidden rounded-t-lg">
           <Image
-            unoptimized
             src={playlist.thumbnailUrl}
             alt={playlist.title}
             fill
