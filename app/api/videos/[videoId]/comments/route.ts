@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
+import playlistModel from "@/app/modals/playlistModel";
 import { ConnectDB } from "@/app/config/db";
 import { VideoComment } from "@/app/interfaces/interfaces";
 
@@ -53,6 +54,7 @@ export async function GET(
     const videoData = video as any; // Type assertion to access comments
     const commentsWithUserDetails = (videoData.comments || []).map(
       (comment: any) => {
+        console.log("commentID" + comment._id);
         const userData = comment.userId || {};
 
         // Process replies to add user details
@@ -167,6 +169,20 @@ export async function POST(
     const createdComment =
       updatedVideo.comments[updatedVideo.comments.length - 1];
 
+    // Find the playlist that contains this video
+    const findPlaylistByVideoId = async (videoId: string) => {
+      try {
+        const playlist = await playlistModel.findOne({ videos: videoId });
+        return playlist?._id || null;
+      } catch (error) {
+        console.error("Error finding playlist by video ID:", error);
+        return null;
+      }
+    };
+
+    // Get the playlist ID for this video
+    const playlistId = await findPlaylistByVideoId(videoId);
+
     // Record the interaction for admin dashboard and notifications
     await InteractionsModel.create({
       userId: user._id,
@@ -174,6 +190,7 @@ export async function POST(
       broadcast: false,
       targetId: videoId,
       targetType: "video",
+      link: `${process.env.baseUrl}playlists/${playlistId}?videoId=${videoId}#${createdComment._id}`,
       actionType: "comment",
       content: text.trim(),
       read: false,

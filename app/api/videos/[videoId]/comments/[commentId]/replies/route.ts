@@ -5,6 +5,7 @@ import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
+import playlistModel from "@/app/modals/playlistModel";
 
 // POST - Add a reply to a comment
 export async function POST(
@@ -81,10 +82,23 @@ export async function POST(
 
     // Get the newly added reply with its ID from the database
     const savedReply = comment.replies[comment.replies.length - 1];
+    const findPlaylistByVideoId = async (videoId: string) => {
+      try {
+        const playlist = await playlistModel.findOne({ videos: videoId });
+        return playlist?._id || null;
+      } catch (error) {
+        console.error("Error finding playlist by video ID:", error);
+        return null;
+      }
+    };
 
+    // Get the playlist ID for this video
+    const playlistId = await findPlaylistByVideoId(videoId);
     // Record the reply interaction
     // const { parentId, parentType } = await request.json();
     await InteractionsModel.create({
+      notifyUserId: comment.userId,
+      link: `${process.env.baseUrl}playlists/${playlistId}?videoId=${videoId}#${commentId}`,
       userId: session.user.id,
       targetId: commentId,
       targetType: "comment",

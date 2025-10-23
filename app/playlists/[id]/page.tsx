@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,9 +15,14 @@ import { useSession } from "next-auth/react";
 import { thirdFont } from "@/fonts";
 import VdoPlayer from "./components/VdoPlayer";
 import CommentSection from "@/components/video/CommentSection";
+import LoadingSpinner from "@/app/checkout/components/LoadingSpinner";
 
 export default function PlaylistPage() {
   const params = useParams();
+  const searchParams = new URLSearchParams(
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+  const videoIdParam = searchParams.get("videoId");
   const router = useRouter();
   const playlistId = params.id as string;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -88,9 +93,31 @@ export default function PlaylistPage() {
       console.log("Playlist data:", res.data);
       setPlaylist(res.data.data);
 
-      // Set the first video as selected if available
+      // Check if we have a videoId in the URL params
       if (res.data.data.videos && res.data.data.videos.length > 0) {
-        setSelectedVideo(res.data.data.videos[0]);
+        if (videoIdParam) {
+          // Find the video with the matching ID
+          const videoIndex = res.data.data.videos.findIndex(
+            (video: any) => video._id === videoIdParam
+          );
+          if (videoIndex !== -1) {
+            // Set the found video as selected and update current index
+            setSelectedVideo(res.data.data.videos[videoIndex]);
+            setCurrentIndex(videoIndex);
+            console.log(
+              `Selected video by ID: ${videoIdParam} at index ${videoIndex}`
+            );
+          } else {
+            // If video not found, default to first video
+            setSelectedVideo(res.data.data.videos[0]);
+            console.log(
+              `Video ID ${videoIdParam} not found, defaulting to first video`
+            );
+          }
+        } else {
+          // No videoId param, default to first video
+          setSelectedVideo(res.data.data.videos[0]);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching playlist:", error);
@@ -377,14 +404,16 @@ export default function PlaylistPage() {
                     onMouseEnter={handleVideoMouseEnter}
                     onMouseLeave={handleVideoMouseLeave}
                   >
-                    <VdoPlayer
-                      otp={otp}
-                      playbackInfo={playbackInfo}
-                      autoplay={currentIndex === 0 ? false : true}
-                      muted={false}
-                      volume={0.8}
-                      onVideoEnd={handleVideoEnd}
-                    />
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <VdoPlayer
+                        otp={otp}
+                        playbackInfo={playbackInfo}
+                        autoplay={currentIndex === 0 ? false : true}
+                        muted={false}
+                        volume={0.8}
+                        onVideoEnd={handleVideoEnd}
+                      />
+                    </Suspense>
                     {/* Navigation buttons - positioned to avoid video controls */}
                     <div
                       className={`absolute top-[45%] left-4 right-4 flex justify-between items-center transition-opacity duration-300 pointer-events-none ${
@@ -486,6 +515,11 @@ export default function PlaylistPage() {
                         if (videoIndex !== -1) {
                           setCurrentIndex(videoIndex);
                           setSelectedVideo(video);
+                          
+                          // Update URL search parameters
+                          const url = new URL(window.location.href);
+                          url.searchParams.set('videoId', video._id);
+                          window.history.pushState({}, '', url.toString());
                         }
                       }}
                     >

@@ -5,6 +5,7 @@ import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
+import playlistModel from "@/app/modals/playlistModel";
 
 // POST - Like/Unlike a reply
 export async function POST(
@@ -101,7 +102,21 @@ export async function POST(
 
     // Record the interaction
     const { parentId, parentType } = await request.json();
+    const findPlaylistByVideoId = async (videoId: string) => {
+      try {
+        const playlist = await playlistModel.findOne({ videos: videoId });
+        return playlist?._id || null;
+      } catch (error) {
+        console.error("Error finding playlist by video ID:", error);
+        return null;
+      }
+    };
+
+    // Get the playlist ID for this video
+    const playlistId = await findPlaylistByVideoId(videoId);
     await InteractionsModel.create({
+      notifyUserId: comment.userId,
+      link: `${process.env.baseUrl}playlists/${playlistId}?videoId=${videoId}#${commentId}`,
       userId: userId,
       targetId: replyId,
       targetType: "reply",

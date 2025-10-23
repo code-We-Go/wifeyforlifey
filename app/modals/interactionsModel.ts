@@ -10,6 +10,7 @@ export interface IInteraction extends Document {
   replyId?: mongoose.Types.ObjectId;
   targetType: "video" | "comment" | "reply";
   actionType: "like" | "unlike" | "comment" | "reply";
+  link: string;
   content?: string; // For comments/replies
   read: boolean; // For notification tracking
   createdAt: Date;
@@ -38,6 +39,10 @@ const InteractionSchema = new Schema<IInteraction>(
       type: Schema.Types.ObjectId,
       required: true,
       index: true,
+    },
+    link: {
+      type: String,
+      required: false,
     },
     targetType: {
       type: String,

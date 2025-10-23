@@ -45,6 +45,7 @@ import { compressImage } from "@/utils/imageCompression";
 import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
+import Link from "next/link";
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -103,6 +104,7 @@ export default function AccountPage() {
       lastName: string;
       imageURL?: string;
     };
+    link: string;
     actionType: "like" | "comment" | "reply" | string;
     targetType: string;
     read: boolean;
@@ -183,7 +185,7 @@ export default function AccountPage() {
       console.error("Error marking notification as read:", error);
     }
   };
-  
+
   const markAllNotificationsAsRead = async () => {
     try {
       await axios.put("/api/notifications", { markAll: true });
@@ -658,7 +660,10 @@ export default function AccountPage() {
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id);
-                if (tab.id === "notifications" && unreadNotificationsCount > 0) {
+                if (
+                  tab.id === "notifications" &&
+                  unreadNotificationsCount > 0
+                ) {
                   markAllNotificationsAsRead();
                 }
               }}
@@ -724,89 +729,157 @@ export default function AccountPage() {
                     <p className="text-lovely">No notifications yet</p>
                   </div>
                 ) : (
-                  notifications.map((notification) => (
-                    <div
-                      key={notification._id}
-                      className={`border rounded-lg overflow-hidden ${
-                        notification.read ? "border-gray-200" : "border-lovely"
-                      }`}
-                    >
-                      <div className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <div className="relative">
-                              {notification.userId?.imageURL ? (
-                                <div className="relative ">
-                                  <div className="rounded-full w-10 h-10 overflow-hidden">
-                                    <Image
-                                      src={notification.userId.imageURL}
-                                      alt={
-                                        notification.userId?.firstName || "User"
-                                      }
-                                      width={40}
-                                      height={40}
-                                      className=""
-                                    />
-                                  </div>
-                                  <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
-                                    {notification.actionType === "like" && (
-                                      <Heart className="h-3 w-3 text-white" />
-                                    )}
-                                    {notification.actionType === "comment" && (
-                                      <MessageCircle className="h-3 w-3 text-white" />
-                                    )}
-                                    {notification.actionType === "reply" && (
-                                      <Reply className="h-3 w-3 text-white" />
-                                    )}
-                                  </div>
-                                </div>
-                              ) : (
+                  notifications.map((notification) => {
+                    // Create a wrapper component based on whether there's a link
+                    const NotificationWrapper = ({
+                      children,
+                    }: {
+                      children: React.ReactNode;
+                    }) => {
+                      // Function to mark notification as read when clicked
+                      const handleNotificationClick = async () => {
+                        if (!notification.read) {
+                          try {
+                            // Mark notification as read
+                            const response = await fetch(
+                              `/api/notifications/${notification._id}/read`,
+                              {
+                                method: "PUT",
+                              }
+                            );
+
+                            if (response.ok) {
+                              // Update UI to show notification as read
+                              setNotifications((prev) =>
+                                prev.map((n) =>
+                                  n._id === notification._id
+                                    ? { ...n, read: true }
+                                    : n
+                                )
+                              );
+                            }
+                          } catch (error) {
+                            console.error(
+                              "Error marking notification as read:",
+                              error
+                            );
+                          }
+                        }
+                      };
+
+                      if (notification.link) {
+                        console.log("link" + notification.link);
+                        return (
+                          <Link
+                            href={notification.link}
+                            onClick={handleNotificationClick}
+                            className="block cursor-pointer hover:bg-gray-50 transition-colors"
+                          >
+                            {children}
+                          </Link>
+                        );
+                      }
+
+                      return <div>{children}</div>;
+                    };
+
+                    return (
+                      <div
+                        key={notification._id}
+                        className={`border rounded-lg overflow-hidden ${
+                          notification.read
+                            ? "border-gray-200"
+                            : "border-lovely"
+                        }`}
+                      >
+                        <NotificationWrapper>
+                          <div className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-3">
                                 <div className="relative">
-                                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <User className="h-6 w-6 text-gray-500" />
-                                  </div>
-                                  <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
-                                    {notification.actionType === "like" && (
-                                      <Heart className="h-3 w-3 text-white" />
-                                    )}
-                                    {notification.actionType === "comment" && (
-                                      <MessageCircle className="h-3 w-3 text-white" />
-                                    )}
-                                    {notification.actionType === "reply" && (
-                                      <Reply className="h-3 w-3 text-white" />
-                                    )}
-                                  </div>
+                                  {notification.userId?.imageURL ? (
+                                    <div className="relative ">
+                                      <div className="rounded-full w-10 h-10 overflow-hidden">
+                                        <Image
+                                          src={notification.userId.imageURL}
+                                          alt={
+                                            notification.userId?.firstName ||
+                                            "User"
+                                          }
+                                          width={40}
+                                          height={40}
+                                          className=""
+                                        />
+                                      </div>
+                                      <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                        {notification.actionType === "like" && (
+                                          <Heart className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "comment" && (
+                                          <MessageCircle className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "reply" && (
+                                          <Reply className="h-3 w-3 text-white" />
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="relative">
+                                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <User className="h-6 w-6 text-gray-500" />
+                                      </div>
+                                      <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                        {notification.actionType === "like" && (
+                                          <Heart className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "comment" && (
+                                          <MessageCircle className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "reply" && (
+                                          <Reply className="h-3 w-3 text-white" />
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
+                                <div>
+                                  <p className="text-lovely font-medium">
+                                    {notification.userId.firstName +
+                                      notification.userId.lastName}{" "}
+                                    {getNotificationText(notification)}
+                                  </p>
+                                  {notification.content && (
+                                    <p className="text-sm text-lovely/70 mt-1">
+                                      &quot;
+                                      {notification.content.length > 100
+                                        ? notification.content.substring(
+                                            0,
+                                            100
+                                          ) + "..."
+                                        : notification.content}
+                                      &quot;
+                                    </p>
+                                  )}
+                                  <p className="text-xs text-lovely/60 mt-2">
+                                    {formatNotificationDate(
+                                      notification.createdAt
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              {!notification.read && (
+                                <div className="h-2 w-2 rounded-full bg-lovely flex-shrink-0"></div>
                               )}
-                            </div>
-                            <div>
-                              <p className="text-lovely font-medium">
-                                {notification.userId.firstName +
-                                  notification.userId.lastName}{" "}
-                                {getNotificationText(notification)}
-                              </p>
-                              {notification.content && (
-                                <p className="text-sm text-lovely/70 mt-1">
-                                  &quot;
-                                  {notification.content.length > 100
-                                    ? notification.content.substring(0, 100) +
-                                      "..."
-                                    : notification.content}
-                                  &quot;
-                                </p>
-                              )}
-                              <p className="text-xs text-lovely/60 mt-2">
-                                {formatNotificationDate(notification.createdAt)}
-                              </p>
                             </div>
                           </div>
-                          {!notification.read && (
-                            <div className="h-2 w-2 rounded-full bg-lovely flex-shrink-0"></div>
-                          )}
-                        </div>
+                        </NotificationWrapper>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}{" "}
