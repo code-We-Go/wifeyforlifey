@@ -138,10 +138,12 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           commentElement.classList.add("duration-1000");
 
           // Remove highlight after a few seconds
-          setTimeout(() => {
-            commentElement.classList.remove("bg-pink-200");
-          }, 3000);
-
+          if (commentElement != null) {
+            const element = commentElement; // Capture the non-null value
+            setTimeout(() => {
+              element.classList.remove("bg-pink-100");
+            }, 3000);
+          }
           return true; // Successfully found and scrolled
         } else if (retryCount < maxRetries) {
           // Element not found yet, retry after a delay
