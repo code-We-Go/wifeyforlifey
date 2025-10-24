@@ -98,7 +98,7 @@ export async function POST(
         const playlistId = await findPlaylistByVideoId(videoId);
         await InteractionsModel.create({
           userId: userId,
-          notifyUserId: "687ad92b77b0605a43c92401",
+          notifyUserId: "685ae0dbe9a01f25818f9830",
           broadcast: false,
           link: `${process.env.baseUrl}playlists/${playlistId}?videoId=${videoId}`,
           targetId: videoId,

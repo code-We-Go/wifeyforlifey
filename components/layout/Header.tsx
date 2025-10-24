@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useContext } from "react";
 import { useCart } from "@/providers/CartProvider";
+import { INotification } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
 
 import {
@@ -25,6 +26,9 @@ import {
   Settings,
   LogOut,
   BookOpenText,
+  Bell,
+  MessageCircle,
+  Reply,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,11 +37,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { thirdFont } from "@/fonts";
 import { useAuth } from "@/hooks/useAuth";
-import axios from "axios";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -74,12 +83,85 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { totalItems } = useCart();
   const { wishList } = useContext(wishListContext);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = async () => {
+    if (!isAuthenticated) return;
+    setLoadingNotifications(true);
+    try {
+      const response = await fetch("/api/notifications");
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+
+        // Check if there are any unread notifications
+        const hasUnread = data.notifications.some(
+          (notification: { read: boolean }) => !notification.read
+        );
+        setHasUnreadNotifications(hasUnread);
+        
+        // Count unread notifications
+        const count = data.notifications.filter((notification: { read: boolean }) => !notification.read).length;
+        setUnreadCount(count);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+  
+  // Function to mark all notifications as read
+  const markAllNotificationsAsRead = async () => {
+    try {
+      const response = await fetch("/api/notifications", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ markAll: true }),
+      });
+      
+      if (response.ok) {
+        // Update local state
+        setNotifications(prevNotifications => 
+          prevNotifications.map((notification: any) => ({
+            ...notification,
+            read: true
+          }))
+        );
+        setHasUnreadNotifications(false);
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
+  // Fetch notifications on component mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [isAuthenticated]);
+
+  // Fetch notifications when modal opens
+  useEffect(() => {
+    if (isNotificationsOpen && isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [isNotificationsOpen, isAuthenticated]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -396,6 +478,7 @@ export default function Header() {
                       <ShoppingBag className="h-5 w-5" />
                       <span>Cart</span>
                     </Link>
+
                     <Link
                       href="/wishlist"
                       className="flex items-center space-x-2"
@@ -404,6 +487,7 @@ export default function Header() {
                       <Heart className={cn("h-5 w-5")} />
                       <span>Wishlist</span>
                     </Link>
+
                     <Link
                       href="/account"
                       className="flex items-center space-x-2"
@@ -439,9 +523,30 @@ export default function Header() {
               />
             </Link>
             <div className="mr-2 gap-4 flex">
-              <Link href={"/wishlist"}>
-                <Heart />
-              </Link>
+              {isAuthenticated ? (
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => {
+                    // Mark all notifications as read
+                    if (unreadCount > 0) {
+                      markAllNotificationsAsRead();
+                    }
+                    // Open the notifications modal
+                    setIsNotificationsOpen(true);
+                  }}
+                >
+                  <Bell className="text-creamey" />
+                  {unreadCount > 0 && (
+                    <div className="absolute -top-1 -left-2 bg-creamey rounded-full w-5 h-5 border text-lovely border-lovely flex items-center justify-center text-xs font-bold">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link href={"/wishlist"}>
+                  <Heart />
+                </Link>
+              )}
               <Link href={"/cart"}>
                 <ShoppingBag />
               </Link>
@@ -459,6 +564,177 @@ export default function Header() {
           </div>
         </div>
       </div>
+      {/* Notifications Modal */}
+      <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lovely">Notifications</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto">
+            {loadingNotifications ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50 animate-pulse"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-1/4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-3/4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500">You have no notifications</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification._id}
+                    className={`border rounded-lg overflow-hidden ${
+                      notification.read ? "border-gray-200" : "border-lovely"
+                    } cursor-pointer hover:bg-gray-100 transition-colors`}
+                    onClick={async () => {
+                      // Mark notification as read if it's not already
+                      if (!notification.read) {
+                        try {
+                          const response = await fetch(
+                            `/api/notifications/${notification._id}/read`,
+                            {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                            }
+                          );
+
+                          if (response.ok) {
+                            // Update local state to mark as read
+                            setNotifications(
+                              notifications.map((n) =>
+                                n._id === notification._id
+                                  ? { ...n, read: true }
+                                  : n
+                              )
+                            );
+
+                            // Update unread status if needed
+                            const stillHasUnread = notifications.some(
+                              (n) => n._id !== notification._id && !n.read
+                            );
+                            setHasUnreadNotifications(stillHasUnread);
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error marking notification as read:",
+                            error
+                          );
+                        }
+                      }
+
+                      // Close the modal
+                      setIsNotificationsOpen(false);
+
+                      // Navigate to the link
+                      if (notification.link) {
+                        // Simple navigation without hash
+                        router.push(notification.link);
+                      }
+                    }}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3">
+                          <div className="relative">
+                            {notification.userId?.imageURL ? (
+                              <div className="relative">
+                                <div className="rounded-full w-10 h-10 overflow-hidden">
+                                  <Image
+                                    src={notification.userId.imageURL}
+                                    alt={
+                                      notification.userId?.firstName || "User"
+                                    }
+                                    width={40}
+                                    height={40}
+                                  />
+                                </div>
+                                <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                  {notification.actionType === "like" && (
+                                    <Heart className="h-3 w-3 text-white" />
+                                  )}
+                                  {notification.actionType === "comment" && (
+                                    <MessageCircle className="h-3 w-3 text-white" />
+                                  )}
+                                  {notification.actionType === "reply" && (
+                                    <Reply className="h-3 w-3 text-white" />
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                  <User className="h-6 w-6 text-gray-500" />
+                                </div>
+                                <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                  {notification.actionType === "like" && (
+                                    <Heart className="h-3 w-3 text-white" />
+                                  )}
+                                  {notification.actionType === "comment" && (
+                                    <MessageCircle className="h-3 w-3 text-white" />
+                                  )}
+                                  {notification.actionType === "reply" && (
+                                    <Reply className="h-3 w-3 text-white" />
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-lovely font-medium">
+                              {notification.userId?.firstName}{" "}
+                              {notification.userId?.lastName}{" "}
+                              {notification.actionType === "like" &&
+                                "liked your comment"}
+                              {notification.actionType === "comment" &&
+                                "commented on your video"}
+                              {notification.actionType === "reply" &&
+                                "replied to your comment"}
+                            </p>
+                            {notification.content && (
+                              <p className="text-sm text-lovely/70 mt-1">
+                                &quot;
+                                {notification.content.length > 100
+                                  ? notification.content.substring(0, 100) +
+                                    "..."
+                                  : notification.content}
+                                &quot;
+                              </p>
+                            )}
+                            <p className="text-xs text-lovely/60 mt-2">
+                              {new Date(
+                                notification.createdAt
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        {!notification.read && (
+                          <div className="h-2 w-2 rounded-full bg-lovely flex-shrink-0"></div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

@@ -358,3 +358,18 @@ export interface ILoyaltyBonus {
   bonusPoints: number;
   active: boolean;
 }
+export interface INotification {
+  _id: string;
+  userId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    imageURL?: string;
+  };
+  link: string;
+  actionType: "like" | "comment" | "reply" | string;
+  targetType: string;
+  read: boolean;
+  createdAt: string;
+  content?: string;
+}

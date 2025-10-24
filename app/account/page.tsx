@@ -38,7 +38,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import CartItemSmall from "../cart/CartItemSmall";
 import { useAuth } from "@/hooks/useAuth";
-import { ILoyaltyTransaction, IOrder } from "../interfaces/interfaces";
+import {
+  ILoyaltyTransaction,
+  IOrder,
+  INotification,
+} from "../interfaces/interfaces";
 import { useCart } from "@/providers/CartProvider";
 import { UploadDropzone } from "@/utils/uploadthing";
 import { compressImage } from "@/utils/imageCompression";
@@ -96,21 +100,6 @@ export default function AccountPage() {
     ILoyaltyTransaction[]
   >([]);
   const [loadingLoyalty, setLoadingLoyalty] = useState(false);
-  interface INotification {
-    _id: string;
-    userId: {
-      _id: string;
-      firstName: string;
-      lastName: string;
-      imageURL?: string;
-    };
-    link: string;
-    actionType: "like" | "comment" | "reply" | string;
-    targetType: string;
-    read: boolean;
-    createdAt: string;
-    content?: string;
-  }
 
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);

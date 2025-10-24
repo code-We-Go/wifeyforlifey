@@ -186,7 +186,7 @@ export async function POST(
     // Record the interaction for admin dashboard and notifications
     await InteractionsModel.create({
       userId: user._id,
-      notifyUserId: "687ad92b77b0605a43c92401",
+      notifyUserId: "685ae0dbe9a01f25818f9830",
       broadcast: false,
       targetId: videoId,
       targetType: "video",
