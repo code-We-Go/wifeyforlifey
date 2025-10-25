@@ -110,9 +110,11 @@ export default function Header() {
           (notification: { read: boolean }) => !notification.read
         );
         setHasUnreadNotifications(hasUnread);
-        
+
         // Count unread notifications
-        const count = data.notifications.filter((notification: { read: boolean }) => !notification.read).length;
+        const count = data.notifications.filter(
+          (notification: { read: boolean }) => !notification.read
+        ).length;
         setUnreadCount(count);
       }
     } catch (error) {
@@ -121,7 +123,7 @@ export default function Header() {
       setLoadingNotifications(false);
     }
   };
-  
+
   // Function to mark all notifications as read
   const markAllNotificationsAsRead = async () => {
     try {
@@ -132,13 +134,13 @@ export default function Header() {
         },
         body: JSON.stringify({ markAll: true }),
       });
-      
+
       if (response.ok) {
         // Update local state
-        setNotifications(prevNotifications => 
+        setNotifications((prevNotifications) =>
           prevNotifications.map((notification: any) => ({
             ...notification,
-            read: true
+            read: true,
           }))
         );
         setHasUnreadNotifications(false);
@@ -566,7 +568,7 @@ export default function Header() {
       </div>
       {/* Notifications Modal */}
       <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-creamey">
           <DialogHeader>
             <DialogTitle className="text-lovely">Notifications</DialogTitle>
           </DialogHeader>

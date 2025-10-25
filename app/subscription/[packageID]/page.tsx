@@ -206,7 +206,7 @@ const SubscriptionPage = () => {
   const getModalContent = (packageId: string) => {
     const packageContents = {
       "687396821b4da119eb1c13fe": {
-        header: "Batch 2 is officially SOLD OUT!",
+        header: "Batch 3 is officially SOLD OUT!",
         content: `Please note that this order is a pre-order, and your planner will be shipped starting November 10th.
 
   While you wait for your gehaz bestie to arrive, you can already enjoy:
@@ -217,7 +217,7 @@ const SubscriptionPage = () => {
   Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
       "68bf6ae9c4d5c1af12cdcd37": {
-        header: "Batch 2 is officially SOLD OUT!",
+        header: "Batch 3 is officially SOLD OUT!",
         content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting November 10th.
 
   After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey.
@@ -348,7 +348,7 @@ const SubscriptionPage = () => {
     lastName: "",
     address: "",
     apartment: "",
-    postalZip: "",
+    postalZip: "0000",
     city: "",
     cart: items,
     phone: "",
@@ -378,7 +378,7 @@ const SubscriptionPage = () => {
     billingState: bostaLocation.city?._id || "",
     billingAddress: "",
     billingApartment: "",
-    billingPostalZip: "",
+    billingPostalZip: "0000",
     billingCity: "",
     billingPhone: "",
     billingWhatsAppNumber: "", // Added billing WhatsApp number field
@@ -1228,7 +1228,7 @@ const SubscriptionPage = () => {
               />
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-2">
-              <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
+              {/* <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
                     Postal/Zip code
@@ -1253,9 +1253,9 @@ const SubscriptionPage = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </div> */}
 
-              <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
+              <div className="flex flex-col w-full   gap-2 ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
                     City
@@ -1266,7 +1266,7 @@ const SubscriptionPage = () => {
                       name="city"
                       value={formData.city}
                       type="text"
-                      className={`border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base ${
+                      className={` w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base ${
                         formErrors.city ? "border-red-500" : ""
                       }`}
                     />
@@ -1550,7 +1550,7 @@ const SubscriptionPage = () => {
                   />
                 </div>
                 <div className="flex w-full gap-2">
-                  <div className="flex w-full gap-2 md:w-3/5 items-center">
+                  {/* <div className="flex w-full gap-2 md:w-3/5 items-center">
                     <label className="text-lovely">
                       Postal/Zip code (Optional)
                     </label>
@@ -1565,9 +1565,9 @@ const SubscriptionPage = () => {
                       type="text"
                       className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2  px-2 text-base"
                     />
-                  </div>
+                  </div> */}
 
-                  <div className="flex w-full  md:w-2/5 gap-2 items-center">
+                  <div className="flex w-full  gap-2 items-center">
                     <label className="text-lovely">City</label>
                     <input
                       onChange={handleInputChange}
