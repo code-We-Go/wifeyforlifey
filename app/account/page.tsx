@@ -24,9 +24,9 @@ import {
   Reply,
   User,
 } from "lucide-react";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, Suspense } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
@@ -51,12 +51,21 @@ import FavoritesGrid from "./favorites/FavoritesGrid";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
 
-export default function AccountPage() {
+const AccountPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get('tab') || "partners";
 
-  const [activeTab, setActiveTab] = useState("partners");
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  
+  // Set the default tab in URL on initial load if not already present
+  useEffect(() => {
+    if (!searchParams.get('tab')) {
+      router.push(`/account?tab=${activeTab}`, { scroll: false });
+    }
+  }, []);
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
@@ -649,6 +658,8 @@ export default function AccountPage() {
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id);
+                // Update URL with the new tab
+                router.push(`/account?tab=${tab.id}`, { scroll: false });
                 if (
                   tab.id === "notifications" &&
                   unreadNotificationsCount > 0
@@ -1674,5 +1685,13 @@ export default function AccountPage() {
         </div>
       )}
     </div>
+  );
+};
+
+export default function AccountPageWithSuspense(props: any) {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <AccountPage {...props} />
+    </Suspense>
   );
 }

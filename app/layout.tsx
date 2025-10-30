@@ -15,6 +15,7 @@ import { ModalProvider } from "./context/ModalContext";
 import ProductModal from "@/components/shop/ProductModal";
 import { AnnouncementProvider } from "../context/announcementContext";
 import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
+import DiscountPopup from "@/components/DiscountPopup";
 import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({
@@ -80,7 +81,8 @@ export default function RootLayout({
                         <Footer />
                       </div>
                       <ProductModal />
-                      {/* <DiscountPopup /> */}
+
+                      <DiscountPopup />
                       <Toaster />
                     </ModalProvider>
                   </AnnouncementProvider>
