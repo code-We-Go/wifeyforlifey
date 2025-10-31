@@ -101,11 +101,11 @@ export async function POST(
           notifyUserId: "685ae0dbe9a01f25818f9830",
           broadcast: false,
           link: `${process.env.baseUrl}blogs/${slug}`,
-          targetId: slug,
+          targetId: parentId,
           targetType: "blog",
           actionType: alreadyLiked ? "unlike" : "like",
-          parentId: parentId || slug,
-          parentType: parentType || "blog",
+          parentId: parentId,
+          parentType: "blog",
           read: false,
         });
 
