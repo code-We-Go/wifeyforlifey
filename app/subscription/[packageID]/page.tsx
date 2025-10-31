@@ -747,14 +747,14 @@ const SubscriptionPage = () => {
   }, [packageID]);
 
   // Show modal when package data is loaded for specific packages
-  useEffect(() => {
-    if (packageData && packageID) {
-      const modalContent = getModalContent(packageID as string);
-      if (modalContent) {
-        setShowModal(true);
-      }
-    }
-  }, [packageData, packageID]);
+  // useEffect(() => {
+  //   if (packageData && packageID) {
+  //     const modalContent = getModalContent(packageID as string);
+  //     if (modalContent) {
+  //       setShowModal(true);
+  //     }
+  //   }
+  // }, [packageData, packageID]);
 
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
