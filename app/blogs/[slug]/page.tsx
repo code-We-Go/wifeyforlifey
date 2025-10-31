@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { thirdFont } from "@/fonts";
 import Image from "next/image";
+import BlogsCommentSection from "../components/BlogsCommentsSection";
 
 interface Blog {
   _id: string;
@@ -262,8 +263,8 @@ const BlogDetailPage = () => {
               <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
               <span>•</span>
               <span>{blog.readingTime} min read</span>
-              <span>•</span>
-              <span>{blog.viewCount} views</span>
+              {/* <span>•</span>
+              <span>{blog.viewCount} views</span> */}
             </div>
           </div>
 
@@ -460,6 +461,8 @@ const BlogDetailPage = () => {
             </div>
           </div>
         )}
+
+        <BlogsCommentSection slug={blog.slug} blogId={blog._id} />
 
         {/* Related Posts */}
         {relatedBlogs.length > 0 && (

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { CommentUser } from "../interfaces/interfaces";
 
 // Define the Blog interface
 export interface IBlog extends Document {
@@ -18,6 +19,7 @@ export interface IBlog extends Document {
   publishedAt?: Date;
   viewCount: number;
   featured: boolean;
+  likes: CommentUser[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +59,8 @@ const BlogSchema = new Schema<IBlog>(
       type: String,
       required: false,
     },
+    likes: [{ type: Schema.Types.ObjectId, ref: "users" }], // Array of user references who liked the video
+
     // author: {
     //   type: mongoose.Schema.Types.ObjectId,
     //   ref: "users",
@@ -146,11 +150,11 @@ BlogSchema.pre("save", function (next) {
 });
 
 // Virtual for reading time estimation (assuming 200 words per minute)
-BlogSchema.virtual("readingTime").get(function () {
-  const wordCount = this.content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-  const readingTime = Math.ceil(wordCount / 200);
-  return readingTime;
-});
+// BlogSchema.virtual("readingTime").get(function () {
+//   const wordCount = this.content.replace(/<[^>]*>/g, "").split(/\s+/).length;
+//   const readingTime = Math.ceil(wordCount / 200);
+//   return readingTime;
+// });
 
 // Virtual for formatted publish date
 BlogSchema.virtual("formattedPublishDate").get(function () {
