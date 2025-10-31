@@ -63,7 +63,7 @@ export async function GET(req: Request) {
 
     // Get blogs with population
     const blogs = await BlogModel.find(searchQuery)
-      .select("title excerpt featuredImage categories tags")
+      .select("title excerpt slug featuredImage categories tags")
 
       .sort({ createdAt: -1 })
       .skip(skip)
