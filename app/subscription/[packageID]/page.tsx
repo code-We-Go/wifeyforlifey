@@ -1530,7 +1530,7 @@ const SubscriptionPage = () => {
                         ? formData.address
                         : formData.billingAddress
                     }
-                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                    className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full  gap-2 items-center">
