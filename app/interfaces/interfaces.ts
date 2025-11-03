@@ -133,14 +133,14 @@ export interface Collection {
   imageURL: string;
   products?: string[];
 }
-export interface SubCategory {
-  _id: string;
-  subCategoryName: string;
-  description: string;
-  categoryID: Category; // now a full object
-  createdAt?: string;
-  updatedAt?: string;
-}
+// export interface SubCategory {
+//   _id: string;
+//   subCategoryName: string;
+//   description: string;
+//   categoryID: Category; // now a full object
+//   createdAt?: string;
+//   updatedAt?: string;
+// }
 
 export interface Product {
   _id: string;

@@ -22,10 +22,11 @@ async function decreaseStock(cart: any[]) {
   for (const item of cart) {
     const product = await productsModel.findById(item.productId);
     if (!product) {
-      return NextResponse.json(
-        { error: `Product not found: ${item.productId}` },
-        { status: 404 }
+      console.log("note");
+      console.log(
+        `Product not found: ${item.productId}, but continuing execution`
       );
+      continue; // Skip this item but continue processing other items
     }
     console.log("productFound");
     // Find the variation with matching color
@@ -34,10 +35,10 @@ async function decreaseStock(cart: any[]) {
     );
 
     if (!variatiant) {
-      return NextResponse.json(
-        { error: ` variant not found: ${item.color}` },
-        { status: 404 }
+      console.log(
+        `Variant not found: ${item.variant.name}, but continuing execution`
       );
+      continue; // Skip this item but continue processing other items
     }
     console.log("variantFound");
     const attribute = variatiant.attributes.find(
@@ -50,12 +51,10 @@ async function decreaseStock(cart: any[]) {
     // Check if enough stock is available
     if (attribute?.stock < item.quantity) {
       console.log("stock problem");
-      return NextResponse.json(
-        {
-          error: `Insufficient stock for ${item.productID} )`,
-        },
-        { status: 400 }
+      console.log(
+        `Insufficient stock for ${item.productId}, but continuing execution`
       );
+      continue; // Skip this item but continue processing other items
     }
 
     // Decrease stock
@@ -87,7 +86,7 @@ export async function POST(request: Request) {
   if (data.cash === "cash") {
     console.log("BOSTACHECK" + data.bostaZone);
     try {
-      await decreaseStock(items); // <-- Decrease stock before order creation
+      // await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
       console.log("appliedDiscount" + data.appliedDiscount);
       const res = await ordersModel.create({

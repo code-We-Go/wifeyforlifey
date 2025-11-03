@@ -56,13 +56,13 @@ const AccountPage = () => {
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
   const searchParams = useSearchParams();
-  const defaultTab = searchParams.get('tab') || "partners";
+  const defaultTab = searchParams.get("tab") || "partners";
 
   const [activeTab, setActiveTab] = useState(defaultTab);
-  
+
   // Set the default tab in URL on initial load if not already present
   useEffect(() => {
-    if (!searchParams.get('tab')) {
+    if (!searchParams.get("tab")) {
       router.push(`/account?tab=${activeTab}`, { scroll: false });
     }
   }, []);
