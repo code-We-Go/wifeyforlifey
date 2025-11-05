@@ -28,15 +28,18 @@ export default function PlaylistPage() {
 
   const handleVideoEnd = () => {
     console.log("Video ended, triggering next video...");
-    // Update playlist progress: add to videosWatched (lastWatchedVideoID is set on start)
+    // If 95% threshold didn't mark it yet, mark on end as fallback
     try {
-      if (selectedVideo?._id) {
+      if (selectedVideo?._id && !watchMarkedRef.current) {
         axios
           .put("/api/playlist-progress", {
             playlistId,
             videoId: (selectedVideo as any)._id,
           })
-          .then(() => fetchPlaylistProgress())
+          .then(() => {
+            watchMarkedRef.current = true;
+            fetchPlaylistProgress();
+          })
           .catch((err) =>
             console.warn("Failed to update playlist progress", err)
           );
@@ -45,6 +48,29 @@ export default function PlaylistPage() {
       console.warn("Progress update threw", e);
     }
     nextVideo(); // autoplay next video on end
+  };
+
+  // Mark video as watched when reaching the 95% threshold
+  const watchMarkedRef = useRef(false);
+  const handleWatchThreshold = () => {
+    try {
+      if (selectedVideo?._id && !watchMarkedRef.current) {
+        axios
+          .put("/api/playlist-progress", {
+            playlistId,
+            videoId: (selectedVideo as any)._id,
+          })
+          .then(() => {
+            watchMarkedRef.current = true;
+            fetchPlaylistProgress();
+          })
+          .catch((err) =>
+            console.warn("Failed to update playlist progress at threshold", err)
+          );
+      }
+    } catch (e) {
+      console.warn("Threshold progress update threw", e);
+    }
   };
 
   const nextVideo = () => {
@@ -80,6 +106,10 @@ export default function PlaylistPage() {
     null
   );
   const preferLastAppliedRef = useRef(false);
+  // Reset local watched flag when selected video changes
+  useEffect(() => {
+    watchMarkedRef.current = false;
+  }, [selectedVideo?._id]);
 
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
@@ -583,6 +613,8 @@ export default function PlaylistPage() {
                         muted={false}
                         volume={0.8}
                         onVideoEnd={handleVideoEnd}
+                        onWatchThreshold={handleWatchThreshold}
+                        watchThresholdPct={0.95}
                       />
                     </Suspense>
                     {/* Navigation buttons - positioned to avoid video controls */}
