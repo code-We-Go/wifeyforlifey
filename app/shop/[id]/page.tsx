@@ -447,9 +447,9 @@ export default function ProductPage() {
                 <div className="ml-2">
                   <h4 className="text-lovely font-medium mb-2">Perfect for:</h4>
                   <ul className="list-disc pl-5 text-lovely/80 space-y-1">
-                    <li>Decorating your Gehaz Bestie Planner</li>
                     <li>
-                      Notebooks, laptops, mirrors, bottles or bridal boxes
+                      Decorating your Notebooks, laptops, mirrors, bottles or
+                      bridal boxes
                     </li>
                     <li>
                       Adding a little extra love, sass & pink energy to your

@@ -123,7 +123,7 @@ export const authOptions: NextAuthOptions = {
       account: any;
       profile?: any;
       credentials?: {
-        deviceFingerprint?: string;
+        // deviceFingerprint?: string;
         email?: string;
         password?: string;
       };
@@ -134,16 +134,18 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google") {
         let existingUser = await UserModel.findOne({ email: user.email });
         if (!existingUser) {
-          const subscribed = await subscriptionsModel.findOne({
-            email: user.email,
-            subscribed: true,
-          });
+          //   const subscribed = await subscriptionsModel.findOne({
+          //     email: user.email,
+          //     subscribed: true,
+          //   }
+          // );
           existingUser = await UserModel.create({
             username: user.name || user.email?.split("@")[0] || "user",
+            firstName: user.name?.split(" ")[0] || "user",
+            lastName: user.name?.split(" ")[1] || "user",
             email: user.email,
             emailVerified: true,
             imageURL: user.image,
-            subscription: subscribed ? (subscribed._id as string) : undefined,
           });
         }
         userId = (existingUser as any)._id?.toString();
@@ -213,12 +215,13 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        
+
         // Fetch user data to get firstName and lastName
         try {
           const userData = await UserModel.findById(token.sub);
           if (userData) {
-            session.user.firstName = userData.firstName || userData.username || "";
+            session.user.firstName =
+              userData.firstName || userData.username || "";
             session.user.lastName = userData.lastName || "";
           }
         } catch (error) {
