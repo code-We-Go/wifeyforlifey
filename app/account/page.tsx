@@ -50,6 +50,7 @@ import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AccountPage = () => {
   const { data: session, status } = useSession();
@@ -85,6 +86,17 @@ const AccountPage = () => {
   const [modalStatus, setModalStatus] = useState<string>("pending");
   const [modalPayment, setModalPayment] = useState<string>("pending");
   const [showUploader, setShowUploader] = useState(false);
+
+  // Continue Watching (latest progress record)
+  type ContinueItem = {
+    playlistId: string;
+    videoId: string;
+    thumbnailUrl?: string;
+    playlistTitle?: string;
+    videoTitle?: string;
+  } | null;
+  const [continueItem, setContinueItem] = useState<ContinueItem>(null);
+  const [continueLoading, setContinueLoading] = useState(false);
   const handleRemoveFromWishlist = (
     productId: string,
     variant: any,
@@ -275,6 +287,54 @@ const AccountPage = () => {
       }
     }
   }, [session]);
+
+  // Fetch latest progress for subscribed users to power Continue Watching
+  useEffect(() => {
+    const loadContinueWatching = async () => {
+      try {
+        if (!session?.user?.isSubscribed) {
+          setContinueItem(null);
+          return;
+        }
+        setContinueLoading(true);
+        const res = await fetch(`/api/playlist-progress`, {
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          throw new Error("Failed to load progress list");
+        }
+        const data = await res.json();
+        const list = (data?.progressList || []) as any[];
+        // Find the most recent entry that has a lastWatchedVideoID
+        const latest = list.find((p) => p?.lastWatchedVideoID && p?.playlistID);
+        if (latest) {
+          setContinueItem({
+            playlistId: String(latest.playlistID?._id || latest.playlistID),
+            videoId: String(
+              latest.lastWatchedVideoID?._id || latest.lastWatchedVideoID
+            ),
+            thumbnailUrl:
+              latest.lastWatchedVideoID?.thumbnailUrl ||
+              latest.playlistID?.thumbnailUrl,
+            playlistTitle: latest.playlistID?.title,
+            videoTitle: latest.lastWatchedVideoID?.title,
+          });
+        } else {
+          setContinueItem(null);
+        }
+      } catch (e) {
+        console.warn("Continue Watching load failed", e);
+        setContinueItem(null);
+      } finally {
+        setContinueLoading(false);
+      }
+    };
+
+    // Only attempt after session state is known
+    if (status !== "loading") {
+      loadContinueWatching();
+    }
+  }, [status, session?.user?.isSubscribed]);
 
   // Function to record login attempt with device fingerprint
   const recordLoginAttempt = async (
@@ -649,6 +709,65 @@ const AccountPage = () => {
           </div>
         ))}
       </div>
+      
+
+      {/* Continue Watching (subscribed users) */}
+      {session?.user?.isSubscribed && continueLoading && (
+        <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
+              <Skeleton className="w-full h-full" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <Skeleton className="h-6 w-40 mb-2" />
+              <Skeleton className="h-4 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+              <div className="mt-2">
+                <Skeleton className="h-10 w-24 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {session?.user?.isSubscribed && !continueLoading && continueItem && (
+        <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
+              <img
+                src={continueItem.thumbnailUrl || "/video/1.png"}
+                alt={continueItem.videoTitle || "Continue watching"}
+                className="object-cover w-full h-full"
+              />
+              <Link
+                href={`/playlists/${continueItem.playlistId}?videoId=${continueItem.videoId}`}
+                className="absolute inset-0 flex items-center justify-center group"
+              >
+                <span className="sr-only">Continue</span>
+              </Link>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold">Continue Watching</h3>
+              <p className="text-sm text-lovely/90 truncate">
+                {continueItem.videoTitle || "Latest watched video"}
+                {continueItem.playlistTitle ? ` • ${continueItem.playlistTitle}` : ""}
+              </p>
+              <div className="mt-2">
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/playlists/${continueItem.playlistId}?videoId=${continueItem.videoId}`
+                    )
+                  }
+                  className="bg-lovely text-creamey hover:bg-lovely"
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="border-b border-pinkey overflow-x-auto">

@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, Suspense } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Lock, Play, Clock, Calendar } from "lucide-react";
+import { ChevronLeft, Lock, Play, Clock, Calendar, Check } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -19,16 +20,30 @@ import LoadingSpinner from "@/app/checkout/components/LoadingSpinner";
 
 export default function PlaylistPage() {
   const params = useParams();
-  const searchParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : ""
-  );
-  const videoIdParam = searchParams.get("videoId");
+  const searchParams = useSearchParams();
+  const videoIdParam = searchParams?.get("videoId") || null;
   const router = useRouter();
   const playlistId = params.id as string;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleVideoEnd = () => {
     console.log("Video ended, triggering next video...");
+    // Update playlist progress: add to videosWatched (lastWatchedVideoID is set on start)
+    try {
+      if (selectedVideo?._id) {
+        axios
+          .put("/api/playlist-progress", {
+            playlistId,
+            videoId: (selectedVideo as any)._id,
+          })
+          .then(() => fetchPlaylistProgress())
+          .catch((err) =>
+            console.warn("Failed to update playlist progress", err)
+          );
+      }
+    } catch (e) {
+      console.warn("Progress update threw", e);
+    }
     nextVideo(); // autoplay next video on end
   };
 
@@ -60,6 +75,11 @@ export default function PlaylistPage() {
   const [error, setError] = useState<string | null>(null);
   const [seeMore, setSeeMore] = useState(false); // <-- Add this line
   const [isVideoHovered, setIsVideoHovered] = useState(false);
+  const [watchedVideos, setWatchedVideos] = useState<Set<string>>(new Set());
+  const [lastWatchedVideoId, setLastWatchedVideoId] = useState<string | null>(
+    null
+  );
+  const preferLastAppliedRef = useRef(false);
 
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
@@ -115,8 +135,37 @@ export default function PlaylistPage() {
             );
           }
         } else {
-          // No videoId param, default to first video
-          setSelectedVideo(res.data.data.videos[0]);
+          // No videoId param; prefer last watched video for subscribed users
+          if (status === "authenticated" && isSubscribed) {
+            try {
+              const progRes = await axios.get("/api/playlist-progress", {
+                params: { playlistId },
+              });
+              const lastId = progRes.data?.progress?.lastWatchedVideoID
+                ? String(progRes.data.progress.lastWatchedVideoID)
+                : null;
+              if (lastId) {
+                const lastIndex = res.data.data.videos.findIndex(
+                  (v: any) => String(v._id) === lastId
+                );
+                if (lastIndex !== -1) {
+                  setSelectedVideo(res.data.data.videos[lastIndex]);
+                  setCurrentIndex(lastIndex);
+                  console.log(
+                    `Selected last watched video: ${lastId} at index ${lastIndex}`
+                  );
+                  return; // Skip defaulting to first
+                }
+              }
+            } catch (e) {
+              console.warn(
+                "Unable to fetch last watched video for playlist",
+                e
+              );
+            }
+          }
+          // Fallback: default to first video
+          // setSelectedVideo(res.data.data.videos[0]);
         }
       }
     } catch (error: any) {
@@ -193,6 +242,44 @@ export default function PlaylistPage() {
     }
   }, [playlist, fetchRelatedPlaylists]);
 
+  // Create a playlist progress record when user enters the playlist
+  useEffect(() => {
+    if (status === "authenticated" && isSubscribed && playlistId) {
+      axios
+        .post("/api/playlist-progress", { playlistId })
+        .catch((err) =>
+          console.warn("Failed to create playlist progress", err)
+        );
+    }
+  }, [status, isSubscribed, playlistId]);
+
+  // Fetch watched videos for this playlist
+  const fetchPlaylistProgress = useCallback(async () => {
+    try {
+      const res = await axios.get("/api/playlist-progress", {
+        params: { playlistId },
+      });
+      const progress = res.data?.progress;
+      const ids = new Set<string>(
+        (progress?.videosWatched || []).map((id: any) => String(id))
+      );
+      setWatchedVideos(ids);
+      setLastWatchedVideoId(
+        progress?.lastWatchedVideoID
+          ? String(progress.lastWatchedVideoID)
+          : null
+      );
+    } catch (err) {
+      console.warn("Failed to fetch playlist progress", err);
+    }
+  }, [playlistId]);
+
+  useEffect(() => {
+    if (status === "authenticated" && isSubscribed && playlistId) {
+      fetchPlaylistProgress();
+    }
+  }, [status, isSubscribed, playlistId, fetchPlaylistProgress]);
+
   // Sync selectedVideo with currentIndex when playlist loads
   useEffect(() => {
     if (
@@ -202,10 +289,12 @@ export default function PlaylistPage() {
     ) {
       const video = playlist.videos[currentIndex];
       if (typeof video === "object" && video !== null) {
-        setSelectedVideo(video);
+        if (!selectedVideo || String((selectedVideo as any)._id) !== String((video as any)._id)) {
+          setSelectedVideo(video);
+        }
       }
     }
-  }, [playlist, currentIndex]);
+  }, [playlist, currentIndex, selectedVideo]);
 
   // Fetch OTP when selectedVideo changes and is not locked
   useEffect(() => {
@@ -217,6 +306,88 @@ export default function PlaylistPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVideo, videoLocked, watermarkConfig]);
+
+  // Respond to query param changes for videoId (client-side navigation)
+  useEffect(() => {
+    const vid = searchParams?.get("videoId");
+    if (!playlist || !playlist.videos || playlist.videos.length === 0 || !vid)
+      return;
+    // If already on this video, do nothing
+    if (selectedVideo && String((selectedVideo as any)._id) === String(vid)) return;
+    const idx = playlist.videos.findIndex(
+      (v: any) => String(v._id) === String(vid)
+    );
+    if (idx !== -1) {
+      setCurrentIndex(idx);
+      const v = playlist.videos[idx];
+      if (typeof v === "object" && v !== null) {
+        setSelectedVideo(v);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, playlist, selectedVideo]);
+
+  // Prefer last-watched selection when no videoId query is present
+  useEffect(() => {
+    if (!playlist || !playlist.videos || playlist.videos.length === 0) return;
+    // If a videoId is in the query, that effect above will handle selection
+    const vidParam = searchParams?.get("videoId");
+    if (vidParam) return;
+    // Only apply once to avoid loops
+    if (preferLastAppliedRef.current) return;
+    if (status === "authenticated" && isSubscribed && lastWatchedVideoId) {
+      // If current selection already matches last watched, mark applied and exit
+      if (selectedVideo && String((selectedVideo as any)._id) === String(lastWatchedVideoId)) {
+        preferLastAppliedRef.current = true;
+        return;
+      }
+      const idx = playlist.videos.findIndex(
+        (v: any) => String(v._id) === String(lastWatchedVideoId)
+      );
+      if (idx !== -1) {
+        setCurrentIndex(idx);
+        const v = playlist.videos[idx];
+        if (typeof v === "object" && v !== null) {
+          setSelectedVideo(v);
+        }
+        preferLastAppliedRef.current = true;
+      }
+    }
+  }, [
+    playlist,
+    lastWatchedVideoId,
+    searchParams,
+    status,
+    isSubscribed,
+    selectedVideo,
+  ]);
+
+  // Update lastWatchedVideoID when user starts watching a new video
+  useEffect(() => {
+    const updateLast = async () => {
+      try {
+        if (
+          status === "authenticated" &&
+          isSubscribed &&
+          playlistId &&
+          selectedVideo?._id
+        ) {
+          await axios.patch("/api/playlist-progress", {
+            playlistId,
+            videoId: (selectedVideo as any)._id,
+          });
+          // Refresh local progress state so UI stays in sync
+          fetchPlaylistProgress();
+        }
+      } catch (err) {
+        console.warn("Failed to set last watched video", err);
+      }
+    };
+
+    updateLast();
+    // We only care about the selectedVideo object changing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVideo]);
 
   // Format date
   const formatDate = (date: Date) => {
@@ -488,7 +659,41 @@ export default function PlaylistPage() {
             </span>
           </div>
 
-          <div className="bg-card rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-card border border-lovely rounded-lg overflow-hidden shadow-sm">
+            {/* Playlist progress (subscribed users only) */}
+            {status === "authenticated" && isSubscribed && (
+              <div className="p-4  bg-creamey/90">
+                <div className="flex items-center justify-between text-sm text-lovely  mb-2">
+                  <span>
+                    Watched {watchedVideos.size} of{" "}
+                    {playlist.videos?.length || 0}
+                  </span>
+                  <span>
+                    {playlist.videos?.length
+                      ? Math.round(
+                          (watchedVideos.size /
+                            (playlist.videos?.length || 1)) *
+                            100
+                        )
+                      : 0}
+                    %
+                  </span>
+                </div>
+                <Progress
+                  value={
+                    playlist.videos?.length
+                      ? Math.round(
+                          (watchedVideos.size /
+                            (playlist.videos?.length || 1)) *
+                            100
+                        )
+                      : 0
+                  }
+                  className="h-3 bg-pinkey/70 text-lovely"
+                />
+              </div>
+            )}
+
             <div className="divide-y max-h-[70vh] overflow-y-auto ">
               {Array.isArray(playlist.videos) &&
                 playlist.videos.map((video: any, index) => {
@@ -503,7 +708,7 @@ export default function PlaylistPage() {
                       key={video._id}
                       className={`${
                         thirdFont.className
-                      } cursor-pointer transition-colors p-4 text-creamey ${
+                      } cursor-pointer relative transition-colors p-4 text-creamey ${
                         isActive
                           ? "bg-lovely text-creamey"
                           : "bg-pinkey text-lovely  hover:bg-lovely hover:text-creamey "
@@ -515,11 +720,10 @@ export default function PlaylistPage() {
                         if (videoIndex !== -1) {
                           setCurrentIndex(videoIndex);
                           setSelectedVideo(video);
-                          
-                          // Update URL search parameters
-                          const url = new URL(window.location.href);
-                          url.searchParams.set('videoId', video._id);
-                          window.history.pushState({}, '', url.toString());
+                          // Update URL using Next router so searchParams updates
+                          router.push(
+                            `/playlists/${playlistId}?videoId=${video._id}`
+                          );
                         }
                       }}
                     >
@@ -545,6 +749,12 @@ export default function PlaylistPage() {
                             )}
                           </div>
                         </div>
+                        {isSubscribed &&
+                          watchedVideos.has(String(video._id)) && (
+                            <div className="absolute top-1 right-1 bg-white/80 rounded-2xl p-0.5">
+                              <Check className="h-4 w-4 text-lovely" />
+                            </div>
+                          )}
                         <div className="flex-1 min-w-0">
                           <h5 className="font-medium line-clamp-2">
                             {video.title}
