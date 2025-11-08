@@ -29,7 +29,8 @@ const attributeSchema = new Schema<attribute>({
 // Define the Variant schema
 const VariantSchema = new Schema<Variant>({
   name: { type: String, required: true }, // e.g., "Default Variant"
-  attributeName: { type: String, required: true }, // e.g., "Color" or "Size"
+  attributeName: { type: String, required: true },
+  price: { type: Number, required: false, min: 0 }, //, e.g., "Color" or "Size"
   attributes: {
     type: [attributeSchema],
     required: true,
