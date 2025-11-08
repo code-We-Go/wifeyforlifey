@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/shop/ProductCard";
-import { Product, Variant } from "@/app/interfaces/interfaces";
+import { attribute, Product, Variant } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import ProductPageSkeleton from "./ProductPageSkeleton";
@@ -57,7 +57,7 @@ export default function ProductPage() {
   );
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedAttribute, setSelectedAttribute] = useState<
-    { name: string; stock: number } | undefined
+    attribute | undefined
   >(selectedVariant?.attributes[0]);
   const handleShare = async () => {
     const productUrl = `${window.location.origin}/shop/${productId}`;
@@ -113,10 +113,7 @@ export default function ProductPage() {
     setQuantity(1);
   };
 
-  const handleAttributeChange = (attribute: {
-    name: string;
-    stock: number;
-  }) => {
+  const handleAttributeChange = (attribute: attribute) => {
     setSelectedAttribute(attribute);
     setQuantity(1);
   };
@@ -127,7 +124,11 @@ export default function ProductPage() {
     addItem({
       productId: product._id,
       productName: product.title,
-      price: product.price.local,
+      // Prefer attribute price if present, else variant price, else product price
+      price:
+        selectedAttribute?.price ??
+        selectedVariant?.price ??
+        product.price.local,
       attributes: selectedAttribute,
       variant: selectedVariant,
       imageUrl: selectedVariant.images[0].url,
@@ -274,7 +275,11 @@ export default function ProductPage() {
           </div>
 
           <div className="text-2xl text-lovely font-medium">
-            LE{product.price.local.toFixed(2)}
+            LE
+            {selectedAttribute?.price
+              ? selectedAttribute?.price?.toFixed(2)
+              : selectedVariant?.price?.toFixed(2) ??
+                product.price.local.toFixed(2)}
           </div>
 
           <p className="text-lovely/90">{product.description}</p>
@@ -299,18 +304,24 @@ export default function ProductPage() {
 
             {selectedVariant && (
               <div>
-                <h3 className="text-sm text-lovely font-medium mb-2">
+                {/* <h3 className="text-sm text-lovely font-medium mb-2">
                   {selectedVariant.attributeName}
-                </h3>
+                </h3> */}
                 <div className="flex flex-wrap gap-2">
                   {selectedVariant.attributes.map((attr, index) => (
                     <Button
                       key={index}
                       variant={
-                        selectedAttribute === attr ? "default" : "outline"
+                        selectedAttribute?.name === attr.name
+                          ? "default"
+                          : "outline"
                       }
                       onClick={() => handleAttributeChange(attr)}
-                      className="rounded-full text-lovely bg-pinkey"
+                      className={
+                        selectedAttribute?.name === attr.name
+                          ? "rounded-full bg-lovely text-creamey"
+                          : "rounded-full bg-pinkey text-lovely"
+                      }
                       disabled={attr.stock <= 0}
                     >
                       {attr.name}

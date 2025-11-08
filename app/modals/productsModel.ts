@@ -22,7 +22,8 @@ const mediaSchema = new Schema<media>({
 
 // Define the attribute schema (replacing sizeSchema)
 const attributeSchema = new Schema<attribute>({
-  name: { type: String, required: true }, // e.g., "Color" or "Size"
+  name: { type: String, required: true },
+  price: { type: Number, required: false, min: 0 }, // e.g., "Color" or "Size"
   stock: { type: Number, required: true, min: 0 },
 });
 
