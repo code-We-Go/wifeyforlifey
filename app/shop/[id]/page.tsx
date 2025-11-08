@@ -410,7 +410,7 @@ export default function ProductPage() {
       </div>
 
       {/* Stickers Section - Only show for specific subCategory */}
-      {product?.subCategoryID &&
+      {/* {product?.subCategoryID &&
         product.subCategoryID.toString() === "6904b3616ac4c0db524108ef" && (
           <div className="mt-8 w-full border-t pt-8">
             <div className="space-y-4">
@@ -459,7 +459,6 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              {/* Quantity Control */}
               {stickerSelected && (
                 <div className="flex items-center space-x-2 mt-4">
                   <span className="text-lovely">Quantity:</span>
@@ -524,7 +523,7 @@ export default function ProductPage() {
               </Button>
             </div>
           </div>
-        )}
+        )} */}
       {/* Product Tabs */}
       <div className="mt-12">
         <Tabs defaultValue="details">

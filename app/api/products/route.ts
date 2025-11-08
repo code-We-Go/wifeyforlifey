@@ -38,7 +38,9 @@ export async function GET(request: Request) {
       };
     }
     if (featured) {
-      const featuredProducts = await productsModel.find({ featured: "true" });
+      const featuredProducts = await productsModel
+        .find({ featured: "true" })
+        .sort({ createdAt: -1 });
       return NextResponse.json({ data: featuredProducts }, { status: 200 });
     }
     // Apply subcategory filter
