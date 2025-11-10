@@ -11,6 +11,7 @@ import orderValidation from "@/lib/validations/orderValidation";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { X } from "lucide-react";
@@ -201,6 +202,22 @@ const SubscriptionPage = () => {
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const searchParams = useSearchParams();
+  const [overridePrice, setOverridePrice] = useState<number | null>(null);
+
+  // Read upgrade price from query param and set override
+  useEffect(() => {
+    const upgradeParam = searchParams.get("upgrade");
+    const parsed = upgradeParam ? Number(upgradeParam) : NaN;
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      setOverridePrice(parsed);
+    } else {
+      setOverridePrice(null);
+    }
+  }, [searchParams]);
+
+  // Compute effective price used across calculations and UI
+  const price = overridePrice ?? (packageData?.price ?? 0);
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
@@ -265,8 +282,7 @@ const SubscriptionPage = () => {
       // Check if package price meets minimum order amount required for the discount
       if (
         !discount.conditions?.minimumOrderAmount ||
-        (packageData?.price &&
-          packageData.price >= discount.conditions.minimumOrderAmount)
+        (price && price >= discount.conditions.minimumOrderAmount)
       ) {
         setShipping(0);
       }
@@ -312,7 +328,7 @@ const SubscriptionPage = () => {
       appliedDiscount.calculationType !== "FREE_SHIPPING" ||
       // Check if package price meets minimum order amount required for the discount
       (appliedDiscount.conditions?.minimumOrderAmount &&
-        packageData?.price! < appliedDiscount.conditions.minimumOrderAmount)
+        price < appliedDiscount.conditions.minimumOrderAmount)
     ) {
       // Keep the shipping cost even when Bosta Zone is selected
       // if (location.city && location.zone) {
@@ -480,9 +496,8 @@ const SubscriptionPage = () => {
             // Check if package price meets minimum order amount required for the discount
             if (
               !appliedDiscount.conditions?.minimumOrderAmount ||
-              (packageData?.price &&
-                packageData.price >=
-                  appliedDiscount.conditions.minimumOrderAmount)
+              (price &&
+                price >= appliedDiscount.conditions.minimumOrderAmount)
             ) {
               setShipping(0);
             }
@@ -504,7 +519,7 @@ const SubscriptionPage = () => {
     };
     getStates();
 
-    const calculatedSubTotal = packageData?.price ?? 0;
+    const calculatedSubTotal = price;
     setSubTotal(calculatedSubTotal);
 
     // Add 20 EGP to total if a gift card is selected
@@ -759,7 +774,7 @@ const SubscriptionPage = () => {
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
     // Calculate subtotal
-    const calculatedSubTotal = packageData?.price ?? 0;
+    const calculatedSubTotal = price;
     setSubTotal(calculatedSubTotal);
 
     // Calculate discount amount
@@ -1284,13 +1299,13 @@ const SubscriptionPage = () => {
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
-              <BostaLocationSelector
-                onLocationChange={handleBostaLocationChange}
-                selectedCity={bostaLocation.city?._id}
-                selectedZone={bostaLocation.zone?._id}
-                selectedDistrict={bostaLocation.district?.districtId}
-                orderTotal={packageData?.price || 0}
-              />
+            <BostaLocationSelector
+              onLocationChange={handleBostaLocationChange}
+              selectedCity={bostaLocation.city?._id}
+              selectedZone={bostaLocation.zone?._id}
+              selectedDistrict={bostaLocation.district?.districtId}
+              orderTotal={price || 0}
+            />
             ) : (
               <div className="flex w-full gap-2 items-center">
                 <label className="text-lovely text-base whitespace-nowrap">
@@ -1762,7 +1777,7 @@ const SubscriptionPage = () => {
             <DiscountSection
               redeemType="Subscription"
               onDiscountApplied={handleDiscountApplied}
-              packagePrice={packageData?.price}
+              packagePrice={price}
             />
             <LoyaltyPointsSection
               loyaltyPoints={loyaltyPoints}

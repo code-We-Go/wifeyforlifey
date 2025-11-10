@@ -70,6 +70,11 @@ const SubscriptionSchema = new Schema(
       ],
       default: "pending",
     },
+    process: {
+      type: String,
+      enum: ["new", "upgrade", "renew"],
+      default: "new",
+    },
     createdAt: {
       type: Date,
       default: Date.now,

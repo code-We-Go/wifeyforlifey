@@ -658,6 +658,18 @@ const AccountPage = () => {
                 )}
               </span>
             </p>
+            {/* {session?.user?.subscription?.packageId ===
+              "687396821b4da119eb1c13fe" && (
+              // "68bf6ae9c4d5c1af12cdcd37" && (
+              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
+                <Button
+                  size="sm"
+                  className="mt-2 bg-lovely text-creamey rounded-full hover:bg-lovely/80"
+                >
+                  Upgrade now to the Full Wifey Experience
+                </Button>
+              </Link>
+            )} */}
             {user.isSubscribed && (
               <p className="text-lovely/80 text-sm font-semibold">
                 Expires at :{" "}
@@ -709,7 +721,6 @@ const AccountPage = () => {
           </div>
         ))}
       </div>
-      
 
       {/* Continue Watching (subscribed users) */}
       {session?.user?.isSubscribed && continueLoading && (
@@ -750,7 +761,9 @@ const AccountPage = () => {
               <h3 className="text-lg font-semibold">Continue Watching</h3>
               <p className="text-sm text-lovely/90 truncate">
                 {continueItem.videoTitle || "Latest watched video"}
-                {continueItem.playlistTitle ? ` • ${continueItem.playlistTitle}` : ""}
+                {continueItem.playlistTitle
+                  ? ` • ${continueItem.playlistTitle}`
+                  : ""}
               </p>
               <div className="mt-2">
                 <Button

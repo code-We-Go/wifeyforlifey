@@ -25,7 +25,8 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
   mobile = false,
 }) => {
   const maxRedeem =
-    loyaltyPoints.realLoyaltyPoints - (loyaltyPoints.realLoyaltyPoints % 20);
+    loyaltyPoints.realLoyaltyPoints -
+    Math.floor(loyaltyPoints.realLoyaltyPoints * 0.85);
 
   // Handler for redeeming points (allow any value, clamp in effect)
   const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +54,7 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-lovely">
-              {loyaltyPoints.realLoyaltyPoints}
+              {Math.floor(loyaltyPoints.realLoyaltyPoints)}
             </span>
             <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2 relative">
               <div
@@ -66,7 +67,9 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
                 }}
               ></div>
             </div>
-            <span className="text-xs text-lovely/90">max: {maxRedeem}</span>
+            <span className="text-xs text-lovely/90">
+              max: {Math.floor(maxRedeem)}
+            </span>
           </div>
           <div className="flex items-center gap-2 mt-2">
             <label
@@ -91,8 +94,8 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
               type="button"
               className="ml-2 px-3 py-1 rounded bg-lovely/90 text-creamey hover:bg-lovely transition"
               onClick={() => {
-                setRedeemPoints(maxRedeem);
-                setLoyaltyDiscount(Math.floor(maxRedeem / 20));
+                setRedeemPoints(Math.floor(maxRedeem));
+                setLoyaltyDiscount(Math.floor((maxRedeem * 0.15) / 20));
               }}
               disabled={loyaltyPoints.realLoyaltyPoints < 20}
             >
@@ -101,8 +104,8 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
           </div>
           {redeemPoints > 0 && (
             <div className="text-xs text-green-700 mt-1">
-              You will redeem {redeemPoints} points for a {loyaltyDiscount} LE
-              discount.
+              You will redeem {Math.floor(redeemPoints)} points for a{" "}
+              {loyaltyDiscount} LE discount.
             </div>
           )}
         </div>

@@ -355,83 +355,63 @@ export async function POST(request: Request) {
         console.log("order" + JSON.stringify(order.data, null, 2));
         console.log("orderData" + order.data.payment_keys[0].order_id);
 
-        await subscriptionsModel.create({
-          paymentID: order.data.payment_keys[0].order_id,
-          email: data.email,
-          packageID: data.subscription,
-          redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
-          appliedDiscount: data.appliedDiscount,
-          appliedDiscountAmount: data.appliedDiscountAmount,
-          // User information
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phone: data.phone,
-          whatsAppNumber: data.whatsAppNumber,
-          // Gift information
-          isGift: data.isGift,
-          giftRecipientEmail: data.giftRecipientEmail,
-          specialMessage: data.specialMessage,
-          // Address information
-          country: data.country,
-          address: data.address,
-          apartment: data.apartment,
-          city: data.bostaCityName,
-          state: data.bostaZoneName,
-          postalZip: data.postalZip,
-          // Billing information
-          billingCountry: data.billingCountry,
-          billingFirstName: data.billingFirstName,
-          billingLastName: data.billingLastName,
-          billingState: data.billingState,
-          billingAddress: data.billingAddress,
-          billingApartment: data.billingApartment,
-          billingPostalZip: data.billingPostalZip,
-          billingCity: data.billingCity,
-          billingPhone: data.billingPhone,
-          // Payment information
-          total: data.total,
-          subTotal: data.subTotal,
-          shipping: data.shipping,
-          currency: data.currency,
-          cash: data.cash,
-          bostaCity: data.bostaCity,
-          bostaCityName: data.bostaCityName,
-          bostaZone: data.bostaZone,
-          bostaZoneName: data.bostaZoneName,
-          bostaDistrict: data.bostaDistrict,
-          bostaDistrictName: data.bostaDistrictName,
-          giftCardName: data.giftCardName,
-        });
-        // await ordersModel.create({
-        //   email:data.email,
-        //    orderID:order?order.data.payment_keys[0].order_id:''
-        //   ,country: data.country,
-        //   firstName: data.firstName,
-        //   lastName: data.lastName,
-        //   address: data.address,
-        //   apartment: data.apartment,
-        //   postalZip: data.postalZip,
-        //   city: data.city ,
-        //   state:data.state ,
-        //   phone:data.phone ,
-        //   cash: data.cash, // Payment method: Cash or not
-        //   cart: items,
-        //   total: data.total,
-        //   subTotal:data.subTotal,
-        //   billingCountry: data.billingCountry,
-        //   billingFirstName: data.billingFirstName,
-        //   billingState:data.billingState,
-        //   billingLastName: data.billingLastName,
-        //   billingEmail: data.billingEmail,
-        //   billingPhone: data.billingPhone,
-        //   billingAddress: data.billingAddress,
-        //   billingApartment: data.billingApartment,
-        //   billingPostalZip: data.billingPostalZip,
-        // })
-        return NextResponse.json(
-          { token: order.data.client_secret },
-          { status: 200 }
-        );
+        if (data.process === "upgrade") {
+        }
+        // else if (data.process==="new")
+        else {
+          await subscriptionsModel.create({
+            paymentID: order.data.payment_keys[0].order_id,
+            email: data.email,
+            packageID: data.subscription,
+            redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
+            appliedDiscount: data.appliedDiscount,
+            appliedDiscountAmount: data.appliedDiscountAmount,
+            // User information
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            whatsAppNumber: data.whatsAppNumber,
+            // Gift information
+            isGift: data.isGift,
+            giftRecipientEmail: data.giftRecipientEmail,
+            specialMessage: data.specialMessage,
+            // Address information
+            country: data.country,
+            address: data.address,
+            apartment: data.apartment,
+            city: data.bostaCityName,
+            state: data.bostaZoneName,
+            postalZip: data.postalZip,
+            // Billing information
+            billingCountry: data.billingCountry,
+            billingFirstName: data.billingFirstName,
+            billingLastName: data.billingLastName,
+            billingState: data.billingState,
+            billingAddress: data.billingAddress,
+            billingApartment: data.billingApartment,
+            billingPostalZip: data.billingPostalZip,
+            billingCity: data.billingCity,
+            billingPhone: data.billingPhone,
+            // Payment information
+            total: data.total,
+            subTotal: data.subTotal,
+            shipping: data.shipping,
+            currency: data.currency,
+            cash: data.cash,
+            bostaCity: data.bostaCity,
+            bostaCityName: data.bostaCityName,
+            bostaZone: data.bostaZone,
+            bostaZoneName: data.bostaZoneName,
+            bostaDistrict: data.bostaDistrict,
+            bostaDistrictName: data.bostaDistrictName,
+            giftCardName: data.giftCardName,
+          });
+
+          return NextResponse.json(
+            { token: order.data.client_secret },
+            { status: 200 }
+          );
+        }
       } else {
         const order = await axios.post(
           "https://accept.paymob.com/v1/intention/",

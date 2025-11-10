@@ -219,7 +219,7 @@ const CheckoutClientPage = () => {
   };
   type Payment = "cash" | "card" | "instapay";
   const { user } = useContext(userContext);
-  const [shipping, setShipping] = useState(70);
+  const [shipping, setShipping] = useState(90);
   const [bostaLocation, setBostaLocation] = useState<{
     city: BostaCity | null;
     zone: BostaZone | null;
@@ -294,8 +294,8 @@ const CheckoutClientPage = () => {
       !appliedDiscount ||
       appliedDiscount.calculationType !== "FREE_SHIPPING" ||
       // Check if cart total meets minimum order amount required for the discount
-      (appliedDiscount.conditions?.minimumOrderAmount && 
-       subTotal < appliedDiscount.conditions.minimumOrderAmount)
+      (appliedDiscount.conditions?.minimumOrderAmount &&
+        subTotal < appliedDiscount.conditions.minimumOrderAmount)
     ) {
       // Keep the shipping cost even when Bosta Zone is selected
       if (location.city && location.zone) {
@@ -447,7 +447,7 @@ const CheckoutClientPage = () => {
             zone.localGlobal === "local"
         );
         if (zone) {
-          setShipping(zone.zone_rate.local);
+          setShipping(90);
         }
       }
     };
@@ -543,7 +543,7 @@ const CheckoutClientPage = () => {
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
         setShipping(0);
       } else {
-        setShipping(shippingRate);
+        setShipping(90);
       }
       const calculatedSubTotal = items.reduce(
         (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
@@ -563,7 +563,7 @@ const CheckoutClientPage = () => {
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
         setShipping(0);
       } else {
-        setShipping(shippingRate);
+        setShipping(90);
       }
       const calculatedSubTotal = items.reduce(
         (acc, cartItem) => acc + cartItem.price * cartItem.quantity,

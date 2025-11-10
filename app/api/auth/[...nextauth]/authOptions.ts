@@ -24,6 +24,10 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isSubscribed: boolean;
+      subscription?: {
+        packageId?: string;
+        paid?: boolean;
+      };
       subscriptionExpiryDate?: Date | null;
       // loyaltyPoints?: number;
       sessionId?: string; // Add sessionId here
@@ -35,6 +39,10 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     isSubscribed?: boolean;
+    subscription?: {
+      packageId?: string;
+      paid?: boolean;
+    };
     // loyaltyPoints?: number;
     sessionId?: string; // Add sessionId here
     deviceFingerprint?: string; // Add device fingerprint
@@ -182,6 +190,7 @@ export const authOptions: NextAuthOptions = {
             email,
             subscribed: true,
           });
+          console.log("packageID" + subscription.packageID);
           token.isSubscribed = !!(
             subscription?.expiryDate &&
             subscription.expiryDate.getTime() > Date.now()
@@ -189,6 +198,10 @@ export const authOptions: NextAuthOptions = {
           token.subscriptionExpiryDate = subscription?.expiryDate
             ? subscription.expiryDate.toISOString()
             : null;
+          token.subscription = {
+            packageId: subscription?.packageID || null,
+            paid: subscription?.paid || false,
+          };
           // token.loyaltyPoints = await calculateLoyaltyPoints(email);
         }
       } catch (error) {
@@ -234,6 +247,11 @@ export const authOptions: NextAuthOptions = {
         session.user.subscriptionExpiryDate = token.subscriptionExpiryDate
           ? new Date(token.subscriptionExpiryDate as string)
           : null;
+        // Expose subscription details (packageId, paid) on the session user
+        if (session.user && token.subscription) {
+          // token.subscription is set in the JWT callback
+          session.user.subscription = token.subscription;
+        }
         // session.user.loyaltyPoints = token.loyaltyPoints;
       }
       if (session.user && token.sessionId) {
