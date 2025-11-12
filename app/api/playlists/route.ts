@@ -9,7 +9,7 @@ const loadDB = async () => {
 };
 
 loadDB();
-console.log("reagistering" + videoModel)
+console.log("reagistering" + videoModel);
 export async function POST(req: Request) {
   try {
     const data = await req.json();
@@ -26,12 +26,15 @@ export async function DELETE(request: Request) {
   try {
     const req = await request.json();
     console.log("Deleting playlist:", req.playlistID);
-    
+
     const res = await playlistModel.findByIdAndDelete(req.playlistID);
     if (!res) {
-      return NextResponse.json({ error: "Playlist not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Playlist not found" },
+        { status: 404 }
+      );
     }
-    
+
     return NextResponse.json({ data: res }, { status: 200 });
   } catch (error: any) {
     console.error("Error deleting playlist:", error);
@@ -44,18 +47,21 @@ export async function PUT(request: Request) {
     const { searchParams } = new URL(request.url);
     const playlistID = searchParams.get("playlistID");
     const req = await request.json();
-    
+
     console.log("Updating playlist:", playlistID, req);
-    
+
     const res = await playlistModel.findByIdAndUpdate(playlistID, req, {
       new: true,
       runValidators: true,
     });
-    
+
     if (!res) {
-      return NextResponse.json({ error: "Playlist not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Playlist not found" },
+        { status: 404 }
+      );
     }
-    
+
     return NextResponse.json({ data: res }, { status: 200 });
   } catch (error: any) {
     console.error("Error updating playlist:", error);
@@ -75,35 +81,35 @@ export async function GET(req: Request) {
   try {
     // Create search query
     let searchQuery: any = search
-      ? { 
+      ? {
           $or: [
             { title: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
-            { category: { $regex: search, $options: "i" } }
-          ]
+            { category: { $regex: search, $options: "i" } },
+          ],
         }
       : {};
 
     if (featured) {
       searchQuery = { ...searchQuery, featured: true };
     }
-
+    searchQuery = { ...searchQuery, isPublic: true };
     // Get total count
     const totalPlaylists = await playlistModel.countDocuments(searchQuery);
 
     // Get playlists with populated videos and pagination
     const playlists = await playlistModel
       .find(searchQuery)
-      
+
       .populate({
         path: "videos",
         model: "videos",
-        select: "title description thumbnailUrl duration isPublished"
+        select: "title description thumbnailUrl duration isPublished",
       })
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit);
-console.log("sort" + playlists[0].title)
+    console.log("sort" + playlists[0].title);
     return NextResponse.json(
       {
         data: playlists,
@@ -120,4 +126,4 @@ console.log("sort" + playlists[0].title)
       { status: 500 }
     );
   }
-} 
+}
