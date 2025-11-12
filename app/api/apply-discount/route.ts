@@ -5,6 +5,10 @@ import DiscountUsage from '@/app/models/discountUsage';
 // import { getServerSession } from 'next-auth';
 // import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function POST(req: Request) {
   try {
     // const session = await getServerSession(authOptions);
@@ -24,7 +28,7 @@ export async function POST(req: Request) {
 
     // Find the discount
     const discount = await DiscountModel.findOne({
-      code: discountCode,
+      code: new RegExp(`^${escapeRegExp(discountCode)}$`, 'i'),
       isActive: true,
       redeemType: { $in: [redeemType, "All"] },
 

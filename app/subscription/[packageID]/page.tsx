@@ -204,6 +204,7 @@ const SubscriptionPage = () => {
   const [showModal, setShowModal] = useState(false);
   const searchParams = useSearchParams();
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
+  const [isUpgrade, setIsUpgrade] = useState(false);
 
   // Read upgrade price from query param and set override
   useEffect(() => {
@@ -211,13 +212,20 @@ const SubscriptionPage = () => {
     const parsed = upgradeParam ? Number(upgradeParam) : NaN;
     if (!Number.isNaN(parsed) && parsed > 0) {
       setOverridePrice(parsed);
+      setIsUpgrade(true);
+      setShipping(0); // Free shipping on upgrade
+      setFormData((prevData) => ({
+        ...prevData,
+        process: "upgrade",
+      }));
     } else {
       setOverridePrice(null);
+      setIsUpgrade(false);
     }
   }, [searchParams]);
 
   // Compute effective price used across calculations and UI
-  const price = overridePrice ?? (packageData?.price ?? 0);
+  const price = overridePrice ?? packageData?.price ?? 0;
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
@@ -278,6 +286,11 @@ const SubscriptionPage = () => {
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
+    // Upgrades always have free shipping regardless of discounts
+    if (isUpgrade) {
+      setShipping(0);
+      return;
+    }
     if (discount && discount.calculationType === "FREE_SHIPPING") {
       // Check if package price meets minimum order amount required for the discount
       if (
@@ -321,6 +334,10 @@ const SubscriptionPage = () => {
     };
   }) => {
     setBostaLocation(location);
+    // Upgrades always have free shipping
+    if (isUpgrade) {
+      setShipping(0);
+    } else {
     // Always maintain shipping cost regardless of Bosta Zone selection
     // Only apply free shipping if discount is specifically for FREE_SHIPPING
     if (
@@ -344,6 +361,7 @@ const SubscriptionPage = () => {
       // and package price meets minimum order amount
       setShipping(0);
     }
+    }
 
     // Update formData with Bosta location details
     setFormData((prevFormData) => ({
@@ -352,7 +370,7 @@ const SubscriptionPage = () => {
       city: location.city?.name || prevFormData.city,
       zone: location.zone?._id || "",
       district: location.district?.districtId || "",
-      shipping: shipping,
+      shipping: isUpgrade ? 0 : shipping,
     }));
   };
 
@@ -380,6 +398,7 @@ const SubscriptionPage = () => {
     giftRecipientEmail: "",
     specialMessage: "",
     giftCardName: "",
+    process: "new",
     redeemedLoyaltyPoints: Math.max(
       0,
       Math.min(
@@ -481,6 +500,11 @@ const SubscriptionPage = () => {
     };
     getShippingZones();
     const calculateShipping = () => {
+      // Upgrades always have free shipping
+      if (isUpgrade) {
+        setShipping(0);
+        return;
+      }
       if (countryID === 65) {
         const selectedState = states.find(
           (state) => state.name === formData.state
@@ -496,8 +520,7 @@ const SubscriptionPage = () => {
             // Check if package price meets minimum order amount required for the discount
             if (
               !appliedDiscount.conditions?.minimumOrderAmount ||
-              (price &&
-                price >= appliedDiscount.conditions.minimumOrderAmount)
+              (price && price >= appliedDiscount.conditions.minimumOrderAmount)
             ) {
               setShipping(0);
             }
@@ -594,7 +617,14 @@ const SubscriptionPage = () => {
       );
     }
 
-    if (countryID === 65) {
+    // Upgrades always have free shipping
+    if (isUpgrade) {
+      setShipping(0);
+      const calculatedSubTotal = packageData?.price ?? 0;
+      setSubTotal(calculatedSubTotal);
+      const giftCardCost = formData.giftCardName ? 20 : 0;
+      setTotal(calculatedSubTotal + giftCardCost);
+    } else if (countryID === 65) {
       // For Egyptian customers, shipping is handled by Bosta location selector
       // Default shipping will be updated when location is selected
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
@@ -654,6 +684,7 @@ const SubscriptionPage = () => {
     packageData,
     bostaLocation,
     appliedDiscount,
+    isUpgrade,
   ]);
 
   let cartItems = () => {
@@ -1299,13 +1330,13 @@ const SubscriptionPage = () => {
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
-            <BostaLocationSelector
-              onLocationChange={handleBostaLocationChange}
-              selectedCity={bostaLocation.city?._id}
-              selectedZone={bostaLocation.zone?._id}
-              selectedDistrict={bostaLocation.district?.districtId}
-              orderTotal={price || 0}
-            />
+              <BostaLocationSelector
+                onLocationChange={handleBostaLocationChange}
+                selectedCity={bostaLocation.city?._id}
+                selectedZone={bostaLocation.zone?._id}
+                selectedDistrict={bostaLocation.district?.districtId}
+                orderTotal={price || 0}
+              />
             ) : (
               <div className="flex w-full gap-2 items-center">
                 <label className="text-lovely text-base whitespace-nowrap">

@@ -658,18 +658,18 @@ const AccountPage = () => {
                 )}
               </span>
             </p>
-            {/* {session?.user?.subscription?.packageId ===
-              "687396821b4da119eb1c13fe" && (
+            {session?.user?.subscription?.packageId ===
+              "68bf6ae9c4d5c1af12cdcd37" && (
               // "68bf6ae9c4d5c1af12cdcd37" && (
               <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
                 <Button
                   size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-full hover:bg-lovely/80"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80"
                 >
                   Upgrade now to the Full Wifey Experience
                 </Button>
               </Link>
-            )} */}
+            )}
             {user.isSubscribed && (
               <p className="text-lovely/80 text-sm font-semibold">
                 Expires at :{" "}

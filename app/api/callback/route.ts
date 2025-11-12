@@ -11,6 +11,7 @@ import { DiscountModel } from "@/app/modals/Discount";
 import { sendMail } from "@/lib/email";
 import BostaService from "@/app/services/bostaService";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
+import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 
 // Ensure database is connected
 const loadDB = async () => {
@@ -37,6 +38,330 @@ export async function GET(request: Request) {
 
     // Perform your logic with the GET data here
     if (isSuccess) {
+      console.log("registering" + packageModel);
+      // First, check if this payment corresponds to an upgrade/renew operation
+      const paymentOp = await subscriptionPaymentModel
+        .findOne({ paymentID: data.order })
+        .populate({ path: "to", options: { strictPopulate: false } })
+        .populate({ path: "from", options: { strictPopulate: false } });
+
+      if (paymentOp) {
+        // Compute expiry for subscription based on package duration
+        const expiryDate = new Date();
+        if ((paymentOp.to as any)?.duration === "0") {
+          // Mini subscription or special case: expiry is now
+        } else {
+          expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+        }
+
+        // For gifts, use recipient email for account linkage and loyalty
+        const subscriptionEmail =
+          paymentOp.isGift && paymentOp.giftRecipientEmail
+            ? paymentOp.giftRecipientEmail
+            : paymentOp.email;
+
+        // Update user's subscription to the new package (upgrade) or extend (renew), using full details from paymentOp
+        const user = await UserModel.findOne({ email: subscriptionEmail });
+        const subscriptionData: any = {
+          paymentID: data.order,
+          email: subscriptionEmail,
+          packageID: paymentOp.to,
+          subscribed: true,
+          expiryDate,
+          status: "confirmed",
+          process: paymentOp.process,
+          redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,
+          appliedDiscount: paymentOp.appliedDiscount,
+          appliedDiscountAmount: paymentOp.appliedDiscountAmount,
+          // User info
+          firstName: paymentOp.firstName,
+          lastName: paymentOp.lastName,
+          phone: paymentOp.phone,
+          whatsAppNumber: paymentOp.whatsAppNumber,
+          // Gift info
+          isGift: paymentOp.isGift,
+          giftRecipientEmail: paymentOp.giftRecipientEmail,
+          specialMessage: paymentOp.specialMessage,
+          giftCardName: paymentOp.giftCardName,
+          // Address info
+          country: paymentOp.country,
+          address: paymentOp.address,
+          apartment: paymentOp.apartment,
+          city: paymentOp.city,
+          state: paymentOp.state,
+          postalZip: paymentOp.postalZip,
+          // Billing info
+          billingCountry: paymentOp.billingCountry,
+          billingFirstName: paymentOp.billingFirstName,
+          billingLastName: paymentOp.billingLastName,
+          billingState: paymentOp.billingState,
+          billingAddress: paymentOp.billingAddress,
+          billingApartment: paymentOp.billingApartment,
+          billingPostalZip: paymentOp.billingPostalZip,
+          billingCity: paymentOp.billingCity,
+          billingPhone: paymentOp.billingPhone,
+          // Payment info
+          total: paymentOp.total,
+          subTotal: paymentOp.subTotal,
+          shipping: paymentOp.shipping,
+          currency: paymentOp.currency,
+          // Bosta fields
+          bostaCity: paymentOp.bostaCity,
+          bostaCityName: paymentOp.bostaCityName,
+          bostaZone: paymentOp.bostaZone,
+          bostaZoneName: paymentOp.bostaZoneName,
+          bostaDistrict: paymentOp.bostaDistrict,
+          bostaDistrictName: paymentOp.bostaDistrictName,
+        };
+
+        let updatedSub: any = null;
+        if (user?.subscription) {
+          console.log("have subscription");
+          updatedSub = await subscriptionsModel.findByIdAndUpdate(
+            user.subscription._id,
+            subscriptionData,
+            { new: true }
+          );
+          // Fallback: if existing reference is stale/missing, create fresh
+          if (!updatedSub) {
+            console.log("no updated Sub");
+            updatedSub = await subscriptionsModel.create(subscriptionData);
+            await UserModel.findOneAndUpdate(
+              { email: subscriptionEmail },
+              { isSubscribed: true, subscription: updatedSub._id }
+            );
+          }
+        } else {
+          // If user has no subscription, create one and attach it
+          const created = await subscriptionsModel.create(subscriptionData);
+          updatedSub = created;
+          await UserModel.findOneAndUpdate(
+            { email: subscriptionEmail },
+            { isSubscribed: true, subscription: created._id }
+          );
+        }
+        // Ensure package is populated for downstream logic (emails, loyalty, bosta)
+        if (updatedSub?._id) {
+          updatedSub = await subscriptionsModel
+            .findById(updatedSub._id)
+            .populate({
+              path: "packageID",
+              options: { strictPopulate: false },
+            });
+        }
+
+        // Loyalty earn for subscription
+        if (
+          updatedSub?.packageID &&
+          typeof (updatedSub.packageID as any).price === "number"
+        ) {
+          await LoyaltyTransactionModel.create({
+            email: subscriptionEmail,
+            type: "earn",
+            reason: "subscription",
+            amount: (updatedSub.packageID as any).price,
+            bonusID:
+              (updatedSub.packageID as any).duration === "0"
+                ? "68c176b69c1ff0a2ad779c2d"
+                : "687d67f459e6ba857a54ed53",
+          });
+        }
+
+        // Discount usage from payment operation
+        if (paymentOp.appliedDiscount && paymentOp.appliedDiscountAmount) {
+          await DiscountModel.findByIdAndUpdate(paymentOp.appliedDiscount, {
+            $inc: { usageCount: 1 },
+          });
+        }
+
+        // Bosta integration for subscription deliveries (skip for upgrade)
+        try {
+          const isUpgradeProcess = paymentOp?.process === "upgrade";
+          if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess) {
+            const bostaService = new BostaService();
+            const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
+
+            const deliveryPayload = bostaService.createDeliveryPayload(
+              updatedSub,
+              webhookUrl
+            );
+
+            console.log(
+              "Creating Bosta delivery for subscription:",
+              updatedSub._id
+            );
+            const bostaResult = await bostaService.createDelivery(
+              deliveryPayload
+            );
+            console.log("bostaResult" + JSON.stringify(bostaResult));
+            if (bostaResult.success && bostaResult.data) {
+              await subscriptionsModel.findByIdAndUpdate(updatedSub._id, {
+                shipmentID: bostaResult.data._id,
+                status: "confirmed",
+              });
+              console.log(
+                "Bosta delivery created successfully:",
+                bostaResult.data.trackingNumber
+              );
+            } else {
+              console.error(
+                "Failed to create Bosta delivery:",
+                bostaResult.error
+              );
+            }
+          } else if (isUpgradeProcess) {
+            console.log(
+              "Skipping Bosta delivery for upgrade process:",
+              updatedSub?._id
+            );
+          }
+        } catch (bostaError) {
+          console.error("Bosta integration error:", bostaError);
+        }
+
+        // Send email notifications similar to original new subscription flow
+        try {
+          if (updatedSub) {
+            await sendMail({
+              to: "orders@shopwifeyforlifey.com",
+              name: "NEW BESTIEEE",
+              subject: "NEW BESTIEEEE",
+              body: `
+                <h2>New Subscription Notification</h2>
+                <p>A new subscription has been successfully created:</p>
+                <ul>
+                  <li><strong>Email:</strong> ${updatedSub.email}</li>
+                  ${
+                    updatedSub.isGift
+                      ? `<li><strong>Gift:</strong> Yes</li>
+                  <li><strong>Gift Recipient Email:</strong> ${
+                    updatedSub.giftRecipientEmail || "N/A"
+                  }</li>
+                  <li><strong>Special Message:</strong> ${
+                    updatedSub.specialMessage || "N/A"
+                  }</li>
+                   <li><strong>Gift Card:</strong> ${
+                     updatedSub.giftCardName || "N/A"
+                   }</li>`
+                      : ""
+                  }
+                  <li><strong>Package:</strong> ${
+                    (updatedSub.packageID as any)?.name || "N/A"
+                  }</li>
+                  <li><strong>First Name:</strong> ${
+                    updatedSub.firstName || "N/A"
+                  }</li>
+                  <li><strong>Last Name:</strong> ${
+                    updatedSub.lastName || "N/A"
+                  }</li>
+                  <li><strong>Phone:</strong> ${updatedSub.phone || "N/A"}</li>
+                  <li><strong>Country:</strong> ${
+                    updatedSub.country || "N/A"
+                  }</li>
+                </ul>
+              `,
+              from: "noreply@shopwifeyforlifey.com",
+            });
+            console.log("Subscription notification email sent successfully");
+
+            // If it's a gift, send gift email to purchaser
+            if (updatedSub.isGift) {
+              const { giftMail } = await import("@/utils/giftMail");
+              const firstName = updatedSub.firstName || "Wifey";
+
+              await sendMail({
+                to: updatedSub.email,
+                name: firstName,
+                subject: "Thank You for Your Gift Purchase! 🎁",
+                body: giftMail(updatedSub._id.toString()),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+              });
+              console.log("Gift email sent successfully to", updatedSub.email);
+            } else if (paymentOp.process === "new") {
+              // Welcome emails based on package ID
+              if (
+                (updatedSub.packageID as any)?._id &&
+                (updatedSub.packageID as any)._id.toString() ===
+                  "687396821b4da119eb1c13fe"
+              ) {
+                const recipientEmail = updatedSub.email;
+                const firstName = updatedSub.firstName || "Wifey";
+                const { generateWelcomeEmail } = await import(
+                  "@/utils/FullExperienceEmail"
+                );
+
+                await sendMail({
+                  to: updatedSub.email,
+                  name: firstName,
+                  subject:
+                    "You're in, beautiful! Welcome to the Wifeys community 💗",
+                  body: generateWelcomeEmail(firstName, updatedSub),
+                  from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+                });
+                console.log(
+                  "Welcome email sent successfully to",
+                  recipientEmail
+                );
+              } else if (
+                (updatedSub.packageID as any)?._id &&
+                (updatedSub.packageID as any)._id.toString() ===
+                  "68bf6ae9c4d5c1af12cdcd37"
+              ) {
+                const recipientEmail = updatedSub.email;
+                const firstName = updatedSub.firstName || "Wifey";
+                const { generateMiniExperienceMail } = await import(
+                  "@/utils/MiniExperienceEmail"
+                );
+
+                await sendMail({
+                  to: updatedSub.email,
+                  name: firstName,
+                  subject: "Welcome to the Mini Wifey Experience! 💕",
+                  body: generateMiniExperienceMail(firstName, updatedSub),
+                  from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+                });
+                console.log(
+                  "Mini Experience email sent successfully to",
+                  recipientEmail
+                );
+              }
+            }
+          }
+        } catch (emailError) {
+          console.error(
+            "Failed to send subscription notification email:",
+            emailError
+          );
+        }
+
+        // Use payment operation discount fields already handled; link user account
+        const subscribedUser = updatedSub?._id
+          ? await UserModel.findOneAndUpdate(
+              { email: subscriptionEmail },
+              { isSubscribed: true, subscription: updatedSub._id }
+            )
+          : null;
+
+        // Mark payment operation as confirmed
+        await subscriptionPaymentModel.findByIdAndUpdate(paymentOp._id, {
+          status: "confirmed",
+        });
+
+        // Redirect to success; mini vs normal based on package duration and account linkage
+        if ((updatedSub?.packageID as any)?.duration === "0") {
+          return NextResponse.redirect(
+            `${process.env.testUrl}payment/success?subscription=mini${
+              subscribedUser ? "&account=true" : ""
+            }`
+          );
+        }
+        return NextResponse.redirect(
+          `${process.env.testUrl}payment/success?subscription=true${
+            subscribedUser ? "&account=true" : ""
+          }`
+        );
+      }
+
       // Get the subscription to check package details
       let subscription = await subscriptionsModel
         .findOne({ paymentID: data.order })
@@ -113,7 +438,11 @@ export async function GET(request: Request) {
       // Log for debugging
       if (subscription) {
         try {
-          if (process.env.BOSTA_API) {
+          const paymentOpLegacy = await subscriptionPaymentModel.findOne({
+            paymentID: data.order,
+          });
+          const isUpgradeLegacy = paymentOpLegacy?.process === "upgrade";
+          if (process.env.BOSTA_API && !isUpgradeLegacy) {
             const bostaService = new BostaService();
 
             // Default pickup address (you should configure this in your environment)
@@ -175,6 +504,11 @@ export async function GET(request: Request) {
               );
               // Don't fail the order creation if Bosta fails
             }
+          } else if (isUpgradeLegacy) {
+            console.log(
+              "Skipping Bosta delivery for upgrade process:",
+              subscription._id
+            );
           }
         } catch (bostaError) {
           console.error("Bosta integration error:", bostaError);
@@ -240,56 +574,71 @@ export async function GET(request: Request) {
             });
 
             console.log("Gift email sent successfully to", subscription.email);
-          } else {
-            // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
-            if (
-              subscription.packageID._id &&
-              subscription.packageID._id.toString() ===
-                "687396821b4da119eb1c13fe"
-            ) {
-              console.log("fullExp");
-              const recipientEmail = subscription.email;
-              const firstName = subscription.firstName || "Wifey";
+          } 
+          else {
+            // Only send welcome emails for NEW subscriptions
+            const paymentOpLegacy = await subscriptionPaymentModel.findOne({
+              paymentID: data.order,
+            });
+            if (!paymentOpLegacy || paymentOpLegacy.process === "new") {
+              // Send welcome email to the subscriber if packageID matches 687396821b4da119eb1c13fe
+              if (
+                subscription.packageID._id &&
+                subscription.packageID._id.toString() ===
+                  "687396821b4da119eb1c13fe"
+              ) {
+                console.log("fullExp");
+                const recipientEmail = subscription.email;
+                const firstName = subscription.firstName || "Wifey";
 
-              // Import the welcome email template
-              const { generateWelcomeEmail } = await import(
-                "@/utils/FullExperienceEmail"
-              );
+                // Import the welcome email template
+                const { generateWelcomeEmail } = await import(
+                  "@/utils/FullExperienceEmail"
+                );
 
-              await sendMail({
-                to: subscription.email,
-                name: firstName,
-                subject:
-                  "You're in, beautiful! Welcome to the Wifeys community 💗",
-                body: generateWelcomeEmail(firstName, subscription),
-                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-              });
+                await sendMail({
+                  to: subscription.email,
+                  name: firstName,
+                  subject:
+                    "You're in, beautiful! Welcome to the Wifeys community 💗",
+                  body: generateWelcomeEmail(firstName, subscription),
+                  from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+                });
 
-              console.log("Welcome email sent successfully to", recipientEmail);
-            } else if (
-              subscription.packageID._id &&
-              subscription.packageID._id.toString() ===
-                "68bf6ae9c4d5c1af12cdcd37"
-            ) {
-              const recipientEmail = subscription.email;
-              const firstName = subscription.firstName || "Wifey";
+                console.log(
+                  "Welcome email sent successfully to",
+                  recipientEmail
+                );
+              } else if (
+                subscription.packageID._id &&
+                subscription.packageID._id.toString() ===
+                  "68bf6ae9c4d5c1af12cdcd37"
+              ) {
+                const recipientEmail = subscription.email;
+                const firstName = subscription.firstName || "Wifey";
 
-              // Import the Mini Experience email template
-              const { generateMiniExperienceMail } = await import(
-                "@/utils/MiniExperienceEmail"
-              );
+                // Import the Mini Experience email template
+                const { generateMiniExperienceMail } = await import(
+                  "@/utils/MiniExperienceEmail"
+                );
 
-              await sendMail({
-                to: subscription.email,
-                name: firstName,
-                subject: "Welcome to the Mini Wifey Experience! 💕",
-                body: generateMiniExperienceMail(firstName, subscription),
-                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-              });
+                await sendMail({
+                  to: subscription.email,
+                  name: firstName,
+                  subject: "Welcome to the Mini Wifey Experience! 💕",
+                  body: generateMiniExperienceMail(firstName, subscription),
+                  from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+                });
 
+                console.log(
+                  "Mini Experience email sent successfully to",
+                  recipientEmail
+                );
+              }
+            } else {
               console.log(
-                "Mini Experience email sent successfully to",
-                recipientEmail
+                "Skipping welcome emails for upgrade/renew process:",
+                paymentOpLegacy?.process
               );
             }
           }
@@ -309,10 +658,17 @@ export async function GET(request: Request) {
         //       ? "68c176b69c1ff0a2ad779c2d"
         //       : "687d67f459e6ba857a54ed53",
         // });
-        if (subscription.appliedDiscountAmount > 0) {
-          await DiscountModel.findByIdAndUpdate(data.appliedDiscount, {
-            $inc: { usageCount: 1 },
-          });
+        // Use the subscription document's discount fields to increment usage
+        if (
+          updateSubscription?.appliedDiscountAmount &&
+          updateSubscription.appliedDiscount
+        ) {
+          await DiscountModel.findByIdAndUpdate(
+            updateSubscription.appliedDiscount,
+            {
+              $inc: { usageCount: 1 },
+            }
+          );
         }
         const subscribedUser = await UserModel.findOneAndUpdate(
           { email: subscriptionEmail },
@@ -488,6 +844,19 @@ export async function GET(request: Request) {
       //Update the order status with orderId here
       return NextResponse.redirect(`${process.env.testUrl}payment/success`);
     } else {
+      // Mark subscription payment operation as failed if exists
+      try {
+        const failedOp = await subscriptionPaymentModel.findOne({
+          paymentID: data.order,
+        });
+        if (failedOp) {
+          await subscriptionPaymentModel.findByIdAndUpdate(failedOp._id, {
+            status: "failed",
+          });
+        }
+      } catch (e) {
+        console.error("Failed to mark subscription payment as failed", e);
+      }
       const res = await ordersModel.findOneAndUpdate(
         { orderID: data.order },
         { payment: "failed" }
