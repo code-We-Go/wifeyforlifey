@@ -16,6 +16,7 @@ const SubscriptionSchema = new Schema(
       required: false,
       ref: "discounts",
     },
+    
     appliedDiscountAmount: { type: Number, required: false },
     // User information
     firstName: { type: String, required: false },
@@ -50,6 +51,20 @@ const SubscriptionSchema = new Schema(
     shipping: { type: Number, required: false },
     currency: { type: String, required: false },
     expiryDate: { type: Date, default: Date.now },
+
+    allowedPlaylists: {
+      type: [
+        {
+          playlistID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "playlists",
+            required: true,
+          },
+          expiryDate: { type: Date, required: true },
+        },
+      ],
+      default: [],
+    },
 
     bostaCity: { type: String, required: false },
     bostaCityName: { type: String, required: false },

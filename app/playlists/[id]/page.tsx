@@ -113,6 +113,7 @@ export default function PlaylistPage() {
 
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
+  const [hasPlaylistAccess, setHasPlaylistAccess] = useState(false);
 
   const watermarkText = session?.user.email || "";
   // VdoCipher expects watermark config as an array of objects, as a JSON string
@@ -132,7 +133,8 @@ export default function PlaylistPage() {
   const [videoLoading, setVideoLoading] = useState(false);
 
   // Check if the selected video requires subscription
-  const videoLocked = !selectedVideo?.isPublic && !isSubscribed;
+  const canAccessPremium = isSubscribed || hasPlaylistAccess;
+  const videoLocked = !selectedVideo?.isPublic && !canAccessPremium;
 
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
@@ -206,6 +208,45 @@ export default function PlaylistPage() {
     }
   }, [playlistId]);
 
+  // Check allowed playlist access when not subscribed
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        if (
+          status === "authenticated" &&
+          !isSubscribed &&
+          session?.user?.email &&
+          playlistId
+        ) {
+          const res = await axios.get(
+            `/api/subscriptions/track?email=${encodeURIComponent(
+              session.user.email!
+            )}`
+          );
+          const sub = res.data;
+          const allowed = Array.isArray(sub?.allowedPlaylists)
+            ? sub.allowedPlaylists
+            : [];
+          const now = Date.now();
+          const match = allowed.find(
+            (p: any) => String(p?.playlistID) === String(playlistId)
+          );
+          if (match && match.expiryDate && new Date(match.expiryDate).getTime() > now) {
+            setHasPlaylistAccess(true);
+          } else {
+            setHasPlaylistAccess(false);
+          }
+        } else {
+          setHasPlaylistAccess(false);
+        }
+      } catch (e) {
+        setHasPlaylistAccess(false);
+      }
+    };
+
+    checkAccess();
+  }, [status, isSubscribed, session?.user?.email, playlistId]);
+
   // Fetch related playlists
   const fetchRelatedPlaylists = useCallback(async () => {
     try {
@@ -274,14 +315,14 @@ export default function PlaylistPage() {
 
   // Create a playlist progress record when user enters the playlist
   useEffect(() => {
-    if (status === "authenticated" && isSubscribed && playlistId) {
+    if (status === "authenticated" && canAccessPremium && playlistId) {
       axios
         .post("/api/playlist-progress", { playlistId })
         .catch((err) =>
           console.warn("Failed to create playlist progress", err)
         );
     }
-  }, [status, isSubscribed, playlistId]);
+  }, [status, canAccessPremium, playlistId]);
 
   // Fetch watched videos for this playlist
   const fetchPlaylistProgress = useCallback(async () => {
@@ -305,10 +346,10 @@ export default function PlaylistPage() {
   }, [playlistId]);
 
   useEffect(() => {
-    if (status === "authenticated" && isSubscribed && playlistId) {
+    if (status === "authenticated" && canAccessPremium && playlistId) {
       fetchPlaylistProgress();
     }
-  }, [status, isSubscribed, playlistId, fetchPlaylistProgress]);
+  }, [status, canAccessPremium, playlistId, fetchPlaylistProgress]);
 
   // Sync selectedVideo with currentIndex when playlist loads
   useEffect(() => {
@@ -365,7 +406,7 @@ export default function PlaylistPage() {
     if (vidParam) return;
     // Only apply once to avoid loops
     if (preferLastAppliedRef.current) return;
-    if (status === "authenticated" && isSubscribed && lastWatchedVideoId) {
+    if (status === "authenticated" && canAccessPremium && lastWatchedVideoId) {
       // If current selection already matches last watched, mark applied and exit
       if (selectedVideo && String((selectedVideo as any)._id) === String(lastWatchedVideoId)) {
         preferLastAppliedRef.current = true;
@@ -388,7 +429,7 @@ export default function PlaylistPage() {
     lastWatchedVideoId,
     searchParams,
     status,
-    isSubscribed,
+    canAccessPremium,
     selectedVideo,
   ]);
 
@@ -398,7 +439,7 @@ export default function PlaylistPage() {
       try {
         if (
           status === "authenticated" &&
-          isSubscribed &&
+          canAccessPremium &&
           playlistId &&
           selectedVideo?._id
         ) {
@@ -693,7 +734,7 @@ export default function PlaylistPage() {
 
           <div className="bg-card border border-lovely rounded-lg overflow-hidden shadow-sm">
             {/* Playlist progress (subscribed users only) */}
-            {status === "authenticated" && isSubscribed && (
+            {status === "authenticated" && canAccessPremium && (
               <div className="p-4  bg-creamey/90">
                 <div className="flex items-center justify-between text-sm text-lovely  mb-2">
                   <span>
@@ -729,10 +770,7 @@ export default function PlaylistPage() {
             <div className="divide-y max-h-[70vh] overflow-y-auto ">
               {Array.isArray(playlist.videos) &&
                 playlist.videos.map((video: any, index) => {
-                  console.log(
-                    "isLocked" + video.isPublic + isSubscribed + video.title
-                  );
-                  const isLocked = !video.isPublic && !isSubscribed;
+                  const isLocked = !video.isPublic && !canAccessPremium;
                   const isActive = selectedVideo?._id === video._id;
 
                   return (
