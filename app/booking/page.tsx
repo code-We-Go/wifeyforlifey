@@ -18,7 +18,7 @@ const BookingPage = () => {
         sessions. Please select the session type you would like to attend:
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-2 md:px-4">
         <div className="relative bg-lovely p-2 pt-4 border-lovely border-2 group rounded-lg">
           <Image
             width={80}
@@ -67,6 +67,37 @@ const BookingPage = () => {
               journey.
             </p>
             <Link href="/calendly2" className="block w-full">
+              <button className="w-full py-3 bg-creamey text-lovely rounded-lg font-medium hover:bg-creamey/90 transition">
+                Book This Session
+              </button>
+            </Link>
+          </div>
+        </div>
+        <div className="relative bg-lovely p-2 pt-4 border-lovely border-2 group rounded-lg">
+          <Image
+            width={80}
+            height={50}
+            className="absolute -top-5 -rotate-45 -left-5 z-20"
+            alt="fyonka"
+            src={"/fyonkaCreamey.png"}
+          />
+          <div className="bg-lovely p-4">
+            <h2
+              className={`${thirdFont.className} text-2xl text-center tracking-wide font-semibold text-creamey mb-3`}
+            >
+              Dr. Dalia Ghozlan
+            </h2>
+            <p className="text-creamey ">
+              💗✨ Ladies, we have exciting news! ✨💗 We’re hosting our first
+              Wifey Wellness Class in collaboration with Dr. Dalia Ghozlan — and
+              you’re invited! A safe, honest girl-talk session about everything
+              no one properly explains.
+            </p>
+            <p className="text-creamey mb-6">
+              This session is perfect for brides-to-be, newly married wifeys, or
+              any woman who wants to understand her body better. 💗
+            </p>
+            <Link href="/calendly3" className="block w-full">
               <button className="w-full py-3 bg-creamey text-lovely rounded-lg font-medium hover:bg-creamey/90 transition">
                 Book This Session
               </button>
