@@ -22,7 +22,7 @@ const CalendlyWidget = () => {
     <div className="w-full min-h-screen bg-creamey h-auto flex justify-center items-center">
       <div
         className="calendly-inline-widget"
-        data-url="https://calendly.com/wifeyforlifeycorp/self-care-during-gehaz-planning-period?hide_gdpr_banner=1&background_color=d32333&text_color=fbf3e0&primary_color=fbf3e0"
+        data-url="https://calendly.com/wifeyforlifeycorp/the-wifey-wellness-class-with-dr-dalia-ghozlan?hide_gdpr_banner=1&background_color=d32333&text_color=fbf3e0&primary_color=fbf3e0"
         style={{
           minWidth: "450px",
           height: "700px",

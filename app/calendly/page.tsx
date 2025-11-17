@@ -19,7 +19,7 @@ const CalendlyWidget = () => {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-creamey h-auto flex justify-center items-center p-4">
+    <div className="w-full min-h-screen bg-creamey h-auto flex flex-col gap-4 justify-center items-center p-4">
       <div
         className="calendly-inline-widget rounded-lg"
         data-url="https://calendly.com/wifeyforlifeycorp/all-about-appliances?hide_gdpr_banner=1&background_color=d32333&text_color=fbf3e0&primary_color=fbf3e0"
@@ -28,11 +28,24 @@ const CalendlyWidget = () => {
           height: "700px",
         }}
       />
+      
       <script
         type="text/javascript"
         src="https://assets.calendly.com/assets/external/widget.js"
         async
       />
+      <div className="text-center max-w-xl text-lovely">
+        <p className="text-sm mb-2">
+          Note: please confirm your session appointment first. You also have an
+          extra session with Dr Dalia Ghozlan.
+        </p>
+        <button
+          onClick={() => router.push("/calendly3")}
+          className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition"
+        >
+          Go to Dr Dalia Ghozlan Session
+        </button>
+      </div>
     </div>
   );
 };

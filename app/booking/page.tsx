@@ -73,7 +73,7 @@ const BookingPage = () => {
             </Link>
           </div>
         </div>
-        <div className="relative bg-lovely p-2 pt-4 border-lovely border-2 group rounded-lg">
+        {/* <div className="relative bg-lovely p-2 pt-4 border-lovely border-2 group rounded-lg">
           <Image
             width={80}
             height={50}
@@ -103,7 +103,7 @@ const BookingPage = () => {
               </button>
             </Link>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
