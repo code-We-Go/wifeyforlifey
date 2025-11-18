@@ -647,12 +647,12 @@ const CheckoutClientPage = () => {
 
     // Set errors to state
     setFormErrors(errors);
-
-    // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
+      alert(Object.values(errors)[0]);
       setLoading(false);
       return;
     }
+    // Stop submission if there are errors
 
     console.log("total" + formData.total);
     console.log(formData);

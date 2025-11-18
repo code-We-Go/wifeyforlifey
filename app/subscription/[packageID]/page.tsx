@@ -338,29 +338,29 @@ const SubscriptionPage = () => {
     if (isUpgrade) {
       setShipping(0);
     } else {
-    // Always maintain shipping cost regardless of Bosta Zone selection
-    // Only apply free shipping if discount is specifically for FREE_SHIPPING
-    if (
-      !appliedDiscount ||
-      appliedDiscount.calculationType !== "FREE_SHIPPING" ||
-      // Check if package price meets minimum order amount required for the discount
-      (appliedDiscount.conditions?.minimumOrderAmount &&
-        price < appliedDiscount.conditions.minimumOrderAmount)
-    ) {
-      // Keep the shipping cost even when Bosta Zone is selected
-      // if (location.city && location.zone) {
-      //   // Maintain shipping cost when zone is selected
-      //   setShipping(location.shippingCost.priceBeforeVat);
-      // }
-      if (location.city) {
-        // Set shipping when only city is selected
-        setShipping(location.shippingCost.priceBeforeVat);
+      // Always maintain shipping cost regardless of Bosta Zone selection
+      // Only apply free shipping if discount is specifically for FREE_SHIPPING
+      if (
+        !appliedDiscount ||
+        appliedDiscount.calculationType !== "FREE_SHIPPING" ||
+        // Check if package price meets minimum order amount required for the discount
+        (appliedDiscount.conditions?.minimumOrderAmount &&
+          price < appliedDiscount.conditions.minimumOrderAmount)
+      ) {
+        // Keep the shipping cost even when Bosta Zone is selected
+        // if (location.city && location.zone) {
+        //   // Maintain shipping cost when zone is selected
+        //   setShipping(location.shippingCost.priceBeforeVat);
+        // }
+        if (location.city) {
+          // Set shipping when only city is selected
+          setShipping(location.shippingCost.priceBeforeVat);
+        }
+      } else {
+        // Ensure shipping is set to 0 when free shipping discount is applied
+        // and package price meets minimum order amount
+        setShipping(0);
       }
-    } else {
-      // Ensure shipping is set to 0 when free shipping discount is applied
-      // and package price meets minimum order amount
-      setShipping(0);
-    }
     }
 
     // Update formData with Bosta location details
@@ -704,7 +704,7 @@ const SubscriptionPage = () => {
 
     // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
-      alert(Object.keys(errors)[0] + Object.keys(errors)[1]);
+      alert(Object.values(errors)[0]);
       setLoading(false);
       return;
     }
