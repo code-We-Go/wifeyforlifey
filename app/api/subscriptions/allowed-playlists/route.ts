@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const expiryDate = new Date();
-    expiryDate.setMonth(expiryDate.getMonth() + 6);
+    expiryDate.setDate(expiryDate.getDate() + 45);
 
     const existingIndex = (subscription as any).allowedPlaylists?.findIndex(
       (p: any) => p.playlistID?.toString() === playlistId
