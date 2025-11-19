@@ -35,18 +35,11 @@ const CalendlyWidget = () => {
         async
       />
       <div className="text-center max-w-xl text-lovely">
-        <p className="text-sm mb-2">
-          Because you’re a Wifey for Lifey bride, you always get a little extra
-          love. Enjoy this free wellness class with Dr. Dalia. A cosy,
-          girl-to-girl class where we talk about your body, hormones, cycle, and
-          everything you should know before marriage. We take care of our
-          brides, always. 💕🌸
-        </p>
         <button
           onClick={() => router.push("/calendly3")}
           className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition"
         >
-          book your seat
+          Click for a surprise from wifey!
         </button>
       </div>
     </div>
