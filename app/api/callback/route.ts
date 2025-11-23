@@ -320,6 +320,22 @@ export async function GET(request: Request) {
                   body: generateMiniExperienceMail(firstName, updatedSub),
                   from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
                 });
+                const brevoApiKey = process.env.BREVO_API_KEY;
+                if (brevoApiKey) {
+                  await fetch("https://api.brevo.com/v3/contacts", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Accept: "application/json",
+                      "api-key": brevoApiKey,
+                    },
+                    body: JSON.stringify({
+                      email: updatedSub.email,
+                      listIds: [4],
+                      updateEnabled: true,
+                    }),
+                  });
+                }
                 console.log(
                   "Mini Experience email sent successfully to",
                   recipientEmail
@@ -574,8 +590,7 @@ export async function GET(request: Request) {
             });
 
             console.log("Gift email sent successfully to", subscription.email);
-          } 
-          else {
+          } else {
             // Only send welcome emails for NEW subscriptions
             const paymentOpLegacy = await subscriptionPaymentModel.findOne({
               paymentID: data.order,
@@ -629,6 +644,22 @@ export async function GET(request: Request) {
                   body: generateMiniExperienceMail(firstName, subscription),
                   from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
                 });
+                const brevoApiKey2 = process.env.BREVO_API_KEY;
+                if (brevoApiKey2) {
+                  await fetch("https://api.brevo.com/v3/contacts", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Accept: "application/json",
+                      "api-key": brevoApiKey2,
+                    },
+                    body: JSON.stringify({
+                      email: subscription.email,
+                      listIds: [4],
+                      updateEnabled: true,
+                    }),
+                  });
+                }
 
                 console.log(
                   "Mini Experience email sent successfully to",
