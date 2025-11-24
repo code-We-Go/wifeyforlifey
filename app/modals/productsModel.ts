@@ -70,6 +70,7 @@ const ProductSchema = new Schema({
     required: true,
     ref: "subCategories",
   },
+  order: { type: Number, required: false, default: 0 },
 
   season: { type: String, required: false },
   price: { type: priceSchema, required: true },

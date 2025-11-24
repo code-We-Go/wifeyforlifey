@@ -150,6 +150,7 @@ export interface Product {
   description: string;
   price: price;
   comparedPrice: number;
+  order?: number;
   // subCategoryID: mongoose.Types.ObjectId;
   subCategoryID: SubCategory; // now a full object
   variations: Variant[];
