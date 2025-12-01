@@ -38,6 +38,45 @@ export async function GET(request: Request) {
 
     // Perform your logic with the GET data here
     if (isSuccess) {
+      try {
+        const { default: PartnerSessionOrderModel } = await import(
+          "@/app/modals/partnerSessionOrderModel"
+        );
+        const partnerOrder = await PartnerSessionOrderModel.findOne({
+          paymentID: data.order,
+        });
+        if (partnerOrder) {
+          partnerOrder.status = "paid";
+          await partnerOrder.save();
+          try {
+            const { sendMail } = await import("@/lib/email");
+            const { SessionBookingPartnerMail } = await import(
+              "@/utils/SessionBookingPartnerMail"
+            );
+            const body = SessionBookingPartnerMail(
+              partnerOrder.sessionTitle,
+              partnerOrder.clientFirstName,
+              partnerOrder.clientLastName,
+              partnerOrder.clientEmail,
+              partnerOrder.clientPhone
+            );
+            await sendMail({
+              to: partnerOrder.partnerEmail,
+              subject: "New Session Confirmed",
+              name: partnerOrder.partnerName,
+              body,
+              from: "partners@shopwifeyforlifey.com",
+            });
+          } catch (e) {
+            console.error("Failed to send partner confirmation email", e);
+          }
+          return NextResponse.redirect(
+            `${process.env.testUrl}payment/success?session=true&orderId=${partnerOrder._id}`
+          );
+        }
+      } catch (e) {
+        console.error("Partner session order check failed", e);
+      }
       console.log("registering" + packageModel);
       // First, check if this payment corresponds to an upgrade/renew operation
       const paymentOp = await subscriptionPaymentModel

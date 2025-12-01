@@ -11,15 +11,24 @@ function SuccessPage() {
   const { clearCart } = useCart();
   const [subscription, setSubscription] = useState<string | null>(null);
   const [account, setAccount] = useState<string | null>(null);
+  const [sessionOrder, setSessionOrder] = useState<any | null>(null);
   const searchParams = useSearchParams();
   useEffect(() => {
     const subscription = searchParams.get("subscription");
     const account = searchParams.get("account");
+    const partnerSession = searchParams.get("session");
+    const orderId = searchParams.get("orderId");
     if (subscription) {
       setSubscription(subscription);
     }
     if (account) {
       setAccount(account);
+    }
+    if (partnerSession && orderId) {
+      fetch(`/api/partner-sessions/order?orderId=${orderId}`)
+        .then((r) => r.json())
+        .then((d) => setSessionOrder(d.order))
+        .catch(() => setSessionOrder(null));
     }
 
     clearCart();
@@ -61,6 +70,33 @@ function SuccessPage() {
                 </p>
               ))}
             <p>Look out for an email from your bestie 👯‍♀️.</p>
+          </div>
+        ) : sessionOrder ? (
+          <div className="text-lovely">
+            <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">
+              🎉 Your Session is Confirmed. 🎉
+            </h1>
+            <p className="mt-2">Partner: {sessionOrder.partnerName}</p>
+            <p className="mt-1">Session: {sessionOrder.sessionTitle}</p>
+            <div className="mt-4 p-4 border border-lovely rounded-2xl bg-creamey">
+              <p className="font-semibold">
+                click the link below to arrange your appointment:
+              </p>
+              <a
+                href={`https://wa.me/${String(
+                  sessionOrder.whatsappNumber
+                ).replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-lg text-lovely underline"
+              >
+                Whatsapp link
+              </a>
+              {/* <p className=" text-lovely/80">
+                you will be able to arrange the appointment time with{" "}
+                {sessionOrder.partnerName}
+              </p> */}
+            </div>
           </div>
         ) : (
           <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">

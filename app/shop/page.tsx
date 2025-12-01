@@ -30,6 +30,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import PackageCard from "@/components/shop/PackageCard";
 import { lifeyFont, thirdFont } from "@/fonts";
 import { wishListContext } from "@/app/context/wishListContext";
+import PartnerSessionsSection from "@/components/partners/PartnerSessionsSection";
 
 interface Category {
   _id: string;
@@ -396,6 +397,7 @@ function ShopPage() {
             {packages.map((packageItem) => (
               <PackageCard key={packageItem._id} packageItem={packageItem} />
             ))}
+          
             {products.map((product) => {
               const productID = product._id;
               const fav = wishList.find(
@@ -430,6 +432,9 @@ function ShopPage() {
             </Button>
           </div>
         )}
+
+        {/* Partner Sessions Section */}
+        <PartnerSessionsSection />
       </div>
     </div>
   );
