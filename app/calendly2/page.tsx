@@ -34,14 +34,14 @@ const CalendlyWidget = () => {
         src="https://assets.calendly.com/assets/external/widget.js"
         async
       />
-      <div className="text-center max-w-xl text-lovely">
+      {/* <div className="text-center max-w-xl text-lovely">
         <button
           onClick={() => router.push("/calendly3")}
           className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition"
         >
           Click for a surprise from wifey!
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
