@@ -163,12 +163,12 @@ export default function PartnerSessionsSection() {
   };
 
   return (
-    <div className="mt-12">
-      <h2
+    <div className="">
+      {/* <h2
         className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}
       >
         Partner Sessions
-      </h2>
+      </h2> */}
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
