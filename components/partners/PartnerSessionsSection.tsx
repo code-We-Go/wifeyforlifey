@@ -191,8 +191,9 @@ export default function PartnerSessionsSection() {
               Book: {selected.title}
             </h3>
             <p className="text-sm text-lovely/90 mb-4">
-              After payment successfully, you will be redirected to a WhatsApp
-              link to set up your session date with {selected.partnerName}.
+              After your payment is successfully completed, you will receive{" "}
+              {selected.partnerName} WhatsApp contact to arrange your session
+              time.
             </p>
 
             <form onSubmit={book} className="space-y-3">

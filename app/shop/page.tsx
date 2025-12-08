@@ -229,7 +229,7 @@ function ShopPage() {
                 <p className="mt-4 text-lovely/90">Loading subscriptions...</p>
               </div>
             ) : packages.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {packages.map((packageItem) => (
                   <PackageCard
                     key={packageItem._id}

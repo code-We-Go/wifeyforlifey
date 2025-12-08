@@ -14,7 +14,7 @@ export default function PartnerSessionCard({
 }) {
   const hasDiscount = !!session.discountCode;
   return (
-    <div className="bg-creamey border border-lovely rounded-2xl overflow-hidden hover:shadow-lg transition">
+    <div className="bg-creamey border border-lovely rounded-2xl overflow-hidden hover:shadow-lg transition flex flex-col h-full">
       <div className="relative h-48 w-full">
         <Image
           src={session.imageUrl}
@@ -28,10 +28,12 @@ export default function PartnerSessionCard({
           </div>
         )} */}
       </div>
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-lovely">{session.title}</h3>
-          <span className="text-lovely font-medium">EGP {session.price}</span>
+          <h3 className="text-lg font-semibold w-4/5 text-lovely">
+            {session.title}
+          </h3>
+          <span className="text-lovely  font-medium">EGP {session.price}</span>
         </div>
         <div className="mt-1 flex items-center gap-2">
           <p className={`${thirdFont.className} text-sm text-lovely/70`}>
@@ -43,11 +45,11 @@ export default function PartnerSessionCard({
             </span>
           )}
         </div>
-        <p className="text-lovely/90 mt-2 line-clamp-3">
+        <p className="text-lovely/90 mt-2 overflow-y-auto max-h-32 mb-4 scrollbar-creamey pr-2">
           {session.description}
         </p>
         <Button
-          className="mt-4 w-full bg-lovely text-creamey hover:bg-lovely/90 rounded-2xl"
+          className="mt-auto w-full bg-lovely text-creamey hover:bg-lovely/90 rounded-2xl"
           onClick={() => onBook(session)}
         >
           Book Session
