@@ -337,6 +337,22 @@ export async function GET(request: Request) {
                   body: generateWelcomeEmail(firstName, updatedSub),
                   from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
                 });
+                const brevoApiKey = process.env.BREVO_API_KEY;
+                if (brevoApiKey) {
+                  await fetch("https://api.brevo.com/v3/contacts", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Accept: "application/json",
+                      "api-key": brevoApiKey,
+                    },
+                    body: JSON.stringify({
+                      email: updatedSub.email,
+                      listIds: [5],
+                      updateEnabled: true,
+                    }),
+                  });
+                }
                 console.log(
                   "Welcome email sent successfully to",
                   recipientEmail
@@ -658,6 +674,23 @@ export async function GET(request: Request) {
                   body: generateWelcomeEmail(firstName, subscription),
                   from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
                 });
+
+                const brevoApiKey = process.env.BREVO_API_KEY;
+                if (brevoApiKey) {
+                  await fetch("https://api.brevo.com/v3/contacts", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Accept: "application/json",
+                      "api-key": brevoApiKey,
+                    },
+                    body: JSON.stringify({
+                      email: subscription.email,
+                      listIds: [5],
+                      updateEnabled: true,
+                    }),
+                  });
+                }
 
                 console.log(
                   "Welcome email sent successfully to",
