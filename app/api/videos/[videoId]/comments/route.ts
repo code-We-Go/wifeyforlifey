@@ -133,7 +133,6 @@ export async function POST(
     // Check if user is subscribed and subscription hasn't expired
     const today = new Date();
     if (
-      !user.isSubscribed ||
       (user.expiryDate && new Date(user.expiryDate) < today)
     ) {
       return NextResponse.json(
