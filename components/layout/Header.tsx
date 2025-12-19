@@ -242,12 +242,16 @@ export default function Header() {
     <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300 ease-in-out",
-        isScrolled ? "bg-lovely/50 backdrop-blur-md shadow-sm" : "bg-lovely",
-        isVisible ? "translate-y-0" : "-translate-y-16 md:-translate-y-32"
+        isVisible ? "translate-y-0" : "-translate-y-32 md:-translate-y-72 2xl:-translate-y-80"
+        // isScrolled ? "bg-lovely/50 backdrop-blur-md shadow-sm" : "bg-lovely",
+        // isVisible ? "translate-y-0" : "-translate-y-16 md:-translate-y-32"
       )}
     >
       {/* <div className="mx-auto"  > */}
-      <div className={`mx-auto ${thirdFont.className} text-6xl font-semibold`}>
+      <div className={`
+              ${isScrolled ? "bg-lovely/50 backdrop-blur-md shadow-sm" : "bg-lovely"}
+
+        mx-auto ${thirdFont.className} text-6xl font-semibold`}>
         <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
           {/* Desktop Navigation */}
           <nav className="hidden  text-lovely justify-center items-center md:flex px-2 py-8">
@@ -273,7 +277,7 @@ export default function Header() {
               className=" border-x-2 lg:flex-shrink-0 border-creamey items-center px-8 lg:px-16 space-x-2"
             >
               <Image
-                unoptimized
+                
                 className="aspect-auto"
                 alt="logo"
                 width={200}
@@ -445,7 +449,7 @@ export default function Header() {
                       onClick={handleLinkClick}
                     >
                       <Image
-                        unoptimized
+                        
                         className="aspect-auto"
                         alt="logo"
                         width={200}
@@ -516,7 +520,7 @@ export default function Header() {
               className="  lg:flex-shrink-0  items-center px-8 lg:px-16 space-x-2"
             >
               <Image
-                unoptimized
+                
                 className="aspect-auto"
                 alt="logo"
                 width={200}
@@ -565,6 +569,36 @@ export default function Header() {
             </Link> */}
           </div>
         </div>
+      </div>
+      {/* Christmas Decoration - Desktop */}
+      <div className="hidden bg-transparent md:flex w-full sticky top-40 z-40">
+        <Image
+          src="/cristmas/kharbShort.png"
+          alt="Christmas Decoration"
+          width={960}
+          height={100}
+          className="w-1/2  object-contain"
+          
+        />
+        <Image
+          src="/cristmas/kharbShort.png"
+          alt="Christmas Decoration"
+          width={960}
+          height={100}
+          className="w-1/2 h-auto object-contain"
+          
+        />
+      </div>
+      {/* Christmas Decoration - Mobile */}
+      <div className="block md:hidden w-full">
+        <Image
+          src="/cristmas/kharbShortFull.png"
+          alt="Christmas Decoration"
+          width={1920}
+          height={100}
+          className="w-full h-auto"
+          
+        />
       </div>
       {/* Notifications Modal */}
       <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>

@@ -7,7 +7,8 @@ import { lifeyFont } from "@/fonts";
 
 const HeroSection = () => {
   return (
-    <div className="w-full pt-32 relative h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] bg-creamey">
+    // <div className="w-full pt-32 relative h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] bg-creamey">
+    <div className="w-full md:pt-4 relative h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] bg-creamey">
       <div className="relative h-[60%] sm:h-[65%] flex pb-[25vh] lg:pb-[15vh] justify-start lg:w-1/2 items-center sm:pb-[25vh] lg:justify-start lg:items-start">
         <motion.div
           variants={fadeIn({ direction: "right", delay: 0.2 })}
