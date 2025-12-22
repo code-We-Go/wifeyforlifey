@@ -112,8 +112,10 @@ export default function ProductPage() {
           The product you are looking for doesn&apos;t exist or has been
           removed.
         </p>
-        <Button asChild>
-          <Link href="/shop">Back to Shop</Link>
+        <Button asChild className="text-lovely">
+          <Link className="text-lovely" href="/shop">
+            Back to Shop
+          </Link>
         </Button>
       </div>
     );
@@ -223,8 +225,8 @@ export default function ProductPage() {
       {/* Back to shop button - mobile only */}
       <div className="md:hidden mb-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/shop">
-            <ChevronLeft className="mr-1 h-4 w-4" />
+          <Link className="text-lovely" href="/shop">
+            <ChevronLeft className="mr-1 text-lovely h-4 w-4" />
             Back to Shop
           </Link>
         </Button>
