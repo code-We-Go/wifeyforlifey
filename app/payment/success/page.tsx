@@ -41,7 +41,8 @@ function SuccessPage() {
       <div className="text-center z-10">
         <div className="relative h-[350px] md:h-[300px] lg:h-[270px] rounded-lg overflow-hidden">
           <Image
-            src="/joinNow/Brid and Bridesmaids.png"
+            src="/cristmas/hero.png"
+            // src="/joinNow/Brid and Bridesmaids.png"
             alt="Hero Image"
             fill
             priority

@@ -1124,9 +1124,52 @@ const SubscriptionPage = () => {
                       <img
                         src="/giftCard/The Wifey to be card.jpeg"
                         alt="Wifey to be Card"
-                        className="w-full h-auto"
+                        className="w-full object-cover "
                       />
                       {formData.giftCardName === "The Wifey to be card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName === "Merry and Married"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName === "Merry and Married"
+                            ? ""
+                            : "Merry and Married";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Merry and Married
+                      </div>
+                      <img
+                        src="/cristmas/merryAndMarried.jpeg"
+                        alt="Merry and Married Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName === "Merry and Married" && (
                         <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

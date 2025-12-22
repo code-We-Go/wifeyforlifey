@@ -242,16 +242,24 @@ export default function Header() {
     <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300 ease-in-out",
-        isVisible ? "translate-y-0" : "-translate-y-32 md:-translate-y-72 2xl:-translate-y-80"
+        isVisible
+          ? "translate-y-0"
+          : "-translate-y-32 md:-translate-y-72 2xl:-translate-y-80"
         // isScrolled ? "bg-lovely/50 backdrop-blur-md shadow-sm" : "bg-lovely",
         // isVisible ? "translate-y-0" : "-translate-y-16 md:-translate-y-32"
       )}
     >
       {/* <div className="mx-auto"  > */}
-      <div className={`
-              ${isScrolled ? "bg-lovely/50 backdrop-blur-md shadow-sm" : "bg-lovely"}
+      <div
+        className={`
+              ${
+                isScrolled
+                  ? "bg-lovely/50 backdrop-blur-md shadow-sm"
+                  : "bg-lovely"
+              }
 
-        mx-auto ${thirdFont.className} text-6xl font-semibold`}>
+        mx-auto ${thirdFont.className} text-6xl font-semibold relative z-50`}
+      >
         <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
           {/* Desktop Navigation */}
           <nav className="hidden  text-lovely justify-center items-center md:flex px-2 py-8">
@@ -277,12 +285,12 @@ export default function Header() {
               className=" border-x-2 lg:flex-shrink-0 border-creamey items-center px-8 lg:px-16 space-x-2"
             >
               <Image
-                
                 className="aspect-auto"
                 alt="logo"
                 width={200}
                 height={150}
-                src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
+                src={"/cristmas/logo.png"}
+                // src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
               />
             </Link>
             {rightNavigation.map((item) => (
@@ -449,14 +457,14 @@ export default function Header() {
                       onClick={handleLinkClick}
                     >
                       <Image
-                        
                         className="aspect-auto"
                         alt="logo"
                         width={200}
                         height={150}
-                        src={
-                          "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
-                        }
+                        src={"/cristmas/logo.png"}
+                        // src={
+                        //   "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
+                        // }
                       />
                     </Link>
                   </div>
@@ -520,12 +528,11 @@ export default function Header() {
               className="  lg:flex-shrink-0  items-center px-8 lg:px-16 space-x-2"
             >
               <Image
-                
                 className="aspect-auto"
                 alt="logo"
                 width={200}
                 height={150}
-                src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
+                src={"/cristmas/mobile.png"}
               />
             </Link>
             <div className="mr-2 gap-4 flex">
@@ -571,33 +578,30 @@ export default function Header() {
         </div>
       </div>
       {/* Christmas Decoration - Desktop */}
-      <div className="hidden bg-transparent md:flex w-full sticky top-40 z-40">
-        <Image
-          src="/cristmas/kharbShort.png"
+      <div className="hidden bg-transparent md:flex w-full sticky -mt-14 z-40">
+        {/* <Image
+          src="/cristmas/kharb2Full.png"
           alt="Christmas Decoration"
           width={960}
           height={100}
           className="w-1/2  object-contain"
-          
-        />
+        /> */}
         <Image
-          src="/cristmas/kharbShort.png"
+          src="/cristmas/kharb2FullDesktop.png"
           alt="Christmas Decoration"
-          width={960}
+          width={1920}
           height={100}
-          className="w-1/2 h-auto object-contain"
-          
+          className="w-full h-auto object-contain"
         />
       </div>
       {/* Christmas Decoration - Mobile */}
-      <div className="block md:hidden w-full">
+      <div className="block md:hidden w-full relative -mt-10 z-40">
         <Image
-          src="/cristmas/kharbShortFull.png"
+          src="/cristmas/kharb2Long.png"
           alt="Christmas Decoration"
           width={1920}
           height={100}
           className="w-full h-auto"
-          
         />
       </div>
       {/* Notifications Modal */}
