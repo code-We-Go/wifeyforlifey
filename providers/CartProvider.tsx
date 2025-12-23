@@ -1,13 +1,28 @@
 "use client";
 
 import { attribute, CartItem, Variant } from "@/app/interfaces/interfaces";
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+} from "react";
 
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string , variant:Variant ,attribute:attribute) => void;
-  updateQuantity: (productId: string, quantity: number,variant:Variant ,attribute:attribute) => void;
+  removeItem: (
+    productId: string,
+    variant: Variant,
+    attribute: attribute
+  ) => void;
+  updateQuantity: (
+    productId: string,
+    quantity: number,
+    variant: Variant,
+    attribute: attribute
+  ) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -37,16 +52,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => 
-        i.productId === item.productId && 
-        i.attributes.name === item.attributes.name &&
-        i.variant.name === item.variant.name
+      const existingItem = prevItems.find(
+        (i) =>
+          i.productId === item.productId &&
+          i.attributes?.name === item.attributes?.name &&
+          i.variant?.name === item.variant?.name
       );
       if (existingItem) {
         return prevItems.map((i) =>
-          (i.productId === item.productId &&
-           i.attributes.name === item.attributes.name &&
-           i.variant.name === item.variant.name)
+          i.productId === item.productId &&
+          i.attributes?.name === item.attributes?.name &&
+          i.variant?.name === item.variant?.name
             ? { ...i, quantity: i.quantity + item.quantity }
             : i
         );
@@ -55,29 +71,40 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string, variant: Variant, attribute: attribute) => {
+  const removeItem = (
+    productId: string,
+    variant: Variant,
+    attribute: attribute
+  ) => {
     setItems((prevItems) =>
       prevItems.filter(
         (i) =>
-          !(i.productId === productId &&
-            i.attributes.name === attribute.name &&
-            i.variant.name === variant.name)
+          !(
+            i.productId === productId &&
+            i.attributes?.name === attribute?.name &&
+            i.variant?.name === variant?.name
+          )
       )
     );
   };
 
-  const updateQuantity = (productId: string, quantity: number, variant: Variant, attribute: attribute) => {
+  const updateQuantity = (
+    productId: string,
+    quantity: number,
+    variant: Variant,
+    attribute: attribute
+  ) => {
     if (quantity <= 0) {
       removeItem(productId, variant, attribute);
       return;
     }
-    
+
     setItems((prevItems) =>
       prevItems.map((item) =>
-        (item.productId === productId && 
-         item.attributes.name === attribute.name &&
-         item.variant.name === variant.name)
-          ? { ...item, quantity } 
+        item.productId === productId &&
+        item.attributes?.name === attribute?.name &&
+        item.variant?.name === variant?.name
+          ? { ...item, quantity }
           : item
       )
     );
@@ -86,11 +113,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = () => {
     setItems([]);
     localStorage.removeItem("cart"); // or localStorage.setItem("cart", "[]");
-
   };
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
-  
+
   const totalPrice = items.reduce(
     (total, item) => total + item.price * item.quantity,
     0

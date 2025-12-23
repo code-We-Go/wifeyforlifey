@@ -75,7 +75,7 @@ export default function ProductModal() {
           : modalProduct.price.local,
       attributes: selectedAttribute,
       variant: selectedVariant,
-      imageUrl: selectedVariant.images[0].url,
+      imageUrl: selectedVariant.images?.[0]?.url,
       quantity,
     });
 
@@ -92,14 +92,16 @@ export default function ProductModal() {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-              {selectedVariant && (
-                <Image
-                  src={selectedVariant.images[selectedImage].url}
-                  alt={modalProduct.title}
-                  fill
-                  className="object-cover"
-                />
-              )}
+              {selectedVariant &&
+                selectedVariant.images &&
+                selectedVariant.images.length > 0 && (
+                  <Image
+                    src={selectedVariant.images[selectedImage]?.url}
+                    alt={modalProduct.title}
+                    fill
+                    className="object-cover"
+                  />
+                )}
             </div>
 
             {selectedVariant && selectedVariant.images.length > 1 && (

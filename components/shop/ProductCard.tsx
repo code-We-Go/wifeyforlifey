@@ -40,13 +40,10 @@ export default function ProductCard({
           productId: product._id,
           productName: product.title,
           price: product.price.local,
-          variant: product.variations[0],
+          variant: product.variations?.[0],
           quantity: 1,
-          attributes: {
-            name: product.variations[0].attributeName,
-            stock: product.variations[0].attributes[0].stock,
-          },
-          imageUrl: product.variations[0].images[0].url,
+          attributes: product.variations?.[0]?.attributes?.[0],
+          imageUrl: product.variations?.[0]?.images?.[0]?.url,
         },
       ]);
       // Swal.fire({
