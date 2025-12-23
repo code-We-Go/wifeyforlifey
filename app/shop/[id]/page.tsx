@@ -334,25 +334,26 @@ export default function ProductPage() {
                   {selectedVariant.attributeName}
                 </h3> */}
                 <div className="flex flex-wrap gap-2">
-                  {selectedVariant.attributes.map((attr, index) => (
-                    <Button
-                      key={index}
-                      variant={
-                        selectedAttribute?.name === attr.name
-                          ? "default"
-                          : "outline"
-                      }
-                      onClick={() => handleAttributeChange(attr)}
-                      className={
-                        selectedAttribute?.name === attr.name
-                          ? "rounded-full bg-lovely text-creamey"
-                          : "rounded-full bg-pinkey text-lovely"
-                      }
-                      disabled={attr.stock <= 0}
-                    >
-                      {attr.name}
-                    </Button>
-                  ))}
+                  {selectedVariant.attributes.length > 1 &&
+                    selectedVariant.attributes.map((attr, index) => (
+                      <Button
+                        key={index}
+                        variant={
+                          selectedAttribute?.name === attr.name
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() => handleAttributeChange(attr)}
+                        className={
+                          selectedAttribute?.name === attr.name
+                            ? "rounded-full bg-lovely text-creamey"
+                            : "rounded-full bg-pinkey text-lovely"
+                        }
+                        disabled={attr.stock <= 0}
+                      >
+                        {attr.name}
+                      </Button>
+                    ))}
                 </div>
               </div>
             )}
