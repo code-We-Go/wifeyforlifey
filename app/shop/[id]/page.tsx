@@ -301,10 +301,11 @@ export default function ProductPage() {
 
           <div className="text-2xl text-lovely font-medium">
             LE
-            {selectedAttribute?.price
-              ? selectedAttribute?.price?.toFixed(2)
-              : selectedVariant?.price?.toFixed(2) ??
-                product.price.local.toFixed(2)}
+            {selectedAttribute?.price && selectedAttribute.price > 0
+              ? selectedAttribute.price.toFixed(2)
+              : selectedVariant?.price && selectedVariant.price > 0
+              ? selectedVariant.price.toFixed(2)
+              : product.price.local.toFixed(2)}
           </div>
 
           <p className="text-lovely/90">{product.description}</p>

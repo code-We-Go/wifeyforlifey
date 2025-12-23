@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Discount } from "../types/discount";
+import { CartItem } from "../interfaces/interfaces";
 import CartItemSmall from "../cart/CartItemSmall";
 import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
@@ -239,13 +240,50 @@ const CheckoutClientPage = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const {
-    items,
+    items: initialItems,
     removeItem,
     updateQuantity,
     totalItems,
     totalPrice,
     clearCart,
   } = useCart();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isValidating, setIsValidating] = useState(true);
+
+  useEffect(() => {
+    const validateCart = async () => {
+      if (initialItems.length === 0) {
+        setItems([]);
+        setIsValidating(false);
+        return;
+      }
+
+      setIsValidating(true);
+      try {
+        const response = await axios.post("/api/cart/validate", {
+          items: initialItems.map((item) => ({
+            ...item,
+            price:
+              item.attributes?.price && item.attributes.price > 0
+                ? item.attributes.price
+                : item.variant?.price && item.variant.price > 0
+                ? item.variant.price
+                : item.price,
+          })),
+        });
+        if (response.data.items) {
+          setItems(response.data.items);
+        }
+      } catch (error) {
+        console.error("Failed to validate cart", error);
+        setItems(initialItems);
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateCart();
+  }, [initialItems]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
@@ -1265,23 +1303,23 @@ const CheckoutClientPage = () => {
                 <button
                   className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
                   onClick={handleSubmit}
-                  disabled={loading || items.length === 0}
+                  disabled={loading || isValidating || items.length === 0}
                 >
-                  Confirm order
+                  {isValidating ? "Validating..." : "Confirm order"}
                 </button>
               </div>
             ) : (
               <div className="flex justify-end">
                 <button
-                  disabled={items.length === 0 || loading}
+                  disabled={items.length === 0 || loading || isValidating}
                   type="submit"
                   className={`border transition duration-300 border-lovely p-1 ${
-                    items.length === 0 || loading
+                    items.length === 0 || loading || isValidating
                       ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
                       : "hover:cursor-pointer hover:bg-lovely hover:text-white text-lovely"
                   }`}
                 >
-                  PROCEED TO PAYMENT
+                  {isValidating ? "Validating..." : "PROCEED TO PAYMENT"}
                 </button>
               </div>
             )}
@@ -1327,9 +1365,15 @@ const CheckoutClientPage = () => {
               padding: summary ? "0.25rem 0.25rem" : "0",
             }}
           >
-            {items.map((cartItem, index) => (
-              <OrderSummaryItem cartItem={cartItem} key={index} />
-            ))}
+            {isValidating ? (
+              <div className="flex justify-center p-4">
+                <Spinner />
+              </div>
+            ) : (
+              items.map((cartItem, index) => (
+                <OrderSummaryItem cartItem={cartItem} key={index} />
+              ))
+            )}
             <DiscountSection
               onDiscountApplied={handleDiscountApplied}
               redeemType="Purchase"
@@ -1402,9 +1446,15 @@ const CheckoutClientPage = () => {
 
               {/* Cart Items */}
               <div className="flex flex-col gap-4 mb-6">
-                {items.map((item, index) => (
-                  <OrderSummaryItem key={index} cartItem={item} />
-                ))}
+                {isValidating ? (
+                  <div className="flex justify-center p-4">
+                    <Spinner />
+                  </div>
+                ) : (
+                  items.map((item, index) => (
+                    <OrderSummaryItem key={index} cartItem={item} />
+                  ))
+                )}
               </div>
 
               {/* Discount Section */}
