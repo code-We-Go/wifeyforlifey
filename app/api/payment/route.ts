@@ -88,7 +88,7 @@ export async function POST(request: Request) {
   if (data.cash === "cash") {
     console.log("BOSTACHECK" + data.bostaZone);
     try {
-      // await decreaseStock(items); // <-- Decrease stock before order creation
+      await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
       console.log("appliedDiscount" + data.appliedDiscount);
       const res = await ordersModel.create({
