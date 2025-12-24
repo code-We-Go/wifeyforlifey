@@ -578,7 +578,7 @@ export default function Header() {
         </div>
       </div>
       {/* Christmas Decoration - Desktop */}
-      <div className="hidden bg-transparent md:flex w-full sticky -mt-14 z-40">
+      <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
         {/* <Image
           src="/cristmas/kharb2Full.png"
           alt="Christmas Decoration"
@@ -595,7 +595,7 @@ export default function Header() {
         />
       </div>
       {/* Christmas Decoration - Mobile */}
-      <div className="block md:hidden w-full relative -mt-10 z-40">
+      <div className="block md:hidden w-full absolute top-full left-0 -mt-10 z-40 pointer-events-none">
         <Image
           src="/cristmas/kharb2Long.png"
           alt="Christmas Decoration"
