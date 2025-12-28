@@ -2,7 +2,15 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import BoardCard from "./BoardCard";
-import { ArrowLeft, MoreHorizontal, Share, X, ZoomIn } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Share,
+  X,
+  ZoomIn,
+} from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -70,19 +78,88 @@ const InspoTab = () => {
     [activeBoard, sectionTitle]
   );
 
-  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
+  const pinId = searchParams.get("pin");
+
+  const selectedPin = useMemo(() => {
+    if (!pinId) return null;
+    if (activeSection)
+      return activeSection.pins.find((p) => p.id === pinId) || null;
+    // Fallback search
+    for (const board of boards) {
+      for (const section of board.sections) {
+        const pin = section.pins.find((p) => p.id === pinId);
+        if (pin) return pin;
+      }
+    }
+    return null;
+  }, [pinId, activeSection, boards]);
+
+  const currentSection = useMemo(() => {
+    if (activeSection) return activeSection;
+    if (!selectedPin) return null;
+    for (const board of boards) {
+      for (const section of board.sections) {
+        if (section.pins.some((p) => p.id === selectedPin.id)) return section;
+      }
+    }
+    return null;
+  }, [activeSection, selectedPin, boards]);
+
+  const openPin = (pin: Pin) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("pin", pin.id);
+    router.push(`/account?${params.toString()}`, { scroll: false });
+  };
+
+  const closePin = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("pin");
+    router.push(`/account?${params.toString()}`, { scroll: false });
+  };
+
+  const handleNext = () => {
+    if (!selectedPin || !currentSection) return;
+    const currentIndex = currentSection.pins.findIndex(
+      (p) => p.id === selectedPin.id
+    );
+    if (currentIndex < currentSection.pins.length - 1) {
+      openPin(currentSection.pins[currentIndex + 1]);
+    }
+  };
+
+  const handlePrev = () => {
+    if (!selectedPin || !currentSection) return;
+    const currentIndex = currentSection.pins.findIndex(
+      (p) => p.id === selectedPin.id
+    );
+    if (currentIndex > 0) {
+      openPin(currentSection.pins[currentIndex - 1]);
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedPin) return;
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft") handlePrev();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedPin, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const navigateToBoard = (title: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("board", title);
     params.delete("section");
-    router.push(`/account?${params.toString()}`);
+    router.push(`/account?${params.toString()}`, { scroll: false });
   };
 
   const navigateToSection = (title: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("section", title);
-    router.push(`/account?${params.toString()}`);
+    router.push(`/account?${params.toString()}`, { scroll: false });
   };
 
   const goBack = () => {
@@ -92,7 +169,7 @@ const InspoTab = () => {
     } else if (boardTitle) {
       params.delete("board");
     }
-    router.push(`/account?${params.toString()}`);
+    router.push(`/account?${params.toString()}`, { scroll: false });
   };
 
   // Breadcrumbs / Header
@@ -151,103 +228,110 @@ const InspoTab = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex flex-col gap-2">
-            <Skeleton className="aspect-[4/3] rounded-2xl w-full" />
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // View: List of Boards
-  if (!activeBoard) {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-lovely mb-6">
-          Inspiration Boards
-        </h2>
+  const renderContent = () => {
+    if (loading) {
+      return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {boards.map((board) => (
-            <BoardCard
-              key={board.id}
-              title={board.title}
-              pinCount={board.pinCount}
-              sectionCount={board.sectionCount}
-              coverImages={board.coverImages}
-              onClick={() => navigateToBoard(board.title)}
-            />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <Skeleton className="aspect-[4/3] rounded-2xl w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
           ))}
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // View: Inside Board (List of Sections)
-  if (!activeSection) {
+    // View: List of Boards
+    if (!activeBoard) {
+      return (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-lovely mb-6">
+            Inspiration Boards
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {boards.map((board) => (
+              <BoardCard
+                key={board.id}
+                title={board.title}
+                pinCount={board.pinCount}
+                sectionCount={board.sectionCount}
+                coverImages={board.coverImages}
+                onClick={() => navigateToBoard(board.title)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // View: Inside Board (List of Sections)
+    if (!activeSection) {
+      return (
+        <div className="space-y-8">
+          {renderHeader()}
+
+          {/* Sections Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {activeBoard.sections.map((section) => {
+              // Get first 3 images from section for the cover
+              const coverImages = section.pins
+                .slice(0, 3)
+                .map((p) => p.publicId);
+              return (
+                <BoardCard
+                  key={section.id}
+                  title={section.title}
+                  pinCount={section.pins.length}
+                  coverImages={coverImages}
+                  onClick={() => navigateToSection(section.title)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // View: Inside Section (Pins Grid)
     return (
       <div className="space-y-8">
         {renderHeader()}
 
-        {/* Sections Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {activeBoard.sections.map((section) => {
-            // Get first 3 images from section for the cover
-            const coverImages = section.pins.slice(0, 3).map((p) => p.publicId);
-            return (
-              <BoardCard
-                key={section.id}
-                title={section.title}
-                pinCount={section.pins.length}
-                coverImages={coverImages}
-                onClick={() => navigateToSection(section.title)}
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+          {activeSection.pins.map((pin) => (
+            <div
+              key={pin.id}
+              className="break-inside-avoid relative group rounded-xl overflow-hidden cursor-zoom-in mb-4"
+              onClick={() => openPin(pin)}
+            >
+              <CldImage
+                src={pin.publicId}
+                alt={pin.title || "Pin"}
+                width={pin.width || 500}
+                height={pin.height || 500}
+                className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 50vw, 33vw"
               />
-            );
-          })}
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="bg-white/90 p-2 rounded-full text-lovely">
+                  <ZoomIn size={20} />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
-  }
+  };
 
-  // View: Inside Section (Pins Grid)
   return (
-    <div className="space-y-8">
-      {renderHeader()}
-
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-        {activeSection.pins.map((pin) => (
-          <div
-            key={pin.id}
-            className="break-inside-avoid relative group rounded-xl overflow-hidden cursor-zoom-in mb-4"
-            onClick={() => setSelectedPin(pin)}
-          >
-            <CldImage
-              src={pin.publicId}
-              alt={pin.title || "Pin"}
-              width={pin.width || 500}
-              height={pin.height || 500}
-              className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 50vw, 33vw"
-            />
-            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <div className="bg-white/90 p-2 rounded-full text-lovely">
-                <ZoomIn size={20} />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <>
+      {renderContent()}
 
       {/* Full View Modal */}
-      <Dialog
-        open={!!selectedPin}
-        onOpenChange={(open) => !open && setSelectedPin(null)}
-      >
+      <Dialog open={!!selectedPin} onOpenChange={(open) => !open && closePin()}>
         <DialogContent className="max-w-4xl w-full h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden">
           {selectedPin && (
             <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
@@ -257,10 +341,51 @@ const InspoTab = () => {
                   variant="ghost"
                   size="icon"
                   className="bg-black/50 hover:bg-black/70 text-white rounded-full"
-                  onClick={() => setSelectedPin(null)}
+                  onClick={closePin}
                 >
                   <X size={24} />
                 </Button>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between z-40 pointer-events-none">
+                <div className="pointer-events-auto">
+                  {currentSection &&
+                    currentSection.pins.findIndex(
+                      (p) => p.id === selectedPin.id
+                    ) > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="bg-black/50 hover:bg-black/70 text-white rounded-full h-12 w-12"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePrev();
+                        }}
+                      >
+                        <ChevronLeft size={32} />
+                      </Button>
+                    )}
+                </div>
+                <div className="pointer-events-auto">
+                  {currentSection &&
+                    currentSection.pins.findIndex(
+                      (p) => p.id === selectedPin.id
+                    ) <
+                      currentSection.pins.length - 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="bg-black/50 hover:bg-black/70 text-white rounded-full h-12 w-12"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNext();
+                        }}
+                      >
+                        <ChevronRight size={32} />
+                      </Button>
+                    )}
+                </div>
               </div>
 
               <div className="relative w-auto h-auto max-w-full max-h-full rounded-lg overflow-hidden pointer-events-auto bg-white">
@@ -283,7 +408,7 @@ const InspoTab = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
