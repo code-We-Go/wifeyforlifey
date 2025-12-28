@@ -932,8 +932,23 @@ export async function GET(request: Request) {
         //     res.apartment
         //   ),
         // });
+        // If it's a gift, send gift email to purchaser
+        if (res.isGift) {
+          const { giftMail } = await import("@/utils/giftMail");
+          await sendMail({
+            to: res.email,
+            name: res.firstName,
+            subject: "Thank You for Your Gift Purchase! 🎁",
+            body: giftMail(res._id.toString()),
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+          });
+        }
+
         const loyalty = await LoyaltyTransactionModel.create({
-          email: res.email,
+          email:
+            res.isGift && res.giftRecipientEmail
+              ? res.giftRecipientEmail
+              : res.email,
           type: "earn",
           reason: "purchase",
           amount: res.redeemedLoyaltyPoints,
