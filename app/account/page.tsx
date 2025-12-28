@@ -667,7 +667,7 @@ const AccountPage = () => {
               <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
                 <Button
                   size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                 >
                   Upgrade now to the Full Wifey Experience
                 </Button>
