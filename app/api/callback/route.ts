@@ -434,80 +434,84 @@ export async function GET(request: Request) {
       }
 
       // Get the subscription to check package details
-      let subscription = await subscriptionsModel
-        .findOne({ paymentID: data.order })
-        .populate({ path: "packageID", options: { strictPopulate: false } });
-
-      // Set expiry date based on package duration or gift status
-      const expiryDate = new Date();
-
-      // Check if it's a gift subscription
-      if (subscription?.isGift) {
-        // For gifts, keep expiry date as current time (now)
-        console.log(
-          "Gift subscription detected - setting expiry to current time"
-        );
-      }
-      // Check if package exists and has a duration of 0
-      else if (
-        subscription?.packageID &&
-        (subscription.packageID as any).duration === "0"
-      ) {
-        // If duration is 0, set expiryDate to current time (now)
-        // No need to modify expiryDate as it's already set to now
-        console.log(
-          "Package with duration 0 detected - setting expiry to current time"
-        );
-      } else {
-        // Default: set expiry to 1 year from now
-        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      console.log("Checking subscription for order ID:", data.order);
+      let subscription = null;
+      if (data.order) {
+        subscription = await subscriptionsModel
+          .findOne({ paymentID: data.order })
+          .populate({ path: "packageID", options: { strictPopulate: false } });
       }
 
-      // Determine which email to use for the subscription
-      const subscriptionEmail =
-        subscription.isGift && subscription.giftRecipientEmail
-          ? subscription.giftRecipientEmail
-          : subscription.email;
-
-      // 1. Update the document and get the updated version
-      console.log("register" + packageModel);
-      const updateSubscription = await subscriptionsModel
-        .findOneAndUpdate(
-          { paymentID: data.order },
-          {
-            subscribed: true,
-            expiryDate: expiryDate,
-          },
-          { new: true } // <-- This is important!
-        )
-        .populate({ path: "packageID", options: { strictPopulate: false } });
-
-      if (
-        subscription?.packageID &&
-        typeof subscription.packageID.price === "number"
-      ) {
-        const loyaltyBonus = await LoyaltyTransactionModel.create({
-          email: subscriptionEmail, // Use the determined email (gift recipient or normal)
-          type: "earn",
-          reason: "subscription",
-          amount: subscription.packageID.price,
-          bonusID:
-            subscription.packageID.duration === "0"
-              ? "68c176b69c1ff0a2ad779c2d"
-              : "687d67f459e6ba857a54ed53",
-        });
-      } else {
-        console.error(
-          "Cannot create loyalty transaction: packageID or price is missing",
-          {
-            hasPackageID: !!subscription?.packageID,
-            packageIDValue: subscription?.packageID,
-          }
-        );
-      }
-
-      // Log for debugging
       if (subscription) {
+        console.log("Subscription found for ID:", data.order, subscription._id);
+        const expiryDate = new Date();
+
+        // Check if it's a gift subscription
+        if (subscription?.isGift) {
+          // For gifts, keep expiry date as current time (now)
+          console.log(
+            "Gift subscription detected - setting expiry to current time"
+          );
+        }
+        // Check if package exists and has a duration of 0
+        else if (
+          subscription?.packageID &&
+          (subscription.packageID as any).duration === "0"
+        ) {
+          // If duration is 0, set expiryDate to current time (now)
+          // No need to modify expiryDate as it's already set to now
+          console.log(
+            "Package with duration 0 detected - setting expiry to current time"
+          );
+        } else {
+          // Default: set expiry to 1 year from now
+          expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+        }
+
+        // Determine which email to use for the subscription
+        const subscriptionEmail =
+          subscription.isGift && subscription.giftRecipientEmail
+            ? subscription.giftRecipientEmail
+            : subscription.email;
+
+        // 1. Update the document and get the updated version
+        console.log("register" + packageModel);
+        const updateSubscription = await subscriptionsModel
+          .findOneAndUpdate(
+            { paymentID: data.order },
+            {
+              subscribed: true,
+              expiryDate: expiryDate,
+            },
+            { new: true } // <-- This is important!
+          )
+          .populate({ path: "packageID", options: { strictPopulate: false } });
+
+        if (
+          subscription?.packageID &&
+          typeof subscription.packageID.price === "number"
+        ) {
+          const loyaltyBonus = await LoyaltyTransactionModel.create({
+            email: subscriptionEmail, // Use the determined email (gift recipient or normal)
+            type: "earn",
+            reason: "subscription",
+            amount: subscription.packageID.price,
+            bonusID:
+              subscription.packageID.duration === "0"
+                ? "68c176b69c1ff0a2ad779c2d"
+                : "687d67f459e6ba857a54ed53",
+          });
+        } else {
+          console.error(
+            "Cannot create loyalty transaction: packageID or price is missing",
+            {
+              hasPackageID: !!subscription?.packageID,
+              packageIDValue: subscription?.packageID,
+            }
+          );
+        }
+
+        // Log for debugging
         try {
           const paymentOpLegacy = await subscriptionPaymentModel.findOne({
             paymentID: data.order,
@@ -811,6 +815,12 @@ export async function GET(request: Request) {
           { orderID: data.order },
           { payment: "confirmed" }
         );
+
+        if (!res) {
+          console.error(`Order not found for ID: ${data.order}`);
+          return NextResponse.redirect(`${process.env.testUrl}payment/failed`);
+        }
+
         try {
           if (process.env.BOSTA_API) {
             const bostaService = new BostaService();
@@ -933,19 +943,23 @@ export async function GET(request: Request) {
         //   ),
         // });
         // If it's a gift, send gift email to purchaser
-        // if (res.isGift) {
-        //   const { giftMail } = await import("@/utils/giftMail");
-        //   await sendMail({
-        //     to: res.email,
-        //     name: res.firstName,
-        //     subject: "Thank You for Your Gift Purchase! 🎁",
-        //     body: giftMail(res._id.toString()),
-        //     from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-        //   });
-        // }
+        if (res.isGift) {
+          console.log("isGift" + res.isGift);
+          const { giftMail } = await import("@/utils/giftMail");
+          await sendMail({
+            to: res.email,
+            name: res.firstName,
+            subject: "Thank You for Your Gift Purchase! 🎁",
+            body: giftMail(res._id.toString()),
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+          });
+        }
 
         const loyalty = await LoyaltyTransactionModel.create({
-          email: res.email,
+          email:
+            res.isGift && res.giftRecipientEmail
+              ? res.giftRecipientEmail
+              : res.email,
           type: "earn",
           reason: "purchase",
           amount: res.redeemedLoyaltyPoints,
