@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { thirdFont } from "@/fonts";
@@ -12,7 +13,17 @@ export default function PartnerSessionCard({
   session: PartnerSession;
   onBook: (s: PartnerSession) => void;
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const hasDiscount = !!session.discountCode;
+
+  const MAX_LENGTH = 150;
+  const description = session.description || "";
+  const shouldTruncate = description.length > MAX_LENGTH;
+  const displayedDescription =
+    isExpanded || !shouldTruncate
+      ? description
+      : `${description.slice(0, MAX_LENGTH)}...`;
+
   return (
     <div className="bg-creamey border border-lovely rounded-2xl overflow-hidden hover:shadow-lg transition flex flex-col h-full">
       <div className="relative h-48 w-full">
@@ -45,9 +56,17 @@ export default function PartnerSessionCard({
             </span>
           )}
         </div>
-        <p className="text-lovely/90 mt-2 overflow-y-auto max-h-32 mb-4 scrollbar-creamey pr-2">
-          {session.description}
-        </p>
+        <div className="mt-2 mb-4">
+          <p className="text-lovely/90 inline">{displayedDescription}</p>
+          {shouldTruncate && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-lovely font-semibold ml-1 hover:underline text-sm inline-block"
+            >
+              {isExpanded ? "See less" : "See more"}
+            </button>
+          )}
+        </div>
         <Button
           className="mt-auto w-full bg-lovely text-creamey hover:bg-lovely/90 rounded-2xl"
           onClick={() => onBook(session)}

@@ -103,6 +103,10 @@ export async function POST(request: Request) {
         city: data.bostaCityName,
         state: data.bostaZoneName,
         phone: data.phone,
+        isGift: data.isGift,
+        giftRecipientEmail: data.giftRecipientEmail,
+        specialMessage: data.specialMessage,
+        giftCardName: data.giftCardName,
         redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
         appliedDiscount: data.appliedDiscount,
         appliedDiscountAmount: data.appliedDiscountAmount,
@@ -220,6 +224,18 @@ export async function POST(request: Request) {
       } catch (bostaError) {
         console.error("Bosta integration error:", bostaError);
         // Don't fail the order creation if Bosta fails
+      }
+
+      // If it's a gift, send gift email to purchaser
+      if (data.isGift) {
+        const { giftMail } = await import("@/utils/giftMail");
+        await sendMail({
+          to: data.email,
+          name: data.firstName,
+          subject: "Thank You for Your Gift Purchase! 🎁",
+          body: giftMail(res._id.toString()),
+          from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+        });
       }
 
       await sendMail({
@@ -357,10 +373,7 @@ export async function POST(request: Request) {
         console.log("order" + JSON.stringify(order.data, null, 2));
         console.log("orderData" + order.data.payment_keys[0].order_id);
 
-        if (
-          data.process === "upgrade" ||
-          data.process === "renew"
-        ) {
+        if (data.process === "upgrade" || data.process === "renew") {
           // Upgrade/Renew flow: record a pending payment operation, do NOT mutate subscription here
           const user = await UserModel.findOne({ email: data.email }).populate({
             path: "subscription",
@@ -558,6 +571,10 @@ export async function POST(request: Request) {
           city: data.bostaCityName,
           state: data.bostaZoneName,
           phone: data.phone,
+          isGift: data.isGift,
+          giftRecipientEmail: data.giftRecipientEmail,
+          specialMessage: data.specialMessage,
+          giftCardName: data.giftCardName,
           cash: data.cash, // Payment method: Cash or not
           cart: items,
           total: data.total,
