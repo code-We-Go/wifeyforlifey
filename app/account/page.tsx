@@ -611,7 +611,7 @@ const AccountPage = () => {
   const tabs = [
     { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "favorites", label: "Favorites", icon: Star },
-    { id: "inspo", label: "Inspiration", icon: Sparkles },
+    { id: "inspo", label: "Inspo", icon: Sparkles },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },

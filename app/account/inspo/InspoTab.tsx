@@ -1,11 +1,13 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 import BoardCard from "./BoardCard";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  Download,
   MoreHorizontal,
   Share,
   X,
@@ -14,7 +16,7 @@ import {
 import { CldImage } from "next-cloudinary";
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Pin, Board, Section } from "./types";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -46,7 +48,9 @@ const InspoTab = () => {
               })),
             }));
             const allPins = sections.flatMap((s) => s.pins);
-            const coverImages = allPins.slice(0, 3).map((p) => p.publicId);
+            // Randomize the cover images so they aren't all from the first section
+            const shuffledPins = [...allPins].sort(() => 0.5 - Math.random());
+            const coverImages = shuffledPins.slice(0, 3).map((p) => p.publicId);
 
             return {
               id: dbInspo._id,
@@ -172,6 +176,83 @@ const InspoTab = () => {
     router.push(`/account?${params.toString()}`, { scroll: false });
   };
 
+  const handleShare = async () => {
+    try {
+      const url = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand("copy");
+        } catch (err) {
+          console.error("Fallback copy failed", err);
+          throw new Error("Clipboard copy failed");
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+
+      toast({
+        title: "Link Copied",
+        description: "Link has been copied to your clipboard.",
+        variant: "added",
+      });
+    } catch (error) {
+      console.error("Share failed:", error);
+      toast({
+        title: "Error",
+        description: "Failed to copy the link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownload = async (publicId: string, title?: string) => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) {
+      toast({
+        title: "Download Failed",
+        description: "Missing Cloudinary configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const downloadUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
+      const response = await fetch(downloadUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${title || "image"}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download Started",
+        description: "Your image is downloading.",
+        variant: "added",
+      });
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download the image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Breadcrumbs / Header
   const renderHeader = () => {
     if (!activeBoard)
@@ -208,6 +289,7 @@ const InspoTab = () => {
           </div>
           <div className="flex gap-2">
             <Button
+              onClick={handleShare}
               variant="outline"
               size="sm"
               className="gap-2 text-lovely border-lovely/20"
@@ -215,13 +297,13 @@ const InspoTab = () => {
               <Share size={16} />
               Share
             </Button>
-            <Button
+            {/* <Button
               variant="outline"
               size="icon"
               className="text-lovely border-lovely/20"
             >
               <MoreHorizontal size={16} />
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
@@ -333,10 +415,24 @@ const InspoTab = () => {
       {/* Full View Modal */}
       <Dialog open={!!selectedPin} onOpenChange={(open) => !open && closePin()}>
         <DialogContent className="max-w-4xl w-full h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden">
+          <DialogTitle className="sr-only">
+            {selectedPin?.title || "Pin Preview"}
+          </DialogTitle>
           {selectedPin && (
             <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
               {/* Close button - custom positioned */}
-              <div className="absolute top-4 right-4 z-50 pointer-events-auto">
+              <div className="absolute top-4 right-4 z-50 pointer-events-auto flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-black/50 hover:bg-black/70 text-white rounded-full"
+                  onClick={() =>
+                    handleDownload(selectedPin.publicId, selectedPin.title)
+                  }
+                  title="Download Image"
+                >
+                  <Download size={20} />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -396,6 +492,7 @@ const InspoTab = () => {
                   height={1000}
                   className="object-contain max-h-[85vh] w-auto"
                 />
+                {/*
                 {selectedPin.title && (
                   <div className="p-4 bg-white">
                     <h3 className="text-xl font-bold text-lovely">
@@ -403,6 +500,7 @@ const InspoTab = () => {
                     </h3>
                   </div>
                 )}
+                  */}
               </div>
             </div>
           )}

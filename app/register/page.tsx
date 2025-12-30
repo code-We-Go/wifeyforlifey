@@ -50,7 +50,8 @@ function RegisterPage() {
     }
   };
   const handleGoogleSignUp = () => {
-    signIn("google", { callbackUrl: "/account" });
+    const callbackUrl = redirectPath || "/account";
+    signIn("google", { callbackUrl });
   };
 
   return (
