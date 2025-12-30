@@ -69,7 +69,7 @@ async function decreaseStock(cart: any[]) {
 
 export async function POST(request: Request) {
   const data = await request.json();
-  console.log("paymentData" + data.total);
+  console.log("shippinga" + data.shipping);
   // console.log('here'+process.env.PaymobApiKey)
   // const items =await data.cart.map((item: any) => {
   //   return {
@@ -91,6 +91,7 @@ export async function POST(request: Request) {
       await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
       console.log("appliedDiscount" + data.appliedDiscount);
+
       const res = await ordersModel.create({
         email: data.email,
         orderID: "",
@@ -577,6 +578,7 @@ export async function POST(request: Request) {
           giftCardName: data.giftCardName,
           cash: data.cash, // Payment method: Cash or not
           cart: items,
+          shipping: data.shipping,
           total: data.total,
           subTotal: data.subTotal,
           redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
