@@ -59,7 +59,7 @@ const BoardCard = ({
             )}
           </div>
         </div>
-        
+
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
@@ -67,12 +67,12 @@ const BoardCard = ({
       <div className="px-1">
         <h3 className="font-semibold text-lg text-lovely truncate">{title}</h3>
         <div className="flex items-center gap-2 text-xs text-lovely/70">
-          {pinCount !== undefined && <span>{pinCount} Pins</span>}
+          {pinCount !== undefined && <span>{pinCount} Inspos</span>}
           {sectionCount !== undefined && (
-             <>
-               <span>•</span>
-               <span>{sectionCount} Sections</span>
-             </>
+            <>
+              <span>•</span>
+              <span>{sectionCount} Sections</span>
+            </>
           )}
         </div>
       </div>

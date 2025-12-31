@@ -279,7 +279,7 @@ const InspoTab = () => {
             <div className="flex items-center gap-2 text-sm text-lovely/70 mt-1">
               {!activeSection && (
                 <>
-                  <span>{activeBoard.pinCount} Pins</span>
+                  <span>{activeBoard.pinCount} Inspos</span>
                   <span>•</span>
                   <span>{activeBoard.sectionCount} Sections</span>
                 </>
