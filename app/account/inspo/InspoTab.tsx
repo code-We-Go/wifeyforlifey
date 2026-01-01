@@ -29,6 +29,26 @@ const InspoTab = () => {
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Helper to extract string ID from potential $oid object or string
+  const extractId = (id: any): string => {
+    if (!id) return "";
+    if (typeof id === "string") return id;
+    if (typeof id === "object" && id.$oid) return id.$oid;
+    return String(id);
+  };
+
+  const trackActivity = async (type: string, data: any) => {
+    try {
+      await fetch("/api/inspos/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, ...data }),
+      });
+    } catch (error) {
+      console.error("Tracking error:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchBoards = async () => {
       try {
@@ -36,24 +56,43 @@ const InspoTab = () => {
         const data = await res.json();
         if (data.inspos) {
           const mappedBoards: Board[] = data.inspos.map((dbInspo: any) => {
-            const sections: Section[] = dbInspo.sections.map((sec: any) => ({
-              id: sec._id,
-              title: sec.title,
-              pins: sec.images.map((img: string, idx: number) => ({
-                id: `${sec._id}-${idx}`,
-                publicId: img,
-                title: `${sec.title} ${idx + 1}`,
-                width: 500,
-                height: [600, 750, 500, 800][idx % 4],
-              })),
-            }));
+            const sections: Section[] = (dbInspo.sections || []).map(
+              (sec: any) => {
+                const images = sec.images || sec.pins || [];
+                const secId = extractId(sec._id);
+                const pins: Pin[] = images
+                  .map((img: any, idx: number) => {
+                    let pId = "";
+                    if (typeof img === "string") {
+                      pId = img;
+                    } else if (img && typeof img === "object") {
+                      pId = img.public_id || img.publicId || "";
+                    }
+
+                    return {
+                      id: `${secId}-${idx}`,
+                      publicId: pId,
+                      title: `${sec.title} ${idx + 1}`,
+                      width: 500,
+                      height: [600, 750, 500, 800][idx % 4],
+                    };
+                  })
+                  .filter((pin: Pin) => pin.publicId);
+
+                return {
+                  id: secId,
+                  title: sec.title,
+                  pins,
+                };
+              }
+            );
             const allPins = sections.flatMap((s) => s.pins);
             // Randomize the cover images so they aren't all from the first section
             const shuffledPins = [...allPins].sort(() => 0.5 - Math.random());
             const coverImages = shuffledPins.slice(0, 3).map((p) => p.publicId);
 
             return {
-              id: dbInspo._id,
+              id: extractId(dbInspo._id),
               title: dbInspo.title,
               pinCount: allPins.length,
               sectionCount: sections.length,
@@ -81,6 +120,21 @@ const InspoTab = () => {
     () => activeBoard?.sections.find((s) => s.title === sectionTitle),
     [activeBoard, sectionTitle]
   );
+
+  useEffect(() => {
+    if (activeBoard?.id) {
+      trackActivity("view_inspo", { inspoId: activeBoard.id });
+    }
+  }, [activeBoard?.id]);
+
+  useEffect(() => {
+    if (activeSection?.id && activeBoard?.id) {
+      trackActivity("view_section", {
+        inspoId: activeBoard.id,
+        sectionId: activeSection.id,
+      });
+    }
+  }, [activeSection?.id, activeBoard?.id]);
 
   const pinId = searchParams.get("pin");
 
@@ -243,6 +297,20 @@ const InspoTab = () => {
         description: "Your image is downloading.",
         variant: "added",
       });
+
+      // Track download
+      const boardId =
+        activeBoard?.id ||
+        boards.find((b) => b.sections.some((s) => s.id === currentSection?.id))
+          ?.id;
+
+      if (boardId && currentSection?.id) {
+        trackActivity("download_image", {
+          inspoId: boardId,
+          sectionId: currentSection.id,
+          imagePublicId: publicId,
+        });
+      }
     } catch (error) {
       console.error("Download failed:", error);
       toast({

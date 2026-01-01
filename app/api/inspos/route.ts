@@ -17,29 +17,45 @@ export async function GET() {
             {
               title: "Cute wifey designs",
               images: [
-                "nails-cute-1", "nails-cute-2", "nails-cute-3", "nails-cute-4", 
-                "nails-cute-5", "nails-cute-6", "nails-cute-7"
-              ]
+                { public_id: "nails-cute-1" },
+                { public_id: "nails-cute-2" },
+                { public_id: "nails-cute-3" },
+                { public_id: "nails-cute-4" },
+                { public_id: "nails-cute-5" },
+                { public_id: "nails-cute-6" },
+                { public_id: "nails-cute-7" },
+              ],
             },
             {
               title: "Feet",
-              images: ["nails-feet-1", "nails-feet-2", "nails-feet-3"]
+              images: [
+                { public_id: "nails-feet-1" },
+                { public_id: "nails-feet-2" },
+                { public_id: "nails-feet-3" },
+              ],
             },
             {
               title: "French & gradients",
-              images: ["nails-french-1", "nails-french-2"]
-            }
-          ]
+              images: [
+                { public_id: "nails-french-1" },
+                { public_id: "nails-french-2" },
+              ],
+            },
+          ],
         },
         {
           title: "Wedding Dress Ideas",
           sections: [
-             {
-                title: "Ballgowns",
-                images: ["dress-1", "dress-2", "dress-3"]
-             }
-          ]
-        }
+            {
+              title: "Ballgowns",
+              images: [
+                { public_id: "dress-1" },
+                { public_id: "dress-2" },
+                { public_id: "dress-3" },
+              ],
+            },
+          ],
+        },
       ];
       
       // Uncomment to seed automatically
