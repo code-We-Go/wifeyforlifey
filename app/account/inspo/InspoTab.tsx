@@ -4,7 +4,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import BoardCard from "./BoardCard";
 import {
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -12,6 +11,7 @@ import {
   Share,
   X,
   ZoomIn,
+  Heart,
 } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { useState, useMemo, useEffect } from "react";
@@ -28,6 +28,9 @@ const InspoTab = () => {
 
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favoriteInspoIds, setFavoriteInspoIds] = useState<string[]>([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
 
   // Helper to extract string ID from potential $oid object or string
   const extractId = (id: any): string => {
@@ -110,6 +113,28 @@ const InspoTab = () => {
     };
 
     fetchBoards();
+  }, []);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        setFavoritesLoading(true);
+        const res = await fetch("/api/user/inspo-favorites");
+        if (!res.ok) {
+          return;
+        }
+        const data = await res.json();
+        if (Array.isArray(data.favorites)) {
+          setFavoriteInspoIds(data.favorites);
+        }
+      } catch (error) {
+        console.error("Failed to fetch inspo favorites", error);
+      } finally {
+        setFavoritesLoading(false);
+      }
+    };
+
+    fetchFavorites();
   }, []);
 
   const activeBoard = useMemo(
@@ -218,6 +243,52 @@ const InspoTab = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("section", title);
     router.push(`/account?${params.toString()}`, { scroll: false });
+  };
+
+  const navigateToRoot = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("board");
+    params.delete("section");
+    router.push(`/account?${params.toString()}`, { scroll: false });
+  };
+
+  const toggleFavorite = async (publicId: string) => {
+    const optimisticHas = favoriteInspoIds.includes(publicId);
+    const optimisticNext = optimisticHas
+      ? favoriteInspoIds.filter((id) => id !== publicId)
+      : [...favoriteInspoIds, publicId];
+    setFavoriteInspoIds(optimisticNext);
+
+    try {
+      const res = await fetch("/api/user/inspo-favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imagePublicId: publicId }),
+      });
+
+      if (!res.ok) {
+        setFavoriteInspoIds(favoriteInspoIds);
+        toast({
+          title: "Error",
+          description: "Could not update favorites. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const data = await res.json();
+      if (Array.isArray(data.favorites)) {
+        setFavoriteInspoIds(data.favorites);
+      }
+    } catch (error) {
+      console.error("Failed to toggle inspo favorite", error);
+      setFavoriteInspoIds(favoriteInspoIds);
+      toast({
+        title: "Error",
+        description: "Could not update favorites. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const goBack = () => {
@@ -330,13 +401,31 @@ const InspoTab = () => {
 
     return (
       <div className="flex flex-col gap-4">
-        <div
-          className="flex items-center gap-2 text-lovely/60 hover:text-lovely cursor-pointer w-fit"
-          onClick={goBack}
-        >
-          <ArrowLeft size={20} />
-          <span>Back</span>
-        </div>
+        <nav className="flex items-center gap-2 text-sm text-lovely/70">
+          <button
+            type="button"
+            className="text-lovely/60 hover:text-lovely"
+            onClick={navigateToRoot}
+          >
+            Inspiration Boards
+          </button>
+          <span className="text-pinkey">/</span>
+          {activeSection ? (
+            <>
+              <button
+                type="button"
+                className="text-lovely/60 hover:text-lovely"
+                onClick={goBack}
+              >
+                {activeBoard.title}
+              </button>
+              <span className="text-pinkey">/</span>
+              <span className="text-lovely">{activeSection.title}</span>
+            </>
+          ) : (
+            <span className="text-lovely">{activeBoard.title}</span>
+          )}
+        </nav>
 
         <div className="flex justify-between items-start">
           <div>
@@ -365,6 +454,7 @@ const InspoTab = () => {
               <Share size={16} />
               Share
             </Button>
+
             {/* <Button
               variant="outline"
               size="icon"
@@ -393,25 +483,100 @@ const InspoTab = () => {
       );
     }
 
-    // View: List of Boards
     if (!activeBoard) {
+      const favoritePins: Pin[] = boards.flatMap((board) =>
+        board.sections.flatMap((section) =>
+          section.pins.filter((pin) => favoriteInspoIds.includes(pin.publicId))
+        )
+      );
+
       return (
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-lovely mb-6">
-            Inspiration Boards
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {boards.map((board) => (
-              <BoardCard
-                key={board.id}
-                title={board.title}
-                pinCount={board.pinCount}
-                sectionCount={board.sectionCount}
-                coverImages={board.coverImages}
-                onClick={() => navigateToBoard(board.title)}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-lovely">
+              Inspiration Boards
+            </h2>
+            <Button
+              onClick={() => setShowFavorites((prev) => !prev)}
+              // variant={showFavorites ? "default" : "outline"}
+              size="sm"
+              className="gap-2 text-lovely border-lovely/20"
+              disabled={favoritesLoading}
+            >
+              <Heart
+                size={16}
+                className={
+                  showFavorites ? "fill-lovely  text-lovely" : "text-lovely "
+                }
               />
-            ))}
+              Favorites
+              {favoritePins.length > 0 && ` (${favoritePins.length})`}
+            </Button>
           </div>
+
+          {showFavorites ? (
+            favoritePins.length === 0 ? (
+              <div className="text-lovely/70">
+                You do not have any inspo favorites yet.
+              </div>
+            ) : (
+              <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+                {favoritePins.map((pin) => (
+                  <div
+                    key={pin.id}
+                    className="break-inside-avoid relative group rounded-xl overflow-hidden cursor-zoom-in mb-4"
+                    onClick={() => openPin(pin)}
+                  >
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 z-10 bg-black/40 hover:bg-black/60 text-white rounded-full p-1.5 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!favoritesLoading) {
+                          toggleFavorite(pin.publicId);
+                        }
+                      }}
+                    >
+                      <Heart
+                        size={18}
+                        className={
+                          favoriteInspoIds.includes(pin.publicId)
+                            ? "fill-lovely text-lovely"
+                            : "text-creamey"
+                        }
+                      />
+                    </button>
+                    <CldImage
+                      src={pin.publicId}
+                      alt={pin.title || "Pin"}
+                      width={pin.width || 500}
+                      height={pin.height || 500}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="bg-white/90 p-2 rounded-full text-lovely">
+                        <ZoomIn size={20} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {boards.map((board) => (
+                <BoardCard
+                  key={board.id}
+                  title={board.title}
+                  pinCount={board.pinCount}
+                  sectionCount={board.sectionCount}
+                  coverImages={board.coverImages}
+                  onClick={() => navigateToBoard(board.title)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -456,6 +621,25 @@ const InspoTab = () => {
               className="break-inside-avoid relative group rounded-xl overflow-hidden cursor-zoom-in mb-4"
               onClick={() => openPin(pin)}
             >
+              <button
+                type="button"
+                className="absolute top-2 right-2 z-10 bg-black/40 hover:bg-black/60 text-white rounded-full p-1.5 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!favoritesLoading) {
+                    toggleFavorite(pin.publicId);
+                  }
+                }}
+              >
+                <Heart
+                  size={18}
+                  className={
+                    favoriteInspoIds.includes(pin.publicId)
+                      ? "fill-lovely text-lovely"
+                      : "text-creamey"
+                  }
+                />
+              </button>
               <CldImage
                 src={pin.publicId}
                 alt={pin.title || "Pin"}
