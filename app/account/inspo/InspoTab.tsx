@@ -188,6 +188,16 @@ const InspoTab = () => {
     return null;
   }, [activeSection, selectedPin, boards]);
 
+  const favoritePins: Pin[] = useMemo(
+    () =>
+      boards.flatMap((board) =>
+        board.sections.flatMap((section) =>
+          section.pins.filter((pin) => favoriteInspoIds.includes(pin.publicId))
+        )
+      ),
+    [boards, favoriteInspoIds]
+  );
+
   const openPin = (pin: Pin) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("pin", pin.id);
@@ -250,6 +260,14 @@ const InspoTab = () => {
     params.delete("board");
     params.delete("section");
     router.push(`/account?${params.toString()}`, { scroll: false });
+  };
+
+  const handleFavoritesClick = () => {
+    const next = !showFavorites;
+    setShowFavorites(next);
+    if (next) {
+      navigateToRoot();
+    }
   };
 
   const toggleFavorite = async (publicId: string) => {
@@ -401,34 +419,34 @@ const InspoTab = () => {
 
     return (
       <div className="flex flex-col gap-4">
-        <nav className="flex items-center gap-2 text-sm text-lovely/70">
-          <button
-            type="button"
-            className="text-lovely/60 hover:text-lovely"
-            onClick={navigateToRoot}
-          >
-            Inspiration Boards
-          </button>
-          <span className="text-pinkey">/</span>
-          {activeSection ? (
-            <>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <nav className="flex items-center gap-2 text-sm text-lovely/70 mb-1">
               <button
                 type="button"
                 className="text-lovely/60 hover:text-lovely"
-                onClick={goBack}
+                onClick={navigateToRoot}
               >
-                {activeBoard.title}
+                Inspiration Boards
               </button>
               <span className="text-pinkey">/</span>
-              <span className="text-lovely">{activeSection.title}</span>
-            </>
-          ) : (
-            <span className="text-lovely">{activeBoard.title}</span>
-          )}
-        </nav>
+              {activeSection ? (
+                <>
+                  <button
+                    type="button"
+                    className="text-lovely/60 hover:text-lovely"
+                    onClick={goBack}
+                  >
+                    {activeBoard.title}
+                  </button>
+                  <span className="text-pinkey">/</span>
+                  <span className="text-lovely">{activeSection.title}</span>
+                </>
+              ) : (
+                <span className="text-lovely">{activeBoard.title}</span>
+              )}
+            </nav>
 
-        <div className="flex justify-between items-start">
-          <div>
             <h2 className="text-3xl font-bold text-lovely">
               {activeSection ? activeSection.title : activeBoard.title}{" "}
               <span className="text-2xl">💕</span>
@@ -446,6 +464,21 @@ const InspoTab = () => {
           </div>
           <div className="flex gap-2">
             <Button
+              onClick={handleFavoritesClick}
+              size="sm"
+              className="gap-2 text-lovely border-lovely/20"
+              disabled={favoritesLoading}
+            >
+              <Heart
+                size={16}
+                className={
+                  showFavorites ? "fill-lovely  text-lovely" : "text-lovely "
+                }
+              />
+              Favorites
+              {favoritePins.length > 0 && ` (${favoritePins.length})`}
+            </Button>
+            <Button
               onClick={handleShare}
               variant="outline"
               size="sm"
@@ -454,14 +487,6 @@ const InspoTab = () => {
               <Share size={16} />
               Share
             </Button>
-
-            {/* <Button
-              variant="outline"
-              size="icon"
-              className="text-lovely border-lovely/20"
-            >
-              <MoreHorizontal size={16} />
-            </Button> */}
           </div>
         </div>
       </div>
@@ -484,12 +509,6 @@ const InspoTab = () => {
     }
 
     if (!activeBoard) {
-      const favoritePins: Pin[] = boards.flatMap((board) =>
-        board.sections.flatMap((section) =>
-          section.pins.filter((pin) => favoriteInspoIds.includes(pin.publicId))
-        )
-      );
-
       return (
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
@@ -497,8 +516,7 @@ const InspoTab = () => {
               Inspiration Boards
             </h2>
             <Button
-              onClick={() => setShowFavorites((prev) => !prev)}
-              // variant={showFavorites ? "default" : "outline"}
+              onClick={handleFavoritesClick}
               size="sm"
               className="gap-2 text-lovely border-lovely/20"
               disabled={favoritesLoading}
