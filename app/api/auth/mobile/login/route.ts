@@ -4,11 +4,9 @@ import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import bcrypt from "bcryptjs";
 
-// Connect to database
-ConnectDB();
-
 export async function POST(req: Request) {
   try {
+    await ConnectDB();
     const { email, password } = await req.json();
 
     if (!email || !password) {
@@ -40,54 +38,28 @@ export async function POST(req: Request) {
     const token = generateToken({
       id: user._id.toString(),
       email: user.email,
-      // isSubscribed: user.isSubscribed || false,
-      subscriptionExpiryDate: user.subscriptionExpiryDate,
-    });
-
-    return NextResponse.json({ token }, { status: 200 });
-  } catch (error: any) {
-    console.error("Token generation error:", error);
-    return NextResponse.json(
-      { error: error.message || "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-// For testing purposes only - generates a sample token
-export async function GET() {
-  try {
-    // Find a sample user
-    const user = await UserModel.findOne();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "No users found in database" },
-        { status: 404 }
-      );
-    }
-
-    // Generate token for the sample user
-    const token = generateToken({
-      id: user._id.toString(),
-      email: user.email,
-      // isSubscribed: user.isSubscribed || false,
+      isSubscribed: user.isSubscribed || false,
       subscriptionExpiryDate: user.subscriptionExpiryDate,
     });
 
     return NextResponse.json(
       {
+        message: "Login successful",
         token,
         user: {
-          id: user._id.toString(),
+          id: user._id,
+          username: user.username,
           email: user.email,
-          isSubscribed: user.isSubscribed || false,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          imageURL: user.imageURL,
+          isSubscribed: user.isSubscribed,
         },
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Sample token generation error:", error);
+    console.error("Login error:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }

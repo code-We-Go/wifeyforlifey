@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import LoginModel from "@/app/modals/loginsModel";
 import { checkSuspiciousLoginActivity } from "@/utils/suspiciousLoginDetection";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import UserModel from "@/app/modals/userModel";
 
 export async function POST(request: NextRequest) {
@@ -12,7 +11,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     // Get session to access firstName if not provided in request
-    const session = await getServerSession(authOptions);
+    const { user: authUser } = await authenticateRequest(request);
 
     // Validate required fields - only email is required for failed login attempts
     if (!data.email) {
@@ -38,13 +37,23 @@ export async function POST(request: NextRequest) {
       osVersion: data.osVersion,
       fingerprint: data.fingerprint,
     });
-    const user = await UserModel.findById(data.userId).select('firstName -_id');
+    
+    let userFirstName = "";
+    if (data.userId) {
+        try {
+            const user = await UserModel.findById(data.userId).select('firstName -_id');
+            if (user) userFirstName = user.firstName;
+        } catch (e) {
+            console.error("Error fetching user for login tracking:", e);
+        }
+    }
+
     // Check for suspicious login activity if login was successful and we have userId and fingerprint
     let suspiciousActivityDetected = false;
     if (data.success !== false && data.userId && data.fingerprint) {
       // Use firstName from request, session, or default to "User"
       const firstName =
-        user.firstName || data.firstName || session?.user?.firstName || "User";
+        userFirstName || data.firstName || authUser?.firstName || authUser?.name?.split(" ")[0] || "User";
       console.log("firstNameRoute" + firstName);
       suspiciousActivityDetected = await checkSuspiciousLoginActivity(
         data.userId,

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-import videoModel from "@/app/modals/videoModel";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import UserModel from "@/app/modals/userModel";
 import { ConnectDB } from "@/app/config/db";
 import BlogModel from "@/app/modals/blogModel";
@@ -13,9 +11,9 @@ export async function GET(
 ) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated } = await authenticateRequest(request);
 
-    // if (!session?.user?.email) {
+    // if (!isAuthenticated) {
     //   return NextResponse.json(
     //     { error: "Authentication required" },
     //     { status: 401 }

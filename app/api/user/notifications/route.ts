@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import InteractionsModel from "@/app/modals/interactionsModel";
 import UserModel from "@/app/modals/userModel";
 import videoModel from "@/app/modals/videoModel";
@@ -11,9 +10,9 @@ import mongoose from "mongoose";
 export async function GET(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -21,7 +20,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
@@ -99,9 +102,9 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -109,7 +112,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Get user
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },

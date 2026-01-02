@@ -3,10 +3,7 @@ import playlistModel from "@/app/modals/playlistModel";
 import videoModel from "@/app/modals/videoModel";
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/authOptions";
-import { verifyToken, extractTokenFromHeader } from "@/app/utils/jwtUtils";
-import UserModel from "@/app/modals/userModel";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 
 const loadDB = async () => {
   await ConnectDB();
@@ -14,6 +11,7 @@ const loadDB = async () => {
 
 loadDB();
 console.log("reagistering" + videoModel);
+
 export async function POST(req: Request) {
   // Authenticate the request
   const { isAuthenticated, user } = await authenticateRequest(req);
@@ -108,12 +106,12 @@ export async function GET(req: Request) {
   const { isAuthenticated, user } = await authenticateRequest(req);
 
   // Check if user is authenticated
-  if (!isAuthenticated) {
-    return NextResponse.json(
-      { error: "Authentication required" },
-      { status: 401 }
-    );
-  }
+  // if (!isAuthenticated) {
+  //   return NextResponse.json(
+  //     { error: "Authentication required" },
+  //     { status: 401 }
+  //   );
+  // }
 
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
@@ -138,14 +136,13 @@ export async function GET(req: Request) {
     if (featured) {
       searchQuery = { ...searchQuery, featured: true };
     }
-    searchQuery = { ...searchQuery, isPublic: true };
+
     // Get total count
     const totalPlaylists = await playlistModel.countDocuments(searchQuery);
 
     // Get playlists with populated videos and pagination
     const playlists = await playlistModel
       .find(searchQuery)
-
       .populate({
         path: "videos",
         model: "videos",
@@ -154,7 +151,11 @@ export async function GET(req: Request) {
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    console.log("sort" + playlists[0].title);
+
+    if (playlists.length > 0) {
+      console.log("sort" + playlists[0].title);
+    }
+
     return NextResponse.json(
       {
         data: playlists,
