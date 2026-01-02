@@ -36,6 +36,7 @@ export default function ContactUsPage() {
           </div>
           <div className="md:hidden    md:max-h-[90vh] items-center justify-center">
             <Image
+              unoptimized
               width={400}
               height={300}
               src="/characters/Callcentergirlie.png"

@@ -7,7 +7,8 @@ import { lifeyFont } from "@/fonts";
 
 const HeroSection = () => {
   return (
-    <div className="w-full pt-32 relative h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] bg-creamey">
+    // <div className="w-full pt-32 relative h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] bg-creamey">
+    <div className="w-full md:pt-32 relative h-[calc(100vh-64px)] md:h-[calc(100vh-128px)] bg-creamey">
       <div className="relative h-[60%] sm:h-[65%] flex pb-[25vh] lg:pb-[15vh] justify-start lg:w-1/2 items-center sm:pb-[25vh] lg:justify-start lg:items-start">
         <motion.div
           variants={fadeIn({ direction: "right", delay: 0.2 })}
@@ -65,8 +66,10 @@ const HeroSection = () => {
           className="aspect-auto absolute -top-[200px] sm:-top-[330px] right-[3vw] sm:right-[9vw] md:right-[8vw]"
         >
           <Image
-            className=" max-sm:scale-105 max-md:scale-125 md:aspect-auto"
-            src="/hero/Brides Together.png"
+            // className=" max-sm:scale-105 max-md:scale-125 md:aspect-auto"
+            className=" max-sm:scale-110 max-md:scale-125 md:scale-105"
+            // src="/hero/Brides Together.png"
+            src="/cristmas/hero.png"
             alt="Brides Together"
             width={500}
             height={500}

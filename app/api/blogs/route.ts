@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const tag = searchParams.get("tag") || "";
     const featured = searchParams.get("featured");
     const all = searchParams.get("all") === "true";
-    
+
     const limit = all ? 0 : 10;
     const skip = all ? 0 : (page - 1) * limit;
 
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       searchQuery.$or = [
         { title: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } },
-        { excerpt: { $regex: search, $options: "i" } }
+        { excerpt: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -53,7 +53,6 @@ export async function GET(req: Request) {
 
     // Filter by author
 
-
     // Filter by featured
     if (featured !== null && featured !== undefined) {
       searchQuery.featured = featured === "true";
@@ -63,8 +62,8 @@ export async function GET(req: Request) {
     const totalBlogs = await BlogModel.countDocuments(searchQuery);
 
     // Get blogs with population
-    const blogs = await BlogModel
-      .find(searchQuery)
+    const blogs = await BlogModel.find(searchQuery)
+      .select("title excerpt slug featuredImage categories tags")
 
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -92,9 +91,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    
+
     // Validate required fields
-    if (!data.title || !data.content || !data.excerpt ) {
+    if (!data.title || !data.content || !data.excerpt) {
       return NextResponse.json(
         { error: "Title, content, excerpt, and author are required" },
         { status: 400 }
@@ -114,9 +113,9 @@ export async function POST(req: Request) {
     if (!data.slug && data.title) {
       data.slug = data.title
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
         .trim();
     }
 
@@ -128,7 +127,7 @@ export async function POST(req: Request) {
     }
 
     const newBlog = await BlogModel.create(data);
-    
+
     // Populate author information
     // await newBlog.populate({
     //   path: "author",
@@ -148,7 +147,7 @@ export async function PUT(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const blogId = searchParams.get("id");
-    
+
     if (!blogId) {
       return NextResponse.json(
         { error: "Blog ID is required" },
@@ -157,12 +156,12 @@ export async function PUT(req: Request) {
     }
 
     const data = await req.json();
-    
+
     // If slug is being updated, check for uniqueness
     if (data.slug) {
-      const existingBlog = await BlogModel.findOne({ 
-        slug: data.slug, 
-        _id: { $ne: blogId } 
+      const existingBlog = await BlogModel.findOne({
+        slug: data.slug,
+        _id: { $ne: blogId },
       });
       if (existingBlog) {
         return NextResponse.json(
@@ -172,18 +171,13 @@ export async function PUT(req: Request) {
       }
     }
 
-    const updatedBlog = await BlogModel.findByIdAndUpdate(
-      blogId,
-      data,
-      { new: true, runValidators: true }
-    )
-
+    const updatedBlog = await BlogModel.findByIdAndUpdate(blogId, data, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedBlog) {
-      return NextResponse.json(
-        { error: "Blog not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
     return NextResponse.json({ data: updatedBlog }, { status: 200 });
@@ -209,10 +203,7 @@ export async function DELETE(req: Request) {
     const deletedBlog = await BlogModel.findByIdAndDelete(blogId);
 
     if (!deletedBlog) {
-      return NextResponse.json(
-        { error: "Blog not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
     return NextResponse.json(

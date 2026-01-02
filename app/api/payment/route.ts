@@ -9,6 +9,8 @@ import productsModel from "@/app/modals/productsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import BostaService, { BostaAddress } from "@/app/services/bostaService";
+import UserModel from "@/app/modals/userModel";
+import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 
 const loadDB = async () => {
   console.log("hna");
@@ -22,10 +24,11 @@ async function decreaseStock(cart: any[]) {
   for (const item of cart) {
     const product = await productsModel.findById(item.productId);
     if (!product) {
-      return NextResponse.json(
-        { error: `Product not found: ${item.productId}` },
-        { status: 404 }
+      console.log("note");
+      console.log(
+        `Product not found: ${item.productId}, but continuing execution`
       );
+      continue; // Skip this item but continue processing other items
     }
     console.log("productFound");
     // Find the variation with matching color
@@ -34,10 +37,10 @@ async function decreaseStock(cart: any[]) {
     );
 
     if (!variatiant) {
-      return NextResponse.json(
-        { error: ` variant not found: ${item.color}` },
-        { status: 404 }
+      console.log(
+        `Variant not found: ${item.variant.name}, but continuing execution`
       );
+      continue; // Skip this item but continue processing other items
     }
     console.log("variantFound");
     const attribute = variatiant.attributes.find(
@@ -50,12 +53,10 @@ async function decreaseStock(cart: any[]) {
     // Check if enough stock is available
     if (attribute?.stock < item.quantity) {
       console.log("stock problem");
-      return NextResponse.json(
-        {
-          error: `Insufficient stock for ${item.productID} )`,
-        },
-        { status: 400 }
+      console.log(
+        `Insufficient stock for ${item.productId}, but continuing execution`
       );
+      continue; // Skip this item but continue processing other items
     }
 
     // Decrease stock
@@ -68,7 +69,7 @@ async function decreaseStock(cart: any[]) {
 
 export async function POST(request: Request) {
   const data = await request.json();
-  console.log("paymentData" + data.total);
+  console.log("shippinga" + data.shipping);
   // console.log('here'+process.env.PaymobApiKey)
   // const items =await data.cart.map((item: any) => {
   //   return {
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
       await decreaseStock(items); // <-- Decrease stock before order creation
       console.log("redeemedLoyaltyPoints" + data.loyalty.redeemedPoints);
       console.log("appliedDiscount" + data.appliedDiscount);
+
       const res = await ordersModel.create({
         email: data.email,
         orderID: "",
@@ -102,6 +104,10 @@ export async function POST(request: Request) {
         city: data.bostaCityName,
         state: data.bostaZoneName,
         phone: data.phone,
+        isGift: data.isGift,
+        giftRecipientEmail: data.giftRecipientEmail,
+        specialMessage: data.specialMessage,
+        giftCardName: data.giftCardName,
         redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
         appliedDiscount: data.appliedDiscount,
         appliedDiscountAmount: data.appliedDiscountAmount,
@@ -219,6 +225,18 @@ export async function POST(request: Request) {
       } catch (bostaError) {
         console.error("Bosta integration error:", bostaError);
         // Don't fail the order creation if Bosta fails
+      }
+
+      // If it's a gift, send gift email to purchaser
+      if (data.isGift) {
+        const { giftMail } = await import("@/utils/giftMail");
+        await sendMail({
+          to: data.email,
+          name: data.firstName,
+          subject: "Thank You for Your Gift Purchase! 🎁",
+          body: giftMail(res._id.toString()),
+          from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+        });
       }
 
       await sendMail({
@@ -356,83 +374,143 @@ export async function POST(request: Request) {
         console.log("order" + JSON.stringify(order.data, null, 2));
         console.log("orderData" + order.data.payment_keys[0].order_id);
 
-        await subscriptionsModel.create({
-          paymentID: order.data.payment_keys[0].order_id,
-          email: data.email,
-          packageID: data.subscription,
-          redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
-          appliedDiscount: data.appliedDiscount,
-          appliedDiscountAmount: data.appliedDiscountAmount,
-          // User information
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phone: data.phone,
-          whatsAppNumber: data.whatsAppNumber,
-          // Gift information
-          isGift: data.isGift,
-          giftRecipientEmail: data.giftRecipientEmail,
-          specialMessage: data.specialMessage,
-          // Address information
-          country: data.country,
-          address: data.address,
-          apartment: data.apartment,
-          city: data.bostaCityName,
-          state: data.bostaZoneName,
-          postalZip: data.postalZip,
-          // Billing information
-          billingCountry: data.billingCountry,
-          billingFirstName: data.billingFirstName,
-          billingLastName: data.billingLastName,
-          billingState: data.billingState,
-          billingAddress: data.billingAddress,
-          billingApartment: data.billingApartment,
-          billingPostalZip: data.billingPostalZip,
-          billingCity: data.billingCity,
-          billingPhone: data.billingPhone,
-          // Payment information
-          total: data.total,
-          subTotal: data.subTotal,
-          shipping: data.shipping,
-          currency: data.currency,
-          cash: data.cash,
-          bostaCity: data.bostaCity,
-          bostaCityName: data.bostaCityName,
-          bostaZone: data.bostaZone,
-          bostaZoneName: data.bostaZoneName,
-          bostaDistrict: data.bostaDistrict,
-          bostaDistrictName: data.bostaDistrictName,
-          giftCardName: data.giftCardName,
-        });
-        // await ordersModel.create({
-        //   email:data.email,
-        //    orderID:order?order.data.payment_keys[0].order_id:''
-        //   ,country: data.country,
-        //   firstName: data.firstName,
-        //   lastName: data.lastName,
-        //   address: data.address,
-        //   apartment: data.apartment,
-        //   postalZip: data.postalZip,
-        //   city: data.city ,
-        //   state:data.state ,
-        //   phone:data.phone ,
-        //   cash: data.cash, // Payment method: Cash or not
-        //   cart: items,
-        //   total: data.total,
-        //   subTotal:data.subTotal,
-        //   billingCountry: data.billingCountry,
-        //   billingFirstName: data.billingFirstName,
-        //   billingState:data.billingState,
-        //   billingLastName: data.billingLastName,
-        //   billingEmail: data.billingEmail,
-        //   billingPhone: data.billingPhone,
-        //   billingAddress: data.billingAddress,
-        //   billingApartment: data.billingApartment,
-        //   billingPostalZip: data.billingPostalZip,
-        // })
-        return NextResponse.json(
-          { token: order.data.client_secret },
-          { status: 200 }
-        );
+        if (data.process === "upgrade" || data.process === "renew") {
+          // Upgrade/Renew flow: record a pending payment operation, do NOT mutate subscription here
+          const user = await UserModel.findOne({ email: data.email }).populate({
+            path: "subscription",
+            options: { strictPopulate: false },
+          });
+
+          const fromPackageID = (user?.subscription as any)?.packageID || null;
+          await subscriptionPaymentModel.create({
+            paymentID: order.data.payment_keys[0].order_id,
+            email: data.email,
+            userID: user?._id,
+            process: data.process,
+            from: fromPackageID,
+            to: data.subscription,
+            // Parity fields from subscription schema
+            packageID: data.subscription,
+            subscribed: false,
+            redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
+            appliedDiscount: data.appliedDiscount,
+            appliedDiscountAmount: data.appliedDiscountAmount,
+            // User information
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            whatsAppNumber: data.whatsAppNumber,
+            // Gift information
+            isGift: data.isGift,
+            giftRecipientEmail: data.giftRecipientEmail,
+            specialMessage: data.specialMessage,
+            giftCardName: data.giftCardName,
+            // Address information
+            country: data.country,
+            address: data.address,
+            apartment: data.apartment,
+            city: data.bostaCityName,
+            state: data.bostaZoneName,
+            postalZip: data.postalZip,
+            // Billing information
+            billingCountry: data.billingCountry,
+            billingFirstName: data.billingFirstName,
+            billingLastName: data.billingLastName,
+            billingState: data.billingState,
+            billingAddress: data.billingAddress,
+            billingApartment: data.billingApartment,
+            billingPostalZip: data.billingPostalZip,
+            billingCity: data.billingCity,
+            billingPhone: data.billingPhone,
+            // Payment information
+            total: data.total,
+            subTotal: data.subTotal,
+            shipping: data.shipping,
+            currency: data.currency,
+            // Bosta
+            bostaCity: data.bostaCity,
+            bostaCityName: data.bostaCityName,
+            bostaZone: data.bostaZone,
+            bostaZoneName: data.bostaZoneName,
+            bostaDistrict: data.bostaDistrict,
+            bostaDistrictName: data.bostaDistrictName,
+            // Status
+            status: "pending",
+          });
+
+          return NextResponse.json(
+            { token: order.data.client_secret },
+            { status: 200 }
+          );
+        } else {
+          // New subscription flow: record a pending payment operation, do NOT create subscription yet
+          const user = await UserModel.findOne({ email: data.email }).populate({
+            path: "subscription",
+            options: { strictPopulate: false },
+          });
+
+          const fromPackageID = (user?.subscription as any)?.packageID || null;
+          await subscriptionPaymentModel.create({
+            paymentID: order.data.payment_keys[0].order_id,
+            email: data.email,
+            userID: user?._id,
+            process: "new",
+            from: fromPackageID,
+            to: data.subscription,
+            // Parity fields from subscription schema
+            packageID: data.subscription,
+            subscribed: false,
+            redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
+            appliedDiscount: data.appliedDiscount,
+            appliedDiscountAmount: data.appliedDiscountAmount,
+            // User information
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            whatsAppNumber: data.whatsAppNumber,
+            // Gift information
+            isGift: data.isGift,
+            giftRecipientEmail: data.giftRecipientEmail,
+            specialMessage: data.specialMessage,
+            giftCardName: data.giftCardName,
+            // Address information
+            country: data.country,
+            address: data.address,
+            apartment: data.apartment,
+            city: data.bostaCityName,
+            state: data.bostaZoneName,
+            postalZip: data.postalZip,
+            // Billing information
+            billingCountry: data.billingCountry,
+            billingFirstName: data.billingFirstName,
+            billingLastName: data.billingLastName,
+            billingState: data.billingState,
+            billingAddress: data.billingAddress,
+            billingApartment: data.billingApartment,
+            billingPostalZip: data.billingPostalZip,
+            billingCity: data.billingCity,
+            billingPhone: data.billingPhone,
+            // Payment information
+            total: data.total,
+            subTotal: data.subTotal,
+            shipping: data.shipping,
+            currency: data.currency,
+            // Bosta
+            bostaCity: data.bostaCity,
+            bostaCityName: data.bostaCityName,
+            bostaZone: data.bostaZone,
+            bostaZoneName: data.bostaZoneName,
+            bostaDistrict: data.bostaDistrict,
+            bostaDistrictName: data.bostaDistrictName,
+            // Status
+            status: "pending",
+          });
+
+          return NextResponse.json(
+            { token: order.data.client_secret },
+            { status: 200 }
+          );
+        }
       } else {
         const order = await axios.post(
           "https://accept.paymob.com/v1/intention/",
@@ -494,8 +572,13 @@ export async function POST(request: Request) {
           city: data.bostaCityName,
           state: data.bostaZoneName,
           phone: data.phone,
+          isGift: data.isGift,
+          giftRecipientEmail: data.giftRecipientEmail,
+          specialMessage: data.specialMessage,
+          giftCardName: data.giftCardName,
           cash: data.cash, // Payment method: Cash or not
           cart: items,
+          shipping: data.shipping,
           total: data.total,
           subTotal: data.subTotal,
           redeemedLoyaltyPoints: data.loyalty.redeemedPoints,

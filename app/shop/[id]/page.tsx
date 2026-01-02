@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/shop/ProductCard";
-import { Product, Variant } from "@/app/interfaces/interfaces";
+import { attribute, Product, Variant } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import ProductPageSkeleton from "./ProductPageSkeleton";
@@ -29,6 +29,9 @@ export default function ProductPage() {
   const { addItem } = useCart();
   const [product, setProduct] = useState<Product | null | undefined>();
   const [loading, setLoading] = useState(true);
+  const [stickerSelected, setStickerSelected] = useState(true); // Set to true by default
+  const [stickerQuantity, setStickerQuantity] = useState(1);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -49,13 +52,35 @@ export default function ProductPage() {
     fetchProduct();
   }, []);
 
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      if (!product) return;
+      const subId =
+        (product as any).subCategoryID?._id || (product as any).subCategoryID;
+      if (!subId) return;
+      try {
+        const res = await axios.get(`/api/products?subcategory=${subId}`);
+        const data = Array.isArray(res.data)
+          ? (res.data as Product[])
+          : Array.isArray((res.data as any).data)
+          ? ((res.data as any).data as Product[])
+          : [];
+        const filtered = data.filter((p) => p._id !== product._id).slice(0, 4);
+        setRelatedProducts(filtered);
+      } catch (e) {
+        setRelatedProducts([]);
+      }
+    };
+    fetchRelatedProducts();
+  }, [product]);
+
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     product?.variations[0]
   );
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedAttribute, setSelectedAttribute] = useState<
-    { name: string; stock: number } | undefined
+    attribute | undefined
   >(selectedVariant?.attributes[0]);
   const handleShare = async () => {
     const productUrl = `${window.location.origin}/shop/${productId}`;
@@ -87,8 +112,10 @@ export default function ProductPage() {
           The product you are looking for doesn&apos;t exist or has been
           removed.
         </p>
-        <Button asChild>
-          <Link href="/shop">Back to Shop</Link>
+        <Button asChild className="text-lovely">
+          <Link className="text-lovely" href="/shop">
+            Back to Shop
+          </Link>
         </Button>
       </div>
     );
@@ -111,10 +138,7 @@ export default function ProductPage() {
     setQuantity(1);
   };
 
-  const handleAttributeChange = (attribute: {
-    name: string;
-    stock: number;
-  }) => {
+  const handleAttributeChange = (attribute: attribute) => {
     setSelectedAttribute(attribute);
     setQuantity(1);
   };
@@ -125,7 +149,11 @@ export default function ProductPage() {
     addItem({
       productId: product._id,
       productName: product.title,
-      price: product.price.local,
+      // Prefer attribute price if present, else variant price, else product price
+      price:
+        selectedAttribute?.price ??
+        selectedVariant?.price ??
+        product.price.local,
       attributes: selectedAttribute,
       variant: selectedVariant,
       imageUrl: selectedVariant.images[0].url,
@@ -197,8 +225,8 @@ export default function ProductPage() {
       {/* Back to shop button - mobile only */}
       <div className="md:hidden mb-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/shop">
-            <ChevronLeft className="mr-1 h-4 w-4" />
+          <Link className="text-lovely" href="/shop">
+            <ChevronLeft className="mr-1 text-lovely h-4 w-4" />
             Back to Shop
           </Link>
         </Button>
@@ -272,7 +300,12 @@ export default function ProductPage() {
           </div>
 
           <div className="text-2xl text-lovely font-medium">
-            LE{product.price.local.toFixed(2)}
+            LE
+            {selectedAttribute?.price && selectedAttribute.price > 0
+              ? selectedAttribute.price.toFixed(2)
+              : selectedVariant?.price && selectedVariant.price > 0
+              ? selectedVariant.price.toFixed(2)
+              : product.price.local.toFixed(2)}
           </div>
 
           <p className="text-lovely/90">{product.description}</p>
@@ -297,23 +330,30 @@ export default function ProductPage() {
 
             {selectedVariant && (
               <div>
-                <h3 className="text-sm text-lovely font-medium mb-2">
+                {/* <h3 className="text-sm text-lovely font-medium mb-2">
                   {selectedVariant.attributeName}
-                </h3>
+                </h3> */}
                 <div className="flex flex-wrap gap-2">
-                  {selectedVariant.attributes.map((attr, index) => (
-                    <Button
-                      key={index}
-                      variant={
-                        selectedAttribute === attr ? "default" : "outline"
-                      }
-                      onClick={() => handleAttributeChange(attr)}
-                      className="rounded-full text-lovely bg-pinkey"
-                      disabled={attr.stock <= 0}
-                    >
-                      {attr.name}
-                    </Button>
-                  ))}
+                  {selectedVariant.attributes.length > 1 &&
+                    selectedVariant.attributes.map((attr, index) => (
+                      <Button
+                        key={index}
+                        variant={
+                          selectedAttribute?.name === attr.name
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() => handleAttributeChange(attr)}
+                        className={
+                          selectedAttribute?.name === attr.name
+                            ? "rounded-full bg-lovely text-creamey"
+                            : "rounded-full bg-pinkey text-lovely"
+                        }
+                        disabled={attr.stock <= 0}
+                      >
+                        {attr.name}
+                      </Button>
+                    ))}
                 </div>
               </div>
             )}
@@ -355,9 +395,9 @@ export default function ProductPage() {
                       : "text-muted-foreground"
                   }`}
                 >
-                  {selectedAttribute.stock === 0
+                  {/* {selectedAttribute.stock === 0
                     ? "Out of stock"
-                    : `${selectedAttribute.stock} available`}
+                    : `${selectedAttribute.stock} available`} */}
                 </span>
               )}
             </div>
@@ -407,6 +447,121 @@ export default function ProductPage() {
         </div>
       </div>
 
+      {/* Stickers Section - Only show for specific subCategory */}
+      {/* {product?.subCategoryID &&
+        product.subCategoryID.toString() === "6904b3616ac4c0db524108ef" && (
+          <div className="mt-8 w-full border-t pt-8">
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-lovely">
+                ✨ Add a Sticker Sheet to Your Order – Only 100 EGP!
+              </h3>
+              <p className="text-lovely/80 font-semibold">
+                Customize your bridal era even more!
+              </p>
+              <p className="text-lovely/80 ">
+                You can now add an exclusive Wifey for Lifey sticker sheet to
+                your order for just 100 EGP.{" "}
+              </p>
+
+              <div className="flex flex-col md:flex-row w-full md:h-[450px] space-y-4 md:space-y-0 md:space-x-4 mt-4">
+                <div
+                  className={`relative w-full h-[440px] md:w-1/2 md:h-full border-2 rounded cursor-pointer ${
+                    stickerSelected ? "border-lovely" : "border-gray-200"
+                  }`}
+                  onClick={() => setStickerSelected(!stickerSelected)}
+                >
+                  <Image
+                    src="/stickers/stickers.jpeg"
+                    alt="Sticker"
+                    fill
+                    className="object-contain rounded"
+                  />
+                  {stickerSelected && (
+                    <div className="absolute top-1 right-1 bg-lovely text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      ✓
+                    </div>
+                  )}
+                </div>
+                <div className="ml-2">
+                  <h4 className="text-lovely font-medium mb-2">Perfect for:</h4>
+                  <ul className="list-disc pl-5 text-lovely/80 space-y-1">
+                    <li>
+                      Decorating your Notebooks, laptops, mirrors, bottles or
+                      bridal boxes
+                    </li>
+                    <li>
+                      Adding a little extra love, sass & pink energy to your
+                      wedding planning
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {stickerSelected && (
+                <div className="flex items-center space-x-2 mt-4">
+                  <span className="text-lovely">Quantity:</span>
+                  <div className="flex items-center border border-gray-300 rounded">
+                    <button
+                      className="px-3 py-1 text-lovely hover:bg-gray-100"
+                      onClick={() =>
+                        setStickerQuantity((prev) => Math.max(1, prev - 1))
+                      }
+                    >
+                      -
+                    </button>
+                    <span className="px-3 py-1">{stickerQuantity}</span>
+                    <button
+                      className="px-3 py-1 text-lovely hover:bg-gray-100"
+                      onClick={() => setStickerQuantity((prev) => prev + 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                onClick={() => {
+                  if (stickerSelected) {
+                    addItem({
+                      productId: "sticker-addon",
+                      productName: "Wifey Sticker Sheet",
+                      price: 100,
+                      imageUrl:
+                        "https://www.shopwifeyforlifey.com/stickers/stickers.jpeg",
+                      quantity: stickerQuantity,
+                      variant: {
+                        name: "Default",
+                        attributeName: "Size",
+                        attributes: [{ name: "Default", stock: 100 }],
+                        images: [
+                          {
+                            url: "/stickers/stickers.jpeg",
+                            type: "image",
+                          },
+                        ],
+                      },
+                      attributes: { name: "Default", stock: 100 },
+                    });
+                    toast({
+                      title: "Sticker added to cart",
+                      description: `${stickerQuantity} custom sticker(s) added to your cart`,
+                    });
+                  } else {
+                    toast({
+                      title: "Please select a sticker",
+                      description: "Select a sticker to add to your cart",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="bg-lovely text-creamey hover:bg-lovely/90 mt-4"
+              >
+                Add Sticker to Cart - {stickerQuantity * 100} LE
+              </Button>
+            </div>
+          </div>
+        )} */}
       {/* Product Tabs */}
       <div className="mt-12">
         <Tabs defaultValue="details">
@@ -416,6 +571,9 @@ export default function ProductPage() {
               Product details
             </TabsTrigger>
           </TabsList>
+
+          {/* Stickers Section - Separate from tabs */}
+
           {/* <TabsContent value="description" className="py-4">
             <div className="prose max-w-none">
               <p>{product.description}</p>
@@ -447,18 +605,22 @@ export default function ProductPage() {
       </div>
 
       {/* Related Products */}
-      {/* {relatedProducts.length > 0 && (
+      {relatedProducts.length > 0 && (
         <div className="mt-16">
-          <h2 className="text-2xl font-display font-medium mb-6">
+          <h2 className="text-2xl font-display font-medium mb-6 text-lovely">
             You May Also Like
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
-              <ProductCard key={product._id} product={product} favorite={false} />
+              <ProductCard
+                key={product._id}
+                product={product}
+                favorite={false}
+              />
             ))}
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 }

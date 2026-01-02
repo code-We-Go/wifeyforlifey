@@ -15,7 +15,28 @@ export async function POST(request: Request) {
 
     try {
         const res = await newSletterModel.create({email:data.email});
-            return NextResponse.json({ message: "Done Wogo" }, { status: 200 });
+        const apiKey = process.env.BREVO_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json({ message: "BREVO_API_KEY not configured" }, { status: 500 });
+        }
+        const brevoRes = await fetch("https://api.brevo.com/v3/contacts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "api-key": apiKey,
+            },
+            body: JSON.stringify({
+                email: data.email,
+                listIds: [3],
+                updateEnabled: true,
+            }),
+        });
+        if (!brevoRes.ok) {
+            const errText = await brevoRes.text();
+            return NextResponse.json({ message: "Failed to add contact to Brevo", error: errText }, { status: 502 });
+        }
+        return NextResponse.json({ message: "Done Wogo" }, { status: 200 });
    
     }
     catch (error: any) {

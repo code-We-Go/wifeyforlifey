@@ -6,6 +6,7 @@ import UserModel from "@/app/modals/userModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
 import mongoose from "mongoose";
+import playlistModel from "@/app/modals/playlistModel";
 
 // POST - Like/Unlike a comment
 export async function POST(
@@ -85,8 +86,27 @@ export async function POST(
 
     // Record the interaction for admin dashboard and notifications
     const { parentId, parentType } = await request.json();
+    // Find the playlist that contains this video
+    const findPlaylistByVideoId = async (videoId: string) => {
+      try {
+        const playlist = await playlistModel.findOne({ videos: videoId });
+        return playlist?._id || null;
+      } catch (error) {
+        console.error("Error finding playlist by video ID:", error);
+        return null;
+      }
+    };
+    // Get the playlist ID for this video
+    const playlistId = await findPlaylistByVideoId(videoId);
+
+    // Get the comment owner's ID to notify them
+    const commentOwnerId = comment.userId.toString();
+
     await InteractionsModel.create({
       userId: userId,
+      notifyUserId: commentOwnerId,
+      broadcast: false,
+      link: `${process.env.baseUrl}playlists/${playlistId}?videoId=${videoId}#${commentId}`,
       targetId: commentId,
       targetType: "comment",
       actionType: alreadyLiked ? "unlike" : "like",

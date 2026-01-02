@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     subject: "Password Reset",
     name: user.username,
     body: `${resetPasswordEmailTemplate(resetUrl)}`,
-    from: "authintication@shopwifeyforlifey.com",
+    from: "authentication@shopwifeyforlifey.com",
   });
   return NextResponse.json({ success: true, message: "Reset email sent" });
 }

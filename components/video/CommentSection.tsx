@@ -66,6 +66,8 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           `/api/videos/${videoId}/comments`
         );
         setComments(commentsResponse.data.comments || []);
+        // Remove the alert
+        // alert(commentsResponse.data.comments[0]._id);
 
         // Fetch video details to get likes
         const videoResponse = await axios.get(`/api/videos/${videoId}`);
@@ -85,6 +87,92 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       fetchData();
     }
   }, [videoId]);
+
+  // Handle hash fragment for comment scrolling
+  const [targetCommentId, setTargetCommentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get the hash from the URL (without the # symbol)
+    const hash =
+      typeof window !== "undefined" ? window.location.hash.substring(1) : "";
+
+    if (hash && hash.length > 0) {
+      setTargetCommentId(hash);
+
+      // Remove the hash from the URL without triggering a page reload
+      if (typeof window !== "undefined") {
+        // Get current URL without hash
+        const urlWithoutHash = window.location.href.split("#")[0];
+
+        // Replace current URL without the hash
+        window.history.replaceState({}, document.title, urlWithoutHash);
+      }
+    }
+  }, []);
+
+  // Scroll to comment when comments are loaded and target comment ID is set
+  useEffect(() => {
+    if (targetCommentId && comments.length > 0 && !loading) {
+      // Function to find and scroll to the comment
+      const findAndScrollToComment = (retryCount = 0, maxRetries = 10) => {
+        // Try both formats - with and without the prefix
+        let commentElement = document.getElementById(
+          `comment-${targetCommentId}`
+        );
+
+        // If not found with prefix, try direct ID (for backward compatibility)
+        if (!commentElement) {
+          commentElement = document.getElementById(targetCommentId);
+        }
+
+        if (commentElement) {
+          // Found the element, scroll to it
+          commentElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          // Add highlight effect
+          commentElement.classList.add("bg-pink-200");
+          commentElement.classList.add("transition-colors");
+          commentElement.classList.add("duration-1000");
+
+          // Remove highlight after a few seconds
+          if (commentElement != null) {
+            const element = commentElement; // Capture the non-null value
+            setTimeout(() => {
+              element.classList.remove("bg-pink-100");
+            }, 3000);
+          }
+          return true; // Successfully found and scrolled
+        } else if (retryCount < maxRetries) {
+          // Element not found yet, retry after a delay
+          console.log(
+            `Comment element not found, retrying... (${
+              retryCount + 1
+            }/${maxRetries})`
+          );
+          setTimeout(
+            () => findAndScrollToComment(retryCount + 1, maxRetries),
+            500
+          );
+          return false; // Not found yet, but will retry
+        } else {
+          console.log(
+            `Failed to find comment element after ${maxRetries} attempts`
+          );
+          return false; // Failed to find after max retries
+        }
+      };
+
+      // Initial delay before first attempt
+      const initialTimer = setTimeout(() => {
+        findAndScrollToComment();
+      }, 1000); // Increased initial delay to 1000ms
+
+      return () => clearTimeout(initialTimer);
+    }
+  }, [targetCommentId, comments, loading]);
 
   // Submit a new comment
   const handleCommentSubmit = async () => {
@@ -456,7 +544,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
   }
 
   return (
-    <div className="mt-8 space-y-4">
+    <div id="comments" className="mt-8 space-y-4 ">
       <div className="flex md:hidden justify-end w-full  items-center gap-2">
         <button
           onClick={handleLikeVideo}
@@ -675,7 +763,11 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
               );
 
             return (
-              <div key={comment._id} className="space-y-3">
+              <div
+                id={`comment-${comment._id}`}
+                key={comment._id}
+                className="space-y-3"
+              >
                 <div className="flex gap-4">
                   {/* <img
                     className="w-16 h-16 rounded-full"

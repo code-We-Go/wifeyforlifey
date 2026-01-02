@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { Discount } from "../types/discount";
+import { CartItem } from "../interfaces/interfaces";
 import CartItemSmall from "../cart/CartItemSmall";
 import DiscountSection from "./components/DiscountSection";
 import { ShippingZone } from "../interfaces/interfaces";
@@ -168,6 +169,7 @@ const CheckoutClientPage = () => {
   // let total = 0;
   // const []
   //  const[countries,setCountries]=useState([]);
+  const [isGift, setIsGift] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const calculateTotals = () => {
     // Calculate subtotal first
@@ -219,7 +221,7 @@ const CheckoutClientPage = () => {
   };
   type Payment = "cash" | "card" | "instapay";
   const { user } = useContext(userContext);
-  const [shipping, setShipping] = useState(70);
+  const [shipping, setShipping] = useState(90);
   const [bostaLocation, setBostaLocation] = useState<{
     city: BostaCity | null;
     zone: BostaZone | null;
@@ -239,13 +241,50 @@ const CheckoutClientPage = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const {
-    items,
+    items: initialItems,
     removeItem,
     updateQuantity,
     totalItems,
     totalPrice,
     clearCart,
   } = useCart();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isValidating, setIsValidating] = useState(true);
+
+  useEffect(() => {
+    const validateCart = async () => {
+      if (initialItems.length === 0) {
+        setItems([]);
+        setIsValidating(false);
+        return;
+      }
+
+      setIsValidating(true);
+      try {
+        const response = await axios.post("/api/cart/validate", {
+          items: initialItems.map((item) => ({
+            ...item,
+            price:
+              item.attributes?.price && item.attributes.price > 0
+                ? item.attributes.price
+                : item.variant?.price && item.variant.price > 0
+                ? item.variant.price
+                : item.price,
+          })),
+        });
+        if (response.data.items) {
+          setItems(response.data.items);
+        }
+      } catch (error) {
+        console.error("Failed to validate cart", error);
+        setItems(initialItems);
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateCart();
+  }, [initialItems]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
@@ -294,8 +333,8 @@ const CheckoutClientPage = () => {
       !appliedDiscount ||
       appliedDiscount.calculationType !== "FREE_SHIPPING" ||
       // Check if cart total meets minimum order amount required for the discount
-      (appliedDiscount.conditions?.minimumOrderAmount && 
-       subTotal < appliedDiscount.conditions.minimumOrderAmount)
+      (appliedDiscount.conditions?.minimumOrderAmount &&
+        subTotal < appliedDiscount.conditions.minimumOrderAmount)
     ) {
       // Keep the shipping cost even when Bosta Zone is selected
       if (location.city && location.zone) {
@@ -351,6 +390,10 @@ const CheckoutClientPage = () => {
     cart: items,
     phone: "",
     state: state,
+    isGift: false,
+    giftRecipientEmail: "",
+    specialMessage: "",
+    giftCardName: "",
     cash: payment,
     redeemedLoyaltyPoints: Math.max(
       0,
@@ -447,7 +490,7 @@ const CheckoutClientPage = () => {
             zone.localGlobal === "local"
         );
         if (zone) {
-          setShipping(zone.zone_rate.local);
+          setShipping(90);
         }
       }
     };
@@ -543,7 +586,7 @@ const CheckoutClientPage = () => {
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
         setShipping(0);
       } else {
-        setShipping(shippingRate);
+        setShipping(90);
       }
       const calculatedSubTotal = items.reduce(
         (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
@@ -563,7 +606,7 @@ const CheckoutClientPage = () => {
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
         setShipping(0);
       } else {
-        setShipping(shippingRate);
+        setShipping(90);
       }
       const calculatedSubTotal = items.reduce(
         (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
@@ -626,6 +669,8 @@ const CheckoutClientPage = () => {
     const loyaltyLE = Math.floor(validRedeem / 20);
     setLoyaltyDiscount(loyaltyLE);
 
+    const giftCardCost = formData.giftCardName ? 20 : 0;
+
     // Calculate final total, always using effectiveShipping
     // When free shipping is applied, effectiveShipping should be 0
     const finalTotal = Math.max(
@@ -635,10 +680,18 @@ const CheckoutClientPage = () => {
         loyaltyLE +
         (appliedDiscount?.calculationType === "FREE_SHIPPING"
           ? 0
-          : effectiveShipping)
+          : effectiveShipping) +
+        giftCardCost
     );
     setTotal(finalTotal);
-  }, [items, shipping, appliedDiscount, loyaltyPoints, redeemPoints]);
+  }, [
+    items,
+    shipping,
+    appliedDiscount,
+    loyaltyPoints,
+    redeemPoints,
+    formData.giftCardName,
+  ]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -647,12 +700,12 @@ const CheckoutClientPage = () => {
 
     // Set errors to state
     setFormErrors(errors);
-
-    // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
+      alert(Object.values(errors)[0]);
       setLoading(false);
       return;
     }
+    // Stop submission if there are errors
 
     console.log("total" + formData.total);
     console.log(formData);
@@ -762,6 +815,152 @@ const CheckoutClientPage = () => {
                 )}
               </div>
             </div>
+
+            <div className="flex items-center gap-2 w-full mt-2">
+              <input
+                type="checkbox"
+                id="giftCheckbox"
+                checked={isGift}
+                onChange={(e) => {
+                  setIsGift(e.target.checked);
+                  setFormData({
+                    ...formData,
+                    isGift: e.target.checked,
+                  });
+                }}
+                className="w-4 h-4 accent-lovely"
+              />
+              <label htmlFor="giftCheckbox" className="text-lovely text-base">
+                I&apos;m buying this as a gift 💖
+              </label>
+            </div>
+
+            {isGift && (
+              <>
+                <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
+                  <p className="text-sm text-lovely mb-2">
+                    Please enter The Bride&apos;s Email (if it&apos;s available
+                    else let it blank).Please let us know once you give this
+                    planner to the bride and We will contact her through her
+                    WhatsApp and activate her account.
+                  </p>
+                  <div className="flex items-center gap-2 w-full">
+                    <label className="text-lovely text-base">
+                      Bride&apos;s Email
+                    </label>
+                    <div className="flex w-full gap-1 flex-col">
+                      <input
+                        onChange={handleInputChange}
+                        name="giftRecipientEmail"
+                        value={formData.giftRecipientEmail}
+                        type="email"
+                        className={`border w-full h-10 bg-creamey border-pinkey border rounded-2xl px-2 text-base`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col w-full mt-4">
+                  <label className="text-lovely text-base mb-2">
+                    Optional : Select a Gift Card (+20 EGP)
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName ===
+                        "Born to shine birthday gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName ===
+                          "Born to shine birthday gift card"
+                            ? ""
+                            : "Born to shine birthday gift card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Born to shine birthday card
+                      </div>
+                      <img
+                        src="/giftCard/Born to shine birthday gift card.jpeg"
+                        alt="Birthday Gift Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName ===
+                        "Born to shine birthday gift card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName ===
+                        "The I love you more than words gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName ===
+                          "The I love you more than words gift card"
+                            ? ""
+                            : "The I love you more than words gift card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        I love you more than words card
+                      </div>
+                      <img
+                        src="/giftCard/The I love you more than words gift card.jpeg"
+                        alt="Love Gift Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName ===
+                        "The I love you more than words gift card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
             <div
               className={`${thirdFont.className} w-full mt-6 text-lg lg:text-2xl border-b border-lovely`}
             >
@@ -1265,23 +1464,23 @@ const CheckoutClientPage = () => {
                 <button
                   className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
                   onClick={handleSubmit}
-                  disabled={loading || items.length === 0}
+                  disabled={loading || isValidating || items.length === 0}
                 >
-                  Confirm order
+                  {isValidating ? "Validating..." : "Confirm order"}
                 </button>
               </div>
             ) : (
               <div className="flex justify-end">
                 <button
-                  disabled={items.length === 0 || loading}
+                  disabled={items.length === 0 || loading || isValidating}
                   type="submit"
                   className={`border transition duration-300 border-lovely p-1 ${
-                    items.length === 0 || loading
+                    items.length === 0 || loading || isValidating
                       ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
                       : "hover:cursor-pointer hover:bg-lovely hover:text-white text-lovely"
                   }`}
                 >
-                  PROCEED TO PAYMENT
+                  {isValidating ? "Validating..." : "PROCEED TO PAYMENT"}
                 </button>
               </div>
             )}
@@ -1327,9 +1526,15 @@ const CheckoutClientPage = () => {
               padding: summary ? "0.25rem 0.25rem" : "0",
             }}
           >
-            {items.map((cartItem, index) => (
-              <OrderSummaryItem cartItem={cartItem} key={index} />
-            ))}
+            {isValidating ? (
+              <div className="flex justify-center p-4">
+                <Spinner />
+              </div>
+            ) : (
+              items.map((cartItem, index) => (
+                <OrderSummaryItem cartItem={cartItem} key={index} />
+              ))
+            )}
             <DiscountSection
               onDiscountApplied={handleDiscountApplied}
               redeemType="Purchase"
@@ -1402,9 +1607,15 @@ const CheckoutClientPage = () => {
 
               {/* Cart Items */}
               <div className="flex flex-col gap-4 mb-6">
-                {items.map((item, index) => (
-                  <OrderSummaryItem key={index} cartItem={item} />
-                ))}
+                {isValidating ? (
+                  <div className="flex justify-center p-4">
+                    <Spinner />
+                  </div>
+                ) : (
+                  items.map((item, index) => (
+                    <OrderSummaryItem key={index} cartItem={item} />
+                  ))
+                )}
               </div>
 
               {/* Discount Section */}

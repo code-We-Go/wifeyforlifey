@@ -2,12 +2,15 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IInteraction extends Document {
   userId: mongoose.Types.ObjectId;
+  notifyUserId?: mongoose.Types.ObjectId;
+  broadcast: boolean;
   targetId: mongoose.Types.ObjectId;
   parentId?: mongoose.Types.ObjectId;
   parentType?: "video" | "blog";
   replyId?: mongoose.Types.ObjectId;
-  targetType: "video" | "comment" | "reply";
+  targetType: "video" | "comment" | "reply" | "blog";
   actionType: "like" | "unlike" | "comment" | "reply";
+  link: string;
   content?: string; // For comments/replies
   read: boolean; // For notification tracking
   createdAt: Date;
@@ -21,14 +24,29 @@ const InteractionSchema = new Schema<IInteraction>(
       required: true,
       index: true,
     },
+    notifyUserId: {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      required: false,
+      index: true,
+    },
+    broadcast: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
     targetId: {
       type: Schema.Types.ObjectId,
       required: true,
       index: true,
     },
+    link: {
+      type: String,
+      required: false,
+    },
     targetType: {
       type: String,
-      enum: ["video", "comment", "reply"],
+      enum: ["video", "comment", "reply", "blog"],
       required: true,
     },
     actionType: {

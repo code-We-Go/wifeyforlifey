@@ -13,43 +13,18 @@ const loadDB = async () => {
 };
 
 loadDB();
-console.log("reagistering" + videoModel)
-
-// Mixed authentication middleware
-async function authenticateRequest(req: Request) {
-  // Try token-based auth first (for mobile)
-  const authHeader = req.headers.get('authorization');
-  if (authHeader) {
-    const token = extractTokenFromHeader(authHeader);
-    if (token) {
-      const user = verifyToken(token);
-      if (user) {
-        // Fetch full user data if needed
-        const dbUser = await UserModel.findById(user.id);
-        return { user: dbUser, isAuthenticated: true };
-      }
-    }
-  }
-  
-  // Fall back to session-based auth (for web)
-  const session = await getServerSession(authOptions);
-  if (session?.user) {
-    return { user: session.user, isAuthenticated: true };
-  }
-  
-  return { user: null, isAuthenticated: false };
-}
+console.log("reagistering" + videoModel);
 export async function POST(req: Request) {
   // Authenticate the request
   const { isAuthenticated, user } = await authenticateRequest(req);
-  
+
   if (!isAuthenticated) {
     return NextResponse.json(
       { error: "Authentication required" },
       { status: 401 }
     );
   }
-  
+
   try {
     const data = await req.json();
     console.log("Creating playlist:", data);
@@ -64,23 +39,26 @@ export async function POST(req: Request) {
 export async function DELETE(request: Request) {
   // Authenticate the request
   const { isAuthenticated, user } = await authenticateRequest(request);
-  
+
   if (!isAuthenticated) {
     return NextResponse.json(
       { error: "Authentication required" },
       { status: 401 }
     );
   }
-  
+
   try {
     const req = await request.json();
     console.log("Deleting playlist:", req.playlistID);
-    
+
     const res = await playlistModel.findByIdAndDelete(req.playlistID);
     if (!res) {
-      return NextResponse.json({ error: "Playlist not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Playlist not found" },
+        { status: 404 }
+      );
     }
-    
+
     return NextResponse.json({ data: res }, { status: 200 });
   } catch (error: any) {
     console.error("Error deleting playlist:", error);
@@ -91,30 +69,33 @@ export async function DELETE(request: Request) {
 export async function PUT(request: Request) {
   // Authenticate the request
   const { isAuthenticated, user } = await authenticateRequest(request);
-  
+
   if (!isAuthenticated) {
     return NextResponse.json(
       { error: "Authentication required" },
       { status: 401 }
     );
   }
-  
+
   try {
     const { searchParams } = new URL(request.url);
     const playlistID = searchParams.get("playlistID");
     const req = await request.json();
-    
+
     console.log("Updating playlist:", playlistID, req);
-    
+
     const res = await playlistModel.findByIdAndUpdate(playlistID, req, {
       new: true,
       runValidators: true,
     });
-    
+
     if (!res) {
-      return NextResponse.json({ error: "Playlist not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Playlist not found" },
+        { status: 404 }
+      );
     }
-    
+
     return NextResponse.json({ data: res }, { status: 200 });
   } catch (error: any) {
     console.error("Error updating playlist:", error);
@@ -125,7 +106,7 @@ export async function PUT(request: Request) {
 export async function GET(req: Request) {
   // Authenticate the request using our mixed auth middleware
   const { isAuthenticated, user } = await authenticateRequest(req);
-  
+
   // Check if user is authenticated
   if (!isAuthenticated) {
     return NextResponse.json(
@@ -145,38 +126,35 @@ export async function GET(req: Request) {
   try {
     // Create search query
     let searchQuery: any = search
-      ? { 
+      ? {
           $or: [
             { title: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
-            { category: { $regex: search, $options: "i" } }
-          ]
+            { category: { $regex: search, $options: "i" } },
+          ],
         }
       : {};
 
     if (featured) {
       searchQuery = { ...searchQuery, featured: true };
     }
-
+    searchQuery = { ...searchQuery, isPublic: true };
     // Get total count
     const totalPlaylists = await playlistModel.countDocuments(searchQuery);
 
     // Get playlists with populated videos and pagination
     const playlists = await playlistModel
       .find(searchQuery)
+
       .populate({
         path: "videos",
         model: "videos",
-        select: "title description thumbnailUrl duration isPublished"
+        select: "title description thumbnailUrl duration isPublished",
       })
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
-    if (playlists.length > 0) {
-      console.log("sort" + playlists[0].title);
-    }
-    
+    console.log("sort" + playlists[0].title);
     return NextResponse.json(
       {
         data: playlists,

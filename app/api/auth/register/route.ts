@@ -11,10 +11,12 @@ import { hash } from "bcryptjs";
 export async function POST(req: Request) {
   try {
     const { username, email, password } = await req.json();
-    console.log("here" + username, email, password);
+    // Normalize email to avoid case-sensitivity issues
+    const normalizedEmail = email?.trim().toLowerCase();
+    console.log("here" + username, normalizedEmail, password);
 
     // Validate required fields
-    if (!username || !email || !password) {
+    if (!username || !normalizedEmail || !password) {
       return new Response(
         JSON.stringify({ error: "All fields are required" }),
         { status: 400 }
@@ -23,7 +25,7 @@ export async function POST(req: Request) {
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       return new Response(JSON.stringify({ error: "Invalid email format" }), {
         status: 400,
       });
@@ -40,7 +42,7 @@ export async function POST(req: Request) {
     await ConnectDB();
 
     // Check if user already exists
-    const existingUser = await UserModel.findOne({ email: email });
+    const existingUser = await UserModel.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return new Response(JSON.stringify({ error: "Email already used" }), {
@@ -49,11 +51,11 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await hash(password, 10);
-    console.log(username, email, hashedPassword);
+    console.log(username, normalizedEmail, hashedPassword);
 
     const user = await UserModel.create({
       username: username,
-      email: email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -69,11 +71,11 @@ export async function POST(req: Request) {
     //    const token = await bcrypt.hash(savedUser._id.toString(), saltRounds);
     const verificationLink = `${process.env.baseUrl}api/auth/verification/${userResponse.id}`;
     await sendMail({
-      to: email,
+      to: normalizedEmail,
       name: "wiiga",
       subject: "Please click on link to verify your account",
       body: `${SubscriprtionMail(verificationLink)}`,
-      from: "authintication@shopwifeyforlifey.com",
+      from: "authentication@shopwifeyforlifey.com",
       // body: `<a href=${verificationLink}> click here to verify your account</a>`,
       //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
     });

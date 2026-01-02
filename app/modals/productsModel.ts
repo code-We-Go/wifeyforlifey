@@ -22,14 +22,16 @@ const mediaSchema = new Schema<media>({
 
 // Define the attribute schema (replacing sizeSchema)
 const attributeSchema = new Schema<attribute>({
-  name: { type: String, required: true }, // e.g., "Color" or "Size"
+  name: { type: String, required: true },
+  price: { type: Number, required: false, min: 0 }, // e.g., "Color" or "Size"
   stock: { type: Number, required: true, min: 0 },
 });
 
 // Define the Variant schema
 const VariantSchema = new Schema<Variant>({
   name: { type: String, required: true }, // e.g., "Default Variant"
-  attributeName: { type: String, required: true }, // e.g., "Color" or "Size"
+  attributeName: { type: String, required: true },
+  price: { type: Number, required: false, min: 0 }, //, e.g., "Color" or "Size"
   attributes: {
     type: [attributeSchema],
     required: true,
@@ -55,7 +57,7 @@ const VariantSchema = new Schema<Variant>({
 // Define the price schema
 const priceSchema = new Schema<price>({
   local: { type: Number, required: true, min: 0 },
-  global: { type: Number, required: false, min: 0,default:0 },
+  global: { type: Number, required: false, min: 0, default: 0 },
 });
 
 // Define the Product schema
@@ -68,6 +70,7 @@ const ProductSchema = new Schema({
     required: true,
     ref: "subCategories",
   },
+  order: { type: Number, required: false, default: 0 },
 
   season: { type: String, required: false },
   price: { type: priceSchema, required: true },
@@ -87,6 +90,7 @@ const ProductSchema = new Schema({
   },
   featured: { type: Boolean, default: false },
   ratings: { type: Number, default: 0, min: 0 },
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Create and export the Product model

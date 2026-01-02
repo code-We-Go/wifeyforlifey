@@ -13,24 +13,18 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  console.log("slugssHna");
   try {
     const { slug } = await params;
 
     if (!slug) {
-      return NextResponse.json(
-        { error: "Slug is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Slug is required" }, { status: 400 });
     }
 
-    const blog = await BlogModel.findOne({ slug })
-
+    const blog = await BlogModel.findOne({ slug });
 
     if (!blog) {
-      return NextResponse.json(
-        { error: "Blog not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
     return NextResponse.json({ data: blog }, { status: 200 });
@@ -53,10 +47,7 @@ export async function PATCH(
     const { action } = await req.json();
 
     if (!slug) {
-      return NextResponse.json(
-        { error: "Slug is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Slug is required" }, { status: 400 });
     }
 
     if (action === "increment_view") {
@@ -64,23 +55,16 @@ export async function PATCH(
         { slug },
         { $inc: { viewCount: 1 } },
         { new: true }
-      )
-      
+      );
 
       if (!blog) {
-        return NextResponse.json(
-          { error: "Blog not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Blog not found" }, { status: 404 });
       }
 
       return NextResponse.json({ data: blog }, { status: 200 });
     }
 
-    return NextResponse.json(
-      { error: "Invalid action" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
     console.error("Error updating blog:", error);
     return NextResponse.json(

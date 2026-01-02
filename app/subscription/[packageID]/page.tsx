@@ -11,6 +11,7 @@ import orderValidation from "@/lib/validations/orderValidation";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { X } from "lucide-react";
@@ -201,12 +202,36 @@ const SubscriptionPage = () => {
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const searchParams = useSearchParams();
+  const [overridePrice, setOverridePrice] = useState<number | null>(null);
+  const [isUpgrade, setIsUpgrade] = useState(false);
+
+  // Read upgrade price from query param and set override
+  useEffect(() => {
+    const upgradeParam = searchParams.get("upgrade");
+    const parsed = upgradeParam ? Number(upgradeParam) : NaN;
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      setOverridePrice(parsed);
+      setIsUpgrade(true);
+      setShipping(0); // Free shipping on upgrade
+      setFormData((prevData) => ({
+        ...prevData,
+        process: "upgrade",
+      }));
+    } else {
+      setOverridePrice(null);
+      setIsUpgrade(false);
+    }
+  }, [searchParams]);
+
+  // Compute effective price used across calculations and UI
+  const price = overridePrice ?? packageData?.price ?? 0;
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
     const packageContents = {
       "687396821b4da119eb1c13fe": {
-        header: "Batch 2 is officially SOLD OUT!",
+        header: "Batch 3 is officially SOLD OUT!",
         content: `Please note that this order is a pre-order, and your planner will be shipped starting November 10th.
 
   While you wait for your gehaz bestie to arrive, you can already enjoy:
@@ -217,7 +242,7 @@ const SubscriptionPage = () => {
   Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
       "68bf6ae9c4d5c1af12cdcd37": {
-        header: "Batch 2 is officially SOLD OUT!",
+        header: "Batch 3 is officially SOLD OUT!",
         content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting November 10th.
 
   After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey.
@@ -261,12 +286,16 @@ const SubscriptionPage = () => {
   const handleDiscountApplied = (discount: Discount | null) => {
     // alert(discount?.calculationType)
     setAppliedDiscount(discount);
+    // Upgrades always have free shipping regardless of discounts
+    if (isUpgrade) {
+      setShipping(0);
+      return;
+    }
     if (discount && discount.calculationType === "FREE_SHIPPING") {
       // Check if package price meets minimum order amount required for the discount
       if (
         !discount.conditions?.minimumOrderAmount ||
-        (packageData?.price &&
-          packageData.price >= discount.conditions.minimumOrderAmount)
+        (price && price >= discount.conditions.minimumOrderAmount)
       ) {
         setShipping(0);
       }
@@ -305,28 +334,33 @@ const SubscriptionPage = () => {
     };
   }) => {
     setBostaLocation(location);
-    // Always maintain shipping cost regardless of Bosta Zone selection
-    // Only apply free shipping if discount is specifically for FREE_SHIPPING
-    if (
-      !appliedDiscount ||
-      appliedDiscount.calculationType !== "FREE_SHIPPING" ||
-      // Check if package price meets minimum order amount required for the discount
-      (appliedDiscount.conditions?.minimumOrderAmount &&
-        packageData?.price! < appliedDiscount.conditions.minimumOrderAmount)
-    ) {
-      // Keep the shipping cost even when Bosta Zone is selected
-      // if (location.city && location.zone) {
-      //   // Maintain shipping cost when zone is selected
-      //   setShipping(location.shippingCost.priceBeforeVat);
-      // }
-      if (location.city) {
-        // Set shipping when only city is selected
-        setShipping(location.shippingCost.priceBeforeVat);
-      }
-    } else {
-      // Ensure shipping is set to 0 when free shipping discount is applied
-      // and package price meets minimum order amount
+    // Upgrades always have free shipping
+    if (isUpgrade) {
       setShipping(0);
+    } else {
+      // Always maintain shipping cost regardless of Bosta Zone selection
+      // Only apply free shipping if discount is specifically for FREE_SHIPPING
+      if (
+        !appliedDiscount ||
+        appliedDiscount.calculationType !== "FREE_SHIPPING" ||
+        // Check if package price meets minimum order amount required for the discount
+        (appliedDiscount.conditions?.minimumOrderAmount &&
+          price < appliedDiscount.conditions.minimumOrderAmount)
+      ) {
+        // Keep the shipping cost even when Bosta Zone is selected
+        // if (location.city && location.zone) {
+        //   // Maintain shipping cost when zone is selected
+        //   setShipping(location.shippingCost.priceBeforeVat);
+        // }
+        if (location.city) {
+          // Set shipping when only city is selected
+          setShipping(location.shippingCost.priceBeforeVat);
+        }
+      } else {
+        // Ensure shipping is set to 0 when free shipping discount is applied
+        // and package price meets minimum order amount
+        setShipping(0);
+      }
     }
 
     // Update formData with Bosta location details
@@ -336,7 +370,7 @@ const SubscriptionPage = () => {
       city: location.city?.name || prevFormData.city,
       zone: location.zone?._id || "",
       district: location.district?.districtId || "",
-      shipping: shipping,
+      shipping: isUpgrade ? 0 : shipping,
     }));
   };
 
@@ -348,7 +382,7 @@ const SubscriptionPage = () => {
     lastName: "",
     address: "",
     apartment: "",
-    postalZip: "",
+    postalZip: "0000",
     city: "",
     cart: items,
     phone: "",
@@ -364,6 +398,7 @@ const SubscriptionPage = () => {
     giftRecipientEmail: "",
     specialMessage: "",
     giftCardName: "",
+    process: "new",
     redeemedLoyaltyPoints: Math.max(
       0,
       Math.min(
@@ -378,7 +413,7 @@ const SubscriptionPage = () => {
     billingState: bostaLocation.city?._id || "",
     billingAddress: "",
     billingApartment: "",
-    billingPostalZip: "",
+    billingPostalZip: "0000",
     billingCity: "",
     billingPhone: "",
     billingWhatsAppNumber: "", // Added billing WhatsApp number field
@@ -465,6 +500,11 @@ const SubscriptionPage = () => {
     };
     getShippingZones();
     const calculateShipping = () => {
+      // Upgrades always have free shipping
+      if (isUpgrade) {
+        setShipping(0);
+        return;
+      }
       if (countryID === 65) {
         const selectedState = states.find(
           (state) => state.name === formData.state
@@ -480,9 +520,7 @@ const SubscriptionPage = () => {
             // Check if package price meets minimum order amount required for the discount
             if (
               !appliedDiscount.conditions?.minimumOrderAmount ||
-              (packageData?.price &&
-                packageData.price >=
-                  appliedDiscount.conditions.minimumOrderAmount)
+              (price && price >= appliedDiscount.conditions.minimumOrderAmount)
             ) {
               setShipping(0);
             }
@@ -504,7 +542,7 @@ const SubscriptionPage = () => {
     };
     getStates();
 
-    const calculatedSubTotal = packageData?.price ?? 0;
+    const calculatedSubTotal = price;
     setSubTotal(calculatedSubTotal);
 
     // Add 20 EGP to total if a gift card is selected
@@ -579,7 +617,14 @@ const SubscriptionPage = () => {
       );
     }
 
-    if (countryID === 65) {
+    // Upgrades always have free shipping
+    if (isUpgrade) {
+      setShipping(0);
+      const calculatedSubTotal = packageData?.price ?? 0;
+      setSubTotal(calculatedSubTotal);
+      const giftCardCost = formData.giftCardName ? 20 : 0;
+      setTotal(calculatedSubTotal + giftCardCost);
+    } else if (countryID === 65) {
       // For Egyptian customers, shipping is handled by Bosta location selector
       // Default shipping will be updated when location is selected
       if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
@@ -639,6 +684,7 @@ const SubscriptionPage = () => {
     packageData,
     bostaLocation,
     appliedDiscount,
+    isUpgrade,
   ]);
 
   let cartItems = () => {
@@ -658,7 +704,7 @@ const SubscriptionPage = () => {
 
     // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
-      alert(Object.keys(errors)[0] + Object.keys(errors)[1]);
+      alert(Object.values(errors)[0]);
       setLoading(false);
       return;
     }
@@ -747,19 +793,19 @@ const SubscriptionPage = () => {
   }, [packageID]);
 
   // Show modal when package data is loaded for specific packages
-  useEffect(() => {
-    if (packageData && packageID) {
-      const modalContent = getModalContent(packageID as string);
-      if (modalContent) {
-        setShowModal(true);
-      }
-    }
-  }, [packageData, packageID]);
+  // useEffect(() => {
+  //   if (packageData && packageID) {
+  //     const modalContent = getModalContent(packageID as string);
+  //     if (modalContent) {
+  //       setShowModal(true);
+  //     }
+  //   }
+  // }, [packageData, packageID]);
 
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
     // Calculate subtotal
-    const calculatedSubTotal = packageData?.price ?? 0;
+    const calculatedSubTotal = price;
     setSubTotal(calculatedSubTotal);
 
     // Calculate discount amount
@@ -1078,9 +1124,52 @@ const SubscriptionPage = () => {
                       <img
                         src="/giftCard/The Wifey to be card.jpeg"
                         alt="Wifey to be Card"
-                        className="w-full h-auto"
+                        className="w-full object-cover "
                       />
                       {formData.giftCardName === "The Wifey to be card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName === "Merry and Married"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName === "Merry and Married"
+                            ? ""
+                            : "Merry and Married";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Merry and Married
+                      </div>
+                      <img
+                        src="/cristmas/merryAndMarried.jpeg"
+                        alt="Merry and Married Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName === "Merry and Married" && (
                         <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -1228,7 +1317,7 @@ const SubscriptionPage = () => {
               />
             </div>
             <div className="flex flex-col sm:flex-row w-full gap-2">
-              <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
+              {/* <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
                     Postal/Zip code
@@ -1253,9 +1342,9 @@ const SubscriptionPage = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </div> */}
 
-              <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
+              <div className="flex flex-col w-full   gap-2 ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
                     City
@@ -1266,7 +1355,7 @@ const SubscriptionPage = () => {
                       name="city"
                       value={formData.city}
                       type="text"
-                      className={`border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base ${
+                      className={` w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base ${
                         formErrors.city ? "border-red-500" : ""
                       }`}
                     />
@@ -1289,7 +1378,7 @@ const SubscriptionPage = () => {
                 selectedCity={bostaLocation.city?._id}
                 selectedZone={bostaLocation.zone?._id}
                 selectedDistrict={bostaLocation.district?.districtId}
-                orderTotal={packageData?.price || 0}
+                orderTotal={price || 0}
               />
             ) : (
               <div className="flex w-full gap-2 items-center">
@@ -1530,7 +1619,7 @@ const SubscriptionPage = () => {
                         ? formData.address
                         : formData.billingAddress
                     }
-                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                    className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
                 <div className="flex w-full  gap-2 items-center">
@@ -1550,7 +1639,7 @@ const SubscriptionPage = () => {
                   />
                 </div>
                 <div className="flex w-full gap-2">
-                  <div className="flex w-full gap-2 md:w-3/5 items-center">
+                  {/* <div className="flex w-full gap-2 md:w-3/5 items-center">
                     <label className="text-lovely">
                       Postal/Zip code (Optional)
                     </label>
@@ -1565,9 +1654,9 @@ const SubscriptionPage = () => {
                       type="text"
                       className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2  px-2 text-base"
                     />
-                  </div>
+                  </div> */}
 
-                  <div className="flex w-full  md:w-2/5 gap-2 items-center">
+                  <div className="flex w-full  gap-2 items-center">
                     <label className="text-lovely">City</label>
                     <input
                       onChange={handleInputChange}
@@ -1762,7 +1851,7 @@ const SubscriptionPage = () => {
             <DiscountSection
               redeemType="Subscription"
               onDiscountApplied={handleDiscountApplied}
-              packagePrice={packageData?.price}
+              packagePrice={price}
             />
             <LoyaltyPointsSection
               loyaltyPoints={loyaltyPoints}

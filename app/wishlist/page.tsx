@@ -118,10 +118,10 @@ const WishlistPage = () => {
                 </div>
 
                 <div className="md:col-span-1 hidden md:block text-center">
-                  {item.variant.name}
+                  {item.variant?.name || "-"}
                 </div>
                 <div className="md:col-span-1 hidden md:block text-center">
-                  {item.attributes.name}
+                  {item.attributes?.name || "-"}
                 </div>
 
                 {/* Price */}

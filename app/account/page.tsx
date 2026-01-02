@@ -19,10 +19,15 @@ import {
   Percent,
   CirclePercent,
   Star,
+  Sparkles,
+  Bell,
+  MessageCircle,
+  Reply,
+  User,
 } from "lucide-react";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, Suspense } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
@@ -34,20 +39,36 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import CartItemSmall from "../cart/CartItemSmall";
 import { useAuth } from "@/hooks/useAuth";
-import { ILoyaltyTransaction, IOrder } from "../interfaces/interfaces";
+import {
+  ILoyaltyTransaction,
+  IOrder,
+  INotification,
+} from "../interfaces/interfaces";
 import { useCart } from "@/providers/CartProvider";
 import { UploadDropzone } from "@/utils/uploadthing";
 import { compressImage } from "@/utils/imageCompression";
 import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
+import InspoTab from "./inspo/InspoTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function AccountPage() {
+const AccountPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "partners";
 
-  const [activeTab, setActiveTab] = useState("partners");
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Set the default tab in URL on initial load if not already present
+  useEffect(() => {
+    if (!searchParams.get("tab")) {
+      router.push(`/account?tab=${activeTab}`, { scroll: false });
+    }
+  }, []);
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
@@ -67,6 +88,17 @@ export default function AccountPage() {
   const [modalStatus, setModalStatus] = useState<string>("pending");
   const [modalPayment, setModalPayment] = useState<string>("pending");
   const [showUploader, setShowUploader] = useState(false);
+
+  // Continue Watching (latest progress record)
+  type ContinueItem = {
+    playlistId: string;
+    videoId: string;
+    thumbnailUrl?: string;
+    playlistTitle?: string;
+    videoTitle?: string;
+  } | null;
+  const [continueItem, setContinueItem] = useState<ContinueItem>(null);
+  const [continueLoading, setContinueLoading] = useState(false);
   const handleRemoveFromWishlist = (
     productId: string,
     variant: any,
@@ -92,6 +124,94 @@ export default function AccountPage() {
   >([]);
   const [loadingLoyalty, setLoadingLoyalty] = useState(false);
 
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  // Helper functions for notifications
+  const formatNotificationDate = (dateString: string | Date): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)} days ago`;
+
+    return date.toLocaleDateString();
+  };
+
+  const getNotificationText = (notification: INotification): string => {
+    switch (notification.actionType) {
+      case "like":
+        return `liked your ${notification.targetType}`;
+      case "comment":
+        return `commented on your ${notification.targetType}`;
+      case "reply":
+        return `replied to your comment`;
+      default:
+        return `interacted with your ${notification.targetType}`;
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!session?.user?.id) return;
+    setLoadingNotifications(true);
+    try {
+      const response = await axios.get("/api/notifications");
+      setNotifications(response.data.notifications);
+      const unreadCount = response.data.notifications.filter(
+        (n: INotification) => !n.read
+      ).length;
+      setUnreadNotificationsCount(unreadCount);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load notifications",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      await axios.put("/api/notifications", { notificationId });
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification._id === notificationId
+            ? { ...notification, read: true }
+            : notification
+        )
+      );
+      // Update unread count
+      setUnreadNotificationsCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    try {
+      await axios.put("/api/notifications", { markAll: true });
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notification) => ({ ...notification, read: true }))
+      );
+      // Reset unread count
+      setUnreadNotificationsCount(0);
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
   const fetchLoyaltyTransactions = async () => {
     if (!session?.user?.email) return;
     setLoadingLoyalty(true);
@@ -116,6 +236,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (activeTab === "Loyality") {
       fetchLoyaltyTransactions();
+    } else if (activeTab === "notifications") {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, session]);
@@ -139,6 +260,7 @@ export default function AccountPage() {
     if (session?.user) {
       fetchUserData();
       fetchUserOrders();
+      fetchNotifications();
 
       // Check for fingerprint in sessionStorage for Google login tracking
       if (typeof window !== "undefined") {
@@ -167,6 +289,54 @@ export default function AccountPage() {
       }
     }
   }, [session]);
+
+  // Fetch latest progress for subscribed users to power Continue Watching
+  useEffect(() => {
+    const loadContinueWatching = async () => {
+      try {
+        if (!session?.user?.isSubscribed) {
+          setContinueItem(null);
+          return;
+        }
+        setContinueLoading(true);
+        const res = await fetch(`/api/playlist-progress`, {
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          throw new Error("Failed to load progress list");
+        }
+        const data = await res.json();
+        const list = (data?.progressList || []) as any[];
+        // Find the most recent entry that has a lastWatchedVideoID
+        const latest = list.find((p) => p?.lastWatchedVideoID && p?.playlistID);
+        if (latest) {
+          setContinueItem({
+            playlistId: String(latest.playlistID?._id || latest.playlistID),
+            videoId: String(
+              latest.lastWatchedVideoID?._id || latest.lastWatchedVideoID
+            ),
+            thumbnailUrl:
+              latest.lastWatchedVideoID?.thumbnailUrl ||
+              latest.playlistID?.thumbnailUrl,
+            playlistTitle: latest.playlistID?.title,
+            videoTitle: latest.lastWatchedVideoID?.title,
+          });
+        } else {
+          setContinueItem(null);
+        }
+      } catch (e) {
+        console.warn("Continue Watching load failed", e);
+        setContinueItem(null);
+      } finally {
+        setContinueLoading(false);
+      }
+    };
+
+    // Only attempt after session state is known
+    if (status !== "loading") {
+      loadContinueWatching();
+    }
+  }, [status, session?.user?.isSubscribed]);
 
   // Function to record login attempt with device fingerprint
   const recordLoginAttempt = async (
@@ -441,6 +611,8 @@ export default function AccountPage() {
   const tabs = [
     { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "favorites", label: "Favorites", icon: Star },
+    { id: "inspo", label: "Inspo", icon: Sparkles },
+    { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
     { id: "wishlist", label: "Wishlist", icon: Heart },
@@ -489,6 +661,18 @@ export default function AccountPage() {
                 )}
               </span>
             </p>
+            {session?.user?.subscription?.packageId ===
+              "68bf6ae9c4d5c1af12cdcd37" && (
+              // "68bf6ae9c4d5c1af12cdcd37" && (
+              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
+                <Button
+                  size="sm"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                >
+                  Upgrade now to the Full Wifey Experience
+                </Button>
+              </Link>
+            )}
             {user.isSubscribed && (
               <p className="text-lovely/80 text-sm font-semibold">
                 Expires at :{" "}
@@ -541,20 +725,101 @@ export default function AccountPage() {
         ))}
       </div>
 
+      {/* Continue Watching (subscribed users) */}
+      {session?.user?.isSubscribed && continueLoading && (
+        <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
+              <Skeleton className="w-full h-full" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <Skeleton className="h-6 w-40 mb-2" />
+              <Skeleton className="h-4 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+              <div className="mt-2">
+                <Skeleton className="h-10 w-24 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {session?.user?.isSubscribed && !continueLoading && continueItem && (
+        <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
+              <img
+                src={continueItem.thumbnailUrl || "/video/1.png"}
+                alt={continueItem.videoTitle || "Continue watching"}
+                className="object-cover w-full h-full"
+              />
+              <Link
+                href={`/playlists/${continueItem.playlistId}?videoId=${continueItem.videoId}`}
+                className="absolute inset-0 flex items-center justify-center group"
+              >
+                <span className="sr-only">Continue</span>
+              </Link>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold">Continue Watching</h3>
+              <p className="text-sm text-lovely/90 truncate">
+                {continueItem.videoTitle || "Latest watched video"}
+                {continueItem.playlistTitle
+                  ? ` • ${continueItem.playlistTitle}`
+                  : ""}
+              </p>
+              <div className="mt-2">
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/playlists/${continueItem.playlistId}?videoId=${continueItem.videoId}`
+                    )
+                  }
+                  className="bg-lovely text-creamey hover:bg-lovely"
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation Tabs */}
       <div className="border-b border-pinkey overflow-x-auto">
         <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                // Update URL with the new tab
+                router.push(`/account?tab=${tab.id}`, { scroll: false });
+                if (
+                  tab.id === "notifications" &&
+                  unreadNotificationsCount > 0
+                ) {
+                  markAllNotificationsAsRead();
+                }
+              }}
               className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-lovely text-lovely font-semibold"
                   : "border-transparent text-lovely/90 hover:text-lovely duration-300 hover:border-lovely"
               }`}
             >
-              <tab.icon className="h-4 w-4" />
+              <div className="relative">
+                <tab.icon className="h-4 w-4" />
+                {tab.id === "notifications" && unreadNotificationsCount > 0 && (
+                  <div className="absolute max-md:-left-2 pt-[2px] -top-2 md:-right-2 bg-lovely text-creamey text-xs rounded-full h-4 w-4 flex items-center text-center justify-center">
+                    <span>
+                      {unreadNotificationsCount > 9
+                        ? "9+"
+                        : unreadNotificationsCount}
+                    </span>
+                  </div>
+                )}
+              </div>
               <span>{tab.label}</span>
             </button>
           ))}
@@ -563,6 +828,199 @@ export default function AccountPage() {
 
       {/* Tab Content */}
       <div className="mt-6">
+        {activeTab === "notifications" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-lovely">
+                Notifications
+              </h2>
+            </div>
+            {loadingNotifications ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50 animate-pulse"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-1/4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-3/4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500">You have no notifications</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notifications.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Bell className="h-12 w-12 text-lovely mx-auto mb-4" />
+                    <p className="text-lovely">No notifications yet</p>
+                  </div>
+                ) : (
+                  notifications.map((notification) => {
+                    // Create a wrapper component based on whether there's a link
+                    const NotificationWrapper = ({
+                      children,
+                    }: {
+                      children: React.ReactNode;
+                    }) => {
+                      // Function to mark notification as read when clicked
+                      const handleNotificationClick = async () => {
+                        if (!notification.read) {
+                          try {
+                            // Mark notification as read
+                            const response = await fetch(
+                              `/api/notifications/${notification._id}/read`,
+                              {
+                                method: "PUT",
+                              }
+                            );
+
+                            if (response.ok) {
+                              // Update UI to show notification as read
+                              setNotifications((prev) =>
+                                prev.map((n) =>
+                                  n._id === notification._id
+                                    ? { ...n, read: true }
+                                    : n
+                                )
+                              );
+                            }
+                          } catch (error) {
+                            console.error(
+                              "Error marking notification as read:",
+                              error
+                            );
+                          }
+                        }
+                      };
+
+                      if (notification.link) {
+                        console.log("link" + notification.link);
+                        return (
+                          <Link
+                            href={notification.link}
+                            onClick={handleNotificationClick}
+                            className="block cursor-pointer hover:bg-gray-50 transition-colors"
+                          >
+                            {children}
+                          </Link>
+                        );
+                      }
+
+                      return <div>{children}</div>;
+                    };
+
+                    return (
+                      <div
+                        key={notification._id}
+                        className={`border rounded-lg overflow-hidden ${
+                          notification.read
+                            ? "border-gray-200"
+                            : "border-lovely"
+                        }`}
+                      >
+                        <NotificationWrapper>
+                          <div className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-3">
+                                <div className="relative">
+                                  {notification.userId?.imageURL ? (
+                                    <div className="relative ">
+                                      <div className="rounded-full w-10 h-10 overflow-hidden">
+                                        <Image
+                                          src={notification.userId.imageURL}
+                                          alt={
+                                            notification.userId?.firstName ||
+                                            "User"
+                                          }
+                                          width={40}
+                                          height={40}
+                                          className=""
+                                        />
+                                      </div>
+                                      <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                        {notification.actionType === "like" && (
+                                          <Heart className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "comment" && (
+                                          <MessageCircle className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "reply" && (
+                                          <Reply className="h-3 w-3 text-white" />
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="relative">
+                                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <User className="h-6 w-6 text-gray-500" />
+                                      </div>
+                                      <div className="absolute -bottom-1 -right-1 bg-lovely rounded-full p-1">
+                                        {notification.actionType === "like" && (
+                                          <Heart className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "comment" && (
+                                          <MessageCircle className="h-3 w-3 text-white" />
+                                        )}
+                                        {notification.actionType ===
+                                          "reply" && (
+                                          <Reply className="h-3 w-3 text-white" />
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-lovely font-medium">
+                                    {notification.userId.firstName +
+                                      notification.userId.lastName}{" "}
+                                    {getNotificationText(notification)}
+                                  </p>
+                                  {notification.content && (
+                                    <p className="text-sm text-lovely/70 mt-1">
+                                      &quot;
+                                      {notification.content.length > 100
+                                        ? notification.content.substring(
+                                            0,
+                                            100
+                                          ) + "..."
+                                        : notification.content}
+                                      &quot;
+                                    </p>
+                                  )}
+                                  <p className="text-xs text-lovely/60 mt-2">
+                                    {formatNotificationDate(
+                                      notification.createdAt
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                              {!notification.read && (
+                                <div className="h-2 w-2 rounded-full bg-lovely flex-shrink-0"></div>
+                              )}
+                            </div>
+                          </div>
+                        </NotificationWrapper>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}{" "}
+          </div>
+        )}
+
         {activeTab === "orders" && (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -1101,6 +1559,18 @@ export default function AccountPage() {
             )}
           </div>
         )}
+
+        {activeTab === "inspo" && (
+          <div>
+            {user.isSubscribed ? (
+              <InspoTab />
+            ) : (
+              <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
+                Subscribe to access your inspiration boards!
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Orders Section for "See All" button */}
@@ -1362,5 +1832,13 @@ export default function AccountPage() {
         </div>
       )}
     </div>
+  );
+};
+
+export default function AccountPageWithSuspense(props: any) {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <AccountPage {...props} />
+    </Suspense>
   );
 }

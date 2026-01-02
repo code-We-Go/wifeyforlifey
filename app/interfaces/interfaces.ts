@@ -84,6 +84,7 @@ export const videoCategories = [
 ];
 
 export interface Variant {
+  price?: number;
   name: string;
   attributeName: string;
   attributes: attribute[]; // e.g., [{ name: "Color", value: "Black" }, { name: "Capacity", value: "2L" }]
@@ -108,6 +109,7 @@ export interface SubCategory {
 
 export type attribute = {
   name: string;
+  price?: number;
   stock: number;
 };
 export type media = {
@@ -133,14 +135,14 @@ export interface Collection {
   imageURL: string;
   products?: string[];
 }
-export interface SubCategory {
-  _id: string;
-  subCategoryName: string;
-  description: string;
-  categoryID: Category; // now a full object
-  createdAt?: string;
-  updatedAt?: string;
-}
+// export interface SubCategory {
+//   _id: string;
+//   subCategoryName: string;
+//   description: string;
+//   categoryID: Category; // now a full object
+//   createdAt?: string;
+//   updatedAt?: string;
+// }
 
 export interface Product {
   _id: string;
@@ -148,6 +150,7 @@ export interface Product {
   description: string;
   price: price;
   comparedPrice: number;
+  order?: number;
   // subCategoryID: mongoose.Types.ObjectId;
   subCategoryID: SubCategory; // now a full object
   variations: Variant[];
@@ -357,4 +360,19 @@ export interface ILoyaltyBonus {
   description: string;
   bonusPoints: number;
   active: boolean;
+}
+export interface INotification {
+  _id: string;
+  userId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    imageURL?: string;
+  };
+  link: string;
+  actionType: "like" | "comment" | "reply" | string;
+  targetType: string;
+  read: boolean;
+  createdAt: string;
+  content?: string;
 }

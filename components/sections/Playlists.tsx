@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,7 +11,9 @@ import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
 import { thirdFont } from "@/fonts";
 
 const Playlists = () => {
-  const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>([]);
+  const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +74,9 @@ const Playlists = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredPlaylists.length === 0 ? (
-              <div className="col-span-2 text-center py-8">No featured playlists found.</div>
+              <div className="col-span-2 text-center py-8">
+                No featured playlists found.
+              </div>
             ) : (
               featuredPlaylists.map((playlist) => (
                 <VideoCard key={playlist._id} playlist={playlist} />

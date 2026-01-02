@@ -44,6 +44,11 @@ const OrderSchema = new Schema(
         city: { type: String, required: false },
         state: { type: String, required: false },
         phone: { type: String, required: false },
+        // Gift info
+        isGift: { type: Boolean, default: false },
+        giftRecipientEmail: { type: String, required: false },
+        specialMessage: { type: String, required: false },
+        giftCardName: { type: String, required: false },
         cash: { type: String, required: false, default: true }, // Payment method: Cash or not
         cart: {
             type: [CartItemSchema],required:false // Array of cart items

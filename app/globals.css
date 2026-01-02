@@ -257,6 +257,29 @@
   display: none; /* Safari and Chrome */
 }
 
+.scrollbar-creamey {
+  scrollbar-width: thin;
+  scrollbar-color: #d32333 #fbf3e0;
+}
+
+.scrollbar-creamey::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-creamey::-webkit-scrollbar-track {
+  background: #fbf3e0;
+  border-radius: 3px;
+}
+
+.scrollbar-creamey::-webkit-scrollbar-thumb {
+  background: #d32333;
+  border-radius: 3px;
+}
+
+.scrollbar-creamey::-webkit-scrollbar-thumb:hover {
+  background: #b91c2a;
+}
+
 input::placeholder {
   color: #81c8bb;
 }
@@ -264,3 +287,4 @@ input::placeholder {
 .animation-pause {
   animation-play-state: paused;
 }
+

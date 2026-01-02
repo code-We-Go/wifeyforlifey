@@ -14,6 +14,8 @@ interface VdoPlayerProps {
   onVideoEnd?: () => void;
   onVideoStart?: () => void;
   onVideoReady?: () => void;
+  onWatchThreshold?: () => void;
+  watchThresholdPct?: number;
   autoplay?: boolean;
   muted?: boolean;
   volume?: number; // 0 to 1
@@ -25,6 +27,8 @@ const VdoPlayer = ({
   onVideoEnd,
   onVideoStart,
   onVideoReady,
+  onWatchThreshold,
+  watchThresholdPct = 0.95,
   autoplay = true,
   muted = false,
   volume = 1,
@@ -35,6 +39,30 @@ const VdoPlayer = ({
   const [isApiReady, setIsApiReady] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
+  const thresholdTriggeredRef = useRef(false);
+  const readyHandledRef = useRef(false);
+  // Keep latest callbacks in refs to avoid re-init loops
+  const onVideoEndRef = useRef<typeof onVideoEnd>();
+  const onVideoStartRef = useRef<typeof onVideoStart>();
+  const onVideoReadyRef = useRef<typeof onVideoReady>();
+  const onWatchThresholdRef = useRef<typeof onWatchThreshold>();
+  const watchThresholdPctRef = useRef<number>(watchThresholdPct);
+
+  useEffect(() => {
+    onVideoEndRef.current = onVideoEnd;
+  }, [onVideoEnd]);
+  useEffect(() => {
+    onVideoStartRef.current = onVideoStart;
+  }, [onVideoStart]);
+  useEffect(() => {
+    onVideoReadyRef.current = onVideoReady;
+  }, [onVideoReady]);
+  useEffect(() => {
+    onWatchThresholdRef.current = onWatchThreshold;
+  }, [onWatchThreshold]);
+  useEffect(() => {
+    watchThresholdPctRef.current = watchThresholdPct ?? 0.95;
+  }, [watchThresholdPct]);
 
   // Check if user has interacted with the page
   useEffect(() => {
@@ -170,66 +198,100 @@ const VdoPlayer = ({
     } catch (error) {
       console.error("Error initializing VdoCipher player:", error);
     }
-  }, [otp, playbackInfo, autoplay, muted, volume, onVideoReady]);
+  }, [otp, playbackInfo, autoplay, muted, volume]);
 
   const setupEventListeners = (player: any) => {
-    if (!player.video) return;
+    // Reset threshold flag for a fresh video session
+    thresholdTriggeredRef.current = false;
 
-    // Video end event
-    player.video.addEventListener("ended", () => {
+    // Prefer attaching to VdoCipher player instance
+    const onEnded = () => {
       console.log("Video ended");
-      onVideoEnd?.();
-    });
-
-    // Video start event
-    player.video.addEventListener("play", () => {
+      onVideoEndRef.current?.();
+    };
+    const onPlay = () => {
       console.log("Video started playing");
-      onVideoStart?.();
-    });
-
-    // Video ready event
-    player.video.addEventListener("loadeddata", () => {
-      console.log("Video data loaded");
-
-      // If autoplay is enabled and user has interacted, try to play with sound
-      if (autoplay && userInteracted && !muted) {
-        setTimeout(() => {
-          if (player.video) {
-            player.video.muted = false;
-            player.video.volume = volume;
-            player.video.play().catch((error: any) => {
-              console.warn("Autoplay with sound failed, trying muted:", error);
-              // Fallback to muted autoplay
-              player.video.muted = true;
-              player.video.play();
-            });
-          }
-        }, 100);
+      onVideoStartRef.current?.();
+    };
+    const onReady = () => {
+      console.log("VdoCipher player ready");
+      // Ensure ready logic runs once per init
+      if (readyHandledRef.current) return;
+      readyHandledRef.current = true;
+      // If autoplay is enabled, try to play; fallback to muted autoplay
+      try {
+        if (autoplay) {
+          setTimeout(() => {
+            if (player?.video) {
+              player.video.muted = false;
+              player.video.volume = volume;
+              player.video
+                .play()
+                .catch((error: any) => {
+                  console.warn("Autoplay with sound failed, trying muted:", error);
+                  // Fallback to muted autoplay (gesture not required)
+                  try {
+                    player.video.muted = true;
+                    player.video.play().catch(() => {
+                      // ignore if muted autoplay also fails
+                    });
+                  } catch {}
+                });
+            }
+          }, 100);
+        }
+      } catch (e) {
+        // ignore autoplay errors
       }
-    });
+      onVideoReadyRef.current?.();
+    };
 
-    // Video pause event
-    player.video.addEventListener("pause", () => {
-      console.log("Video paused");
-    });
+    const onTimeUpdate = () => {
+      try {
+        const currentTime = player?.video?.currentTime ?? 0;
+        const duration = player?.video?.duration ?? 0;
+        if (!thresholdTriggeredRef.current && duration && duration > 0) {
+          const pct = currentTime / duration;
+          if (pct >= (watchThresholdPctRef.current ?? 0.95)) {
+            thresholdTriggeredRef.current = true;
+            onWatchThresholdRef.current?.();
+          }
+        }
+      } catch (err) {
+        // ignore progress errors
+      }
+    };
 
-    // Time update event for progress tracking
-    player.video.addEventListener("timeupdate", () => {
-      // Optional: track progress
-      // const currentTime = player.video.currentTime;
-      // const duration = player.video.duration;
-      // console.log(`Progress: ${currentTime}/${duration}`);
-    });
-
-    // Handle volume changes
-    player.video.addEventListener("volumechange", () => {
-      console.log(
-        "Volume changed:",
-        player.video.volume,
-        "Muted:",
-        player.video.muted
-      );
-    });
+    try {
+      // Attach to player instance events when available
+      if (player?.addEventListener) {
+        player.addEventListener("ended", onEnded);
+        player.addEventListener("play", onPlay);
+        player.addEventListener("ready", onReady);
+        player.addEventListener("load", onReady);
+        player.addEventListener("timeupdate", onTimeUpdate);
+      }
+      // Fallback to video element events
+      if (player?.video?.addEventListener) {
+        player.video.addEventListener("ended", onEnded);
+        player.video.addEventListener("play", onPlay);
+        player.video.addEventListener("loadeddata", onReady);
+        player.video.addEventListener("timeupdate", onTimeUpdate);
+        player.video.addEventListener("pause", () => {
+          console.log("Video paused");
+        });
+        player.video.addEventListener("volumechange", () => {
+          console.log(
+            "Volume changed:",
+            player.video.volume,
+            "Muted:",
+            player.video.muted
+          );
+        });
+      }
+    } catch (e) {
+      console.warn("Failed to attach VdoCipher event listeners", e);
+    }
   };
 
   useEffect(() => {
@@ -237,6 +299,7 @@ const VdoPlayer = ({
 
     // Cleanup function
     return () => {
+      readyHandledRef.current = false;
       if (containerRef.current) {
         containerRef.current.innerHTML = "";
       }
