@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
@@ -14,9 +13,9 @@ export async function POST(
 ) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email || !session?.user?.id) {
+    if (!isAuthenticated || !authUser) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -33,8 +32,18 @@ export async function POST(
       );
     }
 
-    // Check if user is subscribed directly from session
-    if (!session.user.isSubscribed) {
+    // Get full user from DB to check subscription
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Check if user is subscribed directly from session/user object
+    if (!user.isSubscribed) {
       return NextResponse.json(
         { error: "Subscription required to reply to comments" },
         { status: 403 }
@@ -65,8 +74,8 @@ export async function POST(
 
     // Create the reply with additional fields to match VideoComment structure
     const newReply = {
-      userId: session.user.id,
-      username: session.user.name || "",
+      userId: user._id.toString(),
+      username: user.username || user.firstName || "User",
       text: text.trim(),
       likes: [],
       createdAt: new Date(),
@@ -99,7 +108,7 @@ export async function POST(
     await InteractionsModel.create({
       notifyUserId: comment.userId,
       link: `${process.env.baseUrl}playlists/${playlistId}?videoId=${videoId}#${commentId}`,
-      userId: session.user.id,
+      userId: user._id,
       targetId: commentId,
       targetType: "comment",
       actionType: "reply",
@@ -115,11 +124,11 @@ export async function POST(
       ...newReply,
       _id: savedReply._id.toString(), // Include the actual database ID
       userId: {
-        _id: session.user.id,
-        username: session.user.name || "",
-        firstName: session.user.firstName || "",
-        lastName: session.user.lastName || "",
-        imageURL: session.user.image || "",
+        _id: user._id.toString(),
+        username: user.username,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        imageURL: user.imageURL || user.image || "",
       },
     };
 

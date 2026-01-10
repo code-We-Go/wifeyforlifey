@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import playlistsProgress from "@/app/modals/playlistsProgress";
@@ -9,16 +8,20 @@ import playlistsProgress from "@/app/modals/playlistsProgress";
 export async function GET(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const playlistId = searchParams.get("playlistId");
 
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -59,9 +62,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
@@ -70,7 +73,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "playlistId is required" }, { status: 400 });
     }
 
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -98,9 +105,9 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
@@ -109,7 +116,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "playlistId and videoId are required" }, { status: 400 });
     }
 
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -132,9 +143,9 @@ export async function PUT(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
@@ -143,7 +154,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "playlistId and videoId are required" }, { status: 400 });
     }
 
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }

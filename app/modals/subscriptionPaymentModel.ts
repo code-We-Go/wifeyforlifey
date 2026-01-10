@@ -6,16 +6,36 @@ const SubscriptionPaymentSchema = new Schema(
     // Core payment and context
     paymentID: { type: String, required: true },
     email: { type: String, required: true },
-    userID: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: false },
-    process: { type: String, enum: ["upgrade", "renew", "new"], required: true },
-    from: { type: mongoose.Schema.Types.ObjectId, ref: "packages", required: false },
-    to: { type: mongoose.Schema.Types.ObjectId, ref: "packages", required: true },
+    userID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: false,
+    },
+    process: {
+      type: String,
+      enum: ["upgrade", "renew", "new"],
+      required: true,
+    },
+    from: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "packages",
+      required: false,
+    },
+    to: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "packages",
+      required: true,
+    },
 
     // Subscription model parity fields
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" }, // optional mirror, will be set to `to`
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },
-    appliedDiscount: { type: mongoose.Schema.Types.ObjectId, ref: "discounts", required: false },
+    appliedDiscount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "discounts",
+      required: false,
+    },
     appliedDiscountAmount: { type: Number, required: false },
 
     // User information
@@ -66,7 +86,12 @@ const SubscriptionPaymentSchema = new Schema(
     shipmentID: { type: String, required: false, default: "" },
 
     // Status tracking
-    status: { type: String, enum: ["pending", "confirmed", "failed"], default: "pending" },
+    status: {
+      type: String,
+      enum: ["pending", "confirmed", "failed"],
+      default: "pending",
+    },
+    isMob: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

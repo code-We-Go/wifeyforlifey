@@ -4,8 +4,7 @@ import PartnerSessionModel from "@/app/modals/partnerSessionModel";
 import PartnerSessionOrderModel from "@/app/modals/partnerSessionOrderModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import axios from "axios";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 
 export async function POST(req: Request) {
   try {
@@ -25,8 +24,8 @@ export async function POST(req: Request) {
     }
 
     // Resolve authenticated user subscription state from NextAuth session
-    const authSession = await getServerSession(authOptions);
-    const hasActiveSubscription = !!authSession?.user?.isSubscribed;
+    const { isAuthenticated, user: authUser } = await authenticateRequest(req);
+    const hasActiveSubscription = isAuthenticated && authUser ? !!authUser.isSubscribed : false;
 
     const basePrice = partnerSession.price;
     let finalPrice = basePrice;
