@@ -86,6 +86,7 @@ const OrderSchema = new Schema(
         bostaZoneName: { type: String, required: false },
         bostaDistrict: { type: String, required: false },
         bostaDistrictName: { type: String, required: false },
+        isMob: { type: Boolean, default: false },
         createdAt: { type: Date, default: Date.now },
     },
     { timestamps: true } // Automatically adds createdAt and updatedAt fields
