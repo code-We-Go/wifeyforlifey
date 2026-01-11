@@ -20,6 +20,7 @@ const PackageSchema = new Schema<Ipackage>(
       required: true,
       default: [],
     },
+    active: { type: Boolean, required: true, default: false },
     notes: { type: [String], required: true, default: [] },
     cards: { type: [PackageCardSchema], required: false, default: [] },
   },

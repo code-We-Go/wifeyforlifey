@@ -28,6 +28,7 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const search = searchParams.get("search") || "";
   const all = searchParams.get("all") === "true";
+  const active = searchParams.get("active");
   const limit = all ? 0 : 10;
   const skip = all ? 0 : (page - 1) * limit;
   const packageID = searchParams.get("packageID");
@@ -42,9 +43,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ data: singlePackage }, { status: 200 });
     }
     // Create search query
-    const searchQuery = search
-      ? { name: { $regex: search, $options: "i" } }
-      : {};
+    const searchQuery: any = {};
+
+    if (search) {
+      searchQuery.name = { $regex: search, $options: "i" };
+    }
+
+    if (active !== null) {
+      searchQuery.active = active === "true";
+    }
 
     // Get total count with search filter
     const totalPackages = await packageModel.countDocuments(searchQuery);

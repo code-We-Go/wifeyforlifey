@@ -778,7 +778,7 @@ const SubscriptionPage = () => {
       setNotFound(false);
       try {
         const res = await axios.get(`/api/packages?packageID=${packageID}`);
-        if (res.data.data) {
+        if (res.data.data && res.data.data.active) {
           setPackageData(res.data.data);
         } else {
           setNotFound(true);
@@ -879,7 +879,7 @@ const SubscriptionPage = () => {
   }
   if (notFound || !packageData) {
     return (
-      <div className="container-custom py-16 text-center">
+      <div className="container-custom flex justify-center items-center min-h-screen  text-center">
         Subscription not found.
       </div>
     );
