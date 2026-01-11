@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,9 +12,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Plus, Trash2, Save, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Save,
+  Loader2,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 // Define the Event type
 type TimelineEvent = {
@@ -157,14 +174,17 @@ const addMinutes = (date: Date, minutes: number) => {
 
 function TimelineEditor() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const startTimeParam = searchParams.get("startTime") || "10:30";
   const weddingStartTimeParam = searchParams.get("weddingStartTime") || "18:00";
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   const [events, setEvents] = useState<TimelineEvent[]>(defaultEvents);
   const [baseTime, setBaseTime] = useState<Date>(new Date());
   const [weddingStartTime, setWeddingStartTime] = useState<Date>(new Date());
   const [isSaving, setIsSaving] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     if (startTimeParam) {
@@ -179,7 +199,17 @@ function TimelineEditor() {
       date.setHours(hours, minutes, 0, 0);
       setWeddingStartTime(date);
     }
-  }, [startTimeParam, weddingStartTimeParam]);
+
+    // Override event durations from search params
+    const newEvents = defaultEvents.map((event) => {
+      const paramDuration = searchParams.get(event.id);
+      if (paramDuration) {
+        return { ...event, duration: parseInt(paramDuration, 10) };
+      }
+      return event;
+    });
+    setEvents(newEvents);
+  }, [startTimeParam, weddingStartTimeParam, searchParams]);
 
   const handleDurationChange = (index: number, newDuration: string) => {
     const duration = parseInt(newDuration) || 0;
@@ -216,6 +246,19 @@ function TimelineEditor() {
     setEvents(newEvents);
   };
 
+  const handleMoveEvent = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === events.length - 1) return;
+
+    const newEvents = [...events];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    [newEvents[index], newEvents[targetIndex]] = [
+      newEvents[targetIndex],
+      newEvents[index],
+    ];
+    setEvents(newEvents);
+  };
+
   // Calculate times for rendering
   let currentTime = new Date(baseTime);
   const calculatedEvents = events.map((event) => {
@@ -233,6 +276,11 @@ function TimelineEditor() {
   });
 
   const handleSave = async () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsSaving(true);
     try {
       const response = await fetch("/api/wedding-timeline", {
@@ -272,8 +320,50 @@ function TimelineEditor() {
     }
   };
 
+  const handleGuestContinue = () => {
+    setShowAuthModal(false);
+    // Save to localStorage for guest persistence
+    localStorage.setItem("guestWeddingTimeline", JSON.stringify(events));
+
+    toast({
+      title: "Plan Saved Locally",
+      description:
+        "Your plan is saved in your browser. Login to save permanently.",
+    });
+
+    // Redirect logic if needed, for now we just notify
+    // router.push('/'); // Uncomment if redirect is desired
+  };
+
   return (
     <div className="min-h-screen bg-creamey p-4 md:p-8">
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Your Timeline</DialogTitle>
+            <DialogDescription>
+              Create an account or log in to save your timeline permanently and
+              access it from any device.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:justify-center gap-2">
+            <Button
+              asChild
+              className="w-full bg-pinkey hover:bg-pinkey/90 text-heading-color"
+            >
+              <Link href="/login">Login / Create Account</Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleGuestContinue}
+              className="w-full"
+            >
+              Continue as Guest
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden border-2 border-pinkey/20">
         <div className="p-6 bg-pinkey/10 border-b border-pinkey/20 flex justify-between items-center flex-wrap gap-4">
           <div>
@@ -335,13 +425,34 @@ function TimelineEditor() {
                   GROOMSMEN
                 </TableHead>
                 <TableHead className="w-[50px]"></TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {calculatedEvents.map((event, index) => (
                 <TableRow key={event.id} className="hover:bg-pinkey/5">
                   <TableCell className="font-medium whitespace-nowrap text-sm bg-creamey/30">
-                    <span className="bg-pinkey/20 px-2 py-1 rounded text-heading-color font-semibold">
+                    <div className="flex flex-col items-center gap-1 mr-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleMoveEvent(index, "up")}
+                        disabled={index === 0}
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleMoveEvent(index, "down")}
+                        disabled={index === calculatedEvents.length - 1}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <span className="bg-pinkey/20 px-2 py-1 rounded text-heading-color font-semibold block text-center mt-1">
                       {event.timeLabel}
                     </span>
                   </TableCell>
