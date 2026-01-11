@@ -4,13 +4,18 @@ import { connectToDatabase } from "@/utils/mongodb";
 import FavoritesModel from "@/app/modals/favoritesModel";
 import UserModel from "@/app/modals/userModel";
 import { ConnectDB } from "@/app/config/db";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 // GET /api/favorites - Get all favorites for the current user
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
-    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(req);
-    
+    const {
+      isAuthenticated,
+      user: authUser,
+      authType,
+    } = await authenticateRequest(req);
+
     if (!isAuthenticated || !authUser) {
       return NextResponse.json(
         { error: "You must be logged in to view favorites" },
@@ -20,23 +25,24 @@ export async function GET(req: NextRequest) {
 
     // Connect to database
     await ConnectDB();
-
+    console.log("register" + subscriptionsModel);
     let user = authUser;
     if (authType === "session") {
-      user = await UserModel.findOne({ email: authUser.email });
+      user = await UserModel.findOne({ email: authUser.email }).populate(
+        "subscription"
+      );
     }
 
     if (!user) {
-       return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if user has subscription
     // Ensure subscriptionExpiryDate is treated as Date
-    const expiryDate = user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) : null;
-    
+    const expiryDate = user.subscription?.expiryDate
+      ? new Date(user.subscription.expiryDate)
+      : null;
+    console.log(expiryDate + "date");
     if (!expiryDate || !(expiryDate > new Date())) {
       return NextResponse.json(
         { error: "You need a subscription to access favorites" },
