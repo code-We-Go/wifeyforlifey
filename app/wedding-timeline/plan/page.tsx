@@ -597,7 +597,7 @@ function TimelineEditor() {
     setIsExporting(true);
 
     try {
-      const { default: jsPDF, GState } = await import("jspdf");
+      const { default: jsPDF, GState } = (await import("jspdf")) as any;
       const autoTable = (await import("jspdf-autotable")).default;
 
       const doc = new jsPDF();
@@ -695,10 +695,10 @@ function TimelineEditor() {
         const x = (doc.internal.pageSize.getWidth() - wmWidth) / 2;
         const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
 
-        doc.saveGraphicsState();
-        doc.setGState(new GState({ opacity: 0.25 }));
+        (doc as any).saveGraphicsState();
+        doc.setGState(new GState({ opacity: 0.1 }));
         doc.addImage(watermarkImg, "PNG", x, y, wmWidth, wmHeight);
-        doc.restoreGraphicsState();
+        (doc as any).restoreGraphicsState();
       }
 
       doc.save("wedding-timeline.pdf");
