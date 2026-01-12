@@ -195,6 +195,15 @@ export const authOptions: NextAuthOptions = {
             email,
             subscribed: true,
           });
+          if (!subscription) {
+            token.isSubscribed = false;
+            token.subscriptionExpiryDate = null;
+            token.subscription = {
+              packageId: undefined,
+              paid: false,
+            };
+            return token;
+          }
           console.log("packageID" + subscription.packageID);
           token.isSubscribed = !!(
             subscription?.expiryDate &&
@@ -204,7 +213,7 @@ export const authOptions: NextAuthOptions = {
             ? subscription.expiryDate.toISOString()
             : null;
           token.subscription = {
-            packageId: subscription?.packageID || null,
+            packageId: subscription?.packageID || undefined,
             paid: subscription?.paid || false,
           };
           // token.loyaltyPoints = await calculateLoyaltyPoints(email);

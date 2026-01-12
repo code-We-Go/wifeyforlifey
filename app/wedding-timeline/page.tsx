@@ -1,239 +1,316 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowRight, Clock, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { thirdFont } from "@/fonts";
 
-type Question = {
+type Feature = {
   id: string;
-  type: "time" | "number";
   label: string;
-  hint?: string;
-  defaultValue?: string | number;
+  defaultDuration: number;
+  category: "before" | "zaffa" | "after"; // To help with ordering later
 };
 
-const questions: Question[] = [
+const FEATURES: Feature[] = [
+  { id: "makeup", label: "Makeup", defaultDuration: 105, category: "before" },
+  { id: "hair", label: "Hair & Veil", defaultDuration: 60, category: "before" },
   {
-    id: "startTime",
-    type: "time",
-    label: "What time does your day start?",
-    hint: "Usually this is when you arrive at the venue. (e.g. 10:30)",
-  },
-  {
-    id: "weddingStartTime",
-    type: "time",
-    label: "What time is the Zaffa?",
-    hint: "This is usually the main entrance or ceremony start time. (e.g. 18:00)",
-  },
-  {
-    id: "arrival",
-    type: "number",
-    label: "How many minutes for Arrival to the venue?",
-    defaultValue: 30,
-  },
-  {
-    id: "hair",
-    type: "number",
-    label: "How many minutes for Hair Styling?",
-    defaultValue: 60,
-  },
-  {
-    id: "makeup",
-    type: "number",
-    label: "How many minutes for Makeup?",
-    defaultValue: 105,
-  },
-  {
-    id: "ready_pics",
-    type: "number",
-    label: "How many minutes for Getting Ready pictures?",
-    defaultValue: 15,
-  },
-  {
-    id: "ceremony_clothes",
-    type: "number",
-    label: "How many minutes for Wearing ceremony clothes?",
-    defaultValue: 30,
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
   },
   {
     id: "first_look",
-    type: "number",
-    label: "How many minutes for First Look?",
-    defaultValue: 15,
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
   },
   {
     id: "photoshoot",
-    type: "number",
-    label: "How many minutes for Photoshoot?",
-    defaultValue: 120,
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
   },
+  { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
+  { id: "entrance", label: "Entrance", defaultDuration: 20, category: "after" },
   {
-    id: "break",
-    type: "number",
-    label: "How many minutes for Bridal Team Break?",
-    defaultValue: 30,
+    id: "katb_ketab",
+    label: "Katb Ketab",
+    defaultDuration: 45,
+    category: "after",
   },
-  {
-    id: "zaffa",
-    type: "number",
-    label: "How many minutes for Zaffa / Entrance duration?",
-    defaultValue: 30,
-  },
-  {
-    id: "guests_pics",
-    type: "number",
-    label: "How many minutes for Pictures with guests?",
-    defaultValue: 30,
-  },
-  {
-    id: "party_1",
-    type: "number",
-    label: "How many minutes for Party Time (Part 1)?",
-    defaultValue: 90,
-  },
-  {
-    id: "dinner",
-    type: "number",
-    label: "How many minutes for Dinner?",
-    defaultValue: 60,
-  },
-  {
-    id: "party_2",
-    type: "number",
-    label: "How many minutes for Party Time (Part 2)?",
-    defaultValue: 120,
-  },
+  { id: "dinner", label: "Dinner", defaultDuration: 60, category: "after" },
 ];
 
 export default function WeddingTimelinePage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string | number>>({});
+  const { isAuthenticated, loading } = useAuth();
 
-  const currentQuestion = questions[currentStep];
-  const isLastQuestion = currentStep === questions.length - 1;
+  // State
+  const [step, setStep] = useState<1 | 2>(1);
+  const [checkingTimeline, setCheckingTimeline] = useState(false);
+  const [zaffaTime, setZaffaTime] = useState("18:00");
+  const [selectedFeatures, setSelectedFeatures] = useState<
+    Record<string, { enabled: boolean; duration: number }>
+  >(
+    FEATURES.reduce(
+      (acc, feature) => ({
+        ...acc,
+        [feature.id]: { enabled: true, duration: feature.defaultDuration },
+      }),
+      {}
+    )
+  );
 
-  // Initialize answer with default value if not set
-  const currentAnswer =
-    answers[currentQuestion.id] !== undefined
-      ? answers[currentQuestion.id]
-      : currentQuestion.defaultValue || "";
+  // Check for existing timeline
+  useEffect(() => {
+    const checkExistingTimeline = async () => {
+      if (isAuthenticated && !loading) {
+        setCheckingTimeline(true);
+        try {
+          const res = await fetch("/api/wedding-timeline");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.found && data.data) {
+              const { zaffaTime, selectedFeatures } = data.data;
+              const params = new URLSearchParams();
+              params.set("zaffa", zaffaTime);
 
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
+              // Map DB features to URL param format
+              const featuresParam = selectedFeatures
+                .filter((f: any) => f.enabled)
+                .map((f: any) => `${f.name}:${f.duration}`)
+                .join(",");
 
-    if (!currentAnswer && currentAnswer !== 0) {
-      // Basic validation: required
-      return;
-    }
+              params.set("features", featuresParam);
+              router.push(`/wedding-timeline/plan?${params.toString()}`);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking timeline:", error);
+        } finally {
+          setCheckingTimeline(false);
+        }
+      }
+    };
 
-    if (isLastQuestion) {
-      // Submit
-      const params = new URLSearchParams();
-      // Add current answer to state for submission
-      const finalAnswers = { ...answers, [currentQuestion.id]: currentAnswer };
+    checkExistingTimeline();
+  }, [isAuthenticated, loading, router]);
 
-      Object.entries(finalAnswers).forEach(([key, value]) => {
-        params.append(key, value.toString());
-      });
+  const handleFeatureToggle = (id: string) => {
+    setSelectedFeatures((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], enabled: !prev[id].enabled },
+    }));
+  };
 
-      router.push(`/wedding-timeline/plan?${params.toString()}`);
+  const handleDurationChange = (id: string, duration: number) => {
+    setSelectedFeatures((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], duration },
+    }));
+  };
+
+  const handlePlan = () => {
+    // 1. Construct the data object
+    const data = {
+      zaffaTime,
+      features: FEATURES.map((f) => ({
+        id: f.id,
+        label: f.label,
+        category: f.category,
+        enabled: selectedFeatures[f.id].enabled,
+        duration: selectedFeatures[f.id].duration,
+      })),
+    };
+
+    // 2. Serialize for URL
+    // We'll pass essential data via URL params
+    const params = new URLSearchParams();
+    params.set("zaffa", zaffaTime);
+
+    // Pass selected features as a comma-separated string of "id:duration"
+    // Only pass enabled ones
+    const featuresParam = data.features
+      .filter((f) => f.enabled)
+      .map((f) => `${f.id}:${f.duration}`)
+      .join(",");
+
+    params.set("features", featuresParam);
+
+    const targetUrl = `/wedding-timeline/plan?${params.toString()}`;
+
+    // 3. Check Auth
+    if (!isAuthenticated) {
+      // Force login by redirecting to login with callback
+      const loginUrl = `/login?callbackUrl=${encodeURIComponent(targetUrl)}`;
+      router.push(loginUrl);
     } else {
-      // Save and Next
-      setAnswers((prev) => ({ ...prev, [currentQuestion.id]: currentAnswer }));
-      setCurrentStep((prev) => prev + 1);
+      router.push(targetUrl);
     }
   };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-    }
-  };
-
-  const handleChange = (val: string) => {
-    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: val }));
-  };
-
-  const progress = ((currentStep + 1) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-creamey flex flex-col items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full border-2 border-pinkey/20 relative overflow-hidden">
-        {/* Progress Bar */}
-        <div className="absolute top-0 left-0 w-full h-2 bg-pinkey/10">
-          <div
-            className="h-full bg-pinkey transition-all duration-300 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <h1 className="text-4xl font-display text-center mb-2 text-heading-color mt-4">
-          Wedding Day
+    <div className="min-h-[85vh] bg-creamey flex p-8 md:pt-16 flex-col items-center justify-center ">
+      <div className="bg-creamey border-lovely p-8 rounded-lg shadow-lg max-w-2xl w-full border-4 relative">
+        <Image
+          width={100}
+          height={70}
+          className="absolute -top-8 -rotate-45 -left-10 z-20"
+          alt="fyonka"
+          src={"/fyonkaCreamey.png"}
+        />
+        <h1
+          className={`${thirdFont.className} text-4xl text-center mb-2 text-lovely `}
+        >
+          Your Wedding Day Planner
         </h1>
-        <h2 className="text-2xl font-display text-center mb-8 text-pinkey italic">
+        {/* <h2 className="text-2xl font-display text-center mb-8 text-pinkey italic">
           Timeline Wizard
-        </h2>
+        </h2> */}
 
-        <form onSubmit={handleNext} className="space-y-6">
-          <div className="space-y-3 min-h-[150px]">
-            <Label
-              htmlFor={currentQuestion.id}
-              className="text-lg text-heading-color block mb-4"
-            >
-              {currentQuestion.label}
-            </Label>
-
-            <div className="relative animate-in fade-in slide-in-from-right-4 duration-300">
-              <Input
-                key={currentQuestion.id} // Force re-render input on step change
-                id={currentQuestion.id}
-                type={currentQuestion.type}
-                value={currentAnswer}
-                onChange={(e) => handleChange(e.target.value)}
-                required
-                autoFocus
-                className="text-lg p-6 border-pinkey/30 focus:border-pinkey focus:ring-pinkey bg-creamey/20"
-              />
-            </div>
-
-            {currentQuestion.hint && (
-              <p className="text-sm text-muted-foreground text-center mt-2 animate-in fade-in duration-500">
-                {currentQuestion.hint}
-              </p>
-            )}
+        {loading || checkingTimeline ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-lovely/70 mb-4" />
+            <p className="text-muted-foreground">
+              {checkingTimeline
+                ? "Checking for existing plan..."
+                : "Loading..."}
+            </p>
           </div>
-
-          <div className="flex gap-4 pt-4">
-            {currentStep > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                className="flex-1 border-pinkey text-heading-color hover:bg-pinkey/10"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
+        ) : (
+          <>
+            {!isAuthenticated && step === 1 && (
+              <div className="flex justify-center mb-6">
+                <Button
+                  variant="link"
+                  className="text-lovely/70 underline"
+                  onClick={() =>
+                    router.push("/login?callbackUrl=/wedding-timeline")
+                  }
+                >
+                  Already have a plan? Login to check
+                </Button>
+              </div>
             )}
 
-            <Button
-              type="submit"
-              className={`flex-1 bg-pinkey hover:bg-pinkey/90 text-heading-color font-bold text-lg py-6 ${
-                currentStep === 0 ? "w-full" : ""
-              }`}
-            >
-              {isLastQuestion ? "Finish & Plan" : "Next"}
-              {!isLastQuestion && <ArrowRight className="ml-2 h-4 w-4" />}
-            </Button>
-          </div>
+            {step === 1 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-4">
+                  <Label className="text-xl text-lovely text-center block">
+                    When does the Party start?
+                  </Label>
+                  <div className="flex justify-center">
+                    <div className="relative w-full max-w-xs">
+                      <Input
+                        type="time"
+                        value={zaffaTime}
+                        onChange={(e) => setZaffaTime(e.target.value)}
+                        className="p-6 text-xl border-pinkey/30 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
+                      />
+                      <Clock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-lovely pointer-events-none z-20" />
+                    </div>
+                  </div>
+                  {/* <p className="text-sm text-muted-foreground text-center">
+                This will be the anchor for your timeline.
+              </p> */}
+                </div>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Step {currentStep + 1} of {questions.length}
-          </p>
-        </form>
+                <Button
+                  onClick={() => setStep(2)}
+                  className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8"
+                >
+                  Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6 animate-in  text-lovely fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-4">
+                  <Label className="text-xl  block mb-4">
+                    Select your activities
+                  </Label>
+                  <p className="text-sm text-lovely/60 mb-4">
+                    Select the activities you want to include and adjust their
+                    duration (in minutes).
+                  </p>
+
+                  <div className="grid gap-4 max-h-[50vh] overflow-y-auto pr-2">
+                    {FEATURES.map((feature) => (
+                      <div
+                        key={feature.id}
+                        className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
+                          selectedFeatures[feature.id].enabled
+                            ? "bg-pinkey/20 border-pinkey/30"
+                            : "bg-creamey border-pinkey opacity-70"
+                        }`}
+                      >
+                        <Checkbox
+                          id={feature.id}
+                          checked={selectedFeatures[feature.id].enabled}
+                          onCheckedChange={() =>
+                            handleFeatureToggle(feature.id)
+                          }
+                          className="data-[state=checked]:bg-pinkey border-pinkey  border-2 data-[state=checked]:border-pinkey"
+                        />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor={feature.id}
+                            className="text-base font-medium cursor-pointer"
+                          >
+                            {feature.label}
+                          </Label>
+                        </div>
+                        {selectedFeatures[feature.id].enabled && (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              value={selectedFeatures[feature.id].duration}
+                              onChange={(e) =>
+                                handleDurationChange(
+                                  feature.id,
+                                  parseInt(e.target.value) || 0
+                                )
+                              }
+                              className="w-20 text-center h-8 bg-creamey border-pinkey"
+                            />
+                            <span className="text-xs  w-8">min</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                    className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
+                  >
+                    Prev step
+                  </Button>
+                  <Button
+                    onClick={handlePlan}
+                    disabled={loading}
+                    className="flex-1 bg-pinkey hover:bg-pinkey/90  font-bold  text-lovely"
+                  >
+                    {loading ? "Checking..." : "Plan My Day"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,12 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWeddingTimeline extends Document {
   userId?: string;
-  startTime: string;
+  zaffaTime: string; // The anchor time
+  selectedFeatures: {
+    name: string;
+    duration: number;
+    enabled: boolean;
+  }[];
   events: {
     id: string;
     brideActivity: string;
@@ -25,11 +30,17 @@ const EventSchema = new Schema({
   timeLabel: { type: String },
 });
 
+const SelectedFeatureSchema = new Schema({
+  name: { type: String, required: true },
+  duration: { type: Number, required: true },
+  enabled: { type: Boolean, default: true },
+});
+
 const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
   {
     userId: { type: String, required: false },
-    startTime: { type: String, required: true },
-    weddingStartTime: { type: String, required: true },
+    zaffaTime: { type: String, required: true },
+    selectedFeatures: [SelectedFeatureSchema],
     events: [EventSchema],
   },
   { timestamps: true }
