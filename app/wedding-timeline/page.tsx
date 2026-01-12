@@ -16,6 +16,7 @@ type Feature = {
   label: string;
   defaultDuration: number;
   category: "before" | "zaffa" | "after"; // To help with ordering later
+  hidden?: boolean;
 };
 
 const FEATURES: Feature[] = [
@@ -26,6 +27,13 @@ const FEATURES: Feature[] = [
     label: "Getting ready pictures",
     defaultDuration: 30,
     category: "before",
+  },
+  {
+    id: "dress_suit",
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    hidden: true,
   },
   {
     id: "first_look",
@@ -245,7 +253,7 @@ export default function WeddingTimelinePage() {
                   </p>
 
                   <div className="grid gap-4 max-h-[50vh] overflow-y-auto pr-2">
-                    {FEATURES.map((feature) => (
+                    {FEATURES.filter((f) => !f.hidden).map((feature) => (
                       <div
                         key={feature.id}
                         className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${

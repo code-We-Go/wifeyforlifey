@@ -232,6 +232,14 @@ const FEATURE_META: Record<
     groomsmen: "Photos",
     order: 3,
   },
+  dress_suit: {
+    label: "Wearing dress & suit",
+    bride: "Wearing Dress",
+    groom: "Wearing Suit",
+    bridesmaids: "Helping Bride",
+    groomsmen: "Helping Groom",
+    order: 3.5,
+  },
   first_look: {
     label: "First look",
     bride: "First Look",
