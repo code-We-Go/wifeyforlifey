@@ -51,7 +51,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Define the Event type
+//Define the Event type
 type TimelineEvent = {
   id: string;
   brideActivity: string;
