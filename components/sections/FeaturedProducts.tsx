@@ -23,7 +23,7 @@ const FeaturedProducts = () => {
     const fetchPackages = async () => {
       setPackagesLoading(true);
       try {
-        const response = await fetch("/api/packages?all=true");
+        const response = await fetch("/api/packages?all=true&active=true");
         const data = await response.json();
         setPackages(Array.isArray(data.data) ? data.data : []);
       } catch (error) {

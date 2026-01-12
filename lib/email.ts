@@ -1,21 +1,24 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 export async function sendMail({
   to,
   name,
   subject,
-  body,from,
+  body,
+  from,
 }: {
   to: string;
   name: string;
   subject: string;
   body: string;
-  from:string;
+  from: string;
 }) {
   const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
 
   // Check if environment variables are loaded
   if (!SMTP_EMAIL || !SMTP_PASSWORD) {
-    console.error("SMTP_EMAIL or SMTP_PASSWORD environment variables are not set.");
+    console.error(
+      "SMTP_EMAIL or SMTP_PASSWORD environment variables are not set."
+    );
     throw new Error("Missing SMTP configuration.");
   }
 
@@ -27,7 +30,7 @@ export async function sendMail({
   //   },
   // });
   const transport = nodemailer.createTransport({
-    host: "mail.smtp2go.com",
+    host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {

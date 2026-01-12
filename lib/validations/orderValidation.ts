@@ -38,13 +38,13 @@ function orderValidation(formData: any) {
     errors.phone = "Phone number is required.";
   }
   if (!formData.bostaCityName.trim()) {
-    errors.bostaCityName = "City is required.";
+    errors.bostaCityName = "Please select a governate.";
   }
   if (!formData.bostaZoneName.trim()) {
-    errors.bostaZoneName = "City is required.";
+    errors.bostaZoneName = "Please select your shipping zone";
   }
   if (!formData.bostaDistrictName.trim()) {
-    errors.bostaDistrictName = "City is required.";
+    errors.bostaDistrictName = "Please select your district.";
   }
 
   return errors;

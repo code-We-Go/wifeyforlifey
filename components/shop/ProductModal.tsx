@@ -11,14 +11,14 @@ import { Button } from "@/components/ui/button";
 import { useModal } from "@/app/context/ModalContext";
 import { useCart } from "@/providers/CartProvider";
 import { ShoppingCart } from "lucide-react";
-import { Product, Variant } from "@/app/interfaces/interfaces";
+import { Product, Variant, attribute } from "@/app/interfaces/interfaces";
 
 export default function ProductModal() {
   const { isModalOpen, closeModal, modalProduct } = useModal();
   const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>();
   const [selectedAttribute, setSelectedAttribute] = useState<
-    { name: string; stock: number } | undefined
+    attribute | undefined
   >();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -67,10 +67,15 @@ export default function ProductModal() {
     addItem({
       productId: modalProduct._id,
       productName: modalProduct.title,
-      price: modalProduct.price.local,
+      price:
+        selectedAttribute?.price && selectedAttribute.price > 0
+          ? selectedAttribute.price
+          : selectedVariant?.price && selectedVariant.price > 0
+          ? selectedVariant.price
+          : modalProduct.price.local,
       attributes: selectedAttribute,
       variant: selectedVariant,
-      imageUrl: selectedVariant.images[0].url,
+      imageUrl: selectedVariant.images?.[0]?.url,
       quantity,
     });
 
@@ -79,7 +84,7 @@ export default function ProductModal() {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-[600px] text-lovely bg-creamey">
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-scroll text-lovely bg-creamey">
         <DialogHeader>
           <DialogTitle>Quick Add</DialogTitle>
         </DialogHeader>
@@ -87,14 +92,16 @@ export default function ProductModal() {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-              {selectedVariant && (
-                <Image
-                  src={selectedVariant.images[selectedImage].url}
-                  alt={modalProduct.title}
-                  fill
-                  className="object-cover"
-                />
-              )}
+              {selectedVariant &&
+                selectedVariant.images &&
+                selectedVariant.images.length > 0 && (
+                  <Image
+                    src={selectedVariant.images[selectedImage]?.url}
+                    alt={modalProduct.title}
+                    fill
+                    className="object-cover"
+                  />
+                )}
             </div>
 
             {selectedVariant && selectedVariant.images.length > 1 && (
@@ -127,7 +134,12 @@ export default function ProductModal() {
             <div>
               <h2 className="text-xl font-medium">{modalProduct.title}</h2>
               <p className="text-2xl font-medium mt-2">
-                LE{modalProduct.price.local.toFixed(2)}
+                LE
+                {selectedAttribute?.price && selectedAttribute.price > 0
+                  ? selectedAttribute.price.toFixed(2)
+                  : selectedVariant?.price && selectedVariant.price > 0
+                  ? selectedVariant.price.toFixed(2)
+                  : modalProduct.price.local.toFixed(2)}
               </p>
             </div>
 

@@ -50,9 +50,11 @@ export default function PackagesPage() {
         </div>
       ) : packages.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {packages.map((pkg) => (
-            <PackageCard key={pkg._id} packageItem={pkg} />
-          ))}
+          {packages
+            .filter((pkg) => pkg.active)
+            .map((pkg) => (
+              <PackageCard key={pkg._id} packageItem={pkg} />
+            ))}
         </div>
       ) : (
         <div className="text-center py-12">

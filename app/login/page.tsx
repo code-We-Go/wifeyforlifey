@@ -23,7 +23,8 @@ function LoginPage() {
   // Using imported generateDeviceFingerprint from utils/fingerprint.ts
 
   useEffect(() => {
-    const redirect = searchParams.get("redirect");
+    const redirect =
+      searchParams.get("callbackUrl") || searchParams.get("redirect");
     setRedirectPath(redirect);
   }, [searchParams]);
 
@@ -56,7 +57,10 @@ function LoginPage() {
       if (fingerprint) {
         // Store fingerprint in sessionStorage before credential login
         sessionStorage.setItem("deviceFingerprint", fingerprint);
-        console.log("Stored fingerprint in sessionStorage for credential login:", fingerprint);
+        console.log(
+          "Stored fingerprint in sessionStorage for credential login:",
+          fingerprint
+        );
       } else {
         console.warn("No fingerprint generated for credential login");
       }
@@ -65,6 +69,7 @@ function LoginPage() {
         email,
         password,
         redirect: false,
+        callbackUrl: redirectPath || "/account",
       });
 
       if (result?.error) {
@@ -74,7 +79,7 @@ function LoginPage() {
       }
 
       // Login successful, redirect
-      const redirectTo = redirectPath ? `/${redirectPath}` : "/account";
+      const redirectTo = result?.url || redirectPath || "/account";
       router.push(redirectTo);
     } catch (error) {
       console.error("Login error:", error);
@@ -98,7 +103,7 @@ function LoginPage() {
         console.warn("No fingerprint generated for Google login");
       }
 
-      const callbackUrl = redirectPath ? `/${redirectPath}` : "/account";
+      const callbackUrl = redirectPath || "/account";
       await signIn("google", {
         callbackUrl,
       });
@@ -213,7 +218,14 @@ function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-lovely">
               Don&apos;t have an account?{" "}
-              <a href="/register" className="font-medium underline">
+              <a
+                href={`/register${
+                  redirectPath
+                    ? `?callbackUrl=${encodeURIComponent(redirectPath)}`
+                    : ""
+                }`}
+                className="font-medium underline"
+              >
                 Sign up here
               </a>
             </p>

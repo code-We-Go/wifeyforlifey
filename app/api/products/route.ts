@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     if (featured) {
       const featuredProducts = await productsModel
         .find({ featured: "true" })
-        .sort({ createdAt: -1 });
+        .sort({ order: -1, createdAt: -1 });
       return NextResponse.json({ data: featuredProducts }, { status: 200 });
     }
     // Apply subcategory filter
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
         sort = { ratings: -1 };
         break;
       default:
-        sort = { createdAt: -1 }; // Default to newest
+        sort = { order: -1, createdAt: -1 }; // Default to newest
     }
 
     const products = await productsModel

@@ -44,6 +44,11 @@ const OrderSchema = new Schema(
         city: { type: String, required: false },
         state: { type: String, required: false },
         phone: { type: String, required: false },
+        // Gift info
+        isGift: { type: Boolean, default: false },
+        giftRecipientEmail: { type: String, required: false },
+        specialMessage: { type: String, required: false },
+        giftCardName: { type: String, required: false },
         cash: { type: String, required: false, default: true }, // Payment method: Cash or not
         cart: {
             type: [CartItemSchema],required:false // Array of cart items
@@ -81,6 +86,7 @@ const OrderSchema = new Schema(
         bostaZoneName: { type: String, required: false },
         bostaDistrict: { type: String, required: false },
         bostaDistrictName: { type: String, required: false },
+        isMob: { type: Boolean, default: false },
         createdAt: { type: Date, default: Date.now },
     },
     { timestamps: true } // Automatically adds createdAt and updatedAt fields

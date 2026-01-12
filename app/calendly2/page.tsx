@@ -19,7 +19,7 @@ const CalendlyWidget = () => {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-creamey h-auto flex justify-center items-center">
+    <div className="w-full min-h-screen bg-creamey h-auto flex flex-col gap-4 justify-center items-center p-4">
       <div
         className="calendly-inline-widget"
         data-url="https://calendly.com/wifeyforlifeycorp/self-care-during-gehaz-planning-period?hide_gdpr_banner=1&background_color=d32333&text_color=fbf3e0&primary_color=fbf3e0"
@@ -28,11 +28,20 @@ const CalendlyWidget = () => {
           height: "700px",
         }}
       />
+
       <script
         type="text/javascript"
         src="https://assets.calendly.com/assets/external/widget.js"
         async
       />
+      {/* <div className="text-center max-w-xl text-lovely">
+        <button
+          onClick={() => router.push("/calendly3")}
+          className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition"
+        >
+          Click for a surprise from wifey!
+        </button>
+      </div> */}
     </div>
   );
 };

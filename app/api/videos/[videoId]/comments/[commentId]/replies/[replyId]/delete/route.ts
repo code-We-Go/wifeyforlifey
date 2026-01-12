@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import VideoModel from "@/app/modals/videoModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
-import { getServerSession } from "next-auth";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import mongoose from "mongoose";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 
 export async function DELETE(
   request: Request,
@@ -19,15 +18,16 @@ export async function DELETE(
     await ConnectDB();
 
     // Get the current user session
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const { isAuthenticated, user: authUser } = await authenticateRequest(request);
+
+    if (!isAuthenticated || !authUser) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    const userId = authUser._id ? authUser._id.toString() : authUser.id;
     const { videoId, commentId, replyId } = await params;
 
     // Validate IDs

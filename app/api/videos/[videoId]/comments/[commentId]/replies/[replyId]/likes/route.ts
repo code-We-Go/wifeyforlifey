@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import videoModel from "@/app/modals/videoModel";
 import UserModel from "@/app/modals/userModel";
 import InteractionsModel from "@/app/modals/interactionsModel";
 import { ConnectDB } from "@/app/config/db";
 import playlistModel from "@/app/modals/playlistModel";
+import mongoose from "mongoose";
 
 // POST - Like/Unlike a reply
 export async function POST(
@@ -18,9 +18,9 @@ export async function POST(
 ) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
 
-    if (!session?.user?.email) {
+    if (!isAuthenticated || !authUser?.email) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -30,7 +30,11 @@ export async function POST(
     const { videoId, commentId, replyId } = await params;
 
     // Check if user is subscribed
-    const user = await UserModel.findOne({ email: session.user.email });
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email });
+    }
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }

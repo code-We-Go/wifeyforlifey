@@ -338,29 +338,29 @@ const SubscriptionPage = () => {
     if (isUpgrade) {
       setShipping(0);
     } else {
-    // Always maintain shipping cost regardless of Bosta Zone selection
-    // Only apply free shipping if discount is specifically for FREE_SHIPPING
-    if (
-      !appliedDiscount ||
-      appliedDiscount.calculationType !== "FREE_SHIPPING" ||
-      // Check if package price meets minimum order amount required for the discount
-      (appliedDiscount.conditions?.minimumOrderAmount &&
-        price < appliedDiscount.conditions.minimumOrderAmount)
-    ) {
-      // Keep the shipping cost even when Bosta Zone is selected
-      // if (location.city && location.zone) {
-      //   // Maintain shipping cost when zone is selected
-      //   setShipping(location.shippingCost.priceBeforeVat);
-      // }
-      if (location.city) {
-        // Set shipping when only city is selected
-        setShipping(location.shippingCost.priceBeforeVat);
+      // Always maintain shipping cost regardless of Bosta Zone selection
+      // Only apply free shipping if discount is specifically for FREE_SHIPPING
+      if (
+        !appliedDiscount ||
+        appliedDiscount.calculationType !== "FREE_SHIPPING" ||
+        // Check if package price meets minimum order amount required for the discount
+        (appliedDiscount.conditions?.minimumOrderAmount &&
+          price < appliedDiscount.conditions.minimumOrderAmount)
+      ) {
+        // Keep the shipping cost even when Bosta Zone is selected
+        // if (location.city && location.zone) {
+        //   // Maintain shipping cost when zone is selected
+        //   setShipping(location.shippingCost.priceBeforeVat);
+        // }
+        if (location.city) {
+          // Set shipping when only city is selected
+          setShipping(location.shippingCost.priceBeforeVat);
+        }
+      } else {
+        // Ensure shipping is set to 0 when free shipping discount is applied
+        // and package price meets minimum order amount
+        setShipping(0);
       }
-    } else {
-      // Ensure shipping is set to 0 when free shipping discount is applied
-      // and package price meets minimum order amount
-      setShipping(0);
-    }
     }
 
     // Update formData with Bosta location details
@@ -704,7 +704,7 @@ const SubscriptionPage = () => {
 
     // Stop submission if there are errors
     if (Object.keys(errors).length > 0) {
-      alert(Object.keys(errors)[0] + Object.keys(errors)[1]);
+      alert(Object.values(errors)[0]);
       setLoading(false);
       return;
     }
@@ -778,7 +778,7 @@ const SubscriptionPage = () => {
       setNotFound(false);
       try {
         const res = await axios.get(`/api/packages?packageID=${packageID}`);
-        if (res.data.data) {
+        if (res.data.data && res.data.data.active) {
           setPackageData(res.data.data);
         } else {
           setNotFound(true);
@@ -879,7 +879,7 @@ const SubscriptionPage = () => {
   }
   if (notFound || !packageData) {
     return (
-      <div className="container-custom py-16 text-center">
+      <div className="container-custom flex justify-center items-center min-h-screen  text-center">
         Subscription not found.
       </div>
     );
@@ -1124,9 +1124,52 @@ const SubscriptionPage = () => {
                       <img
                         src="/giftCard/The Wifey to be card.jpeg"
                         alt="Wifey to be Card"
-                        className="w-full h-auto"
+                        className="w-full object-cover "
                       />
                       {formData.giftCardName === "The Wifey to be card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName === "Merry and Married"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName === "Merry and Married"
+                            ? ""
+                            : "Merry and Married";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Merry and Married
+                      </div>
+                      <img
+                        src="/cristmas/merryAndMarried.jpeg"
+                        alt="Merry and Married Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName === "Merry and Married" && (
                         <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

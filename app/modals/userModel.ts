@@ -27,6 +27,7 @@ export interface IUser extends Document {
   subscription: ISubscription;
   birthDate?: Date;
   weddingDate?: Date;
+  inspoFavorites?: string[];
 
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -75,6 +76,10 @@ const UserSchema = new Schema<IUser>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "subscriptions",
       required: false,
+    },
+    inspoFavorites: {
+      type: [String],
+      default: [],
     },
     birthDate: {
       type: Date,

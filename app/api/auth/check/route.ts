@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../[...nextauth]/authOptions';
+import { authenticateRequest } from '@/app/lib/mobileAuth';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user } = await authenticateRequest(request);
     
-    if (!session) {
+    if (!isAuthenticated || !user) {
       return NextResponse.json({ isAuth: false, user: null }, { status: 401 });
     }
     
-    return NextResponse.json({ isAuth: true, user: session.user });
+    return NextResponse.json({ isAuth: true, user: user });
   } catch (error) {
     console.error('Auth check error:', error);
     return NextResponse.json({ isAuth: false, user: null }, { status: 500 });

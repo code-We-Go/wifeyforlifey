@@ -83,15 +83,19 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           await ConnectDB();
-          const user = await UserModel.findOne({ email: credentials?.email });
+          const email = credentials?.email?.trim().toLowerCase();
+          if (!email) {
+            throw new Error("Email is required");
+          }
+          const user = await UserModel.findOne({ email });
           if (!user) throw new Error("No user found");
 
           const isValid = await compare(credentials!.password, user.password);
           if (!isValid) throw new Error("Wrong password");
 
-          if (!credentials?.email) {
-            throw new Error("Email is required for loyalty points calculation");
-          }
+          // if (!credentials?.email) {
+          //   throw new Error("Email is required for loyalty points calculation");
+          // }
           // const loyaltyPoints = await calculateLoyaltyPoints(credentials.email);
 
           // Generate and store sessionId for single-session enforcement
@@ -140,7 +144,8 @@ export const authOptions: NextAuthOptions = {
       let userId: string | undefined;
 
       if (account?.provider === "google") {
-        let existingUser = await UserModel.findOne({ email: user.email });
+        const googleEmail = user.email?.trim().toLowerCase();
+        let existingUser = await UserModel.findOne({ email: googleEmail });
         if (!existingUser) {
           //   const subscribed = await subscriptionsModel.findOne({
           //     email: user.email,
@@ -151,7 +156,7 @@ export const authOptions: NextAuthOptions = {
             username: user.name || user.email?.split("@")[0] || "user",
             firstName: user.name?.split(" ")[0] || "user",
             lastName: user.name?.split(" ")[1] || "user",
-            email: user.email,
+            email: googleEmail,
             emailVerified: true,
             imageURL: user.image,
           });
@@ -184,12 +189,21 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       try {
         await ConnectDB();
-        const email = user?.email || token.email;
+        const email = (user?.email || token.email)?.trim().toLowerCase();
         if (email) {
           const subscription = await subscriptionsModel.findOne({
             email,
             subscribed: true,
           });
+          if (!subscription) {
+            token.isSubscribed = false;
+            token.subscriptionExpiryDate = null;
+            token.subscription = {
+              packageId: undefined,
+              paid: false,
+            };
+            return token;
+          }
           console.log("packageID" + subscription.packageID);
           token.isSubscribed = !!(
             subscription?.expiryDate &&
@@ -199,7 +213,7 @@ export const authOptions: NextAuthOptions = {
             ? subscription.expiryDate.toISOString()
             : null;
           token.subscription = {
-            packageId: subscription?.packageID || null,
+            packageId: subscription?.packageID || undefined,
             paid: subscription?.paid || false,
           };
           // token.loyaltyPoints = await calculateLoyaltyPoints(email);

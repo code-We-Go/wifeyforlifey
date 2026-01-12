@@ -1,33 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import { connectToDatabase } from "@/utils/mongodb";
 import FavoritesModel from "@/app/modals/favoritesModel";
-import { authOptions } from "../auth/[...nextauth]/authOptions";
+import UserModel from "@/app/modals/userModel";
 import { ConnectDB } from "@/app/config/db";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 // GET /api/favorites - Get all favorites for the current user
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    const {
+      isAuthenticated,
+      user: authUser,
+      authType,
+    } = await authenticateRequest(req);
+
+    if (!isAuthenticated || !authUser) {
       return NextResponse.json(
         { error: "You must be logged in to view favorites" },
         { status: 401 }
       );
     }
 
+    // Connect to database
+    await ConnectDB();
+    console.log("register" + subscriptionsModel);
+    let user = authUser;
+    if (authType === "session") {
+      user = await UserModel.findOne({ email: authUser.email }).populate(
+        "subscription"
+      );
+    }
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     // Check if user has subscription
-    const { user } = session;
-    if (!(user.subscriptionExpiryDate! > new Date())) {
+    // Ensure subscriptionExpiryDate is treated as Date
+    const expiryDate = user.subscription?.expiryDate
+      ? new Date(user.subscription.expiryDate)
+      : null;
+    console.log(expiryDate + "date");
+    if (!expiryDate || !(expiryDate > new Date())) {
       return NextResponse.json(
         { error: "You need a subscription to access favorites" },
         { status: 403 }
       );
     }
-
-    // Connect to database
-    await ConnectDB();
 
     // Get query parameters for filtering
     const url = new URL(req.url);

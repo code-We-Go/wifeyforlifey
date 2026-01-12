@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/authOptions";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import Interaction from "@/app/modals/interactionsModel";
 import User from "@/app/modals/userModel";
 import { ConnectDB } from "@/app/config/db";
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser } = await authenticateRequest(req);
 
-    if (!session?.user?.id) {
+    if (!isAuthenticated || !authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const userId = authUser._id ? authUser._id.toString() : authUser.id;
 
     await ConnectDB();
 
     // Find interactions where the current user is notified
     const notifications = await Interaction.find({
-      notifyUserId: session.user.id,
+      notifyUserId: userId,
     })
       .sort({ createdAt: -1 })
       .limit(50)
@@ -37,12 +38,13 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const { isAuthenticated, user: authUser } = await authenticateRequest(req);
 
-    if (!session?.user?.id) {
+    if (!isAuthenticated || !authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = authUser._id ? authUser._id.toString() : authUser.id;
     const { notificationId, markAll } = await req.json();
 
     await ConnectDB();
@@ -50,7 +52,7 @@ export async function PUT(req: NextRequest) {
     if (markAll) {
       // Mark all notifications as read
       await Interaction.updateMany(
-        { notifyUserId: session.user.id, read: false },
+        { notifyUserId: userId, read: false },
         { read: true }
       );
 

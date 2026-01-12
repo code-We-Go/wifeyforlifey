@@ -150,6 +150,7 @@ export interface Product {
   description: string;
   price: price;
   comparedPrice: number;
+  order?: number;
   // subCategoryID: mongoose.Types.ObjectId;
   subCategoryID: SubCategory; // now a full object
   variations: Variant[];
@@ -280,6 +281,7 @@ export interface Ipackage {
   items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
+  active: boolean;
 }
 
 export interface ISubscription {

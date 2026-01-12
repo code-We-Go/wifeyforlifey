@@ -56,14 +56,14 @@ export default function PackageCard({
       </div>
       <div className="md:p-4">
         <h4
-          className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}
+          className={`${thirdFont.className} tracking-normal font-normal max-md:text-base md:font-semibold text-creamey line-clamp-1`}
         >
           {packageItem.name}
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
             {/* <p className="text-xs text-creamey">{packageItem.duration}</p> */}
-            <p className="price-tag text-creamey">
+            <p className="price-tag max-md:text-sm text-creamey">
               LE{packageItem.price.toFixed(2)}
             </p>
           </div>

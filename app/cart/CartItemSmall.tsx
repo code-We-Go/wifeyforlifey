@@ -27,8 +27,8 @@ const CartItemSmall = ({
         if (wishListBool === true) {
           const updatedWishList = wishList.map((wishItem) =>
             wishItem.productId === productId &&
-            wishItem.attributes.name === item.attributes.name &&
-            wishItem.variant.name === item.variant.name
+            wishItem.attributes?.name === item.attributes?.name &&
+            wishItem.variant?.name === item.variant?.name
               ? { ...wishItem, quantity: updatedQuantity }
               : wishItem
           );
@@ -48,8 +48,8 @@ const CartItemSmall = ({
             (wishItem) =>
               !(
                 wishItem.productId === productId &&
-                wishItem.attributes.name === item.attributes.name &&
-                wishItem.variant.name === item.variant.name
+                wishItem.attributes?.name === item.attributes?.name &&
+                wishItem.variant?.name === item.variant?.name
               )
           );
           setWishList(updatedWishList);
@@ -64,8 +64,8 @@ const CartItemSmall = ({
       if (wishListBool === true) {
         const updatedWishList = wishList.map((wishItem) =>
           wishItem.productId === productId &&
-          wishItem.attributes.name === item.attributes.name &&
-          wishItem.variant.name === item.variant.name
+          wishItem.attributes?.name === item.attributes?.name &&
+          wishItem.variant?.name === item.variant?.name
             ? { ...wishItem, quantity: updatedQuantity }
             : wishItem
         );

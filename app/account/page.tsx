@@ -19,6 +19,7 @@ import {
   Percent,
   CirclePercent,
   Star,
+  Sparkles,
   Bell,
   MessageCircle,
   Reply,
@@ -48,6 +49,7 @@ import { UploadDropzone } from "@/utils/uploadthing";
 import { compressImage } from "@/utils/imageCompression";
 import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
+import InspoTab from "./inspo/InspoTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -697,6 +699,7 @@ const AccountPage = () => {
   const tabs = [
     { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "favorites", label: "Favorites", icon: Star },
+    { id: "inspo", label: "Inspo", icon: Sparkles },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
@@ -752,7 +755,7 @@ const AccountPage = () => {
               <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
                 <Button
                   size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                 >
                   Upgrade now to the Full Wifey Experience
                 </Button>
@@ -1655,6 +1658,18 @@ const AccountPage = () => {
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
                 Subscribe to access your favorites!
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "inspo" && (
+          <div>
+            {user.isSubscribed ? (
+              <InspoTab />
+            ) : (
+              <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
+                Subscribe to access your inspiration boards!
               </div>
             )}
           </div>

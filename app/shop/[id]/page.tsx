@@ -31,6 +31,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [stickerSelected, setStickerSelected] = useState(true); // Set to true by default
   const [stickerQuantity, setStickerQuantity] = useState(1);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -50,6 +51,28 @@ export default function ProductPage() {
     };
     fetchProduct();
   }, []);
+
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      if (!product) return;
+      const subId =
+        (product as any).subCategoryID?._id || (product as any).subCategoryID;
+      if (!subId) return;
+      try {
+        const res = await axios.get(`/api/products?subcategory=${subId}`);
+        const data = Array.isArray(res.data)
+          ? (res.data as Product[])
+          : Array.isArray((res.data as any).data)
+          ? ((res.data as any).data as Product[])
+          : [];
+        const filtered = data.filter((p) => p._id !== product._id).slice(0, 4);
+        setRelatedProducts(filtered);
+      } catch (e) {
+        setRelatedProducts([]);
+      }
+    };
+    fetchRelatedProducts();
+  }, [product]);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
@@ -89,8 +112,10 @@ export default function ProductPage() {
           The product you are looking for doesn&apos;t exist or has been
           removed.
         </p>
-        <Button asChild>
-          <Link href="/shop">Back to Shop</Link>
+        <Button asChild className="text-lovely">
+          <Link className="text-lovely" href="/shop">
+            Back to Shop
+          </Link>
         </Button>
       </div>
     );
@@ -200,8 +225,8 @@ export default function ProductPage() {
       {/* Back to shop button - mobile only */}
       <div className="md:hidden mb-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/shop">
-            <ChevronLeft className="mr-1 h-4 w-4" />
+          <Link className="text-lovely" href="/shop">
+            <ChevronLeft className="mr-1 text-lovely h-4 w-4" />
             Back to Shop
           </Link>
         </Button>
@@ -276,10 +301,11 @@ export default function ProductPage() {
 
           <div className="text-2xl text-lovely font-medium">
             LE
-            {selectedAttribute?.price
-              ? selectedAttribute?.price?.toFixed(2)
-              : selectedVariant?.price?.toFixed(2) ??
-                product.price.local.toFixed(2)}
+            {selectedAttribute?.price && selectedAttribute.price > 0
+              ? selectedAttribute.price.toFixed(2)
+              : selectedVariant?.price && selectedVariant.price > 0
+              ? selectedVariant.price.toFixed(2)
+              : product.price.local.toFixed(2)}
           </div>
 
           <p className="text-lovely/90">{product.description}</p>
@@ -308,25 +334,26 @@ export default function ProductPage() {
                   {selectedVariant.attributeName}
                 </h3> */}
                 <div className="flex flex-wrap gap-2">
-                  {selectedVariant.attributes.map((attr, index) => (
-                    <Button
-                      key={index}
-                      variant={
-                        selectedAttribute?.name === attr.name
-                          ? "default"
-                          : "outline"
-                      }
-                      onClick={() => handleAttributeChange(attr)}
-                      className={
-                        selectedAttribute?.name === attr.name
-                          ? "rounded-full bg-lovely text-creamey"
-                          : "rounded-full bg-pinkey text-lovely"
-                      }
-                      disabled={attr.stock <= 0}
-                    >
-                      {attr.name}
-                    </Button>
-                  ))}
+                  {selectedVariant.attributes.length > 1 &&
+                    selectedVariant.attributes.map((attr, index) => (
+                      <Button
+                        key={index}
+                        variant={
+                          selectedAttribute?.name === attr.name
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() => handleAttributeChange(attr)}
+                        className={
+                          selectedAttribute?.name === attr.name
+                            ? "rounded-full bg-lovely text-creamey"
+                            : "rounded-full bg-pinkey text-lovely"
+                        }
+                        disabled={attr.stock <= 0}
+                      >
+                        {attr.name}
+                      </Button>
+                    ))}
                 </div>
               </div>
             )}
@@ -578,18 +605,22 @@ export default function ProductPage() {
       </div>
 
       {/* Related Products */}
-      {/* {relatedProducts.length > 0 && (
+      {relatedProducts.length > 0 && (
         <div className="mt-16">
-          <h2 className="text-2xl font-display font-medium mb-6">
+          <h2 className="text-2xl font-display font-medium mb-6 text-lovely">
             You May Also Like
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
-              <ProductCard key={product._id} product={product} favorite={false} />
+              <ProductCard
+                key={product._id}
+                product={product}
+                favorite={false}
+              />
             ))}
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 }

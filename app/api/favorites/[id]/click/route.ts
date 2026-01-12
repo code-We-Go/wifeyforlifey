@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { connectToDatabase } from "@/utils/mongodb";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import FavoritesModel from "@/app/modals/favoritesModel";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { ConnectDB } from "@/app/config/db";
 
 // POST /api/favorites/[id]/click - Increment click count for a favorite
@@ -14,8 +12,9 @@ export async function POST(
   try {
     console.log("theID" + id);
     // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    const { isAuthenticated } = await authenticateRequest(req);
+    
+    if (!isAuthenticated) {
       return NextResponse.json(
         { error: "You must be logged in" },
         { status: 401 }

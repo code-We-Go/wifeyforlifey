@@ -32,7 +32,7 @@ export default function Home() {
       <HeroSection />
       {/* <HeroTwo /> */}
       <JoinNow />
-      <Pricing />
+      {/* <Pricing /> */}
 
       {/* Featured Products Section */}
       <FeaturedProducts />
