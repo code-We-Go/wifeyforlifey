@@ -18,7 +18,7 @@ import VdoPlayer from "./components/VdoPlayer";
 import CommentSection from "@/components/video/CommentSection";
 import LoadingSpinner from "@/app/checkout/components/LoadingSpinner";
 
-export default function PlaylistPage() {
+function PlaylistContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const videoIdParam = searchParams?.get("videoId") || null;
@@ -894,5 +894,20 @@ export default function PlaylistPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PlaylistPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container-custom flex-col flex w-full justify-center items-center bg-lovely h-auto min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-128px)] py-16 text-center">
+          <div className="animate-spin text-creamey rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-creamey">Loading playlist...</p>
+        </div>
+      }
+    >
+      <PlaylistContent />
+    </Suspense>
   );
 }
