@@ -23,7 +23,7 @@ export default function PlaylistPage() {
   const searchParams = useSearchParams();
   const videoIdParam = searchParams?.get("videoId") || null;
   const router = useRouter();
-  const playlistId = params.id as string;
+  const playlistId = "693c694e82e33f04be5c6f5d";
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleVideoEnd = () => {
@@ -112,7 +112,10 @@ export default function PlaylistPage() {
   }, [selectedVideo?._id]);
 
   const { data: session, status } = useSession();
-  const isSubscribed = session?.user.isSubscribed || false;
+  const isSubscribed =
+    true ||
+    // session?.user.subscription?.packageId === "6965e63c6df4503dda02c12b"
+    false;
 
   const watermarkText = session?.user.email || "";
   // VdoCipher expects watermark config as an array of objects, as a JSON string
@@ -139,7 +142,7 @@ export default function PlaylistPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`/api/playlists/${playlistId}`);
+      const res = await axios.get(`/api/test-playlist/${playlistId}`);
       console.log("Playlist data:", res.data);
       setPlaylist(res.data.data);
 
@@ -319,7 +322,10 @@ export default function PlaylistPage() {
     ) {
       const video = playlist.videos[currentIndex];
       if (typeof video === "object" && video !== null) {
-        if (!selectedVideo || String((selectedVideo as any)._id) !== String((video as any)._id)) {
+        if (
+          !selectedVideo ||
+          String((selectedVideo as any)._id) !== String((video as any)._id)
+        ) {
           setSelectedVideo(video);
         }
       }
@@ -343,7 +349,8 @@ export default function PlaylistPage() {
     if (!playlist || !playlist.videos || playlist.videos.length === 0 || !vid)
       return;
     // If already on this video, do nothing
-    if (selectedVideo && String((selectedVideo as any)._id) === String(vid)) return;
+    if (selectedVideo && String((selectedVideo as any)._id) === String(vid))
+      return;
     const idx = playlist.videos.findIndex(
       (v: any) => String(v._id) === String(vid)
     );
@@ -367,7 +374,10 @@ export default function PlaylistPage() {
     if (preferLastAppliedRef.current) return;
     if (status === "authenticated" && isSubscribed && lastWatchedVideoId) {
       // If current selection already matches last watched, mark applied and exit
-      if (selectedVideo && String((selectedVideo as any)._id) === String(lastWatchedVideoId)) {
+      if (
+        selectedVideo &&
+        String((selectedVideo as any)._id) === String(lastWatchedVideoId)
+      ) {
         preferLastAppliedRef.current = true;
         return;
       }
