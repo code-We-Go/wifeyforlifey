@@ -32,6 +32,7 @@ declare module "next-auth" {
       // loyaltyPoints?: number;
       sessionId?: string; // Add sessionId here
       deviceFingerprint?: string; // Add device fingerprint
+      isTesting?: boolean;
     };
   }
 }
@@ -46,6 +47,7 @@ declare module "next-auth/jwt" {
     // loyaltyPoints?: number;
     sessionId?: string; // Add sessionId here
     deviceFingerprint?: string; // Add device fingerprint
+    isTesting?: boolean;
   }
 }
 
@@ -240,21 +242,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-
-        // Fetch user data to get firstName and lastName
-        try {
-          const userData = await UserModel.findById(token.sub);
-          if (userData) {
-            session.user.firstName =
-              userData.firstName || userData.username || "";
-            session.user.lastName = userData.lastName || "";
-          }
-        } catch (error) {
-          console.error("Error fetching user data for session:", error);
-        }
-      }
+      // 1. Apply token data first (Cached/Stale)
       if (session.user) {
         // if(existingUser?.imageURL) {session.user.image=existingUser.imageURL;}
         session.user.isSubscribed = token.isSubscribed ?? false;
@@ -274,6 +262,48 @@ export const authOptions: NextAuthOptions = {
       // Add device fingerprint to session if available
       if (session.user && token.deviceFingerprint) {
         session.user.deviceFingerprint = token.deviceFingerprint as string;
+      }
+
+      // 2. Apply fresh DB data (Overwrites Stale)
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+
+        // Fetch user data to get firstName and lastName
+        try {
+          const userData = await UserModel.findById(token.sub);
+          if (userData) {
+            session.user.firstName =
+              userData.firstName || userData.username || "";
+            session.user.lastName = userData.lastName || "";
+            session.user.isTesting = userData.isTesting || false;
+
+            // Fetch fresh subscription data to avoid stale JWT
+            if (userData.email) {
+              const subscription = await subscriptionsModel.findOne({
+                email: userData.email,
+                subscribed: true,
+              });
+
+              if (subscription) {
+                session.user.isSubscribed = !!(
+                  subscription.expiryDate &&
+                  subscription.expiryDate.getTime() > Date.now()
+                );
+                session.user.subscriptionExpiryDate = subscription.expiryDate;
+                session.user.subscription = {
+                  packageId: subscription.packageID?.toString(),
+                  paid: subscription.subscribed,
+                };
+              } else {
+                // If DB says no subscription, overwrite token (which might say yes)
+                session.user.isSubscribed = false;
+                session.user.subscription = undefined;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data for session:", error);
+        }
       }
       return session;
     },

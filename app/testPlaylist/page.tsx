@@ -113,9 +113,8 @@ function PlaylistContent() {
 
   const { data: session, status } = useSession();
   const isSubscribed =
-    true ||
-    // session?.user.subscription?.packageId === "6965e63c6df4503dda02c12b"
-    false;
+    session?.user.isTesting 
+    ;
 
   const watermarkText = session?.user.email || "";
   // VdoCipher expects watermark config as an array of objects, as a JSON string
