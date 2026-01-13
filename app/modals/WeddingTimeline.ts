@@ -17,6 +17,7 @@ export interface IWeddingTimeline extends Document {
     duration: number;
     timeLabel?: string;
   }[];
+  shareToken?: string; // Unique token for sharing read-only timeline
   createdAt: Date;
 }
 
@@ -42,6 +43,7 @@ const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
     zaffaTime: { type: String, required: true },
     selectedFeatures: [SelectedFeatureSchema],
     events: [EventSchema],
+    shareToken: { type: String, required: false, unique: true, sparse: true },
   },
   { timestamps: true }
 );

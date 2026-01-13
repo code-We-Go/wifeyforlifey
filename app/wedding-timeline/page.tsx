@@ -30,6 +30,7 @@ import {
   Save,
   Download,
   Plus,
+  Share2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
@@ -442,6 +443,10 @@ function WeddingTimelinePageContent() {
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
   const [mobileActiveColumn, setMobileActiveColumn] = useState("brideActivity");
   const contentRef = useRef<HTMLDivElement>(null);
+  
+  // -- Share State --
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   // -- Dnd Sensors --
   const sensors = useSensors(
@@ -696,6 +701,50 @@ function WeddingTimelinePageContent() {
   const handleSave = async (silent = false) => {
     // We pass the current state to the helper
     await saveToDb(events, calculatedEvents, zaffaTime, silent);
+  };
+
+  const handleShare = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please login to share your timeline.",
+        variant: "default",
+      });
+      return;
+    }
+
+    setIsSharing(true);
+
+    try {
+      const response = await fetch("/api/wedding-timeline?action=share", {
+        method: "GET",
+      });
+
+      if (!response.ok) throw new Error("Failed to get share link");
+
+      const data = await response.json();
+      
+      if (data.success && data.shareUrl) {
+        setShareUrl(data.shareUrl);
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(data.shareUrl);
+        
+        toast({
+          title: "Share Link Created!",
+          description: "Link copied to clipboard. Share it with your loved ones!",
+        });
+      }
+    } catch (error) {
+      console.error("Share failed:", error);
+      toast({
+        title: "Share Failed",
+        description: "Could not get share link. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const handleExportPDF = async () => {
@@ -993,7 +1042,7 @@ function WeddingTimelinePageContent() {
                 onClick={handleExportPDF}
                 disabled={isExporting}
                 variant="outline"
-                className="bg-creamey border-2 border-lovely text-lovely hover:bg-lovely hover:text-white"
+                className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isExporting ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1001,6 +1050,19 @@ function WeddingTimelinePageContent() {
                   <Download className="mr-2 h-4 w-4" />
                 )}
                 Export PDF
+              </Button>
+              <Button
+                onClick={handleShare}
+                disabled={isSharing}
+                variant="outline"
+                className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
+              >
+                {isSharing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Share2 className="mr-2 h-4 w-4" />
+                )}
+                Share
               </Button>
               {/* <Button
                 onClick={() => setStep(2)}
@@ -1012,7 +1074,7 @@ function WeddingTimelinePageContent() {
               <Button
                 onClick={() => handleSave(false)}
                 disabled={isSaving}
-                className="bg-lovely border-2 border-creamey text-white hover:bg-pinkey"
+                className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isSaving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1021,6 +1083,7 @@ function WeddingTimelinePageContent() {
                 )}
                 Save
               </Button>
+              
             </div>
           </div>
 
