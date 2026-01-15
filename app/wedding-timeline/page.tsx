@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import NextImage from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -31,6 +32,9 @@ import {
   Download,
   Plus,
   Share2,
+  MessageSquare,
+  X,
+  Star,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
@@ -442,11 +446,25 @@ function WeddingTimelinePageContent() {
   const [isExporting, setIsExporting] = useState(false);
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
   const [mobileActiveColumn, setMobileActiveColumn] = useState("brideActivity");
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
   // -- Share State --
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+  // -- Feedback State --
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [feedbackRatings, setFeedbackRatings] = useState({
+    easeOfUse: 0,
+    satisfaction: 0,
+    realistic: 0,
+    timeSaved: 0,
+  });
+  const [feedbackText, setFeedbackText] = useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [hasFeedback, setHasFeedback] = useState(false);
+  const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(false);
 
   // -- Dnd Sensors --
   const sensors = useSensors(
@@ -469,11 +487,15 @@ function WeddingTimelinePageContent() {
             const data = await res.json();
             if (data.found && data.data) {
               // Existing plan found -> Load it and go to Step 3
-              const { zaffaTime: savedZaffa, events: savedEvents } = data.data;
+              const { zaffaTime: savedZaffa, events: savedEvents, feedback } = data.data;
               if (savedZaffa) setZaffaTime(savedZaffa);
               if (savedEvents && savedEvents.length > 0) {
                 setEvents(savedEvents);
                 setStep(3);
+              }
+              // Check if user has already provided feedback
+              if (feedback) {
+                setHasFeedback(true);
               }
             }
           }
@@ -538,7 +560,7 @@ function WeddingTimelinePageContent() {
       toast({
         title: "Login Required",
         description: "Please login to save your timeline.",
-        variant: "destructive",
+        className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
@@ -579,18 +601,25 @@ function WeddingTimelinePageContent() {
 
       if (!response.ok) throw new Error("Failed to save");
 
+
       if (!silent) {
         toast({
           title: "Success",
           description: "Your timeline has been saved!",
+          className: "bg-pinkey text-lovely border-lovely",
         });
+
+        // Show feedback prompt if user hasn't provided feedback yet
+        if (!hasFeedback) {
+          setTimeout(() => setShowFeedbackPrompt(true), 1000);
+        }
       }
     } catch (error) {
       if (!silent) {
         toast({
           title: "Error",
           description: "Failed to save timeline. Please try again.",
-          variant: "destructive",
+          className: "bg-pinkey text-lovely border-lovely",
         });
       }
     } finally {
@@ -599,6 +628,11 @@ function WeddingTimelinePageContent() {
   };
 
   const handlePlan = async () => {
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+      return;
+    }
+
     // 1. Generate Events from Selection
     const featureList = FEATURES.map((f) => ({
       id: f.id,
@@ -708,7 +742,7 @@ function WeddingTimelinePageContent() {
       toast({
         title: "Login Required",
         description: "Please login to share your timeline.",
-        variant: "default",
+        className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
@@ -733,17 +767,83 @@ function WeddingTimelinePageContent() {
         toast({
           title: "Share Link Created!",
           description: "Link copied to clipboard. Share it with your loved ones!",
+          className: "bg-pinkey text-lovely border-lovely",
         });
+
+        // Show feedback prompt if user hasn't provided feedback yet
+        if (!hasFeedback) {
+          setTimeout(() => setShowFeedbackPrompt(true), 1000);
+        }
       }
     } catch (error) {
       console.error("Share failed:", error);
       toast({
         title: "Share Failed",
         description: "Could not get share link. Please try again.",
-        variant: "destructive",
+        className: "bg-pinkey text-lovely border-lovely",
       });
     } finally {
       setIsSharing(false);
+    }
+  };
+
+  const handleSubmitFeedback = async () => {
+    // Validate at least one rating or comment
+    const hasRatings = Object.values(feedbackRatings).some((r) => r > 0);
+    if (!hasRatings && !feedbackText.trim()) {
+      toast({
+        title: "Feedback Required",
+        description: "Please provide a rating or comment before submitting.",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+
+    try {
+      const response = await fetch("/api/wedding-timeline/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...feedbackRatings,
+          comment: feedbackText,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to submit feedback");
+
+      const data = await response.json();
+
+      if (data.success) {
+        setHasFeedback(true);
+        setShowFeedbackDialog(false);
+        setShowFeedbackPrompt(false);
+        setFeedbackText("");
+        setFeedbackRatings({
+          easeOfUse: 0,
+          satisfaction: 0,
+          realistic: 0,
+          timeSaved: 0,
+        });
+
+        toast({
+          title: "Thank You! 💕",
+          description: "Your feedback helps us make this feature even better!",
+          className: "bg-pinkey text-lovely border-lovely",
+        });
+      }
+    } catch (error) {
+      console.error("Feedback submission failed:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Could not submit feedback. Please try again.",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+    } finally {
+      setIsSubmittingFeedback(false);
     }
   };
 
@@ -849,13 +949,19 @@ function WeddingTimelinePageContent() {
       toast({
         title: "Success",
         description: "Timeline exported as PDF!",
+        className: "bg-pinkey text-lovely border-lovely",
       });
+
+      // Show feedback prompt if user hasn't provided feedback yet
+      if (!hasFeedback) {
+        setTimeout(() => setShowFeedbackPrompt(true), 1000);
+      }
     } catch (error) {
       console.error("Export failed", error);
       toast({
         title: "Export Failed",
         description: "Could not generate PDF. Please try again.",
-        variant: "destructive",
+        className: "bg-pinkey text-lovely border-lovely",
       });
     } finally {
       setIsExporting(false);
@@ -1049,7 +1155,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Download className="mr-2 h-4 w-4" />
                 )}
-                Export PDF
+                PDF
               </Button>
               <Button
                 onClick={handleShare}
@@ -1170,6 +1276,276 @@ function WeddingTimelinePageContent() {
             >
               <Plus className="mr-2 h-4 w-4" /> Add New Event
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Dialog */}
+      {showFeedbackDialog && step === 3 && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={() => {
+                setShowFeedbackDialog(false);
+                setShowFeedbackPrompt(false);
+              }}
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="mb-4">
+              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
+                We'd Love Your Feedback! 💕
+              </h2>
+              <p className="text-lovely/90 text-sm">
+                How was your experience with the Wedding Timeline feature? Your feedback helps us improve!
+              </p>
+            </div>
+
+            <div className="mb-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              <div className="space-y-4">
+                {/* Q1 */}
+                <div>
+                  <label className="text-sm font-medium text-lovely block mb-1">
+                    How easy was it to use this tool?
+                  </label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() =>
+                          setFeedbackRatings((prev) => ({
+                            ...prev,
+                            easeOfUse: star,
+                          }))
+                        }
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            star <= feedbackRatings.easeOfUse
+                              ? "fill-lovely text-lovely"
+                              : "text-lovely/30"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q2 */}
+                <div>
+                  <label className="text-sm font-medium text-lovely block mb-1">
+                    Are you satisfied by how the day looks?
+                  </label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() =>
+                          setFeedbackRatings((prev) => ({
+                            ...prev,
+                            satisfaction: star,
+                          }))
+                        }
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            star <= feedbackRatings.satisfaction
+                              ? "fill-lovely text-lovely"
+                              : "text-lovely/30"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q3 */}
+                <div>
+                  <label className="text-sm font-medium text-lovely block mb-1">
+                    Do you think this is a realistic timeline?
+                  </label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() =>
+                          setFeedbackRatings((prev) => ({
+                            ...prev,
+                            realistic: star,
+                          }))
+                        }
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            star <= feedbackRatings.realistic
+                              ? "fill-lovely text-lovely"
+                              : "text-lovely/30"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q4 */}
+                <div>
+                  <label className="text-sm font-medium text-lovely block mb-1">
+                    How do you feel about the time saved?
+                  </label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() =>
+                          setFeedbackRatings((prev) => ({
+                            ...prev,
+                            timeSaved: star,
+                          }))
+                        }
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            star <= feedbackRatings.timeSaved
+                              ? "fill-lovely text-lovely"
+                              : "text-lovely/30"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                   <label className="text-sm font-medium text-lovely block mb-1">
+                    Any additional comments?
+                  </label>
+                  <Textarea
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                    placeholder="Share your thoughts..."
+                    className="min-h-[80px] placeholder:text-lovely/60 hover:border-2 border-pinkey bg-creamey resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setShowFeedbackDialog(false);
+                  setShowFeedbackPrompt(false);
+                }}
+                variant="outline"
+                className="flex-1 border-2 border-pinkey text-lovely hover:bg-pinkey bg-pinkey/80 hover:text-lovely"
+              >
+                Maybe Later
+              </Button>
+              <Button
+                onClick={handleSubmitFeedback}
+                disabled={isSubmittingFeedback}
+                className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
+              >
+                {isSubmittingFeedback ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Submit Feedback
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Prompt (appears after using features) */}
+      {showFeedbackPrompt && !showFeedbackDialog && step === 3 && (
+        <div className="fixed bottom-24 right-6 bg-lovely text-white p-4 rounded-lg shadow-xl max-w-xs animate-in slide-in-from-bottom-4 duration-300 z-40">
+          <button
+            onClick={() => setShowFeedbackPrompt(false)}
+            className="absolute top-2 right-2 text-white/70 hover:text-white transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <p className="text-sm mb-3 pr-4">
+            Enjoying the timeline feature? We'd love to hear your thoughts!
+          </p>
+          <Button
+            onClick={() => {
+              setShowFeedbackPrompt(false);
+              setShowFeedbackDialog(true);
+            }}
+            size="sm"
+            className="w-full bg-creamey text-lovely hover:bg-creamey"
+          >
+            Share Feedback
+          </Button>
+        </div>
+      )}
+
+      {/* Floating Feedback Button (always visible if no feedback given) */}
+      {!hasFeedback && step === 3 && !showFeedbackDialog && (
+        <button
+          onClick={() => setShowFeedbackDialog(true)}
+          className="fixed bottom-6 right-6 bg-lovely text-white p-4 rounded-full shadow-lg hover:bg-lovely/90 transition-all hover:scale-110 z-40 flex items-center gap-2 group"
+        >
+          <MessageSquare className="h-5 w-5" />
+          <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap">
+            Write Feedback
+          </span>
+        </button>
+      )}
+      {/* Login Dialog */}
+      {showLoginDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={() => setShowLoginDialog(false)}
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="mb-6 text-center">
+              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
+                Login Required
+              </h2>
+              <p className="text-lovely/90 text-base">
+                You need to have an account to create your wedding plan. <br />
+                Please login or sign up to continue.
+              </p>
+            </div>
+
+            <div className="flex gap-4 flex-col sm:flex-row">
+              <Button
+                className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
+                onClick={() => {
+                  window.open("/login?callbackUrl=/wedding-timeline", "_blank");
+                  setShowLoginDialog(false);
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 border-2 border-lovely text-lovely hover:bg-pinkey/20"
+                onClick={() => {
+                  window.open(
+                    "/signup?callbackUrl=/wedding-timeline",
+                    "_blank"
+                  );
+                  setShowLoginDialog(false);
+                }}
+              >
+                Sign Up
+              </Button>
+            </div>
+            <p className="mt-4 text-xs text-center text-lovely/60">
+              We'll keep this tab open so you can continue your planning!
+            </p>
           </div>
         </div>
       )}

@@ -18,6 +18,13 @@ export interface IWeddingTimeline extends Document {
     timeLabel?: string;
   }[];
   shareToken?: string; // Unique token for sharing read-only timeline
+  feedback?: {
+    easeOfUse: number;
+    satisfaction: number;
+    realistic: number;
+    timeSaved: number;
+    comment?: string;
+  }; 
   createdAt: Date;
 }
 
@@ -44,6 +51,13 @@ const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
     selectedFeatures: [SelectedFeatureSchema],
     events: [EventSchema],
     shareToken: { type: String, required: false, unique: true, sparse: true },
+    feedback: {
+      easeOfUse: { type: Number },
+      satisfaction: { type: Number },
+      realistic: { type: Number },
+      timeSaved: { type: Number },
+      comment: { type: String },
+    },
   },
   { timestamps: true }
 );
