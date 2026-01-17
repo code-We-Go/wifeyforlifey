@@ -19,10 +19,11 @@ export interface IWeddingTimeline extends Document {
   }[];
   shareToken?: string; // Unique token for sharing read-only timeline
   feedback?: {
-    easeOfUse: number;
-    satisfaction: number;
-    realistic: number;
-    timeSaved: number;
+    easeOfUse: number; // 1-5 star rating
+    satisfaction: number; // 1-5 star rating
+    timeSaved: string; // "2-7 days" | "7-14 days" | "era"
+    feelings: string[]; // Multiple selection: ["less_stressed", "more_organized", etc.]
+    recommend: string; // "definitely_not" | "maybe" | "definitely_yes"
     comment?: string;
   }; 
   createdAt: Date;
@@ -54,8 +55,9 @@ const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
     feedback: {
       easeOfUse: { type: Number },
       satisfaction: { type: Number },
-      realistic: { type: Number },
-      timeSaved: { type: Number },
+      timeSaved: { type: String },
+      feelings: [{ type: String }],
+      recommend: { type: String },
       comment: { type: String },
     },
   },

@@ -35,6 +35,9 @@ import {
   MessageSquare,
   X,
   Star,
+  HelpCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
@@ -458,13 +461,48 @@ function WeddingTimelinePageContent() {
   const [feedbackRatings, setFeedbackRatings] = useState({
     easeOfUse: 0,
     satisfaction: 0,
-    realistic: 0,
-    timeSaved: 0,
   });
+  const [feedbackTimeSaved, setFeedbackTimeSaved] = useState("");
+  const [feedbackFeelings, setFeedbackFeelings] = useState<string[]>([]);
+  const [feedbackRecommend, setFeedbackRecommend] = useState("");
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [hasFeedback, setHasFeedback] = useState(false);
   const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(false);
+
+  // -- Tutorial State --
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
+  const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
+
+  // Tutorial Steps
+  const tutorialSteps = [
+    {
+      image: "/weddingPlanningToutorial/1.gif",
+      title: "Set Your Zaffa Time",
+      description: "Start by selecting when your Zaffa (party entrance) begins. This will be the anchor point for your entire timeline."
+    },
+    {
+      image: "/weddingPlanningToutorial/2.gif",
+      title: "Choose Your Features",
+      description: "Select the activities you want to include in your wedding day and customize their duration to fit your schedule."
+    },
+    {
+      image: "/weddingPlanningToutorial/3.gif",
+      title: "Drag and Drop Events",
+      description: "Easily reorder your timeline by dragging and dropping events. Arrange your day exactly how you want it!"
+    },
+    {
+      image: "/weddingPlanningToutorial/4.gif",
+      title: "Mobile View Selector",
+      description: "On mobile devices, use the dropdown selector to switch between viewing different columns (Bride, Groom, Bridesmaids, Groomsmen)."
+    },
+    {
+      image: "/weddingPlanningToutorial/5.gif",
+      title: "Save, Share & Export",
+      description: "Use these three buttons to save your timeline, share it with your loved ones, or export it as a PDF for printing."
+    }
+  ];
 
   // -- Dnd Sensors --
   const sensors = useSensors(
@@ -494,7 +532,8 @@ function WeddingTimelinePageContent() {
                 setStep(3);
               }
               // Check if user has already provided feedback
-              if (feedback) {
+              // Only set hasFeedback to true if feedback exists and has actual data
+              if (feedback && (feedback.easeOfUse > 0 || feedback.satisfaction > 0 || feedback.timeSaved || feedback.recommend || (feedback.feelings && feedback.feelings.length > 0))) {
                 setHasFeedback(true);
               }
             }
@@ -510,7 +549,21 @@ function WeddingTimelinePageContent() {
     checkExistingTimeline();
   }, [isAuthenticated, loading]);
 
-  // 2. Handle Drag End
+  // 2. Show tutorial for first-time users when they reach step 3
+  useEffect(() => {
+    const hasSeenStorage = localStorage.getItem("weddingTimelineTutorialSeen");
+    if (step === 3 && !hasSeenTutorial && !hasSeenStorage) {
+      // Small delay to let the timeline render first
+      const timer = setTimeout(() => {
+        setShowTutorial(true);
+        setHasSeenTutorial(true);
+        localStorage.setItem("weddingTimelineTutorialSeen", "true");
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [step, hasSeenTutorial]);
+
+  // 3. Handle Drag End
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -523,10 +576,10 @@ function WeddingTimelinePageContent() {
     }
   };
 
-  // 3. Calculated Events (Time Calculation)
+  // 4. Calculated Events (Time Calculation)
   const calculatedEvents = calculateTimeline(events, zaffaTime);
 
-  // 4. Auto-Save Logic (Only if newly generated and not yet saved)
+  // 5. Auto-Save Logic (Only if newly generated and not yet saved)
   //   useEffect(() => {
   //     // We might want to be careful with auto-save to avoid overwriting accidentally
   //     // But if the user just created a plan, maybe we save it?
@@ -788,12 +841,14 @@ function WeddingTimelinePageContent() {
   };
 
   const handleSubmitFeedback = async () => {
-    // Validate at least one rating or comment
+    // Validate at least one rating or selection
     const hasRatings = Object.values(feedbackRatings).some((r) => r > 0);
-    if (!hasRatings && !feedbackText.trim()) {
+    const hasSelections = feedbackTimeSaved || feedbackFeelings.length > 0 || feedbackRecommend;
+    
+    if (!hasRatings && !hasSelections && !feedbackText.trim()) {
       toast({
         title: "Feedback Required",
-        description: "Please provide a rating or comment before submitting.",
+        description: "Please provide at least one response before submitting.",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
@@ -808,7 +863,11 @@ function WeddingTimelinePageContent() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...feedbackRatings,
+          easeOfUse: feedbackRatings.easeOfUse,
+          satisfaction: feedbackRatings.satisfaction,
+          timeSaved: feedbackTimeSaved,
+          feelings: feedbackFeelings,
+          recommend: feedbackRecommend,
           comment: feedbackText,
         }),
       });
@@ -825,9 +884,10 @@ function WeddingTimelinePageContent() {
         setFeedbackRatings({
           easeOfUse: 0,
           satisfaction: 0,
-          realistic: 0,
-          timeSaved: 0,
         });
+        setFeedbackTimeSaved("");
+        setFeedbackFeelings([]);
+        setFeedbackRecommend("");
 
         toast({
           title: "Thank You! 💕",
@@ -966,6 +1026,26 @@ function WeddingTimelinePageContent() {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleNextTutorialStep = () => {
+    if (currentTutorialStep < tutorialSteps.length - 1) {
+      setCurrentTutorialStep(currentTutorialStep + 1);
+    } else {
+      setShowTutorial(false);
+      setCurrentTutorialStep(0);
+    }
+  };
+
+  const handlePrevTutorialStep = () => {
+    if (currentTutorialStep > 0) {
+      setCurrentTutorialStep(currentTutorialStep - 1);
+    }
+  };
+
+  const handleCloseTutorial = () => {
+    setShowTutorial(false);
+    setCurrentTutorialStep(0);
   };
 
   // --- Render ---
@@ -1151,11 +1231,11 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isExporting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
                 ) : (
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="h-4 w-4 md:mr-2" />
                 )}
-                PDF
+                <span className="hidden md:inline">PDF</span>
               </Button>
               <Button
                 onClick={handleShare}
@@ -1164,11 +1244,11 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isSharing ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
                 ) : (
-                  <Share2 className="mr-2 h-4 w-4" />
+                  <Share2 className="h-4 w-4 md:mr-2" />
                 )}
-                Share
+                <span className="hidden md:inline">Share</span>
               </Button>
               {/* <Button
                 onClick={() => setStep(2)}
@@ -1183,13 +1263,20 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isSaving ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
                 ) : (
-                  <Save className="mr-2 h-4 w-4" />
+                  <Save className="h-4 w-4 md:mr-2" />
                 )}
-                Save
+                <span className="hidden md:inline">Save</span>
               </Button>
-              
+              <Button
+                onClick={() => setShowTutorial(true)}
+                variant="outline"
+                className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
+              >
+                <HelpCircle className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">How to Use</span>
+              </Button>
             </div>
           </div>
 
@@ -1283,166 +1370,198 @@ function WeddingTimelinePageContent() {
       {/* Feedback Dialog */}
       {showFeedbackDialog && step === 3 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-lg w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => {
                 setShowFeedbackDialog(false);
                 setShowFeedbackPrompt(false);
               }}
-              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors z-10"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <div className="mb-4">
-              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
-                We'd Love Your Feedback! 💕
+            <div className="mb-6">
+              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-3 text-center`}>
+                Hi bestie! We'd love to know your feedback! �
               </h2>
-              <p className="text-lovely/90 text-sm">
-                How was your experience with the Wedding Timeline feature? Your feedback helps us improve!
+              <p className="text-lovely/90 text-sm text-center leading-relaxed">
+                You just created your wedding day timeline in less than 5 minutes! ✨<br />
+                Help us make this tool even better for brides like you.
               </p>
             </div>
 
-            <div className="mb-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              <div className="space-y-4">
-                {/* Q1 */}
-                <div>
-                  <label className="text-sm font-medium text-lovely block mb-1">
-                    How easy was it to use this tool?
-                  </label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() =>
-                          setFeedbackRatings((prev) => ({
-                            ...prev,
-                            easeOfUse: star,
-                          }))
-                        }
-                        className="focus:outline-none transition-transform hover:scale-110"
-                      >
-                        <Star
-                          className={`h-6 w-6 ${
-                            star <= feedbackRatings.easeOfUse
-                              ? "fill-lovely text-lovely"
-                              : "text-lovely/30"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
+            <div className="space-y-5">
+              {/* Q1 - Star Rating */}
+              <div>
+                <label className="text-sm font-medium text-lovely block mb-2">
+                  1. How easy was it to create your wedding day timeline using this tool?
+                </label>
+                <div className="flex gap-1 justify-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() =>
+                        setFeedbackRatings((prev) => ({
+                          ...prev,
+                          easeOfUse: star,
+                        }))
+                      }
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          star <= feedbackRatings.easeOfUse
+                            ? "fill-lovely text-lovely"
+                            : "text-lovely/30"
+                        }`}
+                      />
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Q2 */}
-                <div>
-                  <label className="text-sm font-medium text-lovely block mb-1">
-                    Are you satisfied by how the day looks?
-                  </label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() =>
-                          setFeedbackRatings((prev) => ({
-                            ...prev,
-                            satisfaction: star,
-                          }))
-                        }
-                        className="focus:outline-none transition-transform hover:scale-110"
-                      >
-                        <Star
-                          className={`h-6 w-6 ${
-                            star <= feedbackRatings.satisfaction
-                              ? "fill-lovely text-lovely"
-                              : "text-lovely/30"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
+              {/* Q2 - Star Rating */}
+              <div>
+                <label className="text-sm font-medium text-lovely block mb-2">
+                  2. Are you satisfied about how the day looks?
+                </label>
+                <div className="flex gap-1 justify-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() =>
+                        setFeedbackRatings((prev) => ({
+                          ...prev,
+                          satisfaction: star,
+                        }))
+                      }
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          star <= feedbackRatings.satisfaction
+                            ? "fill-lovely text-lovely"
+                            : "text-lovely/30"
+                        }`}
+                      />
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Q3 */}
-                <div>
-                  <label className="text-sm font-medium text-lovely block mb-1">
-                    Do you think this is a realistic timeline?
-                  </label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() =>
-                          setFeedbackRatings((prev) => ({
-                            ...prev,
-                            realistic: star,
-                          }))
-                        }
-                        className="focus:outline-none transition-transform hover:scale-110"
-                      >
-                        <Star
-                          className={`h-6 w-6 ${
-                            star <= feedbackRatings.realistic
-                              ? "fill-lovely text-lovely"
-                              : "text-lovely/30"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
+              {/* Q3 - Time Saved */}
+              <div>
+                <label className="text-sm font-medium text-lovely block mb-2">
+                  3. Compared to creating a timeline on your own, how much time do you feel this tool saved you?
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { value: "2-7days", label: "Between 2 days to 7 days" },
+                    { value: "7-14days", label: "Between 7 days to 2 weeks" },
+                    { value: "era", label: "A whole era of overthinking" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setFeedbackTimeSaved(option.value)}
+                      className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
+                        feedbackTimeSaved === option.value
+                          ? "border-lovely bg-pinkey/30 text-lovely font-medium"
+                          : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
+                      }`}
+                    >
+                      <span className="mr-2">{feedbackTimeSaved === option.value ? "●" : "○"}</span>
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Q4 */}
-                <div>
-                  <label className="text-sm font-medium text-lovely block mb-1">
-                    How do you feel about the time saved?
-                  </label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() =>
-                          setFeedbackRatings((prev) => ({
-                            ...prev,
-                            timeSaved: star,
-                          }))
-                        }
-                        className="focus:outline-none transition-transform hover:scale-110"
-                      >
-                        <Star
-                          className={`h-6 w-6 ${
-                            star <= feedbackRatings.timeSaved
-                              ? "fill-lovely text-lovely"
-                              : "text-lovely/30"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
+              {/* Q4 - Feelings (Multi-select) */}
+              <div>
+                <label className="text-sm font-medium text-lovely block mb-2">
+                  4. How did this tool make you feel while planning your wedding day?
+                </label>
+                <p className="text-xs text-lovely/60 mb-2">(Select all that apply)</p>
+                <div className="space-y-2">
+                  {[
+                    { value: "less_stressed", label: "Less stressed" },
+                    { value: "more_organized", label: "More organized" },
+                    { value: "more_confident", label: "More confident" },
+                    { value: "calm_reassured", label: "Calm & reassured" },
+                    { value: "no_difference", label: "No difference" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setFeedbackFeelings((prev) =>
+                          prev.includes(option.value)
+                            ? prev.filter((f) => f !== option.value)
+                            : [...prev, option.value]
+                        );
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
+                        feedbackFeelings.includes(option.value)
+                          ? "border-lovely bg-pinkey/30 text-lovely font-medium"
+                          : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
+                      }`}
+                    >
+                      <span className="mr-2">{feedbackFeelings.includes(option.value) ? "☑" : "☐"}</span>
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                <div>
-                   <label className="text-sm font-medium text-lovely block mb-1">
-                    Any additional comments?
-                  </label>
-                  <Textarea
-                    value={feedbackText}
-                    onChange={(e) => setFeedbackText(e.target.value)}
-                    placeholder="Share your thoughts..."
-                    className="min-h-[80px] placeholder:text-lovely/60 hover:border-2 border-pinkey bg-creamey resize-none"
-                  />
+              {/* Q5 - Recommendation */}
+              <div>
+                <label className="text-sm font-medium text-lovely block mb-2">
+                  5. Would you recommend this timeline creator to another bride?
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { value: "definitely_not", label: "Definitely not" },
+                    { value: "maybe", label: "Maybe" },
+                    { value: "definitely_yes", label: "Definitely yes" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setFeedbackRecommend(option.value)}
+                      className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
+                        feedbackRecommend === option.value
+                          ? "border-lovely bg-pinkey/30 text-lovely font-medium"
+                          : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
+                      }`}
+                    >
+                      <span className="mr-2">{feedbackRecommend === option.value ? "●" : "○"}</span>
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              {/* Additional Comments */}
+              <div>
+                <label className="text-sm font-medium text-lovely block mb-2">
+                  Any additional comments?
+                </label>
+                <Textarea
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Share your thoughts..."
+                  className="min-h-[80px] placeholder:text-lovely/60 border-2 border-pinkey bg-creamey resize-none focus:border-lovely"
+                />
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-6">
               <Button
                 onClick={() => {
                   setShowFeedbackDialog(false);
                   setShowFeedbackPrompt(false);
                 }}
                 variant="outline"
-                className="flex-1 border-2 border-pinkey text-lovely hover:bg-pinkey bg-pinkey/80 hover:text-lovely"
+                className="flex-1 border-2 border-pinkey bg-creamey hover:text-lovely text-lovely hover:bg-pinkey/20"
               >
                 Maybe Later
               </Button>
@@ -1523,7 +1642,7 @@ function WeddingTimelinePageContent() {
               <Button
                 className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
                 onClick={() => {
-                  window.open("/login?callbackUrl=/wedding-timeline", "_blank");
+                  router.push("/login?callbackUrl=/wedding-timeline");
                   setShowLoginDialog(false);
                 }}
               >
@@ -1533,19 +1652,97 @@ function WeddingTimelinePageContent() {
                 variant="outline"
                 className="flex-1 border-2 border-lovely text-lovely hover:bg-pinkey/20"
                 onClick={() => {
-                  window.open(
-                    "/signup?callbackUrl=/wedding-timeline",
-                    "_blank"
-                  );
+                  router.push("/signup?callbackUrl=/wedding-timeline");
                   setShowLoginDialog(false);
                 }}
               >
                 Sign Up
               </Button>
             </div>
-            <p className="mt-4 text-xs text-center text-lovely/60">
-              We'll keep this tab open so you can continue your planning!
-            </p>
+
+          </div>
+        </div>
+      )}
+
+      {/* Tutorial Modal */}
+      {showTutorial && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-creamey h-[95vh] md:h-[90vh]  overflow-y-auto border-4 border-lovely rounded-lg shadow-2xl max-w-3xl w-full relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={handleCloseTutorial}
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors z-10"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            <div className="p-4">
+              <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2 text-center`}>
+                How to Use Wedding Timeline Planner
+              </h2>
+              <p className="text-lovely/70 text-center mb-2">
+                Step {currentTutorialStep + 1} of {tutorialSteps.length}
+              </p>
+
+              <div className="bg-creamey rounded-lg p-2 mb-2 border-2 border-pinkey/20">
+                <div className="flex justify-center mb-4">
+                  <NextImage
+                    src={tutorialSteps[currentTutorialStep].image}
+                    alt={tutorialSteps[currentTutorialStep].title}
+                    width={300}
+                    height={300}
+                    className="rounded-lg max-h-[300px] object-cover"
+                    unoptimized
+                  />
+                </div>
+                <h3 className={`${thirdFont.className} text-2xl text-lovely mb-3 text-center`}>
+                  {tutorialSteps[currentTutorialStep].title}
+                </h3>
+                <p className="text-lovely/90 text-center text-base leading-relaxed">
+                  {tutorialSteps[currentTutorialStep].description}
+                </p>
+              </div>
+
+              {/* Progress Dots */}
+              <div className="flex justify-center gap-2 mb-6">
+                {tutorialSteps.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTutorialStep(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentTutorialStep
+                        ? "w-8 bg-lovely"
+                        : "w-2 bg-lovely/30 hover:bg-lovely/50"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={handlePrevTutorialStep}
+                  disabled={currentTutorialStep === 0}
+                  variant="outline"
+                  className="flex-1 border-2 border-pinkey bg-creamey text-lovely hover:text-lovely hover:bg-pinkey/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Previous
+                </Button>
+                <Button
+                  onClick={handleNextTutorialStep}
+                  className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
+                >
+                  {currentTutorialStep === tutorialSteps.length - 1 ? (
+                    "Get Started"
+                  ) : (
+                    <>
+                      Next
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

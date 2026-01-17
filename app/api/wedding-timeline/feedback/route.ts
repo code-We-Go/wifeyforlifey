@@ -14,12 +14,12 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { easeOfUse, satisfaction, realistic, timeSaved, comment } = body;
+    const { easeOfUse, satisfaction, timeSaved, feelings, recommend, comment } = body;
 
-    // Validate that at least one rating is provided or comment is not empty
-    if (!easeOfUse && !satisfaction && !realistic && !timeSaved && (!comment || comment.trim() === "")) {
+    // Validate that at least one field is provided
+    if (!easeOfUse && !satisfaction && !timeSaved && !recommend && (!feelings || feelings.length === 0) && (!comment || comment.trim() === "")) {
       return NextResponse.json(
-        { error: "Please provide at least one rating or comment" },
+        { error: "Please provide at least one response" },
         { status: 400 }
       );
     }
@@ -30,10 +30,11 @@ export async function POST(req: Request) {
       { 
         $set: { 
           feedback: {
-            easeOfUse,
-            satisfaction,
-            realistic,
-            timeSaved,
+            easeOfUse: easeOfUse || 0,
+            satisfaction: satisfaction || 0,
+            timeSaved: timeSaved || "",
+            feelings: feelings || [],
+            recommend: recommend || "",
             comment: comment ? comment.trim() : ""
           } 
         } 
