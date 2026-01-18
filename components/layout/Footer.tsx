@@ -264,7 +264,7 @@ export default function Footer() {
                   value={email}
                   type="email"
                   placeholder="Your email"
-                  className="rounded-r-none text-lovely placeholder:text-lovely/80 bg-creamey border-r py-5 border-lovely"
+                  className="rounded-r-none lowercase text-lovely placeholder:text-lovely/80 bg-creamey border-r py-5 border-lovely"
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <Button

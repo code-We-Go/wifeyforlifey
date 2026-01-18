@@ -110,7 +110,7 @@ export default function ContactForm() {
           type="email"
           id="email"
           {...register("email")}
-          className="w-full rounded-2xl placeholder:text-pinkey bg-creamey border border-gray-300 p-2 focus:border-everGreen focus:ring-everGreen"
+          className="w-full rounded-2xl placeholder:text-pinkey bg-creamey border border-gray-300 p-2 focus:border-everGreen lowercase focus:ring-everGreen"
           placeholder="Email"
         />
         {errors.email && (

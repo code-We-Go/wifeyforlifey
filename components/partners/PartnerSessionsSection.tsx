@@ -214,7 +214,7 @@ export default function PartnerSessionsSection() {
                 required
               />
               <Input
-                className="border-pinkey placeholder:text-lovely bg-creamey"
+                className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
                 placeholder="Email"
                 type="email"
                 value={form.email}

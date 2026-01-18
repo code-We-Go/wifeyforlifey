@@ -136,7 +136,7 @@ function LoginPage() {
                   name="email"
                   type="email"
                   required
-                  className="placeholder:text-pinkey rounded-none border-pinkey relative block w-full px-3 py-2 border-2 bg-creamey/90  text-lovely/90 rounded-t-md focus:outline-none focus:ring-everGreen focus:border-primary focus:z-10 sm:text-sm"
+                  className="placeholder:text-pinkey rounded-none border-pinkey relative block w-full px-3 py-2 border-2 bg-creamey/90  text-lovely/90 rounded-t-md focus:outline-none focus:ring-everGreen focus:border-primary focus:z-10 lowercase sm:text-sm"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

@@ -804,7 +804,7 @@ const CheckoutClientPage = () => {
                   type="email"
                   className={`border ${
                     formErrors.email ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey rounded-2xl  px-2 text-base`}
+                  } w-full h-10 bg-creamey rounded-2xl lowercase px-2 text-base`}
                 />
                 {formErrors.email ? (
                   <p className="uppercase text-xs text-red-500">
@@ -854,7 +854,7 @@ const CheckoutClientPage = () => {
                         name="giftRecipientEmail"
                         value={formData.giftRecipientEmail}
                         type="email"
-                        className={`border w-full h-10 bg-creamey border-pinkey border rounded-2xl px-2 text-base`}
+                        className={`border w-full h-10 bg-creamey border-pinkey lowercase rounded-2xl px-2 text-base`}
                       />
                     </div>
                   </div>

@@ -69,7 +69,7 @@ const Newsletters = () => {
           <Input
             type="email"
             placeholder="Your email address"
-            className="rounded-full bg-creamey border-lovely placeholder:text-lovely/90 flex-1"
+            className="rounded-full lowercase bg-creamey border-lovely placeholder:text-lovely/90 flex-1"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

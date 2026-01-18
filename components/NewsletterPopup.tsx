@@ -105,7 +105,7 @@ export default function NewsletterPopup() {
                 <Input
                   type="email"
                   placeholder="Your email address"
-                  className="bg-creamey border-lovely placeholder:text-lovely/80"
+                  className="bg-creamey lowercase border-lovely placeholder:text-lovely/80"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

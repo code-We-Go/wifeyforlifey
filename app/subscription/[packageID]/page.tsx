@@ -917,7 +917,7 @@ const SubscriptionPage = () => {
                   type="email"
                   className={`border ${
                     formErrors.email ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl  px-2 text-base`}
+                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
                 />
                 {formErrors.email ? (
                   <p className="uppercase text-xs text-red-500">
@@ -969,7 +969,7 @@ const SubscriptionPage = () => {
                         type="email"
                         className={`border ${
                           formErrors.giftRecipientEmail ? "border-red-500" : ""
-                        } w-full h-10 bg-creamey border-pinkey border rounded-2xl px-2 text-base`}
+                        } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
                       />
                       {formErrors.giftRecipientEmail ? (
                         <p className="uppercase text-xs text-red-500">
