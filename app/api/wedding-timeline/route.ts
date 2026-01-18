@@ -156,3 +156,36 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    await ConnectDB();
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const result = await WeddingTimelineModel.findOneAndDelete({
+      userId: session.user.id,
+    });
+
+    if (!result) {
+      return NextResponse.json(
+        { error: "No timeline found to delete" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, message: "Timeline deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Error deleting wedding timeline:", error);
+    return NextResponse.json(
+      { error: "Failed to delete timeline" },
+      { status: 500 }
+    );
+  }
+}
