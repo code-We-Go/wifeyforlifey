@@ -38,6 +38,7 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
+  MoreVertical,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
@@ -318,7 +319,7 @@ function SortableRow({
       {...attributes}
       {...listeners}
       className={`hover:bg-pinkey w-full cursor-grab active:cursor-grabbing ${
-        event.isBreak ? "bg-pinkey/30" : "bg-pinkey/60"
+        event.isBreak ? "bg-pinkey/50" : "bg-pinkey/60"
       } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
     >
       <TableCell className="font-medium whitespace-nowrap text-sm md:text-base p-1 md:p-4">
@@ -474,6 +475,12 @@ function WeddingTimelinePageContent() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
+
+  // -- Reset State --
+  const [showResetDialog, setShowResetDialog] = useState(false);
+
+  // -- Options Modal State (for mobile) --
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
 
   // Tutorial Steps
   const tutorialSteps = [
@@ -1048,6 +1055,55 @@ function WeddingTimelinePageContent() {
     setCurrentTutorialStep(0);
   };
 
+  const handleResetTimeline = async () => {
+    try {
+      // If authenticated, delete from database
+      if (isAuthenticated) {
+        const response = await fetch("/api/wedding-timeline", {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete timeline");
+        }
+      }
+
+      // Reset all state to initial values
+      setEvents([]);
+      setZaffaTime("18:00");
+      setSelectedFeatures(
+        FEATURES.reduce(
+          (acc, feature) => ({
+            ...acc,
+            [feature.id]: { enabled: true, duration: feature.defaultDuration },
+          }),
+          {}
+        )
+      );
+      setStep(1);
+      setHasAutoSaved(false);
+      setShareUrl(null);
+      setShowResetDialog(false);
+      setHasSeenTutorial(false);
+      
+      // Clear tutorial flag from localStorage so it shows again
+      localStorage.removeItem("weddingTimelineTutorialSeen");
+
+      toast({
+        title: "Timeline Reset",
+        description: "Your timeline has been deleted. Start fresh!",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+    } catch (error) {
+      console.error("Reset failed:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reset timeline. Please try again.",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+    }
+  };
+
   // --- Render ---
 
   // Layout wrapper changes based on step
@@ -1106,13 +1162,13 @@ function WeddingTimelinePageContent() {
                     <Label className="text-xl text-lovely text-center block">
                       When does the Party start?
                     </Label>
-                    <div className="flex justify-center">
+                    <div className="flex relative justify-center">
                       <div className="relative w-full max-w-xs">
                         <Input
                           type="time"
                           value={zaffaTime}
                           onChange={(e) => setZaffaTime(e.target.value)}
-                          className="p-6 text-xl border-pinkey/30 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
+                          className="p-6 text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
                         />
                         <Clock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-lovely pointer-events-none z-20" />
                       </div>
@@ -1145,7 +1201,7 @@ function WeddingTimelinePageContent() {
                           key={feature.id}
                           className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
                             selectedFeatures[feature.id].enabled
-                              ? "bg-pinkey/20 border-pinkey/30"
+                              ? "bg-pinkey/20 border-pinkey/50"
                               : "bg-creamey border-pinkey opacity-70"
                           }`}
                         >
@@ -1223,7 +1279,8 @@ function WeddingTimelinePageContent() {
                 Your Wedding Day planner
               </h1>
             </div>
-            <div className="flex gap-2">
+            {/* Desktop: Show all buttons */}
+            <div className="hidden md:flex gap-2">
               <Button
                 onClick={handleExportPDF}
                 disabled={isExporting}
@@ -1231,11 +1288,11 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isExporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <Download className="h-4 w-4 md:mr-2" />
+                  <Download className="h-4 w-4 mr-2" />
                 )}
-                <span className="hidden md:inline">PDF</span>
+                PDF
               </Button>
               <Button
                 onClick={handleShare}
@@ -1244,38 +1301,51 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isSharing ? (
-                  <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <Share2 className="h-4 w-4 md:mr-2" />
+                  <Share2 className="h-4 w-4 mr-2" />
                 )}
-                <span className="hidden md:inline">Share</span>
+                Share
               </Button>
-              {/* <Button
-                onClick={() => setStep(2)}
-                variant="outline"
-                className="bg-creamey border-2 border-lovely text-lovely hover:bg-lovely hover:text-white"
-              >
-                Edit Activities
-              </Button> */}
               <Button
                 onClick={() => handleSave(false)}
                 disabled={isSaving}
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin md:mr-2" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <Save className="h-4 w-4 md:mr-2" />
+                  <Save className="h-4 w-4 mr-2" />
                 )}
-                <span className="hidden md:inline">Save</span>
+                Save
               </Button>
               <Button
                 onClick={() => setShowTutorial(true)}
                 variant="outline"
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
-                <HelpCircle className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">How to Use</span>
+                <HelpCircle className="h-4 w-4 mr-2" />
+                How to Use
+              </Button>
+              <Button
+                onClick={() => setShowResetDialog(true)}
+                variant="outline"
+                className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Reset
+              </Button>
+            </div>
+
+            {/* Mobile: Show Options button */}
+            <div className="md:hidden">
+              <Button
+                onClick={() => setShowOptionsModal(true)}
+                variant="outline"
+                className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
+              >
+                <MoreVertical className="h-4 w-4 mr-2" />
+                Options
               </Button>
             </div>
           </div>
@@ -1382,10 +1452,10 @@ function WeddingTimelinePageContent() {
             </button>
 
             <div className="mb-6">
-              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-3 text-center`}>
-                Hi bestie! We'd love to know your feedback! �
+              <h2 className={`${thirdFont.className} text-3xl text-lovely mb-3 text-center`}>
+                Hi bestie! We'd love to know your feedback! 💗
               </h2>
-              <p className="text-lovely/90 text-sm text-center leading-relaxed">
+              <p className="text-lovely/90 text-base font-semibold text-center ">
                 You just created your wedding day timeline in less than 5 minutes! ✨<br />
                 Help us make this tool even better for brides like you.
               </p>
@@ -1466,7 +1536,7 @@ function WeddingTimelinePageContent() {
                       onClick={() => setFeedbackTimeSaved(option.value)}
                       className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
                         feedbackTimeSaved === option.value
-                          ? "border-lovely bg-pinkey/30 text-lovely font-medium"
+                          ? "border-lovely bg-pinkey/50 text-lovely font-medium"
                           : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
                       }`}
                     >
@@ -1502,7 +1572,7 @@ function WeddingTimelinePageContent() {
                       }}
                       className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
                         feedbackFeelings.includes(option.value)
-                          ? "border-lovely bg-pinkey/30 text-lovely font-medium"
+                          ? "border-lovely bg-pinkey/50 text-lovely font-semibold"
                           : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
                       }`}
                     >
@@ -1529,7 +1599,7 @@ function WeddingTimelinePageContent() {
                       onClick={() => setFeedbackRecommend(option.value)}
                       className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
                         feedbackRecommend === option.value
-                          ? "border-lovely bg-pinkey/30 text-lovely font-medium"
+                          ? "border-lovely bg-pinkey/50 text-lovely font-medium"
                           : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
                       }`}
                     >
@@ -1667,7 +1737,7 @@ function WeddingTimelinePageContent() {
       {/* Tutorial Modal */}
       {showTutorial && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-creamey h-[95vh] md:h-[90vh]  overflow-y-auto border-4 border-lovely rounded-lg shadow-2xl max-w-3xl w-full relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-creamey h-auto  overflow-y-auto border-4 border-lovely rounded-lg shadow-2xl max-w-3xl w-full relative animate-in fade-in slide-in-from-bottom-4 duration-300">
             <button
               onClick={handleCloseTutorial}
               className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors z-10"
@@ -1676,7 +1746,7 @@ function WeddingTimelinePageContent() {
             </button>
 
             <div className="p-4">
-              <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2 text-center`}>
+              <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2 max-md:mt-8 text-center`}>
                 How to Use Wedding Timeline Planner
               </h2>
               <p className="text-lovely/70 text-center mb-2">
@@ -1742,6 +1812,159 @@ function WeddingTimelinePageContent() {
                   )}
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Confirmation Dialog */}
+      {showResetDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={() => setShowResetDialog(false)}
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="mb-6 text-center">
+              <div className="mx-auto w-12 h-12 bg-lovely/10 rounded-full flex items-center justify-center mb-4">
+                <Trash2 className="h-6 w-6 text-lovely" />
+              </div>
+              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
+                Reset Timeline?
+              </h2>
+              <p className="text-lovely/90 text-base">
+                Are you sure you want to delete your current timeline and start over? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-4 flex-col sm:flex-row">
+              <Button
+                variant="outline"
+                className="flex-1 border-2 border-pinkey bg-creamey text-lovely hover:bg-pinkey/20"
+                onClick={() => setShowResetDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
+                onClick={handleResetTimeline}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Yes, Reset
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Options Modal (Mobile) */}
+      {showOptionsModal && (
+        <div
+        onClick={() => setShowOptionsModal(false)}
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={() => setShowOptionsModal(false)}
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="mb-6">
+              <h2 className={`${thirdFont.className} text-2xl text-lovely text-center`}>
+                Timeline Options
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                onClick={() => {
+                  handleExportPDF();
+                  setShowOptionsModal(false);
+                }}
+                disabled={isExporting}
+                variant="outline"
+                className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                ) : (
+                  <Download className="h-5 w-5 mr-3" />
+                )}
+                Export as PDF
+              </Button>
+
+              <Button
+                onClick={() => {
+                  handleShare();
+                  setShowOptionsModal(false);
+                }}
+                disabled={isSharing}
+                variant="outline"
+                className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
+              >
+                {isSharing ? (
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                ) : (
+                  <Share2 className="h-5 w-5 mr-3" />
+                )}
+                Share Timeline
+              </Button>
+
+              <Button
+                onClick={() => {
+                  handleSave(false);
+                  setShowOptionsModal(false);
+                }}
+                disabled={isSaving}
+                className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                ) : (
+                  <Save className="h-5 w-5 mr-3" />
+                )}
+                Save Timeline
+              </Button>
+
+              <Button
+                onClick={() => {
+                  setShowOptionsModal(false);
+                  setShowTutorial(true);
+                }}
+                variant="outline"
+                className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
+              >
+                <HelpCircle className="h-5 w-5 mr-3" />
+                How to Use
+              </Button>
+
+              <Button
+                onClick={() => {
+                  setShowOptionsModal(false);
+                  setShowResetDialog(true);
+                }}
+                variant="outline"
+                className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
+              >
+                <Trash2 className="h-5 w-5 mr-3" />
+                Reset Timeline
+              </Button>
+            </div>
+
+            <div className="mt-6">
+              <Button
+                onClick={() => setShowOptionsModal(false)}
+                variant="outline"
+                className="w-full border-2 border-pinkey bg-creamey text-lovely hover:bg-pinkey/20"
+              >
+                Close
+              </Button>
             </div>
           </div>
         </div>
