@@ -984,118 +984,180 @@ function WeddingTimelinePageContent() {
 
     try {
       const { default: jsPDF, GState } = (await import("jspdf")) as any;
-      const autoTable = (await import("jspdf-autotable")).default;
 
       const doc = new jsPDF();
 
+      // Helper function to draw rounded rectangle
+      const drawRoundedRect = (x: number, y: number, width: number, height: number, radius: number, fillColor: string, borderColor: string) => {
+        doc.setFillColor(fillColor);
+        doc.setDrawColor(borderColor);
+        doc.setLineWidth(0.5);
+        
+        // Draw rounded rectangle
+        doc.roundedRect(x, y, width, height, radius, radius, 'FD');
+      };
+
+      // Helper function to add text centered in a cell
+      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 9) => {
+        doc.setFontSize(fontSize);
+        const textWidth = doc.getTextWidth(text);
+        // Horizontal center
+        const textX = x + (width - textWidth) / 2;
+        // Vertical center - adjusted to move text higher for better centering
+        const textY = y + (height / 2) + (fontSize / 4.5);
+        doc.text(text, textX, textY);
+      };
+
       // Set Page Background (Creamey)
       doc.setFillColor("#FBF3E0");
-      doc.rect(
-        0,
-        0,
-        doc.internal.pageSize.width,
-        doc.internal.pageSize.height,
-        "F"
-      );
+      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
 
-      // Add Title
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(22);
-      doc.setTextColor("#D32333"); // Lovely
-      doc.text("Your Wedding Day Planner", 14, 20);
-
-      // Define columns
-      const tableColumn = [
-        "Time",
-        "Duration",
-        "Bride",
-        "Groom",
-        "Bridesmaids",
-        "Groomsmen",
-      ];
-
-      // Define rows
-      const tableRows = calculatedEvents.map((event) => [
-        event.timeLabel || "",
-        event.duration + " min",
-        event.brideActivity,
-        event.groomActivity,
-        event.bridesmaidsActivity,
-        event.groomsmenActivity,
-      ]);
-
-      // Add Table
-      autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 30,
-        theme: "grid",
-        styles: {
-          font: "helvetica",
-          fontSize: 10,
-          textColor: "#D32333", // Lovely
-          fillColor: "#FFB6C7", // Pinkey
-          lineColor: "#D32333", // Lovely
-          lineWidth: 0.1,
-        },
-        headStyles: {
-          fillColor: "#D32333", // Lovely
-          textColor: "#FFFFFF", // White
-          fontStyle: "bold",
-        },
-        alternateRowStyles: {
-          fillColor: "#FFC2D1", // Slightly lighter/different pink if needed
-        },
-        columnStyles: {
-          0: { cellWidth: 35, fontStyle: "bold" }, // Time
-          1: { cellWidth: 20, halign: "center" }, // Duration
-        },
-      });
-
-      // Add Watermark to all pages
+      // Add Logo at the top (full opacity)
       const logoUrl = "/logo/Wifey for Lifey Primary Logo with Slogan Red.png";
-      const watermarkImg = new Image();
-      watermarkImg.src = logoUrl;
+      const logoImg = new Image();
+      logoImg.src = logoUrl;
 
       await new Promise((resolve, reject) => {
-        watermarkImg.onload = resolve;
-        watermarkImg.onerror = reject;
+        logoImg.onload = resolve;
+        logoImg.onerror = reject;
       });
 
+      // Add logo centered at top
+      const logoWidth = 60;
+      const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
+      const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
+      doc.addImage(logoImg, "PNG", logoX, 10, logoWidth, logoHeight);
+
+      // Add "Wedding day timeline" title in script style
+      doc.setFont("BebasNeue-Regular", "italic");
+      doc.setFontSize(24);
+      doc.setTextColor("#D32333");
+      const titleY = 10 + logoHeight + 8;
+      doc.text("My Wedding day timeline", doc.internal.pageSize.getWidth() / 2, titleY, {
+        align: "center"
+      });
+
+      // Table configuration
+      const startY = titleY + 10;
+      const gap = 2; // Gap between cells
+      const radius = 2; // Rounded corner radius
+      const rowHeight = 8; // Increased for better text spacing
+      const timeColWidth = 30;
+      const activityColWidth = 35;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const tableWidth = timeColWidth + (activityColWidth * 4) + (gap * 5);
+      const startX = (pageWidth - tableWidth) / 2;
+
+      let currentY = startY;
+
+      // Draw header row (text only, no boxes)
+      const headers = ["TIME", "BRIDE", "GROOM", "BRIDESMAIDS", "GROOMSMEN"];
+      const headerWidths = [timeColWidth, activityColWidth, activityColWidth, activityColWidth, activityColWidth];
+      
+      doc.setTextColor("#D32333");
+      doc.setFont("BebasNeue-Regular", "bold");
+      doc.setFontSize(10);
+      
+      let headerX = startX;
+      headers.forEach((header, index) => {
+        const textWidth = doc.getTextWidth(header);
+        const textX = headerX + (headerWidths[index] - textWidth) / 2;
+        doc.text(header, textX, currentY + 5); // Simple text without cell
+        headerX += headerWidths[index] + gap;
+      });
+
+      // Draw horizontal line under headers
+      const lineY = currentY + 7;
+      doc.setDrawColor("#D32333");
+      doc.setLineWidth(0.5);
+      doc.line(startX, lineY, startX + tableWidth, lineY);
+
+      currentY += 10; // Space after headers and line
+
+      // Draw data rows
+      doc.setFont("helvetica", "normal");
+      
+      calculatedEvents.forEach((event) => {
+        // Check if we need a new page
+        if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 20) {
+          doc.addPage();
+          doc.setFillColor("#FBF3E0");
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
+          currentY = 20;
+        }
+
+        // Check if all activities are the same (merged cell)
+        const allSame = 
+          event.brideActivity === event.groomActivity &&
+          event.brideActivity === event.bridesmaidsActivity &&
+          event.brideActivity === event.groomsmenActivity;
+
+        // Draw time cell (always pink)
+        drawRoundedRect(startX, currentY, timeColWidth, rowHeight, radius, "#FFB6C7", "#D32333");
+        doc.setTextColor("#D32333");
+        doc.setFont("helvetica", "bold");
+        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, 9);
+
+        if (allSame) {
+          // Draw merged cell for all activities
+          const mergedWidth = (activityColWidth * 4) + (gap * 3);
+          const mergedX = startX + timeColWidth + gap;
+          drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, "#FBF3E0", "#D32333");
+          doc.setTextColor("#D32333");
+          doc.setFont("helvetica", "normal");
+          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, 9);
+        } else {
+          // Draw separate cells for each activity
+          const activities = [
+            event.brideActivity,
+            event.groomActivity,
+            event.bridesmaidsActivity,
+            event.groomsmenActivity
+          ];
+          
+          let cellX = startX + timeColWidth + gap;
+          activities.forEach((activity) => {
+            drawRoundedRect(cellX, currentY, activityColWidth, rowHeight, radius, "#FBF3E0", "#D32333");
+            doc.setTextColor("#D32333");
+            doc.setFont("helvetica", "normal");
+            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, 9);
+            cellX += activityColWidth + gap;
+          });
+        }
+
+        currentY += rowHeight + gap;
+      });
+
+      // Add Watermark to all pages (with low opacity)
       const totalPages = doc.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         const wmWidth = 120;
-        const wmHeight = (watermarkImg.height * wmWidth) / watermarkImg.width;
+        const wmHeight = (logoImg.height * wmWidth) / logoImg.width;
         const x = (doc.internal.pageSize.getWidth() - wmWidth) / 2;
         const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
 
         (doc as any).saveGraphicsState();
         doc.setGState(new GState({ opacity: 0.1 }));
-        doc.addImage(watermarkImg, "PNG", x, y, wmWidth, wmHeight);
+        doc.addImage(logoImg, "PNG", x, y, wmWidth, wmHeight);
         (doc as any).restoreGraphicsState();
         
         // Add footer text with link
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.setTextColor("#D32333"); // Lovely color
+        doc.setTextColor("#D32333");
         const footerText = "This timeline was created by ";
         const linkText = "shopwifeyforlifey.com";
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const footerY = pageHeight - 10;
         
-        // Calculate text widths for positioning
         const footerTextWidth = doc.getTextWidth(footerText);
-        const linkTextWidth = doc.getTextWidth(linkText);
-        const totalWidth = footerTextWidth + linkTextWidth;
-        const startX = (pageWidth - totalWidth) / 2;
+        const totalWidth = footerTextWidth + doc.getTextWidth(linkText);
+        const footerStartX = (pageWidth - totalWidth) / 2;
         
-        // Add regular text
-        doc.text(footerText, startX, footerY);
-        
-        // Add clickable link
-        doc.textWithLink(linkText, startX + footerTextWidth, footerY, {
+        doc.text(footerText, footerStartX, footerY);
+        doc.textWithLink(linkText, footerStartX + footerTextWidth, footerY, {
           url: "https://shopwifeyforlifey.com"
         });
       }
@@ -1108,7 +1170,6 @@ function WeddingTimelinePageContent() {
         className: "bg-pinkey text-lovely border-lovely",
       });
 
-      // Show feedback prompt if user hasn't provided feedback yet
       if (!hasFeedback) {
         setTimeout(() => setShowFeedbackPrompt(true), 1000);
       }
