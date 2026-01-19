@@ -72,8 +72,15 @@ type Feature = {
 };
 
 const FEATURES: Feature[] = [
+  {
+    id: "arrival",
+    label: "Arrival at the venue",
+    defaultDuration: 30,
+    category: "before",
+    hidden: true,
+  },
+  { id: "hair", label: "Hair & Veil ", defaultDuration: 60, category: "before" },
   { id: "makeup", label: "Makeup", defaultDuration: 105, category: "before" },
-  { id: "hair", label: "Hair & Veil", defaultDuration: 60, category: "before" },
   {
     id: "getting_ready",
     label: "Getting ready pictures",
@@ -100,14 +107,28 @@ const FEATURES: Feature[] = [
     category: "before",
   },
   { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
-  { id: "entrance", label: "Entrance", defaultDuration: 20, category: "after" },
+  { id: "entrance", label: "Entrance", defaultDuration: 10, category: "after" },
   {
     id: "katb_ketab",
     label: "Katb Ketab",
     defaultDuration: 45,
     category: "after",
   },
+  {
+    id: "party_before_dinner",
+    label: "Party",
+    defaultDuration: 60,
+    category: "after",
+    hidden: true,
+  },
   { id: "dinner", label: "Dinner", defaultDuration: 60, category: "after" },
+  {
+    id: "party_after_dinner",
+    label: "Party",
+    defaultDuration: 120,
+    category: "after",
+    hidden: true,
+  },
 ];
 
 // Define Feature Meta for ordering and labels (used in Timeline generation)
@@ -122,29 +143,37 @@ const FEATURE_META: Record<
     order: number;
   }
 > = {
-  makeup: {
-    label: "Makeup",
-    bride: "Makeup",
-    groom: "Relaxing",
-    bridesmaids: "Getting Ready",
-    groomsmen: "Relaxing",
+  arrival: {
+    label: "Arrival at the venue",
+    bride: "Arrival at the venue",
+    groom: "Sleeping",
+    bridesmaids: "Arrival at the venue",
+    groomsmen: "Sleeping",
     order: 1,
   },
   hair: {
-    label: "Hair & Veil",
-    bride: "Hair Styling",
-    groom: "Getting Ready",
+    label: "Hair & Veil (for hijabis we recommend make up to be first)",
+    bride: "Hair Styling ",
+    groom: "Waking up",
     bridesmaids: "Helping Bride",
-    groomsmen: "Getting Ready",
+    groomsmen: "Waking up",
     order: 2,
+  },
+  makeup: {
+    label: "Makeup",
+    bride: "Makeup",
+    groom: "Arriving & Getting Ready",
+    bridesmaids: "Getting Ready",
+    groomsmen: "Arriving & Getting Ready",
+    order: 3,
   },
   getting_ready: {
     label: "Getting ready pictures",
     bride: "Getting Ready Photos",
-    groom: "Getting Ready Photos",
-    bridesmaids: "Photos",
-    groomsmen: "Photos",
-    order: 3,
+    groom: "Break",
+    bridesmaids: "Getting Ready Photos",
+    groomsmen: "Break",
+    order: 4,
   },
   dress_suit: {
     label: "Wearing dress & suit",
@@ -152,15 +181,15 @@ const FEATURE_META: Record<
     groom: "Wearing Suit",
     bridesmaids: "Helping Bride",
     groomsmen: "Helping Groom",
-    order: 3.5,
+    order: 4.5,
   },
   first_look: {
     label: "First look",
     bride: "First Look",
     groom: "First Look",
-    bridesmaids: "Watching",
-    groomsmen: "Watching",
-    order: 4,
+    bridesmaids: "cheering the couple up",
+    groomsmen: "cheering the couple up",
+    order: 5,
   },
   photoshoot: {
     label: "Photoshoot",
@@ -168,7 +197,7 @@ const FEATURE_META: Record<
     groom: "Couple Photoshoot",
     bridesmaids: "Group Photos",
     groomsmen: "Group Photos",
-    order: 5,
+    order: 6,
   },
   zaffa: {
     label: "Zaffa",
@@ -176,7 +205,7 @@ const FEATURE_META: Record<
     groom: "Zaffa / Entrance",
     bridesmaids: "Procession",
     groomsmen: "Procession",
-    order: 6,
+    order: 7,
   },
   entrance: {
     label: "Entrance",
@@ -184,7 +213,7 @@ const FEATURE_META: Record<
     groom: "Grand Entrance",
     bridesmaids: "Entrance",
     groomsmen: "Entrance",
-    order: 7,
+    order: 8,
   },
   katb_ketab: {
     label: "Katb Ketab",
@@ -192,7 +221,15 @@ const FEATURE_META: Record<
     groom: "Katb Ketab Ceremony",
     bridesmaids: "Attending",
     groomsmen: "Attending",
-    order: 8,
+    order: 9,
+  },
+  party_before_dinner: {
+    label: "Party",
+    bride: "Party / Dancing",
+    groom: "Party / Dancing",
+    bridesmaids: "Party / Dancing",
+    groomsmen: "Party / Dancing",
+    order: 9.5,
   },
   dinner: {
     label: "Dinner",
@@ -200,7 +237,15 @@ const FEATURE_META: Record<
     groom: "Dinner",
     bridesmaids: "Dinner",
     groomsmen: "Dinner",
-    order: 9,
+    order: 10,
+  },
+  party_after_dinner: {
+    label: "Party",
+    bride: "Party / Dancing",
+    groom: "Party / Dancing",
+    bridesmaids: "Party / Dancing",
+    groomsmen: "Party / Dancing",
+    order: 11,
   },
 };
 
@@ -559,7 +604,7 @@ function WeddingTimelinePageContent() {
   // 2. Show tutorial for first-time users when they reach step 3
   useEffect(() => {
     const hasSeenStorage = localStorage.getItem("weddingTimelineTutorialSeen");
-    if (step === 3 && !hasSeenTutorial && !hasSeenStorage) {
+    if (!hasSeenTutorial && !hasSeenStorage) {
       // Small delay to let the timeline render first
       const timer = setTimeout(() => {
         setShowTutorial(true);
@@ -570,7 +615,26 @@ function WeddingTimelinePageContent() {
     }
   }, [step, hasSeenTutorial]);
 
-  // 3. Handle Drag End
+  // 3. Handle step parameter from URL and restore zaffaTime after login
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const stepParam = params.get('step');
+    
+    if (stepParam === '2' && isAuthenticated && !checkingTimeline) {
+      // Restore the saved zaffaTime from localStorage
+      const pendingZaffaTime = localStorage.getItem('pendingZaffaTime');
+      if (pendingZaffaTime) {
+        setZaffaTime(pendingZaffaTime);
+        localStorage.removeItem('pendingZaffaTime'); // Clean up
+      }
+      setStep(2);
+      
+      // Clean up the URL parameter
+      window.history.replaceState({}, '', '/wedding-timeline');
+    }
+  }, [isAuthenticated, checkingTimeline]);
+
+  // 4. Handle Drag End
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -583,10 +647,10 @@ function WeddingTimelinePageContent() {
     }
   };
 
-  // 4. Calculated Events (Time Calculation)
+  // 5. Calculated Events (Time Calculation)
   const calculatedEvents = calculateTimeline(events, zaffaTime);
 
-  // 5. Auto-Save Logic (Only if newly generated and not yet saved)
+  // 6. Auto-Save Logic (Only if newly generated and not yet saved)
   //   useEffect(() => {
   //     // We might want to be careful with auto-save to avoid overwriting accidentally
   //     // But if the user just created a plan, maybe we save it?
@@ -688,10 +752,7 @@ function WeddingTimelinePageContent() {
   };
 
   const handlePlan = async () => {
-    if (!isAuthenticated) {
-      setShowLoginDialog(true);
-      return;
-    }
+
 
     // 1. Generate Events from Selection
     const featureList = FEATURES.map((f) => ({
@@ -700,7 +761,8 @@ function WeddingTimelinePageContent() {
       category: f.category,
       enabled: selectedFeatures[f.id].enabled,
       duration: selectedFeatures[f.id].duration,
-    })).filter((f) => f.enabled);
+      hidden: f.hidden,
+    })).filter((f) => f.enabled || f.hidden); // Include if enabled OR hidden (mandatory)
 
     // Sort features based on predefined order
     featureList.sort((a, b) => {
@@ -730,15 +792,18 @@ function WeddingTimelinePageContent() {
         groomsmenActivity: meta.groomsmen,
       });
 
-      // Add break if not the last event
-      if (index < featureList.length - 1) {
+      // Add break if not the last event AND not after zaffa or any 'after' category events
+      if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.category !== "after") {
+        const nextFeature = featureList[index + 1];
+        const isBeforeGettingReady = nextFeature?.id === "getting_ready";
+        
         generatedEvents.push({
           id: `break_${index}`,
           duration: 15,
           brideActivity: "Break / Transition",
-          groomActivity: "Break / Transition",
+          groomActivity: isBeforeGettingReady ? "Getting Ready Photos" : "Break / Transition",
           bridesmaidsActivity: "Break / Transition",
-          groomsmenActivity: "Break / Transition",
+          groomsmenActivity: isBeforeGettingReady ? "Getting Ready Photos" : "Break / Transition",
           isBreak: true,
         });
       }
@@ -1009,6 +1074,30 @@ function WeddingTimelinePageContent() {
         doc.setGState(new GState({ opacity: 0.1 }));
         doc.addImage(watermarkImg, "PNG", x, y, wmWidth, wmHeight);
         (doc as any).restoreGraphicsState();
+        
+        // Add footer text with link
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor("#D32333"); // Lovely color
+        const footerText = "This timeline was created by ";
+        const linkText = "shopwifeyforlifey.com";
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const footerY = pageHeight - 10;
+        
+        // Calculate text widths for positioning
+        const footerTextWidth = doc.getTextWidth(footerText);
+        const linkTextWidth = doc.getTextWidth(linkText);
+        const totalWidth = footerTextWidth + linkTextWidth;
+        const startX = (pageWidth - totalWidth) / 2;
+        
+        // Add regular text
+        doc.text(footerText, startX, footerY);
+        
+        // Add clickable link
+        doc.textWithLink(linkText, startX + footerTextWidth, footerY, {
+          url: "https://shopwifeyforlifey.com"
+        });
       }
 
       doc.save("wedding-timeline.pdf");
@@ -1176,7 +1265,15 @@ function WeddingTimelinePageContent() {
                   </div>
 
                   <Button
-                    onClick={() => setStep(2)}
+                    onClick={() => {
+                          if (!isAuthenticated) {
+      // Save the selected zaffaTime to localStorage before redirecting
+      localStorage.setItem('pendingZaffaTime', zaffaTime);
+      setShowLoginDialog(true);
+      return;
+    }
+    setStep(2);
+                    }}
                     className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8"
                   >
                     Next Step <ArrowRight className="ml-2 h-4 w-4" />
@@ -1219,6 +1316,11 @@ function WeddingTimelinePageContent() {
                               className="text-base font-medium cursor-pointer"
                             >
                               {feature.label}
+                              {feature.id === "hair" && (
+                                <span className="block text-xs font-normal text-lovely/70 mt-1">
+                                  (for hijabis we recommend make up to be first, you can swap them later.)
+                                </span>
+                              )}
                             </Label>
                           </div>
                           {selectedFeatures[feature.id].enabled && (
@@ -1703,8 +1805,7 @@ function WeddingTimelinePageContent() {
                 Login Required
               </h2>
               <p className="text-lovely/90 text-base">
-                You need to have an account to create your wedding plan. <br />
-                Please login or sign up to continue.
+                To be able to view your wedding day timeline later, you’ll need to sign up or login if you already have an account 💗
               </p>
             </div>
 
@@ -1712,7 +1813,7 @@ function WeddingTimelinePageContent() {
               <Button
                 className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
                 onClick={() => {
-                  router.push("/login?callbackUrl=/wedding-timeline");
+                  router.push("/login?callbackUrl=/wedding-timeline?step=2");
                   setShowLoginDialog(false);
                 }}
               >
@@ -1722,7 +1823,7 @@ function WeddingTimelinePageContent() {
                 variant="outline"
                 className="flex-1 border-2 border-lovely text-lovely hover:bg-pinkey/20"
                 onClick={() => {
-                  router.push("/signup?callbackUrl=/wedding-timeline");
+                  router.push("/signup?callbackUrl=/wedding-timeline?step=2");
                   setShowLoginDialog(false);
                 }}
               >
