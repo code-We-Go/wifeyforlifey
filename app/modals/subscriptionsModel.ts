@@ -70,6 +70,8 @@ const SubscriptionSchema = new Schema(
       ],
       default: "pending",
     },
+        paymentMethod: { type: String, required: false,enum:["instapay","cash","card"] },
+
     // process: {
     //   type: String,
     //   enum: ["new", "upgrade", "renew"],

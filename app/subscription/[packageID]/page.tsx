@@ -197,7 +197,7 @@ const SubscriptionPage = () => {
     district: null,
     shippingCost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 },
   });
-  const [payment, setPayment] = useState<"card" | "cash">("card");
+  const [payment, setPayment] = useState<"card" | "cash" | "instapay">("card");
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -726,6 +726,50 @@ const SubscriptionPage = () => {
       formData.billingCity = formData.city;
       formData.billingPhone = formData.phone;
       formData.billingWhatsAppNumber = formData.whatsAppNumber;
+    }
+
+    // Handle instapay payment method
+    if (payment === "instapay") {
+      try {
+        // Create subscription payment record directly
+        const instapayPayload = {
+          ...formData,
+          subscription: packageID,
+          appliedDiscount: appliedDiscount?._id,
+          appliedDiscountAmount:
+            appliedDiscount?.calculationType === "FREE_SHIPPING"
+              ? shipping
+              : appliedDiscount?.calculationType === "PERCENTAGE"
+              ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
+              : appliedDiscount?.value,
+          loyalty: {
+            redeemedPoints: Math.max(
+              0,
+              Math.min(
+                redeemPoints - (redeemPoints % 20),
+                loyaltyPoints.realLoyaltyPoints
+              )
+            ),
+            discount: loyaltyDiscount,
+          },
+        };
+
+        const res = await axios.post("/api/subscription/instapay", instapayPayload);
+        setLoading(false);
+
+        if (res.data.success) {
+          // Redirect to instapay success page with instructions
+          const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201007728799";
+          router.push(
+            `/subscription/instapay-success?total=${total}&whatsapp=${whatsappNumber}&subscriptionId=${res.data.subscriptionId}`
+          );
+        }
+      } catch (error) {
+        console.error("Instapay error:", error);
+        setLoading(false);
+        alert("Failed to create subscription. Please try again.");
+      }
+      return;
     }
 
     // Add discount and loyalty info to payload
@@ -1491,6 +1535,18 @@ const SubscriptionPage = () => {
                       }}
                     />
                     <label className="text-base"> Pay with card</label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      checked={payment === "instapay"}
+                      onChange={() => {
+                        setPayment("instapay");
+                        formData.cash = "instapay";
+                      }}
+                    />
+                    <label className="text-base"> Pay with instapay</label>
                   </div>
                 </div>
               )}

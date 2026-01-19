@@ -389,6 +389,7 @@ export async function POST(request: Request) {
             process: data.process,
             from: fromPackageID,
             to: data.subscription,
+            paymentMethod: "card",
             // Parity fields from subscription schema
             packageID: data.subscription,
             subscribed: false,
@@ -457,6 +458,7 @@ export async function POST(request: Request) {
             process: "new",
             from: fromPackageID,
             to: data.subscription,
+            paymentMethod: "card",
             // Parity fields from subscription schema
             packageID: data.subscription,
             subscribed: false,
