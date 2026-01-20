@@ -211,16 +211,16 @@ const FEATURE_META: Record<
     label: "Entrance",
     bride: "Grand Entrance",
     groom: "Grand Entrance",
-    bridesmaids: "Entrance",
-    groomsmen: "Entrance",
+    bridesmaids: "Grand Entrance",
+    groomsmen: "Grand Entrance",
     order: 8,
   },
   katb_ketab: {
     label: "Katb Ketab",
     bride: "Katb Ketab Ceremony",
     groom: "Katb Ketab Ceremony",
-    bridesmaids: "Attending",
-    groomsmen: "Attending",
+    bridesmaids: "Katb Ketab Ceremony",
+    groomsmen: "Katb Ketab Ceremony",
     order: 9,
   },
   party_before_dinner: {
@@ -1004,7 +1004,7 @@ function WeddingTimelinePageContent() {
         // Horizontal center
         const textX = x + (width - textWidth) / 2;
         // Vertical center - adjusted to move text higher for better centering
-        const textY = y + (height / 2) + (fontSize / 4.5);
+        const textY = y + (height / 2.8) + (fontSize / 4.5);
         doc.text(text, textX, textY);
       };
 
@@ -1040,7 +1040,7 @@ function WeddingTimelinePageContent() {
       // Table configuration
       const startY = titleY + 10;
       const gap = 2; // Gap between cells
-      const radius = 2; // Rounded corner radius
+      const radius = 1; // Rounded corner radius
       const rowHeight = 8; // Increased for better text spacing
       const timeColWidth = 30;
       const activityColWidth = 35;
@@ -1138,7 +1138,7 @@ function WeddingTimelinePageContent() {
         const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
 
         (doc as any).saveGraphicsState();
-        doc.setGState(new GState({ opacity: 0.1 }));
+        doc.setGState(new GState({ opacity: 0.2 }));
         doc.addImage(logoImg, "PNG", x, y, wmWidth, wmHeight);
         (doc as any).restoreGraphicsState();
         
