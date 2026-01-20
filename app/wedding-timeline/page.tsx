@@ -75,7 +75,7 @@ const FEATURES: Feature[] = [
   {
     id: "arrival",
     label: "Arrival at the venue",
-    defaultDuration: 30,
+    defaultDuration: 45,
     category: "before",
     hidden: true,
   },
@@ -107,7 +107,7 @@ const FEATURES: Feature[] = [
     category: "before",
   },
   { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
-  { id: "entrance", label: "Entrance", defaultDuration: 10, category: "after" },
+  // { id: "entrance", label: "Entrance", defaultDuration: 10, category: "after" },
   {
     id: "katb_ketab",
     label: "Katb Ketab",
@@ -146,17 +146,17 @@ const FEATURE_META: Record<
   arrival: {
     label: "Arrival at the venue",
     bride: "Arrival at the venue",
-    groom: "Sleeping",
+    groom: "_",
     bridesmaids: "Arrival at the venue",
-    groomsmen: "Sleeping",
+    groomsmen: "_",
     order: 1,
   },
   hair: {
     label: "Hair & Veil (for hijabis we recommend make up to be first)",
     bride: "Hair Styling ",
-    groom: "Waking up",
-    bridesmaids: "Helping Bride",
-    groomsmen: "Waking up",
+    groom: "_",
+    bridesmaids: "Getting Ready",
+    groomsmen: "_",
     order: 2,
   },
   makeup: {
@@ -203,18 +203,18 @@ const FEATURE_META: Record<
     label: "Zaffa",
     bride: "Zaffa / Entrance",
     groom: "Zaffa / Entrance",
-    bridesmaids: "Procession",
-    groomsmen: "Procession",
+    bridesmaids: "Zaffa / Entrance",
+    groomsmen: "Zaffa / Entrance",
     order: 7,
   },
-  entrance: {
-    label: "Entrance",
-    bride: "Grand Entrance",
-    groom: "Grand Entrance",
-    bridesmaids: "Grand Entrance",
-    groomsmen: "Grand Entrance",
-    order: 8,
-  },
+  // entrance: {
+  //   label: "Entrance",
+  //   bride: "Grand Entrance",
+  //   groom: "Grand Entrance",
+  //   bridesmaids: "Grand Entrance",
+  //   groomsmen: "Grand Entrance",
+  //   order: 8,
+  // },
   katb_ketab: {
     label: "Katb Ketab",
     bride: "Katb Ketab Ceremony",
@@ -792,8 +792,8 @@ function WeddingTimelinePageContent() {
         groomsmenActivity: meta.groomsmen,
       });
 
-      // Add break if not the last event AND not after zaffa or any 'after' category events
-      if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.category !== "after") {
+      // Add break if not the last event AND not after zaffa, arrival, or any 'after' category events
+      if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.id !== "arrival" && feature.category !== "after") {
         const nextFeature = featureList[index + 1];
         const isBeforeGettingReady = nextFeature?.id === "getting_ready";
         
@@ -1004,7 +1004,7 @@ function WeddingTimelinePageContent() {
         // Horizontal center
         const textX = x + (width - textWidth) / 2;
         // Vertical center - adjusted to move text higher for better centering
-        const textY = y + (height / 2.8) + (fontSize / 4.5);
+        const textY = y + (height / 2.8) + (fontSize / 3.5);
         doc.text(text, textX, textY);
       };
 
@@ -1310,17 +1310,17 @@ function WeddingTimelinePageContent() {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl text-lovely text-center block">
-                      When does the Party start?
+                      When does the Wedding start?
                     </Label>
-                    <div className="flex relative justify-center">
-                      <div className="relative w-full max-w-xs">
+                    <div className="flex relative justify-center px-4">
+                      <div className="relative w-full max-w-[280px] sm:max-w-xs">
                         <Input
                           type="time"
                           value={zaffaTime}
                           onChange={(e) => setZaffaTime(e.target.value)}
-                          className="p-6 text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
+                          className="p-4 md:p-6 text-lg md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
                         />
-                        <Clock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-lovely pointer-events-none z-20" />
+                        <Clock className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none z-20" />
                       </div>
                     </div>
                   </div>
