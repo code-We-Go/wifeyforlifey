@@ -106,14 +106,14 @@ const FEATURES: Feature[] = [
     defaultDuration: 120,
     category: "before",
   },
-  { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
-  // { id: "entrance", label: "Entrance", defaultDuration: 10, category: "after" },
+  { id: "entrance", label: "Entrance", defaultDuration: 10, category: "after" },
   {
     id: "katb_ketab",
     label: "Katb Ketab",
     defaultDuration: 45,
-    category: "after",
+    category: "before",
   },
+  { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
   {
     id: "party_before_dinner",
     label: "Party",
@@ -793,7 +793,7 @@ function WeddingTimelinePageContent() {
       });
 
       // Add break if not the last event AND not after zaffa, arrival, or any 'after' category events
-      if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.id !== "arrival" && feature.category !== "after") {
+      if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.id !== "entrance" && feature.id !== "arrival" && feature.id !== "katb_ketab" && feature.category !== "after") {
         const nextFeature = featureList[index + 1];
         const isBeforeGettingReady = nextFeature?.id === "getting_ready";
         
@@ -1128,6 +1128,59 @@ function WeddingTimelinePageContent() {
         currentY += rowHeight + gap;
       });
 
+      // Add Tips section
+      currentY += 10; // Add some space after the table
+
+      // Check if we need a new page for tips
+      if (currentY + 50 > doc.internal.pageSize.getHeight() - 20) {
+        doc.addPage();
+        doc.setFillColor("#FBF3E0");
+        doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
+        currentY = 20;
+      }
+
+      // Tips title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor("#D32333");
+      doc.text("Tips:", startX, currentY);
+      currentY += 7;
+
+      // Tips content
+      const tips = [
+        "Photographer & video to arrive at the last 40-30 mins of makeup session",
+        "If photo booth, audio booth or live painter are hired, it's recommended to arrive and setup 2-1 hour before wedding starts",
+        "Zaffa is recommended to start after katb el ketab",
+        "If any other entertainers are hired (tabla show, violinist, etc..) we recommend them to start after dinner"
+      ];
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor("#D32333");
+
+      tips.forEach((tip) => {
+        // Check if we need a new page
+        if (currentY + 10 > doc.internal.pageSize.getHeight() - 20) {
+          doc.addPage();
+          doc.setFillColor("#FBF3E0");
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
+          currentY = 20;
+        }
+
+        // Add bullet point and text with wrapping
+        const bulletX = startX + 2;
+        const textX = startX + 7;
+        const maxWidth = tableWidth - 7;
+
+        doc.text("•", bulletX, currentY);
+        
+        // Split text if it's too long
+        const lines = doc.splitTextToSize(tip, maxWidth);
+        doc.text(lines, textX, currentY);
+        
+        currentY += (lines.length * 5) + 2; // Adjust spacing based on number of lines
+      });
+
       // Add Watermark to all pages (with low opacity)
       const totalPages = doc.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
@@ -1163,6 +1216,18 @@ function WeddingTimelinePageContent() {
       }
 
       doc.save("wedding-timeline.pdf");
+
+      // Increment export counter in database
+      if (isAuthenticated) {
+        try {
+          await fetch("/api/wedding-timeline/export", {
+            method: "POST",
+          });
+        } catch (error) {
+          console.error("Failed to track export:", error);
+          // Don't show error to user, this is just analytics
+        }
+      }
 
       toast({
         title: "Success",

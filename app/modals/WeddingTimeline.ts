@@ -26,6 +26,7 @@ export interface IWeddingTimeline extends Document {
     recommend: string; // "definitely_not" | "maybe" | "definitely_yes"
     comment?: string;
   }; 
+  exported:{type:Number,default:0};
   createdAt: Date;
 }
 
@@ -60,6 +61,7 @@ const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
       recommend: { type: String },
       comment: { type: String },
     },
+    exported:{type:Number,default:0},
   },
   { timestamps: true }
 );
