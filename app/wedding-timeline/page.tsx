@@ -998,7 +998,7 @@ function WeddingTimelinePageContent() {
       };
 
       // Helper function to add text centered in a cell
-      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 9) => {
+      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 6) => {
         doc.setFontSize(fontSize);
         const textWidth = doc.getTextWidth(text);
         // Horizontal center
@@ -1029,7 +1029,7 @@ function WeddingTimelinePageContent() {
       doc.addImage(logoImg, "PNG", logoX, 10, logoWidth, logoHeight);
 
       // Add "Wedding day timeline" title in script style
-      doc.setFont("BebasNeue-Regular", "italic");
+doc.setFont("helvetica", "normal");
       doc.setFontSize(24);
       doc.setTextColor("#D32333");
       const titleY = 10 + logoHeight + 8;
@@ -1096,7 +1096,7 @@ function WeddingTimelinePageContent() {
         drawRoundedRect(startX, currentY, timeColWidth, rowHeight, radius, "#FFB6C7", "#D32333");
         doc.setTextColor("#D32333");
         doc.setFont("helvetica", "bold");
-        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, 9);
+        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, 8);
 
         if (allSame) {
           // Draw merged cell for all activities
@@ -1105,7 +1105,7 @@ function WeddingTimelinePageContent() {
           drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, "#FBF3E0", "#D32333");
           doc.setTextColor("#D32333");
           doc.setFont("helvetica", "normal");
-          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, 9);
+          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, 8);
         } else {
           // Draw separate cells for each activity
           const activities = [
@@ -1120,7 +1120,7 @@ function WeddingTimelinePageContent() {
             drawRoundedRect(cellX, currentY, activityColWidth, rowHeight, radius, "#FBF3E0", "#D32333");
             doc.setTextColor("#D32333");
             doc.setFont("helvetica", "normal");
-            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, 9);
+            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, 8);
             cellX += activityColWidth + gap;
           });
         }
@@ -1148,10 +1148,10 @@ function WeddingTimelinePageContent() {
 
       // Tips content
       const tips = [
-        "Photographer & video to arrive at the last 40-30 mins of makeup session",
-        "If photo booth, audio booth or live painter are hired, it's recommended to arrive and setup 2-1 hour before wedding starts",
-        "Zaffa is recommended to start after katb el ketab",
-        "If any other entertainers are hired (tabla show, violinist, etc..) we recommend them to start after dinner"
+        "The photographer and videographer should arrive during the last 30-40 minutes of the makeup session.",
+        "If a photo booth, audio booth, or live painter is hired, it's recommended that they arrive and complete setup 1-2 hours before the wedding begins.",
+        "Zaffa is recommended to start after Katb El Ketab.",
+        "If additional entertainers are hired (tabla show, violinist, etc.), we recommend that they begin after dinner."
       ];
 
       doc.setFont("helvetica", "normal");
@@ -1191,7 +1191,7 @@ function WeddingTimelinePageContent() {
         const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
 
         (doc as any).saveGraphicsState();
-        doc.setGState(new GState({ opacity: 0.2 }));
+        doc.setGState(new GState({ opacity: 0.12 }));
         doc.addImage(logoImg, "PNG", x, y, wmWidth, wmHeight);
         (doc as any).restoreGraphicsState();
         
