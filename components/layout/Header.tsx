@@ -6,6 +6,7 @@ import { useState, useEffect, useContext } from "react";
 import { useCart } from "@/providers/CartProvider";
 import { INotification } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
+// import { Toolbox } from "lucide-react";
 
 import {
   ShoppingBag,
@@ -29,6 +30,11 @@ import {
   Bell,
   MessageCircle,
   Reply,
+  ChevronDown,
+  ChevronUp,
+  CalendarDays,
+  Wrench,
+  Boxes
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,7 +59,15 @@ const navigation = [
   { name: "Experience", href: "/club" },
   { name: "Playlists", href: "/playlists" },
   { name: "Shop", href: "/shop" },
-  { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
+  { 
+    name: "Toolskits", 
+    href: "#", 
+    icon: <Wrench />,
+    items: [
+      { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
+      { name: "Wedding Timeline", href: "/wedding-timeline", icon: <CalendarDays /> },
+    ]
+  },
   { name: "About", href: "/about" },
 ];
 const leftNavigation = [
@@ -64,7 +78,15 @@ const leftNavigation = [
   { name: "About", href: "/about", icon: <VenetianMask /> },
 ];
 const rightNavigation = [
-  { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
+  { 
+    name: "Toolskit", 
+    href: "#", 
+    icon: <Wrench />,
+    items: [
+      { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
+      { name: "Wedding Timeline", href: "/wedding-timeline", icon: <CalendarDays /> },
+    ]
+  },
   { name: "Wishlist", href: "/wishlist", icon: <Heart /> },
   { name: "Cart", href: "/cart", icon: <ShoppingBag /> },
 ];
@@ -85,6 +107,12 @@ export default function Header() {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  
+  // Toolkits State
+  const [isToolkitsOpen, setIsToolkitsOpen] = useState(false);
+  const [isToolkitsHovering, setIsToolkitsHovering] = useState(false);
+  const [isMobileToolkitsExpanded, setIsMobileToolkitsExpanded] = useState(false);
+
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
@@ -229,6 +257,23 @@ export default function Header() {
     };
   }, [isHovering]);
 
+  // Add timeout for Toolkits hover behavior
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (!isToolkitsHovering && window.innerWidth >= 768) {
+      timeoutId = setTimeout(() => {
+        setIsToolkitsOpen(false);
+      }, 150); // Small delay to allow moving mouse to dropdown
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isToolkitsHovering]);
+
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
   };
@@ -294,19 +339,75 @@ export default function Header() {
               />
             </Link>
             {rightNavigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "text-base font-medium  transition-colors hover:text-red-900",
-                  pathname === item.href ? "text-red-900 " : "text-creamey"
-                )}
-              >
-                <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey  flex-col gap-2 items-center justify-center">
-                  {item.icon}
-                  {item.name}
+              item.items ? (
+                <div key={item.name} className="relative z-50">
+                  <button
+                    className={cn(
+                      "flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center text-base font-medium transition-colors hover:text-red-900 bg-transparent  cursor-pointer",
+                      isToolkitsOpen ? "text-red-900" : "text-creamey"
+                    )}
+                    onClick={() => setIsToolkitsOpen(!isToolkitsOpen)}
+                    onMouseEnter={() => {
+                      if (window.innerWidth >= 768) {
+                        setIsToolkitsHovering(true);
+                        setIsToolkitsOpen(true);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (window.innerWidth >= 768) {
+                        setIsToolkitsHovering(false);
+                      }
+                    }}
+                  >
+                    {item.icon}
+                    {item.name}
+                  </button>
+
+                  {/* Toolkits Dropdown */}
+                  {isToolkitsOpen && (
+                    <div
+                      className="absolute right-0 top-full mt-2 w-56 p-2 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg"
+                      onMouseEnter={() => {
+                        if (window.innerWidth >= 768) setIsToolkitsHovering(true);
+                      }}
+                      onMouseLeave={() => {
+                        if (window.innerWidth >= 768) setIsToolkitsHovering(false);
+                      }}
+                    >
+                      {item.items.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center px-4 py-3 text-sm font-medium hover:bg-lovely/10 rounded-md transition-colors",
+                            pathname === subItem.href ? "text-red-900 bg-lovely/5" : "text-lovely"
+                          )}
+                          onClick={() => setIsToolkitsOpen(false)}
+                        >
+                          {subItem.icon && (
+                            <span className="mr-3 [&>svg]:h-4 [&>svg]:w-4">{subItem.icon}</span>
+                          )}
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </Link>
+              ) : (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "text-base font-medium transition-colors hover:text-red-900",
+                    pathname === item.href ? "text-red-900 " : "text-creamey"
+                  )}
+                >
+                  <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                    {item.icon}
+                    {item.name}
+                  </div>
+                </Link>
+              )
             ))}
 
             {/* Account with custom dropdown that works on both desktop and touch devices */}
@@ -470,17 +571,48 @@ export default function Header() {
                   </div>
                   <nav className="flex flex-col space-y-6">
                     {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={cn(
-                          "text-xl font-medium  hover:underline transition duration-300",
-                          pathname === item.href ? "underline" : "text-creamey"
-                        )}
-                        onClick={handleLinkClick}
-                      >
-                        {item.name}
-                      </Link>
+                      item.items ? (
+                        <div key={item.name} className="flex flex-col space-y-2">
+                          <button
+                            className="text-xl font-medium hover:underline transition duration-300 text-creamey text-left flex items-center justify-between w-full"
+                            onClick={() => setIsMobileToolkitsExpanded(!isMobileToolkitsExpanded)}
+                          >
+                            {item.name}
+                            {isMobileToolkitsExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                          </button>
+                          
+                          {/* Sub-items */}
+                          {isMobileToolkitsExpanded && (
+                             <div className="flex flex-col space-y-3 pl-4  ml-2">
+                                {item.items.map(subItem => (
+                                   <Link
+                                      key={subItem.name}
+                                      href={subItem.href}
+                                      className={cn(
+                                        "text-lg hover:underline transition duration-300",
+                                        pathname === subItem.href ? "underline" : "text-creamey"
+                                      )}
+                                      onClick={handleLinkClick}
+                                   >
+                                      {subItem.name}
+                                   </Link>
+                                ))}
+                             </div>
+                          )}
+                        </div>
+                      ) : (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className={cn(
+                            "text-xl font-medium  hover:underline transition duration-300",
+                            pathname === item.href ? "underline" : "text-creamey"
+                          )}
+                          onClick={handleLinkClick}
+                        >
+                          {item.name}
+                        </Link>
+                      )
                     ))}
                   </nav>
                   <div className="mt-auto text-lg space-y-4">
