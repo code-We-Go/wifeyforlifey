@@ -1389,8 +1389,8 @@ function WeddingTimelinePageContent() {
                     <Label className="text-xl text-lovely text-center block">
                       When does the Wedding start?
                     </Label>
-                    <div className="flex justify-center">
-                      <div className="relative w-full max-w-[280px] sm:max-w-xs">
+                    <div className="flex w-full justify-center">
+                      <div className="relative w-full ">
                         <Input
                           type="time"
                           value={zaffaTime}
