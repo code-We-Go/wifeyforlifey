@@ -276,8 +276,8 @@ const addMinutes = (date: Date, minutes: number) => {
 
 const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string) => {
   if (events.length === 0) return [];
-
-  const zaffaIndex = events.findIndex((e) => e.id === "zaffa");
+// on Nareiman's Demandss the part starts => entrance
+  const zaffaIndex = events.findIndex((e) => e.id === "entrance");
   const [hours, minutes] = zaffaTimeStr.split(":").map(Number);
   const zaffaDate = new Date();
   zaffaDate.setHours(hours, minutes, 0, 0);
@@ -530,14 +530,14 @@ function WeddingTimelinePageContent() {
   // Tutorial Steps
   const tutorialSteps = [
     {
-      image: "/weddingPlanningToutorial/1.gif",
-      title: "Set Your Zaffa Time",
-      description: "Start by selecting when your Zaffa (party entrance) begins. This will be the anchor point for your entire timeline."
+      image: "/weddingPlanningToutorial/step1.gif",
+      title: "Set Your Wedding Start Time",
+      description: "Start by selecting when your wedding begins. This will be the anchor point for your entire timeline."
     },
     {
       image: "/weddingPlanningToutorial/2.gif",
       title: "Choose Your Features",
-      description: "Select the activities you want to include in your wedding day and customize their duration to fit your schedule."
+      description: "Select the activities you want to include in your wedding day and customize their duration to fit your schedule. (Note: this is our recommended timing but you still can change it later)"
     },
     {
       image: "/weddingPlanningToutorial/3.gif",
@@ -547,12 +547,12 @@ function WeddingTimelinePageContent() {
     {
       image: "/weddingPlanningToutorial/4.gif",
       title: "Mobile View Selector",
-      description: "On mobile devices, use the dropdown selector to switch between viewing different columns (Bride, Groom, Bridesmaids, Groomsmen)."
+      description: "On mobile devices, use the dropdown selector to switch between viewing different personas (Bride, Groom, Bridesmaids, Groomsmen)."
     },
     {
-      image: "/weddingPlanningToutorial/5.gif",
+      image: "/weddingPlanningToutorial/step5.gif",
       title: "Save, Share & Export",
-      description: "Use these three buttons to save your timeline, share it with your loved ones, or export it as a PDF for printing."
+      description: "Use these options to save your timeline, share it with your loved ones, or export it as a PDF for printing."
     }
   ];
 
@@ -1028,17 +1028,27 @@ function WeddingTimelinePageContent() {
       const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
       doc.addImage(logoImg, "PNG", logoX, 10, logoWidth, logoHeight);
 
-      // Add "Wedding day timeline" title in script style
-doc.setFont("helvetica", "normal");
-      doc.setFontSize(24);
-      doc.setTextColor("#D32333");
-      const titleY = 10 + logoHeight + 8;
-      doc.text("My Wedding day timeline", doc.internal.pageSize.getWidth() / 2, titleY, {
-        align: "center"
+
+      // Add timeline subheader image
+      const subHeaderUrl = "/timeline/timelineSubHeader.jpg";
+      const subHeaderImg = new Image();
+      subHeaderImg.src = subHeaderUrl;
+
+      await new Promise((resolve, reject) => {
+        subHeaderImg.onload = resolve;
+        subHeaderImg.onerror = reject;
       });
 
+      // Add subheader image centered below logo
+      const subHeaderWidth = 100;
+      const subHeaderHeight = (subHeaderImg.height * subHeaderWidth) / subHeaderImg.width;
+      const subHeaderX = (doc.internal.pageSize.getWidth() - subHeaderWidth) / 2;
+      const titleY = 10 + logoHeight ;
+      doc.addImage(subHeaderImg, "JPEG", subHeaderX, titleY, subHeaderWidth, subHeaderHeight);
+
+
       // Table configuration
-      const startY = titleY + 10;
+      const startY = titleY + subHeaderHeight ;
       const gap = 2; // Gap between cells
       const radius = 1; // Rounded corner radius
       const rowHeight = 8; // Increased for better text spacing
@@ -1102,7 +1112,9 @@ doc.setFont("helvetica", "normal");
           // Draw merged cell for all activities
           const mergedWidth = (activityColWidth * 4) + (gap * 3);
           const mergedX = startX + timeColWidth + gap;
-          drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, "#FBF3E0", "#D32333");
+          // Use pink background for entrance event, creamy for others
+          const bgColor = event.id === "entrance" ? "#FFB6C7" : "#FBF3E0";
+          drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, bgColor, "#D32333");
           doc.setTextColor("#D32333");
           doc.setFont("helvetica", "normal");
           addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, 8);
@@ -1343,7 +1355,7 @@ doc.setFont("helvetica", "normal");
           <h1
             className={`${thirdFont.className} text-4xl text-center mb-2 text-lovely `}
           >
-            Your Wedding Day Planner
+            Your Timeline Bestie
           </h1>
 
           {loading || checkingTimeline ? (
@@ -1504,7 +1516,7 @@ doc.setFont("helvetica", "normal");
               <h1
                 className={`${thirdFont.className} text-4xl font-display text-white`}
               >
-                Your Wedding Day planner
+                Your Timeline Bestie
               </h1>
             </div>
             {/* Desktop: Show all buttons */}
@@ -1974,7 +1986,7 @@ doc.setFont("helvetica", "normal");
 
             <div className="p-4">
               <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2 max-md:mt-8 text-center`}>
-                How to Use Wedding Timeline Planner
+                How to Use Timeline Bestie
               </h2>
               <p className="text-lovely/70 text-center mb-2">
                 Step {currentTutorialStep + 1} of {tutorialSteps.length}
