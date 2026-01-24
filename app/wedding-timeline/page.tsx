@@ -1389,15 +1389,15 @@ function WeddingTimelinePageContent() {
                     <Label className="text-xl text-lovely text-center block">
                       When does the Wedding start?
                     </Label>
-                    <div className="flex relative justify-center px-4">
+                    <div className="flex justify-center">
                       <div className="relative w-full max-w-[280px] sm:max-w-xs">
                         <Input
                           type="time"
                           value={zaffaTime}
                           onChange={(e) => setZaffaTime(e.target.value)}
-                          className="p-4 md:p-6 text-lg md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
+                          className="w-full p-4 md:p-6 text-lg md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                         />
-                        <Clock className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none z-20" />
+                        <Clock className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none" />
                       </div>
                     </div>
                   </div>

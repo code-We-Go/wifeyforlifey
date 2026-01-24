@@ -79,7 +79,7 @@ const leftNavigation = [
 ];
 const rightNavigation = [
   { 
-    name: "Toolskit", 
+    name: "Tools kit", 
     href: "#", 
     icon: <Wrench />,
     items: [
