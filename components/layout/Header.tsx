@@ -65,7 +65,7 @@ const navigation = [
     icon: <Wrench />,
     items: [
       { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
-      { name: "Wedding Timeline", href: "/wedding-timeline", icon: <CalendarDays /> },
+      { name: "Timeline Bestie", href: "/wedding-timeline", icon: <CalendarDays /> },
     ]
   },
   { name: "About", href: "/about" },
@@ -84,7 +84,7 @@ const rightNavigation = [
     icon: <Wrench />,
     items: [
       { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
-      { name: "Wedding Timeline", href: "/wedding-timeline", icon: <CalendarDays /> },
+      { name: "Timeline Bestie", href: "/wedding-timeline", icon: <CalendarDays /> },
     ]
   },
   { name: "Wishlist", href: "/wishlist", icon: <Heart /> },

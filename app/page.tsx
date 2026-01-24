@@ -20,6 +20,7 @@ import OurPartners2 from "@/components/partners2/OurPartners2";
 import Testimonials from "@/components/sections/Testimonials";
 import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
 import Pricing from "./components/Pricing";
+import TimelinePlanner from "@/components/sections/TimelinePlanner";
 
 export default function Home() {
   // Filter featured products
@@ -32,6 +33,7 @@ export default function Home() {
       <HeroSection />
       {/* <HeroTwo /> */}
       <JoinNow />
+      <TimelinePlanner />
       {/* <Pricing /> */}
 
       {/* Featured Products Section */}
