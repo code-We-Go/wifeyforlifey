@@ -60,7 +60,7 @@ const navigation = [
   { name: "Playlists", href: "/playlists" },
   { name: "Shop", href: "/shop" },
   { 
-    name: "Toolskits", 
+    name: "Tools kit", 
     href: "#", 
     icon: <Wrench />,
     items: [
