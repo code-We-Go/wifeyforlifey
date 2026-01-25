@@ -110,10 +110,10 @@ const FEATURES: Feature[] = [
   {
     id: "katb_ketab",
     label: "Katb Ketab",
-    defaultDuration: 45,
+    defaultDuration: 30,
     category: "before",
   },
-  { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
+  { id: "zaffa", label: "Zaffa", defaultDuration: 15, category: "zaffa" },
   {
     id: "party_before_dinner",
     label: "Party",
@@ -155,7 +155,7 @@ const FEATURE_META: Record<
     label: "Hair & Veil (for hijabis we recommend make up to be first)",
     bride: "Hair Styling ",
     groom: "_",
-    bridesmaids: "Getting Ready",
+    bridesmaids: "Hair Styling (for non hijabis)",
     groomsmen: "_",
     order: 2,
   },
@@ -163,7 +163,7 @@ const FEATURE_META: Record<
     label: "Makeup",
     bride: "Makeup",
     groom: "Arriving & Getting Ready",
-    bridesmaids: "Getting Ready",
+    bridesmaids: "Arrival at the venue and getting ready",
     groomsmen: "Arriving & Getting Ready",
     order: 3,
   },
@@ -1389,15 +1389,15 @@ function WeddingTimelinePageContent() {
                     <Label className="text-xl text-lovely text-center block">
                       When does the Wedding start?
                     </Label>
-                    <div className="flex w-full justify-center">
-                      <div className="relative w-full ">
+                    <div className="flex w-full justify-center px-2">
+                      <div className="relative w-full max-w-md">
                         <Input
                           type="time"
                           value={zaffaTime}
                           onChange={(e) => setZaffaTime(e.target.value)}
-                          className="w-full p-4 md:p-6 text-lg md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          className="w-full px-3 py-3 md:px-6 md:py-6 text-base md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                         />
-                        <Clock className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none" />
+                        <Clock className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none" />
                       </div>
                     </div>
                   </div>
