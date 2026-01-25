@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import NextImage from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -60,6 +60,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Input } from "@/components/ui/input";
 
 // --- Types & Constants ---
 
@@ -147,7 +148,7 @@ const FEATURE_META: Record<
     label: "Arrival at the venue",
     bride: "Arrival at the venue",
     groom: "_",
-    bridesmaids: "Arrival at the venue",
+    bridesmaids: "_",
     groomsmen: "_",
     order: 1,
   },
@@ -394,7 +395,7 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "brideActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
         />
@@ -411,7 +412,7 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "groomActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
         />
@@ -428,7 +429,7 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "bridesmaidsActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
         />
@@ -445,7 +446,7 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "groomsmenActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
         />
@@ -1384,18 +1385,19 @@ function WeddingTimelinePageContent() {
               )}
 
               {step === 1 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl text-lovely text-center block">
                       When does the Wedding start?
                     </Label>
                     <div className="flex w-full justify-center px-2">
-                      <div className="relative w-full max-w-md">
-                        <Input
+                      <div className="relative w-full ">
+                        <input
                           type="time"
                           value={zaffaTime}
                           onChange={(e) => setZaffaTime(e.target.value)}
-                          className="w-full px-3 py-3 md:px-6 md:py-6 text-base md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          className="w-full px-3 py-3 bg-creamey border-pinkey border-2 text-lovely md:px-6 md:py-4 rounded-md  border-input focus:outline-none focus:ring-2 focus:ring-pinkey focus:border-pinkey [&::-webkit-calendar-picker-indicator]:opacity-0"
+                          // className="w-full px-3 py-3 md:px-6 md:py-6 text-base md:text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                         />
                         <Clock className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none" />
                       </div>
@@ -1463,7 +1465,7 @@ function WeddingTimelinePageContent() {
                           </div>
                           {selectedFeatures[feature.id].enabled && (
                             <div className="flex items-center gap-2">
-                              <Input
+                              <input
                                 type="number"
                                 value={selectedFeatures[feature.id].duration}
                                 onChange={(e) =>
@@ -1473,7 +1475,8 @@ function WeddingTimelinePageContent() {
                                   )
                                 }
                                 className="w-20 text-center h-8 bg-creamey border-pinkey"
-                              />
+                              >
+                                </input>
                               <span className="text-xs  w-8">min</span>
                             </div>
                           )}
@@ -1599,19 +1602,19 @@ function WeddingTimelinePageContent() {
               <Table className="w-full relative">
                 <TableHeader className="bg-lovely sticky top-0 z-10 shadow-sm">
                   <TableRow className="hover:bg-lovely">
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-24 md:w-auto">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-24 md:w-auto text-center">
                       TIME
                     </TableHead>
                     <TableHead className="text-center text-white text-xs md:text-sm p-1 md:p-4 w-16 md:w-auto">
                       Duration (min)
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4">
-                      <div className="md:hidden">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 text-center">
+                      <div className="md:hidden flex justify-center w-full">
                         <Select
                           value={mobileActiveColumn}
                           onValueChange={setMobileActiveColumn}
                         >
-                          <SelectTrigger className="h-6 text-xs bg-transparent border-none text-white p-0 focus:ring-0 focus:ring-offset-0 font-bold uppercase">
+                          <SelectTrigger className="h-6 text-xs bg-transparent border-none text-white p-0 focus:ring-0 focus:ring-offset-0 font-bold uppercase text-center justify-center">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -1628,16 +1631,16 @@ function WeddingTimelinePageContent() {
                       </div>
                       <span className="hidden md:inline">BRIDE</span>
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
                       GROOM
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
                       BRIDESMAIDS
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
                       GROOMSMEN
                     </TableHead>
-                    <TableHead className="w-8 md:w-auto p-1 md:p-4"></TableHead>
+                    <TableHead className="w-8 md:w-auto p-1 md:p-4 text-center"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="text-lovely">
