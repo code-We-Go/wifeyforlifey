@@ -998,15 +998,31 @@ function WeddingTimelinePageContent() {
         doc.roundedRect(x, y, width, height, radius, radius, 'FD');
       };
 
-      // Helper function to add text centered in a cell
-      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 6) => {
+      // Helper function to calculate how many lines text will need
+      const calculateTextLines = (text: string, width: number, fontSize: number = 8) => {
         doc.setFontSize(fontSize);
-        const textWidth = doc.getTextWidth(text);
-        // Horizontal center
-        const textX = x + (width - textWidth) / 2;
-        // Vertical center - adjusted to move text higher for better centering
-        const textY = y + (height / 2.8) + (fontSize / 3.5);
-        doc.text(text, textX, textY);
+        const maxWidth = width - 2; // Leave 1 unit padding on each side
+        const lines = doc.splitTextToSize(text, maxWidth);
+        return lines;
+      };
+
+      // Helper function to add text centered in a cell with wrapping
+      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 8) => {
+        doc.setFontSize(fontSize);
+        const maxWidth = width - 2; // Leave 1 unit padding on each side
+        const lines = doc.splitTextToSize(text, maxWidth);
+        const lineHeight = fontSize * 0.5; // Line spacing
+        const totalTextHeight = lines.length * lineHeight;
+        
+        // Start Y position to center the text block vertically
+        let textY = y + (height - totalTextHeight) / 2 + (fontSize / 2.5);
+        
+        lines.forEach((line: string) => {
+          const lineWidth = doc.getTextWidth(line);
+          const textX = x + (width - lineWidth) / 2;
+          doc.text(line, textX, textY);
+          textY += lineHeight;
+        });
       };
 
       // Set Page Background (Creamey)
@@ -1052,7 +1068,8 @@ function WeddingTimelinePageContent() {
       const startY = titleY + subHeaderHeight ;
       const gap = 2; // Gap between cells
       const radius = 1; // Rounded corner radius
-      const rowHeight = 8; // Increased for better text spacing
+      const minRowHeight = 8; // Minimum row height
+      const baseLineHeight = 4; // Height per line of text
       const timeColWidth = 30;
       const activityColWidth = 35;
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -1089,6 +1106,43 @@ function WeddingTimelinePageContent() {
       doc.setFont("helvetica", "normal");
       
       calculatedEvents.forEach((event) => {
+        // Calculate the required height for this row based on content
+        let maxLines = 1;
+        const fontSize = 8;
+        
+        // Check if all activities are the same (merged cell)
+        const allSame = 
+          event.brideActivity === event.groomActivity &&
+          event.brideActivity === event.bridesmaidsActivity &&
+          event.brideActivity === event.groomsmenActivity;
+
+        if (allSame) {
+          // For merged cell, use the merged width
+          const mergedWidth = (activityColWidth * 4) + (gap * 3);
+          const lines = calculateTextLines(event.brideActivity, mergedWidth, fontSize);
+          maxLines = Math.max(maxLines, lines.length);
+        } else {
+          // Check each activity column
+          const activities = [
+            event.brideActivity,
+            event.groomActivity,
+            event.bridesmaidsActivity,
+            event.groomsmenActivity
+          ];
+          
+          activities.forEach((activity) => {
+            const lines = calculateTextLines(activity, activityColWidth, fontSize);
+            maxLines = Math.max(maxLines, lines.length);
+          });
+        }
+
+        // Also check time label
+        const timeLines = calculateTextLines(event.timeLabel || "", timeColWidth, fontSize);
+        maxLines = Math.max(maxLines, timeLines.length);
+
+        // Calculate row height based on number of lines
+        const rowHeight = Math.max(minRowHeight, maxLines * baseLineHeight + 2);
+
         // Check if we need a new page
         if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 20) {
           doc.addPage();
@@ -1097,17 +1151,11 @@ function WeddingTimelinePageContent() {
           currentY = 20;
         }
 
-        // Check if all activities are the same (merged cell)
-        const allSame = 
-          event.brideActivity === event.groomActivity &&
-          event.brideActivity === event.bridesmaidsActivity &&
-          event.brideActivity === event.groomsmenActivity;
-
         // Draw time cell (always pink)
         drawRoundedRect(startX, currentY, timeColWidth, rowHeight, radius, "#FFB6C7", "#D32333");
         doc.setTextColor("#D32333");
         doc.setFont("helvetica", "bold");
-        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, 8);
+        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, fontSize);
 
         if (allSame) {
           // Draw merged cell for all activities
@@ -1118,7 +1166,7 @@ function WeddingTimelinePageContent() {
           drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, bgColor, "#D32333");
           doc.setTextColor("#D32333");
           doc.setFont("helvetica", "normal");
-          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, 8);
+          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, fontSize);
         } else {
           // Draw separate cells for each activity
           const activities = [
@@ -1133,7 +1181,7 @@ function WeddingTimelinePageContent() {
             drawRoundedRect(cellX, currentY, activityColWidth, rowHeight, radius, "#FBF3E0", "#D32333");
             doc.setTextColor("#D32333");
             doc.setFont("helvetica", "normal");
-            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, 8);
+            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, fontSize);
             cellX += activityColWidth + gap;
           });
         }

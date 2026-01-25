@@ -4,7 +4,6 @@ import OrderSummaryItem from "./../components/OrderSummaryItem";
 import { cartContext } from "@/app/context/cartContext";
 import { CartProvider, useCart } from "@/providers/CartProvider";
 import { useSession } from "next-auth/react";
-
 import { userContext } from "@/app/context/userContext";
 import { thirdFont } from "@/fonts";
 import orderValidation from "@/lib/validations/orderValidation";
@@ -1602,7 +1601,7 @@ const SubscriptionPage = () => {
                           : formData.billingLastName
                       }
                       type="text"
-                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                      className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
