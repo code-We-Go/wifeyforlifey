@@ -581,7 +581,6 @@ function WeddingTimelinePageContent() {
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [hasFeedback, setHasFeedback] = useState(false);
-  const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(false);
 
   // -- Tutorial State --
   const [showTutorial, setShowTutorial] = useState(false);
@@ -800,9 +799,9 @@ function WeddingTimelinePageContent() {
           className: "bg-pinkey text-lovely border-lovely",
         });
 
-        // Show feedback prompt if user hasn't provided feedback yet
+        // Show feedback dialog if user hasn't provided feedback yet
         if (!hasFeedback) {
-          setTimeout(() => setShowFeedbackPrompt(true), 1000);
+          setTimeout(() => setShowFeedbackDialog(true), 1000);
         }
       }
     } catch (error) {
@@ -962,9 +961,9 @@ function WeddingTimelinePageContent() {
           className: "bg-pinkey text-lovely border-lovely",
         });
 
-        // Show feedback prompt if user hasn't provided feedback yet
+        // Show feedback dialog if user hasn't provided feedback yet
         if (!hasFeedback) {
-          setTimeout(() => setShowFeedbackPrompt(true), 1000);
+          setTimeout(() => setShowFeedbackDialog(true), 1000);
         }
       }
     } catch (error) {
@@ -1018,7 +1017,6 @@ function WeddingTimelinePageContent() {
       if (data.success) {
         setHasFeedback(true);
         setShowFeedbackDialog(false);
-        setShowFeedbackPrompt(false);
         setFeedbackText("");
         setFeedbackRatings({
           easeOfUse: 0,
@@ -1363,7 +1361,7 @@ function WeddingTimelinePageContent() {
       });
 
       if (!hasFeedback) {
-        setTimeout(() => setShowFeedbackPrompt(true), 1000);
+        setTimeout(() => setShowFeedbackDialog(true), 1000);
       }
     } catch (error) {
       console.error("Export failed", error);
@@ -1799,10 +1797,7 @@ function WeddingTimelinePageContent() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-lg w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
             <button
-              onClick={() => {
-                setShowFeedbackDialog(false);
-                setShowFeedbackPrompt(false);
-              }}
+              onClick={() => setShowFeedbackDialog(false)}
               className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors z-10"
             >
               <X className="h-5 w-5" />
@@ -1983,10 +1978,7 @@ function WeddingTimelinePageContent() {
 
             <div className="flex gap-3 mt-6">
               <Button
-                onClick={() => {
-                  setShowFeedbackDialog(false);
-                  setShowFeedbackPrompt(false);
-                }}
+                onClick={() => setShowFeedbackDialog(false)}
                 variant="outline"
                 className="flex-1 border-2 border-pinkey bg-creamey hover:text-lovely text-lovely hover:bg-pinkey/20"
               >
@@ -2007,30 +1999,7 @@ function WeddingTimelinePageContent() {
         </div>
       )}
 
-      {/* Feedback Prompt (appears after using features) */}
-      {showFeedbackPrompt && !showFeedbackDialog && step === 3 && (
-        <div className="fixed bottom-24 right-6 bg-lovely text-white p-4 rounded-lg shadow-xl max-w-xs animate-in slide-in-from-bottom-4 duration-300 z-40">
-          <button
-            onClick={() => setShowFeedbackPrompt(false)}
-            className="absolute top-2 right-2 text-white/70 hover:text-white transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <p className="text-sm mb-3 pr-4">
-            Enjoying the timeline feature? We'd love to hear your thoughts!
-          </p>
-          <Button
-            onClick={() => {
-              setShowFeedbackPrompt(false);
-              setShowFeedbackDialog(true);
-            }}
-            size="sm"
-            className="w-full bg-creamey text-lovely hover:bg-creamey"
-          >
-            Share Feedback
-          </Button>
-        </div>
-      )}
+
 
       {/* Floating Feedback Button (always visible if no feedback given) */}
       {!hasFeedback && step === 3 && !showFeedbackDialog && (
