@@ -351,6 +351,26 @@ function SortableRow({
     isDragging,
   } = useSortable({ id: event.id });
 
+  const brideRef = useRef<HTMLTextAreaElement>(null);
+  const groomRef = useRef<HTMLTextAreaElement>(null);
+  const bridesmaidsRef = useRef<HTMLTextAreaElement>(null);
+  const groomsmenRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textareas on mount and when content changes
+  useEffect(() => {
+    const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+    };
+
+    resizeTextarea(brideRef.current);
+    resizeTextarea(groomRef.current);
+    resizeTextarea(bridesmaidsRef.current);
+    resizeTextarea(groomsmenRef.current);
+  }, [event.brideActivity, event.groomActivity, event.bridesmaidsActivity, event.groomsmenActivity]);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -368,90 +388,136 @@ function SortableRow({
         event.isBreak ? "bg-pinkey/50" : "bg-pinkey/60"
       } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
     >
-      <TableCell className="font-medium whitespace-nowrap text-sm md:text-base p-1 md:p-4">
-        <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm">
+      <TableCell className="font-medium text-sm md:text-base p-1 md:p-4 align-middle">
+        <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm break-words">
           {event.timeLabel}
         </span>
       </TableCell>
-      <TableCell className="p-1 md:p-4">
-        <Input
-          type="number"
-          value={event.duration}
-          onPointerDown={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          onChange={(e) => handleDurationChange(index, e.target.value)}
-          className="w-16 md:w-20 bg-creamey text-center h-6 md:h-8 text-xs md:text-sm p-1"
-        />
+      <TableCell className="p-1 md:p-4 align-middle">
+        <div className="flex justify-center items-center w-full">
+          <Input
+            type="number"
+            value={event.duration}
+            onPointerDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            onChange={(e) => handleDurationChange(index, e.target.value)}
+            className="w-10 md:w-14 bg-creamey text-center min-h-[1.5rem] md:min-h-[2rem] text-xs md:text-sm p-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+        </div>
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "brideActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={brideRef}
           value={event.brideActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "brideActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "groomActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={groomRef}
           value={event.groomActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "groomActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "bridesmaidsActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={bridesmaidsRef}
           value={event.bridesmaidsActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "bridesmaidsActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "groomsmenActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={groomsmenRef}
           value={event.groomsmenActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "groomsmenActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
-      <TableCell className="p-1 md:p-4">
+      <TableCell className="p-1 md:p-4 align-middle">
         <Button
           variant="ghost"
           size="icon"
@@ -1650,7 +1716,7 @@ function WeddingTimelinePageContent() {
               <Table className="w-full relative">
                 <TableHeader className="bg-lovely sticky top-0 z-10 shadow-sm">
                   <TableRow className="hover:bg-lovely">
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-24 md:w-auto text-center">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-32 md:w-auto text-center">
                       TIME
                     </TableHead>
                     <TableHead className="text-center text-white text-xs md:text-sm p-1 md:p-4 w-16 md:w-auto">
