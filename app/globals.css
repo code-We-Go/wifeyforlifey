@@ -288,3 +288,8 @@ input::placeholder {
   animation-play-state: paused;
 }
 
+/* Style the time input calendar picker indicator */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(21%) sepia(98%) saturate(6943%) hue-rotate(350deg) brightness(89%) contrast(96%);
+  cursor: pointer;
+}
