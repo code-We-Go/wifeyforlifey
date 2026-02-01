@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     if (category) {
       // First find all subcategories that belong to this category
       const subcategories = await mongoose.model("subCategories").find({
-        categoryID: new mongoose.Types.ObjectId(category),
+        categoryID: category,
       });
 
       // Then find products that have any of these subcategories

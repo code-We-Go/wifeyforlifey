@@ -7,6 +7,7 @@ import { thirdFont } from "@/fonts";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 import axios from "axios";
 import { Blog } from "@/app/blogs/page";
+import { headerStyle } from "@/app/styles/style";
 
 const FeaturedBlogs = () => {
   const [featuredBlogs, setFeaturedBlogs] = useState<Blog[]>([]);
@@ -45,7 +46,7 @@ const FeaturedBlogs = () => {
         <div className="flex flex-col items-start md:flex-row justify-between md:items-center mb-12">
           <div>
             <h2
-              className={`${thirdFont.className} tracking-normal text-4xl md:text-5xl  lg:text-6xl   font-semibold text-lovely mb-2`}
+              className={`${thirdFont.className} ${headerStyle} text-lovely mb-2`}
             >
               Featured Blogs
             </h2>

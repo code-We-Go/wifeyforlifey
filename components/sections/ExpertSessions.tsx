@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
+import React, { useEffect, useState, useCallback } from "react";
+import { Button } from "../ui/button";
+import Image from "next/image";
+// import Link from "next/link"; 
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Input } from "@/components/ui/input";
 import axios from "axios";
 import SessionCard from "@/components/shared/SessionCard";
+import SessionCardSkeleton from "@/components/shared/SessionCardSkeleton";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 
-export type PartnerSession = {
+interface IPartnerSession {
   _id: string;
   title: string;
   description: string;
@@ -24,14 +27,16 @@ export type PartnerSession = {
   profitPercentage: number;
   imageUrl: string;
   subscriptionDiscountPercentage?: number;
-};
+}
 
-export default function PartnerSessionsSection() {
+const ExpertSessions = () => {
   const { data: authSession } = useSession();
-  const [sessions, setSessions] = useState<PartnerSession[]>([]);
+  const [sessions, setSessions] = useState<IPartnerSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<PartnerSession | null>(null);
-  const [selectedForDetails, setSelectedForDetails] = useState<PartnerSession | null>(null);
+
+  // Modal & Booking State
+  const [selectedForDetails, setSelectedForDetails] = useState<IPartnerSession | null>(null);
+  const [selectedForBooking, setSelectedForBooking] = useState<IPartnerSession | null>(null);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -44,24 +49,24 @@ export default function PartnerSessionsSection() {
   const [applied, setApplied] = useState(false);
   const [finalPrice, setFinalPrice] = useState<number | null>(null);
   const [subscriptionApplied, setSubscriptionApplied] = useState(false);
-  const [subscriptionFinalPrice, setSubscriptionFinalPrice] = useState<
-    number | null
-  >(null);
+  const [subscriptionFinalPrice, setSubscriptionFinalPrice] = useState<number | null>(null);
   const [couponFinalPrice, setCouponFinalPrice] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
-      setLoading(true);
       try {
-        const res = await fetch("/api/partner-sessions");
-        const data = await res.json();
-        setSessions(data.data || []);
-      } catch (e) {
-        setSessions([]);
+        const response = await fetch("/api/partner-sessions");
+        const data = await response.json();
+        if (data.success) {
+          setSessions(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch sessions:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchSessions();
   }, []);
 
@@ -96,8 +101,13 @@ export default function PartnerSessionsSection() {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
-  const openModal = (s: PartnerSession) => {
-    setSelected(s);
+
+  const openDetailsModal = (s: IPartnerSession) => {
+    setSelectedForDetails(s);
+  };
+
+  const openBookingModal = (s: IPartnerSession) => {
+    setSelectedForBooking(s);
     setError("");
     setForm({
       firstName: "",
@@ -110,6 +120,7 @@ export default function PartnerSessionsSection() {
     setSubscriptionApplied(false);
     setSubscriptionFinalPrice(null);
     setCouponFinalPrice(null);
+
     // Auto-apply subscription discount if user has active subscription
     const isActiveSubscriber = !!authSession?.user?.isSubscribed;
     const subPercent = Number(s.subscriptionDiscountPercentage || 0);
@@ -128,12 +139,12 @@ export default function PartnerSessionsSection() {
 
   const book = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selected) return;
+    if (!selectedForBooking) return;
     setSubmitting(true);
     setError("");
     try {
       const res = await axios.post("/api/partner-sessions/book", {
-        sessionId: selected._id,
+        sessionId: selectedForBooking._id,
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
@@ -150,65 +161,78 @@ export default function PartnerSessionsSection() {
     }
   };
 
-  const applyDiscount = async () => {
-    if (!selected) return;
-    const code = form.discountCode.trim();
-    if (!code) {
-      setApplied(false);
-      // If subscription discount is applied, keep that as final price
-      if (subscriptionFinalPrice !== null) {
-        setFinalPrice(subscriptionFinalPrice);
-      } else {
-        setFinalPrice(selected.price);
-      }
-      setError("");
-      return;
-    }
-    try {
-      const res = await axios.post("/api/apply-discount", {
-        cart: [{ price: selected.price, quantity: 1 }],
-        discountCode: code,
-        redeemType: "All",
-      });
-      const total = res.data?.finalTotal;
-      if (typeof total === "number") {
-        const codePrice = Math.round(total);
-        setCouponFinalPrice(codePrice);
-        // Determine best price between subscription and coupon
-        const baseline = subscriptionFinalPrice ?? selected.price;
-        const best = Math.min(codePrice, baseline);
-        setApplied(codePrice < baseline);
-        setFinalPrice(best);
-        setError("");
-      } else {
-        setApplied(false);
-        setCouponFinalPrice(null);
-        setFinalPrice(subscriptionFinalPrice ?? selected.price);
-        setError("Invalid discount response");
-      }
-    } catch (e: any) {
-      setApplied(false);
-      setCouponFinalPrice(null);
-      setFinalPrice(subscriptionFinalPrice ?? selected.price);
-      const msg =
-        e?.response?.data?.error || "Invalid or expired discount code";
-      setError(msg);
-    }
-  };
+  if (loading) {
+    return (
+      <section className="bg-pinkey text-lovely pt-8 md:pt-16 pb-2">
+        <div className="container-custom">
+          {/* Header */}
+          <div className="text-left mb-6 max-w-4xl">
+            <h2
+              className={`${thirdFont.className} ${headerStyle} mb-4`}
+            >
+              Get real answers from real experts!
+            </h2>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2">
+                
+                <p className={`${subHeaderStyle}`}>
+                  Book consultation sessions with trusted experts and stop relying
+                  on confusing or incorrect advice.
+                </p>
+              </li>
+            </ul>
+          </div>
+
+          {/* Skeleton Carousel */}
+          <div className="relative">
+            <div className="overflow-hidden">
+              <div className="flex gap-6 md:gap-12">
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
+                    <SessionCardSkeleton />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Note */}
+          <div className="mt-16 text-center md:text-left  pt-6">
+            <p className="text-lovely/70 italic text-lg decoration-wavy underline decoration-lovely/30">
+              Private, judgment-free sessions — from the comfort of your home.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (sessions.length === 0) {
+    return null; 
+  }
 
   return (
-    <div className="">
-      {/* <h2
-        className={`${thirdFont.className} text-2xl font-bold mb-6 text-lovely`}
-      >
-        Partner Sessions
-      </h2> */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
-          <p className="mt-4 text-lovely/90">Loading sessions...</p>
+    <section className="bg-pinkey text-lovely pt-8 md:pt-16 pb-2 ">
+      <div className="container-custom">
+        {/* Header */}
+        <div className="text-left mb-6 max-w-4xl">
+          <h2
+            className={`${thirdFont.className} ${headerStyle} mb-4`}
+          >
+            Get real answers from real experts!
+          </h2>
+          <ul className="space-y-2">
+            <li className="flex items-start gap-2">
+              <span className="text-xl mt-1">•</span>
+              <p className={`${subHeaderStyle}`}>
+                Book consultation sessions with trusted experts and stop relying
+                on confusing or incorrect advice.
+              </p>
+            </li>
+          </ul>
         </div>
-      ) : sessions.length > 0 ? (
+
+        {/* Carousel Container */}
         <div className="relative">
           {/* Navigation Arrows */}
           {sessions.length > 4 && (
@@ -243,17 +267,23 @@ export default function PartnerSessionsSection() {
                 <div key={session._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
                   <SessionCard
                     session={session}
-                    onDetailsClick={() => setSelectedForDetails(session)}
-                    onBookClick={() => openModal(session)}
+                    onDetailsClick={() => openDetailsModal(session)}
+                    onBookClick={() => openBookingModal(session)}
                   />
                 </div>
               ))}
             </div>
           </div>
         </div>
-      ) : (
-        <p className="text-lovely/90">No sessions available at the moment.</p>
-      )}
+
+        {/* Footer Note */}
+         <div className="mt-16 text-center md:text-left  pt-6">
+            <p className="text-lovely/70 italic text-lg decoration-wavy underline decoration-lovely/30">
+                Private, judgment-free sessions — from the comfort of your home.
+            </p>
+         </div>
+      </div>
+
 
       {/* Details Modal */}
       {selectedForDetails && (
@@ -324,26 +354,34 @@ export default function PartnerSessionsSection() {
               <Button
                 onClick={() => {
                   setSelectedForDetails(null);
-                  openModal(selectedForDetails);
+                  openBookingModal(selectedForDetails);
                 }}
-                className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
+                className=" bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
               >
                 Book Now
               </Button>
+              {/* <Button
+                variant="outline"
+                className="flex-1 border-lovely text-lovely rounded-xl py-5"
+                onClick={() => setSelectedForDetails(null)}
+              >
+                Close
+              </Button> */}
             </div>
           </div>
         </div>
       )}
 
-      {selected && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-          <div className="bg-creamey rounded-lg w-full max-w-md p-6">
+      {/* Booking Modal */}
+      {selectedForBooking && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold text-lovely mb-2">
-              Book: {selected.title}
+              Book: {selectedForBooking.title}
             </h3>
             <p className="text-sm text-lovely/90 mb-4">
               After your payment is successfully completed, you will receive{" "}
-              {selected.partnerName} WhatsApp contact to arrange your session
+              {selectedForBooking.partnerName}&apos;s WhatsApp contact to arrange your session
               time.
             </p>
 
@@ -379,24 +417,7 @@ export default function PartnerSessionsSection() {
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 required
               />
-              {/* <div className="flex gap-2">
-                <Input
-                  className="border-pinkey placeholder:text-lovely bg-creamey"
-                  placeholder="Discount code (optional)"
-                  value={form.discountCode}
-                  onChange={(e) =>
-                    setForm({ ...form, discountCode: e.target.value })
-                  }
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-lovely text-lovely rounded-2xl"
-                  onClick={applyDiscount}
-                >
-                  Apply
-                </Button>
-              </div> */}
+              
               <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
                 <div className="flex items-center justify-between">
                   <span className="text-lovely">Price</span>
@@ -405,22 +426,17 @@ export default function PartnerSessionsSection() {
                       subscriptionApplied ? "line-through" : ""
                     }`}
                   >
-                    EGP {selected.price}
+                    EGP {selectedForBooking.price}
                   </span>
                 </div>
                 {subscriptionApplied && subscriptionFinalPrice !== null && (
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-lovely">
-                      Subscribtion discount (
-                      {selected.subscriptionDiscountPercentage}%){" "}
-                      {/* {authSession?.user?.subscriptionExpiryDate
-                        ? `(expires ${new Date(
-                            authSession.user.subscriptionExpiryDate
-                          ).toLocaleDateString()})`
-                        : ""} */}
+                      Subscription discount (
+                      {selectedForBooking.subscriptionDiscountPercentage}%){" "}
                     </span>
                     <span className="text-lovely">
-                      EGP {Math.max(0, selected.price - subscriptionFinalPrice)}
+                      EGP {Math.max(0, selectedForBooking.price - subscriptionFinalPrice)}
                     </span>
                   </div>
                 )}
@@ -430,7 +446,7 @@ export default function PartnerSessionsSection() {
                     <span className="text-lovely">EGP {couponFinalPrice}</span>
                   </div>
                 )}
-                {finalPrice !== null && finalPrice !== selected.price && (
+                {finalPrice !== null && finalPrice !== selectedForBooking.price && (
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-lovely font-medium">Final Price</span>
                     <span className="text-lovely font-semibold">
@@ -451,8 +467,8 @@ export default function PartnerSessionsSection() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 border-lovely text-lovely rounded-2xl"
-                  onClick={() => setSelected(null)}
+                  className="flex-1 bg-creamey hover:text-lovely hover:bg-creamey/90 border-lovely text-lovely rounded-2xl"
+                  onClick={() => setSelectedForBooking(null)}
                 >
                   Cancel
                 </Button>
@@ -461,6 +477,8 @@ export default function PartnerSessionsSection() {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
-}
+};
+
+export default ExpertSessions;

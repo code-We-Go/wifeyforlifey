@@ -95,7 +95,7 @@ export default function ProductCard({
 
   return (
     <div
-      className="relative product-card bg-lovely p-2 pt-4 border-lovely border-2 group cursor-pointer"
+      className="relative product-card bg-lovely px-2 pt-4 pb-2 border-lovely border-2 group cursor-pointer"
       onClick={handleProductClick}
     >
       <Image
@@ -147,7 +147,7 @@ export default function ProductCard({
           />
         </Button>
       </div>
-      <div className="md:p-4">
+      <div className="pt-2 px-2 md:pt-4 md:px-4">
         <h4
           className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}
         >
@@ -155,10 +155,12 @@ export default function ProductCard({
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-            {product.comparedPrice > 0 && (
-              <del className="text-creamey text-sm">
+            {product.comparedPrice > 0 ? (
+              <del className="text-creamey text-sm block">
                 LE{product.comparedPrice.toFixed(2)}
               </del>
+            ) : (
+              <div className="text-sm block invisible">LE0.00</div>
             )}
             <p className="price-tag text-creamey">
               LE{product.price.local.toFixed(2)}

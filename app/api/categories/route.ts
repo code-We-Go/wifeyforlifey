@@ -15,22 +15,28 @@ export async function GET() {
     const categoriesWithSubcategories = await Promise.all(
       categories.map(async (category: any) => {
         const subcategories = await subCategoryModel
-          .find({ categoryID: category._id })
+          .find({ categoryID: "69038bc01012e1777357985c" })
           .sort({ subCategoryName: 1 });
+
+        console.log(`Category: ${category.categoryName}, Subcategories found: ${subcategories.length}`);
 
         return {
           _id: category._id,
           name: category.categoryName,
           description: category.description,
+          image: category.image,
           subcategories: subcategories.map((sub: any) => ({
             _id: sub._id,
             name: sub.subCategoryName,
-            description: sub.description
+            description: sub.description,
+            image: sub.image,
+            categoryID: sub.categoryID
           }))
         };
       })
     );
 
+    console.log('Total categories with subcategories:', categoriesWithSubcategories.length);
     return NextResponse.json(categoriesWithSubcategories);
   } catch (error) {
     console.error('Error fetching categories:', error);
