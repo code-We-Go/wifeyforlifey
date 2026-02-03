@@ -13,6 +13,7 @@ import SessionCard from "@/components/shared/SessionCard";
 import SessionCardSkeleton from "@/components/shared/SessionCardSkeleton";
 import useEmblaCarousel from "embla-carousel-react";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface IPartnerSession {
   _id: string;
@@ -30,6 +31,7 @@ interface IPartnerSession {
 }
 
 const ExpertSessions = () => {
+  const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const { data: authSession } = useSession();
   const [sessions, setSessions] = useState<IPartnerSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,7 +165,14 @@ const ExpertSessions = () => {
 
   if (loading) {
     return (
-      <section className="bg-pinkey text-lovely pt-8 md:pt-16 pb-2">
+      <section 
+        ref={sectionRef}
+        className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${
+          isVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-10'
+        }`}
+      >
         <div className="container-custom">
           {/* Header */}
           <div className="text-left mb-6 max-w-4xl">
@@ -212,7 +221,14 @@ const ExpertSessions = () => {
   }
 
   return (
-    <section className="bg-pinkey text-lovely pt-8 md:pt-16 pb-2 ">
+    <section 
+      ref={sectionRef}
+      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      }`}
+    >
       <div className="container-custom">
         {/* Header */}
         <div className="text-left mb-6 max-w-4xl">

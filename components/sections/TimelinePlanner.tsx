@@ -5,10 +5,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { thirdFont } from "@/fonts";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 export default function TimelinePlanner() {
+  const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
+  
   return (
-    <section className="w-full bg-creamy py-8 md:py-16 px-4 md:px-8">
+    <section 
+      ref={sectionRef}
+      className={`w-full bg-creamy py-8 md:py-16 px-4 md:px-8 transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      }`}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12  items-start">
           {/* Left Content */}

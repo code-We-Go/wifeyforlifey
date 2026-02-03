@@ -24,6 +24,7 @@ import ExpertSessions from "@/components/sections/ExpertSessions";
 import WifeyCommunity from "@/components/sections/WifeyCommunity";
 import BridalJourneyTwo from "@/components/sections/BridalJourneyTwo";
 import CategoriesSection from "@/components/sections/CategoriesSection";
+import Support360 from "@/components/sections/Support360";
 
 export default function Home() {
   // Filter featured products
@@ -41,8 +42,12 @@ export default function Home() {
       
       {/* <HeroTwo /> */}
       <JoinNow />
-      {/* <CategoriesSection /> */}
+      
+            {/* <CategoriesSection /> */}
       <TimelinePlanner />
+      
+      {/* 360 Support Section */}
+      <Support360 />
       
       {/* Expert Sessions Section */}
       <ExpertSessions />

@@ -8,9 +8,11 @@ import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { headerStyle } from "@/app/styles/style";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const JoinNow = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
 
   // All images for the carousel (including the original gehaz1.png as first)
   const carouselImages = [
@@ -61,8 +63,12 @@ const JoinNow = () => {
 
   return (
     <section
-      
-      className="bg-creamey text-lovely py-8 md:py-16 overflow-hidden"
+      ref={sectionRef}
+      className={`bg-creamey text-lovely py-8 md:py-16 overflow-hidden transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      }`}
     >
       <div className="container-custom "
       id="join-now">

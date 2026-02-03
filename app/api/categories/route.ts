@@ -15,7 +15,7 @@ export async function GET() {
     const categoriesWithSubcategories = await Promise.all(
       categories.map(async (category: any) => {
         const subcategories = await subCategoryModel
-          .find({ categoryID: "69038bc01012e1777357985c" })
+          .find({ categoryID: category._id })
           .sort({ subCategoryName: 1 });
 
         console.log(`Category: ${category.categoryName}, Subcategories found: ${subcategories.length}`);

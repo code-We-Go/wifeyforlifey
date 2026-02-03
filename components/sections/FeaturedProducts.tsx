@@ -14,8 +14,10 @@ import PackageCard from "../shop/PackageCard";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const FeaturedProducts = () => {
+  const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [packages, setPackages] = useState<Ipackage[]>([]);
   const { wishList, setWishList } = useContext(wishListContext);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>();
@@ -68,7 +70,14 @@ const FeaturedProducts = () => {
   }, []);
 
   return (
-    <section className="  bg-creamey ">
+    <section 
+      ref={sectionRef}
+      className={`bg-creamey transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      }`}
+    >
       {/* <div className='inset-0 bg-black/10 backdrop-blur-[4px]'> */}
       <div className="py-8 md:py-16 container-custom ">
         <div className="flex flex-col items-start md:flex-row justify-between md:items-center mb-2 md:mb-4">

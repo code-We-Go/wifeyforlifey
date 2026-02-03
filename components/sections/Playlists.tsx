@@ -11,8 +11,10 @@ import VideoCard from "@/components/playlists/VideoCard";
 import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
 import { thirdFont } from "@/fonts";
 import { headerStyle } from "@/app/styles/style";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const Playlists = () => {
+  const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>(
     []
   );
@@ -79,7 +81,14 @@ const Playlists = () => {
   }, []);
 
   return (
-    <section className="py-16 bg-lovely text-creamey">
+    <section 
+      ref={sectionRef}
+      className={`py-16 bg-lovely text-creamey transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      }`}
+    >
       <div className="container-custom">
         <div className="flex flex-col md:flex-row justify-between items-center mb-3 md:mb-6">
           <div>

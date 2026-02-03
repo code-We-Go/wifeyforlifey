@@ -16,7 +16,7 @@ export default function CategoryCard({ category, onClick }: CategoryCardProps) {
   return (
     <button
       onClick={onClick}
-      className="group relative overflow-hidden rounded-xl bg-creamey border-2 border-lovely/20 hover:border-lovely transition-all duration-300 hover:shadow-lg text-left w-full"
+      className="group relative overflow-hidden rounded-xl bg-creamey border-2 border-lovely/20 hover:border-lovely flex flex-col justify-start transition-all duration-300 hover:shadow-lg text-left w-full"
     >
       {/* Image Section */}
       {category.image && (

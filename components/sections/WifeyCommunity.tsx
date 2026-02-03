@@ -8,6 +8,7 @@ import { thirdFont } from "@/fonts";
 import { FaTiktok, FaInstagram, FaPlay } from "react-icons/fa";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const socialMediaItems = [
   // 4
@@ -168,6 +169,7 @@ const socialMediaItems = [
 ];
 
 export default function WifeyCommunity() {
+  const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [selectedVideo, setSelectedVideo] = useState<{ id: string; type: string } | null>(null);
   
   const [emblaRef] = useEmblaCarousel(
@@ -188,7 +190,14 @@ export default function WifeyCommunity() {
   );
 
   return (
-    <section className="py-20 bg-pinkey overflow-hidden relative">
+    <section 
+      ref={sectionRef}
+      className={`py-20 bg-pinkey overflow-hidden relative transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-10'
+      }`}
+    >
       <div className="container mx-auto px-4 mb-12 text-center">
         <h2 className={`${thirdFont.className} normal-case ${headerStyle} text-lovely mb-4`}>
           #WifeyForLifeyCommunity

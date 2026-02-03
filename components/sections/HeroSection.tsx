@@ -19,7 +19,10 @@ const HeroSection = () => {
           className="relative text-lovely max-sm:text-sm uppercase ml-[5vw] sm:ml-[10vw] lg:ml-[8vw]"
         >
           <h1 className=" italic font-semibold line-clamp-2 normal-case leading-relaxed tracking-normal text-xl sm:text-2xl lg:text-4xl" >
-            Your  <span className={`tracking-wider ${lifeyFont.className}`}>Bridal-Era Bestie</span> for<br />
+            Your  <span 
+                className={`italic leading-tight text-2xl lowercase  sm:text-3xl lg:text-5xl mb-0 ${lifeyFont.className}`}
+            >
+              Bridal-Era Bestie</span> for<br />
             Wedding & Gehaz Planning
           </h1>
           <div className={`normal-case leading-tight italic tracking-wide text-base sm:text-lg font-medium ${wifeyFont.className}`}>
