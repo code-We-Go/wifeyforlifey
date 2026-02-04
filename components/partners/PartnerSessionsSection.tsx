@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
-import PartnerSessionCard from "@/components/partners/PartnerSessionCard";
+import SessionCard from "@/components/shared/SessionCard";
+import useEmblaCarousel from "embla-carousel-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type PartnerSession = {
   _id: string;
@@ -29,6 +31,7 @@ export default function PartnerSessionsSection() {
   const [sessions, setSessions] = useState<PartnerSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<PartnerSession | null>(null);
+  const [selectedForDetails, setSelectedForDetails] = useState<PartnerSession | null>(null);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -52,7 +55,7 @@ export default function PartnerSessionsSection() {
       try {
         const res = await fetch("/api/partner-sessions");
         const data = await res.json();
-        setSessions(data.sessions || []);
+        setSessions(data.data || []);
       } catch (e) {
         setSessions([]);
       } finally {
@@ -61,6 +64,37 @@ export default function PartnerSessionsSection() {
     };
     fetchSessions();
   }, []);
+
+  // Embla Carousel
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: "start",
+    slidesToScroll: 1,
+  });
+
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+  }, [emblaApi, onSelect]);
 
   const openModal = (s: PartnerSession) => {
     setSelected(s);
@@ -175,13 +209,130 @@ export default function PartnerSessionsSection() {
           <p className="mt-4 text-lovely/90">Loading sessions...</p>
         </div>
       ) : sessions.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sessions.map((s) => (
-            <PartnerSessionCard key={s._id} session={s} onBook={openModal} />
-          ))}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          {sessions.length > 4 && (
+            <>
+              <button
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+            </>
+          )}
+
+          {/* Embla Carousel */}
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-6 md:gap-12">
+              {sessions.map((session) => (
+                <div key={session._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
+                  <SessionCard
+                    session={session}
+                    onDetailsClick={() => setSelectedForDetails(session)}
+                    onBookClick={() => openModal(session)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       ) : (
         <p className="text-lovely/90">No sessions available at the moment.</p>
+      )}
+
+      {/* Details Modal */}
+      {selectedForDetails && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setSelectedForDetails(null)}
+        >
+          <div 
+            className="bg-creamey rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-6 mb-6">
+              {/* Image */}
+              {selectedForDetails.imageUrl && (
+                <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
+                  <Image
+                    src={selectedForDetails.imageUrl}
+                    alt={selectedForDetails.partnerName}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Title & Name */}
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-lovely mb-1">
+                  {selectedForDetails.partnerName}
+                </h3>
+                <p className="text-lg text-lovely/70 mb-3">
+                  {selectedForDetails.title}
+                </p>
+                <p className="text-xl font-semibold text-lovely">
+                  EGP {selectedForDetails.price}
+                </p>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="mb-6">
+              <h4 className="font-bold text-lovely text-lg mb-2">Helps you with:</h4>
+              <div className="text-base font-medium text-lovely/90 whitespace-pre-line">
+                {selectedForDetails.description.split('\n').map((line, i) => (
+                  <div key={i} className="flex items-start gap-2 mb-2">
+                    {line.trim() && (
+                      <>
+                        <span className="mt-1">•</span>
+                        <span>{line}</span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Session Type */}
+            {selectedForDetails.sessionType && (
+              <div className="mb-6">
+                <p className="text-lovely/80">
+                  <span className="font-semibold">Session Type:</span>{" "}
+                  {selectedForDetails.sessionType === "one-to-one" ? "One-to-One" : "Webinar"}
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex w-full justify-center gap-3">
+              <Button
+                onClick={() => {
+                  setSelectedForDetails(null);
+                  openModal(selectedForDetails);
+                }}
+                className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
+              >
+                Book Now
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {selected && (
@@ -214,7 +365,7 @@ export default function PartnerSessionsSection() {
                 required
               />
               <Input
-                className="border-pinkey placeholder:text-lovely bg-creamey"
+                className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
                 placeholder="Email"
                 type="email"
                 value={form.email}

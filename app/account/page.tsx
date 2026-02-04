@@ -1534,7 +1534,7 @@ const AccountPage = () => {
                           email: e.target.value,
                         }))
                       }
-                      className="bg-creamey border-lovely text-lovely"
+                      className="bg-creamey lowercase border-lovely text-lovely"
                     />
                   ) : (
                     <p className=" text-sm text-lovely">{userInfo.email}</p>

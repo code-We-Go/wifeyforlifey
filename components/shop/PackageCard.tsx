@@ -32,7 +32,7 @@ export default function PackageCard({
 
   return (
     <div
-      className="relative product-card bg-lovely p-2 pt-4 border-lovely border-2 group cursor-pointer"
+      className="relative product-card bg-lovely px-2 pt-4 pb-2 border-lovely border-2 group cursor-pointer"
       onClick={handlePackageClick}
     >
       <Image
@@ -54,16 +54,17 @@ export default function PackageCard({
           className={`absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10`}
         ></div>
       </div>
-      <div className="md:p-4">
+      <div className="pt-2 px-2 md:pt-4 md:px-4">
         <h4
-          className={`${thirdFont.className} tracking-normal font-normal max-md:text-base md:font-semibold text-creamey line-clamp-1`}
+          className={`${thirdFont.className} text-sm md:text-base xl:text-lg tracking-wide font-semibold text-creamey line-clamp-1`}
         >
           {packageItem.name}
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-            {/* <p className="text-xs text-creamey">{packageItem.duration}</p> */}
-            <p className="price-tag max-md:text-sm text-creamey">
+            {/* Invisible placeholder to match ProductCard height */}
+            <div className="text-sm block invisible">LE0.00</div>
+            <p className="price-tag text-creamey text-xs md:text-sm">
               LE{packageItem.price.toFixed(2)}
             </p>
           </div>

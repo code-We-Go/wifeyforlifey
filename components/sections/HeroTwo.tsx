@@ -86,7 +86,7 @@ const HeroTwo = () => {
             opacity: textOpacity,
             transform: "scaleY(1.3)",
           }}
-          className="text-lovely italic text-2xl max-sm:ml-[4vw] md:text-4xl lg:text-5xl  font-light"
+          className="text-lovely  text-2xl max-sm:ml-[4vw] md:text-4xl lg:text-5xl  font-light"
         >
           LIKE A PRO ..
         </motion.h1>
@@ -145,7 +145,7 @@ const HeroTwo = () => {
                 opacity: textOpacity,
                 transform: "scaleY(1.3)",
               }}
-              className="italic text-2xl md:text-4xl lg:text-5xl  font-light"
+              className=" text-2xl md:text-4xl lg:text-5xl  font-light"
             >
               party like A
             </motion.h1>
@@ -155,7 +155,7 @@ const HeroTwo = () => {
                 opacity: textOpacity,
                 transform: "scaleY(1.3)",
               }}
-              className={`${lifeyFont.className} italic text-5xl md:text-7xl lg:text-9xl font-normal lowercase`}
+              className={`${lifeyFont.className}  text-5xl md:text-7xl lg:text-9xl font-normal lowercase`}
             >
               bride
             </motion.h1>

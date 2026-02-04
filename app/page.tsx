@@ -2,8 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
-// import { mockProducts } from "@/models/Product";
-// import { mockPlaylists } from "@/models/VideoPlaylist";
 import ProductCard from "@/components/shop/ProductCard";
 import VideoCard from "@/components/playlists/VideoCard";
 import HeroSection from "@/components/sections/HeroSection";
@@ -20,6 +18,13 @@ import OurPartners2 from "@/components/partners2/OurPartners2";
 import Testimonials from "@/components/sections/Testimonials";
 import FeaturedBlogs from "@/components/sections/FeaturedBlogs";
 import Pricing from "./components/Pricing";
+import TimelinePlanner from "@/components/sections/TimelinePlanner";
+import BridalJourney from "@/components/sections/BridalJourney";
+import ExpertSessions from "@/components/sections/ExpertSessions";
+import WifeyCommunity from "@/components/sections/WifeyCommunity";
+import BridalJourneyTwo from "@/components/sections/BridalJourneyTwo";
+import CategoriesSection from "@/components/sections/CategoriesSection";
+import Support360 from "@/components/sections/Support360";
 
 export default function Home() {
   // Filter featured products
@@ -30,15 +35,30 @@ export default function Home() {
     <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
       {/* Hero Section */}
       <HeroSection />
+      
+      {/* Bridal Journey Section */}
+      <BridalJourneyTwo />
+      {/* <BridalJourney /> */}
+      
       {/* <HeroTwo /> */}
       <JoinNow />
+      
+            {/* <CategoriesSection /> */}
+      {/* 360 Support Section */}
+      <Support360 />
+      <TimelinePlanner />
+      
+      
+      {/* Expert Sessions Section */}
+      <ExpertSessions />
+      
       {/* <Pricing /> */}
 
       {/* Featured Products Section */}
       <FeaturedProducts />
 
       {/* Subscription Banner */}
-      <ExclusiveContent />
+      {/* <ExclusiveContent /> */}
 
       {/* Featured Playlists Section */}
       <Playlists />
@@ -46,6 +66,8 @@ export default function Home() {
       {/* <BrandCharacters/> */}
       {/* Newsletter Section */}
       <OurPartners />
+
+      <WifeyCommunity />
       <Testimonials />
       {/* <div className="relative h-32">
 

@@ -5,6 +5,7 @@ import { X, Copy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { lifeyFont, thirdFont, wifeyFont } from "@/fonts";
 
 export default function NewsletterPopup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -86,7 +87,7 @@ export default function NewsletterPopup() {
         <div className="p-6">
           {!success ? (
             <div className="space-y-4">
-              <h2 className="text-2xl pt-4 font-semibold text-lovely text-center">
+              <h2 className={`${thirdFont.className} tracking-wide text-2xl pt-4 font-semibold text-lovely text-center`}>
                 Join Our Newsletter And Get 10% Off !!
               </h2>
               <div className="relative w-full h-[200px] lg:h-[300px]">
@@ -105,7 +106,7 @@ export default function NewsletterPopup() {
                 <Input
                   type="email"
                   placeholder="Your email address"
-                  className="bg-creamey border-lovely placeholder:text-lovely/80"
+                  className="bg-creamey lowercase border-lovely placeholder:text-lovely/80"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

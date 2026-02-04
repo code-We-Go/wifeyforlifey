@@ -93,7 +93,7 @@ function RegisterPage() {
                   name="email"
                   type="email"
                   required
-                  className="appearance-none placeholder:text-lovely/90 bg-creamey/90 rounded-none relative block w-full px-3 py-2 border border-pinkey placeholder-gray-500 text-lovely/90 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="appearance-none lowercase placeholder:text-lovely/90 bg-creamey/90 rounded-none relative block w-full px-3 py-2 border border-pinkey placeholder-gray-500 text-lovely/90 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

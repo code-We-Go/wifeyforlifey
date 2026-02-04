@@ -237,7 +237,7 @@ function TrackOrderPage() {
                   placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-grow bg-creamey border-pinkey"
+                  className="flex-grow lowercase bg-creamey border-pinkey"
                 />
               </div>
             </div>
