@@ -37,14 +37,14 @@ export default function CategoryCard({ category, onClick }: CategoryCardProps) {
             <h3 className="text-sm md:text-base font-bold text-lovely   group-hover:text-lovely/90 transition-colors">
               {category.name}
             </h3>
-            {category.description && (
+            {/* {category.description && (
               <p className="text-sm text-lovely/70 line-clamp-2 ">
                 {category.description}
               </p>
             )}
             <p className="text-sm text-lovely/60">
               {category.subcategories.length} subcategories
-            </p>
+            </p> */}
           </div>
           <ChevronRight className="w-6 h-6 text-lovely/40 group-hover:text-lovely group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" />
         </div>

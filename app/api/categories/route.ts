@@ -8,14 +8,14 @@ export async function GET() {
     // Connect to database with proper error handling
     await ConnectDB();
 
-    // Fetch categories
-    const categories = await categoriesModel.find().sort({ categoryName: 1 });
+    // Fetch only active categories
+    const categories = await categoriesModel.find({ active: true }).sort({ categoryName: 1 });
 
     // Fetch subcategories for each category
     const categoriesWithSubcategories = await Promise.all(
       categories.map(async (category: any) => {
         const subcategories = await subCategoryModel
-          .find({ categoryID: category._id })
+          .find({ categoryID: category._id, active: true })
           .sort({ subCategoryName: 1 });
 
         console.log(`Category: ${category.categoryName}, Subcategories found: ${subcategories.length}`);

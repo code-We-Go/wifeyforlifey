@@ -77,7 +77,9 @@ function ShopPage() {
   const activeTab = searchParams.get("tab") || "subscriptions";
   const [products, setProducts] = useState<Product[]>([]);
   const [packages, setPackages] = useState<Ipackage[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategoriesList, setSubcategoriesList] = useState<Subcategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]); // Keep this if needed for filters, or remove. 
+  // For this refactor, I will focus on populating subcategoriesList.
   const [loading, setLoading] = useState(true);
   const [packagesLoading, setPackagesLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -98,7 +100,7 @@ function ShopPage() {
   const [canScrollPrevPackages, setCanScrollPrevPackages] = useState(false);
   const [canScrollNextPackages, setCanScrollNextPackages] = useState(false);
 
-  // Embla Carousel for Categories
+  // Embla Carousel for Categories (Might be unused now)
   const [categoriesEmblaRef, categoriesEmblaApi] = useEmblaCarousel({
     loop: false,
     align: "start",
@@ -116,28 +118,36 @@ function ShopPage() {
   const [canScrollPrevSubcategories, setCanScrollPrevSubcategories] = useState(false);
   const [canScrollNextSubcategories, setCanScrollNextSubcategories] = useState(false);
 
-  // Embla Carousel for Products
-  const [productsEmblaRef, productsEmblaApi] = useEmblaCarousel({
-    loop: false,
-    align: "start",
-    slidesToScroll: 1,
-  });
-  const [canScrollPrevProducts, setCanScrollPrevProducts] = useState(false);
-  const [canScrollNextProducts, setCanScrollNextProducts] = useState(false);
 
-  // Fetch categories and subcategories
+
+  // Fetch active subcategories directly
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchSubcategories = async () => {
       try {
-        const response = await fetch("/api/categories");
+        const response = await fetch("/api/subcategories?active=true");
         const data = await response.json();
-        setCategories(data);
+        // The API returns { data: [...] } or [...] depending on my previous thought.
+        // My edit to api/subcategories/route.ts returns { data: ... }
+        const rawSubcategories = data.data || [];
+        
+        // Map subCategoryName to name to match interface
+        const mappedSubcategories = rawSubcategories.map((sub: any) => ({
+          _id: sub._id,
+          name: sub.subCategoryName,
+          description: sub.description,
+          image: sub.image,
+          categoryID: sub.categoryID
+        }));
+        
+        setSubcategoriesList(mappedSubcategories);
+        // Also set empty categories to avoid errors if referenced
+        setCategories([]); 
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching subcategories:", error);
       }
     };
 
-    fetchCategories();
+    fetchSubcategories();
   }, []);
 
   // Fetch products with filters
@@ -213,13 +223,7 @@ function ShopPage() {
     if (subcategoriesEmblaApi) subcategoriesEmblaApi.scrollNext();
   }, [subcategoriesEmblaApi]);
 
-  const scrollPrevProducts = useCallback(() => {
-    if (productsEmblaApi) productsEmblaApi.scrollPrev();
-  }, [productsEmblaApi]);
 
-  const scrollNextProducts = useCallback(() => {
-    if (productsEmblaApi) productsEmblaApi.scrollNext();
-  }, [productsEmblaApi]);
 
   // Update scroll button states
   const onSelectPackages = useCallback(() => {
@@ -240,11 +244,7 @@ function ShopPage() {
     setCanScrollNextSubcategories(subcategoriesEmblaApi.canScrollNext());
   }, [subcategoriesEmblaApi]);
 
-  const onSelectProducts = useCallback(() => {
-    if (!productsEmblaApi) return;
-    setCanScrollPrevProducts(productsEmblaApi.canScrollPrev());
-    setCanScrollNextProducts(productsEmblaApi.canScrollNext());
-  }, [productsEmblaApi]);
+
 
   useEffect(() => {
     if (!packagesEmblaApi) return;
@@ -267,12 +267,7 @@ function ShopPage() {
     subcategoriesEmblaApi.on("reInit", onSelectSubcategories);
   }, [subcategoriesEmblaApi, onSelectSubcategories]);
 
-  useEffect(() => {
-    if (!productsEmblaApi) return;
-    onSelectProducts();
-    productsEmblaApi.on("select", onSelectProducts);
-    productsEmblaApi.on("reInit", onSelectProducts);
-  }, [productsEmblaApi, onSelectProducts]);
+
 
   const updateFilter = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -449,93 +444,46 @@ function ShopPage() {
         {activeTab === "products" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
             {/* Breadcrumb Navigation */}
-            {(selectedCategoryId || selectedSubcategoryId) && (
+            {selectedSubcategoryId && (
               <div className="flex items-center gap-2 text-sm text-lovely/70">
                 <button
                   onClick={handleBackToCategories}
                   className="hover:text-lovely transition-colors"
                 >
+                  {/* this appears for users */}
                   All Categories
                 </button>
-                {selectedCategoryId && (
-                  <>
-                    <ChevronRight className="w-4 h-4" />
-                    <button
-                      onClick={handleBackToSubcategories}
-                      className="hover:text-lovely transition-colors"
-                    >
-                      {categories.find((c) => c._id === selectedCategoryId)?.name}
-                    </button>
-                  </>
-                )}
-                {selectedSubcategoryId && (
-                  <>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-lovely font-medium">
-                      {categories
-                        .find((c) => c._id === selectedCategoryId)
-                        ?.subcategories.find((s) => s._id === selectedSubcategoryId)
-                        ?.name}
-                    </span>
-                  </>
-                )}
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-lovely font-medium">
+                <span className="text-lovely font-medium">
+                  {subcategoriesList.find(s => s._id === selectedSubcategoryId)?.name || "Subcategory"}
+                </span>
+                </span>
               </div>
             )}
 
-            {/* Show Categories when no category is selected */}
-            {!selectedCategoryId && (
+            {/* Show All Active Subcategories when no subcategory is selected */}
+            {!selectedSubcategoryId && (
               <div>
-                <h2 className={`${thirdFont.className} ${headerStyle} text-lovely mb-6`}>
-                  Browse by Category
-                </h2>
-                {categories.length > 0 ? (
-                  <div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {categories.map((category) => (
-                        <CategoryCard
-                          key={category._id}
-                          category={category}
-                          onClick={() => handleCategorySelect(category._id)}
-                        />
-                      ))}
-                    </div>
+                {/* <h2 className={`${thirdFont.className} ${headerStyle} text-lovely mb-6`}>
+                  Browse by Subcategory
+                </h2> */}
+
+                {subcategoriesList.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {subcategoriesList.map((subcategory) => (
+                      <SubcategoryCard
+                        key={subcategory._id}
+                        subcategory={subcategory}
+                        onClick={() => handleSubcategorySelect(subcategory._id)}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-lovely/70">No categories available</p>
+                    <p className="text-lovely/70">No subcategories available</p>
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* Show Subcategories when category is selected but no subcategory */}
-            {selectedCategoryId && !selectedSubcategoryId && (
-              <div>
-                <h2 className={`${thirdFont.className} ${headerStyle} text-lovely mb-6`}>
-                  {categories.find((c) => c._id === selectedCategoryId)?.name}
-                </h2>
-                {(() => {
-                  const selectedCategory = categories.find(
-                    (c) => c._id === selectedCategoryId
-                  );
-                  return selectedCategory && selectedCategory.subcategories.length > 0 ? (
-                    <div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {selectedCategory.subcategories.map((subcategory) => (
-                          <SubcategoryCard
-                            key={subcategory._id}
-                            subcategory={subcategory}
-                            onClick={() => handleSubcategorySelect(subcategory._id)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-lovely/70">No subcategories available</p>
-                    </div>
-                  );
-                })()}
               </div>
             )}
 
@@ -636,65 +584,31 @@ function ShopPage() {
 
                           <Separator />
 
-                          {/* Category Filter */}
-                          {filters.category !== "all" && (
-                            <>
-                              <div className="space-y-3">
-                                <h3 className="font-medium">Category</h3>
-                                <Select
-                                  value={filters.category || "none"}
-                                  onValueChange={(value) => {
-                                    updateFilter("category", value === "none" ? "" : value);
-                                    updateFilter("subcategory", ""); // Reset subcategory when category changes
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full bg-creamey border-lovely">
-                                    <SelectValue placeholder="Select category" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="none">All Categories</SelectItem>
-                                    {categories.map((category) => (
-                                      <SelectItem key={category._id} value={category._id}>
-                                        {category.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              {/* Subcategory Filter - Only show if category is selected */}
-                              {filters.category && filters.category !== "" && (
-                                <>
-                                  <div className="space-y-3">
-                                    <h3 className="font-medium">Subcategory</h3>
-                                    <Select
-                                      value={filters.subcategory || "none"}
-                                      onValueChange={(value) => updateFilter("subcategory", value === "none" ? "" : value)}
-                                    >
-                                      <SelectTrigger className="w-full bg-creamey border-lovely">
-                                        <SelectValue placeholder="Select subcategory" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="none">All Subcategories</SelectItem>
-                                        {categories
-                                          .find((c) => c._id === filters.category)
-                                          ?.subcategories.map((subcategory) => (
-                                            <SelectItem
-                                              key={subcategory._id}
-                                              value={subcategory._id}
-                                            >
-                                              {subcategory.name}
-                                            </SelectItem>
-                                          ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </>
-                              )}
-
-                              <Separator />
-                            </>
-                          )}
+                          {/* Subcategory Filter */}
+                          <div className="space-y-3">
+                            <h3 className="font-medium">Subcategory</h3>
+                            <Select
+                              value={filters.subcategory || "none"}
+                              onValueChange={(value) => updateFilter("subcategory", value === "none" ? "" : value)}
+                            >
+                              <SelectTrigger className="w-full bg-creamey border-lovely">
+                                <SelectValue placeholder="Select subcategory" />
+                              </SelectTrigger>
+                              <SelectContent>
+                              {/* this appears for users */}
+                                <SelectItem value="none">All Categories</SelectItem>
+                                {subcategoriesList.map((subcategory) => (
+                                  <SelectItem
+                                    key={subcategory._id}
+                                    value={subcategory._id}
+                                  >
+                                    {subcategory.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <Separator />
 
                           {/* Price Range Filter */}
                           <div className="space-y-4">
@@ -750,11 +664,8 @@ function ShopPage() {
                         onClick={() => updateFilter("subcategory", "")}
                         className="cursor-pointer bg-pinkey"
                       >
-                        Subcategory:{" "}
-                        {categories
-                          .find((c) => c._id === filters.category)
-                          ?.subcategories.find((s) => s._id === filters.subcategory)
-                          ?.name}
+                        {" "}
+                        {subcategoriesList.find((s) => s._id === filters.subcategory)?.name}
                         <X className="ml-1 h-3 w-3" />
                       </Badge>
                     )}
@@ -780,51 +691,20 @@ function ShopPage() {
                     <p className="mt-4 text-lovely/90">Loading products...</p>
                   </div>
                 ) : products.length > 0 ? (
-                  <div className="relative">
-                    {/* Navigation Arrows */}
-                    {products.length > 4 && (
-                      <>
-                        <button
-                          onClick={scrollPrevProducts}
-                          disabled={!canScrollPrevProducts}
-                          className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                            !canScrollPrevProducts ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                          }`}
-                          aria-label="Previous slide"
-                        >
-                          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-                        </button>
-                        <button
-                          onClick={scrollNextProducts}
-                          disabled={!canScrollNextProducts}
-                          className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                            !canScrollNextProducts ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                          }`}
-                          aria-label="Next slide"
-                        >
-                          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-                        </button>
-                      </>
-                    )}
-                    {/* Embla Carousel */}
-                    <div className="overflow-x-hidden py-4 px-2" ref={productsEmblaRef}>
-                      <div className="flex gap-6">
-                        {products.map((product) => {
-                          const productID = product._id;
-                          const fav = wishList.find(
-                            (favorite) => favorite.productId === productID
-                          );
-                          return (
-                            <div key={product._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
-                              <ProductCard
-                                product={product}
-                                favorite={fav ? true : false}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 py-4">
+                    {products.map((product) => {
+                      const productID = product._id;
+                      const fav = wishList.find(
+                        (favorite) => favorite.productId === productID
+                      );
+                      return (
+                        <ProductCard
+                          key={product._id}
+                          product={product}
+                          favorite={fav ? true : false}
+                        />
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12">

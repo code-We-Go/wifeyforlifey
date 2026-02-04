@@ -31,7 +31,7 @@ const OurPartners = () => {
   if (loading || partners.length === 0) return null;
 
   return (
-    <div className="flex py-16 flex-col min-h-[50vh] pb-8 h-auto md:mini-h-[65vh] items-center text-start justify-center bg-pinkey">
+    <div className="flex py-16 flex-col min-h-[50vh] pb-8 h-auto md:mini-h-[65vh] items-center text-start justify-center bg-creamey">
       <section className="w-[95vw] md:w-[80vw] text-start  bg-transparent text-lovely pt-8 pb-4">
         <h2
           className={`${thirdFont.className} ${headerStyle}   mb-8`}

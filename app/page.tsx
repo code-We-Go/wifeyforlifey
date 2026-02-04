@@ -44,10 +44,10 @@ export default function Home() {
       <JoinNow />
       
             {/* <CategoriesSection /> */}
-      <TimelinePlanner />
-      
       {/* 360 Support Section */}
       <Support360 />
+      <TimelinePlanner />
+      
       
       {/* Expert Sessions Section */}
       <ExpertSessions />

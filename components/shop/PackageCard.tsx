@@ -56,7 +56,7 @@ export default function PackageCard({
       </div>
       <div className="pt-2 px-2 md:pt-4 md:px-4">
         <h4
-          className={`${thirdFont.className} tracking-normal font-semibold text-creamey line-clamp-1`}
+          className={`${thirdFont.className} text-sm md:text-base xl:text-lg tracking-wide font-semibold text-creamey line-clamp-1`}
         >
           {packageItem.name}
         </h4>
@@ -64,7 +64,7 @@ export default function PackageCard({
           <div className="space-y-0">
             {/* Invisible placeholder to match ProductCard height */}
             <div className="text-sm block invisible">LE0.00</div>
-            <p className="price-tag text-creamey">
+            <p className="price-tag text-creamey text-xs md:text-sm">
               LE{packageItem.price.toFixed(2)}
             </p>
           </div>

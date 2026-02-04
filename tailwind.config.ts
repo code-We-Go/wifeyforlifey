@@ -10,7 +10,16 @@ const config: Config = {
   ],
   theme: {
     backgroundImage: {pattern1 : 'url(/patterns/patternCreamey.png)',expBG:'url(/experience/wifeyExp.jpeg)',patternPinkey : 'url(/patterns/patternPinkey.png)',patternLovely : 'url(/patterns/patternLovely.png)'}
-    ,container: {
+    ,
+    screens: {
+      'xs': '360px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
+    container: {
       center: true,
       padding: '2rem',
       screens: {

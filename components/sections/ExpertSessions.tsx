@@ -179,7 +179,7 @@ const ExpertSessions = () => {
             <h2
               className={`${thirdFont.className} ${headerStyle} mb-4`}
             >
-              Get real answers from real experts!
+              Get real answers from real experts
             </h2>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
@@ -207,7 +207,7 @@ const ExpertSessions = () => {
 
           {/* Footer Note */}
           <div className="mt-16 text-center md:text-left  pt-6">
-            <p className="text-lovely/70 italic text-lg decoration-wavy underline decoration-lovely/30">
+            <p className="text-lovely/70 italic text-lg   decoration-lovely/30">
               Private, judgment-free sessions — from the comfort of your home.
             </p>
           </div>
@@ -294,7 +294,7 @@ const ExpertSessions = () => {
 
         {/* Footer Note */}
          <div className="mt-16 text-center md:text-left  pt-6">
-            <p className="text-lovely/70 italic text-lg decoration-wavy underline decoration-lovely/30">
+            <p className="text-lovely/70 italic text-lg  decoration-lovely/30">
                 Private, judgment-free sessions — from the comfort of your home.
             </p>
          </div>

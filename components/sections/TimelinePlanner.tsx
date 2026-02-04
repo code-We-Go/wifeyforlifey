@@ -13,7 +13,7 @@ export default function TimelinePlanner() {
   return (
     <section 
       ref={sectionRef}
-      className={`w-full bg-creamy py-8 md:py-16 px-4 md:px-8 transition-all duration-1000 ease-out ${
+      className={`w-full bg-creamey py-8 md:py-16 px-4 md:px-8 transition-all duration-1000 ease-out ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-10'
@@ -75,7 +75,7 @@ export default function TimelinePlanner() {
           {/* Right Content - Timeline Image */}
           <div className="order-2 flex justify-center lg:justify-end">
             <div className="relative w-full flex flex-col items-center justify-center max-w-md lg:max-w-lg">
-              <div className="relative  aspect-[3/4] w-3/4 rounded-sm overflow-hidden shadow-2xl border-2 border-lovely/80">
+              <div className="relative  aspect-[3/4] bg-creamey w-3/4 rounded-sm overflow-hidden shadow-2xl border-2 border-lovely/80">
                 <Image
                   src="/timeline/media.jpg"
                   alt="Wedding Day Timeline Planner Preview"

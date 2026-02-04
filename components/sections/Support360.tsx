@@ -3,6 +3,7 @@
 import { thirdFont } from "@/fonts";
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
@@ -20,7 +21,7 @@ const supportCards: SupportCard[] = [
     id: 1,
     title: "Discounts & Partnerships",
     description: [
-      "A trusted partner list that gives you real savings",
+      "A trusted partner list that grows over time",
       "Community-only discounts on things you actually need",
       "Your membership keeps increasing in value — Wifey-approved = always 💕"
     ],
@@ -46,7 +47,7 @@ const supportCards: SupportCard[] = [
       "Makeup looks, hairstyles, bridal nails & home moodboards",
       "Saved, organized, and filtered by the Wifey team",
       "Inspiration that feels realistic, beautiful, and achievable",
-      "So you start your inspired — not stressed or pressured."
+      "So you can get inspired — not stressed or pressured."
     ],
     imagePath: "/360/51.png"
   },
@@ -56,8 +57,9 @@ const supportCards: SupportCard[] = [
     description: [
       "You're not meant to do this alone.",
       "A private Whatsapp group for Wifey brides only",
-      "Live group chat with trusted experts and each other",
-      "Guided by the Wifey for Life team — not just about gelato, but life, emotions, and everything in between"
+      "Ask questions, share worries, and support each other",
+      // "Live group chat with trusted experts and each other",
+      "Guided by the Wifey for Life team — not just about gehaz, but life, emotions, and everything in between"
     ],
     imagePath: "/360/48.png"
   },
@@ -65,11 +67,12 @@ const supportCards: SupportCard[] = [
     id: 5,
     title: "Bridal-Era Video Guides",
     description: [
-      "Designed to support your Bride Barla Planner when it's time to choose",
-      "Helps you understand options and avoid confusion",
+      "Designed to support your Gehaz Bestie Planner when it's time to choose",
+      "Helps you understand options and avoid confusion or pressure",
       "Protects you from fake reviews and biased sales advice",
-      "Includes trusted expert videos in selected playlists (Eg: GTAs, sex therapists, interior designers, photographers, etc.)",
-      "Organized support in 1 place"
+      "Includes trusted expert videos in selected playlists ",
+      "(OB-GYN, sex therapists, interior designers, appliance experts & more)",
+      // "Organized support in 1 place"
     ],
     imagePath: "/360/49.png"
   },
@@ -77,15 +80,13 @@ const supportCards: SupportCard[] = [
     id: 6,
     title: "Expert-Led Webinars",
     description: [
-      "You're not meant to do this alone.",
-      "A private Whatsapp group for Wifey brides only",
-      "Live group chat with trusted experts and each other",
-      "Guided by the Wifey for Life team — not just about gelato, but life, emotions, and everything in between",
-      "Examples of webinars hosted:",
+      "Live group webinars hosted with trusted experts",
+      "ask questions, learn, and feel reassured",
+      "Guided by the Wifey for Life team",
+      "Examples of webinars hosted!",
       "Appliances 101 with Zeinab Ahmed",
-      "Furniture Care 101 with Dr. Dalia Gawdan",
-      "Sex Education 101 with Omama Therapy",
-      "Interior Joint- Interior Design 101 with Sherry Louis"
+      "Feminine Care 101 with Dr. Dalia Ghozlan",
+      "Sex Education 101 with Quareb Therapy"
     ],
     imagePath: "/360/53.png"
   },
@@ -142,7 +143,7 @@ const Support360 = () => {
   return (
     <section 
       ref={sectionRef}
-      className={`bg-creamey text-lovely pt-8 md:pt-16 pb-24 md:pb-40 transition-all duration-1000 ease-out ${
+      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-16 md:pb-16 transition-all duration-1000 ease-out ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-10'
@@ -193,7 +194,7 @@ const Support360 = () => {
           <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
             <div className="flex gap-2 md:gap-4">
               {supportCards.map((card) => (
-                <div key={card.id} className="relative flex-[0_0_80%] md:flex-[0_0_40%] lg:flex-[0_0_30%]  2xl:flex-[0_0_22%] min-w-0 pb-6 md:pb-12">
+                <div key={card.id} className="relative flex-[0_0_80%] sm:flex-[0_0_50%] md:flex-[0_0_40%] lg:flex-[0_0_30%]  2xl:flex-[0_0_22%] min-w-0 pb-6 md:pb-12">
                   <div className="bg-lovely rounded-sm  shadow-xl h-[350px] md:h-[450px] lg:h-[500px] xl:h-[500px] ">
                     {/* Card Header */}
                     <div className="p-2 md:p-4 pb-32 md:pb-40 h-full ">
@@ -210,7 +211,7 @@ const Support360 = () => {
                     </div>
 
                     {/* Mobile Screen Mockup - Absolutely positioned at bottom */}
-                    <div className="absolute -bottom-10 md:-bottom-14 lg:-bottom-0 xl:-bottom-0 2xl:-bottom-5 left-1/2 z-20 -translate-x-1/2 w-72 md:w-96 lg:w-[420px] xl:w-[460px] 2xl:w-[500px] h-96 md:h-[420px] lg:h-[640px] xl:h-[740px] 2xl:h-[840px]">
+                    <div className="absolute -bottom-14  xs:-bottom-32 sm:-bottom-20 md:-bottom-20 lg:-bottom-16 xl:-bottom-4 2xl:-bottom-14  left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px] md:w-[520px] lg:w-[580px] xl:w-[600px] 2xl:w-[620px] h-[450px] xs:h-[550px] md:h-[550px] lg:h-[640px] xl:h-[800px] 2xl:h-[840px]">
                       <Image
                         src={card.imagePath}
                         alt={card.title}
@@ -224,6 +225,25 @@ const Support360 = () => {
             </div>
           </div>
         </div>
+
+        {/* CTA Button */}
+        <div className="flex justify-center mt-48 sm:mt-36 md:mt-32 lg:mt-20 ">
+          <Link 
+            href="/packages/687396821b4da119eb1c13fe"
+            className="bg-lovely relative text-creamey px-8 py-4 rounded-sm font-semibold text-base md:text-lg hover:bg-lovely/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            Buy Gehaz Bestie Planner Now
+                <Image
+                  width={60}
+                  height={30}
+                  className="absolute -top-5 -rotate-45 -left-5 z-20"
+                  alt="fyonka"
+                  src={"/fyonkaCreamey.png"}
+                  unoptimized
+                />
+          </Link>
+        </div>
+    
       </div>
     </section>
   );

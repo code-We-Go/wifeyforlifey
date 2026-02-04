@@ -1,22 +1,116 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import {
   ChevronLeft,
-  Package,
   ChevronRight,
   ChevronLeft as ChevronLeftIcon,
 } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Ipackage } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import PackageDetailSkeleton from "./PackageDetailSkeleton";
-import PackageCard from "@/app/components/PackageCard";
-import { cn } from "@/lib/utils";
+
+interface SupportCard {
+  id: number;
+  title: string;
+  description: string[];
+  imagePath: string;
+}
+
+const supportCards: SupportCard[] = [
+  {
+    id: 1,
+    title: "Discounts & Partnerships",
+    description: [
+      "A trusted partner list that grows over time",
+      "Community-only discounts on things you actually need",
+      "Your membership keeps increasing in value — Wifey-approved = always 💕"
+    ],
+    imagePath: "/360/50.png"
+  },
+  {
+    id: 2,
+    title: "Wifeys favorite products",
+    description: [
+      "Curated, Wifey-approved products we genuinely recommend",
+      "Real reviews — you don't waste time searching",
+      "Clear guidance on what's worth buying — and what's not",
+      "Includes the maximum fair market price, so you don't overpay"
+    ],
+    imagePath: "/360/52.png"
+  },
+  {
+    id: 3,
+    title: "Inspos",
+    description: [
+      "Pinterest, But Make It Bridal 💕",
+      "Curated bridal inspiration — without the overwhelm",
+      "Makeup looks, hairstyles, bridal nails & home moodboards",
+      "Saved, organized, and filtered by the Wifey team",
+      "Inspiration that feels realistic, beautiful, and achievable",
+      "So you can get inspired — not stressed or pressured."
+    ],
+    imagePath: "/360/51.png"
+  },
+  {
+    id: 4,
+    title: "Whatsapp Support circle",
+    description: [
+      "You're not meant to do this alone.",
+      "A private Whatsapp group for Wifey brides only",
+      "Ask questions, share worries, and support each other",
+      // "Live group chat with trusted experts and each other",
+      "Guided by the Wifey for Life team — not just about gehaz, but life, emotions, and everything in between"
+    ],
+    imagePath: "/360/48.png"
+  },
+  {
+    id: 5,
+    title: "Bridal-Era Video Guides",
+    description: [
+      "Designed to support your Gehaz Bestie Planner when it's time to choose",
+      "Helps you understand options and avoid confusion or pressure",
+      "Protects you from fake reviews and biased sales advice",
+      "Includes trusted expert videos in selected playlists ",
+      "(OB-GYN, sex therapists, interior designers, appliance experts & more)",
+      // "Organized support in 1 place"
+    ],
+    imagePath: "/360/49.png"
+  },
+  {
+    id: 6,
+    title: "Expert-Led Webinars",
+    description: [
+      "Live group webinars hosted with trusted experts",
+      "ask questions, learn, and feel reassured",
+      "Guided by the Wifey for Life team",
+      "Examples of webinars hosted!",
+      "Appliances 101 with Zeinab Ahmed",
+      "Feminine Care 101 with Dr. Dalia Ghozlan",
+      "Sex Education 101 with Quareb Therapy"
+    ],
+    imagePath: "/360/53.png"
+  },
+  {
+    id: 7,
+    title: "Discounts on 1:1 Consultations",
+    description: [
+      "Personal Support — At a Better Price 💕",
+      "10%-20% off 1:1 consultations",
+      "Interior designers",
+      "Women's health educators",
+      "Sex therapists",
+      "Appliance experts",
+      "Wedding & bridal consultants"
+    ],
+    imagePath: "/360/47.png"
+  }
+];
 
 export default function PackageDetailPage() {
   const params = useParams();
@@ -24,6 +118,36 @@ export default function PackageDetailPage() {
   const [packageData, setPackageData] = useState<Ipackage | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Embla Carousel for Package Cards
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: "start",
+    slidesToScroll: 1,
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+  }, [emblaApi, onSelect]);
 
   useEffect(() => {
     const fetchPackageData = async () => {
@@ -51,7 +175,7 @@ export default function PackageDetailPage() {
 
   if (!packageData) {
     return (
-      <div className="container mx-auto py-12 px-4">
+      <div className="container mx-auto py-12 px-4 ">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-lovely">Package not found</h2>
           <p className="mt-4 text-lovely/90">
@@ -69,7 +193,8 @@ export default function PackageDetailPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    // <div className="py-8 pb-44 md:pb-24 px-4">
+    <div className="py-8   px-4">
       {/* Back button */}
       <div className="mb-6">
         <Button
@@ -82,7 +207,7 @@ export default function PackageDetailPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Package Image Carousel */}
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-lg border-2 border-lovely">
@@ -133,12 +258,11 @@ export default function PackageDetailPage() {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={cn(
-                    "relative w-16 h-16 rounded-md overflow-hidden border-2",
+                  className={`relative w-16 h-16 rounded-md overflow-hidden border-2 ${
                     currentImageIndex === index
                       ? "border-lovely"
                       : "border-lovely/30 hover:border-lovely/60"
-                  )}
+                  }`}
                 >
                   <Image
                     src={img}
@@ -169,8 +293,81 @@ export default function PackageDetailPage() {
 
           <Separator className="my-6" />
 
+                <div className="mt-4 container-custom pb-44">
+        <h2
+          className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-4`}
+        >
+          Package Features
+        </h2>
+        
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          {supportCards.length > 2 && (
+            <>
+              <button
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+            </>
+          )}
+
+          {/* Embla Carousel */}
+          <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
+            <div className="flex gap-2 md:gap-4">
+              {supportCards.map((card) => (
+                <div key={card.id} className="relative flex-[0_0_80%] sm:flex-[0_0_50%]  min-w-0 pb-6 md:pb-12">
+                  <div className="bg-lovely rounded-sm  shadow-xl h-[350px]  ">
+                    {/* Card Header */}
+                    <div className="p-2 md:p-4 pb-32 md:pb-40 h-full ">
+                      <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
+                        {card.title}
+                      </h3>
+                      <ul className="list-disc list-outside pl-4  text-creamey marker:text-creamey">
+                        {card.description.map((point, index) => (
+                          <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Mobile Screen Mockup - Absolutely positioned at bottom */}
+
+                    <div className="absolute -bottom-14  xs:-bottom-32 sm:-bottom-20  lg:-bottom-40 xl:-bottom-36 left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px]  h-[450px] xs:h-[550px] ">
+                      <Image
+                        src={card.imagePath}
+                        alt={card.title}
+                        fill
+                        className="object-contain object-bottom"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
           {/* Package Items */}
-          <div className="mb-6">
+        {/*  <div className="mb-6">
             <h2
               className={`${thirdFont.className} text-xl font-semibold text-lovely mb-4`}
             >
@@ -181,13 +378,13 @@ export default function PackageDetailPage() {
                 (item, index) =>
                   item.included && (
                     <li key={index} className="flex items-start">
-                      {/* <Package className="h-5 w-5 text-lovely mr-2 flex-shrink-0 mt-0.5" /> */}
                       <span className="text-lovely">• {item.value}</span>
                     </li>
                   )
               )}
             </ul>
           </div>
+          
 
           {/* Notes */}
           {packageData.notes && packageData.notes.length > 0 && (
@@ -218,23 +415,78 @@ export default function PackageDetailPage() {
       </div>
 
       {/* Package Cards Section */}
-      {packageData.cards && packageData.cards.length > 0 && (
-        <div className="mt-16">
-          <h2
-            className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-8`}
-          >
-            Package Features
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {packageData.cards.map((card, index) => (
-              <PackageCard
-                key={index}
-                card={card}
-                packageId={params.id as string}
-              />
-            ))}
+      {false && (
+      <div className="mt-16 container-custom">
+        <h2
+          className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-8`}
+        >
+          Package Features
+        </h2>
+        
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          {supportCards.length > 2 && (
+            <>
+              <button
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+            </>
+          )}
+
+          {/* Embla Carousel */}
+          <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
+            <div className="flex gap-2 md:gap-4">
+              {supportCards.map((card) => (
+                <div key={card.id} className="relative flex-[0_0_80%] sm:flex-[0_0_50%] md:flex-[0_0_40%] lg:flex-[0_0_30%]  2xl:flex-[0_0_22%] min-w-0 pb-6 md:pb-12">
+                  <div className="bg-lovely rounded-sm  shadow-xl h-[350px] md:h-[450px] lg:h-[500px] xl:h-[500px] ">
+                    {/* Card Header */}
+                    <div className="p-2 md:p-4 pb-32 md:pb-40 h-full ">
+                      <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
+                        {card.title}
+                      </h3>
+                      <ul className="list-disc list-outside pl-4  text-creamey marker:text-creamey">
+                        {card.description.map((point, index) => (
+                          <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Mobile Screen Mockup - Absolutely positioned at bottom */}
+                    <div className="absolute -bottom-14  xs:-bottom-32 sm:-bottom-20 md:-bottom-20 lg:-bottom-16 xl:-bottom-4 2xl:-bottom-14  left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px] md:w-[520px] lg:w-[580px] xl:w-[600px] 2xl:w-[620px] h-[450px] xs:h-[550px] md:h-[550px] lg:h-[640px] xl:h-[800px] 2xl:h-[840px]">
+                      <Image
+                        src={card.imagePath}
+                        alt={card.title}
+                        fill
+                        className="object-contain object-bottom"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
       )}
     </div>
   );

@@ -10,8 +10,8 @@ const subCategorySchema = new mongoose.Schema({
   },
   image:{type:String,required:false},
   description: { type: String },
-    HomePage: { type: Boolean, default: false },
-
+  HomePage: { type: Boolean, default: false },
+  active: { type: Boolean, default: true },
 });
 console.log("Registering subCategoryModel");
 const subCategoryModel =
