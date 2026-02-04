@@ -131,8 +131,7 @@ const JoinNow = () => {
         {/* Bottom Text and CTA */}
         <div className="text-center space-y-6">
           <p className="text-base md:text-lg font-bold text-lovely">
-            She comes with exclusive tools & access — because you deserve more 💗
-          </p>
+This isn’t just a planner — it unlocks a whole support system.          </p>
           <Button
             asChild
             size="lg"
