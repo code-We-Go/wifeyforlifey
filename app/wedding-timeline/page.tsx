@@ -544,6 +544,7 @@ function WeddingTimelinePageContent() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [checkingTimeline, setCheckingTimeline] = useState(false);
   const [zaffaTime, setZaffaTime] = useState("18:00");
+  const [religion, setReligion] = useState<"muslim" | "christian">("muslim");
   const [selectedFeatures, setSelectedFeatures] = useState<
     Record<string, { enabled: boolean; duration: number }>
   >(
@@ -841,13 +842,24 @@ function WeddingTimelinePageContent() {
     const generatedEvents: TimelineEvent[] = [];
 
     featureList.forEach((feature, index) => {
-      const meta = FEATURE_META[feature.id] || {
+      let meta = FEATURE_META[feature.id] || {
         label: feature.id,
         bride: "",
         groom: "",
         bridesmaids: "",
         groomsmen: "",
       };
+
+      if (feature.id === "katb_ketab" && religion === "christian") {
+        meta = {
+          ...meta,
+          label: "Church Ceremony",
+          bride: "Church Ceremony",
+          groom: "Church Ceremony",
+          bridesmaids: "Church Ceremony",
+          groomsmen: "Church Ceremony",
+        };
+      }
 
       generatedEvents.push({
         id: feature.id,
@@ -1516,6 +1528,21 @@ function WeddingTimelinePageContent() {
                     </div>
                   </div>
 
+                  <div className="space-y-4">
+                      <Label className="text-xl text-lovely text-center block">
+                        What is your religion?
+                      </Label>
+                      <Select value={religion} onValueChange={(val: any) => setReligion(val)}>
+                        <SelectTrigger className="w-full bg-creamey border-pinkey border-2 text-lovely rounded-md h-[50px] md:h-[60px]">
+                          <SelectValue placeholder="Select Religion" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-creamey text-lovely border-pinkey">
+                          <SelectItem value="muslim">Muslim</SelectItem>
+                          <SelectItem value="christian">Christian</SelectItem>
+                        </SelectContent>
+                      </Select>
+                  </div>
+
                   <Button
                     onClick={() => {
                           if (!isAuthenticated) {
@@ -1567,7 +1594,9 @@ function WeddingTimelinePageContent() {
                               htmlFor={feature.id}
                               className="text-base font-medium cursor-pointer"
                             >
-                              {feature.label}
+                              {feature.id === "katb_ketab" && religion === "christian"
+                                ? "Church Ceremony"
+                                : feature.label}
                               {feature.id === "hair" && (
                                 <span className="block text-xs font-normal text-lovely/70 mt-1">
                                   (for hijabis we recommend make up to be first, you can swap them later.)
