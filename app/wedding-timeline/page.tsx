@@ -1537,8 +1537,8 @@ function WeddingTimelinePageContent() {
                           <SelectValue placeholder="Select Religion" />
                         </SelectTrigger>
                         <SelectContent className="bg-creamey text-lovely border-pinkey">
-                          <SelectItem value="muslim">Muslim</SelectItem>
-                          <SelectItem value="christian">Christian</SelectItem>
+                          <SelectItem className="text-lovely" value="muslim">Muslim</SelectItem>
+                          <SelectItem className="text-lovely" value="christian">Christian</SelectItem>
                         </SelectContent>
                       </Select>
                   </div>
