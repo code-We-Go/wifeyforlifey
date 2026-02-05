@@ -110,6 +110,7 @@ function SuccessPage() {
                 </p>
               ) : (
                 <p>
+                  {/* hnsheel alsession  */}
                   Your subscription was created successfully, Book your session
                   now.
                 </p>
@@ -162,14 +163,14 @@ function SuccessPage() {
                 </button>
               </Link>
             )}
-            {subscription === "mini" && (
+            {/* {subscription === "mini" && (
               <button
                 onClick={() => setIsPlaylistModalOpen(true)}
                 className="px-6 py-2 bg-creamey text-lovely border-lovely rounded-lg font-semibold hover:cursor-pointer transition"
               >
                 Choose My Playlist
               </button>
-            )}
+            )} */}
           </div>
         )}
 
@@ -203,12 +204,12 @@ function SuccessPage() {
             )}
             {subscription === "mini" && (
               <>
-                <button
+                {/* <button
                   onClick={() => setIsPlaylistModalOpen(true)}
                   className="px-6 py-2 bg-creamey text-lovely  border-lovely border-2 rounded-lg font-semibold hover:cursor-pointer transition"
                 >
                   Choose My Playlist
-                </button>
+                </button> */}
                 <Link href="/shop" passHref>
                   <button className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition">
                     Continue Shopping

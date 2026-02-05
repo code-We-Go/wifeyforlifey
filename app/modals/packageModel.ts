@@ -24,6 +24,7 @@ const PackageSchema = new Schema<Ipackage>(
     notes: { type: [String], required: true, default: [] },
     cards: { type: [PackageCardSchema], required: false, default: [] },
     slug: { type: String, required: false },
+    partOf:{type:String,required:false}
   },
   {
     timestamps: true,

@@ -32,6 +32,7 @@ export async function GET(req: Request) {
   const limit = all ? 0 : 10;
   const skip = all ? 0 : (page - 1) * limit;
   const packageID = searchParams.get("packageID");
+  const slug = searchParams.get("slug");
 
   try {
     if (packageID) {
@@ -48,9 +49,13 @@ export async function GET(req: Request) {
     if (search) {
       searchQuery.name = { $regex: search, $options: "i" };
     }
+//for testing
+    // if (active !== null) {
+    //   searchQuery.active = active === "true";
+    // }
 
-    if (active !== null) {
-      searchQuery.active = active === "true";
+    if (slug) {
+      searchQuery.slug = slug;
     }
 
     // Get total count with search filter

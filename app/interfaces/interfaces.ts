@@ -283,6 +283,7 @@ export interface Ipackage {
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
   active: boolean;
+  partOf? :string
 }
 
 export interface ISubscription {
