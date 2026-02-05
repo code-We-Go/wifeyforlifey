@@ -2047,7 +2047,7 @@ function WeddingTimelinePageContent() {
                 variant="outline"
                 className="flex-1 border-2 border-lovely text-lovely hover:bg-pinkey/20"
                 onClick={() => {
-                  router.push("/signup?callbackUrl=/wedding-timeline?step=2");
+                  router.push("/register?callbackUrl=/wedding-timeline?step=2");
                   setShowLoginDialog(false);
                 }}
               >
