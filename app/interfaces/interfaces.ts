@@ -273,6 +273,7 @@ export interface PackageItem {
 
 export interface Ipackage {
   _id?: string;
+  slug?: string;
   name: string;
   imgUrl: string; // Main image (keeping for backward compatibility)
   images: string[]; // Array of image URLs
