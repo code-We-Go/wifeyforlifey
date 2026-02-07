@@ -229,7 +229,7 @@ const Support360 = () => {
         {/* CTA Button */}
         <div className="flex justify-center mt-48 sm:mt-36 md:mt-32 lg:mt-20 ">
           <Link 
-            href="/packages/687396821b4da119eb1c13fe"
+            href="/package/GehazBestiePlanner"
             className="bg-lovely relative text-creamey px-8 py-4 rounded-sm font-semibold text-base md:text-lg hover:bg-lovely/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Buy Gehaz Bestie Planner Now

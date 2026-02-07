@@ -137,7 +137,7 @@ This isn’t just a planner — it unlocks a whole support system.          </p>
             size="lg"
             className="rounded-md font-bold tracking-wide text-base md:text-lg px-8 py-6 bg-lovely hover:bg-lovely/90 text-creamey shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
-            <Link href="/packages/687396821b4da119eb1c13fe">See what&apos;s inside <span className="ml-2"><Image src="/illustrations/key.png" alt="arrow-right" className="-rotate-[110deg] animate-pulse" width={50} height={50} /></span></Link>
+            <Link href="/package/GehazBestiePlanner">See what&apos;s inside <span className="ml-2"><Image src="/illustrations/key.png" alt="arrow-right" className="-rotate-[110deg] animate-pulse" width={50} height={50} /></span></Link>
           </Button>
         </div>
       </div>

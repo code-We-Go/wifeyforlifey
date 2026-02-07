@@ -187,7 +187,30 @@ function ShopPage() {
       try {
         const response = await fetch("/api/packages?all=true&active=true");
         const data = await response.json();
-        setPackages(Array.isArray(data.data) ? data.data : []);
+        const fetchedPackages = Array.isArray(data.data) ? data.data : [];
+        
+        // Custom Gehaz Bestie Planner package to show first
+        const gehazBestiePlanner: Ipackage = {
+          _id: "custom-gehaz-bestie-planner",
+          slug: "GehazBestiePlanner",
+          name: "Gehaz Bestie Planner",
+          imgUrl: "/experience/gehaz1.png",
+          images: ["/experience/gehaz1.png"],
+          price: 1500,
+          duration: "",
+          items: [],
+          notes: [],
+          cards: [],
+          active: true,
+        };
+        
+        // Filter out any fetched packages with slug "GehazBestiePlanner" to avoid duplicates
+        const filteredPackages = fetchedPackages.filter(
+          (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner"
+        );
+        
+        // Prepend the custom package to the filtered packages
+        setPackages([gehazBestiePlanner, ...filteredPackages]);
       } catch (error) {
         console.error("Error fetching packages:", error);
       } finally {

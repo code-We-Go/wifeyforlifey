@@ -293,82 +293,11 @@ export default function PackageDetailPage() {
 
           <Separator className="my-6" />
 
-                <div className="mt-4 container-custom pb-44">
-        {/* <h2
-          className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-4`}
-        >
-          Package Features
-        </h2> */}
-        
-        {/* Carousel Container */}
-                <div className="relative">
-          {/* Navigation Arrows */}
-          {supportCards.length > 2 && (
-            <>
-              <button
-                onClick={scrollPrev}
-                disabled={!canScrollPrev}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-              <button
-                onClick={scrollNext}
-                disabled={!canScrollNext}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
-                aria-label="Next slide"
-              >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-            </>
-          )}
 
-          {/* Embla Carousel */}
-          <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
-            <div className="flex gap-2 md:gap-4">
-              {supportCards.map((card) => (
-                <div key={card.id} className="relative flex-[0_0_80%] sm:flex-[0_0_50%]  min-w-0 pb-6 md:pb-12">
-                  <div className="bg-lovely rounded-sm  shadow-xl h-[350px]  ">
-                    {/* Card Header */}
-                    <div className="p-2 md:p-4 pb-32 md:pb-40 h-full ">
-                      <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
-                        {card.title}
-                      </h3>
-                      <ul className="list-disc list-outside pl-4  text-creamey marker:text-creamey">
-                        {card.description.map((point, index) => (
-                          <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
-                            {point}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
 
-                    {/* Mobile Screen Mockup - Absolutely positioned at bottom */}
-
-                    <div className="absolute -bottom-14  xs:-bottom-32 sm:-bottom-20  lg:-bottom-40 xl:-bottom-36 left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px]  h-[450px] xs:h-[550px] ">
-                      <Image
-                        src={card.imagePath}
-                        alt={card.title}
-                        fill
-                        className="object-contain object-bottom"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-      </div>
 
           {/* Package Items */}
-         <div className="mb-6">
+         {/* <div className="mb-6">
             <h2
               className={`${thirdFont.className} text-xl font-semibold text-lovely mb-4`}
             >
@@ -385,7 +314,7 @@ export default function PackageDetailPage() {
               )}
             </ul>
           </div>
-          
+           */}
 
           {/* Notes */}
           {packageData.notes && packageData.notes.length > 0 && (

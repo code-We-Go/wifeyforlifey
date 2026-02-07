@@ -50,9 +50,9 @@ export async function GET(req: Request) {
       searchQuery.name = { $regex: search, $options: "i" };
     }
 //for testing
-    // if (active !== null) {
-    //   searchQuery.active = active === "true";
-    // }
+    if (active !== null) {
+      searchQuery.active = active === "true";
+    }
 
     if (slug) {
       searchQuery.slug = slug;

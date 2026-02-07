@@ -761,7 +761,7 @@ const AccountPage = () => {
                 </Button>
               </Link>
             )}
-            {!user.isSubscribed && shouldPromptChoosePlaylist && (
+            {/* {!user.isSubscribed && shouldPromptChoosePlaylist && (
               <div className="mt-3">
                 <Button
                   size="sm"
@@ -772,7 +772,7 @@ const AccountPage = () => {
                   Choose My Playlist
                 </Button>
               </div>
-            )}
+            )} */}
 
             {user.isSubscribed && (
               <p className="text-lovely/80 text-sm font-semibold">

@@ -101,21 +101,23 @@ function SuccessPage() {
             <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">
               🎉 Your Subscription was created successfully. 🎉
             </h1>
-            {!account &&
-              (subscription !== "mini" ? (
-                <p>
-                  Your subscription was created successfully, now create your
-                  account to enjoy our exclusive educational channel and
-                  partnerships
-                </p>
-              ) : (
-                <p>
-                  {/* hnsheel alsession  */}
-                  Your subscription was created successfully, Book your session
-                  now.
-                </p>
-              ))}
-            <p>Look out for an email from your bestie 👯‍♀️.</p>
+            <>
+              {!account &&
+                (subscription !== "mini" ? (
+                  <p>
+                    Your subscription was created successfully, now create your
+                    account to enjoy our exclusive educational channel and
+                    partnerships
+                  </p>
+                ) : (
+                  <p className="px-2 md:px-6 xl:px-12">
+                    {/* hnsheel alsession  */}
+                    Your subscription was created successfully, 
+                    Once you receive your planner, you'll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you'll find a thank-you card with a QR code that lets you browse and select your favorite playlist.
+                 </p>
+                ))}
+              <p>Look out for an email from your bestie 👯‍♀️.</p>
+            </>
           </div>
         ) : sessionOrder ? (
           <div className="text-lovely">

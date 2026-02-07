@@ -198,7 +198,7 @@ const Playlists = () => {
             size="lg"
             className="bg-creamey text-lovely hover:bg-creamey/90  text-sm md:text-base md:px-8 py-4 md:py-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Link href="/packages/687396821b4da119eb1c13fe" className="text-center leading-tight">
+            <Link href="/package/GehazBestiePlanner" className="text-center leading-tight">
               Subscribe to unlock <br /> premium videos
             </Link>
           </Button>

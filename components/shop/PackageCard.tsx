@@ -21,13 +21,13 @@ export default function PackageCard({
   const handlePackageClick = (e: React.MouseEvent) => {
     // Only navigate if the click wasn't on a button
     if (!(e.target as HTMLElement).closest("button")) {
-      router.push(`/packages/${packageItem._id}`);
+    router.push(`/package/${packageItem.slug}`);
     }
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation
-    router.push(`/packages/${packageItem._id}`);
+    router.push(`/package/${packageItem.slug}`);
   };
 
   return (
