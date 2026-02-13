@@ -26,6 +26,9 @@ loadDB();
 
 // Handle GET requests
 export async function GET(request: Request) {
+  console.log("==========================================");
+  console.log("🚀 CALLBACK ROUTE HIT - GET REQUEST");
+  console.log("==========================================");
   try {
     const { searchParams } = new URL(request.url);
     const data: Record<string, string> = {};
@@ -34,6 +37,8 @@ export async function GET(request: Request) {
     });
 
     console.log("GET Callback Received:", data);
+    console.log("Order ID:", data.order);
+    console.log("Success:", data.success);
     const isSuccess = data.success === "true";
 
     // Perform your logic with the GET data here
@@ -84,7 +89,14 @@ export async function GET(request: Request) {
         .populate({ path: "to", options: { strictPopulate: false } })
         .populate({ path: "from", options: { strictPopulate: false } });
 
+      console.log("PaymentOp found:", !!paymentOp);
       if (paymentOp) {
+        console.log("=== PAYMENT OP PATH ===");
+        console.log("paymentOp.to._id:", (paymentOp as any)?.to?._id?.toString());
+        console.log("paymentOp.isGift:", paymentOp.isGift);
+        console.log("paymentOp.giftRecipientEmail:", paymentOp.giftRecipientEmail);
+        console.log("paymentOp.email:", paymentOp.email);
+        
         // Compute expiry for subscription based on package duration
         const expiryDate = new Date();
         if ((paymentOp.to as any)?.duration === "0") {
@@ -98,7 +110,7 @@ export async function GET(request: Request) {
           paymentOp.isGift && paymentOp.giftRecipientEmail
             ? paymentOp.giftRecipientEmail
             : paymentOp.email;
-
+        console.log("subscriptionEmail (paymentOp path):", subscriptionEmail);
         // Update user's subscription to the new package (upgrade) or extend (renew), using full details from paymentOp
         const user = await UserModel.findOne({ email: subscriptionEmail });
         const subscriptionData: any = {
@@ -443,7 +455,13 @@ export async function GET(request: Request) {
       }
 
       if (subscription) {
+        console.log("=== LEGACY SUBSCRIPTION PATH ===");
         console.log("Subscription found for ID:", data.order, subscription._id);
+        console.log("subscription.packageID._id:", subscription.packageID?._id?.toString());
+        console.log("subscription.isGift:", subscription.isGift);
+        console.log("subscription.giftRecipientEmail:", subscription.giftRecipientEmail);
+        console.log("subscription.email:", subscription.email);
+        
         const expiryDate = new Date();
 
         // Check if it's a gift subscription
@@ -473,6 +491,7 @@ export async function GET(request: Request) {
           subscription.isGift && subscription.giftRecipientEmail
             ? subscription.giftRecipientEmail
             : subscription.email;
+        console.log("subscriptionEmail (legacy path):", subscriptionEmail);
 
         // 1. Update the document and get the updated version
         console.log("register" + packageModel);
@@ -954,7 +973,7 @@ export async function GET(request: Request) {
             from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
           });
         }
-
+// we need here if they are same email to skip this one because loyalty points are already added
         const loyalty = await LoyaltyTransactionModel.create({
           email:
             res.isGift && res.giftRecipientEmail

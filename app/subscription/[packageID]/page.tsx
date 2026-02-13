@@ -437,7 +437,11 @@ We’re beyond excited to share this experience with you… your planner will be
   ) => {
     const { name, value } = e.target;
     console.log(value);
-    setFormData({ ...formData, [name]: value });
+    // Convert email fields to lowercase
+    const finalValue = (name === 'email' || name === 'giftRecipientEmail') 
+      ? value.toLowerCase() 
+      : value;
+    setFormData({ ...formData, [name]: finalValue });
   };
 
   // Separate handler for state changes to ensure shipping calculation triggers

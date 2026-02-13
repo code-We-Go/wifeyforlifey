@@ -8,23 +8,36 @@ import mongoose from "mongoose";
 export async function POST(request: NextRequest) {
   try {
     await ConnectDB();
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-    }
-
-    const { playlistId } = await request.json();
+    const { playlistId, subscriptionId } = await request.json();
+    console.log("subscriptionId"+subscriptionId)
+    
     if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
       return NextResponse.json({ error: "Valid playlistId is required" }, { status: 400 });
     }
 
-    const subscription = await subscriptionsModel.findOne({ email: session.user.email, subscribed: true });
+    let subscription;
+
+    // Check if subscriptionId is provided (for mini subscription verification flow)
+    if (subscriptionId) {
+      if (!mongoose.Types.ObjectId.isValid(subscriptionId)) {
+        return NextResponse.json({ error: "Valid subscriptionId is required" }, { status: 400 });
+      }
+      subscription = await subscriptionsModel.findById(subscriptionId);
+    } else {
+      // Otherwise, use authenticated session
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+      subscription = await subscriptionsModel.findOne({ email: session.user.email, subscribed: true });
+    }
+
     if (!subscription) {
       return NextResponse.json({ error: "Active subscription not found" }, { status: 404 });
     }
 
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 45);
+    expiryDate.setMonth(expiryDate.getMonth() + 6);
 
     const existingIndex = (subscription as any).allowedPlaylists?.findIndex(
       (p: any) => p.playlistID?.toString() === playlistId
@@ -43,6 +56,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
+    console.error("Error updating allowed playlists:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
