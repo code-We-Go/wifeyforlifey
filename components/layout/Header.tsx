@@ -688,9 +688,12 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <Link href={"/wishlist"}>
-                  <Heart />
-                </Link>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => setIsAccountOpen(true)}
+                >
+                  <User className="text-creamey" />
+                </div>
               )}
               <Link href={"/cart"}>
                 <ShoppingBag />
@@ -904,6 +907,66 @@ export default function Header() {
                 ))}
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Mobile Account Modal */}
+      <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
+        <DialogContent className="sm:max-w-md w-[80%] bg-creamey">
+          <DialogHeader>
+            <DialogTitle className="text-lovely">Account</DialogTitle>
+          </DialogHeader>
+          <div className="p-2">
+            <nav className="space-y-1">
+              {isAuthenticated ? (
+                accountItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                    onClick={() => setIsAccountOpen(false)}
+                  >
+                    <item.icon className="mr-3 h-4 w-4 text-lovely" />
+                    {item.label}
+                  </Link>
+                ))
+              ) : (
+                <div></div>
+              )}
+
+              {isAuthenticated ? (
+                <div className="border-t border-gray-200 mt-2 pt-2">
+                  <button
+                    className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
+                    onClick={() => {
+                      handleLogout();
+                      setIsAccountOpen(false);
+                    }}
+                  >
+                    <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="">
+                  <Link
+                    href={"/login"}
+                    className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                    onClick={() => setIsAccountOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href={"/register"}
+                    className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
+                    onClick={() => setIsAccountOpen(false)}
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
+            </nav>
           </div>
         </DialogContent>
       </Dialog>
