@@ -52,6 +52,9 @@ export async function POST(request: NextRequest) {
       ];
     }
 
+    // Set miniSubscriptionActivated to true when playlist is added
+    (subscription as any).miniSubscriptionActivated = true;
+
     await subscription.save();
 
     return NextResponse.json({ success: true });

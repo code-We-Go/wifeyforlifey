@@ -41,6 +41,14 @@ console.log(giftSenderEmail)
       );
     }
 
+    // Check if subscription has already been activated
+    if ((subscription as any).miniSubscriptionActivated === true) {
+      return NextResponse.json(
+        { error: "This subscription has already been activated" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       subscription: subscription,
