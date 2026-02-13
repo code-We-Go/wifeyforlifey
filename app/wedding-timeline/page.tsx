@@ -39,6 +39,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreVertical,
+  GripVertical,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
@@ -382,12 +383,20 @@ function SortableRow({
     <TableRow
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={`hover:bg-pinkey w-full cursor-grab active:cursor-grabbing ${
+      className={`hover:bg-pinkey w-full ${
         event.isBreak ? "bg-pinkey/50" : "bg-pinkey/60"
       } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
     >
+      {/* Drag Handle Column */}
+      <TableCell className="p-1 md:p-2 align-middle w-8">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-lovely/60 hover:text-lovely flex items-center justify-center touch-none"
+        >
+          <GripVertical className="h-4 w-4 md:h-5 md:w-5" />
+        </div>
+      </TableCell>
       <TableCell className="font-medium text-sm md:text-base p-1 md:p-4 align-middle">
         <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm break-words">
           {event.timeLabel}
@@ -1714,6 +1723,8 @@ function WeddingTimelinePageContent() {
               <Table className="w-full relative">
                 <TableHeader className="bg-lovely sticky top-0 z-10 shadow-sm">
                   <TableRow className="hover:bg-lovely">
+                    {/* Drag Handle Header */}
+                    <TableHead className="w-8 p-1 md:p-2"></TableHead>
                     <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-32 md:w-auto text-center">
                       TIME
                     </TableHead>
