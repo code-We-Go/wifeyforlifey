@@ -4,12 +4,13 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await ConnectDB();
     
-    const subscriptionId = params.id;
+    const { id } = await params;
+    const subscriptionId = id;
     
     const subscription = await subscriptionsModel.findById(subscriptionId);
     

@@ -48,7 +48,7 @@ export default function FavoritesGrid() {
               const price = fav.maxPrice && fav.maxPrice > 0 ? fav.maxPrice : fav.price;
               return price && price > 0 ? price : null;
             })
-            .filter((price: number | null) => price !== null);
+            .filter((price: number | null): price is number => price !== null);
 
           const maxPrice = pricesArray.length > 0 ? Math.max(...pricesArray) : 1000000;
           setMaxPriceValue(maxPrice);
@@ -104,7 +104,7 @@ export default function FavoritesGrid() {
           const price = fav.maxPrice && fav.maxPrice > 0 ? fav.maxPrice : fav.price;
           return price && price > 0 ? price : null;
         })
-        .filter((price: number | null) => price !== null);
+        .filter((price: number | null): price is number => price !== null);
 
       const maxPrice = pricesArray.length > 0 ? Math.max(...pricesArray) : 1000000;
       setMaxPriceValue(maxPrice);
