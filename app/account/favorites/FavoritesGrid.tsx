@@ -28,8 +28,8 @@ export default function FavoritesGrid() {
   const [subCategories, setSubCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("All");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
-  const [maxPriceValue, setMaxPriceValue] = useState<number>(10000);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
+  const [maxPriceValue, setMaxPriceValue] = useState<number>(100000);
 
   // Fetch favorites data from API
   useEffect(() => {
@@ -43,13 +43,16 @@ export default function FavoritesGrid() {
           setFavorites(data.favorites);
 
           // Find the maximum price for the slider
-          const maxPrice = Math.max(
-            ...data.favorites.map((fav: IFavorite) =>
-              fav.maxPrice && fav.maxPrice > 0 ? fav.maxPrice : fav.price || 0
-            )
-          );
-          setMaxPriceValue(maxPrice > 0 ? maxPrice : 10000);
-          setPriceRange([0, maxPrice > 0 ? maxPrice : 10000]);
+          const pricesArray = data.favorites
+            .map((fav: IFavorite) => {
+              const price = fav.maxPrice && fav.maxPrice > 0 ? fav.maxPrice : fav.price;
+              return price && price > 0 ? price : null;
+            })
+            .filter((price: number | null) => price !== null);
+
+          const maxPrice = pricesArray.length > 0 ? Math.max(...pricesArray) : 1000000;
+          setMaxPriceValue(maxPrice);
+          setPriceRange([0, maxPrice]);
         } else {
           console.error("No favorites data found");
           setFavorites([]);
@@ -82,6 +85,33 @@ export default function FavoritesGrid() {
     }
   }, [favorites]);
 
+  // Update max price when category or subcategory changes
+  useEffect(() => {
+    if (favorites.length > 0) {
+      // Filter favorites by category and subcategory (without price filter)
+      const categoryFilteredFavorites = favorites.filter((favorite) => {
+        const categoryMatch =
+          selectedCategory === "All" || favorite.category === selectedCategory;
+        const subCategoryMatch =
+          selectedSubCategory === "All" ||
+          favorite.subCategory === selectedSubCategory;
+        return categoryMatch && subCategoryMatch;
+      });
+
+      // Calculate max price from filtered items
+      const pricesArray = categoryFilteredFavorites
+        .map((fav: IFavorite) => {
+          const price = fav.maxPrice && fav.maxPrice > 0 ? fav.maxPrice : fav.price;
+          return price && price > 0 ? price : null;
+        })
+        .filter((price: number | null) => price !== null);
+
+      const maxPrice = pricesArray.length > 0 ? Math.max(...pricesArray) : 1000000;
+      setMaxPriceValue(maxPrice);
+      setPriceRange([0, maxPrice]);
+    }
+  }, [favorites, selectedCategory, selectedSubCategory]);
+
   // Filter favorites based on selected category, subcategory, and price range
   const filteredFavorites = favorites.filter((favorite) => {
     const categoryMatch =
@@ -91,15 +121,22 @@ export default function FavoritesGrid() {
       favorite.subCategory === selectedSubCategory;
 
     // Price filtering logic
+    // If item has no price information, always show it
+    const hasPrice = favorite.price && favorite.price > 0;
+    const hasMaxPrice = favorite.maxPrice && favorite.maxPrice > 0;
+    
+    // Items without price should always be shown
+    if (!hasPrice && !hasMaxPrice) {
+      return categoryMatch && subCategoryMatch;
+    }
+
     const minPrice = favorite.price || 0;
-    const maxPrice =
-      favorite.maxPrice && favorite.maxPrice > 0
-        ? favorite.maxPrice
-        : favorite.price || 0;
+    const maxPrice = hasMaxPrice ? favorite.maxPrice! : favorite.price || 0;
 
     const priceMatch =
       (minPrice >= priceRange[0] && minPrice <= priceRange[1]) ||
-      (maxPrice >= priceRange[0] && maxPrice <= priceRange[1]);
+      (maxPrice >= priceRange[0] && maxPrice <= priceRange[1]) ||
+      (minPrice <= priceRange[0] && maxPrice >= priceRange[1]); // Item price range encompasses filter range
 
     return categoryMatch && subCategoryMatch && priceMatch;
   });
@@ -107,10 +144,8 @@ export default function FavoritesGrid() {
   // Handle category change
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    // Reset subcategory when category changes
-    if (category !== "All") {
-      setSelectedSubCategory("All");
-    }
+    // Always reset subcategory when category changes
+    setSelectedSubCategory("All");
   };
 
   // Handle price range change
@@ -200,14 +235,14 @@ export default function FavoritesGrid() {
 
       {/* Favorites Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(8)].map((_, index) => (
             <FavoriteCardSkeleton key={index} />
           ))}
         </div>
       ) : (
         <>
-          {filteredFavorites.length === 0 ? (
+          {filteredFavorites?.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-lovely text-lg">
                 No favorites found with the selected filters.
@@ -215,7 +250,7 @@ export default function FavoritesGrid() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredFavorites.map((favorite) => (
+              {filteredFavorites?.map((favorite) => (
                 <FavoriteCard key={favorite._id} favorite={favorite} />
               ))}
             </div>

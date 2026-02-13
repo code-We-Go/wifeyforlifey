@@ -273,7 +273,7 @@ function MiniSubscriptionVerificationContent() {
            ✨ Welcome home, Wifey! ✨
           </h1>
           <p className="text-lovely/80">
-            We’re so excited you’re here, my beautiful bride 💖 
+            We’re so excited you’re here, our beautiful bride 💖 
             <br />
 Let’s verify your experience and choose your playlist! your bridal era officially starts now.          </p>
         </div>
