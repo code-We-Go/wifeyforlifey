@@ -1001,6 +1001,20 @@ function WeddingTimelinePageContent() {
       return;
     }
 
+    // Check if feedback text is mandatory based on ratings and recommendation
+    const hasLowRating = feedbackRatings.easeOfUse < 5 && feedbackRatings.easeOfUse > 0 || 
+                         feedbackRatings.satisfaction < 5 && feedbackRatings.satisfaction > 0;
+    const hasNegativeRecommendation = feedbackRecommend === "definitely_not" || feedbackRecommend === "maybe";
+    
+    if ((hasLowRating || hasNegativeRecommendation) && !feedbackText.trim()) {
+      toast({
+        title: "Additional Feedback Required",
+        description: "Please share your thoughts in the comments section to help us improve.",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+
     setIsSubmittingFeedback(true);
 
     try {
@@ -1977,12 +1991,25 @@ function WeddingTimelinePageContent() {
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
                   Any additional comments?
+                  {((feedbackRatings.easeOfUse < 5 && feedbackRatings.easeOfUse > 0) || 
+                    (feedbackRatings.satisfaction < 5 && feedbackRatings.satisfaction > 0) ||
+                    feedbackRecommend === "definitely_not" || 
+                    feedbackRecommend === "maybe") && (
+                    <span className="text-lovely ml-1">*</span>
+                  )}
                 </label>
                 <Textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Share your thoughts..."
-                  className="min-h-[80px] placeholder:text-lovely/60 border-2 border-pinkey bg-creamey resize-none focus:border-lovely"
+                  className={`min-h-[80px] placeholder:text-lovely/60 border-2 bg-creamey resize-none focus:border-lovely ${
+                    ((feedbackRatings.easeOfUse < 5 && feedbackRatings.easeOfUse > 0) || 
+                     (feedbackRatings.satisfaction < 5 && feedbackRatings.satisfaction > 0) ||
+                     feedbackRecommend === "definitely_not" || 
+                     feedbackRecommend === "maybe")
+                      ? "border-lovely"
+                      : "border-pinkey"
+                  }`}
                 />
               </div>
             </div>
