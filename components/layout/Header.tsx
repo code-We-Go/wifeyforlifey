@@ -105,6 +105,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   
@@ -690,7 +691,7 @@ export default function Header() {
               ) : (
                 <div
                   className="cursor-pointer"
-                  onClick={() => setIsAccountOpen(true)}
+                  onClick={() => setIsMobileAccountOpen(true)}
                 >
                   <User className="text-creamey" />
                 </div>
@@ -912,7 +913,7 @@ export default function Header() {
       </Dialog>
       
       {/* Mobile Account Modal */}
-      <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
+      <Dialog open={isMobileAccountOpen} onOpenChange={setIsMobileAccountOpen}>
         <DialogContent className="sm:max-w-md w-[80%] bg-creamey">
           <DialogHeader>
             <DialogTitle className="text-lovely">Account</DialogTitle>
@@ -925,7 +926,7 @@ export default function Header() {
                     key={item.href}
                     href={item.href}
                     className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                    onClick={() => setIsAccountOpen(false)}
+                    onClick={() => setIsMobileAccountOpen(false)}
                   >
                     <item.icon className="mr-3 h-4 w-4 text-lovely" />
                     {item.label}
@@ -941,7 +942,7 @@ export default function Header() {
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md group transition-colors"
                     onClick={() => {
                       handleLogout();
-                      setIsAccountOpen(false);
+                      setIsMobileAccountOpen(false);
                     }}
                   >
                     <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
@@ -953,14 +954,14 @@ export default function Header() {
                   <Link
                     href={"/login"}
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                    onClick={() => setIsAccountOpen(false)}
+                    onClick={() => setIsMobileAccountOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link
                     href={"/register"}
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
-                    onClick={() => setIsAccountOpen(false)}
+                    onClick={() => setIsMobileAccountOpen(false)}
                   >
                     Sign up
                   </Link>
