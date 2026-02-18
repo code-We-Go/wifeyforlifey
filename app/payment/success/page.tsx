@@ -128,7 +128,7 @@ function SuccessPage() {
             <p className="mt-1">Session: {sessionOrder.sessionTitle}</p>
             <div className="mt-4 p-4 border border-lovely rounded-2xl bg-creamey">
               <p className="font-semibold">
-                click the link below to arrange your appointment:
+                click the link below r appointment:
               </p>
               <a
                 href={`https://wa.me/${String(

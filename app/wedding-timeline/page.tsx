@@ -150,7 +150,7 @@ const FEATURES: Feature[] = [
     category: "before",
     allowedVariations: ["christian_church_venue", "christian_church_only"],
   },
-  { id: "Guest_Arrival", label: "Guest Arrival", defaultDuration: 30, category: "before" },
+  { id: "Guest_Arrival", label: "Guest Arrival", defaultDuration: 10, category: "before" },
   // { id: "entrance", label: "Entrance", defaultDuration: 10, category: "before" },
   {
     id: "katb_ketab",
@@ -176,7 +176,7 @@ const FEATURES: Feature[] = [
   {
     id: "church",
     label: "Church Ceremony",
-    defaultDuration: 45,
+    defaultDuration: 60,
     category: "before",
     allowedVariations: ["christian_church_venue", "christian_church_only"],
   },
@@ -265,7 +265,7 @@ const FEATURE_META: Record<
     label: "Makeup",
     bride: "Makeup",
     groom: "Arriving & Getting Ready",
-    bridesmaids: "Arrival at the venue and getting ready",
+    bridesmaids: "Arriving & Getting Ready",
     groomsmen: "Arriving & Getting Ready",
     order: 3,
   },
@@ -303,10 +303,10 @@ const FEATURE_META: Record<
   },
   moving_to_church: {
     label: "Moving to Church",
-    bride: "Heading to Church",
-    groom: "Heading to Church",
-    bridesmaids: "Heading to Church",
-    groomsmen: "Heading to Church",
+    bride: "Heading to Church / Guest Arrival",
+    groom: "Heading to Church / Guest Arrival",
+    bridesmaids: "Heading to Church / Guest Arrival",
+    groomsmen: "Heading to Church / Guest Arrival",
     order: 7.5,
   },
   Guest_Arrival: {
@@ -352,10 +352,10 @@ const FEATURE_META: Record<
   },
   salamat: {
     label: "Salamat & Pictures",
-    bride: "Greetings & Photos",
-    groom: "Greetings & Photos",
-    bridesmaids: "Photos",
-    groomsmen: "Photos",
+    bride: "Salamat & Photos",
+    groom: "Salamat & Photos",
+    bridesmaids: "Salamat & Photos",
+    groomsmen: "Salamat & Photos",
     order: 8.2,
   },
   moving_to_venue: {
