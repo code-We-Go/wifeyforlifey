@@ -120,23 +120,30 @@ export default function FavoritesGrid() {
       selectedSubCategory === "All" ||
       favorite.subCategory === selectedSubCategory;
 
+    // If the slider covers the full range, skip price filtering entirely
+    const isFullPriceRange =
+      priceRange[0] === 0 && priceRange[1] >= maxPriceValue;
+    if (isFullPriceRange) {
+      return categoryMatch && subCategoryMatch;
+    }
+
     // Price filtering logic
-    // If item has no price information, always show it
-    const hasPrice = favorite.price && favorite.price > 0;
-    const hasMaxPrice = favorite.maxPrice && favorite.maxPrice > 0;
-    
-    // Items without price should always be shown
+    const hasPrice = (favorite.price ?? 0) > 0;
+    const hasMaxPrice = (favorite.maxPrice ?? 0) > 0;
+
+    // Items without any price information are always shown
     if (!hasPrice && !hasMaxPrice) {
       return categoryMatch && subCategoryMatch;
     }
 
-    const minPrice = favorite.price || 0;
-    const maxPrice = hasMaxPrice ? favorite.maxPrice! : favorite.price || 0;
+    // Use price as both min and max when maxPrice is 0 or missing
+    const minPrice = hasPrice ? favorite.price! : 0;
+    const maxPrice = hasMaxPrice ? favorite.maxPrice! : minPrice;
 
     const priceMatch =
       (minPrice >= priceRange[0] && minPrice <= priceRange[1]) ||
       (maxPrice >= priceRange[0] && maxPrice <= priceRange[1]) ||
-      (minPrice <= priceRange[0] && maxPrice >= priceRange[1]); // Item price range encompasses filter range
+      (minPrice <= priceRange[0] && maxPrice >= priceRange[1]);
 
     return categoryMatch && subCategoryMatch && priceMatch;
   });
