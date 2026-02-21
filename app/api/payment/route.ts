@@ -436,6 +436,7 @@ export async function POST(request: Request) {
             bostaDistrictName: data.bostaDistrictName,
             // Status
             status: "pending",
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           });
 
           return NextResponse.json(
@@ -504,6 +505,7 @@ export async function POST(request: Request) {
             bostaDistrictName: data.bostaDistrictName,
             // Status
             status: "pending",
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           });
 
           return NextResponse.json(
