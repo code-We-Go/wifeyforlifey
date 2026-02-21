@@ -8,6 +8,8 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 // GET /api/favorites - Get all favorites for the current user
 export async function GET(req: NextRequest) {
+  await ConnectDB();
+  // Connect to database
   try {
     // Check authentication
     const {
@@ -17,33 +19,39 @@ export async function GET(req: NextRequest) {
     } = await authenticateRequest(req);
 
     if (!isAuthenticated || !authUser) {
+      console.warn("[favorites] Unauthenticated request");
       return NextResponse.json(
         { error: "You must be logged in to view favorites" },
         { status: 401 }
       );
     }
-
-    // Connect to database
-    await ConnectDB();
+    
+    console.log(`[favorites] Auth OK — email: ${authUser.email}, authType: ${authType}`);
+    
     console.log("register" + subscriptionsModel);
+
     let user = authUser;
     if (authType === "session") {
-      user = await UserModel.findOne({ email: authUser.email }).populate(
+      user = await UserModel.findOne({ email: user.email }).populate(
         "subscription"
       );
+      console.log(`[favorites] DB user lookup — found: ${!!user}, subscription: ${JSON.stringify(user?.subscription ?? null)}`);
     }
 
     if (!user) {
+      console.warn(`[favorites] User not found in DB for email: ${authUser.email}`);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if user has subscription
-    // Ensure subscriptionExpiryDate is treated as Date
     const expiryDate = user.subscription?.expiryDate
       ? new Date(user.subscription.expiryDate)
       : null;
-    console.log(expiryDate + "date");
+
+    console.log(`[favorites] Subscription expiryDate: ${expiryDate}, now: ${new Date()}, valid: ${!!expiryDate && expiryDate > new Date()}`);
+
     if (!expiryDate || !(expiryDate > new Date())) {
+      console.warn(`[favorites] Subscription expired or missing for: ${authUser.email}`);
       return NextResponse.json(
         { error: "You need a subscription to access favorites" },
         { status: 403 }
@@ -103,12 +111,22 @@ export async function GET(req: NextRequest) {
       query.subCategory = subCategory;
     }
 
+    console.log(`[favorites] DB query: ${JSON.stringify(query)}`);
+
     // Fetch favorites
     const favorites = await FavoritesModel.find(query).sort({ createdAt: -1 });
 
+    console.log(`[favorites] Found ${favorites.length} favorite(s) for: ${authUser.email}`);
+
+    if (favorites.length === 0) {
+      // Extra diagnostic: count ALL documents in the collection ignoring the query
+      const totalInCollection = await FavoritesModel.countDocuments({});
+      console.warn(`[favorites] 0 results returned — total docs in collection: ${totalInCollection}, query used: ${JSON.stringify(query)}`);
+    }
+
     return NextResponse.json({ favorites });
   } catch (error) {
-    console.error("Error fetching favorites:", error);
+    console.error("[favorites] Unexpected error:", error);
     return NextResponse.json(
       { error: "Failed to fetch favorites" },
       { status: 500 }
