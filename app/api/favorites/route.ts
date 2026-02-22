@@ -31,12 +31,10 @@ export async function GET(req: NextRequest) {
     console.log("register" + subscriptionsModel);
 
     let user = authUser;
-    if (authType === "session") {
-      user = await UserModel.findOne({ email: user.email }).populate(
-        "subscription"
-      );
-      console.log(`[favorites] DB user lookup — found: ${!!user}, subscription: ${JSON.stringify(user?.subscription ?? null)}`);
-    }
+    const subscription = await subscriptionsModel.findOne({ email: user.email })
+    // if (authType === "session") {
+    //   console.log(`[favorites] DB user lookup — found: ${!!user}, subscription: ${JSON.stringify(subscription)}`);
+    // }
 
     if (!user) {
       console.warn(`[favorites] User not found in DB for email: ${authUser.email}`);
@@ -44,8 +42,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has subscription
-    const expiryDate = user.subscription?.expiryDate
-      ? new Date(user.subscription.expiryDate)
+    const expiryDate = subscription.expiryDate
+      ? new Date(subscription.expiryDate)
       : null;
 
     console.log(`[favorites] Subscription expiryDate: ${expiryDate}, now: ${new Date()}, valid: ${!!expiryDate && expiryDate > new Date()}`);
