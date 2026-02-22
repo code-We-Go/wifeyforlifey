@@ -14,7 +14,7 @@ export async function GET() {
       expiresAt: { $lt: now },
     },
     {
-      $set: { paymentStatus: "failed" },
+      $set: { status: "failed" },
     }
   );
 
