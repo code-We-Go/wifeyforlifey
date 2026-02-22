@@ -42,11 +42,6 @@ export async function GET() {
             },
             body: JSON.stringify({
               email: payment.email,
-              attributes: {
-                FIRSTNAME: payment.firstName || "",
-                LASTNAME: payment.lastName || "",
-                SMS: payment.phone || "",
-              },
               listIds: [9],
               updateEnabled: true,
             }),
