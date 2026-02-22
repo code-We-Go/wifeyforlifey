@@ -87,7 +87,7 @@ export async function GET() {
             },
             body: JSON.stringify({
               email: order.email,
-              listIds: [10],
+              listIds: [11],
               updateEnabled: true,
             }),
           })
