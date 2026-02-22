@@ -436,6 +436,7 @@ export async function POST(request: Request) {
             bostaDistrictName: data.bostaDistrictName,
             // Status
             status: "pending",
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           });
 
           return NextResponse.json(
@@ -504,6 +505,7 @@ export async function POST(request: Request) {
             bostaDistrictName: data.bostaDistrictName,
             // Status
             status: "pending",
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           });
 
           return NextResponse.json(
@@ -599,6 +601,7 @@ export async function POST(request: Request) {
           bostaZoneName: data.bostaZoneName || "",
           bostaDistrict: data.bostaDistrict || "",
           bostaDistrictName: data.bostaDistrictName || "",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         });
         return NextResponse.json(
           { token: order.data.client_secret },

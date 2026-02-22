@@ -40,6 +40,7 @@ export async function GET(request: Request) {
     console.log("Order ID:", data.order);
     console.log("Success:", data.success);
     const isSuccess = data.success === "true";
+    //lw failed
 
     // Perform your logic with the GET data here
     if (isSuccess) {

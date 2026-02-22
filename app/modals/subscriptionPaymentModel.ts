@@ -91,6 +91,8 @@ const SubscriptionPaymentSchema = new Schema(
       enum: ["pending", "confirmed", "failed"],
       default: "pending",
     },
+    expiresAt: { type: Date, required: false },
+
     isMob: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
   },

@@ -24,6 +24,7 @@ interface IFavorite {
 export default function FavoritesGrid() {
   const [favorites, setFavorites] = useState<IFavorite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [subCategories, setSubCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -35,9 +36,16 @@ export default function FavoritesGrid() {
   useEffect(() => {
     const fetchFavorites = async () => {
       setLoading(true);
+      setApiError(null);
       try {
         const response = await fetch("/api/favorites");
         const data = await response.json();
+
+        if (!response.ok || data.error) {
+          setApiError(data.error ?? "Failed to fetch favorites");
+          setFavorites([]);
+          return;
+        }
 
         if (data.favorites) {
           setFavorites(data.favorites);
@@ -59,6 +67,7 @@ export default function FavoritesGrid() {
         }
       } catch (error) {
         console.error("Error fetching favorites:", error);
+        setApiError("Something went wrong. Please try again later.");
         setFavorites([]);
       } finally {
         setLoading(false);
@@ -120,23 +129,30 @@ export default function FavoritesGrid() {
       selectedSubCategory === "All" ||
       favorite.subCategory === selectedSubCategory;
 
+    // If the slider covers the full range, skip price filtering entirely
+    const isFullPriceRange =
+      priceRange[0] === 0 && priceRange[1] >= maxPriceValue;
+    if (isFullPriceRange) {
+      return categoryMatch && subCategoryMatch;
+    }
+
     // Price filtering logic
-    // If item has no price information, always show it
-    const hasPrice = favorite.price && favorite.price > 0;
-    const hasMaxPrice = favorite.maxPrice && favorite.maxPrice > 0;
-    
-    // Items without price should always be shown
+    const hasPrice = (favorite.price ?? 0) > 0;
+    const hasMaxPrice = (favorite.maxPrice ?? 0) > 0;
+
+    // Items without any price information are always shown
     if (!hasPrice && !hasMaxPrice) {
       return categoryMatch && subCategoryMatch;
     }
 
-    const minPrice = favorite.price || 0;
-    const maxPrice = hasMaxPrice ? favorite.maxPrice! : favorite.price || 0;
+    // Use price as both min and max when maxPrice is 0 or missing
+    const minPrice = hasPrice ? favorite.price! : 0;
+    const maxPrice = hasMaxPrice ? favorite.maxPrice! : minPrice;
 
     const priceMatch =
       (minPrice >= priceRange[0] && minPrice <= priceRange[1]) ||
       (maxPrice >= priceRange[0] && maxPrice <= priceRange[1]) ||
-      (minPrice <= priceRange[0] && maxPrice >= priceRange[1]); // Item price range encompasses filter range
+      (minPrice <= priceRange[0] && maxPrice >= priceRange[1]);
 
     return categoryMatch && subCategoryMatch && priceMatch;
   });
@@ -242,11 +258,35 @@ export default function FavoritesGrid() {
         </div>
       ) : (
         <>
-          {filteredFavorites?.length === 0 ? (
+          {apiError ? (
             <div className="text-center py-12">
-              <p className="text-lovely text-lg">
-                No favorites found with the selected filters.
-              </p>
+              <p className="text-red-500 text-lg">{apiError}</p>
+            </div>
+          ) : filteredFavorites?.length === 0 ? (
+            <div className="text-center py-12">
+              {favorites.length === 0 ? (
+                // Truly no favorites exist in the database at all
+                <p className="text-lovely text-lg">
+                  No favorites have been added yet.
+                </p>
+              ) : (
+                // Favorites exist but current filters are hiding all of them
+                <>
+                  <p className="text-lovely text-lg">
+                    No favorites match the selected filters.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory("All");
+                      setSelectedSubCategory("All");
+                      setPriceRange([0, maxPriceValue]);
+                    }}
+                    className="mt-4 px-6 py-2 rounded-full text-sm bg-lovely text-creamey hover:opacity-80 transition-opacity"
+                  >
+                    Reset Filters
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
