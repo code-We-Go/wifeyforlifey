@@ -14,6 +14,7 @@ import { Ipackage } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import PackageDetailSkeleton from "./PackageDetailSkeleton";
+import WifeyCommunity from "@/components/sections/WifeyCommunity";
 
 export default function PackageDetailPage() {
   const params = useParams();
@@ -389,7 +390,9 @@ export default function PackageDetailPage() {
           </Button>
         </div>
       </div>
-
+      <div className="bg-pink-50 -mx-4 mt-8 -mb-8">
+        <WifeyCommunity/>
+      </div>
       {/* Package Cards Section */}
       {false && (
       <div className="mt-16 container-custom">
