@@ -271,6 +271,13 @@ export interface PackageItem {
   included: boolean;
 }
 
+export interface SupportCard {
+  id: number;
+  title: string;
+  description: string[];
+  imagePath: string;
+}
+
 export interface Ipackage {
   _id?: string;
   slug?: string;
@@ -283,7 +290,8 @@ export interface Ipackage {
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
   active: boolean;
-  partOf? :string
+  partOf?: string;
+  supportCards?: SupportCard[]; // Support/feature cards shown on the package page
 }
 
 export interface ISubscription {
