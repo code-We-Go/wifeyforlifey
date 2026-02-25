@@ -14,115 +14,7 @@ import { Ipackage } from "@/app/interfaces/interfaces";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import PackageDetailSkeleton from "./PackageDetailSkeleton";
-
-interface SupportCard {
-  id: number;
-  title: string;
-  description: string[];
-  imagePath: string;
-}
-
-const supportCards: SupportCard[] = [
-  {
-    id: 0,
-    title: "GEHAZ BESTIE PLANNER",
-    description: [
-      "The first planner ever to include a chapter about your relationship with your fiancé — plus 10 chapters covering every part of your home.",
-      "The only planner to split gehaz into Essentials vs Nice-to-Haves so you don't overspend",
-      "Quantity recommendations so you buy just enough",
-      "Emotions Journaling to keep you grounded through the chaos"
-    ],
-    imagePath: "/360/plannerFeatures.png"
-  },
-    {
-    id: 5,
-    title: "Bridal-Era Video Guides",
-    description: [
-      "Designed to support your Gehaz Bestie Planner when it's time to choose",
-      "Helps you understand options and avoid confusion or pressure",
-      "Protects you from fake reviews and biased sales advice",
-      "Includes trusted expert videos in selected playlists ,(OB-GYN, sex therapists, interior designers, appliance experts & more)",
-      
-      // "Organized support in 1 place"
-    ],
-    imagePath: "/360/49.png"
-  },
-  {
-    id: 1,
-    title: "Discounts & Partnerships",
-    description: [
-      "A trusted partner list that grows over time",
-      "Community-only discounts on things you actually need",
-      "Your membership keeps increasing in value — Wifey-approved = always 💕"
-    ],
-    imagePath: "/360/50.png"
-  },
-  {
-    id: 2,
-    title: "Wifeys favorite products",
-    description: [
-      "Curated, Wifey-approved products we genuinely recommend",
-      "Real reviews — you don't waste time searching",
-      "Clear guidance on what's worth buying — and what's not",
-      "Includes the maximum fair market price, so you don't overpay"
-    ],
-    imagePath: "/360/52.png"
-  },
-  {
-    id: 3,
-    title: "Inspos",
-    description: [
-      "Pinterest, But Make It Bridal 💕",
-      "Curated bridal inspiration — without the overwhelm",
-      "Makeup looks, hairstyles, bridal nails & home moodboards",
-      "Saved, organized, and filtered by the Wifey team",
-      "Inspiration that feels realistic, beautiful, and achievable",
-      "So you can get inspired — not stressed or pressured."
-    ],
-    imagePath: "/360/51.png"
-  },
-  {
-    id: 4,
-    title: "Whatsapp Support circle",
-    description: [
-      "You're not meant to do this alone.",
-      "A private Whatsapp group for Wifey brides only",
-      "Ask questions, share worries, and support each other",
-      // "Live group chat with trusted experts and each other",
-      "Guided by the Wifey for Life team — not just about gehaz, but life, emotions, and everything in between"
-    ],
-    imagePath: "/360/48.png"
-  },
-
-  {
-    id: 6,
-    title: "Expert-Led Webinars",
-    description: [
-      "Live group webinars hosted with trusted experts",
-      "ask questions, learn, and feel reassured",
-      "Guided by the Wifey for Life team",
-      "Examples of webinars hosted!",
-      "Appliances 101 with Zeinab Ahmed",
-      "Feminine Care 101 with Dr. Dalia Ghozlan",
-      "Sex Education 101 with Quareb Therapy"
-    ],
-    imagePath: "/360/53.png"
-  },
-  {
-    id: 7,
-    title: "Discounts on 1:1 Consultations",
-    description: [
-      "Personal Support — At a Better Price 💕",
-      "10%-20% off 1:1 consultations",
-      "Interior designers",
-      "Women's health educators",
-      "Sex therapists",
-      "Appliance experts",
-      "Wedding & bridal consultants"
-    ],
-    imagePath: "/360/47.png"
-  }
-];
+import WifeyCommunity from "@/components/sections/WifeyCommunity";
 
 export default function PackageDetailPage() {
   const params = useParams();
@@ -358,7 +250,7 @@ export default function PackageDetailPage() {
         {/* Carousel Container */}
         <div className="relative">
           {/* Navigation Arrows */}
-          {supportCards.length > 2 && (
+          {(packageData.supportCards ?? []).length > 2 && (
             <>
               <button
                 onClick={scrollPrev}
@@ -386,7 +278,7 @@ export default function PackageDetailPage() {
           {/* Embla Carousel */}
           <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
             <div className="flex gap-2 md:gap-4">
-              {supportCards.map((card) => (
+              {(packageData.supportCards ?? []).map((card) => (
                 <div
                   key={card.id}
                   className="relative flex-[0_0_80%] sm:flex-[0_0_50%]  min-w-0 pb-6 md:pb-12"
@@ -406,12 +298,7 @@ export default function PackageDetailPage() {
                         {card.title}
                       </h3>
                       <ul className="list-disc list-outside pl-4  text-creamey marker:text-creamey">
-                        {/* Mini Experience specific feature */}
-                        {packageData?._id === "68bf6ae9c4d5c1af12cdcd37" && card.id === 5 && (
-                          <li className="text-xs md:text-sm text-creamey/95 leading-normal">
-                            Includes access to 1 playlist of your choice from our 12 curated playlists. Choose the one that supports your journey the most!
-                          </li>
-                        )}
+
                         {card.description.map((point, index) => (
                           <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
                             {point}
@@ -503,7 +390,9 @@ export default function PackageDetailPage() {
           </Button>
         </div>
       </div>
-
+      <div className="bg-pink-50 -mx-4 mt-8 -mb-8">
+        <WifeyCommunity/>
+      </div>
       {/* Package Cards Section */}
       {false && (
       <div className="mt-16 container-custom">
