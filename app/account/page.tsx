@@ -50,6 +50,7 @@ import { compressImage } from "@/utils/imageCompression";
 import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import InspoTab from "./inspo/InspoTab";
+import ShoppingBestieTab from "./shopping-bestie/ShoppingBestieTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -700,6 +701,7 @@ const AccountPage = () => {
     { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "favorites", label: "Favorites", icon: Star },
     { id: "inspo", label: "Inspo", icon: Sparkles },
+    { id: "shopping-bestie", label: "Shopping Bestie", icon: ShoppingCart },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
@@ -1672,6 +1674,12 @@ const AccountPage = () => {
                 Subscribe to access your inspiration boards!
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "shopping-bestie" && (
+          <div>
+            <ShoppingBestieTab isSubscribed={user.isSubscribed} />
           </div>
         )}
       </div>
