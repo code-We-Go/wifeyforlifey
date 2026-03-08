@@ -7,8 +7,8 @@ export interface IShoppingBrandReview extends Document {
   userName: string;
   rating: number; // 1–5
   comment?: string;
-  helpful: number;
-  notHelpful: number;
+  helpful: Types.ObjectId[];    // users who found this review helpful
+  notHelpful: Types.ObjectId[]; // users who found this review not helpful
   createdAt: Date;
 }
 
@@ -22,8 +22,8 @@ const ReviewSchema = new Schema<IShoppingBrandReview>(
     userName: { type: String, required: true, trim: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, required: false, trim: true },
-    helpful: { type: Number, default: 0 },
-    notHelpful: { type: Number, default: 0 },
+    helpful: { type: [Schema.Types.ObjectId], ref: "users", default: [] },
+    notHelpful: { type: [Schema.Types.ObjectId], ref: "users", default: [] },
   },
   { timestamps: true }
 );
@@ -41,9 +41,6 @@ export interface IShoppingBrand extends Document {
   clicks: number;
   isFeatured: boolean;
   isActive: boolean;
-  // Denormalised stats – updated on every new review
-  averageRating: number;
-  totalRatings: number;
   reviews: IShoppingBrandReview[];
   createdAt: Date;
   updatedAt: Date;
@@ -61,8 +58,6 @@ const ShoppingBrandSchema = new Schema<IShoppingBrand>(
     clicks: { type: Number, default: 0 },
     isFeatured: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-    averageRating: { type: Number, default: 0, min: 0, max: 5 },
-    totalRatings: { type: Number, default: 0 },
     reviews: { type: [ReviewSchema], default: [] },
   },
   { timestamps: true }

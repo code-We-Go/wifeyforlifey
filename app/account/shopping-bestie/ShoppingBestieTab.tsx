@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   ExternalLink,
   Star,
@@ -24,14 +24,23 @@ import axios from "axios";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+export interface VoterInfo {
+  userId: string;
+  displayName: string;
+}
+
 export interface BrandReview {
   _id: string;
   userId: string;
   userName: string;
+  firstName?: string;
+  lastName?: string;
   comment?: string;
   rating: number;
-  helpful: number;
-  notHelpful: number;
+  helpful: string[];         // raw userId array (for length / toggle tracking)
+  notHelpful: string[];      // raw userId array
+  helpfulVoters?: VoterInfo[];    // enriched voter names from API
+  notHelpfulVoters?: VoterInfo[]; // enriched voter names from API
   createdAt: string;
 }
 
@@ -43,12 +52,87 @@ export interface ShoppingBrand {
   subCategory: string;
   description: string;
   link: string;
-  averageRating: number;
-  totalRatings: number;
+  averageRating: number;  // computed by aggregation in GET /api/shopping-bestie
+  reviewCount: number;    // computed by aggregation ($size of reviews array)
   clicks: number;
   tags: string[];
   isFeatured?: boolean;
   reviews?: BrandReview[];
+}
+
+// ─── Voter Popover ──────────────────────────────────────────────────────────
+
+function VoterPopover({
+  count,
+  voters,
+  type,
+}: {
+  count: number;
+  voters: VoterInfo[];
+  type: "helpful" | "notHelpful";
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  if (count === 0) {
+    return <span className="text-xs tabular-nums">{count}</span>;
+  }
+
+  const accent = type === "helpful" ? "text-green-400" : "text-red-400";
+  const borderColor = type === "helpful" ? "border-green-400/30" : "border-red-400/30";
+  const bgColor = type === "helpful" ? "bg-green-400/10" : "bg-red-400/10";
+
+  return (
+    <div ref={ref} className="relative bg-creamey inline-flex">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        className={`text-xs tabular-nums underline decoration-dotted underline-offset-2 cursor-pointer hover:opacity-80 transition-opacity ${accent}`}
+      >
+        {count}
+      </button>
+      {open && (
+        <div
+          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 min-w-[140px] max-w-[200px] rounded-xl border ${borderColor} text-lovely bg-creamey shadow-xl p-2`}
+        >
+          <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1.5 px-1 ${accent}`}>
+            {type === "helpful" ? "👍 Helpful" : "👎 Not Helpful"}
+          </p>
+          <ul className="space-y-0.5">
+            {voters.length > 0 ? (
+              voters.map((v) => (
+                <li key={v.userId} className="text-xs text-lovely truncate px-1 py-0.5 rounded hover:bg-white/5">
+                  {v.displayName}
+                </li>
+              ))
+            ) : (
+              <li className="text-xs text-lovely/60 px-1">No names available</li>
+            )}
+          </ul>
+          {/* Caret */}
+          <div
+            className={`absolute top-full left-1/2 -translate-x-1/2 w-0 h-0`}
+            style={{
+              borderLeft: "5px solid transparent",
+              borderRight: "5px solid transparent",
+              borderTop: `5px solid ${type === "helpful" ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`,
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── Star Rating Display ─────────────────────────────────────────────────────
@@ -122,7 +206,7 @@ interface BrandCardProps {
     brandId: string,
     rating: number,
     comment: string
-  ) => Promise<{ averageRating: number; totalRatings: number; review: BrandReview }>;
+  ) => Promise<{ averageRating: number; review: BrandReview }>;
   onBrandUpdate: (brandId: string, patch: Partial<ShoppingBrand>) => void;
 }
 
@@ -142,19 +226,77 @@ function BrandCard({
   const [userComment, setUserComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(userHasRated);
+  // Track which reviews the user has already voted on: reviewId -> vote type
+  const [votedReviews, setVotedReviews] = useState<Map<string, "helpful" | "notHelpful">>(new Map());
 
   const loadReviews = async () => {
     if (reviews.length > 0) return; // already loaded
     setLoadingReviews(true);
     try {
       const res = await axios.get(
-        `/api/shopping-bestie/${brand._id}/review?limit=20`
+        `/api/shopping-bestie/${brand._id}/review?limit=40`
       );
       setReviews(res.data.data || []);
     } catch {
       // silently fail
     } finally {
       setLoadingReviews(false);
+    }
+  };
+
+  const handleVote = async (reviewId: string, vote: "helpful" | "notHelpful") => {
+    const currentVote = votedReviews.get(reviewId);
+    const opposite = vote === "helpful" ? "notHelpful" : "helpful";
+    const isTogglingOff = currentVote === vote;
+    const isSwitching = currentVote && currentVote !== vote;
+
+    // Optimistic UI update — work with arrays
+    setReviews((prev) =>
+      prev.map((r) => {
+        if (r._id !== reviewId) return r;
+        const fakeId = "optimistic";
+        if (isTogglingOff) {
+          return { ...r, [vote]: r[vote].filter((id) => id !== fakeId) };
+        }
+        return {
+          ...r,
+          [vote]: [...r[vote], fakeId],
+          ...(isSwitching ? { [opposite]: r[opposite].filter((id) => id !== fakeId) } : {}),
+        };
+      })
+    );
+
+    if (isTogglingOff) {
+      setVotedReviews((prev) => { const next = new Map(prev); next.delete(reviewId); return next; });
+    } else {
+      setVotedReviews((prev) => new Map(prev).set(reviewId, vote));
+    }
+
+    try {
+      const res = await axios.post(
+        `/api/shopping-bestie/${brand._id}/review/${reviewId}/vote`,
+        { vote }
+      );
+      // Sync with real server counts
+      setReviews((prev) =>
+        prev.map((r) =>
+          r._id === reviewId
+            ? {
+                ...r,
+                helpful: Array.from({ length: res.data.helpful }, (_, i) => `srv_${i}`),
+                notHelpful: Array.from({ length: res.data.notHelpful }, (_, i) => `srv_${i}`),
+              }
+            : r
+        )
+      );
+      if (res.data.userVote === null) {
+        setVotedReviews((prev) => { const next = new Map(prev); next.delete(reviewId); return next; });
+      }
+    } catch {
+      // Rollback on failure — refetch reviews
+      setReviews([]);
+      loadReviews();
+      setVotedReviews((prev) => { const next = new Map(prev); next.delete(reviewId); return next; });
     }
   };
 
@@ -176,7 +318,6 @@ function BrandCard({
       setReviews((prev) => [result.review, ...prev]);
       onBrandUpdate(brand._id, {
         averageRating: result.averageRating,
-        totalRatings: result.totalRatings,
       });
     } catch (err: any) {
       // Already reviewed or other error – surface through toast if possible
@@ -244,7 +385,7 @@ function BrandCard({
                 {brand.averageRating > 0 ? brand.averageRating.toFixed(1) : "–"}
               </span>
               <span className="text-xs text-lovely/40">
-                ({brand.totalRatings} ratings)
+                ({brand.reviews?.length ?? brand.reviewCount} ratings)
               </span>
             </div>
           </div>
@@ -278,7 +419,7 @@ function BrandCard({
           </div>
           <div className="flex items-center gap-1">
             <MessageSquare className="h-3.5 w-3.5 text-lovely/40" />
-            <span>{brand.totalRatings} reviews</span>
+            <span>{brand.reviews?.length ?? brand.reviewCount} reviews</span>
           </div>
         </div>
 
@@ -302,7 +443,7 @@ function BrandCard({
               disabled={submitted}
               className={`flex items-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium border transition-all duration-200 ${
                 submitted
-                  ? "border-green-400/40 text-green-500/70 cursor-default"
+                  ? "border-lovely/40 text-lovely/70 cursor-default"
                   : showFeedback
                   ? "bg-lovely/10 border-lovely text-lovely"
                   : "border-lovely/30 text-lovely/70 hover:border-lovely hover:text-lovely"
@@ -358,7 +499,7 @@ function BrandCard({
         )}
 
         {/* Reviews Toggle */}
-        {brand.totalRatings > 0 && (
+        {(brand.reviews?.length ?? brand.reviewCount) > 0 && (
           <div className="mt-4">
             <button
               onClick={handleToggleReviews}
@@ -391,7 +532,9 @@ function BrandCard({
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-semibold text-lovely">
-                          {review.userName}
+                          {review.firstName
+                            ? `${review.firstName}${review.lastName ? " " + review.lastName : ""}`
+                            : review.userName}
                         </span>
                         <div className="flex items-center gap-1">
                           <StarRatingDisplay rating={review.rating} />
@@ -407,14 +550,45 @@ function BrandCard({
                         <p className="text-xs text-lovely/70">{review.comment}</p>
                       )}
                       <div className="flex items-center gap-3 mt-2">
-                        <button className="flex items-center gap-1 text-xs text-lovely/50 hover:text-lovely transition-colors">
-                          <ThumbsUp className="h-3 w-3" />
-                          {review.helpful}
-                        </button>
-                        <button className="flex items-center gap-1 text-xs text-lovely/50 hover:text-lovely transition-colors">
-                          <ThumbsDown className="h-3 w-3" />
-                          {review.notHelpful}
-                        </button>
+                        {/* Helpful vote button + clickable count popover */}
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleVote(review._id, "helpful")}
+                            disabled={votedReviews.has(review._id)}
+                            className={`flex items-center gap-1 text-xs transition-colors disabled:cursor-default ${
+                              votedReviews.get(review._id) === "helpful"
+                              ? "text-lovely-500"
+                                : "text-lovely/50 hover:text-lovely"
+                            }`}
+                          >
+                            <ThumbsUp className="h-3 w-3" />
+                          </button>
+                          <VoterPopover
+                            count={review.helpful.length}
+                            voters={review.helpfulVoters ?? []}
+                            type="helpful"
+                          />
+                        </div>
+
+                        {/* Not-helpful vote button + clickable count popover */}
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleVote(review._id, "notHelpful")}
+                            disabled={votedReviews.has(review._id)}
+                            className={`flex items-center gap-1 text-xs transition-colors disabled:cursor-default ${
+                              votedReviews.get(review._id) === "notHelpful"
+                                ? "text-red-400"
+                                : "text-lovely/50 hover:text-lovely"
+                            }`}
+                          >
+                            <ThumbsDown className="h-3 w-3" />
+                          </button>
+                          <VoterPopover
+                            count={review.notHelpful.length}
+                            voters={review.notHelpfulVoters ?? []}
+                            type="notHelpful"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))
@@ -441,7 +615,7 @@ export default function ShoppingBestieTab({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState<"rating" | "clicks" | "default">(
+  const [sortBy, setSortBy] = useState<"rating" | "visits" | "default">(
     "default"
   );
   const [ratedBrands, setRatedBrands] = useState<Set<string>>(new Set());
@@ -576,7 +750,7 @@ export default function ShoppingBestieTab({
         {/* Sort */}
         <div className="flex items-center gap-2 text-xs text-lovely/60">
           <span className="font-medium">Sort by:</span>
-          {(["default", "rating", "clicks"] as const).map((opt) => (
+          {(["default", "rating", "visits"] as const).map((opt) => (
             <button
               key={opt}
               onClick={() => setSortBy(opt)}

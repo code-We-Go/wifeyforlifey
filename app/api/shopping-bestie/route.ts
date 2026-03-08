@@ -5,28 +5,52 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 
 // ─── GET /api/shopping-bestie ─────────────────────────────────────────────────
-// Public: returns all active brands (sorted: featured first, then by rating)
+// Public: returns all active brands with computed reviewCount + averageRating.
+// Uses aggregation to compute stats from the reviews array without sending
+// the full reviews payload to the client.
 export async function GET(request: Request) {
   try {
     await ConnectDB();
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
-    const sort = searchParams.get("sort"); // "rating" | "clicks" | "featured"
+    const sort = searchParams.get("sort"); // "rating" | "clicks"
 
-    const filter: Record<string, any> = { isActive: true };
+    const matchStage: Record<string, any> = { isActive: true };
     if (category && category !== "All") {
-      filter.category = category;
+      matchStage.category = category;
     }
 
-    let sortQuery: Record<string, 1 | -1> = { isFeatured: -1, averageRating: -1 };
-    if (sort === "clicks") sortQuery = { clicks: -1 };
-    else if (sort === "rating") sortQuery = { averageRating: -1, totalRatings: -1 };
+    // Determine sort — we can now sort by the computed averageRating
+    let sortStage: Record<string, 1 | -1>;
+    if (sort === "visits") {
+      sortStage = { clicks: -1 };
+    } else if (sort === "rating") {
+      sortStage = { averageRating: -1, reviewCount: -1 };
+    } else {
+      sortStage = { isFeatured: -1, averageRating: -1 };
+    }
 
-    const brands = await ShoppingBrandModel.find(filter)
-      .sort(sortQuery)
-      .select("-reviews") // don't send reviews list on index – load on demand
-      .lean();
+    const brands = await ShoppingBrandModel.aggregate([
+      { $match: matchStage },
+      {
+        $addFields: {
+          reviewCount: { $size: "$reviews" },
+          averageRating: {
+            $cond: [
+              { $gt: [{ $size: "$reviews" }, 0] },
+              {
+                $round: [{ $avg: "$reviews.rating" }, 1],
+              },
+              0,
+            ],
+          },
+        },
+      },
+      // Strip the full reviews array — loaded on demand when a card is expanded
+      { $project: { reviews: 0 } },
+      { $sort: sortStage },
+    ]);
 
     return NextResponse.json({ success: true, data: brands }, { status: 200 });
   } catch (error) {
@@ -40,51 +64,51 @@ export async function GET(request: Request) {
 
 // ─── POST /api/shopping-bestie ────────────────────────────────────────────────
 // Admin-only: create a new brand
-export async function POST(request: Request) {
-  try {
-    await ConnectDB();
+// export async function POST(request: Request) {
+//   try {
+//     await ConnectDB();
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session?.user?.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+//     const session = await getServerSession(authOptions);
+//     if (!session?.user?.id || session?.user?.role !== "admin") {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//     }
 
-    const body = await request.json();
-    const {
-      name,
-      logo,
-      category,
-      subCategory,
-      description,
-      link,
-      tags,
-      isFeatured,
-    } = body;
+//     const body = await request.json();
+//     const {
+//       name,
+//       logo,
+//       category,
+//       subCategory,
+//       description,
+//       link,
+//       tags,
+//       isFeatured,
+//     } = body;
 
-    if (!name || !category || !subCategory || !description || !link) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, category, subCategory, description, link" },
-        { status: 400 }
-      );
-    }
+//     if (!name || !category || !subCategory || !description || !link) {
+//       return NextResponse.json(
+//         { error: "Missing required fields: name, category, subCategory, description, link" },
+//         { status: 400 }
+//       );
+//     }
 
-    const brand = await ShoppingBrandModel.create({
-      name,
-      logo: logo || "",
-      category,
-      subCategory,
-      description,
-      link,
-      tags: tags || [],
-      isFeatured: isFeatured || false,
-    });
+//     const brand = await ShoppingBrandModel.create({
+//       name,
+//       logo: logo || "",
+//       category,
+//       subCategory,
+//       description,
+//       link,
+//       tags: tags || [],
+//       isFeatured: isFeatured || false,
+//     });
 
-    return NextResponse.json({ success: true, data: brand }, { status: 201 });
-  } catch (error) {
-    console.error("Error creating shopping brand:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create brand" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json({ success: true, data: brand }, { status: 201 });
+//   } catch (error) {
+//     console.error("Error creating shopping brand:", error);
+//     return NextResponse.json(
+//       { success: false, error: "Failed to create brand" },
+//       { status: 500 }
+//     );
+//   }
+// }
