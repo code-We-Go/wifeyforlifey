@@ -581,8 +581,8 @@ function WeddingTimelinePageContent() {
   // -- Feedback State --
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   const [feedbackRatings, setFeedbackRatings] = useState({
-    easeOfUse: 0,
-    satisfaction: 0,
+    easeOfUse: 5,
+    satisfaction: 5,
   });
   const [feedbackTimeSaved, setFeedbackTimeSaved] = useState("");
   const [feedbackFeelings, setFeedbackFeelings] = useState<string[]>([]);
