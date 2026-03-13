@@ -240,7 +240,9 @@ const SubscriptionPage = () => {
 
   // Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
   //     },
-      "68bf6ae9c4d5c1af12cdcd37": {
+  //for later
+      // "68bf6ae9c4d5c1af12cdcd37": {
+      "68bf6ae9c4d5c1af12": {
         header: "This is a pre-order",
         content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will begin shipping starting February 14th.
 
