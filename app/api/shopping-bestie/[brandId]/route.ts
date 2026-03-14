@@ -5,17 +5,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 
 interface Params {
-  params: { brandId: string };
+  params: Promise<{ brandId: string }>;
 }
 
 // ─── GET /api/shopping-bestie/[brandId] ──────────────────────────────────────
 // Public: returns a single brand INCLUDING its reviews
 export async function GET(_req: Request, { params }: Params) {
   try {
+    const { brandId } = await params;
     await ConnectDB();
 
     const brand = await ShoppingBrandModel.findOne({
-      _id: params.brandId,
+      _id: brandId,
       isActive: true,
     })
       .populate({

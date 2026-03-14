@@ -3,7 +3,7 @@ import { ConnectDB } from "@/app/config/db";
 import ShoppingBrandModel from "@/app/modals/shoppingBestieModel";
 
 interface Params {
-  params: { brandId: string };
+  params: Promise<{ brandId: string }>;
 }
 
 // ─── POST /api/shopping-bestie/[brandId]/click ────────────────────────────────
@@ -11,10 +11,11 @@ interface Params {
 // Called whenever a user clicks "Visit Store".
 export async function POST(_req: Request, { params }: Params) {
   try {
+    const { brandId } = await params;
     await ConnectDB();
 
     const updated = await ShoppingBrandModel.findByIdAndUpdate(
-      params.brandId,
+      brandId,
       { $inc: { clicks: 1 } },
       { new: true }
     ).select("clicks");

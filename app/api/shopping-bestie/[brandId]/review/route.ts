@@ -8,7 +8,7 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import mongoose from "mongoose";
 
 interface Params {
-  params: { brandId: string };
+  params: Promise<{ brandId: string }>;
 }
 
 // ─── POST /api/shopping-bestie/[brandId]/review ───────────────────────────────
