@@ -95,7 +95,7 @@ export async function POST() {
     await ConnectDB();
 
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session?.user?.role !== "admin") {
+    if (!session?.user?.id ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

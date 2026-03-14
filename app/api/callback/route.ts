@@ -73,6 +73,13 @@ export async function GET(request: Request) {
               body,
               from: "partners@shopwifeyforlifey.com",
             });
+            await sendMail({
+              to: "orders@shopwifeyforlifey.com",
+              subject: "New Session Confirmed",
+              name: partnerOrder.partnerName,
+              body,
+              from: "partners@shopwifeyforlifey.com",
+            });
           } catch (e) {
             console.error("Failed to send partner confirmation email", e);
           }

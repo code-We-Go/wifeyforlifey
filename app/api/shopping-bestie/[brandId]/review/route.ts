@@ -23,8 +23,7 @@ export async function POST(request: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Subscription check — look up by email in the subscriptions collection
-    //    and verify expiryDate is still in the future.
+    // 2. Subscription check removed — allow all account holders to review
     const user = await UserModel.findById(session.user.id).select(
       "email username firstName lastName"
     );
@@ -32,25 +31,9 @@ export async function POST(request: Request, { params }: Params) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const subscription = await subscriptionsModel.findOne({
-      email: user.email,
-      subscribed: true,
-    }).select("expiryDate");
-
-    const expiryDate = subscription?.expiryDate
-      ? new Date(subscription.expiryDate)
-      : null;
-
-    if (!expiryDate || expiryDate <= new Date()) {
-      return NextResponse.json(
-        { error: "An active subscription is required to leave a review" },
-        { status: 403 }
-      );
-    }
-
     // 3. Parse body
     const body = await request.json();
-    const { rating, comment } = body;
+    const { rating, comment, images } = body;
 
     if (!rating || typeof rating !== "number" || rating < 1 || rating > 5) {
       return NextResponse.json(
@@ -76,7 +59,7 @@ export async function POST(request: Request, { params }: Params) {
     // 5. Build the display name for the review
     const displayName =
       user.firstName
-        ? `${user.firstName}${user.lastName ? " " + user.lastName[0] + "." : ""}`
+        ? `${user.firstName}${user.lastName ? " " + user.lastName : ""}`
         : user.username || "Anonymous";
 
     // 6. Push the new review (aggregation pipeline to concat safely)
@@ -95,6 +78,7 @@ export async function POST(request: Request, { params }: Params) {
                     userName: displayName,
                     rating: rating,
                     comment: comment ? comment.trim() : "",
+                    images: Array.isArray(images) ? images : [],
                     helpful: [],
                     notHelpful: [],
                     createdAt: "$$NOW",

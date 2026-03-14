@@ -18,14 +18,50 @@ export async function GET(_req: Request, { params }: Params) {
       _id: params.brandId,
       isActive: true,
     })
-      .populate("reviews.userId", "username firstName lastName imageURL")
+      .populate({
+        path: "subCategories",
+        populate: {
+          path: "categoryId",
+          model: "ShoppingCategory",
+          strictPopulate: false,
+        },
+        strictPopulate: false,
+      },
+    
+    )
+      .populate("reviews.userId", "username firstName lastName imageURL",
+        
+      )
       .lean();
 
     if (!brand) {
       return NextResponse.json({ error: "Brand not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: brand }, { status: 200 });
+    // Format the result to match the UI shape derived in the main aggregation
+    const subCategories = (brand as any).subCategories || [];
+    const subCategoryDocs = subCategories.map((sub: any) => ({
+      _id: sub._id?.toString(),
+      name: sub.name,
+      slug: sub.slug,
+      categoryId: sub.categoryId?._id?.toString(),
+      categoryName: sub.categoryId?.name || "Uncategorised",
+      categorySlug: sub.categoryId?.slug || "",
+    }));
+
+    const categoryNames = Array.from(
+      new Set(subCategoryDocs.map((doc: any) => doc.categoryName))
+    );
+
+    const formattedBrand = {
+      ...(brand as any),
+      subCategories: subCategories.map((s: any) => s._id?.toString()),
+      subCategoryDocs,
+      subCategoryNames: subCategoryDocs.map((doc: any) => doc.name),
+      categories: categoryNames,
+    };
+
+    return NextResponse.json({ success: true, data: formattedBrand }, { status: 200 });
   } catch (error) {
     console.error("Error fetching brand:", error);
     return NextResponse.json(

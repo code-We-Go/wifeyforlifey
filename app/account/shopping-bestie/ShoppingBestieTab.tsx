@@ -17,10 +17,30 @@ import {
   Sparkles,
   Filter,
   RefreshCw,
+  Plus,
+  Store,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
 } from "lucide-react";
 import { thirdFont } from "@/fonts";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { compressImage } from "@/utils/imageCompression";
+import { UploadDropzone } from "@/utils/uploadthing";
+import { CldImage, CldUploadWidget } from "next-cloudinary";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -41,22 +61,40 @@ export interface BrandReview {
   notHelpful: string[];      // raw userId array
   helpfulVoters?: VoterInfo[];    // enriched voter names from API
   notHelpfulVoters?: VoterInfo[]; // enriched voter names from API
+  images?: string[];
   createdAt: string;
+}
+
+export interface SubCategoryDoc {
+  _id: string;
+  name: string;
+  slug: string;
+  categoryId: string;
+  categoryName: string;
+  categorySlug: string;
 }
 
 export interface ShoppingBrand {
   _id: string;
   name: string;
   logo?: string;
-  category: string;
-  subCategory: string;
+  /** Raw ObjectId refs to ShoppingSubcategory */
+  subCategories: string[];
+  /** Enriched sub-category docs (with parent category populated) */
+  subCategoryDocs: SubCategoryDoc[];
+  /** Flat list of sub-category names, e.g. ["Clothing", "Accessories"] */
+  subCategoryNames: string[];
+  /** Deduplicated list of parent category names, e.g. ["Fashion", "Beauty"] */
+  categories: string[];
   description: string;
   link: string;
-  averageRating: number;  // computed by aggregation in GET /api/shopping-bestie
-  reviewCount: number;    // computed by aggregation ($size of reviews array)
+  averageRating: number;  // computed by aggregation
+  reviewCount: number;    // computed by aggregation ($size of reviews)
   clicks: number;
   tags: string[];
   isFeatured?: boolean;
+  approved?: boolean;
+  submittedBy?: string | null;
   reviews?: BrandReview[];
 }
 
@@ -205,7 +243,8 @@ interface BrandCardProps {
   onSubmitFeedback: (
     brandId: string,
     rating: number,
-    comment: string
+    comment: string,
+    images: string[]
   ) => Promise<{ averageRating: number; review: BrandReview }>;
   onBrandUpdate: (brandId: string, patch: Partial<ShoppingBrand>) => void;
 }
@@ -224,10 +263,75 @@ function BrandCard({
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
+  const [userImages, setUserImages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(userHasRated);
   // Track which reviews the user has already voted on: reviewId -> vote type
   const [votedReviews, setVotedReviews] = useState<Map<string, "helpful" | "notHelpful">>(new Map());
+
+  // Image viewer state
+  const [viewerImages, setViewerImages] = useState<string[] | null>(null);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const openImageViewer = (images: string[], index: number) => {
+    if (images && images.length > 0) {
+      setViewerImages(images);
+      setViewerIndex(index);
+    }
+  };
+
+  const closeImageViewer = () => {
+    setViewerImages(null);
+    setViewerIndex(0);
+  };
+
+  const handleNextImage = useCallback(() => {
+    if (viewerImages && viewerIndex < viewerImages.length - 1) {
+      setViewerIndex((prev) => prev + 1);
+    }
+  }, [viewerImages, viewerIndex]);
+
+  const handlePrevImage = useCallback(() => {
+    if (viewerIndex > 0) {
+      setViewerIndex((prev) => prev - 1);
+    }
+  }, [viewerIndex]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!viewerImages) return;
+      if (e.key === "ArrowRight") handleNextImage();
+      if (e.key === "ArrowLeft") handlePrevImage();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [viewerImages, handleNextImage, handlePrevImage]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    if (isLeftSwipe) {
+      handleNextImage();
+    }
+    if (isRightSwipe) {
+      handlePrevImage();
+    }
+  };
 
   const loadReviews = async () => {
     if (reviews.length > 0) return; // already loaded
@@ -309,15 +413,18 @@ function BrandCard({
     if (!userRating) return;
     setSubmitting(true);
     try {
-      const result = await onSubmitFeedback(brand._id, userRating, userComment);
+      const result = await onSubmitFeedback(brand._id, userRating, userComment, userImages);
       setSubmitted(true);
       setUserRating(0);
       setUserComment("");
+      setUserImages([]);
       setShowFeedback(false);
       // Prepend new review to local list
       setReviews((prev) => [result.review, ...prev]);
       onBrandUpdate(brand._id, {
         averageRating: result.averageRating,
+        reviewCount: (brand.reviewCount || 0) + 1,
+        ...(brand.reviews ? { reviews: [result.review, ...brand.reviews] } : {}),
       });
     } catch (err: any) {
       // Already reviewed or other error – surface through toast if possible
@@ -356,7 +463,7 @@ function BrandCard({
               <img
                 src={brand.logo}
                 alt={brand.name}
-                className="h-full w-full object-contain p-1"
+                className="h-full w-full object-cover "
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
@@ -373,11 +480,21 @@ function BrandCard({
             <h3 className="text-lovely font-bold text-lg leading-tight truncate">
               {brand.name}
             </h3>
-            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-xs bg-lovely/10 text-lovely px-2 py-0.5 rounded-full font-medium">
-                {brand.category}
-              </span>
-              <span className="text-xs text-lovely/60">{brand.subCategory}</span>
+            {/* Categories + sub-categories — a brand may belong to many */}
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              {(brand.categories ?? []).map((cat) => (
+                <span
+                  key={cat}
+                  className="text-xs bg-lovely/10 text-lovely px-2 py-0.5 rounded-full font-medium"
+                >
+                  {cat}
+                </span>
+              ))}
+              {(brand.subCategoryNames ?? []).map((sub) => (
+                <span key={sub} className="text-xs text-lovely/60">
+                  {sub}
+                </span>
+              ))}
             </div>
             <div className="flex items-center gap-2 mt-1.5">
               <StarRatingDisplay rating={brand.averageRating} />
@@ -422,83 +539,7 @@ function BrandCard({
             <span>{brand.reviews?.length ?? brand.reviewCount} reviews</span>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <a
-            href={brand.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => onLinkClick(brand._id)}
-            className="flex-1 min-w-0 flex items-center justify-center gap-2 py-2.5 px-4 bg-lovely text-creamey rounded-xl text-sm font-semibold hover:bg-lovely/90 transition-all duration-200 group-hover:shadow-md"
-          >
-            <ShoppingBag className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">Visit Store</span>
-            <ExternalLink className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
-          </a>
-
-          {isSubscribed && (
-            <button
-              onClick={() => setShowFeedback(!showFeedback)}
-              disabled={submitted}
-              className={`flex items-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium border transition-all duration-200 ${
-                submitted
-                  ? "border-lovely/40 text-lovely/70 cursor-default"
-                  : showFeedback
-                  ? "bg-lovely/10 border-lovely text-lovely"
-                  : "border-lovely/30 text-lovely/70 hover:border-lovely hover:text-lovely"
-              }`}
-            >
-              <Star className="h-4 w-4" />
-              {submitted ? "✓ Rated" : "Rate"}
-            </button>
-          )}
-        </div>
-
-        {/* Feedback Form */}
-        {isSubscribed && showFeedback && !submitted && (
-          <div className="mt-4 p-4 rounded-xl bg-lovely/5 border border-lovely/15 space-y-3">
-            <p className="text-sm font-semibold text-lovely">
-              Leave your review
-            </p>
-            <StarRatingInput value={userRating} onChange={setUserRating} />
-            <textarea
-              value={userComment}
-              onChange={(e) => setUserComment(e.target.value)}
-              placeholder="Share your experience with this brand (optional)"
-              rows={3}
-              className="w-full bg-transparent border border-lovely/20 rounded-lg p-2.5 text-sm text-lovely placeholder-lovely/40 focus:outline-none focus:border-lovely/50 resize-none"
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={handleSubmit}
-                disabled={!userRating || submitting}
-                className="flex-1 bg-lovely text-creamey hover:bg-lovely/90 h-9 text-sm"
-              >
-                {submitting ? (
-                  <span className="flex items-center gap-1.5">
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                    Submitting...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5">
-                    <Send className="h-3.5 w-3.5" />
-                    Submit Review
-                  </span>
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setShowFeedback(false)}
-                className="text-lovely/70 hover:text-lovely h-9 px-3"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Reviews Toggle */}
+                {/* Reviews Toggle */}
         {(brand.reviews?.length ?? brand.reviewCount) > 0 && (
           <div className="mt-4">
             <button
@@ -547,9 +588,29 @@ function BrandCard({
                         </div>
                       </div>
                       {review.comment && (
-                        <p className="text-xs text-lovely/70">{review.comment}</p>
+                        <p className="text-xs text-lovely/70 mt-1">{review.comment}</p>
                       )}
-                      <div className="flex items-center gap-3 mt-2">
+                      {review.images && review.images.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {review.images.map((imgUrl, i) => (
+                            <div key={i} className="relative group cursor-pointer" onClick={() => openImageViewer(review.images!, i)}>
+                              <CldImage
+                                src={imgUrl}
+                                alt="review image"
+                                width={120}
+                                height={120}
+                                className="rounded-lg object-cover w-16 h-16 sm:w-20 sm:h-20 transition-transform duration-300 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                <div className="bg-white/90 p-1.5 rounded-full text-lovely shadow-sm">
+                                  <ZoomIn size={16} />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3 mt-3">
                         {/* Helpful vote button + clickable count popover */}
                         <div className="flex items-center gap-1">
                           <button
@@ -597,8 +658,452 @@ function BrandCard({
             )}
           </div>
         )}
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <a
+            href={brand.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onLinkClick(brand._id)}
+            className="flex-1 min-w-0 flex items-center justify-center gap-2 py-2.5 px-4 bg-lovely text-creamey rounded-xl text-sm font-semibold hover:bg-lovely/90 transition-all duration-200 group-hover:shadow-md"
+          >
+            <ShoppingBag className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Visit Store</span>
+            <ExternalLink className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
+          </a>
+
+          <button
+            onClick={() => setShowFeedback(!showFeedback)}
+            disabled={submitted}
+            className={`flex items-center gap-1.5 py-2.5 px-3 rounded-xl text-sm font-medium border transition-all duration-200 ${
+              submitted
+                ? "border-lovely/40 text-lovely/70 cursor-default"
+                : showFeedback
+                ? "bg-lovely/10 border-lovely text-lovely"
+                : "border-lovely/30 text-lovely/70 hover:border-lovely hover:text-lovely"
+            }`}
+          >
+            <Star className="h-4 w-4" />
+            {submitted ? "✓ Rated" : "Rate"}
+          </button>
+        </div>
+
+        {/* Feedback Form */}
+        {showFeedback && !submitted && (
+          <div className="mt-4 p-4 rounded-xl bg-lovely/5 border border-lovely/15 space-y-3">
+            <p className="text-sm font-semibold text-lovely">
+              Leave your review
+            </p>
+            <StarRatingInput value={userRating} onChange={setUserRating} />
+            <textarea
+              value={userComment}
+              onChange={(e) => setUserComment(e.target.value)}
+              placeholder="Share your experience with this brand (optional)"
+              rows={3}
+              className="w-full bg-transparent border border-lovely/20 rounded-lg p-2.5 text-sm text-lovely placeholder-lovely/40 focus:outline-none focus:border-lovely/50 resize-none"
+            />
+            {userImages.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {userImages.map((imgUrl, i) => (
+                  <div key={i} className="relative">
+                    <CldImage
+                      src={imgUrl}
+                      alt="uploaded image"
+                      width={80}
+                      height={80}
+                      className="rounded-lg object-cover w-20 h-20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setUserImages((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="absolute -top-1 -right-1 bg-white text-red-500 rounded-full p-0.5 shadow-sm border border-red-100"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <CldUploadWidget
+              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "inspoPintrest"}
+              onSuccess={(result: any) => {
+                if (result?.info?.public_id) {
+                  setUserImages((prev) => [...prev, result.info.public_id]);
+                }
+              }}
+            >
+              {({ open }) => (
+                <button
+                  type="button"
+                  onClick={() => open()}
+                  className="flex items-center gap-1.5 text-xs text-lovely/70 hover:text-lovely"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Images
+                </button>
+              )}
+            </CldUploadWidget>
+            <div className="flex gap-2 mt-2">
+              <Button
+                onClick={handleSubmit}
+                disabled={!userRating || submitting}
+                className="flex-1 bg-lovely text-creamey hover:bg-lovely/90 h-9 text-sm"
+              >
+                {submitting ? (
+                  <span className="flex items-center gap-1.5">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    Submitting...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <Send className="h-3.5 w-3.5" />
+                    Submit Review
+                  </span>
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowFeedback(false)}
+                className="text-lovely/70 hover:text-lovely h-9 px-3"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
       </div>
+
+      {/* Full View Image Modal */}
+      <Dialog open={!!viewerImages} onOpenChange={(open) => !open && closeImageViewer()}>
+        <DialogContent className="max-w-4xl w-full h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden">
+          <DialogTitle className="sr-only">
+            Review Image Preview
+          </DialogTitle>
+          {viewerImages && (
+            <div 
+              className="relative w-full h-full flex items-center justify-center touch-none outline-none"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              {/* Close button */}
+              <div className="absolute top-4 right-4 z-50 flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-black/50 hover:bg-black/70 text-white rounded-full"
+                  onClick={closeImageViewer}
+                >
+                  <X size={24} />
+                </Button>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between z-40 pointer-events-none">
+                <div className="pointer-events-auto">
+                  {viewerIndex > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-black/50 hover:bg-black/70 text-white rounded-full h-12 w-12"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrevImage();
+                      }}
+                    >
+                      <ChevronLeft size={32} />
+                    </Button>
+                  )}
+                </div>
+                <div className="pointer-events-auto">
+                  {viewerIndex < viewerImages.length - 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-black/50 hover:bg-black/70 text-white rounded-full h-12 w-12"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNextImage();
+                      }}
+                    >
+                      <ChevronRight size={32} />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="relative w-auto h-auto max-w-full max-h-full rounded-lg overflow-hidden flex items-center justify-center select-none bg-black/10 backdrop-blur-sm p-2 sm:p-4">
+                <CldImage
+                  src={viewerImages[viewerIndex]}
+                  alt="Full View"
+                  width={1000}
+                  height={1000}
+                  className="object-contain max-h-[85vh] w-auto animate-in fade-in zoom-in-95 duration-300 pointer-events-none"
+                  draggable={false}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// ─── Brand Submission Dialog ──────────────────────────────────────────────────
+
+interface CategoryData {
+  _id: string;
+  name: string;
+  subcategories: { _id: string; name: string }[];
+}
+
+function BrandSubmissionDialog() {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    link: "",
+    logo: "",
+    selectedSubCategories: [] as string[],
+    tags: "",
+  });
+
+  useEffect(() => {
+    if (open && categories.length === 0) {
+      axios.get("/api/shopping-bestie/categories").then((res) => {
+        setCategories(res.data.data || []);
+      });
+    }
+  }, [open, categories.length]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.selectedSubCategories.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please select at least one sub-category.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post("/api/shopping-bestie", {
+        ...formData,
+        subCategories: formData.selectedSubCategories,
+        tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      });
+      toast({
+        title: "Success! 🎉",
+        description: "Your brand suggestion has been submitted for review.",
+        variant: "added",
+      });
+      setOpen(false);
+      setFormData({
+        name: "",
+        description: "",
+        link: "",
+        logo: "",
+        selectedSubCategories: [],
+        tags: "",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.response?.data?.error || "Failed to submit brand suggestion.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSubCategory = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedSubCategories: prev.selectedSubCategories.includes(id)
+        ? prev.selectedSubCategories.filter((sid) => sid !== id)
+        : [...prev.selectedSubCategories, id],
+    }));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-lovely text-creamey hover:bg-lovely/90 rounded-xl px-4 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Suggest a Brand
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-creamey border-lovely/20 max-w-lg w-[95vw] rounded-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-lovely flex items-center gap-2">
+            <Store className="h-6 w-6" />
+            Suggest a New Brand
+          </DialogTitle>
+          <p className="text-lovely/60 text-sm">
+            Know a brand that every wifey should love? Tell us about it!
+          </p>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="brand-name" className="text-lovely font-semibold">Brand Name *</Label>
+            <Input
+              id="brand-name"
+              required
+              placeholder="e.g., Wifey Essentials"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="bg-white/50 border-lovely/20 focus:border-lovely"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brand-link" className="text-lovely font-semibold">Website/Link *</Label>
+            <Input
+              id="brand-link"
+              required
+              type="url"
+              placeholder="https://example.com"
+              value={formData.link}
+              onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+              className="bg-white/50 border-lovely/20 focus:border-lovely"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brand-desc" className="text-lovely font-semibold">Description *</Label>
+            <Textarea
+              id="brand-desc"
+              required
+              placeholder="What makes this brand special?"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="bg-white/50 border-lovely/20 focus:border-lovely min-h-[100px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-lovely font-semibold">Categories *</Label>
+            <div className="space-y-3 max-h-[200px] overflow-y-auto p-3 rounded-lg border border-lovely/10 bg-white/30">
+              {categories.map((cat) => (
+                <div key={cat._id} className="space-y-1.5">
+                  <p className="text-xs font-bold text-lovely/40 uppercase tracking-widest">{cat.name}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.subcategories.map((sub) => (
+                      <button
+                        key={sub._id}
+                        type="button"
+                        onClick={() => toggleSubCategory(sub._id)}
+                        className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                          formData.selectedSubCategories.includes(sub._id)
+                            ? "bg-lovely text-creamey border-lovely"
+                            : "bg-white/50 text-lovely/70 border-lovely/10 hover:border-lovely/30"
+                        }`}
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="brand-tags" className="text-lovely font-semibold">Tags</Label>
+            <Input
+              id="brand-tags"
+              placeholder="fashion, jewelry, local (comma separated)"
+              value={formData.tags}
+              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              className="bg-white/50 border-lovely/20 focus:border-lovely"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-lovely font-semibold">Logo (Optional)</Label>
+            {formData.logo ? (
+              <div className="relative inline-block mt-2">
+                <img src={formData.logo} alt="Brand logo" className="h-24 w-24 object-cover rounded-xl shadow-sm border border-lovely/20" />
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, logo: "" })}
+                  className="absolute -top-2 -right-2 bg-creamey border border-lovely/20 text-red-500 rounded-full p-1 shadow hover:bg-red-50"
+                  title="Remove image"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="border border-lovely/20 rounded-xl bg-white/50 p-2">
+                <UploadDropzone
+                  endpoint="mediaUploader"
+                  config={{ mode: "auto" }}
+                  onBeforeUploadBegin={async (files) => {
+                    try {
+                      return await Promise.all(
+                        files.map(async (file) => {
+                          if (file.type.startsWith("image/")) {
+                            return await compressImage(file);
+                          }
+                          return file;
+                        })
+                      );
+                    } catch (error) {
+                      console.error("Compression err", error);
+                      return files;
+                    }
+                  }}
+                  onClientUploadComplete={(res) => {
+                    if (res && res[0] && res[0].url) {
+                      setFormData({ ...formData, logo: res[0].url });
+                    }
+                  }}
+                  onUploadError={(error) => {
+                    toast({
+                      title: "Upload Failed",
+                      description: error.message,
+                      variant: "destructive",
+                    });
+                  }}
+                  appearance={{
+                    uploadIcon: "text-lovely",
+                    allowedContent: "text-lovely/90",
+                    button: "bg-lovely text-creamey rounded-full px-6 py-2 font-bold hover:bg-lovely/80 transition hover:cursor-pointer",
+                    container: "flex text-lovely/80 flex-col items-center gap-2",
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="pt-4">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-lovely text-creamey hover:bg-lovely/90 h-11 text-base font-bold shadow-lg shadow-lovely/20"
+            >
+              {loading ? (
+                <RefreshCw className="h-5 w-5 animate-spin mr-2" />
+              ) : (
+                <Send className="h-5 w-5 mr-2" />
+              )}
+              Submit Brand for Approval
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -620,11 +1125,26 @@ export default function ShoppingBestieTab({
   );
   const [ratedBrands, setRatedBrands] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("All");
+  const [categoriesData, setCategoriesData] = useState<CategoryData[]>([]);
 
-  // Derived categories from loaded data
+  useEffect(() => {
+    setSelectedSubCategory("All");
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    axios
+      .get("/api/shopping-bestie/categories")
+      .then((res) => {
+        setCategoriesData(res.data.data || []);
+      })
+      .catch((err) => console.error("Error fetching categories:", err));
+  }, []);
+
+  // Derive unique category names from fetched categories data
   const categories = [
     "All",
-    ...Array.from(new Set(brands.map((b) => b.category))),
+    ...categoriesData.map((c) => c.name).sort(),
   ];
 
   const fetchBrands = useCallback(async () => {
@@ -665,11 +1185,12 @@ export default function ShoppingBestieTab({
   const handleSubmitFeedback = async (
     brandId: string,
     rating: number,
-    comment: string
+    comment: string,
+    images: string[] = []
   ) => {
     const res = await axios.post(
       `/api/shopping-bestie/${brandId}/review`,
-      { rating, comment }
+      { rating, comment, images }
     );
     setRatedBrands((prev) =>
       new Set(Array.from(prev).concat(brandId))
@@ -683,17 +1204,33 @@ export default function ShoppingBestieTab({
     );
   };
 
-  // Client-side search (categories/sort are server-side via query params)
-  const filteredBrands = searchQuery
-    ? brands.filter(
-        (b) =>
-          b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          b.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          b.tags.some((t) =>
-            t.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-      )
-    : brands;
+  // Derive unique subCategory names from fetched categories data when a specific category is selected
+  const subCategories = selectedCategory === "All"
+    ? []
+    : [
+        "All",
+        ...(categoriesData
+          .find((c) => c.name === selectedCategory)
+          ?.subcategories.map((s) => s.name)
+          .sort() || []),
+      ];
+
+  // Client-side search and subcategory filter (categories/sort are server-side via query params)
+  const filteredBrands = brands.filter((b) => {
+    const matchesSearch = searchQuery
+      ? b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (b.categories ?? []).some((c) => c.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (b.subCategoryNames ?? []).some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+      : true;
+
+    const matchesSubCats = selectedSubCategory === "All"
+      ? true
+      : (b.subCategoryNames ?? []).includes(selectedSubCategory);
+
+    return matchesSearch && matchesSubCats;
+  });
 
   return (
     <div className="space-y-6">
@@ -709,11 +1246,7 @@ export default function ShoppingBestieTab({
             Handpicked brands every wifey should know about
           </p>
         </div>
-        {!isSubscribed && (
-          <div className="bg-lovely/10 border border-lovely/30 rounded-xl px-4 py-2 text-lovely text-sm font-medium">
-            Subscribe to rate &amp; review brands ✨
-          </div>
-        )}
+        <BrandSubmissionDialog />
       </div>
 
       {/* Filters & Search */}
@@ -746,6 +1279,25 @@ export default function ShoppingBestieTab({
             </button>
           ))}
         </div>
+
+        {/* SubCategory Pills */}
+        {selectedCategory !== "All" && subCategories.length > 1 && (
+          <div className="flex flex-wrap gap-2 pt-1 border-t border-lovely/10 mt-2">
+            {subCategories.map((subcat) => (
+              <button
+                key={subcat}
+                onClick={() => setSelectedSubCategory(subcat)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                  selectedSubCategory === subcat
+                    ? "bg-lovely/80 text-creamey shadow-sm"
+                    : "bg-white/50 text-lovely/80 hover:bg-lovely/10 border border-lovely/20"
+                }`}
+              >
+                {subcat}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Sort */}
         <div className="flex items-center gap-2 text-xs text-lovely/60">
@@ -834,8 +1386,8 @@ export default function ShoppingBestieTab({
 
       {/* Footer */}
       <p className="text-center text-xs text-lovely/30 pb-4">
-        Ratings &amp; reviews can only be submitted once per brand by subscribed
-        members.
+        Ratings &amp; reviews can be submitted by all registered members.
+        New brand suggestions will be reviewed and approved by our team.
       </p>
     </div>
   );
