@@ -86,7 +86,7 @@ export interface ShoppingBrand {
   subCategoryNames: string[];
   /** Deduplicated list of parent category names, e.g. ["Fashion", "Beauty"] */
   categories: string[];
-  description: string;
+  description?: string;
   link: string;
   averageRating: number;  // computed by aggregation
   reviewCount: number;    // computed by aggregation ($size of reviews)
@@ -510,7 +510,7 @@ function BrandCard({
 
         {/* Description */}
         <p className="text-lovely/70 text-sm mb-3 line-clamp-2">
-          {brand.description}
+          {brand.description || "No description available"}
         </p>
 
         {/* Tags */}
@@ -981,10 +981,9 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand-desc" className="text-lovely font-semibold">Description *</Label>
+            <Label htmlFor="brand-desc" className="text-lovely font-semibold">Description (Optional)</Label>
             <Textarea
               id="brand-desc"
-              required
               placeholder="What makes this brand special?"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -1020,7 +1019,7 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand-tags" className="text-lovely font-semibold">Tags</Label>
+            <Label htmlFor="brand-tags" className="text-lovely font-semibold">Tags (Optional)</Label>
             <Input
               id="brand-tags"
               placeholder="fashion, jewelry, local (comma separated)"
@@ -1219,7 +1218,7 @@ export default function ShoppingBestieTab({
   const filteredBrands = brands.filter((b) => {
     const matchesSearch = searchQuery
       ? b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (b.categories ?? []).some((c) => c.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (b.subCategoryNames ?? []).some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))

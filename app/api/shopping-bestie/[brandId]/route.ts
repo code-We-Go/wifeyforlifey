@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: Params) {
     await ConnectDB();
 
     const brand = await ShoppingBrandModel.findOne({
-      _id: brandId,
+      _id: brandId, 
       isActive: true,
     })
       .populate({

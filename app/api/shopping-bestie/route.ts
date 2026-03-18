@@ -233,9 +233,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, description, link, subCategories, tags, logo } = body;
 
-    if (!name || !description || !link || !subCategories || subCategories.length === 0) {
+    if (!name ||  !link || !subCategories || subCategories.length === 0) {
       return NextResponse.json(
-        { error: "Missing required fields (name, description, link, subCategories)" },
+        { error: "Missing required fields (name, link, subCategories)" },
         { status: 400 }
       );
     }
