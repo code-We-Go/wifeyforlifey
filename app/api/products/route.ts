@@ -6,6 +6,7 @@ import subCategoryModel from "@/app/modals/subCategoryModel";
 import categoriesModel from "@/app/modals/categoriesModel";
 
 export async function GET(request: Request) {
+  console.log("registering"+subCategoryModel+categoriesModel)
   await ConnectDB();
   try {
     const { searchParams } = new URL(request.url);
