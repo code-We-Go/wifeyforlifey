@@ -3,14 +3,16 @@ import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-const loadDB = async () => {
-  await ConnectDB();
-};
+// const loadDB = async () => {
+//   await ConnectDB();
+// };
 
-loadDB();
+// loadDB();
 
 // GET - Fetch all blogs with pagination, search, and filtering
 export async function GET(req: Request) {
+    await ConnectDB();
+
   try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);

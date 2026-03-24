@@ -11,6 +11,7 @@ loadDB();
 
 // CREATE - POST
 export async function POST(req: Request) {
+  await ConnectDB();
   try {
     const data = await req.json();
     console.log("Creating package:", data);
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
 
 // READ - GET
 export async function GET(req: Request) {
+  await ConnectDB();
+
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const search = searchParams.get("search") || "";
@@ -88,6 +91,8 @@ export async function GET(req: Request) {
 
 // UPDATE - PUT
 export async function PUT(request: Request) {
+  await ConnectDB();
+
   const { searchParams } = new URL(request.url);
   const packageID = searchParams.get("packageID");
   
@@ -127,6 +132,8 @@ export async function PUT(request: Request) {
 
 // DELETE
 export async function DELETE(request: Request) {
+  await ConnectDB();
+
   const { searchParams } = new URL(request.url);
   const packageID = searchParams.get("packageID");
 

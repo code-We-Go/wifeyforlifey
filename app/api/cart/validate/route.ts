@@ -3,13 +3,15 @@ import productsModel from "@/app/modals/productsModel";
 import { ConnectDB } from "@/app/config/db";
 import { CartItem } from "@/app/interfaces/interfaces";
 
-const loadDB = async () => {
-  await ConnectDB();
-};
+// const loadDB = async () => {
+//   await ConnectDB();
+// };
 
-loadDB();
+// loadDB();
 
 export async function POST(req: Request) {
+    await ConnectDB();
+  
   try {
     const body = await req.json();
     const { items } = body as { items: CartItem[] };

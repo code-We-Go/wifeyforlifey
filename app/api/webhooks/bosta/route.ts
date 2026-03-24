@@ -4,11 +4,11 @@ import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 // Connect to database
-const loadDB = async () => {
-  await ConnectDB();
-};
+// const loadDB = async () => {
+//   await ConnectDB();
+// };
 
-loadDB();
+// loadDB();
 
 // Bosta webhook status mapping based on state codes
 const BOSTA_STATUS_MAPPING: { [key: string]: string } = {
@@ -92,6 +92,8 @@ interface BostaWebhookPayload {
 }
 
 export async function POST(request: Request) {
+    await ConnectDB();
+
   try {
     const payload: BostaWebhookPayload = await request.json();
 
@@ -204,6 +206,8 @@ export async function POST(request: Request) {
 
 // Handle GET requests (for webhook verification if needed)
 export async function GET(request: NextRequest) {
+    await ConnectDB();
+
   return NextResponse.json(
     { message: "Bosta webhook endpoint is active" },
     { status: 200 }

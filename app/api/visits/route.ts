@@ -2,14 +2,16 @@ import { ConnectDB } from "@/app/config/db";
 import visitesModel from "@/app/modals/visitsModel";
 import { NextResponse } from "next/server";
 
-const loadDB = async () => {
-    console.log('hna');
-    await ConnectDB();
-}
+// const loadDB = async () => {
+//     console.log('hna');
+//     await ConnectDB();
+// }
 
-loadDB();
+// loadDB();
 
 export async function POST(request: Request) {
+    await ConnectDB();
+    
     const data = await request.json();
     console.log("data"+data)
     console.log(data.countryCode);

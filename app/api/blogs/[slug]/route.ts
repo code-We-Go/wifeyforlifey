@@ -2,17 +2,18 @@ import BlogModel from "@/app/modals/blogModel";
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 
-const loadDB = async () => {
-  await ConnectDB();
-};
+// const loadDB = async () => {
+//   await ConnectDB();
+// };
 
-loadDB();
+// loadDB();
 
 // GET - Fetch a single blog by slug
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  await ConnectDB();
   console.log("slugssHna");
   try {
     const { slug } = await params;

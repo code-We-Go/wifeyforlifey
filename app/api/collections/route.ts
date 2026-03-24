@@ -4,13 +4,15 @@ import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 import collectionsModel from "@/app/modals/collectionsModel";
 
-const loadDB = async () => {
-    await ConnectDB();
-};
+// const loadDB = async () => {
+//     await ConnectDB();
+// };
 
-loadDB();
+// loadDB();
 
 export async function GET(req: Request) {
+    await ConnectDB();
+  
     const { searchParams } = new URL(req.url);
     const collectionID = searchParams.get("collectionID")!;
     const collectionName = searchParams.get("collectionName")!;

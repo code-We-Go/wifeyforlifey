@@ -4,12 +4,14 @@ import InteractionsModel from "@/app/modals/interactionsModel";
 import mongoose from "mongoose";
 import UserModel from "@/app/modals/userModel";
 
-const loadDB = async () => {
-  await ConnectDB();
-};
+// const loadDB = async () => {
+//   await ConnectDB();
+// };
 
 // GET: Get all interactions with pagination and filtering
 export async function GET(request: Request) {
+    await ConnectDB();
+  
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
@@ -20,7 +22,7 @@ export async function GET(request: Request) {
   const sortField = searchParams.get("sortField") || "createdAt";
   const sortOrder = searchParams.get("sortOrder") || "desc";
 
-  await loadDB();
+  await ConnectDB();
   console.log("register userModel" + UserModel);
   try {
     // Build query based on filters
@@ -83,7 +85,7 @@ export async function GET(request: Request) {
 
 // POST: Create a new interaction
 export async function POST(request: Request) {
-  await loadDB();
+  await ConnectDB();
 
   try {
     const body = await request.json();
@@ -131,7 +133,7 @@ export async function POST(request: Request) {
 
 // PUT: Update interactions in bulk (e.g., mark as read)
 export async function PUT(request: Request) {
-  await loadDB();
+  await ConnectDB();
 
   try {
     const body = await request.json();
@@ -193,7 +195,7 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  await loadDB();
+  await ConnectDB();
 
   try {
     if (!id) {

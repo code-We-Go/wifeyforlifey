@@ -2,15 +2,9 @@ import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 import statesModel from "@/app/modals/states";
 
-const loadDB = async () => {
-  console.log("hna");
-  await ConnectDB();
-};
-
-loadDB();
-
 export async function GET(request: Request) {
   try {
+    await ConnectDB();
     const { searchParams } = new URL(request.url);
     const countryID = searchParams.get("countryID");
 

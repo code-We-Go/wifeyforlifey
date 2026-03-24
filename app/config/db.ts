@@ -1,5 +1,3 @@
-// lib/mongodb.ts or utils/db.ts
-
 import mongoose from "mongoose";
 
 const MONGODB_URI = `mongodb+srv://wifeyforlifey:${process.env.MONGO_PASSWORD}@wifeyforlifey.j0pm4vx.mongodb.net/wifeyforlifey?retryWrites=true&w=majority&appName=WifeyForLifey`;
@@ -8,30 +6,26 @@ if (!process.env.MONGO_PASSWORD) {
   throw new Error("Please define the MONGO_PASSWORD environment variable");
 }
 
-export const ConnectDB = async () => {
-  try {
-    if (mongoose.connection.readyState === 1) {
-      console.log("Already connected to MongoDB");
-      return;
-    }
+// 👇 global cache (VERY IMPORTANT)
+let cached = global.mongoose || { conn: null, promise: null };
 
-    // Add connection options to handle timeouts and retries
+export const ConnectDB = async () => {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
     const options = {
-      serverSelectionTimeoutMS: 10000, // Timeout after 5 seconds instead of 30
-      socketTimeoutMS: 65000, // Close sockets after 45 seconds of inactivity
-      connectTimeoutMS: 100000, // Give up initial connection after 10 seconds
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 1, // Maintain at least 1 socket connection
-      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
-      retryWrites: true,
-      retryReads: true,
+      bufferCommands: false,
+      maxPoolSize: 5, // lower = safer for free tier
     };
 
-    await mongoose.connect(MONGODB_URI, options);
-    console.log("MongoDB Connected...");
-  } catch (error) {
-    console.error("MongoDB connection error:", error);
-    // Don't exit the process, just throw the error
-    throw error;
+    cached.promise = mongoose.connect(MONGODB_URI, options);
   }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
 };
+
+// 👇 save to global
+global.mongoose = cached;
