@@ -229,22 +229,22 @@ const SubscriptionPage = () => {
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
     const packageContents = {
-  //     "687396821b4da119eb1c13fe": {
-  //       header: "Batch 3 is officially SOLD OUT!",
-  //       content: `Please note that this order is a pre-order, and your planner will be shipped starting November 10th.
+      "687396821b4da119eb1c13fe": {
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
 
-  // While you wait for your gehaz bestie to arrive, you can already enjoy:
-  // ✨ Wifey's curated playlists
-  // ✨ Exclusive partner discounts
-  // ✨ Access to supportive Wifey circles
+  While you wait for your gehaz bestie to arrive, you can already enjoy:
+  ✨ Wifey's curated playlists
+  ✨ Exclusive partner discounts
+  ✨ Access to supportive Wifey circles
 
-  // Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
-  //     },
+  Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
+      },
   //for later
       // "68bf6ae9c4d5c1af12cdcd37": {
-      "68bf6ae9c4d5c1af12": {
+      "68bf6ae9c4d5c1af12cdcd37": {
         header: "This is a pre-order",
-        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will begin shipping starting February 14th.
+        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will shipped within 10 business days.
 
 After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
 
