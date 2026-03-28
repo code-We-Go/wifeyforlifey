@@ -244,7 +244,7 @@ const SubscriptionPage = () => {
       // "68bf6ae9c4d5c1af12cdcd37": {
       "68bf6ae9c4d5c1af12cdcd37": {
         header: "This is a pre-order",
-        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will shipped within 10 business days.
+        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
 
 After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
 
