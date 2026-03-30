@@ -1241,7 +1241,7 @@ export default function ShoppingBestieTab({
           >
             Shopping Bestie 🛍️
           </h2>
-          <div className="mt-4 space-y-4 text-lovely/60 text-sm max-w-3xl leading-relaxed">
+          <div className="mt-4 space-y-4 text-lovely/80 text-sm max-w-3xl leading-relaxed">
             <p>
               These brands aren’t officially recommended or endorsed by Wifey for Lifey 💗✨<br />
               They’re simply a curated list of our community’s go-to favorites!
