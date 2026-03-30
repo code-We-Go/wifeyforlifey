@@ -530,10 +530,10 @@ function BrandCard({
 
         {/* Stats Row */}
         <div className="flex items-center gap-4 mb-4 text-xs text-lovely/50">
-          <div className="flex items-center gap-1">
+          {/* <div className="flex items-center gap-1">
             <MousePointerClick className="h-3.5 w-3.5 text-lovely/40" />
             <span>{brand.clicks.toLocaleString()} visits</span>
-          </div>
+          </div> */}
           <div className="flex items-center gap-1">
             <MessageSquare className="h-3.5 w-3.5 text-lovely/40" />
             <span>{brand.reviews?.length ?? brand.reviewCount} reviews</span>
@@ -1241,9 +1241,19 @@ export default function ShoppingBestieTab({
           >
             Shopping Bestie 🛍️
           </h2>
-          <p className="text-lovely/60 text-sm mt-1">
-            Handpicked brands every wifey should know about
-          </p>
+          <div className="mt-4 space-y-4 text-lovely/60 text-sm max-w-3xl leading-relaxed">
+            <p>
+              These brands aren’t officially recommended or endorsed by Wifey for Lifey 💗✨<br />
+              They’re simply a curated list of our community’s go-to favorites!
+            </p>
+            <p>
+              Always do your own research, read reviews, and choose what feels right for you before purchasing 🛍️💭<br />
+              Wifey for Lifey isn’t responsible for any issues related to products or services.
+            </p>
+            <p>
+              We just put this list together to make your shopping journey a little easier and way less overwhelming 💕
+            </p>
+          </div>
         </div>
         <BrandSubmissionDialog />
       </div>
