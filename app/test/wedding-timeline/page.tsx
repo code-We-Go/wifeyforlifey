@@ -427,6 +427,9 @@ function WeddingTimelinePageContent() {
   // Q3: Is photo session at same place as Katb Ketab? "yes" | "no"
   const [photoAtKatbLocation, setPhotoAtKatbLocation] = useState<"yes" | "no" | null>(null);
 
+  // Selected anchor for christian_church_venue (either 'church' or 'Grand_Entrance')
+  const [selectedAnchor, setSelectedAnchor] = useState<string | null>(null);
+
   // -- Names (optional, for PDF) --
   const [brideFirstName, setBrideFirstName] = useState("");
   const [groomFirstName, setGroomFirstName] = useState("");
@@ -485,9 +488,12 @@ function WeddingTimelinePageContent() {
   } | null>(null);
 
   // -- Helper for Anchor Event --
-  const getAnchorEventId = (variation: CeremonyVariation | null) => {
+  const getAnchorEventId = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
     if (!variation) return "zaffa";
     
+    // For Christian Church + Venue, use the user's selected anchor if available
+    if (variation === "christian_church_venue" && anchorOverride) return anchorOverride;
+
     // Christian variations usually anchor to Church, unless it's venue only
     // if (variation.startsWith("christian") && variation !== "christian_venue_only") return "church";
     if (variation === "christian_venue_only" || variation === "christian_church_only" || variation === "christian_church_venue") return "Grand_Entrance";
@@ -499,8 +505,8 @@ function WeddingTimelinePageContent() {
     return "zaffa"; 
   };
   
-  const getAnchorLabel = (variation: CeremonyVariation | null) => {
-    const anchorId = getAnchorEventId(variation);
+  const getAnchorLabel = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
+    const anchorId = getAnchorEventId(variation, anchorOverride);
     const feature = ALL_FEATURES.find(f => f.id === anchorId);
     return feature ? feature.label : "Wedding";
   };
@@ -627,6 +633,13 @@ function WeddingTimelinePageContent() {
     }
   }, [isAuthenticated, checkingTimeline]);
 
+  // Reset selectedAnchor if variation changes to something other than christian_church_venue
+  useEffect(() => {
+    if (selectedCeremonyVariation !== "christian_church_venue") {
+      setSelectedAnchor(null);
+    }
+  }, [selectedCeremonyVariation]);
+
   // 4. Handle Drag End
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -641,7 +654,7 @@ function WeddingTimelinePageContent() {
   };
 
   // 5. Calculated Events (Time Calculation)
-  const calculatedEvents = calculateTimeline(events, zaffaTime, getAnchorEventId(selectedCeremonyVariation));
+  const calculatedEvents = calculateTimeline(events, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor));
 
   // 6. Auto-Save Logic (Only if newly generated and not yet saved)
   //   useEffect(() => {
@@ -1778,11 +1791,35 @@ function WeddingTimelinePageContent() {
 
               {step === 3 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="space-y-4">
-                    <Label className="text-xl text-lovely text-center block">
-                      When does the {getAnchorLabel(selectedCeremonyVariation)} start?
-                    </Label>
-                    <div className="flex w-full justify-center px-2">
+                  {selectedCeremonyVariation === "christian_church_venue" && !selectedAnchor ? (
+                    <div className="space-y-4">
+                      <Label className="text-xl text-lovely text-center block">
+                        Which time you want to adjust the day on?
+                      </Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          onClick={() => setSelectedAnchor("church")}
+                          className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                        >
+                          ⛪ Church Ceremony
+                        </button>
+                        <button
+                          onClick={() => setSelectedAnchor("Grand_Entrance")}
+                          className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                        >
+                          🚪 Venue Entrance
+                        </button>
+                      </div>
+                      <p className="text-sm text-lovely/60 text-center">
+                        This event will be the anchor that everything else is calculated from.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Label className="text-xl text-lovely text-center block">
+                        When does the {getAnchorLabel(selectedCeremonyVariation, selectedAnchor)} start?
+                      </Label>
+                      <div className="flex w-full justify-center px-2">
                         <input
                           type="time"
                           value={zaffaTime}
@@ -1792,28 +1829,45 @@ function WeddingTimelinePageContent() {
                             colorScheme: 'light'
                           }}
                         />
+                      </div>
+                      {selectedCeremonyVariation === "christian_church_venue" && selectedAnchor && (
+                        <div className="flex justify-center">
+                          <Button 
+                            variant="link" 
+                            onClick={() => setSelectedAnchor(null)}
+                            className="text-lovely/60 text-xs underline"
+                          >
+                            Change reference event
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex gap-4 mt-8">
                     <Button
                       variant="outline"
-                      onClick={() =>
-                        setStep(
-                          selectedCeremonyVariation === "muslim_katb_ketab_only" ||
-                          selectedCeremonyVariation === "christian_church_only" ||
-                          selectedCeremonyVariation === "christian_church_venue"
-                            ? 2
-                            : 1
-                        )
-                      }
+                      onClick={() => {
+                        if (selectedCeremonyVariation === "christian_church_venue" && selectedAnchor) {
+                          setSelectedAnchor(null);
+                        } else {
+                          setStep(
+                            selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                            selectedCeremonyVariation === "christian_church_only" ||
+                            selectedCeremonyVariation === "christian_church_venue"
+                              ? 2
+                              : 1
+                          );
+                        }
+                      }}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
                       Back
                     </Button>
                     <Button
+                      disabled={selectedCeremonyVariation === "christian_church_venue" && !selectedAnchor}
                       onClick={() => setStep(4)}
-                      className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg"
+                      className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next Step <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
