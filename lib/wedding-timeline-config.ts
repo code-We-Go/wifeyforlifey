@@ -1,0 +1,1780 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Wedding Timeline – Shared Configuration
+// Single source of truth: used by the web page AND the /api/wedding-timeline/config
+// endpoint so mobile apps can consume the same data.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type CeremonyType = "muslim" | "christian";
+
+export type CeremonyVariation =
+  | "muslim_katb_ketab_wedding"
+  | "muslim_katb_ketab_only"
+  | "muslim_wedding_only"
+  | "christian_church_venue"
+  | "christian_church_only"
+  | "christian_venue_only";
+
+export type CeremonyAnswers = {
+  gettingReadyLocation?: "home" | "venue" | null;
+  bridesmaidsAtPrep?: "yes" | "no" | null;
+  //katb ketab and church
+  photoAtKatbLocation?: "yes" | "no" | null;
+  photoshootLocation?: "venue" | "another_place" | null;
+};
+
+export type WeddingFeature = {
+  id: string;
+  /** Label shown in the wizard checklist */
+  label: string;
+  /** Default duration in minutes */
+  defaultDuration: number;
+  /** Ordering bucket */
+  category: "before" | "zaffa" | "after";
+  /** Sort order within the generated timeline */
+  order: number;
+  /** If true: always included, hidden from the user's checklist */
+  hidden?: boolean;
+  /** If set: only available for these ceremony variations */
+  allowedVariations?: CeremonyVariation[];
+  /** What each party is doing during this event */
+  activities: {
+    bride: string;
+    groom: string;
+    bridesmaids: string;
+    groomsmen: string;
+  };
+  /** If true: no break will be automatically added before this event */
+  noBreakBefore?: boolean;
+  /** If true: no break will be automatically added after this event */
+  noBreakAfter?: boolean;
+  /** If set: only includes feature when answers match these values */
+  showIf?: Partial<CeremonyAnswers>;
+  /** If set: overrides specific activities when answers match these values */
+  conditionalActivities?: {
+    condition: Partial<CeremonyAnswers>;
+    activities: Partial<{
+      bride: string;
+      groom: string;
+      bridesmaids: string;
+      groomsmen: string;
+    }>;
+  }[];
+};
+
+export const CEREMONY_OPTIONS: {
+  id: CeremonyType;
+  label: string;
+  variations: { id: CeremonyVariation; label: string }[];
+}[] = [
+  {
+    id: "muslim",
+    label: "Muslim Ceremony",
+    variations: [
+      { id: "muslim_katb_ketab_wedding", label: "Katb Ketab + Wedding" },
+      { id: "muslim_katb_ketab_only", label: "Katb Ketab Only" },
+      { id: "muslim_wedding_only", label: "Wedding Only" },
+    ],
+  },
+  {
+    id: "christian",
+    label: "Christian Ceremony",
+    variations: [
+      { id: "christian_church_venue", label: "Church + Venue" },
+      { id: "christian_church_only", label: "Church Only" },
+      { id: "christian_venue_only", label: "Venue Only" },
+      
+    ],
+  },
+];
+
+export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
+  {
+    id: "arrival",
+    noBreakAfter: true,
+    label: "Arrival at the venue",
+    defaultDuration: 15,
+    category: "before",
+    order: 1,
+    hidden: true,
+    activities: {
+      bride: "Arrival at the venue",
+      groom: "_",
+      bridesmaids: "_",
+      groomsmen: "_",
+    },
+  },
+  {
+    id: "hair",
+    label: "Hair & Veil",
+    defaultDuration: 60,
+    category: "before",
+    order: 2,
+    activities: {
+      bride: "Hair Styling",
+      groom: "_",
+      bridesmaids: "Hair Styling (for non hijabis)",
+      groomsmen: "_",
+    },
+  },
+  {
+    id: "makeup",
+    label: "Makeup",
+    defaultDuration: 105,
+    category: "before",
+    order: 3,
+    activities: {
+      bride: "Makeup",
+      groom: "Arriving & Getting Ready",
+      bridesmaids: "Arriving & Getting Ready",
+      groomsmen: "Arriving & Getting Ready",
+    },
+  },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Getting Ready Photos",
+    },
+  },
+  {
+    id: "dress_suit",
+    noBreakAfter: true,
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.5,
+    hidden: true,
+    activities: {
+      bride: "Wearing Dress",
+      groom: "Wearing Suit",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+  },
+  // {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,
+  //   noBreakAfter: true,
+  //   category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 5,
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 6,
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+
+  {
+    id: "Guest_Arrival",
+    noBreakBefore: true,
+    noBreakAfter: true,
+    label: "Guest Arrival",
+    defaultDuration: 20,
+    category: "before",
+    order: 7.8,
+    activities: {
+      bride: "Guests Arrival",
+      groom: "Guests Arrival",
+      bridesmaids: "Guests Arrival",
+      groomsmen: "Guests Arrival",
+    },
+  },
+
+  {
+    id: "Grand_Entrance",
+    noBreakAfter: true,
+    label: "Grand Entrance",
+    defaultDuration: 10,
+    category: "before",
+    order: 8.7,
+    activities: {
+      bride: "Grand Entrance",
+      groom: "Grand Entrance",
+      bridesmaids: "Grand Entrance",
+      groomsmen: "Grand Entrance",
+    },
+  },
+    {
+    id: "katb_ketab",
+    noBreakAfter: true,
+    label: "Katb Ketab",
+    defaultDuration: 60,
+    category: "before",
+    order: 8,
+    activities: {
+      bride: "Katb Ketab Ceremony",
+      groom: "Katb Ketab Ceremony",
+      bridesmaids: "Katb Ketab Ceremony",
+      groomsmen: "Katb Ketab Ceremony",
+    },
+  },
+
+  {
+    id: "zaffa",
+    noBreakAfter: true,
+    label: "Zaffa",
+    defaultDuration: 15,
+    category: "zaffa",
+    order: 9,
+    allowedVariations: ["muslim_katb_ketab_wedding", "muslim_wedding_only"],
+    activities: {
+      bride: "Zaffa / Entrance",
+      groom: "Zaffa / Entrance",
+      bridesmaids: "Zaffa / Entrance",
+      groomsmen: "Zaffa / Entrance",
+    },
+  },
+  {
+    id: "party_before_dinner",
+    label: "Party",
+    defaultDuration: 60,
+    category: "after",
+    order: 9.5,
+    hidden: true,
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+  {
+    id: "dinner",
+    label: "Dinner",
+    defaultDuration: 60,
+    category: "after",
+    order: 10,
+    activities: {
+      bride: "Dinner",
+      groom: "Dinner",
+      bridesmaids: "Dinner",
+      groomsmen: "Dinner",
+    },
+  },
+  {
+    id: "party_after_dinner",
+    label: "Party",
+    defaultDuration: 120,
+    category: "after",
+    order: 11,
+    hidden: true,
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+];
+export const MUSLIM_KATB_KETAB_ONLY_FEATURES: WeddingFeature[] = [
+  {
+    id: "arrival",
+    noBreakAfter: true,
+    label: "Arrival at the venue",
+    defaultDuration: 15,
+    category: "before",
+    order: 1,
+    hidden: true,
+    showIf: { gettingReadyLocation: "venue" },
+    activities: {
+      bride: "Arrival at the venue",
+      groom: "_",
+      bridesmaids: "_",
+      groomsmen: "_",
+    },
+    // conditionalActivities: [
+    //   {
+    //     condition: { bridesmaidsAtPrep: "yes" },
+    //     activities: { bridesmaids: "Arrival at the venue" },
+    //   },
+    // ],
+  },
+  {
+    id: "hair",
+    label: "Hair & Veil",
+    defaultDuration: 60,
+    category: "before",
+    order: 2,
+    activities: {
+      bride: "Hair Styling",
+      groom: "_",
+      bridesmaids: "Hair Styling (for non hijabis)",
+      groomsmen: "_",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" },
+        activities: { groom: "", groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "makeup",
+    label: "Makeup",
+    defaultDuration: 105,
+    category: "before",
+    order: 3,
+    activities: {
+      bride: "Makeup",
+      groom: "Arriving & Getting Ready",
+      bridesmaids: "Arriving & Getting Ready",
+      groomsmen: "Arriving & Getting Ready",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "yes" },
+        activities: { bridesmaids: "Makeup" },
+      },
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_",groomsmen: "_" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" },
+        activities: { groom: "", groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    showIf: { bridesmaidsAtPrep: "yes" },
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Getting Ready Photos",
+    },
+  },
+  {
+    id: "dress_suit",
+    noBreakAfter: true,
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.5,
+    hidden: true,
+    activities: {
+      bride: "Wearing Dress",
+      groom: "Wearing Suit",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "",groomsmen: "" },
+      },
+    ],
+  },
+
+  {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}
+,
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_",groomsmen: "_" },
+      },
+    ],
+  },
+  {
+    id: "picking_up_bride",
+    label: "Picking up the bride",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.7,
+    noBreakAfter: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "Waiting for the groom",
+      groom: "Picking up the bride",
+      bridesmaids: "Celebrating",
+      groomsmen: "Celebrating",
+    },
+        conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "",groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 4.8,
+    noBreakAfter: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+            conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "",groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "transport_to_photoshoot",
+    label: "Moving to Photoshoot Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.9,
+    hidden: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "Moving to Photoshoot Location",
+      groom: "Moving to Photoshoot Location",
+      bridesmaids: "Moving to Photoshoot Location",
+      groomsmen: "Moving to Photoshoot Location",
+    },
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 5,
+    showIf: { gettingReadyLocation: "venue" },
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+            conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_",groomsmen: "_" },
+      },
+    ],
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 6,
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+  {
+    id: "transport_to_mosque",
+    label: "Moving to Mosque / Katb Ketab Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 6.5,
+    hidden: true,
+    showIf: { photoAtKatbLocation: "no" },
+    activities: {
+      bride: "Moving to Mosque / Katb Ketab Location",
+      groom: "Moving to Mosque / Katb Ketab Location",
+      bridesmaids: "Moving to Mosque / Katb Ketab Location",
+      groomsmen: "Moving to Mosque / Katb Ketab Location",
+    },
+  },
+
+  {
+    id: "Guest_Arrival",
+    noBreakBefore: true,
+    noBreakAfter: true,
+    label: "Guest Arrival",
+    defaultDuration: 20,
+    category: "before",
+    order: 7.8,
+    activities: {
+      bride: "Guests Arrival",
+      groom: "Guests Arrival",
+      bridesmaids: "Guests Arrival",
+      groomsmen: "Guests Arrival",
+    },
+  },
+  {
+    id: "katb_ketab",
+    noBreakAfter: true,
+    label: "Katb Ketab",
+    defaultDuration: 60,
+    category: "before",
+    order: 8,
+    activities: {
+      bride: "Katb Ketab Ceremony",
+      groom: "Katb Ketab Ceremony",
+      bridesmaids: "Katb Ketab Ceremony",
+      groomsmen: "Katb Ketab Ceremony",
+    },
+  },
+
+  {
+    id: "katb_ketab_pictures_greetings",
+    label: "Katb Ketab Pictures & Greetings",
+    defaultDuration: 60,
+    category: "before",
+    order: 8.1,
+    activities: {
+      bride: "Pictures & Greetings",
+      groom: "Pictures & Greetings",
+      bridesmaids: "Photos",
+      groomsmen: "Photos",
+    },
+  },
+
+
+
+
+
+
+
+];
+export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
+  {
+    id: "arrival",
+    noBreakAfter: true,
+    label: "Arrival at the venue",
+    defaultDuration: 15,
+    category: "before",
+    order: 1,
+    hidden: true,
+    activities: {
+      bride: "Arrival at the venue",
+      groom: "_",
+      bridesmaids: "_",
+      groomsmen: "_",
+    },
+    // conditionalActivities: [
+    //   {
+    //     condition: { bridesmaidsAtPrep: "yes" },
+    //     activities: { bridesmaids: "Arrival at the venue" },
+    //   },
+    // ],
+  },
+  {
+    id: "hair",
+    label: "Hair & Veil",
+    defaultDuration: 60,
+    category: "before",
+    order: 2,
+    activities: {
+      bride: "Hair Styling",
+      groom: "_",
+      bridesmaids: "Hair Styling (for non hijabis)",
+      groomsmen: "_",
+    },
+  },
+  {
+    id: "makeup",
+    label: "Makeup",
+    defaultDuration: 105,
+    category: "before",
+    order: 3,
+    activities: {
+      bride: "Makeup",
+      groom: "Arriving & Getting Ready",
+      bridesmaids: "Arriving & Getting Ready",
+      groomsmen: "Arriving & Getting Ready",
+    },
+  },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Getting Ready Photos",
+    },
+  },
+  {
+    id: "dress_suit",
+    noBreakAfter: true,
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.5,
+    hidden: true,
+    activities: {
+      bride: "Wearing Dress",
+      groom: "Wearing Suit",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+  },
+  // {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 5,
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 6,
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+
+  {
+    id: "Guest_Arrival",
+    noBreakBefore: true,
+    noBreakAfter: true,
+    label: "Guest Arrival",
+    defaultDuration: 20,
+    category: "before",
+    order: 7.8,
+    activities: {
+      bride: "Guests Arrival",
+      groom: "Guests Arrival",
+      bridesmaids: "Guests Arrival",
+      groomsmen: "Guests Arrival",
+    },
+  },
+
+  {
+    id: "Grand_Entrance",
+    noBreakAfter: true,
+    label: "Grand Entrance",
+    defaultDuration: 10,
+    category: "before",
+    order: 8.7,
+    activities: {
+      bride: "Grand Entrance",
+      groom: "Grand Entrance",
+      bridesmaids: "Grand Entrance",
+      groomsmen: "Grand Entrance",
+    },
+  },
+
+
+
+  {
+    id: "zaffa",
+    noBreakAfter: true,
+    label: "Zaffa",
+    defaultDuration: 15,
+    category: "zaffa",
+    order: 9,
+    activities: {
+      bride: "Zaffa / Entrance",
+      groom: "Zaffa / Entrance",
+      bridesmaids: "Zaffa / Entrance",
+      groomsmen: "Zaffa / Entrance",
+    },
+  },
+  {
+    id: "party_before_dinner",
+    label: "Party",
+    defaultDuration: 60,
+    category: "after",
+    order: 9.5,
+    hidden: true,
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+  {
+    id: "dinner",
+    label: "Dinner",
+    defaultDuration: 60,
+    category: "after",
+    order: 10,
+    activities: {
+      bride: "Dinner",
+      groom: "Dinner",
+      bridesmaids: "Dinner",
+      groomsmen: "Dinner",
+    },
+  },
+  {
+    id: "party_after_dinner",
+    label: "Party",
+    defaultDuration: 120,
+    category: "after",
+    order: 11,
+    hidden: true,
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+];
+export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
+  {
+    id: "arrival",
+    noBreakAfter: true,
+    label: "Arrival at the venue",
+    defaultDuration: 15,
+    category: "before",
+    order: 1,
+    hidden: true,
+    activities: {
+      bride: "Arrival at the venue",
+      groom: "_",
+      bridesmaids: "_",
+      groomsmen: "_",
+    },
+
+  },
+  {
+    id: "hair",
+    label: "Hair & Veil",
+    defaultDuration: 60,
+    category: "before",
+    order: 2,
+    activities: {
+      bride: "Hair Styling",
+      groom: "_",
+      bridesmaids: "Hair Styling",
+      groomsmen: "_",
+    },
+  },
+  {
+    id: "makeup",
+    label: "Makeup",
+    defaultDuration: 105,
+    category: "before",
+    order: 3,
+    activities: {
+      bride: "Makeup",
+      groom: "Arriving & Getting Ready",
+      bridesmaids: "Arriving & Getting Ready",
+      groomsmen: "Arriving & Getting Ready",
+    },
+  },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Getting Ready Photos",
+    },
+  },
+  {
+    id: "dress_suit",
+    noBreakAfter: true,
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.5,
+    hidden: true,
+    activities: {
+      bride: "Wearing Dress",
+      groom: "Wearing Suit",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    noBreakAfter: true,
+    category: "before",
+    order: 5,
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+  },
+  {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:5.1,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
+    {
+    id: "transport_to_photoshoot",
+    label: "Moving to Photoshoot Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 5.2,
+    hidden: true,
+    showIf: { photoAtKatbLocation: "no" },
+    activities: {
+      bride: "Moving to Photoshoot Location",
+      groom: "Moving to Photoshoot Location",
+      bridesmaids: "Moving to Photoshoot Location",
+      groomsmen: "Moving to Photoshoot Location",
+    },
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 6,
+    showIf: { photoAtKatbLocation: "no" },
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+  {
+    id: "moving_to_church",
+    noBreakAfter: true,
+    label: "Moving to Church",
+    defaultDuration: 30,
+    category: "before",
+    order: 7.5,
+    activities: {
+      bride: "Heading to Church / Guest Arrival",
+      groom: "Heading to Church / Guest Arrival",
+      bridesmaids: "Heading to Church / Guest Arrival",
+      groomsmen: "Heading to Church / Guest Arrival",
+    },
+  },
+    {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 7.6,
+    showIf: { photoAtKatbLocation: "yes" },
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+  {
+    id: "Guest_Arrival",
+    noBreakBefore: true,
+    noBreakAfter: true,
+    label: "Guest Arrival",
+    defaultDuration: 20,
+    category: "before",
+    order: 7.8,
+    activities: {
+      bride: "Guests Arrival",
+      groom: "Guests Arrival",
+      bridesmaids: "Guests Arrival",
+      groomsmen: "Guests Arrival",
+    },
+  },
+
+
+
+  {
+    id: "church",
+    noBreakAfter: true,
+    label: "Church Ceremony",
+    defaultDuration: 60,
+    category: "before",
+    order: 8,
+    activities: {
+      bride: "Church Ceremony",
+      groom: "Church Ceremony",
+      bridesmaids: "Church Ceremony",
+      groomsmen: "Church Ceremony",
+    },
+  },
+  {
+    id: "salamat",
+    label: "Salamat & Pictures",
+    defaultDuration: 45,
+    category: "after",
+    order: 8.2,
+    activities: {
+      bride: "Salamat & Photos",
+      groom: "Salamat & Photos",
+      bridesmaids: "Salamat & Photos",
+      groomsmen: "Salamat & Photos",
+    },
+  },
+  {
+    id: "moving_to_venue",
+    noBreakAfter: true,
+    label: "Moving to Venue",
+    defaultDuration: 30,
+    category: "after",
+    order: 8.5,
+    activities: {
+      bride: "Heading to Venue",
+      groom: "Heading to Venue",
+      bridesmaids: "Heading to Venue",
+      groomsmen: "Heading to Venue",
+    },
+  },
+  {
+    id: "settling",
+    label: "Settling",
+    defaultDuration: 30,
+    category: "after",
+    order: 8.6,
+    activities: {
+      bride: "Freshening Up",
+      groom: "Freshening Up",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+  },
+  {
+    id: "Grand_Entrance",
+    noBreakAfter: true,
+    label: "Grand Entrance",
+    defaultDuration: 10,
+    category: "zaffa",
+    order: 8.7,
+    activities: {
+      bride: "Grand Entrance",
+      groom: "Grand Entrance",
+      bridesmaids: "Grand Entrance",
+      groomsmen: "Grand Entrance",
+    },
+  },
+  {
+    id: "party_before_dinner",
+    label: "Party",
+    defaultDuration: 60,
+    category: "after",
+    order: 9.5,
+    hidden: true,
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+  {
+    id: "dinner",
+    label: "Dinner",
+    defaultDuration: 60,
+    category: "after",
+    order: 10,
+
+    activities: {
+      bride: "Dinner",
+      groom: "Dinner",
+      bridesmaids: "Dinner",
+      groomsmen: "Dinner",
+    },
+  },
+  {
+    id: "party_after_dinner",
+    label: "Party",
+    defaultDuration: 120,
+    category: "after",
+    order: 11,
+    hidden: true,
+
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+];
+
+export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
+  {
+    id: "arrival",
+    noBreakAfter: true,
+    label: "Arrival at the venue",
+    defaultDuration: 15,
+    category: "before",
+    order: 1,
+    hidden: true,
+    showIf: { gettingReadyLocation: "venue" },
+    activities: {
+      bride: "Arrival at the venue",
+      groom: "_",
+      bridesmaids: "_",
+      groomsmen: "_",
+    },
+    // conditionalActivities: [
+    //   {
+    //     condition: { bridesmaidsAtPrep: "yes" },
+    //     activities: { bridesmaids: "Arrival at the venue" },
+    //   },
+    // ],
+  },
+  {
+    id: "hair",
+    label: "Hair & Veil",
+    defaultDuration: 60,
+    category: "before",
+    order: 2,
+    activities: {
+      bride: "Hair Styling",
+      groom: "_",
+      bridesmaids: "Hair Styling (for non hijabis)",
+      groomsmen: "_",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" },
+        activities: { groom: "", groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "makeup",
+    label: "Makeup",
+    defaultDuration: 105,
+    category: "before",
+    order: 3,
+    activities: {
+      bride: "Makeup",
+      groom: "Arriving & Getting Ready",
+      bridesmaids: "Arriving & Getting Ready",
+      groomsmen: "Arriving & Getting Ready",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "yes" },
+        activities: { bridesmaids: "Makeup" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" , bridesmaidsAtPrep: "yes"},
+        activities: { groom: "Getting Ready", groomsmen: "Arriving to groom's house" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" , bridesmaidsAtPrep: "no"},
+        activities: { groom: "Getting Ready", groomsmen: "_" },
+      },
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_",groomsmen: "_" },
+      },
+      // {
+      //   condition: { gettingReadyLocation: "home", bridesmaidsAtPrep: "yes" },
+      //   activities: { groom: "Getting Ready", groomsmen: "Arriving to groom's house" },
+      // },
+    ],
+  },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    showIf: { bridesmaidsAtPrep: "yes" },
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Getting Ready Photos",
+    },
+  },
+  {
+    id: "dress_suit",
+    noBreakAfter: true,
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.5,
+    hidden: true,
+    activities: {
+      bride: "Wearing Dress",
+      groom: "Wearing Suit",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "",groomsmen: "" },
+      },
+    ],
+  },
+
+  {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}
+,
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_",groomsmen: "_" },
+      },
+    ],
+  },
+  {
+    id: "picking_up_bride",
+    label: "Picking up the bride",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.7,
+    noBreakAfter: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "Waiting for the groom",
+      groom: "Picking up the bride",
+      bridesmaids: "Celebrating",
+      groomsmen: "Celebrating",
+    },
+        conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "",groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 4.8,
+    noBreakAfter: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+            conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "",groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "transport_to_photoshoot",
+    label: "Moving to Photoshoot Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.9,
+    hidden: true,
+    showIf: { gettingReadyLocation: "home"},
+    activities: {
+      bride: "Moving to Photoshoot Location",
+      groom: "Moving to Photoshoot Location",
+      bridesmaids: "Moving to Photoshoot Location",
+      groomsmen: "Moving to Photoshoot Location",
+    },
+  },
+  {
+    id: "transport_to_photoshoot",
+    label: "Moving to Photoshoot Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 5.1,
+    hidden: true,
+    showIf: { gettingReadyLocation: "venue", photoAtKatbLocation: "yes" },
+    activities: {
+      bride: "Moving to Photoshoot Location",
+      groom: "Moving to Photoshoot Location",
+      bridesmaids: "Moving to Photoshoot Location",
+      groomsmen: "Moving to Photoshoot Location",
+    },
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 5,
+    showIf: { gettingReadyLocation: "venue" },
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+            conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_",groomsmen: "_" },
+      },
+    ],
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 6,
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+  {
+    id: "transport_to_church",
+    label: "Moving to church",
+    defaultDuration: 30,
+    category: "before",
+    order: 6.5,
+    hidden: true,
+    showIf: { photoAtKatbLocation: "no" },
+    activities: {
+      bride: "Moving to church",
+      groom: "Moving to church",
+      bridesmaids: "Moving to church",
+      groomsmen: "Moving to church",
+    },
+  },
+
+  {
+    id: "Guest_Arrival",
+    noBreakBefore: true,
+    noBreakAfter: true,
+    label: "Guest Arrival",
+    defaultDuration: 20,
+    category: "before",
+    order: 7.8,
+    activities: {
+      bride: "Guests Arrival",
+      groom: "Guests Arrival",
+      bridesmaids: "Guests Arrival",
+      groomsmen: "Guests Arrival",
+    },
+  },
+
+
+
+
+  // {
+  //   id: "arrival",
+  //   noBreakAfter: true,
+  //   label: "Arrival at the venue",
+  //   defaultDuration: 45,
+  //   category: "before",
+  //   order: 1,
+  //   hidden: true,
+  //   showIf: { gettingReadyLocation: "venue" },
+  //   activities: {
+  //     bride: "Arrival at the venue",
+  //     groom: "Arrival at the venue",
+  //     bridesmaids: "_",
+  //     groomsmen: "_",
+  //   },
+  //   conditionalActivities: [
+  //     {
+  //       condition: { bridesmaidsAtPrep: "yes" },
+  //       activities: { bridesmaids: "Arrival at the venue" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "hair",
+  //   label: "Hair & Veil",
+  //   defaultDuration: 60,
+  //   category: "before",
+  //   order: 2,
+  //   activities: {
+  //     bride: "Hair Styling",
+  //     groom: "_",
+  //     bridesmaids: "Hair Styling ",
+  //     groomsmen: "_",
+  //   },
+  // },
+  // {
+  //   id: "makeup",
+  //   label: "Makeup",
+  //   defaultDuration: 105,
+  //   category: "before",
+  //   order: 3,
+  //   activities: {
+  //     bride: "Makeup",
+  //     groom: "Arriving & Getting Ready",
+  //     bridesmaids: "Makeup",
+  //     groomsmen: "Arriving & Getting Ready",
+  //   },
+  //   conditionalActivities: [
+  //     {
+  //       condition: { bridesmaidsAtPrep: "no" },
+  //       activities: { bridesmaids: "" },
+  //     },
+  //     {
+  //       condition: { gettingReadyLocation: "home" },
+  //       activities: { groom: "", groomsmen: "" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "getting_ready",
+  //   label: "Getting ready pictures",
+  //   defaultDuration: 30,
+  //   category: "before",
+  //   order: 4,
+  //   showIf: { bridesmaidsAtPrep: "yes" },
+  //   activities: {
+  //     bride: "Getting Ready Photos",
+  //     groom: "",
+  //     bridesmaids: "Getting Ready Photos",
+  //     groomsmen: "",
+  //   },
+  // },
+  // {
+  //   id: "dress_suit",
+  //   noBreakAfter: true,
+  //   label: "Wearing dress & suit",
+  //   defaultDuration: 30,
+  //   category: "before",
+  //   order: 4.5,
+  //   hidden: true,
+  //   activities: {
+  //     bride: "Wearing Dress",
+  //     groom: "Wearing Suit",
+  //     bridesmaids: "Helping Bride",
+  //     groomsmen: "Helping Groom",
+  //   },
+  //   conditionalActivities: [
+  //     {
+  //       condition: { bridesmaidsAtPrep: "no" },
+  //       activities: { bridesmaids: "" },
+  //     },
+  //   ],
+  // },
+  // {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
+  // {
+  //   id: "picking_up_bride",
+  //   label: "Picking up the bride",
+  //   defaultDuration: 30,
+  //   category: "before",
+  //   order: 4.7,
+  //   noBreakAfter: true,
+  //   showIf: { gettingReadyLocation: "home" },
+  //   activities: {
+  //     bride: "Waiting for the groom",
+  //     groom: "Picking up the bride",
+  //     bridesmaids: "Celebrating",
+  //     groomsmen: "Celebrating",
+  //   },
+  //       conditionalActivities: [
+  //     {
+  //       condition: { bridesmaidsAtPrep: "no" },
+  //       activities: { bridesmaids: "",groomsmen: "" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "first_look",
+  //   label: "First look",
+  //   defaultDuration: 15,
+  //   category: "before",
+  //   order: 4.8,
+  //   noBreakAfter: true,
+  //   showIf: { gettingReadyLocation: "home" },
+  //   activities: {
+  //     bride: "First Look",
+  //     groom: "First Look",
+  //     bridesmaids: "cheering the couple up",
+  //     groomsmen: "cheering the couple up",
+  //   },
+  //           conditionalActivities: [
+  //     {
+  //       condition: { bridesmaidsAtPrep: "no" },
+  //       activities: { bridesmaids: "",groomsmen: "" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "transport_to_photoshoot",
+  //   label: "Moving to Photoshoot Location",
+  //   defaultDuration: 30,
+  //   category: "before",
+  //   order: 4.9,
+  //   hidden: true,
+  //   showIf: { gettingReadyLocation: "home" },
+  //   activities: {
+  //     bride: "Moving to Photoshoot Location",
+  //     groom: "Moving to Photoshoot Location",
+  //     bridesmaids: "Moving to Photoshoot Location",
+  //     groomsmen: "Moving to Photoshoot Location",
+  //   },
+  // },
+  // {
+  //   id: "first_look",
+  //   label: "First look",
+  //   defaultDuration: 15,
+  //   category: "before",
+  //   order: 5,
+  //   showIf: { gettingReadyLocation: "venue" },
+  //   activities: {
+  //     bride: "First Look",
+  //     groom: "First Look",
+  //     bridesmaids: "cheering the couple up",
+  //     groomsmen: "cheering the couple up",
+  //   },
+  // },
+  // {
+  //   id: "photoshoot",
+  //   label: "Photoshoot",
+  //   defaultDuration: 120,
+  //   category: "before",
+  //   order: 6,
+  //   activities: {
+  //     bride: "Couple Photoshoot",
+  //     groom: "Couple Photoshoot",
+  //     bridesmaids: "Group Photos",
+  //     groomsmen: "Group Photos",
+  //   },
+  // },
+  // {
+  //   id: "moving_to_church",
+  //   noBreakAfter: true,
+  //   label: "Moving to Church",
+  //   defaultDuration: 30,
+  //   category: "before",
+  //   order: 7.5,
+  //   hidden: true,
+  //   showIf: { photoAtKatbLocation: "no" },
+  //   activities: {
+  //     bride: "Heading to Church / Guest Arrival",
+  //     groom: "Heading to Church / Guest Arrival",
+  //     bridesmaids: "Heading to Church / Guest Arrival",
+  //     groomsmen: "Heading to Church / Guest Arrival",
+  //   },
+  // },
+  // {
+  //   id: "Guest_Arrival",
+  //   noBreakBefore: true,
+  //   noBreakAfter: true,
+  //   label: "Guest Arrival",
+  //   defaultDuration: 20,
+  //   category: "before",
+  //   order: 7.8,
+  //   activities: {
+  //     bride: "Guests Arrival",
+  //     groom: "Guests Arrival",
+  //     bridesmaids: "Guests Arrival",
+  //     groomsmen: "Guests Arrival",
+  //   },
+  // },
+
+  // {
+  //   id: "Grand_Entrance",
+  //   noBreakAfter: true,
+  //   label: "Grand Entrance",
+  //   defaultDuration: 10,
+  //   category: "before",
+  //   order: 7.9,
+
+  //   activities: {
+  //     bride: "Grand Entrance",
+  //     groom: "Grand Entrance",
+  //     bridesmaids: "Grand Entrance",
+  //     groomsmen: "Grand Entrance",
+  //   },
+  // },
+
+  {
+    id: "church",
+    noBreakAfter: true,
+    label: "Church Ceremony",
+    defaultDuration: 60,
+    category: "zaffa",
+    order: 8,
+    activities: {
+      bride: "Church Ceremony",
+      groom: "Church Ceremony",
+      bridesmaids: "Church Ceremony",
+      groomsmen: "Church Ceremony",
+    },
+  },
+  {
+    id: "salamat",
+    label: "Salamat & Pictures",
+    defaultDuration: 45,
+    category: "after",
+    order: 8.2,
+    allowedVariations: ["christian_church_venue", "christian_church_only"],
+    activities: {
+      bride: "Salamat & Photos",
+      groom: "Salamat & Photos",
+      bridesmaids: "Salamat & Photos",
+      groomsmen: "Salamat & Photos",
+    },
+  },
+
+];
+
+export const CHRISTIAN_VENUE_ONLY_FEATURES: WeddingFeature[] = [
+   {
+    id: "arrival",
+    noBreakAfter: true,
+    label: "Arrival at the venue",
+    defaultDuration: 15,
+    category: "before",
+    order: 1,
+    hidden: true,
+    activities: {
+      bride: "Arrival at the venue",
+      groom: "_",
+      bridesmaids: "_",
+      groomsmen: "_",
+    },
+    // conditionalActivities: [
+    //   {
+    //     condition: { bridesmaidsAtPrep: "yes" },
+    //     activities: { bridesmaids: "Arrival at the venue" },
+    //   },
+    // ],
+  },
+  {
+    id: "hair",
+    label: "Hair & Veil",
+    defaultDuration: 60,
+    category: "before",
+    order: 2,
+    activities: {
+      bride: "Hair Styling",
+      groom: "_",
+      bridesmaids: "Hair Styling",
+      groomsmen: "_",
+    },
+  },
+  {
+    id: "makeup",
+    label: "Makeup",
+    defaultDuration: 105,
+    category: "before",
+    order: 3,
+    activities: {
+      bride: "Makeup",
+      groom: "Arriving & Getting Ready",
+      bridesmaids: "Arriving & Getting Ready",
+      groomsmen: "Arriving & Getting Ready",
+    },
+  },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Getting Ready Photos",
+    },
+  },
+  {
+    id: "dress_suit",
+    noBreakAfter: true,
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.5,
+    hidden: true,
+    activities: {
+      bride: "Wearing Dress",
+      groom: "Wearing Suit",
+      bridesmaids: "Helping Bride",
+      groomsmen: "Helping Groom",
+    },
+  },
+  {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
+   {
+    id: "moving_to_venue",
+    noBreakAfter: true,
+    label: "Moving to Venue",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.7,
+    activities: {
+      bride: "Heading to Venue",
+      groom: "Heading to Venue",
+      bridesmaids: "Heading to Venue",
+      groomsmen: "Heading to Venue",
+    },
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+    order: 5,
+    activities: {
+      bride: "First Look",
+      groom: "First Look",
+      bridesmaids: "cheering the couple up",
+      groomsmen: "cheering the couple up",
+    },
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+    order: 6,
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Group Photos",
+      groomsmen: "Group Photos",
+    },
+  },
+
+  {
+    id: "Guest_Arrival",
+    noBreakBefore: true,
+    noBreakAfter: true,
+    label: "Guest Arrival",
+    defaultDuration: 20,
+    category: "before",
+    order: 7.8,
+    activities: {
+      bride: "Guests Arrival",
+      groom: "Guests Arrival",
+      bridesmaids: "Guests Arrival",
+      groomsmen: "Guests Arrival",
+    },
+  },
+
+  
+  
+
+
+  {
+    id: "Grand_Entrance",
+    noBreakAfter: true,
+    label: "Grand Entrance",
+    defaultDuration: 10,
+    category: "before",
+    order: 8.7,
+    activities: {
+      bride: "Grand Entrance",
+      groom: "Grand Entrance",
+      bridesmaids: "Grand Entrance",
+      groomsmen: "Grand Entrance",
+    },
+  },
+
+{
+  id: "zaffa",
+    noBreakAfter: true,
+    label: "Zaffa",
+    defaultDuration: 20,
+    category: "zaffa",
+    order: 8.7,
+    activities: {
+      bride: "Zaffa",
+      groom: "Zaffa",
+      bridesmaids: "Zaffa",
+      groomsmen: "Zaffa",
+    },
+  },
+
+  {
+    id: "party_before_dinner",
+    label: "Party",
+    defaultDuration: 60,
+    category: "after",
+    order: 9.5,
+    hidden: true,
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },
+  {
+    id: "dinner",
+    label: "Dinner",
+    defaultDuration: 60,
+    category: "after",
+    order: 10,
+
+    activities: {
+      bride: "Dinner",
+      groom: "Dinner",
+      bridesmaids: "Dinner",
+      groomsmen: "Dinner",
+    },
+  },
+  {
+    id: "party_after_dinner",
+    label: "Party",
+    defaultDuration: 120,
+    category: "after",
+    order: 11,
+    hidden: true,
+
+    activities: {
+      bride: "Party / Dancing",
+      groom: "Party / Dancing",
+      bridesmaids: "Party / Dancing",
+      groomsmen: "Party / Dancing",
+    },
+  },];
+
+export const FEATURES_BY_VARIATION: Record<CeremonyVariation, WeddingFeature[]> = {
+  muslim_katb_ketab_wedding: MUSLIM_KATB_KETAB_WEDDING_FEATURES,
+  muslim_katb_ketab_only: MUSLIM_KATB_KETAB_ONLY_FEATURES,
+  muslim_wedding_only: MUSLIM_WEDDING_ONLY_FEATURES,
+  christian_church_venue: CHRISTIAN_CHURCH_VENUE_FEATURES,
+  christian_church_only: CHRISTIAN_CHURCH_ONLY_FEATURES,
+  christian_venue_only: CHRISTIAN_VENUE_ONLY_FEATURES,
+};
+
+export const ALL_FEATURES = Object.values(FEATURES_BY_VARIATION)
+  .flat()
+  .filter((feat, index, self) => index === self.findIndex((t) => t.id === feat.id));
