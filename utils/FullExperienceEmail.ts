@@ -249,7 +249,7 @@ export function generateWelcomeEmail(
 															<td class="pad">
 																<div style="margin-left:-20px">
 																	<ol start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: decimal;">
-																		<li style="Margin: 0 0 0 0;">👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
+																		<li style="Margin: 0 0 0 0;">👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/Ls9uAdMdOGH9fY1Cfj761n" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
 																	</ol>
 																</div>
 															</td>
