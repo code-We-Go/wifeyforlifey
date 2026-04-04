@@ -69,7 +69,7 @@ import {
   CEREMONY_OPTIONS,
   FEATURES_BY_VARIATION,
   ALL_FEATURES,
-} from "@/lib/wedding-timeline-config";
+} from "@/lib/wedding-timeline-config-test";
 
 // --- Types & Constants ---
 
@@ -426,6 +426,7 @@ function WeddingTimelinePageContent() {
   const [bridesmaidsAtPrep, setBridesmaidsAtPrep] = useState<"yes" | "no" | null>(null);
   // Q3: Is photo session at same place as Katb Ketab? "yes" | "no"
   const [photoAtKatbLocation, setPhotoAtKatbLocation] = useState<"yes" | "no" | null>(null);
+  const [photoshootTiming, setPhotoshootTiming] = useState<"before" | "after" | null>(null);
 
   // Selected anchor for christian_church_venue (either 'church' or 'Grand_Entrance')
   const [selectedAnchor, setSelectedAnchor] = useState<string | null>(null);
@@ -491,18 +492,16 @@ function WeddingTimelinePageContent() {
   const getAnchorEventId = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
     if (!variation) return "zaffa";
     
-    // For Christian Church + Venue, use the user's selected anchor if available
-    if (variation === "christian_church_venue" && anchorOverride) return anchorOverride;
+    // For these variations, use the user's selected anchor if available
+    if ((variation === "christian_church_venue" || variation === "muslim_katb_ketab_wedding") && anchorOverride) return anchorOverride;
 
     // Christian variations usually anchor to Church, unless it's venue only
     // if (variation.startsWith("christian") && variation !== "christian_venue_only") return "church";
     if (variation === "christian_venue_only" || variation === "christian_church_only" || variation === "christian_church_venue") return "Grand_Entrance";
     
     // Muslim variations
-    if (variation === "muslim_katb_ketab_only") return "katb_ketab";
-    
     // Default for muslim_katb_ketab_wedding and muslim_wedding_only
-    return "zaffa"; 
+    return variation === "muslim_katb_ketab_only" ? "katb_ketab" : "zaffa"; 
   };
   
   const getAnchorLabel = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
@@ -612,6 +611,7 @@ function WeddingTimelinePageContent() {
           if (parsed.gettingReadyLocation) setGettingReadyLocation(parsed.gettingReadyLocation);
           if (parsed.bridesmaidsAtPrep) setBridesmaidsAtPrep(parsed.bridesmaidsAtPrep);
           if (parsed.photoAtKatbLocation) setPhotoAtKatbLocation(parsed.photoAtKatbLocation);
+          if (parsed.photoshootTiming) setPhotoshootTiming(parsed.photoshootTiming);
           if (parsed.zaffaTime) setZaffaTime(parsed.zaffaTime);
           if (parsed.selectedFeatures) setSelectedFeatures(parsed.selectedFeatures);
           if (parsed.brideFirstName) setBrideFirstName(parsed.brideFirstName);
@@ -633,9 +633,8 @@ function WeddingTimelinePageContent() {
     }
   }, [isAuthenticated, checkingTimeline]);
 
-  // Reset selectedAnchor if variation changes to something other than christian_church_venue
   useEffect(() => {
-    if (selectedCeremonyVariation !== "christian_church_venue") {
+    if (selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "muslim_katb_ketab_wedding") {
       setSelectedAnchor(null);
     }
   }, [selectedCeremonyVariation]);
@@ -786,6 +785,7 @@ function WeddingTimelinePageContent() {
           if (f.showIf.gettingReadyLocation && f.showIf.gettingReadyLocation !== gettingReadyLocation) return false;
           if (f.showIf.bridesmaidsAtPrep && f.showIf.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
           if (f.showIf.photoAtKatbLocation && f.showIf.photoAtKatbLocation !== photoAtKatbLocation) return false;
+          if (f.showIf.photoshootTiming && f.showIf.photoshootTiming !== photoshootTiming) return false;
         }
         return true;
       })
@@ -1698,7 +1698,14 @@ function WeddingTimelinePageContent() {
                               : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                           }`}
                         >
-                          {option === "home" ? "🏠 Home" : "🏛️ Venue"}
+                          <div className="flex flex-col items-center gap-1">
+                            <span>{option === "home" ? "🏠 Somewhere else" : "🏛️ Wedding Venue"}</span>
+                            {option === "home" && (
+                              <span className="text-[10px] normal-case font-normal opacity-70">
+                                (Home, other venue)
+                              </span>
+                            )}
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -1739,33 +1746,60 @@ function WeddingTimelinePageContent() {
                   </div>
                   )}
 
-                  {/* Q3: Is photo session at same place as Katb Ketab / Church? */}
+                  {/* Q3: Photo session location/timing */}
+                  {selectedCeremonyVariation !== "christian_venue_only" && (
                   <div className="space-y-3">
-                    <Label className="text-xl text-lovely text-center block">
-                      Is the photo session at the same location as the{" "}
-                      {activeCeremonyType === "muslim" ? "Katb Ketab" : "Church"}?
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(["yes", "no"] as const).map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => setPhotoAtKatbLocation(option)}
-                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                            photoAtKatbLocation === option
-                              ? "bg-lovely text-creamey border-lovely"
-                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                          }`}
-                        >
-                          {option === "yes" ? "✅ Yes, same place" : "📍 No, different"}
-                        </button>
-                      ))}
-                    </div>
-                    {photoAtKatbLocation === "no" && (
-                      <p className="text-xs text-lovely/60 text-center">
-                        A 30-minute {selectedCeremonyVariation === "christian_church_venue" ? "transportation to the church" : `transportation to the ${activeCeremonyType === "muslim" ? "mosque" : "church"}`} will be added after the photoshoot.
-                      </p>
+                    {activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") ? (
+                      <>
+                        <Label className="text-xl text-lovely text-center block">
+                          When do you want to have the photo session?
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {(["before", "after"] as const).map((option) => (
+                            <button
+                              key={option}
+                              onClick={() => setPhotoshootTiming(option)}
+                              className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
+                                photoshootTiming === option
+                                  ? "bg-lovely text-creamey border-lovely"
+                                  : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                              }`}
+                            >
+                              {option === "before" ? "🕒 Before Church" : "🕓 After Church"}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : ( 
+                      // Muslim or variations where we ask location relative to anchor
+                      <>
+                        <Label className="text-xl text-lovely text-center block">
+                          Is the photo session at the same location as the {getAnchorLabel(selectedCeremonyVariation)}?
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {(["yes", "no"] as const).map((option) => (
+                            <button
+                              key={option}
+                              onClick={() => setPhotoAtKatbLocation(option)}
+                              className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
+                                photoAtKatbLocation === option
+                                  ? "bg-lovely text-creamey border-lovely"
+                                  : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                              }`}
+                            >
+                              {option === "yes" ? "✅ Yes, same place" : "📍 No, different"}
+                            </button>
+                          ))}
+                        </div>
+                        {photoAtKatbLocation === "no" && (
+                          <p className="text-xs text-lovely/60 text-center">
+                            A 30-minute transportation to the {getAnchorLabel(selectedCeremonyVariation)} will be added after the photoshoot.
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
+                  )}
 
                         <div className="flex gap-4 pt-2">
                     <Button
@@ -1778,7 +1812,10 @@ function WeddingTimelinePageContent() {
                     <Button
                       disabled={
                         (selectedCeremonyVariation !== "christian_church_venue" && (!gettingReadyLocation || !bridesmaidsAtPrep)) || 
-                        !photoAtKatbLocation
+                        (selectedCeremonyVariation === "christian_venue_only" ? false : 
+                          (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
+                          ? !photoshootTiming 
+                          : !photoAtKatbLocation))
                       }
                       onClick={() => setStep(3)}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1791,24 +1828,43 @@ function WeddingTimelinePageContent() {
 
               {step === 3 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
-                  {selectedCeremonyVariation === "christian_church_venue" && !selectedAnchor ? (
+                  {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && !selectedAnchor ? (
                     <div className="space-y-4">
-                      <Label className="text-xl text-lovely text-center block">
-                        Which time you want to adjust the day on?
-                      </Label>
+                      <h2 className="text-xl text-lovely text-center block font-semibold">
+                        Which event you want to adjust the day on?
+                      </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button
-                          onClick={() => setSelectedAnchor("church")}
-                          className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                        >
-                          ⛪ Church Ceremony
-                        </button>
-                        <button
-                          onClick={() => setSelectedAnchor("Grand_Entrance")}
-                          className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                        >
-                          🚪 Venue Entrance
-                        </button>
+                        {selectedCeremonyVariation === "christian_church_venue" ? (
+                          <>
+                            <button
+                              onClick={() => setSelectedAnchor("church")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              ⛪ Church Ceremony
+                            </button>
+                            <button
+                              onClick={() => setSelectedAnchor("Grand_Entrance")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              🚪 Venue Entrance
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setSelectedAnchor("katb_ketab")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              📜 Katb Ketab Ceremony
+                            </button>
+                            <button
+                              onClick={() => setSelectedAnchor("zaffa")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              🥁 Zaffa
+                            </button>
+                          </>
+                        )}
                       </div>
                       <p className="text-sm text-lovely/60 text-center">
                         This event will be the anchor that everything else is calculated from.
@@ -1830,7 +1886,7 @@ function WeddingTimelinePageContent() {
                           }}
                         />
                       </div>
-                      {selectedCeremonyVariation === "christian_church_venue" && selectedAnchor && (
+                      {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor && (
                         <div className="flex justify-center">
                           <Button 
                             variant="link" 
@@ -1848,17 +1904,17 @@ function WeddingTimelinePageContent() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        if (selectedCeremonyVariation === "christian_church_venue" && selectedAnchor) {
-                          setSelectedAnchor(null);
-                        } else {
-                          setStep(
-                            selectedCeremonyVariation === "muslim_katb_ketab_only" ||
-                            selectedCeremonyVariation === "christian_church_only" ||
-                            selectedCeremonyVariation === "christian_church_venue"
-                              ? 2
-                              : 1
-                          );
-                        }
+                      if ((selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor) {
+                        setSelectedAnchor(null);
+                      } else {
+                        setStep(
+                          selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                          selectedCeremonyVariation === "christian_church_only" ||
+                          selectedCeremonyVariation === "christian_church_venue"
+                            ? 2
+                            : 1
+                        );
+                      }
                       }}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
@@ -1897,6 +1953,7 @@ function WeddingTimelinePageContent() {
                             if (f.showIf.gettingReadyLocation && f.showIf.gettingReadyLocation !== gettingReadyLocation) return false;
                             if (f.showIf.bridesmaidsAtPrep && f.showIf.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
                             if (f.showIf.photoAtKatbLocation && f.showIf.photoAtKatbLocation !== photoAtKatbLocation) return false;
+                            if (f.showIf.photoshootTiming && f.showIf.photoshootTiming !== photoshootTiming) return false;
                           }
                           return true;
                         })
@@ -1997,6 +2054,7 @@ function WeddingTimelinePageContent() {
                           gettingReadyLocation,
                           bridesmaidsAtPrep,
                           photoAtKatbLocation,
+                          photoshootTiming,
                           zaffaTime,
                           selectedFeatures,
                           brideFirstName,
