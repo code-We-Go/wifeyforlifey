@@ -89,6 +89,8 @@ export interface Variant {
   attributeName: string;
   attributes: attribute[]; // e.g., [{ name: "Color", value: "Black" }, { name: "Capacity", value: "2L" }]
   images: media[];
+    mobImages?: media[];
+
 }
 
 export interface Category {
@@ -284,6 +286,8 @@ export interface Ipackage {
   name: string;
   imgUrl: string; // Main image (keeping for backward compatibility)
   images: string[]; // Array of image URLs
+  mobMainImage?: string;
+  mobImages?: string[];
   price: number;
   duration: string;
   items: PackageItem[];

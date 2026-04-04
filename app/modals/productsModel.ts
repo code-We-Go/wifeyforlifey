@@ -22,16 +22,18 @@ const mediaSchema = new Schema<media>({
 
 // Define the attribute schema (replacing sizeSchema)
 const attributeSchema = new Schema<attribute>({
-  name: { type: String, required: true },
-  price: { type: Number, required: false, min: 0 }, // e.g., "Color" or "Size"
+  name: { type: String, required: true }, // e.g., "Color" or "Size"
   stock: { type: Number, required: true, min: 0 },
+  price: { type: Number, required: false, min: 0 }, // e.g., "Color" or "Size"
 });
 
 // Define the Variant schema
 const VariantSchema = new Schema<Variant>({
-  name: { type: String, required: true }, // e.g., "Default Variant"
+  name: { type: String, required: false }, // e.g., "Default Variant"
   attributeName: { type: String, required: true },
   price: { type: Number, required: false, min: 0 }, //, e.g., "Color" or "Size"
+
+  // e.g., "Color" or "Size"
   attributes: {
     type: [attributeSchema],
     required: true,
@@ -52,6 +54,11 @@ const VariantSchema = new Schema<Variant>({
       message: "At least one image is required",
     },
   },
+  mobImages: {
+    type: [mediaSchema],
+    required: false,
+    default: [],
+  },
 });
 
 // Define the price schema
@@ -69,12 +76,13 @@ const ProductSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "subCategories",
+    options: { strictPopulate: false },
   },
-  order: { type: Number, required: false, default: 0 },
 
   season: { type: String, required: false },
   price: { type: priceSchema, required: true },
   comparedPrice: { type: Number, required: false, min: 0 },
+  order: { type: Number, required: false, default: 0 },
   productDimensions: { type: [String], default: [] },
   productDetails: { type: [String], default: [] },
   productCare: { type: [String], default: [] },
