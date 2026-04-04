@@ -409,19 +409,13 @@ export const MUSLIM_KATB_KETAB_ONLY_FEATURES: WeddingFeature[] = [
     defaultDuration: 30,
     category: "before",
     order: 4,
-    // showIf: { bridesmaidsAtPrep: "yes" },
+    showIf: { bridesmaidsAtPrep: "yes" },
     activities: {
       bride: "Getting Ready Photos",
       groom: "Getting Ready Photos",
       bridesmaids: "Getting Ready Photos",
       groomsmen: "Getting Ready Photos",
     },
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "",groomsmen: "" },
-      },
-    ],
   },
   {
     id: "dress_suit",
@@ -1322,19 +1316,13 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
     defaultDuration: 30,
     category: "before",
     order: 4,
-    // showIf: { bridesmaidsAtPrep: "yes" },
+    showIf: { bridesmaidsAtPrep: "yes" },
     activities: {
       bride: "Getting Ready Photos",
       groom: "Getting Ready Photos",
       bridesmaids: "Getting Ready Photos",
       groomsmen: "Getting Ready Photos",
     },
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "",groomsmen: "" },
-      },
-    ],
   },
   {
     id: "dress_suit",
