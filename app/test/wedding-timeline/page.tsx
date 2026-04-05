@@ -1619,7 +1619,7 @@ function WeddingTimelinePageContent() {
                           `}
                           onClick={() => setActiveCeremonyType(option.id)}
                         >
-                          <h3 className="text-lg font-bold text-lovely text-center mb-2">
+                          <h3 className="text-lg font-bold text-lovely text-center">
                             {option.label}
                           </h3>
                           
@@ -1738,11 +1738,9 @@ function WeddingTimelinePageContent() {
                         </button>
                       ))}
                     </div>
-                    {bridesmaidsAtPrep === "no" && (
-                      <p className="text-xs text-lovely/60 text-center">
+                      {/* <p className="text-xs text-lovely/60 text-center">
                         The &quot;Getting Ready Pictures&quot; event will be removed.
-                      </p>
-                    )}
+                      </p> */}
                   </div>
                   )}
 
