@@ -500,8 +500,11 @@ function WeddingTimelinePageContent() {
     if (variation === "christian_venue_only" || variation === "christian_church_only" || variation === "christian_church_venue") return "Grand_Entrance";
     
     // Muslim variations
-    // Default for muslim_katb_ketab_wedding and muslim_wedding_only
-    return variation === "muslim_katb_ketab_only" ? "katb_ketab" : "zaffa"; 
+    if (variation === "muslim_katb_ketab_only") return "katb_ketab";
+    if (variation === "muslim_katb_ketab_wedding") return anchorOverride || "Grand_Entrance"; // Or katb_ketab depending on override, but default if not set
+    if (variation === "muslim_wedding_only") return "Grand_Entrance"; 
+    
+    return "zaffa"; 
   };
   
   const getAnchorLabel = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
@@ -1682,7 +1685,7 @@ function WeddingTimelinePageContent() {
               {step === 2 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* Q1: Where are you getting ready? */}
-                  {selectedCeremonyVariation !== "christian_church_venue" && (
+                  { selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only" && (
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
                       Where are you getting ready?
@@ -1809,7 +1812,7 @@ function WeddingTimelinePageContent() {
                     </Button>
                     <Button
                       disabled={
-                        (selectedCeremonyVariation !== "christian_church_venue" && (!gettingReadyLocation || !bridesmaidsAtPrep)) || 
+                        (selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only"&&(!gettingReadyLocation || !bridesmaidsAtPrep)) || 
                         (selectedCeremonyVariation === "christian_venue_only" ? false : 
                           (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
                           ? !photoshootTiming 
@@ -1856,10 +1859,10 @@ function WeddingTimelinePageContent() {
                               📜 Katb Ketab Ceremony
                             </button>
                             <button
-                              onClick={() => setSelectedAnchor("zaffa")}
+                              onClick={() => setSelectedAnchor("Grand_Entrance")}
                               className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                             >
-                              🥁 Zaffa
+                              🥁 Grand Entrance
                             </button>
                           </>
                         )}

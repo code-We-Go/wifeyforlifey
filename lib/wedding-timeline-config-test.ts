@@ -278,7 +278,7 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
   {
     id: "party_before_dinner",
     label: "Party",
-    defaultDuration: 60,
+    defaultDuration: 90,
     category: "after",
     order: 9.5,
     hidden: true,
@@ -822,7 +822,7 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
   {
     id: "party_before_dinner",
     label: "Party",
-    defaultDuration: 60,
+    defaultDuration: 90,
     category: "after",
     order: 9.5,
     hidden: true,
@@ -1181,7 +1181,7 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
   {
     id: "party_before_dinner",
     label: "Party",
-    defaultDuration: 60,
+    defaultDuration: 90,
     category: "after",
     order: 9.5,
     hidden: true,
@@ -2054,7 +2054,7 @@ export const CHRISTIAN_VENUE_ONLY_FEATURES: WeddingFeature[] = [
   {
     id: "party_before_dinner",
     label: "Party",
-    defaultDuration: 60,
+    defaultDuration: 90,
     category: "after",
     order: 9.5,
     hidden: true,

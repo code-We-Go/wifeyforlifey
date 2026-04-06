@@ -22,10 +22,11 @@ const loadDB = async () => {
     console.error("Database connection failed:", error);
   }
 };
-loadDB();
 
 // Handle GET requests
 export async function GET(request: Request) {
+  loadDB();
+
   console.log("==========================================");
   console.log("🚀 CALLBACK ROUTE HIT - GET REQUEST");
   console.log("==========================================");
@@ -1039,6 +1040,8 @@ export async function GET(request: Request) {
 
 // Handle POST requests
 export async function POST(request: Request) {
+  loadDB();
+
   try {
     const data = await request.json();
     console.log("POST Callback Received:", data);
