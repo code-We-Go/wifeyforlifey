@@ -29,6 +29,8 @@ export interface IUser extends Document {
   weddingDate?: Date;
   inspoFavorites?: string[];
   isTesting?: boolean;
+  pushToken?: string;
+  tags?: string[];
 
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -90,6 +92,15 @@ const UserSchema = new Schema<IUser>(
     weddingDate: {
       type: Date,
       required: false,
+    },
+    
+    pushToken: {
+      type: String,
+      required: false,
+    },
+    tags: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }
