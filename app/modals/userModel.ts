@@ -31,6 +31,9 @@ export interface IUser extends Document {
   isTesting?: boolean;
   pushToken?: string;
   tags?: string[];
+  appleUserId?: string;
+  googleUserId?: string;
+  authProvider?: 'email' | 'apple' | 'google';
 
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -101,6 +104,22 @@ const UserSchema = new Schema<IUser>(
     tags: {
       type: [String],
       default: [],
+    },
+    appleUserId: {
+      type: String,
+      required: false,
+      index: true,
+    },
+    googleUserId: {
+      type: String,
+      required: false,
+      index: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ['email', 'apple', 'google'],
+      default: 'email',
+      required: false,
     },
   },
   { timestamps: true }
