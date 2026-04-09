@@ -843,10 +843,10 @@ function WeddingTimelinePageContent() {
         generatedEvents.push({
           id: `break_${index}`,
           duration: 15,
-          brideActivity: "Break / Transition",
-          groomActivity: (acts.groom === "_" || !acts.groom) ? "_" : "Break / Transition",
-          bridesmaidsActivity: (acts.bridesmaids === "_" || !acts.bridesmaids) ? "_" : "Break / Transition",
-          groomsmenActivity: (acts.groomsmen === "_" || !acts.groomsmen) ? "_" : "Break / Transition",
+          brideActivity: (acts.bride?.trim() === "_" || !acts.bride?.trim()) ? "_" : "Break / Transition",
+          groomActivity: (acts.groom?.trim() === "_" || !acts.groom?.trim()) ? "_" : "Break / Transition",
+          bridesmaidsActivity: (acts.bridesmaids?.trim() === "_" || !acts.bridesmaids?.trim()) ? "_" : "Break / Transition",
+          groomsmenActivity: (acts.groomsmen?.trim() === "_" || !acts.groomsmen?.trim()) ? "_" : "Break / Transition",
           isBreak: true,
         });
       }
@@ -1371,7 +1371,11 @@ function WeddingTimelinePageContent() {
         "The photographer and videographer should arrive during the last 30-40 minutes of the makeup session.",
         "If a photo booth, audio booth, or live painter is hired, it's recommended that they arrive and complete setup 1-2 hours before the wedding begins.",
         "Zaffa is recommended to start after Katb El Ketab.",
-        "If additional entertainers are hired (tabla show, violinist, etc.), we recommend that they begin after dinner."
+        "If additional entertainers are hired (tabla show, violinist, etc.), we recommend that they begin after dinner.",
+        `for bridesmaids coming to photoshoot but getting ready at home : 
+- Consider 90 mins for hair styling at the salon 
+- 60 mins for makeup and dress 
+- Please leave early to arrive on time for photoshoot`
       ];
 
       doc.setFont("helvetica", "normal");
@@ -1667,8 +1671,11 @@ function WeddingTimelinePageContent() {
                     onClick={() => {
                       if (
                         selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                        selectedCeremonyVariation === "muslim_katb_ketab_wedding" ||
+                        selectedCeremonyVariation === "muslim_wedding_only" ||
                         selectedCeremonyVariation === "christian_church_only" ||
-                        selectedCeremonyVariation === "christian_church_venue"
+                        selectedCeremonyVariation === "christian_church_venue" ||
+                        selectedCeremonyVariation === "christian_venue_only"
                       ) {
                         setStep(2); // go to extra questions step
                       } else {
@@ -1685,7 +1692,7 @@ function WeddingTimelinePageContent() {
               {step === 2 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* Q1: Where are you getting ready? */}
-                  { selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only" && (
+                  {  selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only" && (
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
                       Where are you getting ready?
@@ -1775,7 +1782,11 @@ function WeddingTimelinePageContent() {
                       // Muslim or variations where we ask location relative to anchor
                       <>
                         <Label className="text-xl text-lovely text-center block">
-                          Is the photo session at the same location as the {getAnchorLabel(selectedCeremonyVariation)}?
+                          Is the photo session at the same location as the {
+                            selectedCeremonyVariation?.includes("church") ? "church" : 
+                            selectedCeremonyVariation?.includes("katb_ketab") ? "Katb ketab location" : 
+                            "venue"
+                          }?
                         </Label>
                         <div className="grid grid-cols-2 gap-3">
                           {(["yes", "no"] as const).map((option) => (
@@ -1910,8 +1921,11 @@ function WeddingTimelinePageContent() {
                       } else {
                         setStep(
                           selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                          selectedCeremonyVariation === "muslim_katb_ketab_wedding" ||
+                          selectedCeremonyVariation === "muslim_wedding_only" ||
                           selectedCeremonyVariation === "christian_church_only" ||
-                          selectedCeremonyVariation === "christian_church_venue"
+                          selectedCeremonyVariation === "christian_church_venue" ||
+                          selectedCeremonyVariation === "christian_venue_only"
                             ? 2
                             : 1
                         );

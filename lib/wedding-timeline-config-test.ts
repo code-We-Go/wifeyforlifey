@@ -97,6 +97,7 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 1,
     hidden: true,
+    showIf: { gettingReadyLocation: "venue" },
     activities: {
       bride: "Arrival at the venue",
       groom: "_",
@@ -116,6 +117,16 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       bridesmaids: "Hair Styling (for non hijabis)",
       groomsmen: "_",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" },
+        activities: { groom: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "makeup",
@@ -129,6 +140,20 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       bridesmaids: "Arriving & Getting Ready",
       groomsmen: "Arriving & Getting Ready",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "yes" },
+        activities: { bridesmaids: "Makeup" },
+      },
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_", groomsmen: "_" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" },
+        activities: { groom: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "getting_ready",
@@ -139,9 +164,15 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
     activities: {
       bride: "Getting Ready Photos",
       groom: "Getting Ready Photos",
-      bridesmaids: "Getting Ready Photos",
-      groomsmen: "Getting Ready Photos",
+      bridesmaids: "Getting Ready/Hair Styling",
+      groomsmen: "Getting Ready/Hair Styling",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "dress_suit",
@@ -157,10 +188,69 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       bridesmaids: "Helping Bride",
       groomsmen: "Helping Groom",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "", groomsmen: "" },
+      },
+    ],
   },
-  // {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,
-  //   noBreakAfter: true,
-  //   category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
+  {
+    id: "beforeLeaving",
+    label: "getting ready to leave",
+    defaultDuration: 15,
+    category: "before",
+    order: 4.6,
+    activities: {
+      bride: "getting ready to leave",
+      groom: "getting ready to leave",
+      bridesmaids: "getting ready to leave",
+      groomsmen: "getting ready to leave",
+    },
+    noBreakAfter: true,
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_", groomsmen: "_" },
+      },
+    ],
+  },
+  {
+    id: "picking_up_bride",
+    label: "Picking up the bride",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.7,
+    noBreakAfter: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "bride only pictures",
+      groom: "Picking up the bride",
+      bridesmaids: "Celebrating",
+      groomsmen: "Celebrating",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "", groomsmen: "" },
+      },
+    ],
+  },
+  {
+    id: "transport_to_photoshoot",
+    label: "Moving to Photoshoot Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 4.9,
+    hidden: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "Moving to Photoshoot Location",
+      groom: "Moving to Photoshoot Location",
+      bridesmaids: "Moving to Photoshoot Location",
+      groomsmen: "Moving to Photoshoot Location",
+    },
+  },
   {
     id: "first_look",
     label: "First look",
@@ -173,6 +263,12 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       bridesmaids: "cheering the couple up",
       groomsmen: "cheering the couple up",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_", groomsmen: "_" },
+      },
+    ],
   },
   {
     id: "couple_photoshoot",
@@ -215,7 +311,21 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       groomsmen: "Bridal Party Photoshoot",
     },
   },
-
+  {
+    id: "transport_to_katb_ketab",
+    label: "Moving to Katb Ketab Location",
+    defaultDuration: 30,
+    category: "before",
+    order: 6.5,
+    hidden: true,
+    showIf: { photoAtKatbLocation: "no" },
+    activities: {
+      bride: "Moving to Katb Ketab Location",
+      groom: "Moving to Katb Ketab Location",
+      bridesmaids: "Moving to Katb Ketab Location",
+      groomsmen: "Moving to Katb Ketab Location",
+    },
+  },
   {
     id: "Guest_Arrival",
     noBreakBefore: true,
@@ -231,7 +341,20 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       groomsmen: "Guests Arrival/Bridal party break",
     },
   },
-
+  {
+    id: "katb_ketab",
+    noBreakAfter: true,
+    label: "Katb Ketab",
+    defaultDuration: 30,
+    category: "before",
+    order: 8,
+    activities: {
+      bride: "Katb Ketab Ceremony",
+      groom: "Katb Ketab Ceremony",
+      bridesmaids: "Katb Ketab Ceremony",
+      groomsmen: "Katb Ketab Ceremony",
+    },
+  },
   {
     id: "Grand_Entrance",
     noBreakAfter: true,
@@ -246,21 +369,6 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       groomsmen: "Grand Entrance",
     },
   },
-    {
-    id: "katb_ketab",
-    noBreakAfter: true,
-    label: "Katb Ketab",
-    defaultDuration: 60,
-    category: "before",
-    order: 8,
-    activities: {
-      bride: "Katb Ketab Ceremony",
-      groom: "Katb Ketab Ceremony",
-      bridesmaids: "Katb Ketab Ceremony",
-      groomsmen: "Katb Ketab Ceremony",
-    },
-  },
-
   {
     id: "zaffa",
     noBreakAfter: true,
@@ -649,6 +757,7 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 1,
     hidden: true,
+    showIf: { gettingReadyLocation: "venue" },
     activities: {
       bride: "Arrival at the venue",
       groom: "_",
@@ -674,6 +783,13 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "Hair Styling (for non hijabis)",
       groomsmen: "_",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
   },
   {
     id: "makeup",
@@ -687,6 +803,13 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "Arriving & Getting Ready",
       groomsmen: "Arriving & Getting Ready",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
   },
   {
     id: "getting_ready",
@@ -700,6 +823,13 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "Getting Ready Photos",
       groomsmen: "Getting Ready Photos",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
   },
   {
     id: "dress_suit",
@@ -715,6 +845,13 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "Helping Bride",
       groomsmen: "Helping Groom",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
   },
   // {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
   {
@@ -729,6 +866,35 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "cheering the couple up",
       groomsmen: "cheering the couple up",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
+  },
+  {
+    id: "transport_to_photoshoot",
+    label: "Heading to the photoshoot",
+    defaultDuration: 30,
+    category: "before",
+    order: 5.5,
+    hidden: true,
+    showIf: { gettingReadyLocation: "home" },
+    activities: {
+      bride: "Heading to the photoshoot",
+      groom: "Heading to the photoshoot",
+      bridesmaids: "Heading to the photoshoot",
+      groomsmen: "Heading to the photoshoot",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
   },
   {
     id: "couple_photoshoot",
@@ -743,6 +909,13 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "Photoshoot Break",
       groomsmen: "Photoshoot Break",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
   },
   {
     id: "family_photoshoot",
@@ -757,6 +930,13 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       bridesmaids: "Photoshoot Break",
       groomsmen: "Photoshoot Break",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "Arriving " ,groomsmen:"Arriving"},
+      },
+
+    ],
   },
   {
     id: "bridal_party_photoshoot",
@@ -771,7 +951,21 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       groomsmen: "Bridal Party Photoshoot",
     },
   },
-
+  {
+    id: "transport_to_venue",
+    label: "Heading to the venue",
+    defaultDuration: 30,
+    category: "before",
+    order: 6.5,
+    hidden: true,
+    showIf: { photoshootLocation: "another_place" },
+    activities: {
+      bride: "Heading to the venue",
+      groom: "Heading to the venue",
+      bridesmaids: "Heading to the venue",
+      groomsmen: "Heading to the venue",
+    },
+  },
   {
     id: "Guest_Arrival",
     noBreakBefore: true,
@@ -822,7 +1016,7 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
   {
     id: "party_before_dinner",
     label: "Party",
-    defaultDuration: 90,
+    defaultDuration: 120,
     category: "after",
     order: 9.5,
     hidden: true,
@@ -849,7 +1043,7 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
   {
     id: "party_after_dinner",
     label: "Party",
-    defaultDuration: 120,
+    defaultDuration: 90,
     category: "after",
     order: 11,
     hidden: true,
@@ -860,20 +1054,8 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
       groomsmen: "Party / Dancing",
     },
   },
-    {
-    id: "party_ends",
-    label: "Party Ends",
-    defaultDuration: 10,
-    category: "after",
-    order: 12,
-    activities: {
-      bride: "Party Ends",
-      groom: "Party Ends",
-      bridesmaids: "Party Ends",
-      groomsmen: "Party Ends",
-    },
-  },
 ];
+
 export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
   {
     id: "arrival",
@@ -883,13 +1065,13 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 1,
     hidden: true,
+    showIf: { gettingReadyLocation: "venue" },
     activities: {
       bride: "Arrival at the venue",
       groom: "_",
       bridesmaids: "_",
       groomsmen: "_",
     },
-
   },
   {
     id: "hair",
@@ -900,9 +1082,19 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
     activities: {
       bride: "Hair Styling",
       groom: "_",
-      bridesmaids: "Hair Styling",
+      bridesmaids: "Hair Styling (for non hijabis)",
       groomsmen: "_",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" },
+      },
+      {
+        condition: { gettingReadyLocation: "home" },
+        activities: { groom: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "makeup",
@@ -916,6 +1108,27 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       bridesmaids: "Arriving & Getting Ready",
       groomsmen: "Arriving & Getting Ready",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "yes" },
+        activities: { bridesmaids: "Makeup" },
+      },
+      {
+        condition: { gettingReadyLocation: "home", bridesmaidsAtPrep: "yes" },
+        activities: {
+          groom: "Getting Ready",
+          groomsmen: "Arriving to groom's house",
+        },
+      },
+      {
+        condition: { gettingReadyLocation: "home", bridesmaidsAtPrep: "no" },
+        activities: { groom: "Getting Ready", groomsmen: "_" },
+      },
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_", groomsmen: "_" },
+      },
+    ],
   },
   {
     id: "getting_ready",
@@ -929,6 +1142,12 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       bridesmaids: "Getting Ready Photos",
       groomsmen: "Getting Ready Photos",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "dress_suit",
@@ -944,6 +1163,12 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       bridesmaids: "Helping Bride",
       groomsmen: "Helping Groom",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "first_look",
@@ -958,9 +1183,33 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       bridesmaids: "cheering the couple up",
       groomsmen: "cheering the couple up",
     },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_", groomsmen: "_" },
+      },
+    ],
   },
-  {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:5.1,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
-    {
+  {
+    id: "beforeLeaving",
+    label: "getting ready to leave",
+    defaultDuration: 15,
+    category: "before",
+    order: 5.1,
+    activities: {
+      bride: "getting ready to leave",
+      groom: "getting ready to leave",
+      bridesmaids: "getting ready to leave",
+      groomsmen: "getting ready to leave",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_", groomsmen: "_" },
+      },
+    ],
+  },
+  {
     id: "transport_to_photoshoot",
     label: "Moving to Photoshoot Location",
     defaultDuration: 30,
@@ -1048,9 +1297,6 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       groomsmen: "Guests Arrival/Bridal party break",
     },
   },
-
-
-
   {
     id: "church",
     noBreakAfter: true,
@@ -1198,7 +1444,6 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
     defaultDuration: 60,
     category: "after",
     order: 10,
-
     activities: {
       bride: "Dinner",
       groom: "Dinner",
@@ -1213,7 +1458,6 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
     category: "after",
     order: 11,
     hidden: true,
-
     activities: {
       bride: "Party / Dancing",
       groom: "Party / Dancing",
@@ -1221,7 +1465,7 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       groomsmen: "Party / Dancing",
     },
   },
-    {
+  {
     id: "party_ends",
     label: "Party Ends",
     defaultDuration: 10,
@@ -1864,6 +2108,7 @@ export const CHRISTIAN_VENUE_ONLY_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 1,
     hidden: true,
+    showIf: { gettingReadyLocation: "venue" },
     activities: {
       bride: "Arrival at the venue",
       groom: "_",
