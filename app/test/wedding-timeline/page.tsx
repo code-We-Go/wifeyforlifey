@@ -1373,9 +1373,9 @@ function WeddingTimelinePageContent() {
         "Zaffa is recommended to start after Katb El Ketab.",
         "If additional entertainers are hired (tabla show, violinist, etc.), we recommend that they begin after dinner.",
         `for bridesmaids coming to photoshoot but getting ready at home : 
-- Consider 90 mins for hair styling at the salon 
-- 60 mins for makeup and dress 
-- Please leave early to arrive on time for photoshoot`
+- Consider 90 mins for hair styling at the salon. 
+- 60 mins for makeup and dress. 
+- Please leave early to arrive on time for photoshoot.`
       ];
 
       doc.setFont("helvetica", "normal");
