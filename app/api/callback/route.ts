@@ -367,6 +367,15 @@ async function handleSubscription(
     });
   }
 
+  if (paymentOp.redeemedLoyaltyPoints > 0) {
+    await LoyaltyTransactionModel.create({
+      email: subscriptionEmail,
+      type: "spend",
+      reason: "subscription",
+      amount: paymentOp.redeemedLoyaltyPoints,
+    });
+  }
+
   // Discount usage
   if (paymentOp.appliedDiscount && paymentOp.appliedDiscountAmount) {
     await DiscountModel.findByIdAndUpdate(paymentOp.appliedDiscount, {
@@ -687,6 +696,15 @@ async function handleOrder(
     reason: "purchase",
     amount: res.subTotal,
   });
+
+  if (res.redeemedLoyaltyPoints > 0) {
+    await LoyaltyTransactionModel.create({
+      email: loyaltyEmail,
+      type: "spend",
+      reason: "purchase",
+      amount: res.redeemedLoyaltyPoints,
+    });
+  }
 
   // Discount usage — BUG FIX: use res.appliedDiscount (from the order document)
   if (res.appliedDiscountAmount > 0 && res.appliedDiscount) {
