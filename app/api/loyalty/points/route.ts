@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { ConnectDB } from "@/app/config/db";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
-ConnectDB();
 console.log("registering" + LoyaltyPointsModel);
 export async function POST(req: NextRequest) {
+  await ConnectDB();
   const { email } = await req.json();
   if (!email) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
