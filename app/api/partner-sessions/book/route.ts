@@ -3,6 +3,7 @@ import { ConnectDB } from "@/app/config/db";
 import PartnerSessionModel from "@/app/modals/partnerSessionModel";
 import PartnerSessionOrderModel from "@/app/modals/partnerSessionOrderModel";
 import { DiscountModel } from "@/app/modals/Discount";
+import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
 import axios from "axios";
 import { authenticateRequest } from "@/app/lib/mobileAuth";
 
@@ -147,6 +148,18 @@ export async function POST(req: Request) {
       paymentID: order.data.payment_keys?.[0]?.order_id || undefined,
       status: "pending",
     });
+
+    // Register in PendingPayment for callback lookup
+    const createdPartnerOrder = await PartnerSessionOrderModel.findOne({
+      paymentID: order.data.payment_keys?.[0]?.order_id,
+    });
+    if (createdPartnerOrder && order.data.payment_keys?.[0]?.order_id) {
+      await PendingPaymentModel.create({
+        paymobOrderId: String(order.data.payment_keys[0].order_id),
+        productType: "partner_session",
+        referenceId: createdPartnerOrder._id,
+      });
+    }
 
     return NextResponse.json(
       { token: order.data.client_secret },
