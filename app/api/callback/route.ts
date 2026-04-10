@@ -1040,7 +1040,7 @@ export async function GET(request: Request) {
 
 // Handle POST requests
 export async function POST(request: Request) {
-  loadDB();
+ await loadDB();
 
   try {
     const data = await request.json();
