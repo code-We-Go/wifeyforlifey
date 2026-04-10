@@ -11,6 +11,7 @@ import { DiscountModel } from "@/app/modals/Discount";
 import BostaService, { BostaAddress } from "@/app/services/bostaService";
 import UserModel from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
+import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
 
 const loadDB = async () => {
   console.log("hna");
@@ -439,6 +440,13 @@ export async function POST(request: Request) {
             expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           });
 
+          // Register in PendingPayment for callback lookup
+          await PendingPaymentModel.create({
+            paymobOrderId: String(order.data.payment_keys[0].order_id),
+            productType: "subscription",
+            referenceId: (await subscriptionPaymentModel.findOne({ paymentID: order.data.payment_keys[0].order_id }))._id,
+          });
+
           return NextResponse.json(
             { token: order.data.client_secret },
             { status: 200 }
@@ -506,6 +514,13 @@ export async function POST(request: Request) {
             // Status
             status: "pending",
             expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+
+          // Register in PendingPayment for callback lookup
+          await PendingPaymentModel.create({
+            paymobOrderId: String(order.data.payment_keys[0].order_id),
+            productType: "subscription",
+            referenceId: (await subscriptionPaymentModel.findOne({ paymentID: order.data.payment_keys[0].order_id }))._id,
           });
 
           return NextResponse.json(
@@ -603,6 +618,17 @@ export async function POST(request: Request) {
           bostaDistrictName: data.bostaDistrictName || "",
           expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         });
+
+        // Register in PendingPayment for callback lookup
+        const createdOrder = await ordersModel.findOne({ orderID: order.data.payment_keys[0].order_id });
+        if (createdOrder) {
+          await PendingPaymentModel.create({
+            paymobOrderId: String(order.data.payment_keys[0].order_id),
+            productType: "order",
+            referenceId: createdOrder._id,
+          });
+        }
+
         return NextResponse.json(
           { token: order.data.client_secret },
           { status: 200 }
