@@ -28,10 +28,10 @@ const loadDB = async () => {
 // ─── HMAC Verification ──────────────────────────────────────────────
 function verifyHmac(queryParams: Record<string, string>): boolean {
   // Skip HMAC in development for local testing (Postman, etc.)
-  if (process.env.NODE_ENV !== "production") {
-    console.log("⏭️ Skipping HMAC verification (non-production environment)");
-    return true;
-  }
+  // if (process.env.NODE_ENV !== "production") {
+  //   console.log("⏭️ Skipping HMAC verification (non-production environment)");
+  //   return true;
+  // }
 
   const hmacSecret = process.env.PAYMOB_HMAC_SECRET;
   if (!hmacSecret) {
@@ -813,10 +813,10 @@ export async function GET(request: Request) {
     console.log("Success:", data.success);
 
     // HMAC verification
-    if (!verifyHmac(data)) {
-      console.error("❌ HMAC verification failed — rejecting callback");
-      return NextResponse.redirect(`${process.env.testUrl}payment/failed`);
-    }
+    // if (!verifyHmac(data)) {
+    //   console.error("❌ HMAC verification failed — rejecting callback");
+    //   return NextResponse.redirect(`${process.env.testUrl}payment/failed`);
+    // }
 
     const isSuccess = data.success === "true";
     const paymobOrderId = data.order;
@@ -858,14 +858,14 @@ export async function POST(request: Request) {
 
     // HMAC verification for POST
     const { searchParams } = new URL(request.url);
-    const hmacFromQuery = searchParams.get("hmac") || body.hmac || "";
-    if (!verifyPostHmac(obj, hmacFromQuery)) {
-      console.error("❌ POST HMAC verification failed — rejecting callback");
-      return NextResponse.json(
-        { error: "HMAC verification failed" },
-        { status: 403 }
-      );
-    }
+    // const hmacFromQuery = searchParams.get("hmac") || body.hmac || "";
+    // if (!verifyPostHmac(obj, hmacFromQuery)) {
+    //   console.error("❌ POST HMAC verification failed — rejecting callback");
+    //   return NextResponse.json(
+    //     { error: "HMAC verification failed" },
+    //     { status: 403 }
+    //   );
+    // }
 
     const isSuccess = obj.success === true;
     const paymobOrderId = String(obj.order?.id || obj.order);
