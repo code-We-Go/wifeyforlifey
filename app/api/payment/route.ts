@@ -18,7 +18,6 @@ const loadDB = async () => {
   await ConnectDB();
 };
 
-loadDB();
 
 async function decreaseStock(cart: any[]) {
   // product(variants)=>variant (attribures)=>attribute
@@ -69,20 +68,10 @@ async function decreaseStock(cart: any[]) {
 }
 
 export async function POST(request: Request) {
+  await loadDB();
   const data = await request.json();
   console.log("shippinga" + data.shipping);
-  // console.log('here'+process.env.PaymobApiKey)
-  // const items =await data.cart.map((item: any) => {
-  //   return {
-  //    "productId": item.productId,
-  //    "productName": item.productName ,
-  //    "price": item.price,
-  //      "quantity": item.quantity,
-  //     "color":item.color,
-  //     "imageUrl":item.imageUrl
 
-  //   }
-  // });
   const items = await data.cart;
   console.log("items" + items.length);
 
