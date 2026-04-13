@@ -70,6 +70,7 @@ async function decreaseStock(cart: any[]) {
 export async function POST(request: Request) {
   await loadDB();
   const data = await request.json();
+  console.log("dataMigo"+JSON.stringify(data))
   console.log("shippinga" + data.shipping);
 
   const items = await data.cart;
