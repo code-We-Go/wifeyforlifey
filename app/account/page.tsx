@@ -754,7 +754,7 @@ const AccountPage = () => {
             {session?.user?.subscription?.packageId ===
               "68bf6ae9c4d5c1af12cdcd37" && (
               // "68bf6ae9c4d5c1af12cdcd37" && (
-              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
+              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=true">
                 <Button
                   size="sm"
                   className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"

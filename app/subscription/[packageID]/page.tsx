@@ -208,20 +208,41 @@ const SubscriptionPage = () => {
   // Read upgrade price from query param and set override
   useEffect(() => {
     const upgradeParam = searchParams.get("upgrade");
-    const parsed = upgradeParam ? Number(upgradeParam) : NaN;
-    if (!Number.isNaN(parsed) && parsed > 0) {
-      setOverridePrice(parsed);
+    if (upgradeParam === "true") {
       setIsUpgrade(true);
       setShipping(0); // Free shipping on upgrade
       setFormData((prevData) => ({
         ...prevData,
         process: "upgrade",
       }));
+      
+      const fetchUpgradeInfo = async () => {
+        try {
+          const res = await axios.get(`/api/packages/upgrade?targetPackageId=${packageID}`);
+          if (res.data.success) {
+            setOverridePrice(res.data.difference);
+          }
+        } catch (error) {
+          console.error("Failed to fetch upgrade info:", error);
+        }
+      };
+      fetchUpgradeInfo();
     } else {
-      setOverridePrice(null);
-      setIsUpgrade(false);
+      const parsed = upgradeParam ? Number(upgradeParam) : NaN;
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        setOverridePrice(parsed);
+        setIsUpgrade(true);
+        setShipping(0); // Free shipping on upgrade
+        setFormData((prevData) => ({
+          ...prevData,
+          process: "upgrade",
+        }));
+      } else {
+        setOverridePrice(null);
+        setIsUpgrade(false);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, packageID]);
 
   // Compute effective price used across calculations and UI
   const price = overridePrice ?? packageData?.price ?? 0;
@@ -577,10 +598,10 @@ We’re beyond excited to share this experience with you… your planner will be
 
   // Update total when gift card selection changes
   useEffect(() => {
-    const calculatedSubTotal = packageData?.price ?? 0;
+    const calculatedSubTotal = price;
     const giftCardCost = formData.giftCardName ? 20 : 0;
     setTotal(calculatedSubTotal + shipping + giftCardCost);
-  }, [formData.giftCardName, packageData?.price, shipping]);
+  }, [formData.giftCardName, price, shipping]);
 
   // Handle country changes
   useEffect(() => {
@@ -627,7 +648,7 @@ We’re beyond excited to share this experience with you… your planner will be
     // Upgrades always have free shipping
     if (isUpgrade) {
       setShipping(0);
-      const calculatedSubTotal = packageData?.price ?? 0;
+      const calculatedSubTotal = price;
       setSubTotal(calculatedSubTotal);
       const giftCardCost = formData.giftCardName ? 20 : 0;
       setTotal(calculatedSubTotal + giftCardCost);
@@ -638,11 +659,10 @@ We’re beyond excited to share this experience with you… your planner will be
         // Check if package price meets minimum order amount required for the discount
         if (
           !appliedDiscount.conditions?.minimumOrderAmount ||
-          (packageData?.price &&
-            packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
+          (price >= appliedDiscount.conditions.minimumOrderAmount)
         ) {
           setShipping(0);
-          const calculatedSubTotal = packageData?.price ?? 0;
+          const calculatedSubTotal = price;
           setSubTotal(calculatedSubTotal);
           const giftCardCost = formData.giftCardName ? 20 : 0;
           setTotal(calculatedSubTotal + giftCardCost);
@@ -650,7 +670,7 @@ We’re beyond excited to share this experience with you… your planner will be
       } else if (!bostaLocation.city) {
         // Set default shipping if no Bosta location selected yet
         setShipping(0);
-        const calculatedSubTotal = packageData?.price ?? 0;
+        const calculatedSubTotal = price;
         setSubTotal(calculatedSubTotal);
         const giftCardCost = formData.giftCardName ? 20 : 0;
         setTotal(calculatedSubTotal + shipping + giftCardCost);
@@ -668,8 +688,7 @@ We’re beyond excited to share this experience with you… your planner will be
         // Check if package price meets minimum order amount required for the discount
         if (
           !appliedDiscount.conditions?.minimumOrderAmount ||
-          (packageData?.price &&
-            packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
+          (price >= appliedDiscount.conditions.minimumOrderAmount)
         ) {
           setShipping(0);
         }
@@ -677,7 +696,7 @@ We’re beyond excited to share this experience with you… your planner will be
       //  else {
       //   setShipping(shippingRate);
       // }
-      const calculatedSubTotal = packageData?.price ?? 0;
+      const calculatedSubTotal = price;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shipping);
     }
@@ -688,7 +707,7 @@ We’re beyond excited to share this experience with you… your planner will be
     state,
     countries,
     items,
-    packageData,
+    price,
     bostaLocation,
     appliedDiscount,
     isUpgrade,
@@ -876,6 +895,8 @@ We’re beyond excited to share this experience with you… your planner will be
     countryID,
     subTotal,
     formData.giftCardName,
+    price,
+    overridePrice
   ]);
 
   if (loadingPackage) {
