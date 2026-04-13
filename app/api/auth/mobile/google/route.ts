@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     const signingKey = getSigningKey(googleKeys, kid);
 
     // 3. Verify the token — accept both mobile and web client IDs
-    const GOOGLE_MOBILE_CLIENT_ID = process.env.GOOGLE_MOBILE_CLIENT_ID;
+    const GOOGLE_MOBILE_CLIENT_ID = process.env.googleClientId;
     const GOOGLE_WEB_CLIENT_ID = process.env.googleClientId;
 
     const validAudiences = [
