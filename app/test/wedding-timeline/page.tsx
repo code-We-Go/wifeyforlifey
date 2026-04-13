@@ -2276,6 +2276,58 @@ function WeddingTimelinePageContent() {
               </Button>
             </div>
           </div>
+          {/* testing */}
+          <div className="mx-6 mt-6 mb-2 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-pinkey/30 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+            <h3 className={`${thirdFont.className} text-xl text-lovely mb-3 flex items-center gap-2`}>
+              <Clock className="h-5 w-5" /> Your Timeline Details
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+              {activeCeremonyType && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Ceremony Type</span>
+                  <span className="text-lovely font-medium capitalize">{activeCeremonyType.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {selectedCeremonyVariation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Format</span>
+                  <span className="text-lovely font-medium capitalize">{selectedCeremonyVariation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {zaffaTime && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Reference Time</span>
+                  <span className="text-lovely font-medium">
+                    {new Date(`2000-01-01T${zaffaTime}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                  </span>
+                </div>
+              )}
+              {gettingReadyLocation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Prep Location</span>
+                  <span className="text-lovely font-medium capitalize">{gettingReadyLocation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {bridesmaidsAtPrep && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Bridesmaids at Prep</span>
+                  <span className="text-lovely font-medium capitalize">{bridesmaidsAtPrep}</span>
+                </div>
+              )}
+              {photoAtKatbLocation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photos at Katb Ketab</span>
+                  <span className="text-lovely font-medium capitalize">{photoAtKatbLocation}</span>
+                </div>
+              )}
+              {photoshootLocation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photoshoot Location</span>
+                  <span className="text-lovely font-medium capitalize">{photoshootLocation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+            </div>
+          </div>
 
           <div className="overflow-x-auto">
             <DndContext
