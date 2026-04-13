@@ -88,12 +88,16 @@ export async function POST(req: Request) {
     const signingKey = getSigningKey(googleKeys, kid);
 
     // 3. Verify the token — accept both mobile and web client IDs
-    const GOOGLE_MOBILE_CLIENT_ID = process.env.googleClientId;
+    // const GOOGLE_MOBILE_CLIENT_ID = process.env.googleClientId;
     const GOOGLE_WEB_CLIENT_ID = process.env.googleClientId;
+   const GOOGLE_IOS_CLIENT_ID= process.env.GOOGLE_IOS_CLIENT_ID;
+const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID;
 
     const validAudiences = [
-      GOOGLE_MOBILE_CLIENT_ID,
+      // GOOGLE_MOBILE_CLIENT_ID,
       GOOGLE_WEB_CLIENT_ID,
+      GOOGLE_IOS_CLIENT_ID,
+      GOOGLE_ANDROID_CLIENT_ID
     ].filter(Boolean) as string[];
 
     if (validAudiences.length === 0) {
