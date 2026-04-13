@@ -426,6 +426,7 @@ function WeddingTimelinePageContent() {
   const [bridesmaidsAtPrep, setBridesmaidsAtPrep] = useState<"yes" | "no" | null>(null);
   // Q3: Is photo session at same place as Katb Ketab? "yes" | "no"
   const [photoAtKatbLocation, setPhotoAtKatbLocation] = useState<"yes" | "no" | null>(null);
+  const [photoshootLocation, setPhotoshootLocation] = useState<"venue" | "another_place" | null>(null);
   const [photoshootTiming, setPhotoshootTiming] = useState<"before" | "after" | null>(null);
 
   // Selected anchor for christian_church_venue (either 'church' or 'Grand_Entrance')
@@ -614,6 +615,7 @@ function WeddingTimelinePageContent() {
           if (parsed.gettingReadyLocation) setGettingReadyLocation(parsed.gettingReadyLocation);
           if (parsed.bridesmaidsAtPrep) setBridesmaidsAtPrep(parsed.bridesmaidsAtPrep);
           if (parsed.photoAtKatbLocation) setPhotoAtKatbLocation(parsed.photoAtKatbLocation);
+          if (parsed.photoshootLocation) setPhotoshootLocation(parsed.photoshootLocation);
           if (parsed.photoshootTiming) setPhotoshootTiming(parsed.photoshootTiming);
           if (parsed.zaffaTime) setZaffaTime(parsed.zaffaTime);
           if (parsed.selectedFeatures) setSelectedFeatures(parsed.selectedFeatures);
@@ -788,6 +790,7 @@ function WeddingTimelinePageContent() {
           if (f.showIf.gettingReadyLocation && f.showIf.gettingReadyLocation !== gettingReadyLocation) return false;
           if (f.showIf.bridesmaidsAtPrep && f.showIf.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
           if (f.showIf.photoAtKatbLocation && f.showIf.photoAtKatbLocation !== photoAtKatbLocation) return false;
+          if (f.showIf.photoshootLocation && f.showIf.photoshootLocation !== photoshootLocation) return false;
           if (f.showIf.photoshootTiming && f.showIf.photoshootTiming !== photoshootTiming) return false;
         }
         return true;
@@ -815,6 +818,7 @@ function WeddingTimelinePageContent() {
           if (ca.condition.gettingReadyLocation && ca.condition.gettingReadyLocation !== gettingReadyLocation) match = false;
           if (ca.condition.bridesmaidsAtPrep && ca.condition.bridesmaidsAtPrep !== bridesmaidsAtPrep) match = false;
           if (ca.condition.photoAtKatbLocation && ca.condition.photoAtKatbLocation !== photoAtKatbLocation) match = false;
+          if (ca.condition.photoshootLocation && ca.condition.photoshootLocation !== photoshootLocation) match = false;
           
           if (match) {
             acts = { ...acts, ...ca.activities };
@@ -856,7 +860,7 @@ function WeddingTimelinePageContent() {
 
     // 2. Save to DB
     if (isAuthenticated) {
-      const computedEvents = calculateTimeline(generatedEvents, zaffaTime, getAnchorEventId(selectedCeremonyVariation));
+      const computedEvents = calculateTimeline(generatedEvents, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor));
       await saveToDb(generatedEvents, computedEvents, zaffaTime, true);
     }
 
@@ -1755,7 +1759,7 @@ function WeddingTimelinePageContent() {
                   )}
 
                   {/* Q3: Photo session location/timing */}
-                  {selectedCeremonyVariation !== "christian_venue_only" && (
+                  {selectedCeremonyVariation && (
                   <div className="space-y-3">
                     {activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") ? (
                       <>
@@ -1792,9 +1796,15 @@ function WeddingTimelinePageContent() {
                           {(["yes", "no"] as const).map((option) => (
                             <button
                               key={option}
-                              onClick={() => setPhotoAtKatbLocation(option)}
+                              onClick={() => {
+                                if (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only") {
+                                  setPhotoshootLocation(option === "yes" ? "venue" : "another_place");
+                                } else {
+                                  setPhotoAtKatbLocation(option);
+                                }
+                              }}
                               className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                                photoAtKatbLocation === option
+                                (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? (photoshootLocation === (option === "yes" ? "venue" : "another_place")) : (photoAtKatbLocation === option))
                                   ? "bg-lovely text-creamey border-lovely"
                                   : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                               }`}
@@ -1803,7 +1813,7 @@ function WeddingTimelinePageContent() {
                             </button>
                           ))}
                         </div>
-                        {photoAtKatbLocation === "no" && (
+                        {(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? photoshootLocation === "another_place" : photoAtKatbLocation === "no") && (
                           <p className="text-xs text-lovely/60 text-center">
                             A 30-minute transportation to the {getAnchorLabel(selectedCeremonyVariation)} will be added after the photoshoot.
                           </p>
@@ -1823,11 +1833,10 @@ function WeddingTimelinePageContent() {
                     </Button>
                     <Button
                       disabled={
-                        (selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only"&&(!gettingReadyLocation || !bridesmaidsAtPrep)) || 
-                        (selectedCeremonyVariation === "christian_venue_only" ? false : 
-                          (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
+                        (selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only" && (!gettingReadyLocation || !bridesmaidsAtPrep)) || 
+                        (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
                           ? !photoshootTiming 
-                          : !photoAtKatbLocation))
+                          : (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? !photoshootLocation : !photoAtKatbLocation))
                       }
                       onClick={() => setStep(3)}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
@@ -2069,7 +2078,7 @@ function WeddingTimelinePageContent() {
                           gettingReadyLocation,
                           bridesmaidsAtPrep,
                           photoAtKatbLocation,
-                          photoshootTiming,
+                          photoshootLocation,
                           zaffaTime,
                           selectedFeatures,
                           brideFirstName,
@@ -2091,6 +2100,7 @@ function WeddingTimelinePageContent() {
                           gettingReadyLocation,
                           bridesmaidsAtPrep,
                           photoAtKatbLocation,
+                          photoshootLocation,
                           zaffaTime,
                           selectedFeatures,
                           brideFirstName,

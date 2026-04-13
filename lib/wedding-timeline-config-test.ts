@@ -817,10 +817,32 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
     defaultDuration: 30,
     category: "before",
     order: 4,
+    noBreakAfter: true,
     activities: {
       bride: "Getting Ready Photos",
-      groom: "Getting Ready Photos",
+      groom: "Break",
       bridesmaids: "Getting Ready Photos",
+      groomsmen: "Break",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
+    ],
+  },
+  {
+    id: "getting_ready_2",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    noBreakAfter:true,
+    order: 4.1,
+    activities: {
+      bride: "Break",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Break",
       groomsmen: "Getting Ready Photos",
     },
     conditionalActivities: [
@@ -2177,18 +2199,19 @@ export const CHRISTIAN_VENUE_ONLY_FEATURES: WeddingFeature[] = [
     },
   },
   {id:"beforeLeaving",label:"getting ready to leave",defaultDuration:15,category:"before",order:4.6,activities:{bride:"getting ready to leave",groom:"getting ready to leave",bridesmaids:"getting ready to leave",groomsmen:"getting ready to leave"}},
-   {
-    id: "moving_to_venue",
-    noBreakAfter: true,
-    label: "Moving to Venue",
+  {
+    id: "transport_to_photoshoot",
+    label: "Heading to the photoshoot",
     defaultDuration: 30,
     category: "before",
     order: 4.7,
+    hidden: true,
+    showIf: { gettingReadyLocation: "home" },
     activities: {
-      bride: "Heading to Venue",
-      groom: "Heading to Venue",
-      bridesmaids: "Heading to Venue",
-      groomsmen: "Heading to Venue",
+      bride: "Heading to the photoshoot",
+      groom: "Heading to the photoshoot",
+      bridesmaids: "Heading to the photoshoot",
+      groomsmen: "Heading to the photoshoot",
     },
   },
   {
@@ -2243,6 +2266,21 @@ export const CHRISTIAN_VENUE_ONLY_FEATURES: WeddingFeature[] = [
       groom: "Bridal Party Photoshoot",
       bridesmaids: "Bridal Party Photoshoot",
       groomsmen: "Bridal Party Photoshoot",
+    },
+  },
+  {
+    id: "transport_to_venue",
+    label: "Heading to the venue",
+    defaultDuration: 30,
+    category: "before",
+    order: 6.5,
+    hidden: true,
+    showIf: { photoshootLocation: "another_place" },
+    activities: {
+      bride: "Heading to the venue",
+      groom: "Heading to the venue",
+      bridesmaids: "Heading to the venue",
+      groomsmen: "Heading to the venue",
     },
   },
 
