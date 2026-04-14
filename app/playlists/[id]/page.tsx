@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Lock, Play, Clock, Calendar, Check } from "lucide-react";
+import { ChevronLeft, ChevronDown, Lock, Play, Clock, Calendar, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +100,12 @@ export default function PlaylistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seeMore, setSeeMore] = useState(false); // <-- Add this line
+  const [collapsedFolders, setCollapsedFolders] = useState<Record<string, boolean>>({});
+
+  const toggleFolder = (slug: string) => {
+    // We allow manually toggling, it just updates this specific slug state
+    setCollapsedFolders((prev) => ({ ...prev, [slug]: !prev[slug] }));
+  };
   const [isVideoHovered, setIsVideoHovered] = useState(false);
   const [watchedVideos, setWatchedVideos] = useState<Set<string>>(new Set());
   const [lastWatchedVideoId, setLastWatchedVideoId] = useState<string | null>(
@@ -366,6 +372,27 @@ export default function PlaylistPage() {
       }
     }
   }, [playlist, currentIndex, selectedVideo]);
+
+  // Adjust folder collapsed state based on the selected video
+  useEffect(() => {
+    if (playlist && selectedVideo) {
+      // Find what folder the selected video belongs to
+      const targetSlug = selectedVideo.playlistFolder;
+      
+      const newCollapsedState: Record<string, boolean> = {};
+      
+      if (playlist.folders && Array.isArray(playlist.folders)) {
+        playlist.folders.forEach((folder: any) => {
+          // If this is the active folder, close it (false). Otherwise open it (true).
+          // Well wait, "collapsed" means true = closed, false = open.
+          // So if folder.slug === targetSlug, collapsed is FALSE. Otherwise TRUE.
+          newCollapsedState[folder.slug] = folder.slug !== targetSlug;
+        });
+      }
+      
+      setCollapsedFolders(newCollapsedState);
+    }
+  }, [playlist, selectedVideo]);
 
   // Fetch OTP when selectedVideo changes and is not locked
   useEffect(() => {
@@ -768,11 +795,36 @@ export default function PlaylistPage() {
             )}
 
             <div className="divide-y max-h-[70vh] overflow-y-auto ">
-              {Array.isArray(playlist.videos) &&
-                playlist.videos.map((video: any, index) => {
+              {(() => {
+                if (!Array.isArray(playlist.videos)) return null;
+
+                const videos: any[] = playlist.videos;
+                const folders: any[] = Array.isArray(playlist.folders) ? playlist.folders : [];
+
+                // Separate videos into grouped (have a playlistFolder) and ungrouped
+                const grouped: Record<string, any[]> = {};
+                const ungrouped: any[] = [];
+
+                videos.forEach((video: any) => {
+                  if (video.playlistFolder) {
+                    if (!grouped[video.playlistFolder]) grouped[video.playlistFolder] = [];
+                    grouped[video.playlistFolder].push(video);
+                  } else {
+                    ungrouped.push(video);
+                  }
+                });
+
+                // Determine folder display order: use playlist.folders order, then any stray slugs
+                const orderedSlugs: string[] = [
+                  ...folders.map((f: any) => f.slug).filter((slug: string) => grouped[slug]),
+                  ...Object.keys(grouped).filter(
+                    (slug) => !folders.some((f: any) => f.slug === slug)
+                  ),
+                ];
+
+                const renderVideoItem = (video: any) => {
                   const isLocked = !video.isPublic && !canAccessPremium;
                   const isActive = selectedVideo?._id === video._id;
-
                   return (
                     <div
                       key={video._id}
@@ -790,7 +842,6 @@ export default function PlaylistPage() {
                         if (videoIndex !== -1) {
                           setCurrentIndex(videoIndex);
                           setSelectedVideo(video);
-                          // Update URL using Next router so searchParams updates
                           router.push(
                             `/playlists/${playlistId}?videoId=${video._id}`
                           );
@@ -799,13 +850,6 @@ export default function PlaylistPage() {
                     >
                       <div className="flex gap-3">
                         <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
-                          {/* <Image
-                            src={video.thumbnailUrl || "/video/1.png"}
-                            alt={video.title}
-                            fill
-                            unoptimized
-                            className="object-cover aspect-video"
-                          /> */}
                           <img
                             src={video.thumbnailUrl || "/video/1.png"}
                             alt={video.title}
@@ -840,7 +884,52 @@ export default function PlaylistPage() {
                       </div>
                     </div>
                   );
-                })}
+                };
+
+                return (
+                  <>
+                    {/* Folder sections */}
+                    {orderedSlugs.map((slug) => {
+                      const folderDef = folders.find((f: any) => f.slug === slug);
+                      const folderName = folderDef?.name || slug;
+                      const folderVideos = grouped[slug];
+                      const isCollapsed = !!collapsedFolders[slug];
+
+                      return (
+                        <div key={slug}>
+                          {/* Folder header */}
+                          <button
+                            onClick={() => toggleFolder(slug)}
+                            className={`${thirdFont.className} w-full flex items-center justify-between px-4 py-3 bg-lovely/90 text-creamey font-semibold text-sm hover:bg-lovely transition-colors`}
+                          >
+                            <span className="line-clamp-1 tracking-wide text-lg md:text-xl text-left">{folderName}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                              <span className="text-xs font-normal opacity-80">
+                                {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
+                              </span>
+                              <ChevronDown
+                                className={`h-4 w-4 transition-transform duration-200 ${
+                                  isCollapsed ? "-rotate-90" : ""
+                                }`}
+                              />
+                            </div>
+                          </button>
+
+                          {/* Folder videos */}
+                          {!isCollapsed && (
+                            <div className="divide-y">
+                              {folderVideos.map(renderVideoItem)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Ungrouped videos (no folder) */}
+                    {ungrouped.map(renderVideoItem)}
+                  </>
+                );
+              })()}
             </div>
           </div>
 

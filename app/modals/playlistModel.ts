@@ -15,6 +15,13 @@ const PlaylistSchema = new Schema<Playlist>({
     model:"videoModel",
     required: false
   }],
+    folders: [
+    {
+      name: { type: String, required: true },   // display label, e.g. "Behind the Scenes"
+      slug: { type: String, required: true },   // URL-safe key, e.g. "behind-the-scenes"
+    }
+  ],
+
   thumbnailUrl: { type: String, required: true },
   featured: { type: Boolean, default: false },
   order: { type: Number, default: 0 },

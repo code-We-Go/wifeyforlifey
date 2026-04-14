@@ -42,11 +42,16 @@ export interface Video {
   isPublic: boolean;
   likes?: (CommentUser | string)[]; // Array of users or user IDs who liked the video
   comments?: VideoComment[]; // Array of comments
-
+  playlistFolder?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface playlistFolder {
+  _id?: string;
+  name: string;   // e.g. "Behind the Scenes"
+  slug: string;   // e.g. "behind-the-scenes"
+}
 // types/Playlist.ts
 export interface Playlist {
   _id?: string;
@@ -57,6 +62,8 @@ export interface Playlist {
   isPublic: boolean;
   category?: string;
   tags?: string[];
+  folders: playlistFolder[];          // ordered list of folders
+
   featured: boolean;
   createdAt: Date;
   updatedAt: Date;

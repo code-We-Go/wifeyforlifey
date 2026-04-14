@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       .populate({
         path: "videos",
         // model: "videoModel",
-        select: "title description thumbnailUrl duration isPublic isPublished url"
+        select: "title description thumbnailUrl duration isPublic isPublished url playlistFolder"
       });
 
     if (!playlist) {
