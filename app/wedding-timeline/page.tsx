@@ -62,20 +62,194 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/input";
-import {
-  type CeremonyType,
-  type CeremonyVariation,
-  type WeddingFeature,
-  CEREMONY_OPTIONS,
-  FEATURES,
-} from "@/lib/wedding-timeline-config";
 
 // --- Types & Constants ---
 
-// CEREMONY_OPTIONS and FEATURES are imported from @/lib/wedding-timeline-config
-// They are also served via GET /api/wedding-timeline/config for mobile app consumption.
+type Feature = {
+  id: string;
+  label: string;
+  defaultDuration: number;
+  category: "before" | "zaffa" | "after"; // To help with ordering later
+  hidden?: boolean;
+};
 
+const FEATURES: Feature[] = [
+  {
+    id: "arrival",
+    label: "Arrival at the venue",
+    defaultDuration: 45,
+    category: "before",
+    hidden: true,
+  },
+  { id: "hair", label: "Hair & Veil ", defaultDuration: 60, category: "before" },
+  { id: "makeup", label: "Makeup", defaultDuration: 105, category: "before" },
+  {
+    id: "getting_ready",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+  },
+  {
+    id: "dress_suit",
+    label: "Wearing dress & suit",
+    defaultDuration: 30,
+    category: "before",
+    hidden: true,
+  },
+  {
+    id: "first_look",
+    label: "First look",
+    defaultDuration: 15,
+    category: "before",
+  },
+  {
+    id: "photoshoot",
+    label: "Photoshoot",
+    defaultDuration: 120,
+    category: "before",
+  },
+  { id: "entrance", label: "Entrance", defaultDuration: 10, category: "after" },
+  {
+    id: "katb_ketab",
+    label: "Katb Ketab",
+    defaultDuration: 30,
+    category: "before",
+  },
+  { id: "zaffa", label: "Zaffa", defaultDuration: 15, category: "zaffa" },
+  {
+    id: "party_before_dinner",
+    label: "Party",
+    defaultDuration: 60,
+    category: "after",
+    hidden: true,
+  },
+  { id: "dinner", label: "Dinner", defaultDuration: 60, category: "after" },
+  {
+    id: "party_after_dinner",
+    label: "Party",
+    defaultDuration: 120,
+    category: "after",
+    hidden: true,
+  },
+];
 
+// Define Feature Meta for ordering and labels (used in Timeline generation)
+const FEATURE_META: Record<
+  string,
+  {
+    label: string;
+    bride: string;
+    groom: string;
+    bridesmaids: string;
+    groomsmen: string;
+    order: number;
+  }
+> = {
+  arrival: {
+    label: "Arrival at the venue",
+    bride: "Arrival at the venue",
+    groom: "_",
+    bridesmaids: "_",
+    groomsmen: "_",
+    order: 1,
+  },
+  hair: {
+    label: "Hair & Veil (for hijabis we recommend make up to be first)",
+    bride: "Hair Styling ",
+    groom: "_",
+    bridesmaids: "Hair Styling (for non hijabis)",
+    groomsmen: "_",
+    order: 2,
+  },
+  makeup: {
+    label: "Makeup",
+    bride: "Makeup",
+    groom: "Arriving & Getting Ready",
+    bridesmaids: "Arrival at the venue and getting ready",
+    groomsmen: "Arriving & Getting Ready",
+    order: 3,
+  },
+  getting_ready: {
+    label: "Getting ready pictures",
+    bride: "Getting Ready Photos",
+    groom: "Break",
+    bridesmaids: "Getting Ready Photos",
+    groomsmen: "Break",
+    order: 4,
+  },
+  dress_suit: {
+    label: "Wearing dress & suit",
+    bride: "Wearing Dress",
+    groom: "Wearing Suit",
+    bridesmaids: "Helping Bride",
+    groomsmen: "Helping Groom",
+    order: 4.5,
+  },
+  first_look: {
+    label: "First look",
+    bride: "First Look",
+    groom: "First Look",
+    bridesmaids: "cheering the couple up",
+    groomsmen: "cheering the couple up",
+    order: 5,
+  },
+  photoshoot: {
+    label: "Photoshoot",
+    bride: "Couple Photoshoot",
+    groom: "Couple Photoshoot",
+    bridesmaids: "Group Photos",
+    groomsmen: "Group Photos",
+    order: 6,
+  },
+  entrance: {
+    label: "Entrance",
+    bride: "Grand Entrance",
+    groom: "Grand Entrance",
+    bridesmaids: "Grand Entrance",
+    groomsmen: "Grand Entrance",
+    order: 7,
+  },
+  katb_ketab: {
+    label: "Katb Ketab",
+    bride: "Katb Ketab Ceremony",
+    groom: "Katb Ketab Ceremony",
+    bridesmaids: "Katb Ketab Ceremony",
+    groomsmen: "Katb Ketab Ceremony",
+    order: 8,
+  },
+  zaffa: {
+    label: "Zaffa",
+    bride: "Zaffa / Entrance",
+    groom: "Zaffa / Entrance",
+    bridesmaids: "Zaffa / Entrance",
+    groomsmen: "Zaffa / Entrance",
+    order: 9,
+  },
+  party_before_dinner: {
+    label: "Party",
+    bride: "Party / Dancing",
+    groom: "Party / Dancing",
+    bridesmaids: "Party / Dancing",
+    groomsmen: "Party / Dancing",
+    order: 9.5,
+  },
+  dinner: {
+    label: "Dinner",
+    bride: "Dinner",
+    groom: "Dinner",
+    bridesmaids: "Dinner",
+    groomsmen: "Dinner",
+    order: 10,
+  },
+  party_after_dinner: {
+    label: "Party",
+    bride: "Party / Dancing",
+    groom: "Party / Dancing",
+    bridesmaids: "Party / Dancing",
+    groomsmen: "Party / Dancing",
+    order: 11,
+  },
+};
 
 type TimelineEvent = {
   id: string;
@@ -102,10 +276,10 @@ const addMinutes = (date: Date, minutes: number) => {
   return new Date(date.getTime() + minutes * 60000);
 };
 
-const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa") => {
+const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string) => {
   if (events.length === 0) return [];
 // on Nareiman's Demandss the part starts => entrance
-  const zaffaIndex = events.findIndex((e) => e.id === anchorId);
+  const zaffaIndex = events.findIndex((e) => e.id === "entrance");
   const [hours, minutes] = zaffaTimeStr.split(":").map(Number);
   const zaffaDate = new Date();
   zaffaDate.setHours(hours, minutes, 0, 0);
@@ -376,9 +550,7 @@ function WeddingTimelinePageContent() {
   const { toast } = useToast();
 
   // -- Wizard State --
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
-  const [activeCeremonyType, setActiveCeremonyType] = useState<CeremonyType | null>(null);
-  const [selectedCeremonyVariation, setSelectedCeremonyVariation] = useState<CeremonyVariation | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [checkingTimeline, setCheckingTimeline] = useState(false);
   const [zaffaTime, setZaffaTime] = useState("18:00");
   const [selectedFeatures, setSelectedFeatures] = useState<
@@ -392,18 +564,6 @@ function WeddingTimelinePageContent() {
       {}
     )
   );
-
-  // -- Katb Ketab Only - Extra Questions State --
-  // Q1: Where are you getting ready? "home" | "venue"
-  const [gettingReadyLocation, setGettingReadyLocation] = useState<"home" | "venue" | null>(null);
-  // Q2: Will bridesmaids come to preparations? "yes" | "no"
-  const [bridesmaidsAtPrep, setBridesmaidsAtPrep] = useState<"yes" | "no" | null>(null);
-  // Q3: Is photo session at same place as Katb Ketab? "yes" | "no"
-  const [photoAtKatbLocation, setPhotoAtKatbLocation] = useState<"yes" | "no" | null>(null);
-
-  // -- Names (optional, for PDF) --
-  const [brideFirstName, setBrideFirstName] = useState("");
-  const [groomFirstName, setGroomFirstName] = useState("");
 
   // -- Timeline Editor State --
   const [events, setEvents] = useState<TimelineEvent[]>([]);
@@ -430,7 +590,6 @@ function WeddingTimelinePageContent() {
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [hasFeedback, setHasFeedback] = useState(false);
-  const [showBlogSuggestion, setShowBlogSuggestion] = useState(false);
 
   // -- Tutorial State --
   const [showTutorial, setShowTutorial] = useState(false);
@@ -442,26 +601,6 @@ function WeddingTimelinePageContent() {
 
   // -- Options Modal State (for mobile) --
   const [showOptionsModal, setShowOptionsModal] = useState(false);
-
-  // -- Helper for Anchor Event --
-  const getAnchorEventId = (variation: CeremonyVariation | null) => {
-    if (!variation) return "zaffa";
-    
-    // Christian variations always anchor to Church
-    if (variation.startsWith("christian")) return "church";
-    
-    // Muslim variations
-    if (variation === "muslim_katb_ketab_only") return "katb_ketab";
-    
-    // Default for muslim_katb_ketab_wedding and muslim_wedding_only
-    return "zaffa"; 
-  };
-  
-  const getAnchorLabel = (variation: CeremonyVariation | null) => {
-    const anchorId = getAnchorEventId(variation);
-    const feature = FEATURES.find(f => f.id === anchorId);
-    return feature ? feature.label : "Wedding";
-  };
 
   // Tutorial Steps
   const tutorialSteps = [
@@ -517,7 +656,7 @@ function WeddingTimelinePageContent() {
               if (savedZaffa) setZaffaTime(savedZaffa);
               if (savedEvents && savedEvents.length > 0) {
                 setEvents(savedEvents);
-                setStep(5);
+                setStep(3);
               }
               // Check if user has already provided feedback
               // Only set hasFeedback to true if feedback exists and has actual data
@@ -537,10 +676,10 @@ function WeddingTimelinePageContent() {
     checkExistingTimeline();
   }, [isAuthenticated, loading]);
 
-  // 2. Show tutorial for first-time users when they reach step 5 (Timeline)
+  // 2. Show tutorial for first-time users when they reach step 3
   useEffect(() => {
     const hasSeenStorage = localStorage.getItem("weddingTimelineTutorialSeen");
-    if (step === 6 && !hasSeenTutorial && !hasSeenStorage) {
+    if (!hasSeenTutorial && !hasSeenStorage) {
       // Small delay to let the timeline render first
       const timer = setTimeout(() => {
         setShowTutorial(true);
@@ -563,7 +702,7 @@ function WeddingTimelinePageContent() {
         setZaffaTime(pendingZaffaTime);
         localStorage.removeItem('pendingZaffaTime'); // Clean up
       }
-      setStep(4);
+      setStep(2);
       
       // Clean up the URL parameter
       window.history.replaceState({}, '', '/wedding-timeline');
@@ -584,7 +723,7 @@ function WeddingTimelinePageContent() {
   };
 
   // 5. Calculated Events (Time Calculation)
-  const calculatedEvents = calculateTimeline(events, zaffaTime, getAnchorEventId(selectedCeremonyVariation));
+  const calculatedEvents = calculateTimeline(events, zaffaTime);
 
   // 6. Auto-Save Logic (Only if newly generated and not yet saved)
   //   useEffect(() => {
@@ -689,94 +828,48 @@ function WeddingTimelinePageContent() {
 
   const handlePlan = async () => {
 
+
     // 1. Generate Events from Selection
-    // featureList keeps the full WeddingFeature shape (including .order and .activities)
-    let featureList = FEATURES.filter(
-      (f) =>
-        !f.allowedVariations ||
-        (selectedCeremonyVariation &&
-          f.allowedVariations.includes(selectedCeremonyVariation))
-    ).map((f) => ({
-      ...f,
-      enabled: selectedFeatures[f.id]?.enabled ?? true,
-      duration: selectedFeatures[f.id]?.duration ?? f.defaultDuration,
+    const featureList = FEATURES.map((f) => ({
+      id: f.id,
+      label: f.label,
+      category: f.category,
+      enabled: selectedFeatures[f.id].enabled,
+      duration: selectedFeatures[f.id].duration,
+      hidden: f.hidden,
     })).filter((f) => f.enabled || f.hidden); // Include if enabled OR hidden (mandatory)
 
-    // -- Katb Ketab Only: Apply extra question answers --
-    if (selectedCeremonyVariation === "muslim_katb_ketab_only") {
-      // Q1: Remove "Arrival at the venue" if getting ready at home
-      if (gettingReadyLocation === "home") {
-        featureList = featureList.filter((f) => f.id !== "arrival");
-      }
-      // Q2: Remove getting_ready if bridesmaids won't attend
-      if (bridesmaidsAtPrep === "no") {
-        featureList = featureList.filter((f) => f.id !== "getting_ready");
-      }
-    }
-
-    // Sort features based on their order field (from WeddingFeature)
-    featureList.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    // Sort features based on predefined order
+    featureList.sort((a, b) => {
+      const orderA = FEATURE_META[a.id]?.order || 99;
+      const orderB = FEATURE_META[b.id]?.order || 99;
+      return orderA - orderB;
+    });
 
     // Generate Events with Breaks
     const generatedEvents: TimelineEvent[] = [];
 
     featureList.forEach((feature, index) => {
-      // Activities come directly from the merged WeddingFeature shape
-      const acts = feature.activities ?? { bride: "", groom: "", bridesmaids: "", groomsmen: "" };
-
-      // -- Katb Ketab Only overrides --
-      const isKatbOnly = selectedCeremonyVariation === "muslim_katb_ketab_only";
-      const isHomeKatbOnly = isKatbOnly && gettingReadyLocation === "home";
-      const noBridesmaids = isKatbOnly && bridesmaidsAtPrep === "no";
-
-      // Events where bridesmaids/groomsmen have no activity if they're not present
-      const bridesmaidsEmptyFor = ["makeup", "dress_suit"];
+      const meta = FEATURE_META[feature.id] || {
+        label: feature.id,
+        bride: "",
+        groom: "",
+        bridesmaids: "",
+        groomsmen: "",
+      };
 
       generatedEvents.push({
         id: feature.id,
         duration: feature.duration,
-        brideActivity: acts.bride,
-        groomActivity: isHomeKatbOnly && feature.id === "makeup" ? "" : acts.groom,
-        bridesmaidsActivity:
-          noBridesmaids && bridesmaidsEmptyFor.includes(feature.id) ? "" : acts.bridesmaids,
-        groomsmenActivity: isHomeKatbOnly && feature.id === "makeup" ? "" : acts.groomsmen,
+        brideActivity: meta.bride,
+        groomActivity: meta.groom,
+        bridesmaidsActivity: meta.bridesmaids,
+        groomsmenActivity: meta.groomsmen,
       });
 
-      // -- Katb Ketab Only: after preparations (dress_suit) insert 30 min transport if getting ready at home --
-      if (
-        selectedCeremonyVariation === "muslim_katb_ketab_only" &&
-        feature.id === "dress_suit" &&
-        gettingReadyLocation === "home"
-      ) {
-        generatedEvents.push({
-          id: "transport_to_photoshoot",
-          duration: 30,
-          brideActivity: "Transportation to Photoshoot Location",
-          groomActivity: "Transportation to Photoshoot Location",
-          bridesmaidsActivity: "Transportation to Photoshoot Location",
-          groomsmenActivity: "Transportation to Photoshoot Location",
-        });
-      }
-
-      // -- Katb Ketab Only: after photoshoot insert 30 min transport to mosque if different location --
-      if (
-        selectedCeremonyVariation === "muslim_katb_ketab_only" &&
-        feature.id === "photoshoot" &&
-        photoAtKatbLocation === "no"
-      ) {
-        generatedEvents.push({
-          id: "transport_to_mosque",
-          duration: 30,
-          brideActivity: "Transportation to Mosque / Katb Ketab Location",
-          groomActivity: "Transportation to Mosque / Katb Ketab Location",
-          bridesmaidsActivity: "Transportation to Mosque / Katb Ketab Location",
-          groomsmenActivity: "Transportation to Mosque / Katb Ketab Location",
-        });
-      }
-
       // Add break if not the last event AND not after zaffa, arrival, or any 'after' category events
-    if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.id !== "entrance" && feature.id !== "arrival" && feature.id !== "katb_ketab" && feature.id !== "church" && feature.id !== "moving_to_venue" && feature.id !== "Guest_Arrival" && feature.id !== "moving_to_church" && feature.id !== "Grand_Entrance" && feature.category !== "after") {
-      const nextFeature = featureList[index + 1];
+      if (index < featureList.length - 1 && feature.id !== "zaffa" && feature.id !== "entrance" && feature.id !== "arrival" && feature.id !== "katb_ketab" && feature.category !== "after") {
+        const nextFeature = featureList[index + 1];
         const isBeforeGettingReady = nextFeature?.id === "getting_ready";
         
         generatedEvents.push({
@@ -793,14 +886,15 @@ function WeddingTimelinePageContent() {
 
     setEvents(generatedEvents);
 
-    // 2. Save to DB
+    // 2. Save to DB (Silent or not? User said "add a record", let's be explicit but not blocking)
     if (isAuthenticated) {
-      const computedEvents = calculateTimeline(generatedEvents, zaffaTime, getAnchorEventId(selectedCeremonyVariation));
+      // Calculate timeline for saving (since state 'events' is not updated yet in this closure)
+      const computedEvents = calculateTimeline(generatedEvents, zaffaTime);
       await saveToDb(generatedEvents, computedEvents, zaffaTime, true);
     }
 
-    // 3. Move to Step 6
-    setStep(6);
+    // 3. Move to Step 3
+    setStep(3);
   };
 
   const handleDurationChange = (index: number, newDuration: string) => {
@@ -894,62 +988,34 @@ function WeddingTimelinePageContent() {
   };
 
   const handleSubmitFeedback = async () => {
-    // Validate ALL fields are filled in
-    if (feedbackRatings.easeOfUse === 0) {
+    // Validate at least one rating or selection
+    const hasRatings = Object.values(feedbackRatings).some((r) => r > 0);
+    const hasSelections = feedbackTimeSaved || feedbackFeelings.length > 0 || feedbackRecommend;
+    
+    if (!hasRatings && !hasSelections && !feedbackText.trim()) {
       toast({
-        title: "Rating Required",
-        description: "Please rate how easy it was to create your timeline (Question 1).",
-        className: "bg-pinkey text-lovely border-lovely",
-      });
-      return;
-    }
-    if (feedbackRatings.satisfaction === 0) {
-      toast({
-        title: "Rating Required",
-        description: "Please rate how satisfied you are with how the day looks (Question 2).",
-        className: "bg-pinkey text-lovely border-lovely",
-      });
-      return;
-    }
-    if (!feedbackTimeSaved) {
-      toast({
-        title: "Selection Required",
-        description: "Please select how much time you feel this tool saved you (Question 3).",
-        className: "bg-pinkey text-lovely border-lovely",
-      });
-      return;
-    }
-    if (feedbackFeelings.length === 0) {
-      toast({
-        title: "Selection Required",
-        description: "Please select at least one feeling about how this tool made you feel (Question 4).",
-        className: "bg-pinkey text-lovely border-lovely",
-      });
-      return;
-    }
-    if (!feedbackRecommend) {
-      toast({
-        title: "Selection Required",
-        description: "Please let us know if you would recommend this tool to another bride (Question 5).",
-        className: "bg-pinkey text-lovely border-lovely",
-      });
-      return;
-    }
-    if (!feedbackText.trim()) {
-      toast({
-        title: "Comments Required",
-        description: "Please share any additional comments before submitting.",
+        title: "Feedback Required",
+        description: "Please provide at least one response before submitting.",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
 
-    await doSubmitFeedback();
-  };
+    // Check if feedback text is mandatory based on ratings and recommendation
+    const hasLowRating = feedbackRatings.easeOfUse < 5 && feedbackRatings.easeOfUse > 0 || 
+                         feedbackRatings.satisfaction < 5 && feedbackRatings.satisfaction > 0;
+    const hasNegativeRecommendation = feedbackRecommend === "definitely_not" || feedbackRecommend === "maybe";
+    
+    if ((hasLowRating || hasNegativeRecommendation) && !feedbackText.trim()) {
+      toast({
+        title: "Additional Feedback Required",
+        description: "Please share your thoughts in the comments section to help us improve.",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
 
-  const doSubmitFeedback = async () => {
     setIsSubmittingFeedback(true);
-    setShowBlogSuggestion(false);
 
     try {
       const response = await fetch("/api/wedding-timeline/feedback", {
@@ -1183,7 +1249,7 @@ function WeddingTimelinePageContent() {
           const mergedWidth = (activityColWidth * 4) + (gap * 3);
           const mergedX = startX + timeColWidth + gap;
           // Use pink background for entrance event, creamy for others
-          const bgColor = event.id === "entrance" || event.id === "church" || event.id === "Grand_Entrance" ? "#FFB6C7" : "#FBF3E0";
+          const bgColor = event.id === "entrance" ? "#FFB6C7" : "#FBF3E0";
           drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, bgColor, "#D32333");
           doc.setTextColor("#D32333");
           doc.setFont("helvetica", "normal");
@@ -1297,11 +1363,7 @@ function WeddingTimelinePageContent() {
         });
       }
 
-      const pdfFileName =
-        brideFirstName.trim() && groomFirstName.trim()
-          ? `${brideFirstName.trim()} & ${groomFirstName.trim()} wedding day timeline.pdf`
-          : "wedding-timeline.pdf";
-      doc.save(pdfFileName);
+      doc.save("wedding-timeline.pdf");
 
       // Increment export counter in database
       if (isAuthenticated) {
@@ -1382,17 +1444,10 @@ function WeddingTimelinePageContent() {
         )
       );
       setStep(1);
-      setActiveCeremonyType(null);
-      setSelectedCeremonyVariation(null);
-      setGettingReadyLocation(null);
-      setBridesmaidsAtPrep(null);
-      setPhotoAtKatbLocation(null);
       setHasAutoSaved(false);
       setShareUrl(null);
       setShowResetDialog(false);
       setHasSeenTutorial(false);
-      setBrideFirstName("");
-      setGroomFirstName("");
       
       // Clear tutorial flag from localStorage so it shows again
       localStorage.removeItem("weddingTimelineTutorialSeen");
@@ -1415,7 +1470,7 @@ function WeddingTimelinePageContent() {
   // --- Render ---
 
   // Layout wrapper changes based on step
-  const isWizard = step === 1 || step === 2 || step === 3 || step === 4 || step === 5;
+  const isWizard = step === 1 || step === 2;
 
   return (
     <div
@@ -1468,185 +1523,7 @@ function WeddingTimelinePageContent() {
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl text-lovely text-center block">
-                      What kind of ceremony are you planning?
-                    </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                      {CEREMONY_OPTIONS.map((option) => (
-                        <div
-                          key={option.id}
-                          className={`
-                            border-2 rounded-lg p-4 cursor-pointer transition-all
-                            ${
-                              activeCeremonyType === option.id
-                                ? "border-pinkey bg-pinkey/50 text-lovely"
-                                : "border-pinkey/30 hover:border-pinkey/60 bg-creamey"
-                            }
-                          `}
-                          onClick={() => setActiveCeremonyType(option.id)}
-                        >
-                          <h3 className="text-lg font-bold text-lovely text-center mb-2">
-                            {option.label}
-                          </h3>
-                          
-                          {activeCeremonyType === option.id && (
-                            <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2">
-                              {option.variations.map((variation) => (
-                                <div
-                                  key={variation.id}
-                                  className={`
-                                    p-3 rounded border cursor-pointer flex items-center gap-3
-                                    ${
-                                      selectedCeremonyVariation === variation.id
-                                        ? "bg-lovely text-creamey border-lovely"
-                                        : "bg-white/50 hover:text-creamey hover:bg-lovely/90 text-lovely border-pinkey/20"
-                                    }
-                                  `}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedCeremonyVariation(variation.id);
-                                  }}
-                                >
-                                  <div className={`
-                                    w-4 h-4 rounded-full border-2 flex items-center justify-center
-                                    ${selectedCeremonyVariation === variation.id ? "border-white" : "border-pinkey"}
-                                  `}>
-                                    {selectedCeremonyVariation === variation.id && (
-                                      <div className="w-2 h-2 rounded-full bg-white" />
-                                    )}
-                                  </div>
-                                  <span className="text-sm font-medium">{variation.label}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button
-                    disabled={!selectedCeremonyVariation}
-                    onClick={() => {
-                      if (selectedCeremonyVariation === "muslim_katb_ketab_only") {
-                        setStep(2); // go to extra questions step
-                      } else {
-                        setStep(3); // skip extra questions, go to time picker
-                      }
-                    }}
-                    className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next Step <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-
-              {step === 2 && (
-                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
-                  {/* Q1: Where are you getting ready? */}
-                  <div className="space-y-3">
-                    <Label className="text-xl text-lovely text-center block">
-                      Where are you getting ready?
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(["home", "venue"] as const).map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => setGettingReadyLocation(option)}
-                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                            gettingReadyLocation === option
-                              ? "bg-lovely text-creamey border-lovely"
-                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                          }`}
-                        >
-                          {option === "home" ? "🏠 Home" : "🏛️ Venue"}
-                        </button>
-                      ))}
-                    </div>
-                    {gettingReadyLocation === "home" && (
-                      <p className="text-xs text-lovely/60 text-center">
-                        A 30-minute transportation to the photoshoot location will be added after preparations.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Q2: Will bridesmaids come to preparations? */}
-                  <div className="space-y-3">
-                    <Label className="text-xl text-lovely text-center block">
-                      Will the bridesmaids come to preparations?
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(["yes", "no"] as const).map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => setBridesmaidsAtPrep(option)}
-                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                            bridesmaidsAtPrep === option
-                              ? "bg-lovely text-creamey border-lovely"
-                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                          }`}
-                        >
-                          {option === "yes" ? "✅ Yes" : "❌ No"}
-                        </button>
-                      ))}
-                    </div>
-                    {bridesmaidsAtPrep === "no" && (
-                      <p className="text-xs text-lovely/60 text-center">
-                        The &quot;Getting Ready Pictures&quot; event will be removed.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Q3: Is photo session at same place as Katb Ketab? */}
-                  <div className="space-y-3">
-                    <Label className="text-xl text-lovely text-center block">
-                      Is the photo session at the same location as the Katb Ketab?
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(["yes", "no"] as const).map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => setPhotoAtKatbLocation(option)}
-                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                            photoAtKatbLocation === option
-                              ? "bg-lovely text-creamey border-lovely"
-                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                          }`}
-                        >
-                          {option === "yes" ? "✅ Yes, same place" : "📍 No, different"}
-                        </button>
-                      ))}
-                    </div>
-                    {photoAtKatbLocation === "no" && (
-                      <p className="text-xs text-lovely/60 text-center">
-                        A 30-minute transportation to the mosque will be added after the photoshoot.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-4 pt-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      disabled={!gettingReadyLocation || !bridesmaidsAtPrep || !photoAtKatbLocation}
-                      onClick={() => setStep(3)}
-                      className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="space-y-4">
-                    <Label className="text-xl text-lovely text-center block">
-                      When does the {getAnchorLabel(selectedCeremonyVariation)} start?
+                      When does the Wedding start?
                     </Label>
                     <div className="flex w-full justify-center px-2">
                         <input
@@ -1658,35 +1535,28 @@ function WeddingTimelinePageContent() {
                             colorScheme: 'light'
                           }}
                         />
+                        {/* <Clock className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-lovely pointer-events-none" /> */}
                     </div>
                   </div>
 
-                  <div className="flex gap-4 mt-8">
-                    <Button
-                      variant="outline"
-                      onClick={() => setStep(selectedCeremonyVariation === "muslim_katb_ketab_only" ? 2 : 1)}
-                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (!isAuthenticated) {
-                          localStorage.setItem('pendingZaffaTime', zaffaTime);
-                          setShowLoginDialog(true);
-                          return;
-                        }
-                        setStep(4);
-                      }}
-                      className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg"
-                    >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={() => {
+                          if (!isAuthenticated) {
+      // Save the selected zaffaTime to localStorage before redirecting
+      localStorage.setItem('pendingZaffaTime', zaffaTime);
+      setShowLoginDialog(true);
+      return;
+    }
+    setStep(2);
+                    }}
+                    className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8"
+                  >
+                    Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
               )}
 
-              {step === 4 && (
+              {step === 2 && (
                 <div className="space-y-6 animate-in  text-lovely fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl  block mb-4">
@@ -1698,15 +1568,7 @@ function WeddingTimelinePageContent() {
                     </p>
 
                     <div className="grid gap-4 max-h-[50vh] overflow-y-auto pr-2">
-                      {FEATURES.filter(
-                        (f) =>
-                          !f.hidden &&
-                          (!f.allowedVariations ||
-                            (selectedCeremonyVariation &&
-                              f.allowedVariations.includes(
-                                selectedCeremonyVariation
-                              )))
-                      ).map((feature) => (
+                      {FEATURES.filter((f) => !f.hidden).map((feature) => (
                         <div
                           key={feature.id}
                           className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
@@ -1761,81 +1623,17 @@ function WeddingTimelinePageContent() {
                   <div className="flex gap-4 pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => setStep(3)}
+                      onClick={() => setStep(1)}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
                       Prev step
                     </Button>
                     <Button
-                      onClick={() => setStep(5)}
+                      onClick={handlePlan}
                       disabled={loading}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90  font-bold  text-lovely"
                     >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {step === 5 && (
-                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="space-y-4">
-                    <Label className="text-xl text-lovely text-center block">
-                      One last thing! 💕
-                    </Label>
-                    <p className="text-sm text-lovely/60 text-center">
-                      Optionally, enter the bride&apos;s and groom&apos;s first names to personalise your PDF file name.
-                    </p>
-
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-sm font-semibold text-lovely mb-1 block">
-                          Bride&apos;s First Name
-                        </Label>
-                        <Input
-                          type="text"
-                          placeholder="e.g. Nour"
-                          value={brideFirstName}
-                          onChange={(e) => setBrideFirstName(e.target.value)}
-                          className="bg-creamey border-pinkey border-2 text-lovely placeholder:text-lovely/40 focus-visible:ring-pinkey"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-semibold text-lovely mb-1 block">
-                          Groom&apos;s First Name
-                        </Label>
-                        <Input
-                          type="text"
-                          placeholder="e.g. Ahmed"
-                          value={groomFirstName}
-                          onChange={(e) => setGroomFirstName(e.target.value)}
-                          className="bg-creamey border-pinkey border-2 text-lovely placeholder:text-lovely/40 focus-visible:ring-pinkey"
-                        />
-                      </div>
-                    </div>
-
-                    {brideFirstName.trim() && groomFirstName.trim() && (
-                      <p className="text-xs text-lovely/60 text-center">
-                        Your PDF will be saved as: <span className="font-semibold text-lovely">&ldquo;{brideFirstName.trim()} &amp; {groomFirstName.trim()} wedding.pdf&rdquo;</span>
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-4 pt-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setStep(4)}
-                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      onClick={handlePlan}
-                      disabled={loading}
-                      className="flex-1 bg-pinkey hover:bg-pinkey/90 font-bold text-lovely"
-                    >
-                      {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      Plan My Day 💍
+                      Plan My Day
                     </Button>
                   </div>
                 </div>
@@ -1845,8 +1643,8 @@ function WeddingTimelinePageContent() {
         </div>
       )}
 
-      {/* Timeline Editor Step 6 */}
-      {step === 6 && (
+      {/* Timeline Editor Step 3 */}
+      {step === 3 && (
         <div
           ref={contentRef}
           className="max-w-7xl mx-auto w-full rounded-lg shadow-xl overflow-hidden border-4 border-pinkey animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -2019,53 +1817,8 @@ function WeddingTimelinePageContent() {
         </div>
       )}
 
-      {/* Blog Suggestion Popup */}
-      {showBlogSuggestion && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
-          <div className="bg-creamey border-4 border-lovely rounded-2xl shadow-2xl max-w-md w-full p-7 relative animate-in fade-in zoom-in-95 duration-300">
-            <button
-              onClick={() => setShowBlogSuggestion(false)}
-              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <h2 className={`${thirdFont.className} text-2xl text-lovely text-center mb-3`}>
-              Quick Tip Before You Go!
-            </h2>
-            <p className="text-lovely/80 text-sm text-center mb-5 leading-relaxed">
-              We noticed your ratings were a bit low. Our blog post on{" "}
-              <strong>creating the perfect wedding day timeline</strong> might have the answers you're looking for — from ordering events to timing tips! 🌸
-            </p>
-
-            {/* Blog image */}
-            <div className="flex shadow-lg justify-center mb-4 rounded-xl overflow-hidden">
-              <NextImage
-                src="/timeline/blog.png"
-                alt="Wedding Timeline Blog"
-                width={400}
-                height={220}
-                className="w-full object-cover rounded-xl"
-                unoptimized
-              />
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <a
-                href="/blogs/how-to-create-your-perfect-wedding-day-timeline-with-free-canva-template"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-lovely hover:bg-lovely/90 text-white font-semibold py-3 px-4 rounded-lg transition-all hover:scale-[1.02]"
-              >
-                <span>📖</span> Read the Blog Post
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Feedback Dialog */}
-      {showFeedbackDialog && step === 4 && (
+      {showFeedbackDialog && step === 3 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-lg w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
             <button
@@ -2095,13 +1848,12 @@ function WeddingTimelinePageContent() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      onClick={() => {
+                      onClick={() =>
                         setFeedbackRatings((prev) => ({
                           ...prev,
                           easeOfUse: star,
-                        }));
-                        if (star < 4) setShowBlogSuggestion(true);
-                      }}
+                        }))
+                      }
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star
@@ -2125,13 +1877,12 @@ function WeddingTimelinePageContent() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      onClick={() => {
+                      onClick={() =>
                         setFeedbackRatings((prev) => ({
                           ...prev,
                           satisfaction: star,
-                        }));
-                        if (star < 4) setShowBlogSuggestion(true);
-                      }}
+                        }))
+                      }
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star
@@ -2240,13 +1991,25 @@ function WeddingTimelinePageContent() {
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
                   Any additional comments?
-                  <span className="text-lovely ml-1">*</span>
+                  {((feedbackRatings.easeOfUse < 5 && feedbackRatings.easeOfUse > 0) || 
+                    (feedbackRatings.satisfaction < 5 && feedbackRatings.satisfaction > 0) ||
+                    feedbackRecommend === "definitely_not" || 
+                    feedbackRecommend === "maybe") && (
+                    <span className="text-lovely ml-1">*</span>
+                  )}
                 </label>
                 <Textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Share your thoughts..."
-                  className="min-h-[80px] placeholder:text-lovely/60 border-2 bg-creamey resize-none focus:border-lovely border-pinkey"
+                  className={`min-h-[80px] placeholder:text-lovely/60 border-2 bg-creamey resize-none focus:border-lovely ${
+                    ((feedbackRatings.easeOfUse < 5 && feedbackRatings.easeOfUse > 0) || 
+                     (feedbackRatings.satisfaction < 5 && feedbackRatings.satisfaction > 0) ||
+                     feedbackRecommend === "definitely_not" || 
+                     feedbackRecommend === "maybe")
+                      ? "border-lovely"
+                      : "border-pinkey"
+                  }`}
                 />
               </div>
             </div>
@@ -2277,7 +2040,7 @@ function WeddingTimelinePageContent() {
 
 
       {/* Floating Feedback Button (always visible if no feedback given) */}
-      {!hasFeedback && step === 4 && !showFeedbackDialog && (
+      {!hasFeedback && step === 3 && !showFeedbackDialog && (
         <button
           onClick={() => setShowFeedbackDialog(true)}
           className="fixed bottom-6 right-6 bg-lovely text-white p-4 rounded-full shadow-lg hover:bg-lovely/90 transition-all hover:scale-110 z-40 flex items-center gap-2 group"
