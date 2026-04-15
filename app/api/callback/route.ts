@@ -736,7 +736,7 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
   }
 
   // Idempotency: skip if already processed
-  if (pendingPayment.status !== "pending") {
+  if (pendingPayment.status !== "pending" && pendingPayment.status !== "failed") {
     console.log(
       `⏭️ Payment already processed (status: ${pendingPayment.status}), skipping`
     );
