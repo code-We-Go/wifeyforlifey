@@ -48,8 +48,8 @@ export type WeddingFeature = {
   noBreakBefore?: boolean;
   /** If true: no break will be automatically added after this event */
   noBreakAfter?: boolean;
-  /** If set: only includes feature when answers match these values */
-  showIf?: Partial<CeremonyAnswers>;
+  /** If set: only includes feature when answers match these values. Array means OR. */
+  showIf?: Partial<CeremonyAnswers> | Partial<CeremonyAnswers>[];
   /** If set: overrides specific activities when answers match these values */
   conditionalActivities?: {
     condition: Partial<CeremonyAnswers>;
@@ -389,10 +389,10 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
     category: "zaffa",
     order: 9,
     activities: {
-      bride: "Zaffa / Entrance",
-      groom: "Zaffa / Entrance",
-      bridesmaids: "Zaffa / Entrance",
-      groomsmen: "Zaffa / Entrance",
+      bride: "Zaffa",
+      groom: "Zaffa",
+      bridesmaids: "Zaffa",
+      groomsmen: "Zaffa",
     },
   },
   {
@@ -927,7 +927,7 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 5.5,
     hidden: true,
-    showIf: { gettingReadyLocation: "home" },
+    showIf: [{ gettingReadyLocation: "home" }, { photoshootLocation: "another_place" }],
     activities: {
       bride: "Heading to the photoshoot",
       groom: "Heading to the photoshoot",
@@ -1052,10 +1052,10 @@ export const MUSLIM_WEDDING_ONLY_FEATURES: WeddingFeature[] = [
     category: "zaffa",
     order: 9,
     activities: {
-      bride: "Zaffa / Entrance",
-      groom: "Zaffa / Entrance",
-      bridesmaids: "Zaffa / Entrance",
-      groomsmen: "Zaffa / Entrance",
+      bride: "Zaffa",
+      groom: "Zaffa",
+      bridesmaids: "Zaffa",
+      groomsmen: "Zaffa",
     },
   },
   {
@@ -2349,7 +2349,7 @@ export const CHRISTIAN_VENUE_ONLY_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 5.5,
     hidden: true,
-    showIf: { gettingReadyLocation: "home" },
+    showIf: [{ gettingReadyLocation: "home" }, { photoshootLocation: "another_place" }],
     activities: {
       bride: "Heading to the photoshoot",
       groom: "Heading to the photoshoot",

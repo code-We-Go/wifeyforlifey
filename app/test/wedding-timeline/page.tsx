@@ -787,11 +787,16 @@ function WeddingTimelinePageContent() {
     )
       .filter((f) => {
         if (f.showIf) {
-          if (f.showIf.gettingReadyLocation && f.showIf.gettingReadyLocation !== gettingReadyLocation) return false;
-          if (f.showIf.bridesmaidsAtPrep && f.showIf.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
-          if (f.showIf.photoAtKatbLocation && f.showIf.photoAtKatbLocation !== photoAtKatbLocation) return false;
-          if (f.showIf.photoshootLocation && f.showIf.photoshootLocation !== photoshootLocation) return false;
-          if (f.showIf.photoshootTiming && f.showIf.photoshootTiming !== photoshootTiming) return false;
+          const conditions = Array.isArray(f.showIf) ? f.showIf : [f.showIf];
+          const hasMatch = conditions.some((cond) => {
+            if (cond.gettingReadyLocation && cond.gettingReadyLocation !== gettingReadyLocation) return false;
+            if (cond.bridesmaidsAtPrep && cond.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
+            if (cond.photoAtKatbLocation && cond.photoAtKatbLocation !== photoAtKatbLocation) return false;
+            if (cond.photoshootLocation && cond.photoshootLocation !== photoshootLocation) return false;
+            if (cond.photoshootTiming && cond.photoshootTiming !== photoshootTiming) return false;
+            return true;
+          });
+          if (!hasMatch) return false;
         }
         return true;
       })
@@ -1815,7 +1820,8 @@ function WeddingTimelinePageContent() {
                         </div>
                         {(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? photoshootLocation === "another_place" : photoAtKatbLocation === "no") && (
                           <p className="text-xs text-lovely/60 text-center">
-                            A 30-minute transportation to the {getAnchorLabel(selectedCeremonyVariation)} will be added after the photoshoot.
+                            A 30-minute transportation to the will be added after the photoshoot.
+                            {/* A 30-minute transportation to the {getAnchorLabel(selectedCeremonyVariation)} will be added after the photoshoot. */}
                           </p>
                         )}
                       </>
@@ -1974,10 +1980,16 @@ function WeddingTimelinePageContent() {
                         .filter((f) => {
                           if (f.hidden) return false;
                           if (f.showIf) {
-                            if (f.showIf.gettingReadyLocation && f.showIf.gettingReadyLocation !== gettingReadyLocation) return false;
-                            if (f.showIf.bridesmaidsAtPrep && f.showIf.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
-                            if (f.showIf.photoAtKatbLocation && f.showIf.photoAtKatbLocation !== photoAtKatbLocation) return false;
-                            if (f.showIf.photoshootTiming && f.showIf.photoshootTiming !== photoshootTiming) return false;
+                            const conditions = Array.isArray(f.showIf) ? f.showIf : [f.showIf];
+                            const hasMatch = conditions.some((cond) => {
+                              if (cond.gettingReadyLocation && cond.gettingReadyLocation !== gettingReadyLocation) return false;
+                              if (cond.bridesmaidsAtPrep && cond.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
+                              if (cond.photoAtKatbLocation && cond.photoAtKatbLocation !== photoAtKatbLocation) return false;
+                              if (cond.photoshootLocation && cond.photoshootLocation !== photoshootLocation) return false;
+                              if (cond.photoshootTiming && cond.photoshootTiming !== photoshootTiming) return false;
+                              return true;
+                            });
+                            if (!hasMatch) return false;
                           }
                           return true;
                         })

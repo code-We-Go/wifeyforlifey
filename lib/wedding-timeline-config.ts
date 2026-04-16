@@ -48,8 +48,8 @@ export type WeddingFeature = {
   noBreakBefore?: boolean;
   /** If true: no break will be automatically added after this event */
   noBreakAfter?: boolean;
-  /** If set: only includes feature when answers match these values */
-  showIf?: Partial<CeremonyAnswers>;
+  /** If set: only includes feature when answers match these values. Array means OR. */
+  showIf?: Partial<CeremonyAnswers> | Partial<CeremonyAnswers>[];
   /** If set: overrides specific activities when answers match these values */
   conditionalActivities?: {
     condition: Partial<CeremonyAnswers>;
