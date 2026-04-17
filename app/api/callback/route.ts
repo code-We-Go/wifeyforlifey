@@ -246,10 +246,16 @@ async function handleSubscription(
 
   // Compute expiry for subscription based on package duration
   const expiryDate = new Date();
-  if ((paymentOp.to as any)?.duration === "0") {
+  const pkgId = (paymentOp.to as any)?._id?.toString();
+
+  if (pkgId === "68bf6ae9c4d5c1af12cdcd37") {
     // Mini subscription: expiry is now
-  } else {
+  }
+  else if (pkgId === "687396821b4da119eb1c13fe") {
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  }
+   else if (pkgId === "6965e63c6df4503dda02c12b") {
+    expiryDate.setMonth(expiryDate.getMonth() + 6);
   }
 
   // For gifts, use recipient email for account linkage and loyalty
@@ -361,7 +367,8 @@ async function handleSubscription(
       reason: "subscription",
       amount: (updatedSub.packageID as any).price,
       bonusID:
-        (updatedSub.packageID as any).duration === "0"
+        (updatedSub.packageID as any)?._id?.toString() ===
+        "68bf6ae9c4d5c1af12cdcd37"
           ? "68c176b69c1ff0a2ad779c2d"
           : "687d67f459e6ba857a54ed53",
     });
@@ -577,7 +584,10 @@ async function handleSubscription(
   });
 
   // Determine redirect
-  if ((updatedSub?.packageID as any)?.duration === "0") {
+  if (
+    (updatedSub?.packageID as any)?._id?.toString() ===
+    "68bf6ae9c4d5c1af12cdcd37"
+  ) {
     return {
       success: true,
       redirect: `payment/success?subscription=mini${
