@@ -244,6 +244,8 @@ async function handleSubscription(
   console.log("paymentOp.isGift:", paymentOp.isGift);
   console.log("paymentOp.email:", paymentOp.email);
 
+  const isUpgradeProcess = paymentOp?.process === "upgrade";
+
   // Compute expiry for subscription based on package duration
   const expiryDate = new Date();
   const pkgId = (paymentOp.to as any)?._id?.toString();
@@ -365,12 +367,19 @@ async function handleSubscription(
       email: subscriptionEmail,
       type: "earn",
       reason: "subscription",
-      amount: (updatedSub.packageID as any).price,
-      bonusID:
-        (updatedSub.packageID as any)?._id?.toString() ===
-        "68bf6ae9c4d5c1af12cdcd37"
-          ? "68c176b69c1ff0a2ad779c2d"
-          : "687d67f459e6ba857a54ed53",
+      amount: isUpgradeProcess
+        ? Math.max(
+            0,
+            ((paymentOp.to as any)?.price || 0) -
+              ((paymentOp.from as any)?.price || 0)
+          )
+        : (updatedSub.packageID as any).price,
+      bonusID: isUpgradeProcess
+        ? "69e35eba75941926796f40ce"
+        : (updatedSub.packageID as any)?._id?.toString() ===
+          "68bf6ae9c4d5c1af12cdcd37"
+        ? "68c176b69c1ff0a2ad779c2d"
+        : "687d67f459e6ba857a54ed53",
     });
   }
 
@@ -392,7 +401,6 @@ async function handleSubscription(
 
   // Bosta integration (skip for upgrade)
   try {
-    const isUpgradeProcess = paymentOp?.process === "upgrade";
     if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess) {
       const bostaService = new BostaService();
       const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
