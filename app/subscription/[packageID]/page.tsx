@@ -177,7 +177,7 @@ const SubscriptionPage = () => {
   const [notFound, setNotFound] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const { isAuthenticated, loyaltyPoints } = useAuth();
+  const { isAuthenticated, loyaltyPoints, user } = useAuth();
   const [loading, setLoading] = useState(false);
   // const [shipping, setShipping] = useState(0);
   const [shipping, setShipping] = useState(0);
@@ -718,6 +718,60 @@ We’re beyond excited to share this experience with you… your planner will be
       <OrderSummaryItem cartItem={cartItem} key={index} />
     ));
   };
+  const handleUpgradeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    let errors: any = {};
+    if (!user?.email || !/\S+@\S+\.\S+/.test(user.email)) {
+      errors.email = "Please enter a valid email address.";
+    }
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      alert(Object.values(errors)[0]);
+      setLoading(false);
+      return;
+    }
+
+    // Set the email from user session
+    formData.email = user!.email!;
+
+    // Build payload matching the regular submit flow
+    const payload = {
+      ...formData,
+      appliedDiscount: appliedDiscount?._id,
+      appliedDiscountAmount:
+        appliedDiscount?.calculationType === "FREE_SHIPPING"
+          ? shipping
+          : appliedDiscount?.calculationType === "PERCENTAGE"
+          ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
+          : appliedDiscount?.value,
+      loyalty: {
+        redeemedPoints: Math.max(
+          0,
+          Math.min(
+            redeemPoints - (redeemPoints % 20),
+            loyaltyPoints.realLoyaltyPoints
+          )
+        ),
+        discount: loyaltyDiscount,
+      },
+    };
+
+    try {
+      const res = await axios.post("/api/payment/", payload);
+      console.log(res.data.token);
+      setLoading(false);
+
+      // Redirect to Paymob checkout
+      const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
+      router.push(paymobIframeURL);
+    } catch (error: any) {
+      console.error(error);
+      alert(error?.response?.data?.error || "Something went wrong");
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     // alert("clicked");
     e.preventDefault();
@@ -821,7 +875,7 @@ We’re beyond excited to share this experience with you… your planner will be
 
   // Show modal when package data is loaded for specific packages
   useEffect(() => {
-    if (packageData && packageID) {
+    if (packageData && packageID && !isUpgrade) {
       const modalContent = getModalContent(packageID as string);
       if (modalContent) {
         setShowModal(true);
@@ -927,6 +981,75 @@ We’re beyond excited to share this experience with you… your planner will be
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
         <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
+          {isUpgrade ? (
+            <form
+              onSubmit={handleUpgradeSubmit}
+              className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2 border-lovely text-nowrap"
+            >
+              <div
+                className={`${thirdFont.className} w-full text-base lg:text-2xl border-b border-lovely`}
+              >
+                Upgrade Subscription
+              </div>
+              <div className="flex items-center gap-2 w-full">
+                <label className="text-lovely text-base">Email</label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    name="email"
+                    value={formData.email || user?.email || ""}
+                    type="email"
+                    className={`border ${
+                      formErrors.email ? "border-red-500" : ""
+                    } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
+                  />
+                  {formErrors.email && (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-base mt-4">
+                <label className="flex items-center gap-2 cursor-pointer relative">
+                  <input
+                    type="checkbox"
+                    id="accept-terms-upgrade"
+                    checked={acceptedTerms}
+                    onChange={() => setAcceptedTerms(!acceptedTerms)}
+                    className="peer appearance-none bg-creamey checked:bg-everGreen border border-pinkey w-4 h-4 rounded transition-colors flex-shrink-0"
+                  />
+                  <span className="absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs pointer-events-none peer-checked:opacity-100 opacity-0">
+                    ✔
+                  </span>
+                </label>
+                <span className="pl-2 text-lovely text-base">
+                  By checking, you agree to the{" "}
+                  <Link
+                    href="/policies?terms-and-conditions"
+                    className="underline hover:cursor-pointer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    terms and conditions
+                  </Link>
+                </span>
+              </div>
+              <div className="flex justify-end w-full mt-2">
+                <button
+                  disabled={loading || !acceptedTerms}
+                  type="submit"
+                  className={`border text-base transition duration-300 border-lovely p-1 ${
+                    loading || !acceptedTerms
+                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
+                      : "hover:cursor-pointer bg-lovely px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
+                  }`}
+                >
+                  {loading ? "Processing..." : "PROCEED TO PAYMENT"}
+                </button>
+              </div>
+            </form>
+          ) : (
           <form
             onSubmit={handleSubmit}
             className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
@@ -1814,6 +1937,8 @@ We’re beyond excited to share this experience with you… your planner will be
               </button>
             </div>
           </form>
+          )}
+          
         </div>
 
         {/* orderSummaryMob */}

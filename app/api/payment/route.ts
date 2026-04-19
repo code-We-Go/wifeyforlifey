@@ -319,7 +319,17 @@ export async function POST(request: Request) {
       )}`;
       console.log(specialReference);
       console.log("firstDebug" + data.subscription);
+      console.log("total" + data.total);
       if (data.subscription) {
+        let userSub = null;
+        if (data.process === "upgrade" || data.process === "renew") {
+          userSub = await UserModel.findOne({ email: data.email }).populate({
+            path: "subscription",
+            options: { strictPopulate: false },
+          });
+        }
+        const existingSub = userSub?.subscription as any;
+
         const order = await axios.post(
           "https://accept.paymob.com/v1/intention/",
           {
@@ -335,17 +345,17 @@ export async function POST(request: Request) {
             //   }
             // ],
             billing_data: {
-              apartment: data.appartment,
-              first_name: data.firstName,
-              last_name: data.lastName,
-              street: "street",
+              apartment: existingSub?.apartment || data.appartment || "apartment",
+              first_name: existingSub?.firstName || data.firstName || "firstName",
+              last_name: existingSub?.lastName || data.lastName || "lastName",
+              street: existingSub?.address || "street",
               building: "building",
-              phone_number: data.phone,
-              city: data.city,
-              country: data.country,
-              email: data.email,
+              phone_number: existingSub?.phone || data.phone || "phone",
+              city: existingSub?.city || data.city || "city",
+              country: existingSub?.country || data.country || "country",
+              email: existingSub?.email || data.email || "email",
               floor: "floor",
-              state: data.state,
+              state: existingSub?.state || data.state || "state",
             },
             extras: {
               ee: "subscription",
@@ -367,10 +377,7 @@ export async function POST(request: Request) {
 
         if (data.process === "upgrade" || data.process === "renew") {
           // Upgrade/Renew flow: record a pending payment operation, do NOT mutate subscription here
-          const user = await UserModel.findOne({ email: data.email }).populate({
-            path: "subscription",
-            options: { strictPopulate: false },
-          });
+          const user = userSub;
 
           const fromPackageID = (user?.subscription as any)?.packageID || null;
           await subscriptionPaymentModel.create({
