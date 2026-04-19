@@ -40,22 +40,62 @@ const FeaturedProducts = () => {
     ]
   );
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      setPackagesLoading(true);
-      try {
-        const response = await fetch("/api/packages?all=true&active=true");
-        const data = await response.json();
-        setPackages(Array.isArray(data.data) ? data.data : []);
-      } catch (error) {
-        console.error("Error fetching packages:", error);
-      } finally {
-        setPackagesLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchPackages = async () => {
+  //     setPackagesLoading(true);
+  //     try {
+  //       const response = await fetch("/api/packages?all=true&active=true");
+  //       const data = await response.json();
+  //       setPackages(Array.isArray(data.data) ? data.data : []);
+  //     } catch (error) {
+  //       console.error("Error fetching packages:", error);
+  //     } finally {
+  //       setPackagesLoading(false);
+  //     }
+  //   };
 
-    fetchPackages();
-  }, []);
+  //   fetchPackages();
+  // }, []);
+    useEffect(() => {
+      const fetchPackages = async () => {
+        setPackagesLoading(true);
+        try {
+          const response = await fetch("/api/packages?all=true&active=true");
+          const data = await response.json();
+          const fetchedPackages = Array.isArray(data.data) ? data.data : [];
+          
+          // Custom Gehaz Bestie Planner package to show first
+          const gehazBestiePlanner: Ipackage = {
+            _id: "custom-gehaz-bestie-planner",
+            slug: "GehazBestiePlanner",
+            name: "Gehaz Bestie Planner",
+            imgUrl: "/experience/gehaz1.png",
+            images: ["/experience/gehaz1.png"],
+            price: 1500,
+            duration: "",
+            items: [],
+            notes: [],
+            cards: [],
+            active: true,
+          };
+          
+          // Filter out any fetched packages with slug "GehazBestiePlanner" to avoid duplicates
+          const filteredPackages = fetchedPackages.filter(
+            (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner"
+          );
+          
+          // Prepend the custom package to the filtered packages
+          setPackages([gehazBestiePlanner, ...filteredPackages]);
+        } catch (error) {
+          console.error("Error fetching packages:", error);
+        } finally {
+          setPackagesLoading(false);
+        }
+      };
+  
+      fetchPackages();
+    }, []);
+  
   // const featuredProducts = mockProducts
   //   .filter((product) => product.featured)
   //   .slice(0, 3);
@@ -130,6 +170,16 @@ const FeaturedProducts = () => {
                   </div>
                 </div>
               ))}
+              {/* {packages.map((packageItem) => (
+                <div
+                  key={packageItem._id}
+                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2 h-full"
+                >
+                  <div className="h-full">
+                    <PackageCard packageItem={packageItem} />
+                  </div>
+                </div>
+              ))} */}
               {featuredProducts?.map((product) => {
                 const productID = product._id;
                 const fav = wishList.find(

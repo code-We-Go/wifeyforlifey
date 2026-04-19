@@ -453,7 +453,8 @@ function ShopPage() {
                   </div>
                 </div>
               </div>
-            ) : (
+            ) 
+            : (
               <div className="text-center py-12">
                 <p className="text-lovely text-lg">
                   No subscriptions available at the moment.
