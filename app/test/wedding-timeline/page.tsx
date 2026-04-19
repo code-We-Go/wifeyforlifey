@@ -69,6 +69,7 @@ import {
   CEREMONY_OPTIONS,
   FEATURES_BY_VARIATION,
   ALL_FEATURES,
+  MUSLIM_KATB_KETAB_ONLY_FEATURES,
 } from "@/lib/wedding-timeline-config-test";
 
 // --- Types & Constants ---
@@ -1701,7 +1702,7 @@ function WeddingTimelinePageContent() {
               {step === 2 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* Q1: Where are you getting ready? */}
-                  {  selectedCeremonyVariation !== "christian_church_only" && selectedCeremonyVariation !== "muslim_katb_ketab_only" && (
+                  {  selectedCeremonyVariation !== "christian_church_only"  && (
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
                       Where are you getting ready?
@@ -1718,7 +1719,7 @@ function WeddingTimelinePageContent() {
                           }`}
                         >
                           <div className="flex flex-col items-center gap-1">
-                            <span>{option === "home" ? "🏠 Somewhere else" : "🏛️ Wedding Venue"}</span>
+                            <span>{option === "home" ? "🏠 Somewhere else" : (selectedCeremonyVariation === "muslim_katb_ketab_only" ? "🏛️ Katb ketab Venue" : "🏛️ Wedding Venue")}</span>
                             {option === "home" && (
                               <span className="text-[10px] normal-case font-normal opacity-70">
                                 (Home, other venue)
