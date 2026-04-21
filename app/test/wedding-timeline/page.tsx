@@ -409,12 +409,12 @@ function WeddingTimelinePageContent() {
   const [checkingTimeline, setCheckingTimeline] = useState(false);
   const [zaffaTime, setZaffaTime] = useState("18:00");
   const [selectedFeatures, setSelectedFeatures] = useState<
-    Record<string, { enabled: boolean; duration: number }>
+    Record<string, { enabled: boolean; duration?: number }>
   >(
     ALL_FEATURES.reduce(
       (acc, feature) => ({
         ...acc,
-        [feature.id]: { enabled: true, duration: feature.defaultDuration },
+        [feature.id]: { enabled: true },
       }),
       {}
     )
@@ -1528,7 +1528,7 @@ function WeddingTimelinePageContent() {
         ALL_FEATURES.reduce(
           (acc, feature) => ({
             ...acc,
-            [feature.id]: { enabled: true, duration: feature.defaultDuration },
+            [feature.id]: { enabled: true },
           }),
           {}
         )
@@ -2028,7 +2028,7 @@ function WeddingTimelinePageContent() {
                             <div className="flex items-center gap-2">
                               <input
                                 type="number"
-                                value={selectedFeatures[feature.id].duration}
+                                value={selectedFeatures[feature.id]?.duration ?? feature.defaultDuration}
                                 onFocus={(e) => setOriginalDuration(parseInt(e.target.value) || 0)}
                                 onChange={(e) =>
                                   handleFeatureDurationChange(
