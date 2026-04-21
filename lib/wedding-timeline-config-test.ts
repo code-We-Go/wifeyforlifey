@@ -1635,72 +1635,18 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
     order: 3,
     activities: {
       bride: "Makeup",
-      groom: "Arriving & Getting Ready",
-      bridesmaids: "Arriving & Getting Ready",
-      groomsmen: "Arriving & Getting Ready",
+      groom: "Getting Ready",
+      bridesmaids: "",
+      groomsmen: "",
     },
     conditionalActivities: [
       {
         condition: { bridesmaidsAtPrep: "yes" },
-        activities: { bridesmaids: "Makeup" },
-      },
-      {
-        condition: { gettingReadyLocation: "home" , bridesmaidsAtPrep: "yes"},
-        activities: { groom: "Getting Ready", groomsmen: "Arriving to groom's house" },
-      },
-      {
-        condition: { gettingReadyLocation: "home" , bridesmaidsAtPrep: "no"},
-        activities: { groom: "Getting Ready", groomsmen: "_" },
+        activities: { bridesmaids: "Makeup" ,groomsmen:"arriving to groom's house"},
       },
       {
         condition: { bridesmaidsAtPrep: "no" },
         activities: { bridesmaids: "_",groomsmen: "_" },
-      },
-      // {
-      //   condition: { gettingReadyLocation: "home", bridesmaidsAtPrep: "yes" },
-      //   activities: { groom: "Getting Ready", groomsmen: "Arriving to groom's house" },
-      // },
-    ],
-  },
-  {
-    id: "getting_ready",
-    label: "Getting ready pictures",
-    defaultDuration: 30,
-    category: "before",
-    order: 4,
-    showIf: { gettingReadyLocation: "venue" },
-    noBreakAfter: true,
-    activities: {
-      bride: "Getting Ready Photos",
-      groom: "Break",
-      bridesmaids: "Getting Ready Photos",
-      groomsmen: "Break",
-    },
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "_" ,groomsmen:"_"},
-      },
-    ],
-  },
-  {
-    id: "getting_ready_2",
-    label: "Getting ready pictures",
-    defaultDuration: 30,
-    category: "before",
-    noBreakAfter:true,
-    order: 4.1,
-    showIf: { gettingReadyLocation: "venue" },
-    activities: {
-      bride: "Break",
-      groom: "Getting Ready Photos",
-      bridesmaids: "Break",
-      groomsmen: "Getting Ready Photos",
-    },
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "_" ,groomsmen:"_"},
       },
     ],
   },
@@ -1711,7 +1657,6 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
     category: "before",
     noBreakAfter:true,
     order: 4.1,
-    showIf: { gettingReadyLocation: "home" },
     activities: {
       bride: "Getting Ready Photos",
       groom: "Getting Ready Photos",
@@ -1798,6 +1743,12 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
       },
     ],
   },
+{id:"transport_to_church",label:"transport to church",
+  defaultDuration:30,category:"before",order:4.85,
+  showIf:{photoshootTiming:"after"},
+  activities:{bride:"Moving to church",groom:"Moving to church",bridesmaids:"Moving to church",groomsmen:"Moving to church"},
+  conditionalActivities:[{condition:{bridesmaidsAtPrep:"no"},
+    activities:{bridesmaids:"",groomsmen:""}}]},
   {
     id: "transport_to_photoshoot",
     label: "Moving to Photoshoot Location",
@@ -1819,41 +1770,7 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
       },
     ]
   },
-  {
-    id: "transport_to_photoshoot",
-    label: "Moving to Photoshoot Location",
-    defaultDuration: 30,
-    category: "before",
-    order: 5.1,
-    hidden: true,
-    showIf: { gettingReadyLocation: "venue", photoshootTiming: "before" },
-    activities: {
-      bride: "Moving to Photoshoot Location",
-      groom: "Moving to Photoshoot Location",
-      bridesmaids: "Moving to Photoshoot Location",
-      groomsmen: "Moving to Photoshoot Location",
-    },
-  },
-  {
-    id: "first_look",
-    label: "First look",
-    defaultDuration: 15,
-    category: "before",
-    order: 5,
-    showIf: { gettingReadyLocation: "venue" },
-    activities: {
-      bride: "First Look",
-      groom: "First Look",
-      bridesmaids: "cheering the couple up",
-      groomsmen: "cheering the couple up",
-    },
-            conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "_",groomsmen: "_" },
-      },
-    ],
-  },
+
   {
     id: "couple_photoshoot",
     label: "Couple Photoshoot",
@@ -1911,21 +1828,6 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
     },
   },
   {
-    id: "transport_to_photoshoot_after",
-    label: "Moving to Photoshoot Location",
-    defaultDuration: 30,
-    category: "after",
-    order: 8.25,
-    hidden: true,
-    showIf: { photoshootTiming: "after" },
-    activities: {
-      bride: "Moving to Photoshoot Location",
-      groom: "Moving to Photoshoot Location",
-      bridesmaids: "Moving to Photoshoot Location",
-      groomsmen: "Moving to Photoshoot Location",
-    },
-  },
-  {
     id: "transport_to_church",
     label: "Moving to church",
     defaultDuration: 30,
@@ -1962,9 +1864,9 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
       },
     ]
   },
-
-
-
+  
+  
+  
   {
     id: "church",
     noBreakAfter: true,
@@ -1991,6 +1893,21 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
       groom: "Salamat & Photos",
       bridesmaids: "Salamat & Photos",
       groomsmen: "Salamat & Photos",
+    },
+  },
+  {
+    id: "transport_to_photoshoot_after",
+    label: "Moving to Photoshoot Location",
+    defaultDuration: 30,
+    category: "after",
+    order: 8.25,
+    hidden: true,
+    showIf: { photoshootTiming: "after" },
+    activities: {
+      bride: "Moving to Photoshoot Location",
+      groom: "Moving to Photoshoot Location",
+      bridesmaids: "Moving to Photoshoot Location",
+      groomsmen: "Moving to Photoshoot Location",
     },
   },
     {

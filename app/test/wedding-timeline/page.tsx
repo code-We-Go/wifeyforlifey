@@ -1703,6 +1703,7 @@ function WeddingTimelinePageContent() {
               {step === 2 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* Q1: Where are you getting ready? */}
+                {selectedCeremonyVariation !== "christian_church_only" && (
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
                       Where are you getting ready?
@@ -1735,6 +1736,7 @@ function WeddingTimelinePageContent() {
                       </p>
                     )}
                   </div>
+              )}
                   {/* Q2: Will bridesmaids come to preparations? */}
                   {selectedCeremonyVariation !== "christian_church_venue" && (
                   <div className="space-y-3">
@@ -1838,7 +1840,7 @@ function WeddingTimelinePageContent() {
                     </Button>
                     <Button
                       disabled={
-                        !gettingReadyLocation ||
+                        !gettingReadyLocation && selectedCeremonyVariation !== "christian_church_only"||
                         (selectedCeremonyVariation !== "christian_church_venue" && !bridesmaidsAtPrep) ||
                         (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
                           ? !photoshootTiming 
