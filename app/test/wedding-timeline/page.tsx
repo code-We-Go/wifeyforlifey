@@ -499,7 +499,8 @@ function WeddingTimelinePageContent() {
 
     // Christian variations usually anchor to Church, unless it's venue only
     // if (variation.startsWith("christian") && variation !== "christian_venue_only") return "church";
-    if (variation === "christian_venue_only" || variation === "christian_church_only" || variation === "christian_church_venue") return "Grand_Entrance";
+    if (variation === "christian_venue_only"  || variation === "christian_church_venue") return "Grand_Entrance";
+    if (variation === "christian_church_only") return "church";
     
     // Muslim variations
     if (variation === "muslim_katb_ketab_only") return "katb_ketab";
@@ -2092,6 +2093,7 @@ function WeddingTimelinePageContent() {
                           bridesmaidsAtPrep,
                           photoAtKatbLocation,
                           photoshootLocation,
+                          photoshootTiming,
                           zaffaTime,
                           selectedFeatures,
                           brideFirstName,
@@ -2114,6 +2116,7 @@ function WeddingTimelinePageContent() {
                           bridesmaidsAtPrep,
                           photoAtKatbLocation,
                           photoshootLocation,
+                          photoshootTiming,
                           zaffaTime,
                           selectedFeatures,
                           brideFirstName,
@@ -2337,6 +2340,12 @@ function WeddingTimelinePageContent() {
                 <div>
                   <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photoshoot Location</span>
                   <span className="text-lovely font-medium capitalize">{photoshootLocation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {photoshootTiming && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photoshoot Timing</span>
+                  <span className="text-lovely font-medium capitalize">{photoshootTiming} church</span>
                 </div>
               )}
             </div>

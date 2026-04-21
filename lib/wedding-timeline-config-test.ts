@@ -1881,62 +1881,6 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
     },
   },
   {
-    id: "couple_photoshoot_after",
-    label: "Couple Photoshoot",
-    defaultDuration: 90,
-    category: "after",
-    order: 8.3,
-    noBreakAfter: true,
-    showIf: { photoshootTiming: "after" },
-    activities: {
-      bride: "Couple Photoshoot",
-      groom: "Couple Photoshoot",
-      bridesmaids: "Photoshoot Break",
-      groomsmen: "Photoshoot Break",
-    },
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "" ,groomsmen:""},
-      },
-    ],
-  },
-  {
-    id: "family_photoshoot_after",
-    label: "Family Photoshoot",
-    defaultDuration: 15,
-    category: "after",
-    order: 8.31,
-    noBreakAfter: true,
-    showIf: { photoshootTiming: "after" },
-    activities: {
-      bride: "Family Photoshoot",
-      groom: "Family Photoshoot",
-      bridesmaids: "Photoshoot Break",
-      groomsmen: "Photoshoot Break",
-    },
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "Arriving " ,groomsmen:"Arriving"},
-      },
-    ],
-  },
-  {
-    id: "bridal_party_photoshoot_after",
-    label: "Bridal Party Photoshoot",
-    defaultDuration: 15,
-    category: "after",
-    order: 8.32,
-    showIf: { photoshootTiming: "after" },
-    activities: {
-      bride: "Bridal Party Photoshoot",
-      groom: "Bridal Party Photoshoot",
-      bridesmaids: "Bridal Party Photoshoot",
-      groomsmen: "Bridal Party Photoshoot",
-    },
-  },
-  {
     id: "transport_to_church",
     label: "Moving to church",
     defaultDuration: 30,
@@ -2225,6 +2169,63 @@ export const CHRISTIAN_CHURCH_ONLY_FEATURES: WeddingFeature[] = [
       groomsmen: "Salamat & Photos",
     },
   },
+    {
+    id: "couple_photoshoot_after",
+    label: "Couple Photoshoot",
+    defaultDuration: 90,
+    category: "after",
+    order: 8.3,
+    noBreakAfter: true,
+    showIf: { photoshootTiming: "after" },
+    activities: {
+      bride: "Couple Photoshoot",
+      groom: "Couple Photoshoot",
+      bridesmaids: "Photoshoot Break",
+      groomsmen: "Photoshoot Break",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "" ,groomsmen:""},
+      },
+    ],
+  },
+  {
+    id: "family_photoshoot_after",
+    label: "Family Photoshoot",
+    defaultDuration: 15,
+    category: "after",
+    order: 8.31,
+    noBreakAfter: true,
+    showIf: { photoshootTiming: "after" },
+    activities: {
+      bride: "Family Photoshoot",
+      groom: "Family Photoshoot",
+      bridesmaids: "Photoshoot Break",
+      groomsmen: "Photoshoot Break",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "Arriving " ,groomsmen:"Arriving"},
+      },
+    ],
+  },
+  {
+    id: "bridal_party_photoshoot_after",
+    label: "Bridal Party Photoshoot",
+    defaultDuration: 15,
+    category: "after",
+    order: 8.32,
+    showIf: { photoshootTiming: "after" },
+    activities: {
+      bride: "Bridal Party Photoshoot",
+      groom: "Bridal Party Photoshoot",
+      bridesmaids: "Bridal Party Photoshoot",
+      groomsmen: "Bridal Party Photoshoot",
+    },
+  },
+
 
 ];
 
