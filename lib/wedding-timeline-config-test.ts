@@ -250,6 +250,12 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       bridesmaids: "Moving to Photoshoot Location",
       groomsmen: "Moving to Photoshoot Location",
     },
+     conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "", groomsmen: "" },
+      },
+    ],
   },
   {
     id: "first_look",
