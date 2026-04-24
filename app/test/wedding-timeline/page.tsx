@@ -1860,7 +1860,7 @@ function WeddingTimelinePageContent() {
                   {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && !selectedAnchor ? (
                     <div className="space-y-4">
                       <h2 className="text-xl text-lovely text-center block font-semibold">
-                        Which event you want to adjust the day on?
+                        Which event should we build your timeline around?
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {selectedCeremonyVariation === "christian_church_venue" ? (

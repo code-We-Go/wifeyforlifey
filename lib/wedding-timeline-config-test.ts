@@ -161,17 +161,42 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
     defaultDuration: 30,
     category: "before",
     order: 4,
+    showIf: { gettingReadyLocation: "venue" },
+    noBreakAfter: true,
     activities: {
       bride: "Getting Ready Photos",
-      groom: "Getting Ready Photos",
-      bridesmaids: "Getting Ready/Hair Styling",
-      groomsmen: "Getting Ready/Hair Styling",
+      groom: "Break",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "Break",
     },
     conditionalActivities: [
       {
         condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "", groomsmen: "" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
       },
+
+    ],
+  },
+  {
+    id: "getting_ready_2",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    noBreakAfter:true,
+    order: 4.1,
+    showIf: { gettingReadyLocation: "venue" },
+    activities: {
+      bride: "Break",
+      groom: "Getting Ready Photos",
+      bridesmaids: "Break",
+      groomsmen: "Getting Ready Photos",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
     ],
   },
   {
@@ -195,26 +220,26 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       },
     ],
   },
-  {
-    id: "beforeLeaving",
-    label: "getting ready to leave",
-    defaultDuration: 15,
-    category: "before",
-    order: 4.6,
-    activities: {
-      bride: "getting ready to leave",
-      groom: "getting ready to leave",
-      bridesmaids: "getting ready to leave",
-      groomsmen: "getting ready to leave",
-    },
-    noBreakAfter: true,
-    conditionalActivities: [
-      {
-        condition: { bridesmaidsAtPrep: "no" },
-        activities: { bridesmaids: "_", groomsmen: "_" },
-      },
-    ],
-  },
+  // {
+  //   id: "beforeLeaving",
+  //   label: "getting ready to leave",
+  //   defaultDuration: 15,
+  //   category: "before",
+  //   order: 4.6,
+  //   activities: {
+  //     bride: "getting ready to leave",
+  //     groom: "getting ready to leave",
+  //     bridesmaids: "getting ready to leave",
+  //     groomsmen: "getting ready to leave",
+  //   },
+  //   noBreakAfter: true,
+  //   conditionalActivities: [
+  //     {
+  //       condition: { bridesmaidsAtPrep: "no" },
+  //       activities: { bridesmaids: "_", groomsmen: "_" },
+  //     },
+  //   ],
+  // },
   {
     id: "picking_up_bride",
     label: "Picking up the bride",
@@ -360,6 +385,20 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
     },
   },
   {
+    id: "Grand_Entrance",
+    noBreakAfter: true,
+    label: "Grand Entrance",
+    defaultDuration: 10,
+    category: "before",
+    order: 7.9,
+    activities: {
+      bride: "Grand Entrance",
+      groom: "Grand Entrance",
+      bridesmaids: "Grand Entrance",
+      groomsmen: "Grand Entrance",
+    },
+  },
+  {
     id: "katb_ketab",
     noBreakAfter: true,
     label: "Katb Ketab",
@@ -371,20 +410,6 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       groom: "Katb Ketab Ceremony",
       bridesmaids: "Katb Ketab Ceremony",
       groomsmen: "Katb Ketab Ceremony",
-    },
-  },
-  {
-    id: "Grand_Entrance",
-    noBreakAfter: true,
-    label: "Grand Entrance",
-    defaultDuration: 10,
-    category: "before",
-    order: 8.7,
-    activities: {
-      bride: "Grand Entrance",
-      groom: "Grand Entrance",
-      bridesmaids: "Grand Entrance",
-      groomsmen: "Grand Entrance",
     },
   },
   {
