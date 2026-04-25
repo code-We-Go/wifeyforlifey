@@ -741,32 +741,44 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
   console.log("Success:", isSuccess);
   console.log("==========================================");
 
-  // Single lookup in PendingPayment
-  const pendingPayment = await PendingPaymentModel.findOne({
-    paymobOrderId: String(paymobOrderId),
-  });
+  // Atomic claim: only one caller (GET or POST) can grab this payment.
+  // Uses findOneAndUpdate so that the check + status change is a single
+  // atomic operation, preventing the race where both GET and POST read
+  // status "pending" simultaneously and both proceed to process.
+  const pendingPayment = await PendingPaymentModel.findOneAndUpdate(
+    {
+      paymobOrderId: String(paymobOrderId),
+      status: "pending",               // only claim if still pending
+    },
+    { status: "processing" },           // atomically mark as in-progress
+    { new: true }
+  );
 
   if (!pendingPayment) {
-    console.error(
-      `❌ No PendingPayment found for Paymob order: ${paymobOrderId}`
-    );
-    return { success: false, redirect: "payment/failed" };
-  }
+    // Either no record exists, or it was already claimed by the other callback.
+    // Look it up to decide the correct redirect.
+    const existing = await PendingPaymentModel.findOne({
+      paymobOrderId: String(paymobOrderId),
+    });
 
-  // Idempotency: skip if already processed
-  if (pendingPayment.status !== "pending" && pendingPayment.status !== "failed") {
+    if (!existing) {
+      console.error(
+        `❌ No PendingPayment found for Paymob order: ${paymobOrderId}`
+      );
+      return { success: false, redirect: "payment/failed" };
+    }
+
+    // Already processing or processed — return appropriate redirect
     console.log(
-      `⏭️ Payment already processed (status: ${pendingPayment.status}), skipping`
+      `⏭️ Payment already processed (status: ${existing.status}), skipping`
     );
-    // Still redirect to appropriate page
-    if (pendingPayment.status === "confirmed") {
-      // Re-derive the redirect based on product type
-      if (pendingPayment.productType === "partner_session") {
+    if (existing.status === "confirmed" || existing.status === "processing") {
+      if (existing.productType === "partner_session") {
         return {
           success: true,
-          redirect: `payment/success?session=true&orderId=${pendingPayment.referenceId}`,
+          redirect: `payment/success?session=true&orderId=${existing.referenceId}`,
         };
-      } else if (pendingPayment.productType === "subscription") {
+      } else if (existing.productType === "subscription") {
         return { success: true, redirect: "payment/success?subscription=true" };
       } else {
         return { success: true, redirect: "payment/success" };

@@ -4,7 +4,7 @@ export interface IPendingPayment extends Document {
   paymobOrderId: string;
   productType: "subscription" | "order" | "partner_session";
   referenceId: mongoose.Types.ObjectId;
-  status: "pending" | "confirmed" | "failed";
+  status: "pending" | "processing" | "confirmed" | "failed";
   processedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -29,7 +29,7 @@ const PendingPaymentSchema = new Schema<IPendingPayment>(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "failed"],
+      enum: ["pending", "processing", "confirmed", "failed"],
       default: "pending",
     },
     processedAt: {
