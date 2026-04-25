@@ -151,8 +151,30 @@ export const MUSLIM_KATB_KETAB_WEDDING_FEATURES: WeddingFeature[] = [
       },
       {
         condition: { gettingReadyLocation: "home" },
-        activities: { groom: "", groomsmen: "" },
+        activities: { groom: "Getting Ready", groomsmen: "" },
       },
+    ],
+  },
+  {
+    id: "getting_ready_home",
+    label: "Getting ready pictures",
+    defaultDuration: 30,
+    category: "before",
+    order: 4,
+    showIf: { gettingReadyLocation: "home" },
+    noBreakAfter: true,
+    activities: {
+      bride: "Getting Ready Photos",
+      groom: "",
+      bridesmaids: "Getting Ready Photos",
+      groomsmen: "",
+    },
+    conditionalActivities: [
+      {
+        condition: { bridesmaidsAtPrep: "no" },
+        activities: { bridesmaids: "_" ,groomsmen:"_"},
+      },
+
     ],
   },
   {
