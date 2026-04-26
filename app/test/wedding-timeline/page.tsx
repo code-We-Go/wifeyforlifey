@@ -2018,7 +2018,7 @@ function WeddingTimelinePageContent() {
                               className="text-base font-medium cursor-pointer"
                             >
                               {feature.label}
-                              {feature.id === "hair" && (
+                              {(feature.id === "hair" && activeCeremonyType !== "christian") && (
                                 <span className="block text-xs font-normal text-lovely/70 mt-1">
                                   (for hijabis we recommend make up to be first, you can swap them later.)
                                 </span>
