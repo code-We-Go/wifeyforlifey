@@ -1738,7 +1738,6 @@ function WeddingTimelinePageContent() {
                   </div>
               )}
                   {/* Q2: Will bridesmaids come to preparations? */}
-                  {selectedCeremonyVariation !== "christian_church_venue" && (
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
                       Will the bridesmaids come to preparations?
@@ -1762,7 +1761,7 @@ function WeddingTimelinePageContent() {
                         The &quot;Getting Ready Pictures&quot; event will be removed.
                       </p> */}
                   </div>
-                  )}
+                
 
                   {/* Q3: Photo session location/timing */}
                   {selectedCeremonyVariation && (

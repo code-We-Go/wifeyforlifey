@@ -1254,7 +1254,7 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
       },
       {
         condition: { gettingReadyLocation: "home" },
-        activities: { groom: "Getting Ready", groomsmen: "" },
+        activities: { groom: "Arriving & Getting Ready", groomsmen: "Arriving & Getting Ready" },
       },
     ],
   },
@@ -1268,9 +1268,9 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
     noBreakAfter: true,
     activities: {
       bride: "Getting Ready Photos",
-      groom: "",
+      groom: "Getting Ready Photos",
       bridesmaids: "Getting Ready Photos",
-      groomsmen: "",
+      groomsmen: "Getting Ready Photos",
     },
     conditionalActivities: [
       {
@@ -1392,7 +1392,7 @@ export const CHRISTIAN_CHURCH_VENUE_FEATURES: WeddingFeature[] = [
     category: "before",
     order: 5,
     hidden: true,
-    showIf: { gettingReadyLocation: "home" },
+    showIf: { gettingReadyLocation: "home",photoshootTiming: "before" },
     activities: {
       bride: "Moving to Photoshoot Location",
       groom: "Moving to Photoshoot Location",
