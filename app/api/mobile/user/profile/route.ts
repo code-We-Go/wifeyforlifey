@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
-import UserModel from "@/app/modals/userModel";
+import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
       );
     }
     console.log(packageModel + "registerd");
-    // 1. Fetch User
+    // 1. Fetch User with all subscriptions populated
     const user = await UserModel.findById(userID).populate({
-      path: "subscription",
+      path: "subscriptions",
       populate: {
         path: "packageID",
         model: "packages",
@@ -71,23 +71,38 @@ export async function GET(request: NextRequest) {
         ? (loyaltyStats[0].totalEarned || 0) - (loyaltyStats[0].totalSpent || 0)
         : 0;
 
-    // 4. Extract Subscription Details
+    // 4. Extract Subscription Details from the subscriptions array
     let packageName = null;
     let expiryDate = null;
     let isSubscribed = user.isSubscribed;
 
-    if (user.subscription && isSubscribed) {
-      // user.subscription is populated
-      const sub = user.subscription as any; // Type assertion since we populated it
-      expiryDate = sub.expiryDate;
+    // Find the active main subscription (Full Experience or Mini — non-bestie)
+    const now = new Date();
+    const activeSubs = ((user.subscriptions as any[]) || []).filter(
+      (s: any) => s.subscribed && s.expiryDate && new Date(s.expiryDate) > now
+    );
 
-      if (sub.packageID) {
-        packageName = sub.packageID.name;
+    // Main subscription: any active sub that is NOT the Wedding Planning Bestie package
+    const mainSub = activeSubs.find(
+      (s: any) =>
+        s.packageID?._id?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+    );
+
+    if (mainSub && isSubscribed) {
+      expiryDate = mainSub.expiryDate;
+      if (mainSub.packageID) {
+        packageName = mainSub.packageID.name;
       }
     }
 
+    // Wedding Planning Bestie subscription (separate package)
+    const bestieSub = activeSubs.find(
+      (s: any) =>
+        s.packageID?._id?.toString() === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+    );
+
     // 5. Construct Response
-    const responseData = {
+    const responseData: any = {
       name:
         user.firstName && user.lastName
           ? `${user.firstName} ${user.lastName}`
@@ -104,6 +119,13 @@ export async function GET(request: NextRequest) {
       loyaltyPoints: loyaltyPoints,
       weddingDate: user.weddingDate,
       birthDate: user.birthDate,
+      // Wedding Planning Bestie data (null if not subscribed to this package)
+      weddingPlanningBestie: bestieSub
+        ? {
+            expiryDate: bestieSub.expiryDate,
+            packageName: bestieSub.packageID?.name || null,
+          }
+        : null,
     };
 
     return NextResponse.json(responseData);

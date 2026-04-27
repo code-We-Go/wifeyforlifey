@@ -29,12 +29,14 @@ export async function POST(req: Request) {
       console.error("Error deleting wedding timeline:", err);
     }
 
-    // 2. Delete Subscription if it exists
-    if (auth.user.subscription) {
+    // 2. Delete Subscriptions if they exist
+    if (auth.user.subscriptions && auth.user.subscriptions.length > 0) {
       try {
-        await subscriptionsModel.findByIdAndDelete(auth.user.subscription);
+        await subscriptionsModel.deleteMany({
+          _id: { $in: auth.user.subscriptions },
+        });
       } catch (err) {
-        console.error("Error deleting subscription:", err);
+        console.error("Error deleting subscriptions:", err);
       }
     }
 

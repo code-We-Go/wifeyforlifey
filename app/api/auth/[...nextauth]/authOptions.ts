@@ -196,7 +196,7 @@ export const authOptions: NextAuthOptions = {
           const subscription = await subscriptionsModel.findOne({
             email,
             subscribed: true,
-          });
+          }).sort({ expiryDate: -1 });
           if (!subscription) {
             token.isSubscribed = false;
             token.subscriptionExpiryDate = null;
@@ -282,7 +282,7 @@ export const authOptions: NextAuthOptions = {
               const subscription = await subscriptionsModel.findOne({
                 email: userData.email,
                 subscribed: true,
-              });
+              }).sort({ expiryDate: -1 });
 
               if (subscription) {
                 session.user.isSubscribed = !!(

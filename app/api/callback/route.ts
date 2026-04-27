@@ -320,35 +320,16 @@ async function handleSubscription(
     bostaDistrictName: paymentOp.bostaDistrictName,
   };
 
-  // Create or update subscription
-  const user = await UserModel.findOne({ email: subscriptionEmail });
-  let updatedSub: any = null;
-
-  if (user?.subscription) {
-    console.log("have subscription — updating");
-    updatedSub = await subscriptionsModel.findByIdAndUpdate(
-      user.subscription._id,
-      subscriptionData,
-      { new: true }
-    );
-    // Fallback: if existing reference is stale/missing, create fresh
-    if (!updatedSub) {
-      console.log("no updated Sub — creating new");
-      updatedSub = await subscriptionsModel.create(subscriptionData);
-      await UserModel.findOneAndUpdate(
-        { email: subscriptionEmail },
-        { isSubscribed: true, subscription: updatedSub._id }
-      );
+  // Always create a new subscription document (preserves history)
+  const created = await subscriptionsModel.create(subscriptionData);
+  let updatedSub: any = created;
+  await UserModel.findOneAndUpdate(
+    { email: subscriptionEmail },
+    {
+      isSubscribed: true,
+      $push: { subscriptions: created._id },
     }
-  } else {
-    // If user has no subscription, create one and attach it
-    const created = await subscriptionsModel.create(subscriptionData);
-    updatedSub = created;
-    await UserModel.findOneAndUpdate(
-      { email: subscriptionEmail },
-      { isSubscribed: true, subscription: created._id }
-    );
-  }
+  );
 
   // Ensure package is populated for downstream logic
   if (updatedSub?._id) {
@@ -578,11 +559,11 @@ async function handleSubscription(
     );
   }
 
-  // Link user account
+  // Link user account (ensure subscription is in the array)
   const subscribedUser = updatedSub?._id
     ? await UserModel.findOneAndUpdate(
         { email: subscriptionEmail },
-        { isSubscribed: true, subscription: updatedSub._id }
+        { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
       )
     : null;
 
