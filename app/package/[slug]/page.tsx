@@ -24,6 +24,22 @@ export default function PackageDetailPage() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const formatDuration = (duration: any) => {
+    const months = Number(duration);
+    if (isNaN(months) || months <= 0) return null;
+    if (months < 12) return `${months} Months`;
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    let result = `${years} ${years === 1 ? "Year" : "Years"}`;
+    if (remainingMonths > 0) {
+      result += ` and ${remainingMonths} ${
+        remainingMonths === 1 ? "Month" : "Months"
+      }`;
+    }
+    return result;
+  };
+
+
   // Embla Carousel for Package Cards
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
@@ -32,6 +48,7 @@ export default function PackageDetailPage() {
   });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(-1);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -71,6 +88,11 @@ export default function PackageDetailPage() {
             pkg.price > max.price ? pkg : max
           , packages[0]);
           setPackageData(highestPricePackage);
+
+          // Auto-select the last variant if variants exist
+          if (highestPricePackage.variants && highestPricePackage.variants.length > 0) {
+            setSelectedVariantIndex(highestPricePackage.variants.length - 1);
+          }
         } else {
              setPackageData(null);
         }
@@ -211,6 +233,12 @@ export default function PackageDetailPage() {
                   onClick={() => {
                     setPackageData(pkg);
                     setCurrentImageIndex(0);
+                    // Auto-select the last variant if variants exist
+                    if (pkg.variants && pkg.variants.length > 0) {
+                      setSelectedVariantIndex(pkg.variants.length - 1);
+                    } else {
+                      setSelectedVariantIndex(-1);
+                    }
                   }}
                   className={`cursor-pointer px-4 py-1 rounded-full border transition-all ${
                     packageData?._id === pkg._id
@@ -224,13 +252,48 @@ export default function PackageDetailPage() {
             </div>
           )}
 
-          {/* <p className="text-lg font-medium text-lovely mb-4">
-            Duration: {packageData.duration}
-          </p> */}
-          <p className="text-2xl font-bold text-lovely mb-6">
-            LE {packageData.price.toFixed(2)}
-          </p>
-
+          {packageData.variants && packageData.variants.length > 0 ? (
+            <div className="mb-6">
+              <h2 className={`${thirdFont.className} text-xl font-semibold text-lovely mb-4`}>
+                Choose a plan
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {packageData.variants.map((variant, index) => (
+                  <div 
+                    key={index}
+                    className={`p-4 border-2 rounded-2xl cursor-pointer transition-all ${
+                      selectedVariantIndex === index ? 'border-lovely bg-lovely/5' : 'border-lovely/20 hover:border-lovely/50'
+                    }`}
+                    onClick={() => setSelectedVariantIndex(index)}
+                  >
+                    {formatDuration(variant.duration) && (
+                      <p className="font-bold text-lovely">{formatDuration(variant.duration)}</p>
+                    )}
+                    <p className="text-xl font-bold text-lovely">LE {variant.price.toFixed(2)}</p>
+                    {variant.saving && (
+                      <p className="text-sm text-lovely/70 font-medium">{variant.saving}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              {formatDuration(packageData.duration) && (
+                <p className="text-lg font-medium text-lovely mb-4">
+                  Duration: {formatDuration(packageData.duration)}
+                </p>
+              )}
+              <p className="text-2xl font-bold text-lovely ">
+                LE {packageData.price.toFixed(2)}
+              </p>
+              {packageData.saving && (
+                <p className="text-sm text-lovely/70 font-medium ">
+                  {packageData.saving}
+                </p>
+              )}
+            </>
+          )}
           <Separator className="my-6" />
 
         {/* <h2
@@ -384,7 +447,20 @@ export default function PackageDetailPage() {
           {/* CTA Button */}
           <Button
             className="w-full mt-6 bg-lovely text-creamey hover:bg-lovely/90 rounded-full py-6"
-            onClick={() => router.push(`/subscription/${packageData._id}`)}
+            onClick={() => {
+              if (packageData.variants && packageData.variants.length > 0) {
+                if (selectedVariantIndex === -1) {
+                  alert("Please select a plan before subscribing.");
+                  return;
+                }
+                const selected = packageData.variants[selectedVariantIndex];
+                router.push(
+                  `/subscription/${packageData._id}?duration=${selected.duration}&price=${selected.price}`
+                );
+              } else {
+                router.push(`/subscription/${packageData._id}`);
+              }
+            }}
           >
             Subscribe to {packageData.name}
           </Button>

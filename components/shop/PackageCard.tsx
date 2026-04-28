@@ -62,10 +62,29 @@ export default function PackageCard({
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
-            {/* Invisible placeholder to match ProductCard height */}
-            <div className="text-sm block invisible">LE0.00</div>
             <p className="price-tag text-creamey text-xs md:text-sm">
               LE{packageItem.price.toFixed(2)}
+            </p>
+            {packageItem.saving && (
+              <p className="text-[10px] md:text-xs text-green-300 font-medium">
+                {packageItem.saving}
+              </p>
+            )}
+            <p className="text-[10px] md:text-xs text-creamey/80">
+              {(() => {
+                const months = Number(packageItem.duration);
+                if (isNaN(months) || months === 0) return packageItem.duration;
+                if (months < 12) return `${months} Months`;
+                const years = Math.floor(months / 12);
+                const remainingMonths = months % 12;
+                let result = `${years} ${years === 1 ? "Year" : "Years"}`;
+                if (remainingMonths > 0) {
+                  result += ` and ${remainingMonths} ${
+                    remainingMonths === 1 ? "Month" : "Months"
+                  }`;
+                }
+                return result;
+              })()}
             </p>
           </div>
           <div className="flex items-center space-x-2">

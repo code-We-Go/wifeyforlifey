@@ -287,6 +287,12 @@ export interface SupportCard {
   imagePath: string;
 }
 
+export interface PackageVariant {
+  price: number;
+  duration: number;
+  saving?: string;
+}
+
 export interface Ipackage {
   _id?: string;
   slug?: string;
@@ -296,7 +302,10 @@ export interface Ipackage {
   mobMainImage?: string;
   mobImages?: string[];
   price: number;
-  duration: string;
+  duration: number;
+  saving?: string;
+  cost?: number;
+  variants?: PackageVariant[];
   items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
@@ -311,6 +320,7 @@ export interface ISubscription {
   packageID?: string;
   email?: string;
   subscribed?: boolean;
+  selectedDuration?: number;
   redeemedLoyaltyPoints?: number;
   appliedDiscount?: string;
   appliedDiscountAmount?: number;

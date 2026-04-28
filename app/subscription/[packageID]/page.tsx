@@ -203,11 +203,23 @@ const SubscriptionPage = () => {
   const [showModal, setShowModal] = useState(false);
   const searchParams = useSearchParams();
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
+  const [variantPrice, setVariantPrice] = useState<number | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [isUpgrade, setIsUpgrade] = useState(false);
 
   // Read upgrade price from query param and set override
   useEffect(() => {
     const upgradeParam = searchParams.get("upgrade");
+    const priceParam = searchParams.get("price");
+    const durationParam = searchParams.get("duration");
+
+    if (priceParam) {
+      setVariantPrice(Number(priceParam));
+    }
+    if (durationParam) {
+      setSelectedDuration(Number(durationParam));
+    }
+
     if (upgradeParam === "true") {
       setIsUpgrade(true);
       setShipping(0); // Free shipping on upgrade
@@ -245,7 +257,14 @@ const SubscriptionPage = () => {
   }, [searchParams, packageID]);
 
   // Compute effective price used across calculations and UI
-  const price = overridePrice ?? packageData?.price ?? 0;
+  const price = overridePrice ?? variantPrice ?? packageData?.price ?? 0;
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedDuration: selectedDuration,
+    }));
+  }, [selectedDuration]);
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
@@ -412,6 +431,7 @@ We’re beyond excited to share this experience with you… your planner will be
     phone: "",
     whatsAppNumber: "", // Added WhatsApp number field
     subscription: packageID,
+    selectedDuration: null as number | null,
     state: bostaLocation.city?._id || "",
     zone: bostaLocation.zone?._id || "",
     district: bostaLocation.district?.districtId || "",
