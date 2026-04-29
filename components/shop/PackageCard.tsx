@@ -65,11 +65,13 @@ export default function PackageCard({
             <p className="price-tag text-creamey text-xs md:text-sm">
               LE{packageItem.price.toFixed(2)}
             </p>
-            {packageItem.saving && (
+            {/* {packageItem.saving && (
               <p className="text-[10px] md:text-xs text-green-300 font-medium">
                 {packageItem.saving}
               </p>
-            )}
+            )} */}
+            {
+              packageItem.duration > 0 ? (
             <p className="text-[10px] md:text-xs text-creamey/80">
               {(() => {
                 const months = Number(packageItem.duration);
@@ -85,7 +87,11 @@ export default function PackageCard({
                 }
                 return result;
               })()}
-            </p>
+            </p> ):
+            <div className="md:h-5 h-3">
+
+            </div>
+            }
           </div>
           <div className="flex items-center space-x-2">
             <Button

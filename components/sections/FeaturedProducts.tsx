@@ -72,7 +72,7 @@ const FeaturedProducts = () => {
             imgUrl: "/experience/gehaz1.png",
             images: ["/experience/gehaz1.png"],
             price: 1500,
-            duration: "",
+            duration: 0,
             items: [],
             notes: [],
             cards: [],
