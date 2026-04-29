@@ -139,7 +139,7 @@ export default function PlaylistPage() {
   const [videoLoading, setVideoLoading] = useState(false);
 
   // Check if the selected video requires subscription
-  const canAccessPremium = isSubscribed || hasPlaylistAccess;
+  const canAccessPremium = hasPlaylistAccess;
   const videoLocked = !selectedVideo?.isPublic && !canAccessPremium;
 
   // Fetch the specific playlist
@@ -229,51 +229,64 @@ export default function PlaylistPage() {
       try {
         if (
           status === "authenticated" &&
-          !isSubscribed &&
+          (isSubscribed || session?.user?.weddingPlanningBestie?.isSubscribed) &&
           session?.user?.email &&
           playlistId
         ) {
+          // Fetch all subscriptions for this user
           const res = await axios.get(
             `/api/subscriptions/track?email=${encodeURIComponent(
               session.user.email!
-            )}`
+            )}&all=true`
           );
-          const sub = res.data;
+          console.log("userSubscriptions", res.data)
+          // Support both array and single subscription responses
+          const subs = Array.isArray(res.data) ? res.data : [res.data];
           const now = Date.now();
 
-          // Check subscription's allowedPlaylists (always considered)
-          const allowed = Array.isArray(sub?.allowedPlaylists)
-            ? sub.allowedPlaylists
-            : [];
-          const matchAllowed = allowed.find(
-            (p: any) =>
-              String(p?.playlistID) === String(playlistId) &&
-              p.expiryDate &&
-              new Date(p.expiryDate).getTime() > now
-          );
+          for (const sub of subs) {
+            if (!sub || !sub.subscribed) continue;
 
-          if (matchAllowed) {
-            setHasPlaylistAccess(true);
-            return;
-          }
+            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37";
+            const isExpired = !isMini && sub.expiryDate && new Date(sub.expiryDate).getTime() < now;
+            
+            if (isExpired) continue;
 
-          // Check package-level playlist access
-          const pkg = sub?.packageID; // populated package object
-          if (pkg && pkg.accessAllPlaylists) {
-            // accessAllPlaylists is true → grant access to all packagePlaylists
-            const pkgPlaylists = Array.isArray(pkg.packagePlaylists)
-              ? pkg.packagePlaylists
+            // Check subscription's allowedPlaylists (always considered)
+            const allowed = Array.isArray(sub?.allowedPlaylists)
+              ? sub.allowedPlaylists
               : [];
-            const matchPkg = pkgPlaylists.some(
-              (pid: any) => String(pid) === String(playlistId)
+            const matchAllowed = allowed.find(
+              (p: any) =>
+                String(p?.playlistID) === String(playlistId) &&
+                p.expiryDate &&
+                new Date(p.expiryDate).getTime() > now
             );
-            if (matchPkg) {
+
+            if (matchAllowed) {
               setHasPlaylistAccess(true);
               return;
             }
+
+            // Check package-level playlist access
+            const pkg = sub?.packageID; // populated package object
+            if (pkg && pkg.accessAllPlaylists) {
+              console.log("accessAllPlaylists is true")
+              // accessAllPlaylists is true → grant access to all packagePlaylists
+              const pkgPlaylists = Array.isArray(pkg.packagePlaylists)
+                ? pkg.packagePlaylists
+                : [];
+              const matchPkg = pkgPlaylists.some(
+                (pid: any) => String(pid) === String(playlistId)
+              );
+              if (matchPkg) {
+                setHasPlaylistAccess(true);
+                return;
+              }
+            }
           }
 
-          // No match found
+          // No match found in any subscription
           setHasPlaylistAccess(false);
         } else {
           setHasPlaylistAccess(false);

@@ -3,7 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { ConnectDB } from "@/app/config/db";
 import { compare } from "bcryptjs";
-import UserModel from "@/app/modals/userModel";
+import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
@@ -29,6 +29,10 @@ declare module "next-auth" {
         paid?: boolean;
       };
       subscriptionExpiryDate?: Date | null;
+      weddingPlanningBestie?: {
+        expiryDate?: Date | null;
+        isSubscribed: boolean;
+      } | null;
       // loyaltyPoints?: number;
       sessionId?: string; // Add sessionId here
       deviceFingerprint?: string; // Add device fingerprint
@@ -44,6 +48,10 @@ declare module "next-auth/jwt" {
       packageId?: string;
       paid?: boolean;
     };
+    weddingPlanningBestie?: {
+      expiryDate?: string | null;
+      isSubscribed: boolean;
+    } | null;
     // loyaltyPoints?: number;
     sessionId?: string; // Add sessionId here
     deviceFingerprint?: string; // Add device fingerprint
@@ -193,31 +201,69 @@ export const authOptions: NextAuthOptions = {
         await ConnectDB();
         const email = (user?.email || token.email)?.trim().toLowerCase();
         if (email) {
-          const subscription = await subscriptionsModel.findOne({
+          // Fetch all active subscriptions for this user
+          const allSubscriptions = await subscriptionsModel.find({
             email,
             subscribed: true,
           }).sort({ expiryDate: -1 });
-          if (!subscription) {
+
+          if (!allSubscriptions || allSubscriptions.length === 0) {
             token.isSubscribed = false;
             token.subscriptionExpiryDate = null;
             token.subscription = {
               packageId: undefined,
               paid: false,
             };
+            token.weddingPlanningBestie = null;
             return token;
           }
-          console.log("packageID" + subscription.packageID);
-          token.isSubscribed = !!(
-            subscription?.expiryDate &&
-            subscription.expiryDate.getTime() > Date.now()
+
+          // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
+          const mainSubscription = 
+            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
+            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+
+          if (mainSubscription) {
+            const isMini =
+              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+
+            // Mini is active if subscribed=true (no expiry check)
+            // Others are active if expiryDate is in the future
+            token.isSubscribed = isMini
+              ? !!mainSubscription.subscribed
+              : !!(
+                  mainSubscription.expiryDate &&
+                  mainSubscription.expiryDate.getTime() > Date.now()
+                );
+
+            token.subscriptionExpiryDate = mainSubscription.expiryDate
+              ? mainSubscription.expiryDate.toISOString()
+              : null;
+            token.subscription = {
+              packageId: mainSubscription.packageID?.toString() || undefined,
+              paid: mainSubscription.subscribed || false,
+            };
+          } else {
+            // User only has Bestie subscription, no main package
+            token.isSubscribed = false;
+            token.subscriptionExpiryDate = null;
+            token.subscription = {
+              packageId: undefined,
+              paid: false,
+            };
+          }
+
+          // Wedding Planning Bestie (separate field, like mobile)
+          const bestieSub = allSubscriptions.find(
+            (sub: any) =>
+              sub.packageID?.toString() === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
           );
-          token.subscriptionExpiryDate = subscription?.expiryDate
-            ? subscription.expiryDate.toISOString()
+          token.weddingPlanningBestie = bestieSub
+            ? { 
+                expiryDate: bestieSub.expiryDate?.toISOString() || null,
+                isSubscribed: !!(bestieSub.subscribed && (!bestieSub.expiryDate || new Date(bestieSub.expiryDate).getTime() > Date.now()))
+              }
             : null;
-          token.subscription = {
-            packageId: subscription?.packageID || undefined,
-            paid: subscription?.paid || false,
-          };
           // token.loyaltyPoints = await calculateLoyaltyPoints(email);
         }
       } catch (error) {
@@ -254,6 +300,17 @@ export const authOptions: NextAuthOptions = {
           // token.subscription is set in the JWT callback
           session.user.subscription = token.subscription;
         }
+        // Expose Bestie subscription
+        if (session.user) {
+          session.user.weddingPlanningBestie = token.weddingPlanningBestie
+            ? {
+                expiryDate: token.weddingPlanningBestie.expiryDate
+                  ? new Date(token.weddingPlanningBestie.expiryDate)
+                  : null,
+                isSubscribed: token.weddingPlanningBestie.isSubscribed
+              }
+            : null;
+        }
         // session.user.loyaltyPoints = token.loyaltyPoints;
       }
       if (session.user && token.sessionId) {
@@ -279,25 +336,55 @@ export const authOptions: NextAuthOptions = {
 
             // Fetch fresh subscription data to avoid stale JWT
             if (userData.email) {
-              const subscription = await subscriptionsModel.findOne({
+              const allSubscriptions = await subscriptionsModel.find({
                 email: userData.email,
                 subscribed: true,
               }).sort({ expiryDate: -1 });
 
-              if (subscription) {
-                session.user.isSubscribed = !!(
-                  subscription.expiryDate &&
-                  subscription.expiryDate.getTime() > Date.now()
+              if (allSubscriptions && allSubscriptions.length > 0) {
+                // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
+                const mainSubscription = 
+                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
+                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+
+                if (mainSubscription) {
+                  const isMini =
+                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+
+                  session.user.isSubscribed = isMini
+                    ? !!mainSubscription.subscribed
+                    : !!(
+                        mainSubscription.expiryDate &&
+                        mainSubscription.expiryDate.getTime() > Date.now()
+                      );
+                  session.user.subscriptionExpiryDate = mainSubscription.expiryDate;
+                  session.user.subscription = {
+                    packageId: mainSubscription.packageID?.toString(),
+                    paid: mainSubscription.subscribed,
+                  };
+                } else {
+                  // User only has Bestie subscription, no main package
+                  session.user.isSubscribed = false;
+                  session.user.subscriptionExpiryDate = null;
+                  session.user.subscription = undefined;
+                }
+
+                // Wedding Planning Bestie (separate field, like mobile)
+                const bestieSub = allSubscriptions.find(
+                  (sub: any) =>
+                    sub.packageID?.toString() === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
                 );
-                session.user.subscriptionExpiryDate = subscription.expiryDate;
-                session.user.subscription = {
-                  packageId: subscription.packageID?.toString(),
-                  paid: subscription.subscribed,
-                };
+                session.user.weddingPlanningBestie = bestieSub
+                  ? { 
+                      expiryDate: bestieSub.expiryDate || null,
+                      isSubscribed: !!(bestieSub.subscribed && (!bestieSub.expiryDate || new Date(bestieSub.expiryDate).getTime() > Date.now()))
+                    }
+                  : null;
               } else {
                 // If DB says no subscription, overwrite token (which might say yes)
                 session.user.isSubscribed = false;
                 session.user.subscription = undefined;
+                session.user.weddingPlanningBestie = null;
               }
             }
           }

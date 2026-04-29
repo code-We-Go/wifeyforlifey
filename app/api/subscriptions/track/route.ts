@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import "@/app/modals/packageModel";
+import { PACKAGE_IDS } from "@/app/modals/userModel";
 import { ISubscription } from "@/app/interfaces/interfaces";
 
 export async function GET(request: NextRequest) {
@@ -10,6 +11,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const subscriptionId = searchParams.get("subscriptionId");
     const email = searchParams.get("email");
+
+    const all = searchParams.get("all");
 
     if (!subscriptionId && !email) {
       return NextResponse.json(
@@ -42,6 +45,34 @@ export async function GET(request: NextRequest) {
 
     // If not found by ID or shipmentID, try by email
     if (!subscription && email) {
+      if (all === "true") {
+        // Return all subscriptions for this email
+        const subscriptions = await subscriptionsModel.find({ 
+          $and: [
+            {
+              $or: [
+                { email: email },
+                { giftRecipientEmail: email }
+              ]
+            },
+            {
+              $or: [
+                { expiryDate: { $gt: new Date() } },
+                { packageID: PACKAGE_IDS.MINI }
+              ]
+            }
+          ],
+          subscribed: true,
+        }).sort({ expiryDate: -1 })
+          .populate("packageID", "packagePlaylists accessAllPlaylists");
+
+        if (!subscriptions || subscriptions.length === 0) {
+          return NextResponse.json({ message: "Subscription not found" }, { status: 404 });
+        }
+console.log("userSubscriptions",subscriptions)
+        return NextResponse.json(subscriptions);
+      }
+
       subscription = await subscriptionsModel.findOne({ 
         $or: [
           { email: email },

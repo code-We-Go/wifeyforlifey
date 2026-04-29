@@ -9,7 +9,7 @@ import productsModel from "@/app/modals/productsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import BostaService, { BostaAddress } from "@/app/services/bostaService";
-import UserModel from "@/app/modals/userModel";
+import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
 
@@ -324,11 +324,15 @@ export async function POST(request: Request) {
         let userSub = null;
         if (data.process === "upgrade" || data.process === "renew") {
           userSub = await UserModel.findOne({ email: data.email }).populate({
-            path: "subscription",
-            options: { strictPopulate: false },
+            path: "subscriptions",
+            options: { sort: { expiryDate: -1 } },
           });
         }
-        const existingSub = userSub?.subscription as any;
+        // Find the main subscription (exclude Bestie)
+        const existingSub = userSub?.subscriptions?.find(
+          (sub: any) =>
+            sub.packageID?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+        ) as any;
 
         const order = await axios.post(
           "https://accept.paymob.com/v1/intention/",
@@ -379,7 +383,7 @@ export async function POST(request: Request) {
           // Upgrade/Renew flow: record a pending payment operation, do NOT mutate subscription here
           const user = userSub;
 
-          const fromPackageID = (user?.subscription as any)?.packageID || null;
+          const fromPackageID = existingSub?.packageID || null;
           await subscriptionPaymentModel.create({
             paymentID: order.data.payment_keys[0].order_id,
             email: data.email,
@@ -452,11 +456,16 @@ export async function POST(request: Request) {
         } else {
           // New subscription flow: record a pending payment operation, do NOT create subscription yet
           const user = await UserModel.findOne({ email: data.email }).populate({
-            path: "subscription",
-            options: { strictPopulate: false },
+            path: "subscriptions",
+            options: { sort: { expiryDate: -1 } },
           });
 
-          const fromPackageID = (user?.subscription as any)?.packageID || null;
+          // Find the main subscription (exclude Bestie)
+          const mainSub = user?.subscriptions?.find(
+            (sub: any) =>
+              sub.packageID?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+          ) as any;
+          const fromPackageID = mainSub?.packageID || null;
           await subscriptionPaymentModel.create({
             paymentID: order.data.payment_keys[0].order_id,
             email: data.email,

@@ -674,6 +674,8 @@ const AccountPage = () => {
     name: session.user.name || "User",
     email: session.user.email || "user@example.com",
     isSubscribed: session.user.isSubscribed || false,
+    subscription: session.user.subscription,
+    weddingPlanningBestie: session.user.weddingPlanningBestie,
     subscriptionExpiryDate: session.user.subscriptionExpiryDate,
     imgUrl: session.user.image,
     loyaltyPoints: loyaltyPoints,
@@ -749,16 +751,67 @@ const AccountPage = () => {
             <p className="text-sm font-semibold text-lovely/80 break-all">
               {user.email}
             </p>
-            <p className="text-sm font-semibold flex items-center gap-2 text-lovely/80">
-              Subscription :{" "}
-              <span>
-                {user.isSubscribed ? (
-                  <BadgeCheck className="text-lovely/80" />
-                ) : (
-                  <BadgeAlert />
-                )}
-              </span>
-            </p>
+            <div className="text-sm font-semibold flex flex-col gap-2 text-lovely/80 mb-4 mt-2">
+              <span className="font-bold underline">Your Subscriptions:</span>
+              
+              {/* No Subscriptions at all */}
+              {!user.subscription?.packageId && !user.weddingPlanningBestie && (
+                <span className="flex items-center gap-2">None <BadgeAlert className="h-4 w-4" /></span>
+              )}
+
+              {/* Full Experience */}
+              {user.subscription?.packageId === "687396821b4da119eb1c13fe" && (
+                <div className="flex items-center gap-2">
+                  {user.isSubscribed ? (
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" />
+                  ) : (
+                    <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
+                  )}
+                  <span className={user.isSubscribed ? "" : "text-red-500"}>Full Wifey Experience</span>
+                  {user.subscriptionExpiryDate && (
+                    <span className={`text-xs  ${user.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
+                      {(() => {
+                        const expiry = new Date(user.subscriptionExpiryDate);
+                        const now = new Date();
+                        const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
+                        
+                        if (expiry > tenYearsFromNow) {
+                          return <span className="inline-flex gap-2 items-end">Lifetime Wifey <Crown className="h-3 w-3"/></span>;
+                        }
+                        
+                        const prefix = expiry < new Date() ? "Expired" : "Expires";
+                        return `(${prefix}: ${expiry.toLocaleDateString()})`;
+                      })()}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Mini Experience */}
+              {user.subscription?.packageId === "68bf6ae9c4d5c1af12cdcd37" && (
+                <div className="flex items-center gap-2">
+                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Experience 
+                </div>
+              )}
+
+              {/* Wedding Planning Bestie */}
+              {user.weddingPlanningBestie && (
+                <div className="flex items-center gap-2">
+                  {user.weddingPlanningBestie.isSubscribed ? (
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" />
+                  ) : (
+                    <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
+                  )}
+                  <span className={user.weddingPlanningBestie.isSubscribed ? "" : "text-red-500"}>Wedding Planning Bestie</span>
+                  {user.weddingPlanningBestie.expiryDate && (
+                    <span className={`text-xs  ${user.weddingPlanningBestie.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
+                      ({new Date(user.weddingPlanningBestie.expiryDate) < new Date() ? "Expired" : "Expires"}: {new Date(user.weddingPlanningBestie.expiryDate).toLocaleDateString()})
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="flex md:gap-4 flex-col md:flex-row">
             {session?.user?.subscription?.packageId ===
               "68bf6ae9c4d5c1af12cdcd37" && (
@@ -787,28 +840,6 @@ const AccountPage = () => {
                   </Button>
                 </div>
               )}
-            
-            {user.isSubscribed && (
-              <p className="text-lovely/80 text-sm font-semibold">
-                Expires at :{" "}
-                {user.subscriptionExpiryDate
-                  ? (() => {
-                      const expiry = new Date(user.subscriptionExpiryDate);
-                      const now = new Date();
-                      const tenYearsFromNow = new Date(
-                        now.setFullYear(now.getFullYear() + 10)
-                      );
-                      return expiry > tenYearsFromNow ? (
-                        <span className="inline-flex gap-2 items-end">
-                          Lifetime Wifey <Crown />
-                        </span>
-                      ) : (
-                        expiry.toLocaleDateString()
-                      );
-                    })()
-                  : ""}
-              </p>
-            )}
             </div>
           </div>
         </div>

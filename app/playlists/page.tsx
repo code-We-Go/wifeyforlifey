@@ -371,7 +371,8 @@ function PlaylistsPage() {
         )}
 
         {/* Subscription CTA */}
-        {!session?.user.isSubscribed && (
+        {!session?.user?.isSubscribed && 
+          !session?.user?.weddingPlanningBestie?.isSubscribed && (
           <div className="bg-creamey text-lovely rounded-xl p-6 md:p-8 shadow-md">
             <div className="grid md:grid-cols-3 gap-6 items-center">
               <div className="md:col-span-2 space-y-4">
