@@ -284,12 +284,32 @@ export default function PackageDetailPage() {
           >
             {packageData.name}
           </h1>
-          {/* <p className="text-lg font-medium text-lovely mb-4">
-            Duration: {packageData.duration}
-          </p> */}
-          <p className="text-2xl font-bold text-lovely mb-6">
-            LE {packageData.price.toFixed(2)}
+          <p className="text-lg font-medium text-lovely mb-4">
+            Duration: {(() => {
+              const months = Number(packageData.duration);
+              if (isNaN(months) || months === 0) return packageData.duration;
+              if (months < 12) return `${months} Months`;
+              const years = Math.floor(months / 12);
+              const remainingMonths = months % 12;
+              let result = `${years} ${years === 1 ? "Year" : "Years"}`;
+              if (remainingMonths > 0) {
+                result += ` and ${remainingMonths} ${
+                  remainingMonths === 1 ? "Month" : "Months"
+                }`;
+              }
+              return result;
+            })()}
           </p>
+          <div className="flex flex-col mb-6">
+            <p className="text-2xl font-bold text-lovely">
+              LE {packageData.price.toFixed(2)}
+            </p>
+            {packageData.saving && (
+              <p className="text-sm text-green-600 font-medium mt-1">
+                {packageData.saving}
+              </p>
+            )}
+          </div>
 
           <Separator className="my-6" />
 

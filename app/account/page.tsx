@@ -361,7 +361,15 @@ const AccountPage = () => {
       setLoadingPlaylists(true);
       setPlaylistsError(null);
       try {
-        const res = await fetch("/api/playlists?all=true", {
+        const pkgId =
+          subscriptionDoc?.packageID?._id ||
+          subscriptionDoc?.packageID ||
+          session?.user?.subscription?.packageId;
+        const url =
+          pkgId === "68bf6ae9c4d5c1af12cdcd37"
+            ? `/api/playlists?all=true&packageId=${pkgId}`
+            : "/api/playlists?all=true";
+        const res = await fetch(url, {
           cache: "no-store",
         });
         const data = await res.json();
@@ -751,6 +759,7 @@ const AccountPage = () => {
                 )}
               </span>
             </p>
+            <div className="flex md:gap-4 flex-col md:flex-row">
             {session?.user?.subscription?.packageId ===
               "68bf6ae9c4d5c1af12cdcd37" && (
               // "68bf6ae9c4d5c1af12cdcd37" && (
@@ -763,19 +772,22 @@ const AccountPage = () => {
                 </Button>
               </Link>
             )}
-            {/* {!user.isSubscribed && shouldPromptChoosePlaylist && (
-              <div className="mt-3">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-lovely text-lovely bg-creamey hover:bg-creamey hover:text-lovely"
-                  onClick={() => setIsPlaylistModalOpen(true)}
-                >
-                  Choose My Playlist
-                </Button>
-              </div>
-            )} */}
-
+            {(subscriptionDoc?.packageID?._id ||
+              subscriptionDoc?.packageID ||
+              session?.user?.subscription?.packageId) ===
+              "68bf6ae9c4d5c1af12cdcd37" &&
+              !subscriptionDoc?.miniSubscriptionActivated && (
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    className="bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                    onClick={() => setIsPlaylistModalOpen(true)}
+                  >
+                    Activate your mini experience
+                  </Button>
+                </div>
+              )}
+            
             {user.isSubscribed && (
               <p className="text-lovely/80 text-sm font-semibold">
                 Expires at :{" "}
@@ -797,6 +809,7 @@ const AccountPage = () => {
                   : ""}
               </p>
             )}
+            </div>
           </div>
         </div>
       </div>
@@ -1952,8 +1965,10 @@ const AccountPage = () => {
           <DialogHeader>
             <DialogTitle>Choose Your Playlist</DialogTitle>
             <p>
-              Note: choose only one playlist. After confirming, you cannot
-              choose another; you can defer this choice for later.
+              Note: you have to choose only one playlist. If you click confirm
+              there&apos;s no way to choose another one.
+              <br />
+              It expires after 6 months from activation.
             </p>
           </DialogHeader>
           {loadingPlaylists ? (

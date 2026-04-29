@@ -3,6 +3,7 @@ import playlistModel from "@/app/modals/playlistModel";
 import videoModel from "@/app/modals/videoModel";
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
+import packageModel from "@/app/modals/packageModel";
 
 export async function GET(req: Request) {
   await ConnectDB();
@@ -24,6 +25,7 @@ export async function GET(req: Request) {
   const limit = all ? 0 : 10;
   const skip = all ? 0 : (page - 1) * limit;
   const featured = searchParams.get("featured") === "true";
+  const packageId = searchParams.get("packageId");
 
   try {
     // Create search query
@@ -40,6 +42,25 @@ export async function GET(req: Request) {
     if (featured) {
       searchQuery = { ...searchQuery, featured: true };
     }
+
+    if (packageId) {
+      const pkg = await packageModel.findById(packageId);
+      if (pkg && pkg.packagePlaylists && pkg.packagePlaylists.length > 0) {
+        searchQuery = { ...searchQuery, _id: { $in: pkg.packagePlaylists } };
+      } else {
+        // If package doesn't exist or has no playlists, return empty
+        return NextResponse.json(
+          {
+            data: [],
+            total: 0,
+            currentPage: page,
+            totalPages: 1,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     searchQuery = { ...searchQuery, isPublic: true };
 
     // Get total count

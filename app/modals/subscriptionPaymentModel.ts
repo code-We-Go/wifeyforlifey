@@ -29,6 +29,7 @@ const SubscriptionPaymentSchema = new Schema(
 
     // Subscription model parity fields
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" }, // optional mirror, will be set to `to`
+    selectedDuration: { type: Number, required: false },
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },
     appliedDiscount: {

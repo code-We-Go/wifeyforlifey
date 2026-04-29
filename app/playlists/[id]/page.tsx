@@ -216,6 +216,15 @@ export default function PlaylistPage() {
 
   // Check allowed playlist access when not subscribed
   useEffect(() => {
+    //User opens a playlist →
+  // 1. Check subscription's `allowedPlaylists` (always checked first)
+  //    → If playlist found with valid expiry → ✅ GRANT ACCESS
+  // 2. If not found, check `sub.packageID.accessAllPlaylists`
+  //    → If true: check if playlist is in `packageID.packagePlaylists`
+  //      → If found → ✅ GRANT ACCESS
+  //    → If false: skip (only allowedPlaylists matter)
+  // 3. No match → ❌ DENY ACCESS
+
     const checkAccess = async () => {
       try {
         if (
@@ -230,18 +239,42 @@ export default function PlaylistPage() {
             )}`
           );
           const sub = res.data;
+          const now = Date.now();
+
+          // Check subscription's allowedPlaylists (always considered)
           const allowed = Array.isArray(sub?.allowedPlaylists)
             ? sub.allowedPlaylists
             : [];
-          const now = Date.now();
-          const match = allowed.find(
-            (p: any) => String(p?.playlistID) === String(playlistId)
+          const matchAllowed = allowed.find(
+            (p: any) =>
+              String(p?.playlistID) === String(playlistId) &&
+              p.expiryDate &&
+              new Date(p.expiryDate).getTime() > now
           );
-          if (match && match.expiryDate && new Date(match.expiryDate).getTime() > now) {
+
+          if (matchAllowed) {
             setHasPlaylistAccess(true);
-          } else {
-            setHasPlaylistAccess(false);
+            return;
           }
+
+          // Check package-level playlist access
+          const pkg = sub?.packageID; // populated package object
+          if (pkg && pkg.accessAllPlaylists) {
+            // accessAllPlaylists is true → grant access to all packagePlaylists
+            const pkgPlaylists = Array.isArray(pkg.packagePlaylists)
+              ? pkg.packagePlaylists
+              : [];
+            const matchPkg = pkgPlaylists.some(
+              (pid: any) => String(pid) === String(playlistId)
+            );
+            if (matchPkg) {
+              setHasPlaylistAccess(true);
+              return;
+            }
+          }
+
+          // No match found
+          setHasPlaylistAccess(false);
         } else {
           setHasPlaylistAccess(false);
         }

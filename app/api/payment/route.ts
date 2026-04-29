@@ -389,6 +389,7 @@ export async function POST(request: Request) {
             to: data.subscription,
             // Parity fields from subscription schema
             packageID: data.subscription,
+            selectedDuration: data.selectedDuration,
             subscribed: false,
             redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
             appliedDiscount: data.appliedDiscount,
@@ -465,6 +466,7 @@ export async function POST(request: Request) {
             to: data.subscription,
             // Parity fields from subscription schema
             packageID: data.subscription,
+            selectedDuration: data.selectedDuration,
             subscribed: false,
             redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
             appliedDiscount: data.appliedDiscount,

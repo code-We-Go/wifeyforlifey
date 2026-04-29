@@ -248,15 +248,20 @@ async function handleSubscription(
 
   // Compute expiry for subscription based on package duration
   const expiryDate = new Date();
-  const pkgId = (paymentOp.to as any)?._id?.toString();
+  const targetPackage = paymentOp.to as any;
+  const pkgId = targetPackage?._id?.toString();
 
-  if (pkgId === "68bf6ae9c4d5c1af12cdcd37") {
+  const durationToUse = paymentOp.selectedDuration ?? targetPackage?.duration;
+
+  if (typeof durationToUse === "number" && durationToUse > 0) {
+    expiryDate.setMonth(expiryDate.getMonth() + durationToUse);
+  } else if (pkgId === "68bf6ae9c4d5c1af12cdcd37") {
     // Mini subscription: expiry is now
-  }
-  else if (pkgId === "687396821b4da119eb1c13fe") {
+  } else if (pkgId === "687396821b4da119eb1c13fe") {
+    // Legacy fallback
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-  }
-   else if (pkgId === "6965e63c6df4503dda02c12b") {
+  } else if (pkgId === "6965e63c6df4503dda02c12b") {
+    // Legacy fallback
     expiryDate.setMonth(expiryDate.getMonth() + 6);
   }
 
@@ -272,6 +277,7 @@ async function handleSubscription(
     paymentID: paymobOrderId,
     email: subscriptionEmail,
     packageID: paymentOp.to,
+    selectedDuration: paymentOp.selectedDuration,
     subscribed: true,
     expiryDate,
     status: "confirmed",

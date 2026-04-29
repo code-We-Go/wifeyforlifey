@@ -212,7 +212,7 @@ function MiniSubscriptionVerificationContent() {
       setLoadingPlaylists(true);
       setPlaylistsError(null);
       try {
-        const res = await fetch("/api/playlists?all=true", {
+        const res = await fetch("/api/playlists?all=true&packageId=68bf6ae9c4d5c1af12cdcd37", {
           cache: "no-store",
         });
         const data = await res.json();

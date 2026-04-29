@@ -8,7 +8,9 @@ const SubscriptionSchema = new Schema(
       required: true,
     },
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" },
+    selectedDuration: { type: Number, required: false },
     email: { type: String },
+
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },
     appliedDiscount: {
