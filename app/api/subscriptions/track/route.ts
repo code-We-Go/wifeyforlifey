@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import "@/app/modals/packageModel";
 import { ISubscription } from "@/app/interfaces/interfaces";
 
 export async function GET(request: NextRequest) {
@@ -25,12 +26,14 @@ export async function GET(request: NextRequest) {
     if (subscriptionId) {
       try {
         if (ObjectId.isValid(subscriptionId)) {
-          subscription = await subscriptionsModel.findOne({ _id: new ObjectId(subscriptionId) });
+          subscription = await subscriptionsModel.findOne({ _id: new ObjectId(subscriptionId) })
+            .populate("packageID", "packagePlaylists accessAllPlaylists");
         }
 
         // If not found by ObjectId, try by shipmentID
         if (!subscription) {
-          subscription = await subscriptionsModel.findOne({ shipmentID: subscriptionId });
+          subscription = await subscriptionsModel.findOne({ shipmentID: subscriptionId })
+            .populate("packageID", "packagePlaylists accessAllPlaylists");
         }
       } catch (error) {
         console.error("Error finding by ID:", error);
@@ -44,7 +47,8 @@ export async function GET(request: NextRequest) {
           { email: email },
           { giftRecipientEmail: email }
         ]
-      }).sort({ createdAt: -1 }); // Get the most recent subscription for this email
+      }).sort({ createdAt: -1 }) // Get the most recent subscription for this email
+        .populate("packageID", "packagePlaylists accessAllPlaylists");
     }
 
     if (!subscription) {

@@ -50,6 +50,11 @@ const PackageSchema = new Schema<Ipackage>(
     slug: { type: String, required: false },
     partOf: { type: String, required: false },
     supportCards: { type: [SupportCardSchema], required: false, default: [] },
+    packagePlaylists: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "playlists" }],
+      default: [],
+    },
+    accessAllPlaylists: { type: Boolean, default: false },
   },
   {
     timestamps: true,

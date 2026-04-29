@@ -312,6 +312,8 @@ export interface Ipackage {
   active: boolean;
   partOf?: string;
   supportCards?: SupportCard[]; // Support/feature cards shown on the package page
+  packagePlaylists?: string[]; // Playlist IDs included in this package
+  accessAllPlaylists?: boolean; // If true, package grants access to all packagePlaylists
 }
 
 export interface ISubscription {
