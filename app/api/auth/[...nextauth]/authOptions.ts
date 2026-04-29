@@ -157,11 +157,16 @@ export const authOptions: NextAuthOptions = {
         const googleEmail = user.email?.trim().toLowerCase();
         let existingUser = await UserModel.findOne({ email: googleEmail });
         if (!existingUser) {
-          //   const subscribed = await subscriptionsModel.findOne({
-          //     email: user.email,
-          //     subscribed: true,
-          //   }
-          // );
+          const subscriptions = await subscriptionsModel.find({
+            $or: [
+              { email: googleEmail },
+              { giftRecipientEmail: googleEmail }
+            ],
+            subscribed: true,
+          });
+
+          const subscriptionIds = subscriptions.map(sub => sub._id);
+
           existingUser = await UserModel.create({
             username: user.name || user.email?.split("@")[0] || "user",
             firstName: user.name?.split(" ")[0] || "user",
@@ -169,6 +174,7 @@ export const authOptions: NextAuthOptions = {
             email: googleEmail,
             emailVerified: true,
             imageURL: user.image,
+            subscriptions: subscriptionIds
           });
         }
         userId = (existingUser as any)._id?.toString();
