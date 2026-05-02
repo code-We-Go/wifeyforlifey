@@ -3,9 +3,11 @@ import { authenticateRequest } from "@/app/lib/mobileAuth";
 import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import playlistsProgress from "@/app/modals/playlistsProgress";
+import playlistModel from "@/app/modals/playlistModel";
 
 // GET: fetch playlist progress record for current user
 export async function GET(request: NextRequest) {
+  console.log(playlistModel+ "importing Playlists schema")
   try {
     await ConnectDB();
     const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);

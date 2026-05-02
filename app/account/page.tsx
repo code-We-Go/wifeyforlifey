@@ -1710,20 +1710,20 @@ const AccountPage = () => {
         )}
 
         {activeTab === "inspo" && (
-          <div>
-
-              <InspoTab />
-
-          </div>
           // <div>
-          //   {user.isSubscribed ? (
+
           //     <InspoTab />
-          //   ) : (
-          //     <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
-          //       Subscribe to access your inspiration boards!
-          //     </div>
-          //   )}
+
           // </div>
+          <div>
+            {user.isSubscribed ? (
+              <InspoTab />
+            ) : (
+              <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
+                Subscribe to access your inspiration boards!
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === "shopping-bestie" && (
