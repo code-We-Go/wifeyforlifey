@@ -314,6 +314,10 @@ export interface Ipackage {
   supportCards?: SupportCard[]; // Support/feature cards shown on the package page
   packagePlaylists?: string[]; // Playlist IDs included in this package
   accessAllPlaylists?: boolean; // If true, package grants access to all packagePlaylists
+  packageInspos?: string[]; // Inspo IDs included in this package
+  accessAllInspos?: boolean; // If true, package grants access to all packageInspos
+  packagePartners?: string[]; // Partner IDs included in this package
+  accessAllPartners?: boolean; // If true, package grants access to all packagePartners
 }
 
 export interface ISubscription {

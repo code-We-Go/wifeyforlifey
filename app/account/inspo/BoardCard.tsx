@@ -1,7 +1,7 @@
 "use client";
 
 import { CldImage } from "next-cloudinary";
-import { MoreHorizontal, Share } from "lucide-react";
+import { MoreHorizontal, Share, Lock } from "lucide-react";
 
 interface BoardCardProps {
   title: string;
@@ -9,6 +9,7 @@ interface BoardCardProps {
   sectionCount?: number;
   coverImages: string[];
   onClick: () => void;
+  isLocked?: boolean;
 }
 
 const BoardCard = ({
@@ -17,6 +18,7 @@ const BoardCard = ({
   sectionCount,
   coverImages,
   onClick,
+  isLocked,
 }: BoardCardProps) => {
   return (
     <div className="flex flex-col gap-2 cursor-pointer group" onClick={onClick}>
@@ -59,6 +61,15 @@ const BoardCard = ({
             )}
           </div>
         </div>
+
+        {/* Lock Overlay */}
+        {isLocked && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+            <div className="bg-white/90 p-3 rounded-full text-lovely shadow-lg">
+              <Lock size={24} />
+            </div>
+          </div>
+        )}
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />

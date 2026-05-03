@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
+import { useSession } from "next-auth/react";
 import BoardCard from "./BoardCard";
 import {
   ChevronLeft,
@@ -12,6 +13,7 @@ import {
   X,
   ZoomIn,
   Heart,
+  Lock,
 } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import { useState, useMemo, useEffect } from "react";
@@ -31,6 +33,12 @@ const InspoTab = () => {
   const [favoriteInspoIds, setFavoriteInspoIds] = useState<string[]>([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
+  const { data: session, status: sessionStatus } = useSession();
+  const [userSubs, setUserSubs] = useState<any[]>([]);
+  const [allPackages, setAllPackages] = useState<any[]>([]);
+  const [loadingSubs, setLoadingSubs] = useState(true);
+  const [lockedBoardPackages, setLockedBoardPackages] = useState<any[]>([]);
+  const [isLockModalOpen, setIsLockModalOpen] = useState(false);
 
   // Helper to extract string ID from potential $oid object or string
   const extractId = (id: any): string => {
@@ -114,6 +122,97 @@ const InspoTab = () => {
 
     fetchBoards();
   }, []);
+
+  useEffect(() => {
+    const fetchSubsAndPackages = async () => {
+      if (sessionStatus !== "authenticated" || !session?.user?.email) {
+        setLoadingSubs(false);
+        return;
+      }
+
+      try {
+        setLoadingSubs(true);
+        // Fetch subscriptions
+        const subRes = await fetch(
+          `/api/subscriptions/track?email=${encodeURIComponent(
+            session.user.email
+          )}&all=true`
+        );
+        if (subRes.ok) {
+          const subs = await subRes.json();
+          setUserSubs(Array.isArray(subs) ? subs : [subs]);
+        }
+
+        // Fetch all active packages
+        const pkgRes = await fetch("/api/packages?all=true&active=true");
+        if (pkgRes.ok) {
+          const pkgs = await pkgRes.json();
+          setAllPackages(pkgs.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch subs/packages", error);
+      } finally {
+        setLoadingSubs(false);
+      }
+    };
+
+    fetchSubsAndPackages();
+  }, [session?.user?.email, sessionStatus]);
+
+  const checkAccess = (boardId: string) => {
+    if (!boardId) return true;
+    if (sessionStatus !== "authenticated") return false;
+
+    const now = Date.now();
+    for (const sub of userSubs) {
+      if (!sub || !sub.subscribed) continue;
+
+      const isMini =
+        String(sub.packageID?._id || sub.packageID) ===
+        "68bf6ae9c4d5c1af12cdcd37";
+      const isExpired =
+        !isMini &&
+        sub.expiryDate &&
+        new Date(sub.expiryDate).getTime() < now;
+      if (isExpired) continue;
+
+      // Check package-level inspo access
+      const pkg = sub?.packageID; // populated package object
+      if (pkg) {
+        if (pkg.accessAllInspos) {
+          // If accessAllInspos is true, user has access to all inspos in the package
+          const pkgInspos = Array.isArray(pkg.packageInspos)
+            ? pkg.packageInspos
+            : [];
+          if (
+            pkgInspos.some(
+              (id: any) => String(extractId(id)) === String(boardId)
+            )
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  const getRequiredPackages = (boardId: string) => {
+    return allPackages.filter((pkg) => {
+      const pkgInspos = Array.isArray(pkg.packageInspos)
+        ? pkg.packageInspos
+        : [];
+      return pkgInspos.some(
+        (id: any) => String(extractId(id)) === String(boardId)
+      );
+    });
+  };
+
+  const handleLockedSectionClick = (boardId: string) => {
+    const pkgs = getRequiredPackages(boardId);
+    setLockedBoardPackages(pkgs);
+    setIsLockModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -612,13 +711,19 @@ const InspoTab = () => {
               const coverImages = section.pins
                 .slice(0, 3)
                 .map((p) => p.publicId);
+              const isLocked = !checkAccess(activeBoard.id);
               return (
                 <BoardCard
                   key={section.id}
                   title={section.title}
                   pinCount={section.pins.length}
                   coverImages={coverImages}
-                  onClick={() => navigateToSection(section.title)}
+                  isLocked={isLocked}
+                  onClick={() =>
+                    isLocked
+                      ? handleLockedSectionClick(activeBoard.id)
+                      : navigateToSection(section.title)
+                  }
                 />
               );
             })}
@@ -628,6 +733,57 @@ const InspoTab = () => {
     }
 
     // View: Inside Section (Pins Grid)
+    if (activeSection) {
+      const isLocked = activeBoard ? !checkAccess(activeBoard.id) : false;
+      if (isLocked) {
+        const pkgs = activeBoard ? getRequiredPackages(activeBoard.id) : [];
+        return (
+          <div className="space-y-8">
+            {renderHeader()}
+            <div className="flex flex-col items-center justify-center py-20 bg-creamey/30 rounded-3xl border-2 border-dashed border-lovely/20 px-6 text-center">
+              <div className="bg-white p-6 rounded-full shadow-xl mb-6">
+                <Lock size={48} className="text-lovely" />
+              </div>
+              <h3 className="text-2xl font-bold text-lovely mb-4">
+                Section Locked
+              </h3>
+              <p className="text-lovely/70 max-w-md mx-auto mb-8">
+                {pkgs.length > 0
+                  ? `This section is exclusive to ${pkgs
+                      .map((p) => p.name)
+                      .join(
+                        " and "
+                      )} packages. Please subscribe to view these inspiration boards.`
+                  : "Please subscribe to a package to view these inspiration boards."}
+              </p>
+
+              {pkgs.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                  {pkgs.map((pkg) => (
+                    <Button
+                      key={pkg._id}
+                      onClick={() => router.push(`/subscription/${pkg._id}`)}
+                      className="bg-lovely text-white hover:bg-lovely/90 rounded-full px-6"
+                    >
+                      Subscribe to {pkg.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                onClick={navigateToRoot}
+                variant="outline"
+                className="rounded-full border-lovely text-lovely hover:bg-lovely hover:text-white px-8"
+              >
+                View Other Boards
+              </Button>
+            </div>
+          </div>
+        );
+      }
+    }
+
     return (
       <div className="space-y-8">
         {renderHeader()}
@@ -774,6 +930,62 @@ const InspoTab = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Lock Guidance Modal */}
+      <Dialog open={isLockModalOpen} onOpenChange={setIsLockModalOpen}>
+        <DialogContent className="max-w-md bg-creamey rounded-3xl p-8 border-none shadow-2xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="bg-creamey/30 p-4 rounded-full mb-6">
+              <Lock size={40} className="text-lovely" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-lovely mb-4">
+              Board Locked
+            </DialogTitle>
+            <p className="text-lovely/70 mb-8">
+              {lockedBoardPackages.length > 0
+                ? "This inspiration board is exclusive to our community members. Subscribe to one of the following packages to gain full access:"
+                : "This inspiration board is exclusive to our community members. Please subscribe to a package to gain full access."}
+            </p>
+
+            <div className="w-full space-y-3">
+              {lockedBoardPackages.map((pkg) => (
+                <button
+                  key={pkg._id}
+                  onClick={() => {
+                    router.push(`/subscription/${pkg._id}`);
+                    setIsLockModalOpen(false);
+                  }}
+                  className="w-full flex items-center hover:bg-pinkey cursor-pointer justify-between p-4 hover:text-lovely bg-pinkey/80  rounded-2xl border border-lovely/60 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
+                      {pkg.imgUrl && (
+                        <img
+                          src={pkg.imgUrl}
+                          alt={pkg.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <span className="font-semibold text-lovely  transition-colors">
+                      {pkg.name}
+                    </span>
+                  </div>
+                  <ChevronRight size={20} className="text-lovely/50" />
+                </button>
+              ))}
+            </div>
+
+            <Button
+              variant="ghost"
+              onClick={() => setIsLockModalOpen(false)}
+              className="mt-6 text-lovely/60 hover:text-lovely"
+            >
+              Maybe Later
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
