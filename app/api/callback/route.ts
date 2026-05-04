@@ -738,7 +738,7 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
   // "confirmed" is the only terminal success state — everything else is
   // (re-)claimable so we handle retries, stuck serverless functions, and
   // out-of-order Paymob webhooks in a single pass.
-  const claimableStatuses = ["pending", "failed", "processing"];
+  const claimableStatuses = ["pending", "failed"];
   const pendingPayment = await PendingPaymentModel.findOneAndUpdate(
     {
       paymobOrderId: String(paymobOrderId),
