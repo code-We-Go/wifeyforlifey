@@ -326,6 +326,12 @@ async function handleSubscription(
     bostaDistrictName: paymentOp.bostaDistrictName,
   };
 
+  // For NEW subscriptions only: pull the package cost and store it on the record
+  if (paymentOp.process === "new" && typeof targetPackage?.cost === "number") {
+    subscriptionData.cost = targetPackage.cost;
+    console.log(`[handleSubscription] Storing package cost on new subscription: ${targetPackage.cost}`);
+  }
+
   // Always create a new subscription document (preserves history)
   const created = await subscriptionsModel.create(subscriptionData);
   let updatedSub: any = created;

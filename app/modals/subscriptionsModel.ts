@@ -50,6 +50,7 @@ const SubscriptionSchema = new Schema(
     // Payment information
     total: { type: Number, required: false },
     subTotal: { type: Number, required: false },
+    cost: { type: Number, required: false }, // Package cost at time of subscription
     shipping: { type: Number, required: false },
     currency: { type: String, required: false },
     expiryDate: { type: Date, default: Date.now },
