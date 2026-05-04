@@ -27,6 +27,8 @@ const VideoSchema = new Schema<Video>({
   url: { type: String, required: true },
   thumbnailUrl: { type: String, required: true },
   isPublic: { type: Boolean, default: false },
+      playlistFolder: { type: String, required: false }, // slug of the folder this video belongs to within its playlist
+
   likes: [{ type: Schema.Types.ObjectId, ref: 'users' }], // Array of user references who liked the video
   comments: [VideoCommentSchema], // Array of comments
 }, {

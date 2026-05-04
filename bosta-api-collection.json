@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "c1f6cba0-beeb-410a-ade6-3fbc062b8df1",
+		"name": "Bosta API Endpoints Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Bosta Locations",
+			"item": [
+				{
+					"name": "Get All Cities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bosta/cities",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bosta",
+								"cities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Zones by City ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bosta/zones?cityId=EG-01",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bosta",
+								"zones"
+							],
+							"query": [
+								{
+									"key": "cityId",
+									"value": "EG-01",
+									"description": "The ID of the city to fetch zones for"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Districts by City ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bosta/districts?cityId=EG-01",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bosta",
+								"districts"
+							],
+							"query": [
+								{
+									"key": "cityId",
+									"value": "EG-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Districts by City ID and Zone ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bosta/districts?cityId=EG-01&zoneId=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bosta",
+								"districts"
+							],
+							"query": [
+								{
+									"key": "cityId",
+									"value": "EG-01"
+								},
+								{
+									"key": "zoneId",
+									"value": "1",
+									"description": "Optional zone ID to filter districts"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bosta Pricing",
+			"item": [
+				{
+					"name": "Calculate Shipping Cost",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bosta/pricing?cod=1000&dropOffCity=Cairo&pickupCity=Alexandria&size=Normal&type=SEND",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bosta",
+								"pricing"
+							],
+							"query": [
+								{
+									"key": "cod",
+									"value": "1000",
+									"description": "Cash on Delivery value"
+								},
+								{
+									"key": "dropOffCity",
+									"value": "Cairo"
+								},
+								{
+									"key": "pickupCity",
+									"value": "Alexandria"
+								},
+								{
+									"key": "size",
+									"value": "Normal",
+									"description": "Optional: Normal (default) or others supported by Bosta"
+								},
+								{
+									"key": "type",
+									"value": "SEND",
+									"description": "Optional: SEND (default), RETURN, etc."
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

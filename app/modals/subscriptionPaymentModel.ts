@@ -29,6 +29,7 @@ const SubscriptionPaymentSchema = new Schema(
 
     // Subscription model parity fields
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" }, // optional mirror, will be set to `to`
+    selectedDuration: { type: Number, required: false },
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },
     appliedDiscount: {
@@ -91,6 +92,8 @@ const SubscriptionPaymentSchema = new Schema(
       enum: ["pending", "confirmed", "failed"],
       default: "pending",
     },
+    expiresAt: { type: Date, required: false },
+
     isMob: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     paymentMethod: { type: String, required: false,enum:["instapay","cash","card"] },

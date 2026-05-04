@@ -4,6 +4,7 @@ import WeddingTimelineModel from "@/app/modals/WeddingTimeline";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/authOptions";
 import crypto from "crypto";
+import mongoose from "mongoose";
 
 export async function GET(req: Request) {
   try {
@@ -42,12 +43,12 @@ export async function GET(req: Request) {
     if (action === "share") {
       const session = await getServerSession(authOptions);
 
-      if (!session?.user?.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (!session?.user?.id || !mongoose.Types.ObjectId.isValid(session.user.id)) {
+        return NextResponse.json({ error: "Unauthorized or Invalid ID" }, { status: 401 });
       }
 
       const timeline = await WeddingTimelineModel.findOne({
-        userId: session.user.id,
+        userId: new mongoose.Types.ObjectId(session.user.id),
       });
 
       if (!timeline) {
@@ -75,12 +76,12 @@ export async function GET(req: Request) {
     // Default: fetch authenticated user's timeline
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.id || !mongoose.Types.ObjectId.isValid(session.user.id)) {
+      return NextResponse.json({ error: "Unauthorized or Invalid ID" }, { status: 401 });
     }
 
     const timeline = await WeddingTimelineModel.findOne({
-      userId: session.user.id,
+      userId: new mongoose.Types.ObjectId(session.user.id),
     });
 
     if (!timeline) {
@@ -110,14 +111,15 @@ export async function POST(req: Request) {
 
     const userId = session?.user?.id || body.userId;
 
-    if (userId) {
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      const userObjectId = new mongoose.Types.ObjectId(userId);
       // Upsert for logged in user
       // Generate shareToken only on creation (setOnInsert)
       const timeline = await WeddingTimelineModel.findOneAndUpdate(
-        { userId: userId },
+        { userId: userObjectId },
         {
           $set: {
-            userId: userId,
+            userId: userObjectId,
             zaffaTime: body.zaffaTime,
             selectedFeatures: body.selectedFeatures || [],
             events: body.events,

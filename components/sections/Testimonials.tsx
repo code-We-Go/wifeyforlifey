@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { TestimonialCard } from "./testomonials/TestomonialsCard";
+import { headerStyle } from "@/app/styles/style";
 const testimonials = [
   {
     name: "sandy_wadea",
@@ -120,7 +121,7 @@ const Testimonials = () => {
           </span>
         </div>
         <h2
-          className={`${thirdFont.className} text-lovely tracking-normal text-4xl md:text-6xl font-bold text-center mb-4 `}
+          className={`${thirdFont.className} text-lovely ${headerStyle} text-center mb-4 `}
         >
           Think Wifey&apos;s Tiktok is helpful?
           <br />

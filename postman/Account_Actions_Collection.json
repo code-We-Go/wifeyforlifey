@@ -1,0 +1,106 @@
+{
+  "info": {
+    "name": "Wifey Account Management",
+    "description": "API collection for account-level actions including account deletion and package upgrade calculations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Account Actions",
+      "item": [
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "description": "JWT token for mobile authentication (optional if session exists)",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/delete-account",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delete-account"]
+            },
+            "description": "Deletes the authenticated user's account and all associated data (Subscription, Timeline, Loyalty, Interactions, Progress). Supports both JWT (mobile) and Session (web) authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Account (DELETE Method)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "description": "JWT token for mobile authentication (optional if session exists)",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/delete-account",
+              "host": ["{{base_url}}"],
+              "path": ["api", "delete-account"]
+            },
+            "description": "Alternative DELETE method for account deletion."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Package Management",
+      "item": [
+        {
+          "name": "Calculate Upgrade Difference",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "description": "JWT token for mobile authentication (optional if session exists)",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/packages/upgrade?targetPackageId={{target_package_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "packages", "upgrade"],
+              "query": [
+                {
+                  "key": "targetPackageId",
+                  "value": "{{target_package_id}}",
+                  "description": "The ID of the package the user wants to upgrade to"
+                }
+              ]
+            },
+            "description": "Calculates the price difference between the user's current package and the target package. Used for showing the upgrade cost in the UI."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "target_package_id",
+      "value": "package_id_here",
+      "type": "string"
+    }
+  ]
+}

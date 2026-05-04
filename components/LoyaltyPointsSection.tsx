@@ -28,14 +28,21 @@ const LoyaltyPointsSection: React.FC<LoyaltyPointsSectionProps> = ({
     loyaltyPoints.realLoyaltyPoints -
     Math.floor(loyaltyPoints.realLoyaltyPoints * 0.85);
 
-  // Handler for redeeming points (allow any value, clamp in effect)
+  // Handler for redeeming points
   const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value) || 0;
+    
+    // Restrict the typed value so it doesn't exceed the max reachable
+    if (value > maxRedeem) {
+      value = Math.floor(maxRedeem);
+    }
+    
     setRedeemPoints(value);
-    // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
+    
+    // Loyalty points: clamp to valid multiple of 20
     let validRedeem = Math.max(
       0,
-      Math.min(value - (value % 20), loyaltyPoints.realLoyaltyPoints)
+      Math.min(value - (value % 20), maxRedeem)
     );
     const loyaltyLE = Math.floor(validRedeem / 20);
     setLoyaltyDiscount(loyaltyLE);

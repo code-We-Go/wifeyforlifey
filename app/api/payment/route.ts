@@ -9,15 +9,15 @@ import productsModel from "@/app/modals/productsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import BostaService, { BostaAddress } from "@/app/services/bostaService";
-import UserModel from "@/app/modals/userModel";
+import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
+import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
 
 const loadDB = async () => {
   console.log("hna");
   await ConnectDB();
 };
 
-loadDB();
 
 async function decreaseStock(cart: any[]) {
   // product(variants)=>variant (attribures)=>attribute
@@ -68,20 +68,11 @@ async function decreaseStock(cart: any[]) {
 }
 
 export async function POST(request: Request) {
+  await loadDB();
   const data = await request.json();
+  console.log("dataMigo"+JSON.stringify(data))
   console.log("shippinga" + data.shipping);
-  // console.log('here'+process.env.PaymobApiKey)
-  // const items =await data.cart.map((item: any) => {
-  //   return {
-  //    "productId": item.productId,
-  //    "productName": item.productName ,
-  //    "price": item.price,
-  //      "quantity": item.quantity,
-  //     "color":item.color,
-  //     "imageUrl":item.imageUrl
 
-  //   }
-  // });
   const items = await data.cart;
   console.log("items" + items.length);
 
@@ -328,7 +319,21 @@ export async function POST(request: Request) {
       )}`;
       console.log(specialReference);
       console.log("firstDebug" + data.subscription);
+      console.log("total" + data.total);
       if (data.subscription) {
+        let userSub = null;
+        if (data.process === "upgrade" || data.process === "renew") {
+          userSub = await UserModel.findOne({ email: data.email }).populate({
+            path: "subscriptions",
+            options: { sort: { expiryDate: -1 } },
+          });
+        }
+        // Find the main subscription (exclude Bestie)
+        const existingSub = userSub?.subscriptions?.find(
+          (sub: any) =>
+            sub.packageID?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+        ) as any;
+
         const order = await axios.post(
           "https://accept.paymob.com/v1/intention/",
           {
@@ -344,17 +349,17 @@ export async function POST(request: Request) {
             //   }
             // ],
             billing_data: {
-              apartment: data.appartment,
-              first_name: data.firstName,
-              last_name: data.lastName,
-              street: "street",
+              apartment: existingSub?.apartment || data.appartment || "apartment",
+              first_name: existingSub?.firstName || data.firstName || "firstName",
+              last_name: existingSub?.lastName || data.lastName || "lastName",
+              street: existingSub?.address || "street",
               building: "building",
-              phone_number: data.phone,
-              city: data.city,
-              country: data.country,
-              email: data.email,
+              phone_number: existingSub?.phone || data.phone || "phone",
+              city: existingSub?.city || data.city || "city",
+              country: existingSub?.country || data.country || "country",
+              email: existingSub?.email || data.email || "email",
               floor: "floor",
-              state: data.state,
+              state: existingSub?.state || data.state || "state",
             },
             extras: {
               ee: "subscription",
@@ -376,12 +381,9 @@ export async function POST(request: Request) {
 
         if (data.process === "upgrade" || data.process === "renew") {
           // Upgrade/Renew flow: record a pending payment operation, do NOT mutate subscription here
-          const user = await UserModel.findOne({ email: data.email }).populate({
-            path: "subscription",
-            options: { strictPopulate: false },
-          });
+          const user = userSub;
 
-          const fromPackageID = (user?.subscription as any)?.packageID || null;
+          const fromPackageID = existingSub?.packageID || null;
           await subscriptionPaymentModel.create({
             paymentID: order.data.payment_keys[0].order_id,
             email: data.email,
@@ -392,6 +394,7 @@ export async function POST(request: Request) {
             paymentMethod: "card",
             // Parity fields from subscription schema
             packageID: data.subscription,
+            selectedDuration: data.selectedDuration,
             subscribed: false,
             redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
             appliedDiscount: data.appliedDiscount,
@@ -437,6 +440,14 @@ export async function POST(request: Request) {
             bostaDistrictName: data.bostaDistrictName,
             // Status
             status: "pending",
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+
+          // Register in PendingPayment for callback lookup
+          await PendingPaymentModel.create({
+            paymobOrderId: String(order.data.payment_keys[0].order_id),
+            productType: "subscription",
+            referenceId: (await subscriptionPaymentModel.findOne({ paymentID: order.data.payment_keys[0].order_id }))._id,
           });
 
           return NextResponse.json(
@@ -446,11 +457,16 @@ export async function POST(request: Request) {
         } else {
           // New subscription flow: record a pending payment operation, do NOT create subscription yet
           const user = await UserModel.findOne({ email: data.email }).populate({
-            path: "subscription",
-            options: { strictPopulate: false },
+            path: "subscriptions",
+            options: { sort: { expiryDate: -1 } },
           });
 
-          const fromPackageID = (user?.subscription as any)?.packageID || null;
+          // Find the main subscription (exclude Bestie)
+          const mainSub = user?.subscriptions?.find(
+            (sub: any) =>
+              sub.packageID?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+          ) as any;
+          const fromPackageID = mainSub?.packageID || null;
           await subscriptionPaymentModel.create({
             paymentID: order.data.payment_keys[0].order_id,
             email: data.email,
@@ -461,6 +477,7 @@ export async function POST(request: Request) {
             paymentMethod: "card",
             // Parity fields from subscription schema
             packageID: data.subscription,
+            selectedDuration: data.selectedDuration,
             subscribed: false,
             redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
             appliedDiscount: data.appliedDiscount,
@@ -506,6 +523,14 @@ export async function POST(request: Request) {
             bostaDistrictName: data.bostaDistrictName,
             // Status
             status: "pending",
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+
+          // Register in PendingPayment for callback lookup
+          await PendingPaymentModel.create({
+            paymobOrderId: String(order.data.payment_keys[0].order_id),
+            productType: "subscription",
+            referenceId: (await subscriptionPaymentModel.findOne({ paymentID: order.data.payment_keys[0].order_id }))._id,
           });
 
           return NextResponse.json(
@@ -601,7 +626,19 @@ export async function POST(request: Request) {
           bostaZoneName: data.bostaZoneName || "",
           bostaDistrict: data.bostaDistrict || "",
           bostaDistrictName: data.bostaDistrictName || "",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         });
+
+        // Register in PendingPayment for callback lookup
+        const createdOrder = await ordersModel.findOne({ orderID: order.data.payment_keys[0].order_id });
+        if (createdOrder) {
+          await PendingPaymentModel.create({
+            paymobOrderId: String(order.data.payment_keys[0].order_id),
+            productType: "order",
+            referenceId: createdOrder._id,
+          });
+        }
+
         return NextResponse.json(
           { token: order.data.client_secret },
           { status: 200 }

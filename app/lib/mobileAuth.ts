@@ -3,6 +3,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { verifyToken, extractTokenFromHeader } from "@/app/utils/jwtUtils";
 import UserModel from "@/app/modals/userModel";
 import subscriptionsModel from "../modals/subscriptionsModel";
+import { ConnectDB } from "../config/db";
 
 export interface AuthResult {
   user: any | null;
@@ -11,6 +12,7 @@ export interface AuthResult {
 }
 
 export async function authenticateRequest(req: Request): Promise<AuthResult> {
+  await ConnectDB();
   // 1. Try token-based auth first (for mobile)
   const authHeader = req.headers.get("authorization");
       console.log("register" + subscriptionsModel);
@@ -24,7 +26,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
         // Fetch full user data to ensure user still exists and get latest details
         try {
           const dbUser = await UserModel.findById(decodedUser.id).populate(
-            "subscription"
+            "subscriptions"
           );
           if (dbUser) {
             return { user: dbUser, isAuthenticated: true, authType: "jwt" };

@@ -8,7 +8,9 @@ const SubscriptionSchema = new Schema(
       required: true,
     },
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" },
+    selectedDuration: { type: Number, required: false },
     email: { type: String },
+
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },
     appliedDiscount: {
@@ -16,6 +18,7 @@ const SubscriptionSchema = new Schema(
       required: false,
       ref: "discounts",
     },
+    
     appliedDiscountAmount: { type: Number, required: false },
     // User information
     firstName: { type: String, required: false },
@@ -47,10 +50,28 @@ const SubscriptionSchema = new Schema(
     // Payment information
     total: { type: Number, required: false },
     subTotal: { type: Number, required: false },
+    cost: { type: Number, required: false }, // Package cost at time of subscription
     shipping: { type: Number, required: false },
     currency: { type: String, required: false },
     expiryDate: { type: Date, default: Date.now },
 
+    allowedPlaylists: {
+      type: [
+        {
+          playlistID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "playlists",
+            required: true,
+          },
+          expiryDate: { type: Date, required: true },
+        },
+      ],
+      default: [],
+    },
+    miniSubscriptionActivated:{
+      type: Boolean,
+      required: false,
+    },
     bostaCity: { type: String, required: false },
     bostaCityName: { type: String, required: false },
     bostaZone: { type: String, required: false },

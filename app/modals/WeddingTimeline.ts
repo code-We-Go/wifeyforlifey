@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWeddingTimeline extends Document {
-  userId?: string;
+  userId?: mongoose.Types.ObjectId;
   zaffaTime: string; // The anchor time
   selectedFeatures: {
     name: string;
@@ -26,6 +26,7 @@ export interface IWeddingTimeline extends Document {
     recommend: string; // "definitely_not" | "maybe" | "definitely_yes"
     comment?: string;
   }; 
+  exported:{type:Number,default:0};
   createdAt: Date;
 }
 
@@ -47,7 +48,7 @@ const SelectedFeatureSchema = new Schema({
 
 const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
   {
-    userId: { type: String, required: false },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: false },
     zaffaTime: { type: String, required: true },
     selectedFeatures: [SelectedFeatureSchema],
     events: [EventSchema],
@@ -60,6 +61,7 @@ const WeddingTimelineSchema = new Schema<IWeddingTimeline>(
       recommend: { type: String },
       comment: { type: String },
     },
+    exported:{type:Number,default:0},
   },
   { timestamps: true }
 );

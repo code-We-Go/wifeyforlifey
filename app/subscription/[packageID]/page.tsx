@@ -4,7 +4,6 @@ import OrderSummaryItem from "./../components/OrderSummaryItem";
 import { cartContext } from "@/app/context/cartContext";
 import { CartProvider, useCart } from "@/providers/CartProvider";
 import { useSession } from "next-auth/react";
-
 import { userContext } from "@/app/context/userContext";
 import { thirdFont } from "@/fonts";
 import orderValidation from "@/lib/validations/orderValidation";
@@ -178,7 +177,7 @@ const SubscriptionPage = () => {
   const [notFound, setNotFound] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const { isAuthenticated, loyaltyPoints } = useAuth();
+  const { isAuthenticated, loyaltyPoints, user } = useAuth();
   const [loading, setLoading] = useState(false);
   // const [shipping, setShipping] = useState(0);
   const [shipping, setShipping] = useState(0);
@@ -204,35 +203,75 @@ const SubscriptionPage = () => {
   const [showModal, setShowModal] = useState(false);
   const searchParams = useSearchParams();
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
+  const [variantPrice, setVariantPrice] = useState<number | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [isUpgrade, setIsUpgrade] = useState(false);
 
   // Read upgrade price from query param and set override
   useEffect(() => {
     const upgradeParam = searchParams.get("upgrade");
-    const parsed = upgradeParam ? Number(upgradeParam) : NaN;
-    if (!Number.isNaN(parsed) && parsed > 0) {
-      setOverridePrice(parsed);
+    const priceParam = searchParams.get("price");
+    const durationParam = searchParams.get("duration");
+
+    if (priceParam) {
+      setVariantPrice(Number(priceParam));
+    }
+    if (durationParam) {
+      setSelectedDuration(Number(durationParam));
+    }
+
+    if (upgradeParam === "true") {
       setIsUpgrade(true);
       setShipping(0); // Free shipping on upgrade
       setFormData((prevData) => ({
         ...prevData,
         process: "upgrade",
       }));
+      
+      const fetchUpgradeInfo = async () => {
+        try {
+          const res = await axios.get(`/api/packages/upgrade?targetPackageId=${packageID}`);
+          if (res.data.success) {
+            setOverridePrice(res.data.difference);
+          }
+        } catch (error) {
+          console.error("Failed to fetch upgrade info:", error);
+        }
+      };
+      fetchUpgradeInfo();
     } else {
-      setOverridePrice(null);
-      setIsUpgrade(false);
+      const parsed = upgradeParam ? Number(upgradeParam) : NaN;
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        setOverridePrice(parsed);
+        setIsUpgrade(true);
+        setShipping(0); // Free shipping on upgrade
+        setFormData((prevData) => ({
+          ...prevData,
+          process: "upgrade",
+        }));
+      } else {
+        setOverridePrice(null);
+        setIsUpgrade(false);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, packageID]);
 
   // Compute effective price used across calculations and UI
-  const price = overridePrice ?? packageData?.price ?? 0;
+  const price = overridePrice ?? variantPrice ?? packageData?.price ?? 0;
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedDuration: selectedDuration,
+    }));
+  }, [selectedDuration]);
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
     const packageContents = {
       "687396821b4da119eb1c13fe": {
-        header: "Batch 3 is officially SOLD OUT!",
-        content: `Please note that this order is a pre-order, and your planner will be shipped starting November 10th.
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
 
   While you wait for your gehaz bestie to arrive, you can already enjoy:
   ✨ Wifey's curated playlists
@@ -241,13 +280,17 @@ const SubscriptionPage = () => {
 
   Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
+  //for later
+      // "68bf6ae9c4d5c1af12cdcd37": {
       "68bf6ae9c4d5c1af12cdcd37": {
-        header: "Batch 3 is officially SOLD OUT!",
-        content: `Please note that this order is a pre-order, and your gehaz bestie planner will be shipped starting November 10th.
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
 
-  After completing your purchase, you'll receive an email with a tracking link so you can follow your planner's journey.
+After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
 
-  We're beyond excited to share this experience with you — your planner will be on its way very soon! ✨`,
+Once you receive your planner, you’ll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you’ll find a thank-you card with a QR code that lets you browse and select your favorite playlist.
+
+We’re beyond excited to share this experience with you… your planner will be on its way very soon! ✨`,
       },
     };
 
@@ -388,6 +431,7 @@ const SubscriptionPage = () => {
     phone: "",
     whatsAppNumber: "", // Added WhatsApp number field
     subscription: packageID,
+    selectedDuration: null as number | null,
     state: bostaLocation.city?._id || "",
     zone: bostaLocation.zone?._id || "",
     district: bostaLocation.district?.districtId || "",
@@ -436,7 +480,11 @@ const SubscriptionPage = () => {
   ) => {
     const { name, value } = e.target;
     console.log(value);
-    setFormData({ ...formData, [name]: value });
+    // Convert email fields to lowercase
+    const finalValue = (name === 'email' || name === 'giftRecipientEmail') 
+      ? value.toLowerCase() 
+      : value;
+    setFormData({ ...formData, [name]: finalValue });
   };
 
   // Separate handler for state changes to ensure shipping calculation triggers
@@ -570,10 +618,10 @@ const SubscriptionPage = () => {
 
   // Update total when gift card selection changes
   useEffect(() => {
-    const calculatedSubTotal = packageData?.price ?? 0;
+    const calculatedSubTotal = price;
     const giftCardCost = formData.giftCardName ? 20 : 0;
     setTotal(calculatedSubTotal + shipping + giftCardCost);
-  }, [formData.giftCardName, packageData?.price, shipping]);
+  }, [formData.giftCardName, price, shipping]);
 
   // Handle country changes
   useEffect(() => {
@@ -620,7 +668,7 @@ const SubscriptionPage = () => {
     // Upgrades always have free shipping
     if (isUpgrade) {
       setShipping(0);
-      const calculatedSubTotal = packageData?.price ?? 0;
+      const calculatedSubTotal = price;
       setSubTotal(calculatedSubTotal);
       const giftCardCost = formData.giftCardName ? 20 : 0;
       setTotal(calculatedSubTotal + giftCardCost);
@@ -631,11 +679,10 @@ const SubscriptionPage = () => {
         // Check if package price meets minimum order amount required for the discount
         if (
           !appliedDiscount.conditions?.minimumOrderAmount ||
-          (packageData?.price &&
-            packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
+          (price >= appliedDiscount.conditions.minimumOrderAmount)
         ) {
           setShipping(0);
-          const calculatedSubTotal = packageData?.price ?? 0;
+          const calculatedSubTotal = price;
           setSubTotal(calculatedSubTotal);
           const giftCardCost = formData.giftCardName ? 20 : 0;
           setTotal(calculatedSubTotal + giftCardCost);
@@ -643,7 +690,7 @@ const SubscriptionPage = () => {
       } else if (!bostaLocation.city) {
         // Set default shipping if no Bosta location selected yet
         setShipping(0);
-        const calculatedSubTotal = packageData?.price ?? 0;
+        const calculatedSubTotal = price;
         setSubTotal(calculatedSubTotal);
         const giftCardCost = formData.giftCardName ? 20 : 0;
         setTotal(calculatedSubTotal + shipping + giftCardCost);
@@ -661,8 +708,7 @@ const SubscriptionPage = () => {
         // Check if package price meets minimum order amount required for the discount
         if (
           !appliedDiscount.conditions?.minimumOrderAmount ||
-          (packageData?.price &&
-            packageData.price >= appliedDiscount.conditions.minimumOrderAmount)
+          (price >= appliedDiscount.conditions.minimumOrderAmount)
         ) {
           setShipping(0);
         }
@@ -670,7 +716,7 @@ const SubscriptionPage = () => {
       //  else {
       //   setShipping(shippingRate);
       // }
-      const calculatedSubTotal = packageData?.price ?? 0;
+      const calculatedSubTotal = price;
       setSubTotal(calculatedSubTotal);
       setTotal(calculatedSubTotal + shipping);
     }
@@ -681,7 +727,7 @@ const SubscriptionPage = () => {
     state,
     countries,
     items,
-    packageData,
+    price,
     bostaLocation,
     appliedDiscount,
     isUpgrade,
@@ -692,6 +738,60 @@ const SubscriptionPage = () => {
       <OrderSummaryItem cartItem={cartItem} key={index} />
     ));
   };
+  const handleUpgradeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    let errors: any = {};
+    if (!user?.email || !/\S+@\S+\.\S+/.test(user.email)) {
+      errors.email = "Please enter a valid email address.";
+    }
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      alert(Object.values(errors)[0]);
+      setLoading(false);
+      return;
+    }
+
+    // Set the email from user session
+    formData.email = user!.email!;
+
+    // Build payload matching the regular submit flow
+    const payload = {
+      ...formData,
+      appliedDiscount: appliedDiscount?._id,
+      appliedDiscountAmount:
+        appliedDiscount?.calculationType === "FREE_SHIPPING"
+          ? shipping
+          : appliedDiscount?.calculationType === "PERCENTAGE"
+          ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
+          : appliedDiscount?.value,
+      loyalty: {
+        redeemedPoints: Math.max(
+          0,
+          Math.min(
+            redeemPoints - (redeemPoints % 20),
+            loyaltyPoints.realLoyaltyPoints
+          )
+        ),
+        discount: loyaltyDiscount,
+      },
+    };
+
+    try {
+      const res = await axios.post("/api/payment/", payload);
+      console.log(res.data.token);
+      setLoading(false);
+
+      // Redirect to Paymob checkout
+      const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
+      router.push(paymobIframeURL);
+    } catch (error: any) {
+      console.error(error);
+      alert(error?.response?.data?.error || "Something went wrong");
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     // alert("clicked");
     e.preventDefault();
@@ -822,12 +922,13 @@ const SubscriptionPage = () => {
       setNotFound(false);
       try {
         const res = await axios.get(`/api/packages?packageID=${packageID}`);
-        if (res.data.data && res.data.data.active) {
+        if (res.data.data) {
           setPackageData(res.data.data);
         } else {
           setNotFound(true);
         }
       } catch (e) {
+        console.log(e)
         setNotFound(true);
       } finally {
         setLoadingPackage(false);
@@ -837,14 +938,16 @@ const SubscriptionPage = () => {
   }, [packageID]);
 
   // Show modal when package data is loaded for specific packages
-  // useEffect(() => {
-  //   if (packageData && packageID) {
-  //     const modalContent = getModalContent(packageID as string);
-  //     if (modalContent) {
-  //       setShowModal(true);
-  //     }
-  //   }
-  // }, [packageData, packageID]);
+  useEffect(() => {
+    if (packageData && packageID && !isUpgrade) {
+      const modalContent = getModalContent(packageID as string);
+      if (modalContent) {
+        setShowModal(false);
+        //not a pre-order now
+        //setShowModal(true); 
+      }
+    }
+  }, [packageData, packageID]);
 
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
@@ -912,6 +1015,8 @@ const SubscriptionPage = () => {
     countryID,
     subTotal,
     formData.giftCardName,
+    price,
+    overridePrice
   ]);
 
   if (loadingPackage) {
@@ -942,6 +1047,75 @@ const SubscriptionPage = () => {
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
         <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
+          {isUpgrade ? (
+            <form
+              onSubmit={handleUpgradeSubmit}
+              className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2 border-lovely text-nowrap"
+            >
+              <div
+                className={`${thirdFont.className} w-full text-base lg:text-2xl border-b border-lovely`}
+              >
+                Upgrade Subscription
+              </div>
+              <div className="flex items-center gap-2 w-full">
+                <label className="text-lovely text-base">Email</label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    name="email"
+                    value={formData.email || user?.email || ""}
+                    type="email"
+                    className={`border ${
+                      formErrors.email ? "border-red-500" : ""
+                    } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
+                  />
+                  {formErrors.email && (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-base mt-4">
+                <label className="flex items-center gap-2 cursor-pointer relative">
+                  <input
+                    type="checkbox"
+                    id="accept-terms-upgrade"
+                    checked={acceptedTerms}
+                    onChange={() => setAcceptedTerms(!acceptedTerms)}
+                    className="peer appearance-none bg-creamey checked:bg-everGreen border border-pinkey w-4 h-4 rounded transition-colors flex-shrink-0"
+                  />
+                  <span className="absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs pointer-events-none peer-checked:opacity-100 opacity-0">
+                    ✔
+                  </span>
+                </label>
+                <span className="pl-2 text-lovely text-base">
+                  By checking, you agree to the{" "}
+                  <Link
+                    href="/policies?terms-and-conditions"
+                    className="underline hover:cursor-pointer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    terms and conditions
+                  </Link>
+                </span>
+              </div>
+              <div className="flex justify-end w-full mt-2">
+                <button
+                  disabled={loading || !acceptedTerms}
+                  type="submit"
+                  className={`border text-base transition duration-300 border-lovely p-1 ${
+                    loading || !acceptedTerms
+                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
+                      : "hover:cursor-pointer bg-lovely px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
+                  }`}
+                >
+                  {loading ? "Processing..." : "PROCEED TO PAYMENT"}
+                </button>
+              </div>
+            </form>
+          ) : (
           <form
             onSubmit={handleSubmit}
             className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
@@ -1658,7 +1832,7 @@ const SubscriptionPage = () => {
                           : formData.billingLastName
                       }
                       type="text"
-                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                      className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
@@ -1841,6 +2015,8 @@ const SubscriptionPage = () => {
               </button>
             </div>
           </form>
+          )}
+          
         </div>
 
         {/* orderSummaryMob */}

@@ -1,0 +1,78 @@
+{
+	"info": {
+		"_postman_id": "d2f6cba0-ceeb-410a-bde6-4fbc062b8cf2",
+		"name": "Discounts API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Active Discounts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/active-discounts?cartTotal=100&redeemType=Purchase",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"active-discounts"
+					],
+					"query": [
+						{
+							"key": "cartTotal",
+							"value": "100",
+							"description": "Total value of the cart"
+						},
+						{
+							"key": "redeemType",
+							"value": "Purchase",
+							"description": "Type of redemption: Purchase or Subscription"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Apply Discount",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"cart\": [\n    {\n      \"price\": 100,\n      \"quantity\": 2\n    }\n  ],\n  \"discountCode\": \"SAVE20\",\n  \"redeemType\": \"Purchase\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/apply-discount",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"apply-discount"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

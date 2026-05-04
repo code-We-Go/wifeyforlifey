@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import NextImage from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,6 +39,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreVertical,
+  GripVertical,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
@@ -60,149 +61,23 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Input } from "@/components/ui/input";
+import {
+  type CeremonyType,
+  type CeremonyVariation,
+  type WeddingFeature,
+  CEREMONY_OPTIONS,
+  FEATURES_BY_VARIATION,
+  ALL_FEATURES,
+  MUSLIM_KATB_KETAB_ONLY_FEATURES,
+} from "@/lib/wedding-timeline-config";
 
 // --- Types & Constants ---
 
-type Feature = {
-  id: string;
-  label: string;
-  defaultDuration: number;
-  category: "before" | "zaffa" | "after"; // To help with ordering later
-  hidden?: boolean;
-};
+// CEREMONY_OPTIONS and FEATURES are imported from @/lib/wedding-timeline-config
+// They are also served via GET /api/wedding-timeline/config for mobile app consumption.
 
-const FEATURES: Feature[] = [
-  { id: "makeup", label: "Makeup", defaultDuration: 105, category: "before" },
-  { id: "hair", label: "Hair & Veil", defaultDuration: 60, category: "before" },
-  {
-    id: "getting_ready",
-    label: "Getting ready pictures",
-    defaultDuration: 30,
-    category: "before",
-  },
-  {
-    id: "dress_suit",
-    label: "Wearing dress & suit",
-    defaultDuration: 30,
-    category: "before",
-    hidden: true,
-  },
-  {
-    id: "first_look",
-    label: "First look",
-    defaultDuration: 15,
-    category: "before",
-  },
-  {
-    id: "photoshoot",
-    label: "Photoshoot",
-    defaultDuration: 120,
-    category: "before",
-  },
-  { id: "zaffa", label: "Zaffa", defaultDuration: 30, category: "zaffa" },
-  { id: "entrance", label: "Entrance", defaultDuration: 20, category: "after" },
-  {
-    id: "katb_ketab",
-    label: "Katb Ketab",
-    defaultDuration: 45,
-    category: "after",
-  },
-  { id: "dinner", label: "Dinner", defaultDuration: 60, category: "after" },
-];
 
-// Define Feature Meta for ordering and labels (used in Timeline generation)
-const FEATURE_META: Record<
-  string,
-  {
-    label: string;
-    bride: string;
-    groom: string;
-    bridesmaids: string;
-    groomsmen: string;
-    order: number;
-  }
-> = {
-  makeup: {
-    label: "Makeup",
-    bride: "Makeup",
-    groom: "Relaxing",
-    bridesmaids: "Getting Ready",
-    groomsmen: "Relaxing",
-    order: 1,
-  },
-  hair: {
-    label: "Hair & Veil",
-    bride: "Hair Styling",
-    groom: "Getting Ready",
-    bridesmaids: "Helping Bride",
-    groomsmen: "Getting Ready",
-    order: 2,
-  },
-  getting_ready: {
-    label: "Getting ready pictures",
-    bride: "Getting Ready Photos",
-    groom: "Getting Ready Photos",
-    bridesmaids: "Photos",
-    groomsmen: "Photos",
-    order: 3,
-  },
-  dress_suit: {
-    label: "Wearing dress & suit",
-    bride: "Wearing Dress",
-    groom: "Wearing Suit",
-    bridesmaids: "Helping Bride",
-    groomsmen: "Helping Groom",
-    order: 3.5,
-  },
-  first_look: {
-    label: "First look",
-    bride: "First Look",
-    groom: "First Look",
-    bridesmaids: "Watching",
-    groomsmen: "Watching",
-    order: 4,
-  },
-  photoshoot: {
-    label: "Photoshoot",
-    bride: "Couple Photoshoot",
-    groom: "Couple Photoshoot",
-    bridesmaids: "Group Photos",
-    groomsmen: "Group Photos",
-    order: 5,
-  },
-  zaffa: {
-    label: "Zaffa",
-    bride: "Zaffa / Entrance",
-    groom: "Zaffa / Entrance",
-    bridesmaids: "Procession",
-    groomsmen: "Procession",
-    order: 6,
-  },
-  entrance: {
-    label: "Entrance",
-    bride: "Grand Entrance",
-    groom: "Grand Entrance",
-    bridesmaids: "Entrance",
-    groomsmen: "Entrance",
-    order: 7,
-  },
-  katb_ketab: {
-    label: "Katb Ketab",
-    bride: "Katb Ketab Ceremony",
-    groom: "Katb Ketab Ceremony",
-    bridesmaids: "Attending",
-    groomsmen: "Attending",
-    order: 8,
-  },
-  dinner: {
-    label: "Dinner",
-    bride: "Dinner",
-    groom: "Dinner",
-    bridesmaids: "Dinner",
-    groomsmen: "Dinner",
-    order: 9,
-  },
-};
 
 type TimelineEvent = {
   id: string;
@@ -225,14 +100,33 @@ const formatTime = (date: Date) => {
   });
 };
 
+const shiftZaffaTime = (currentZaffa: string, minutes: number) => {
+  const [hours, mins] = (currentZaffa || "18:00").split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours, mins, 0, 0);
+  const newDate = new Date(date.getTime() + minutes * 60000);
+  return `${String(newDate.getHours()).padStart(2, "0")}:${String(newDate.getMinutes()).padStart(2, "0")}`;
+};
+
 const addMinutes = (date: Date, minutes: number) => {
   return new Date(date.getTime() + minutes * 60000);
 };
 
-const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string) => {
+const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa") => {
   if (events.length === 0) return [];
+// on Nareiman's Demandss the part starts => entrance
+  let zaffaIndex = events.findIndex((e) => e.id === anchorId);
+  
+  // Fallback to auto-detecting common anchor IDs if the primary anchorId wasn't found. 
+  // (This handles cases where the user restored a timeline from DB without the full variation config).
+  if (zaffaIndex === -1) {
+    const fallbackAnchors = ["zaffa", "church", "katb_ketab"];
+    for (const pa of fallbackAnchors) {
+      zaffaIndex = events.findIndex((e) => e.id === pa);
+      if (zaffaIndex !== -1) break;
+    }
+  }
 
-  const zaffaIndex = events.findIndex((e) => e.id === "zaffa");
   const [hours, minutes] = zaffaTimeStr.split(":").map(Number);
   const zaffaDate = new Date();
   zaffaDate.setHours(hours, minutes, 0, 0);
@@ -281,13 +175,16 @@ function SortableRow({
   event,
   index,
   handleDurationChange,
+  handleDurationBlur,
   handleActivityChange,
   handleDeleteEvent,
   mobileActiveColumn,
+  setOriginalDuration,
 }: {
   event: TimelineEvent;
   index: number;
   handleDurationChange: (index: number, val: string) => void;
+  handleDurationBlur: (index: number, duration: number) => void;
   handleActivityChange: (
     index: number,
     field: keyof TimelineEvent,
@@ -295,6 +192,7 @@ function SortableRow({
   ) => void;
   handleDeleteEvent: (index: number) => void;
   mobileActiveColumn: string;
+  setOriginalDuration: (val: number) => void;
 }) {
   const {
     attributes,
@@ -304,6 +202,26 @@ function SortableRow({
     transition,
     isDragging,
   } = useSortable({ id: event.id });
+
+  const brideRef = useRef<HTMLTextAreaElement>(null);
+  const groomRef = useRef<HTMLTextAreaElement>(null);
+  const bridesmaidsRef = useRef<HTMLTextAreaElement>(null);
+  const groomsmenRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textareas on mount and when content changes
+  useEffect(() => {
+    const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+    };
+
+    resizeTextarea(brideRef.current);
+    resizeTextarea(groomRef.current);
+    resizeTextarea(bridesmaidsRef.current);
+    resizeTextarea(groomsmenRef.current);
+  }, [event.brideActivity, event.groomActivity, event.bridesmaidsActivity, event.groomsmenActivity]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -316,96 +234,152 @@ function SortableRow({
     <TableRow
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={`hover:bg-pinkey w-full cursor-grab active:cursor-grabbing ${
+      className={`hover:bg-pinkey w-full ${
         event.isBreak ? "bg-pinkey/50" : "bg-pinkey/60"
       } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
     >
-      <TableCell className="font-medium whitespace-nowrap text-sm md:text-base p-1 md:p-4">
-        <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm">
+      {/* Drag Handle Column */}
+      <TableCell className="p-1 md:p-2 align-middle w-8">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-lovely/60 hover:text-lovely flex items-center justify-center touch-none"
+        >
+          <GripVertical className="h-4 w-4 md:h-5 md:w-5" />
+        </div>
+      </TableCell>
+      <TableCell className="font-medium text-sm md:text-base p-1 md:p-4 align-middle">
+        <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm break-words">
           {event.timeLabel}
         </span>
       </TableCell>
-      <TableCell className="p-1 md:p-4">
-        <Input
-          type="number"
-          value={event.duration}
-          onPointerDown={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          onChange={(e) => handleDurationChange(index, e.target.value)}
-          className="w-16 md:w-20 bg-creamey text-center h-6 md:h-8 text-xs md:text-sm p-1"
-        />
+      <TableCell className="p-1 md:p-4 align-middle">
+        <div className="flex justify-center items-center w-full">
+          <Input
+            type="number"
+            value={event.duration}
+            onPointerDown={(e) => e.stopPropagation()}
+            onFocus={(e) => setOriginalDuration(parseInt(e.target.value) || 0)}
+            onKeyDown={(e) => e.stopPropagation()}
+            onChange={(e) => handleDurationChange(index, e.target.value)}
+            onBlur={(e) => handleDurationBlur(index, parseInt(e.target.value) || 0)}
+            className="w-10 md:w-14 bg-creamey text-center min-h-[1.5rem] md:min-h-[2rem] text-xs md:text-sm p-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+        </div>
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "brideActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={brideRef}
           value={event.brideActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "brideActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "groomActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={groomRef}
           value={event.groomActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "groomActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "bridesmaidsActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={bridesmaidsRef}
           value={event.bridesmaidsActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "bridesmaidsActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 ${
+        className={`p-1 md:p-4 align-middle ${
           mobileActiveColumn === "groomsmenActivity" ? "table-cell" : "hidden"
         } md:table-cell`}
       >
-        <Input
+        <Textarea
+          ref={groomsmenRef}
           value={event.groomsmenActivity}
           onPointerDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) =>
             handleActivityChange(index, "groomsmenActivity", e.target.value)
           }
-          className={`h-6 md:h-8 bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 ${
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
             event.isBreak ? "text-lovely italic" : ""
           }`}
+          rows={1}
+          style={{
+            height: 'auto',
+            lineHeight: '1.2',
+          }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = target.scrollHeight + 'px';
+          }}
         />
       </TableCell>
-      <TableCell className="p-1 md:p-4">
+      <TableCell className="p-1 md:p-4 align-middle">
         <Button
           variant="ghost"
           size="icon"
@@ -429,20 +403,39 @@ function WeddingTimelinePageContent() {
   const { toast } = useToast();
 
   // -- Wizard State --
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  const [activeCeremonyType, setActiveCeremonyType] = useState<CeremonyType | null>(null);
+  const [selectedCeremonyVariation, setSelectedCeremonyVariation] = useState<CeremonyVariation | null>(null);
   const [checkingTimeline, setCheckingTimeline] = useState(false);
   const [zaffaTime, setZaffaTime] = useState("18:00");
   const [selectedFeatures, setSelectedFeatures] = useState<
-    Record<string, { enabled: boolean; duration: number }>
+    Record<string, { enabled: boolean; duration?: number }>
   >(
-    FEATURES.reduce(
+    ALL_FEATURES.reduce(
       (acc, feature) => ({
         ...acc,
-        [feature.id]: { enabled: true, duration: feature.defaultDuration },
+        [feature.id]: { enabled: true },
       }),
       {}
     )
   );
+
+  // -- Katb Ketab Only - Extra Questions State --
+  // Q1: Where are you getting ready? "home" | "venue"
+  const [gettingReadyLocation, setGettingReadyLocation] = useState<"home" | "venue" | null>(null);
+  // Q2: Will bridesmaids come to preparations? "yes" | "no"
+  const [bridesmaidsAtPrep, setBridesmaidsAtPrep] = useState<"yes" | "no" | null>(null);
+  // Q3: Is photo session at same place as Katb Ketab? "yes" | "no"
+  const [photoAtKatbLocation, setPhotoAtKatbLocation] = useState<"yes" | "no" | null>(null);
+  const [photoshootLocation, setPhotoshootLocation] = useState<"venue" | "another_place" | null>(null);
+  const [photoshootTiming, setPhotoshootTiming] = useState<"before" | "after" | null>(null);
+
+  // Selected anchor for christian_church_venue (either 'church' or 'Grand_Entrance')
+  const [selectedAnchor, setSelectedAnchor] = useState<string | null>(null);
+
+  // -- Names (optional, for PDF) --
+  const [brideFirstName, setBrideFirstName] = useState("");
+  const [groomFirstName, setGroomFirstName] = useState("");
 
   // -- Timeline Editor State --
   const [events, setEvents] = useState<TimelineEvent[]>([]);
@@ -450,7 +443,6 @@ function WeddingTimelinePageContent() {
   const [isExporting, setIsExporting] = useState(false);
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
   const [mobileActiveColumn, setMobileActiveColumn] = useState("brideActivity");
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
   // -- Share State --
@@ -469,7 +461,7 @@ function WeddingTimelinePageContent() {
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [hasFeedback, setHasFeedback] = useState(false);
-  const [showFeedbackPrompt, setShowFeedbackPrompt] = useState(false);
+  const [showBlogSuggestion, setShowBlogSuggestion] = useState(false);
 
   // -- Tutorial State --
   const [showTutorial, setShowTutorial] = useState(false);
@@ -482,17 +474,59 @@ function WeddingTimelinePageContent() {
   // -- Options Modal State (for mobile) --
   const [showOptionsModal, setShowOptionsModal] = useState(false);
 
+  // -- Add New Event Modal State --
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [newEventName, setNewEventName] = useState("");
+  const [newEventDuration, setNewEventDuration] = useState(30);
+  const [newEventPosition, setNewEventPosition] = useState<"start" | "end">("end");
+
+  // -- Time Shift Dialog State --
+  const [showShiftDialog, setShowShiftDialog] = useState(false);
+  const [originalDuration, setOriginalDuration] = useState<number | null>(null);
+  const [pendingShift, setPendingShift] = useState<{
+    type: "feature" | "event";
+    idOrIndex: string | number;
+    newDuration: number;
+    prevDuration: number;
+  } | null>(null);
+
+  // -- Helper for Anchor Event --
+  const getAnchorEventId = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
+    if (!variation) return "zaffa";
+    
+    // For these variations, use the user's selected anchor if available
+    if ((variation === "christian_church_venue" || variation === "muslim_katb_ketab_wedding") && anchorOverride) return anchorOverride;
+
+    // Christian variations usually anchor to Church, unless it's venue only
+    // if (variation.startsWith("christian") && variation !== "christian_venue_only") return "church";
+    if (variation === "christian_venue_only"  || variation === "christian_church_venue") return "Grand_Entrance";
+    if (variation === "christian_church_only") return "church";
+    
+    // Muslim variations
+    if (variation === "muslim_katb_ketab_only") return "katb_ketab";
+    if (variation === "muslim_katb_ketab_wedding") return anchorOverride || "Grand_Entrance"; // Or katb_ketab depending on override, but default if not set
+    if (variation === "muslim_wedding_only") return "Grand_Entrance"; 
+    
+    return "zaffa"; 
+  };
+  
+  const getAnchorLabel = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
+    const anchorId = getAnchorEventId(variation, anchorOverride);
+    const feature = ALL_FEATURES.find(f => f.id === anchorId);
+    return feature ? feature.label : "Wedding";
+  };
+
   // Tutorial Steps
   const tutorialSteps = [
     {
-      image: "/weddingPlanningToutorial/1.gif",
-      title: "Set Your Zaffa Time",
-      description: "Start by selecting when your Zaffa (party entrance) begins. This will be the anchor point for your entire timeline."
+      image: "/weddingPlanningToutorial/step1.gif",
+      title: "Set Your Wedding Start Time",
+      description: "Start by selecting when your wedding begins. This will be the anchor point for your entire timeline."
     },
     {
       image: "/weddingPlanningToutorial/2.gif",
       title: "Choose Your Features",
-      description: "Select the activities you want to include in your wedding day and customize their duration to fit your schedule."
+      description: "Select the activities you want to include in your wedding day and customize their duration to fit your schedule. (Note: this is our recommended timing but you still can change it later)"
     },
     {
       image: "/weddingPlanningToutorial/3.gif",
@@ -502,12 +536,12 @@ function WeddingTimelinePageContent() {
     {
       image: "/weddingPlanningToutorial/4.gif",
       title: "Mobile View Selector",
-      description: "On mobile devices, use the dropdown selector to switch between viewing different columns (Bride, Groom, Bridesmaids, Groomsmen)."
+      description: "On mobile devices, use the dropdown selector to switch between viewing different personas (Bride, Groom, Bridesmaids, Groomsmen)."
     },
     {
-      image: "/weddingPlanningToutorial/5.gif",
+      image: "/weddingPlanningToutorial/step5.gif",
       title: "Save, Share & Export",
-      description: "Use these three buttons to save your timeline, share it with your loved ones, or export it as a PDF for printing."
+      description: "Use these options to save your timeline, share it with your loved ones, or export it as a PDF for printing."
     }
   ];
 
@@ -530,14 +564,16 @@ function WeddingTimelinePageContent() {
           const res = await fetch("/api/wedding-timeline");
           if (res.ok) {
             const data = await res.json();
-            if (data.found && data.data) {
-              // Existing plan found -> Load it and go to Step 3
-              const { zaffaTime: savedZaffa, events: savedEvents, feedback } = data.data;
-              if (savedZaffa) setZaffaTime(savedZaffa);
-              if (savedEvents && savedEvents.length > 0) {
-                setEvents(savedEvents);
-                setStep(3);
-              }
+              if (data.found && data.data) {
+                // Existing plan found -> Load it and go to Step 3
+                const { zaffaTime: savedZaffa, events: savedEvents, feedback, brideFirstName: savedBride, groomFirstName: savedGroom } = data.data;
+                if (savedZaffa) setZaffaTime(savedZaffa);
+                if (savedBride) setBrideFirstName(savedBride);
+                if (savedGroom) setGroomFirstName(savedGroom);
+                if (savedEvents && savedEvents.length > 0) {
+                  setEvents(savedEvents);
+                  setStep(6);
+                }
               // Check if user has already provided feedback
               // Only set hasFeedback to true if feedback exists and has actual data
               if (feedback && (feedback.easeOfUse > 0 || feedback.satisfaction > 0 || feedback.timeSaved || feedback.recommend || (feedback.feelings && feedback.feelings.length > 0))) {
@@ -556,21 +592,61 @@ function WeddingTimelinePageContent() {
     checkExistingTimeline();
   }, [isAuthenticated, loading]);
 
-  // 2. Show tutorial for first-time users when they reach step 3
+  // 2. Show tutorial for first-time users when they reach step 5 (Timeline)
   useEffect(() => {
     const hasSeenStorage = localStorage.getItem("weddingTimelineTutorialSeen");
-    if (step === 3 && !hasSeenTutorial && !hasSeenStorage) {
+    if ( !hasSeenTutorial && !hasSeenStorage) {
       // Small delay to let the timeline render first
-      const timer = setTimeout(() => {
         setShowTutorial(true);
-        setHasSeenTutorial(true);
         localStorage.setItem("weddingTimelineTutorialSeen", "true");
-      }, 500);
-      return () => clearTimeout(timer);
     }
   }, [step, hasSeenTutorial]);
 
-  // 3. Handle Drag End
+  // 3. Handle step parameter from URL and restore state after login
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const stepParam = params.get('step');
+    
+    if (stepParam === '5' && isAuthenticated && !checkingTimeline) {
+      const savedStateStr = localStorage.getItem('pendingWeddingTimelineState');
+      if (savedStateStr) {
+        try {
+          const parsed = JSON.parse(savedStateStr);
+          if (parsed.activeCeremonyType) setActiveCeremonyType(parsed.activeCeremonyType);
+          if (parsed.selectedCeremonyVariation) setSelectedCeremonyVariation(parsed.selectedCeremonyVariation);
+          if (parsed.gettingReadyLocation) setGettingReadyLocation(parsed.gettingReadyLocation);
+          if (parsed.bridesmaidsAtPrep) setBridesmaidsAtPrep(parsed.bridesmaidsAtPrep);
+          if (parsed.photoAtKatbLocation) setPhotoAtKatbLocation(parsed.photoAtKatbLocation);
+          if (parsed.photoshootLocation) setPhotoshootLocation(parsed.photoshootLocation);
+          if (parsed.photoshootTiming) setPhotoshootTiming(parsed.photoshootTiming);
+          if (parsed.zaffaTime) setZaffaTime(parsed.zaffaTime);
+          if (parsed.selectedFeatures) setSelectedFeatures(parsed.selectedFeatures);
+          if (parsed.brideFirstName) setBrideFirstName(parsed.brideFirstName);
+          if (parsed.groomFirstName) setGroomFirstName(parsed.groomFirstName);
+        } catch(e) {}
+        localStorage.removeItem('pendingWeddingTimelineState');
+      }
+      setStep(5);
+      window.history.replaceState({}, '', '/wedding-timeline');
+    } else if (stepParam === '2' && isAuthenticated && !checkingTimeline) {
+      // legacy support
+      const pendingZaffaTime = localStorage.getItem('pendingZaffaTime');
+      if (pendingZaffaTime) {
+        setZaffaTime(pendingZaffaTime);
+        localStorage.removeItem('pendingZaffaTime');
+      }
+      setStep(4);
+      window.history.replaceState({}, '', '/wedding-timeline');
+    }
+  }, [isAuthenticated, checkingTimeline]);
+
+  useEffect(() => {
+    if (selectedCeremonyVariation !== "christian_church_venue" && selectedCeremonyVariation !== "muslim_katb_ketab_wedding") {
+      setSelectedAnchor(null);
+    }
+  }, [selectedCeremonyVariation]);
+
+  // 4. Handle Drag End
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -583,10 +659,10 @@ function WeddingTimelinePageContent() {
     }
   };
 
-  // 4. Calculated Events (Time Calculation)
-  const calculatedEvents = calculateTimeline(events, zaffaTime);
+  // 5. Calculated Events (Time Calculation)
+  const calculatedEvents = calculateTimeline(events, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor));
 
-  // 5. Auto-Save Logic (Only if newly generated and not yet saved)
+  // 6. Auto-Save Logic (Only if newly generated and not yet saved)
   //   useEffect(() => {
   //     // We might want to be careful with auto-save to avoid overwriting accidentally
   //     // But if the user just created a plan, maybe we save it?
@@ -608,6 +684,19 @@ function WeddingTimelinePageContent() {
       ...prev,
       [id]: { ...prev[id], duration },
     }));
+  };
+
+  const handleFeatureDurationBlur = (id: string, duration: number) => {
+    if (originalDuration === null || originalDuration === duration) return;
+
+    setPendingShift({
+      type: "feature",
+      idOrIndex: id,
+      newDuration: duration,
+      prevDuration: originalDuration,
+    });
+    setShowShiftDialog(true);
+    setOriginalDuration(null);
   };
 
   const saveToDb = async (
@@ -635,6 +724,8 @@ function WeddingTimelinePageContent() {
         },
         body: JSON.stringify({
           zaffaTime: currentZaffaTime,
+          brideFirstName,
+          groomFirstName,
           selectedFeatures: currentEvents
             .filter(
               (e) =>
@@ -669,9 +760,9 @@ function WeddingTimelinePageContent() {
           className: "bg-pinkey text-lovely border-lovely",
         });
 
-        // Show feedback prompt if user hasn't provided feedback yet
+        // Show feedback dialog if user hasn't provided feedback yet
         if (!hasFeedback) {
-          setTimeout(() => setShowFeedbackPrompt(true), 1000);
+          setTimeout(() => setShowFeedbackDialog(true), 1000);
         }
       }
     } catch (error) {
@@ -688,57 +779,85 @@ function WeddingTimelinePageContent() {
   };
 
   const handlePlan = async () => {
-    if (!isAuthenticated) {
-      setShowLoginDialog(true);
-      return;
-    }
 
     // 1. Generate Events from Selection
-    const featureList = FEATURES.map((f) => ({
-      id: f.id,
-      label: f.label,
-      category: f.category,
-      enabled: selectedFeatures[f.id].enabled,
-      duration: selectedFeatures[f.id].duration,
-    })).filter((f) => f.enabled);
+    // featureList keeps the full WeddingFeature shape (including .order and .activities)
+    let featureList = (
+      selectedCeremonyVariation
+        ? FEATURES_BY_VARIATION[selectedCeremonyVariation]
+        : ALL_FEATURES
+    )
+      .filter((f) => {
+        if (f.showIf) {
+          const conditions = Array.isArray(f.showIf) ? f.showIf : [f.showIf];
+          const hasMatch = conditions.some((cond) => {
+            if (cond.gettingReadyLocation && cond.gettingReadyLocation !== gettingReadyLocation) return false;
+            if (cond.bridesmaidsAtPrep && cond.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
+            if (cond.photoAtKatbLocation && cond.photoAtKatbLocation !== photoAtKatbLocation) return false;
+            if (cond.photoshootLocation && cond.photoshootLocation !== photoshootLocation) return false;
+            if (cond.photoshootTiming && cond.photoshootTiming !== photoshootTiming) return false;
+            return true;
+          });
+          if (!hasMatch) return false;
+        }
+        return true;
+      })
+      .map((f) => ({
+        ...f,
+        enabled: selectedFeatures[f.id]?.enabled ?? true,
+        duration: selectedFeatures[f.id]?.duration ?? f.defaultDuration,
+      })).filter((f) => f.enabled || f.hidden); // Include if enabled OR hidden (mandatory)
 
-    // Sort features based on predefined order
-    featureList.sort((a, b) => {
-      const orderA = FEATURE_META[a.id]?.order || 99;
-      const orderB = FEATURE_META[b.id]?.order || 99;
-      return orderA - orderB;
-    });
+    // Sort features based on their order field (from WeddingFeature)
+    featureList.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
     // Generate Events with Breaks
     const generatedEvents: TimelineEvent[] = [];
 
     featureList.forEach((feature, index) => {
-      const meta = FEATURE_META[feature.id] || {
-        label: feature.id,
-        bride: "",
-        groom: "",
-        bridesmaids: "",
-        groomsmen: "",
-      };
+      // Activities come directly from the merged WeddingFeature shape
+      let acts = { ...(feature.activities ?? { bride: "", groom: "", bridesmaids: "", groomsmen: "" }) };
+
+      // Apply conditional activities if conditions are met
+      if (feature.conditionalActivities) {
+        for (const ca of feature.conditionalActivities) {
+          let match = true;
+          if (ca.condition.gettingReadyLocation && ca.condition.gettingReadyLocation !== gettingReadyLocation) match = false;
+          if (ca.condition.bridesmaidsAtPrep && ca.condition.bridesmaidsAtPrep !== bridesmaidsAtPrep) match = false;
+          if (ca.condition.photoAtKatbLocation && ca.condition.photoAtKatbLocation !== photoAtKatbLocation) match = false;
+          if (ca.condition.photoshootLocation && ca.condition.photoshootLocation !== photoshootLocation) match = false;
+          
+          if (match) {
+            acts = { ...acts, ...ca.activities };
+          }
+        }
+      }
 
       generatedEvents.push({
         id: feature.id,
         duration: feature.duration,
-        brideActivity: meta.bride,
-        groomActivity: meta.groom,
-        bridesmaidsActivity: meta.bridesmaids,
-        groomsmenActivity: meta.groomsmen,
+        brideActivity: acts.bride || "",
+        groomActivity: acts.groom || "",
+        bridesmaidsActivity: acts.bridesmaids || "",
+        groomsmenActivity: acts.groomsmen || "",
       });
 
-      // Add break if not the last event
-      if (index < featureList.length - 1) {
+      // Add break if not the last event AND not after zaffa, arrival, or any 'after' category events
+      const nextFeature = featureList[index + 1];
+      if (
+        index < featureList.length - 1 &&
+        feature.category !== "after" &&
+        !feature.noBreakAfter &&
+        nextFeature &&
+        !nextFeature.noBreakBefore
+      ) {
         generatedEvents.push({
           id: `break_${index}`,
           duration: 15,
-          brideActivity: "Break / Transition",
-          groomActivity: "Break / Transition",
-          bridesmaidsActivity: "Break / Transition",
-          groomsmenActivity: "Break / Transition",
+          brideActivity: (acts.bride?.trim() === "_" || !acts.bride?.trim()) ? "_" : "Break / Transition",
+          groomActivity: (acts.groom?.trim() === "_" || !acts.groom?.trim()) ? "_" : "Break / Transition",
+          bridesmaidsActivity: (acts.bridesmaids?.trim() === "_" || !acts.bridesmaids?.trim()) ? "_" : "Break / Transition",
+          groomsmenActivity: (acts.groomsmen?.trim() === "_" || !acts.groomsmen?.trim()) ? "_" : "Break / Transition",
           isBreak: true,
         });
       }
@@ -746,15 +865,14 @@ function WeddingTimelinePageContent() {
 
     setEvents(generatedEvents);
 
-    // 2. Save to DB (Silent or not? User said "add a record", let's be explicit but not blocking)
+    // 2. Save to DB
     if (isAuthenticated) {
-      // Calculate timeline for saving (since state 'events' is not updated yet in this closure)
-      const computedEvents = calculateTimeline(generatedEvents, zaffaTime);
+      const computedEvents = calculateTimeline(generatedEvents, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor));
       await saveToDb(generatedEvents, computedEvents, zaffaTime, true);
     }
 
-    // 3. Move to Step 3
-    setStep(3);
+    // 3. Move to Step 6
+    setStep(6);
   };
 
   const handleDurationChange = (index: number, newDuration: string) => {
@@ -762,6 +880,19 @@ function WeddingTimelinePageContent() {
     const newEvents = [...events];
     newEvents[index].duration = duration;
     setEvents(newEvents);
+  };
+
+  const handleDurationBlur = (index: number, duration: number) => {
+    if (originalDuration === null || originalDuration === duration) return;
+
+    setPendingShift({
+      type: "event",
+      idOrIndex: index,
+      newDuration: duration,
+      prevDuration: originalDuration,
+    });
+    setShowShiftDialog(true);
+    setOriginalDuration(null);
   };
 
   const handleActivityChange = (
@@ -774,16 +905,80 @@ function WeddingTimelinePageContent() {
     setEvents(newEvents);
   };
 
+  const confirmShift = (choice: "start-earlier" | "end-later") => {
+    if (!pendingShift) return;
+    const { type, idOrIndex, newDuration, prevDuration } = pendingShift;
+    const delta = newDuration - prevDuration;
+
+    if (type === "feature") {
+      const id = idOrIndex as string;
+      setSelectedFeatures((prev) => ({
+        ...prev,
+        [id]: { ...prev[id], duration: newDuration },
+      }));
+
+      // Determine if it's before/after anchor to decide if zaffaTime needs adjustment
+      const anchorId = getAnchorEventId(selectedCeremonyVariation);
+      const features = selectedCeremonyVariation ? FEATURES_BY_VARIATION[selectedCeremonyVariation] : ALL_FEATURES;
+      const targetFeature = features.find(f => f.id === id);
+      const anchorFeature = features.find(f => f.id === anchorId);
+      const isBeforeAnchor = (targetFeature?.order ?? 99) < (anchorFeature?.order ?? 99);
+
+      if (choice === "end-later" && isBeforeAnchor) {
+        setZaffaTime(prev => shiftZaffaTime(prev, delta));
+      } else if (choice === "start-earlier" && !isBeforeAnchor) {
+        setZaffaTime(prev => shiftZaffaTime(prev, -delta));
+      }
+    } else {
+      const index = idOrIndex as number;
+      const newEvents = [...events];
+      newEvents[index].duration = newDuration;
+      setEvents(newEvents);
+
+      const anchorId = getAnchorEventId(selectedCeremonyVariation);
+      const anchorIndex = events.findIndex(e => e.id === anchorId);
+      const isBeforeAnchor = index < anchorIndex;
+
+      if (choice === "end-later" && isBeforeAnchor) {
+        setZaffaTime(prev => shiftZaffaTime(prev, delta));
+      } else if (choice === "start-earlier" && !isBeforeAnchor) {
+        setZaffaTime(prev => shiftZaffaTime(prev, -delta));
+      }
+    }
+
+    setShowShiftDialog(false);
+    setPendingShift(null);
+  };
+
   const handleAddNewEvent = () => {
+    setNewEventName("");
+    setNewEventDuration(30);
+    setNewEventPosition("end");
+    setShowAddEventModal(true);
+  };
+
+  const confirmAddNewEvent = () => {
     const newEvent: TimelineEvent = {
       id: `new_${Date.now()}`,
-      duration: 30,
-      brideActivity: "New Activity",
-      groomActivity: "",
-      bridesmaidsActivity: "",
-      groomsmenActivity: "",
+      duration: newEventDuration,
+      brideActivity: newEventName || "New Activity",
+      groomActivity: newEventName || "New Activity",
+      bridesmaidsActivity: newEventName || "New Activity",
+      groomsmenActivity: newEventName || "New Activity",
     };
-    setEvents([...events, newEvent]);
+
+    if (newEventPosition === "start") {
+      setEvents([newEvent, ...events]);
+    } else {
+      setEvents([...events, newEvent]);
+    }
+    setShowAddEventModal(false);
+    
+    toast({
+      title: "Event Added",
+      description: `"${newEventName || "New Activity"}" has been added to your timeline.`,
+      className: "bg-pinkey text-lovely border-lovely",
+    });
   };
 
   const handleDeleteEvent = (index: number) => {
@@ -830,9 +1025,9 @@ function WeddingTimelinePageContent() {
           className: "bg-pinkey text-lovely border-lovely",
         });
 
-        // Show feedback prompt if user hasn't provided feedback yet
+        // Show feedback dialog if user hasn't provided feedback yet
         if (!hasFeedback) {
-          setTimeout(() => setShowFeedbackPrompt(true), 1000);
+          setTimeout(() => setShowFeedbackDialog(true), 1000);
         }
       }
     } catch (error) {
@@ -848,20 +1043,62 @@ function WeddingTimelinePageContent() {
   };
 
   const handleSubmitFeedback = async () => {
-    // Validate at least one rating or selection
-    const hasRatings = Object.values(feedbackRatings).some((r) => r > 0);
-    const hasSelections = feedbackTimeSaved || feedbackFeelings.length > 0 || feedbackRecommend;
-    
-    if (!hasRatings && !hasSelections && !feedbackText.trim()) {
+    // Validate ALL fields are filled in
+    if (feedbackRatings.easeOfUse === 0) {
       toast({
-        title: "Feedback Required",
-        description: "Please provide at least one response before submitting.",
+        title: "Rating Required",
+        description: "Please rate how easy it was to create your timeline (Question 1).",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+    if (feedbackRatings.satisfaction === 0) {
+      toast({
+        title: "Rating Required",
+        description: "Please rate how satisfied you are with how the day looks (Question 2).",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+    if (!feedbackTimeSaved) {
+      toast({
+        title: "Selection Required",
+        description: "Please select how much time you feel this tool saved you (Question 3).",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+    if (feedbackFeelings.length === 0) {
+      toast({
+        title: "Selection Required",
+        description: "Please select at least one feeling about how this tool made you feel (Question 4).",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+    if (!feedbackRecommend) {
+      toast({
+        title: "Selection Required",
+        description: "Please let us know if you would recommend this tool to another bride (Question 5).",
+        className: "bg-pinkey text-lovely border-lovely",
+      });
+      return;
+    }
+    if (!feedbackText.trim()) {
+      toast({
+        title: "Comments Required",
+        description: "Please share any additional comments before submitting.",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
 
+    await doSubmitFeedback();
+  };
+
+  const doSubmitFeedback = async () => {
     setIsSubmittingFeedback(true);
+    setShowBlogSuggestion(false);
 
     try {
       const response = await fetch("/api/wedding-timeline/feedback", {
@@ -886,7 +1123,6 @@ function WeddingTimelinePageContent() {
       if (data.success) {
         setHasFeedback(true);
         setShowFeedbackDialog(false);
-        setShowFeedbackPrompt(false);
         setFeedbackText("");
         setFeedbackRatings({
           easeOfUse: 0,
@@ -919,99 +1155,318 @@ function WeddingTimelinePageContent() {
 
     try {
       const { default: jsPDF, GState } = (await import("jspdf")) as any;
-      const autoTable = (await import("jspdf-autotable")).default;
 
       const doc = new jsPDF();
 
+      // Helper function to draw rounded rectangle
+      const drawRoundedRect = (x: number, y: number, width: number, height: number, radius: number, fillColor: string, borderColor: string) => {
+        doc.setFillColor(fillColor);
+        doc.setDrawColor(borderColor);
+        doc.setLineWidth(0.5);
+        
+        // Draw rounded rectangle
+        doc.roundedRect(x, y, width, height, radius, radius, 'FD');
+      };
+
+      // Helper function to calculate how many lines text will need
+      const calculateTextLines = (text: string, width: number, fontSize: number = 8) => {
+        doc.setFontSize(fontSize);
+        const maxWidth = width - 2; // Leave 1 unit padding on each side
+        const lines = doc.splitTextToSize(text, maxWidth);
+        return lines;
+      };
+
+      // Helper function to add text centered in a cell with wrapping
+      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 8) => {
+        doc.setFontSize(fontSize);
+        const maxWidth = width - 2; // Leave 1 unit padding on each side
+        const lines = doc.splitTextToSize(text, maxWidth);
+        const lineHeight = fontSize * 0.5; // Line spacing
+        const totalTextHeight = lines.length * lineHeight;
+        
+        // Start Y position to center the text block vertically
+        let textY = y + (height - totalTextHeight) / 2 + (fontSize / 2.5);
+        
+        lines.forEach((line: string) => {
+          const lineWidth = doc.getTextWidth(line);
+          const textX = x + (width - lineWidth) / 2;
+          doc.text(line, textX, textY);
+          textY += lineHeight;
+        });
+      };
+
       // Set Page Background (Creamey)
       doc.setFillColor("#FBF3E0");
-      doc.rect(
-        0,
-        0,
-        doc.internal.pageSize.width,
-        doc.internal.pageSize.height,
-        "F"
-      );
+      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
 
-      // Add Title
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(22);
-      doc.setTextColor("#D32333"); // Lovely
-      doc.text("Your Wedding Day Planner", 14, 20);
-
-      // Define columns
-      const tableColumn = [
-        "Time",
-        "Duration",
-        "Bride",
-        "Groom",
-        "Bridesmaids",
-        "Groomsmen",
-      ];
-
-      // Define rows
-      const tableRows = calculatedEvents.map((event) => [
-        event.timeLabel || "",
-        event.duration + " min",
-        event.brideActivity,
-        event.groomActivity,
-        event.bridesmaidsActivity,
-        event.groomsmenActivity,
-      ]);
-
-      // Add Table
-      autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 30,
-        theme: "grid",
-        styles: {
-          font: "helvetica",
-          fontSize: 10,
-          textColor: "#D32333", // Lovely
-          fillColor: "#FFB6C7", // Pinkey
-          lineColor: "#D32333", // Lovely
-          lineWidth: 0.1,
-        },
-        headStyles: {
-          fillColor: "#D32333", // Lovely
-          textColor: "#FFFFFF", // White
-          fontStyle: "bold",
-        },
-        alternateRowStyles: {
-          fillColor: "#FFC2D1", // Slightly lighter/different pink if needed
-        },
-        columnStyles: {
-          0: { cellWidth: 35, fontStyle: "bold" }, // Time
-          1: { cellWidth: 20, halign: "center" }, // Duration
-        },
-      });
-
-      // Add Watermark to all pages
+      // Add Logo at the top (full opacity)
       const logoUrl = "/logo/Wifey for Lifey Primary Logo with Slogan Red.png";
-      const watermarkImg = new Image();
-      watermarkImg.src = logoUrl;
+      const logoImg = new Image();
+      logoImg.src = logoUrl;
 
       await new Promise((resolve, reject) => {
-        watermarkImg.onload = resolve;
-        watermarkImg.onerror = reject;
+        logoImg.onload = resolve;
+        logoImg.onerror = reject;
       });
 
+      // Add logo centered at top
+      const logoWidth = 60;
+      const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
+      const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
+      doc.addImage(logoImg, "PNG", logoX, 10, logoWidth, logoHeight);
+
+
+      // Add timeline subheader image
+      const subHeaderUrl = "/timeline/timelineSubHeader.jpg";
+      const subHeaderImg = new Image();
+      subHeaderImg.src = subHeaderUrl;
+
+      await new Promise((resolve, reject) => {
+        subHeaderImg.onload = resolve;
+        subHeaderImg.onerror = reject;
+      });
+
+      // Add subheader image centered below logo
+      const subHeaderWidth = 100;
+      const subHeaderHeight = (subHeaderImg.height * subHeaderWidth) / subHeaderImg.width;
+      const subHeaderX = (doc.internal.pageSize.getWidth() - subHeaderWidth) / 2;
+      const titleY = 10 + logoHeight ;
+      doc.addImage(subHeaderImg, "JPEG", subHeaderX, titleY, subHeaderWidth, subHeaderHeight);
+
+
+      // Table configuration
+      const startY = titleY + subHeaderHeight ;
+      const gap = 2; // Gap between cells
+      const radius = 1; // Rounded corner radius
+      const minRowHeight = 8; // Minimum row height
+      const baseLineHeight = 4; // Height per line of text
+      const timeColWidth = 30;
+      const activityColWidth = 35;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const tableWidth = timeColWidth + (activityColWidth * 4) + (gap * 5);
+      const startX = (pageWidth - tableWidth) / 2;
+
+      let currentY = startY;
+
+      // Draw header row (text only, no boxes)
+      const headers = ["TIME", "BRIDE", "GROOM", "BRIDESMAIDS", "GROOMSMEN"];
+      const headerWidths = [timeColWidth, activityColWidth, activityColWidth, activityColWidth, activityColWidth];
+      
+      doc.setTextColor("#D32333");
+      doc.setFont("BebasNeue-Regular", "bold");
+      doc.setFontSize(10);
+      
+      let headerX = startX;
+      headers.forEach((header, index) => {
+        const textWidth = doc.getTextWidth(header);
+        const textX = headerX + (headerWidths[index] - textWidth) / 2;
+        doc.text(header, textX, currentY + 5); // Simple text without cell
+        headerX += headerWidths[index] + gap;
+      });
+
+      // Draw horizontal line under headers
+      const lineY = currentY + 7;
+      doc.setDrawColor("#D32333");
+      doc.setLineWidth(0.5);
+      doc.line(startX, lineY, startX + tableWidth, lineY);
+
+      currentY += 10; // Space after headers and line
+
+      // Draw data rows
+      doc.setFont("helvetica", "normal");
+      
+      calculatedEvents.forEach((event) => {
+        // Calculate the required height for this row based on content
+        let maxLines = 1;
+        const fontSize = 8;
+        
+        // Check if all activities are the same (merged cell)
+        const allSame = 
+          event.brideActivity === event.groomActivity &&
+          event.brideActivity === event.bridesmaidsActivity &&
+          event.brideActivity === event.groomsmenActivity;
+
+        if (allSame) {
+          // For merged cell, use the merged width
+          const mergedWidth = (activityColWidth * 4) + (gap * 3);
+          const lines = calculateTextLines(event.brideActivity, mergedWidth, fontSize);
+          maxLines = Math.max(maxLines, lines.length);
+        } else {
+          // Check each activity column
+          const activities = [
+            event.brideActivity,
+            event.groomActivity,
+            event.bridesmaidsActivity,
+            event.groomsmenActivity
+          ];
+          
+          activities.forEach((activity) => {
+            const lines = calculateTextLines(activity, activityColWidth, fontSize);
+            maxLines = Math.max(maxLines, lines.length);
+          });
+        }
+
+        // Also check time label
+        const timeLines = calculateTextLines(event.timeLabel || "", timeColWidth, fontSize);
+        maxLines = Math.max(maxLines, timeLines.length);
+
+        // Calculate row height based on number of lines
+        const rowHeight = Math.max(minRowHeight, maxLines * baseLineHeight + 2);
+
+        // Check if we need a new page
+        if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 20) {
+          doc.addPage();
+          doc.setFillColor("#FBF3E0");
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
+          currentY = 20;
+        }
+
+        // Draw time cell (always pink)
+        drawRoundedRect(startX, currentY, timeColWidth, rowHeight, radius, "#FFB6C7", "#D32333");
+        doc.setTextColor("#D32333");
+        doc.setFont("helvetica", "bold");
+        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, fontSize);
+
+        if (allSame) {
+          // Draw merged cell for all activities
+          const mergedWidth = (activityColWidth * 4) + (gap * 3);
+          const mergedX = startX + timeColWidth + gap;
+          // Use pink background for entrance event, creamy for others
+          const bgColor = event.id === "entrance" || event.id === "church" || event.id === "Grand_Entrance" ? "#FFB6C7" : "#FBF3E0";
+          drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, bgColor, "#D32333");
+          doc.setTextColor("#D32333");
+          doc.setFont("helvetica", "normal");
+          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, fontSize);
+        } else {
+          // Draw separate cells for each activity
+          const activities = [
+            event.brideActivity,
+            event.groomActivity,
+            event.bridesmaidsActivity,
+            event.groomsmenActivity
+          ];
+          
+          let cellX = startX + timeColWidth + gap;
+          activities.forEach((activity) => {
+            drawRoundedRect(cellX, currentY, activityColWidth, rowHeight, radius, "#FBF3E0", "#D32333");
+            doc.setTextColor("#D32333");
+            doc.setFont("helvetica", "normal");
+            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, fontSize);
+            cellX += activityColWidth + gap;
+          });
+        }
+
+        currentY += rowHeight + gap;
+      });
+
+      // Add Tips section
+      currentY += 10; // Add some space after the table
+
+      // Check if we need a new page for tips
+      if (currentY + 50 > doc.internal.pageSize.getHeight() - 20) {
+        doc.addPage();
+        doc.setFillColor("#FBF3E0");
+        doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
+        currentY = 20;
+      }
+
+      // Tips title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor("#D32333");
+      doc.text("Tips:", startX, currentY);
+      currentY += 7;
+
+      // Tips content
+      const tips = [
+        "The photographer and videographer should arrive during the last 30-40 minutes of the makeup session.",
+        "If a photo booth, audio booth, or live painter is hired, it's recommended that they arrive and complete setup 1-2 hours before the wedding begins.",
+        "Zaffa is recommended to start after Katb El Ketab.",
+        "If additional entertainers are hired (tabla show, violinist, etc.), we recommend that they begin after dinner.",
+        `for bridesmaids coming to photoshoot but getting ready at home : 
+- Consider 90 mins for hair styling at the salon. 
+- 60 mins for makeup and dress. 
+- Please leave early to arrive on time for photoshoot.`
+      ];
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor("#D32333");
+
+      tips.forEach((tip) => {
+        // Check if we need a new page
+        if (currentY + 10 > doc.internal.pageSize.getHeight() - 20) {
+          doc.addPage();
+          doc.setFillColor("#FBF3E0");
+          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
+          currentY = 20;
+        }
+
+        // Add bullet point and text with wrapping
+        const bulletX = startX + 2;
+        const textX = startX + 7;
+        const maxWidth = tableWidth - 7;
+
+        doc.text("•", bulletX, currentY);
+        
+        // Split text if it's too long
+        const lines = doc.splitTextToSize(tip, maxWidth);
+        doc.text(lines, textX, currentY);
+        
+        currentY += (lines.length * 5) + 2; // Adjust spacing based on number of lines
+      });
+
+      // Add Watermark to all pages (with low opacity)
       const totalPages = doc.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         const wmWidth = 120;
-        const wmHeight = (watermarkImg.height * wmWidth) / watermarkImg.width;
+        const wmHeight = (logoImg.height * wmWidth) / logoImg.width;
         const x = (doc.internal.pageSize.getWidth() - wmWidth) / 2;
         const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
 
         (doc as any).saveGraphicsState();
-        doc.setGState(new GState({ opacity: 0.1 }));
-        doc.addImage(watermarkImg, "PNG", x, y, wmWidth, wmHeight);
+        doc.setGState(new GState({ opacity: 0.12 }));
+        doc.addImage(logoImg, "PNG", x, y, wmWidth, wmHeight);
         (doc as any).restoreGraphicsState();
+        
+        // Add footer text with link
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor("#D32333");
+        const footerText = "This timeline was created by ";
+        const linkText = "shopwifeyforlifey.com";
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const footerY = pageHeight - 10;
+        
+        const footerTextWidth = doc.getTextWidth(footerText);
+        const totalWidth = footerTextWidth + doc.getTextWidth(linkText);
+        const footerStartX = (pageWidth - totalWidth) / 2;
+        
+        doc.text(footerText, footerStartX, footerY);
+        doc.textWithLink(linkText, footerStartX + footerTextWidth, footerY, {
+          url: "https://shopwifeyforlifey.com"
+        });
       }
 
-      doc.save("wedding-timeline.pdf");
+      const pdfFileName =
+        brideFirstName.trim() && groomFirstName.trim()
+          ? `${brideFirstName.trim()} & ${groomFirstName.trim()} wedding day timeline.pdf`
+          : "wedding-timeline.pdf";
+      doc.save(pdfFileName);
+
+      // Increment export counter in database
+      if (isAuthenticated) {
+        try {
+          await fetch("/api/wedding-timeline/export", {
+            method: "POST",
+          });
+        } catch (error) {
+          console.error("Failed to track export:", error);
+          // Don't show error to user, this is just analytics
+        }
+      }
 
       toast({
         title: "Success",
@@ -1019,9 +1474,8 @@ function WeddingTimelinePageContent() {
         className: "bg-pinkey text-lovely border-lovely",
       });
 
-      // Show feedback prompt if user hasn't provided feedback yet
       if (!hasFeedback) {
-        setTimeout(() => setShowFeedbackPrompt(true), 1000);
+        setTimeout(() => setShowFeedbackDialog(true), 1000);
       }
     } catch (error) {
       console.error("Export failed", error);
@@ -1072,19 +1526,26 @@ function WeddingTimelinePageContent() {
       setEvents([]);
       setZaffaTime("18:00");
       setSelectedFeatures(
-        FEATURES.reduce(
+        ALL_FEATURES.reduce(
           (acc, feature) => ({
             ...acc,
-            [feature.id]: { enabled: true, duration: feature.defaultDuration },
+            [feature.id]: { enabled: true },
           }),
           {}
         )
       );
       setStep(1);
+      setActiveCeremonyType(null);
+      setSelectedCeremonyVariation(null);
+      setGettingReadyLocation(null);
+      setBridesmaidsAtPrep(null);
+      setPhotoAtKatbLocation(null);
       setHasAutoSaved(false);
       setShareUrl(null);
       setShowResetDialog(false);
       setHasSeenTutorial(false);
+      setBrideFirstName("");
+      setGroomFirstName("");
       
       // Clear tutorial flag from localStorage so it shows again
       localStorage.removeItem("weddingTimelineTutorialSeen");
@@ -1107,7 +1568,7 @@ function WeddingTimelinePageContent() {
   // --- Render ---
 
   // Layout wrapper changes based on step
-  const isWizard = step === 1 || step === 2;
+  const isWizard = step === 1 || step === 2 || step === 3 || step === 4 || step === 5;
 
   return (
     <div
@@ -1128,7 +1589,7 @@ function WeddingTimelinePageContent() {
           <h1
             className={`${thirdFont.className} text-4xl text-center mb-2 text-lovely `}
           >
-            Your Wedding Day Planner
+            Your Timeline Bestie
           </h1>
 
           {loading || checkingTimeline ? (
@@ -1157,27 +1618,82 @@ function WeddingTimelinePageContent() {
               )}
 
               {step === 1 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl text-lovely text-center block">
-                      When does the Party start?
+                      What kind of ceremony are you planning?
                     </Label>
-                    <div className="flex relative justify-center">
-                      <div className="relative w-full max-w-xs">
-                        <Input
-                          type="time"
-                          value={zaffaTime}
-                          onChange={(e) => setZaffaTime(e.target.value)}
-                          className="p-6 text-xl border-pinkey/50 focus:border-pinkey focus:ring-pinkey text-lovely/90 bg-creamey/20 text-center [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer relative z-10"
-                        />
-                        <Clock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-lovely pointer-events-none z-20" />
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                      {CEREMONY_OPTIONS.map((option) => (
+                        <div
+                          key={option.id}
+                          className={`
+                            border-2 rounded-lg p-4 cursor-pointer transition-all
+                            ${
+                              activeCeremonyType === option.id
+                                ? "border-pinkey bg-pinkey/50 text-lovely"
+                                : "border-pinkey/30 hover:border-pinkey/60 bg-creamey"
+                            }
+                          `}
+                          onClick={() => setActiveCeremonyType(option.id)}
+                        >
+                          <h3 className="text-lg font-bold text-lovely text-center">
+                            {option.label}
+                          </h3>
+                          
+                          {activeCeremonyType === option.id && (
+                            <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2">
+                              {option.variations.map((variation) => (
+                                <div
+                                  key={variation.id}
+                                  className={`
+                                    p-3 rounded border cursor-pointer flex items-center gap-3
+                                    ${
+                                      selectedCeremonyVariation === variation.id
+                                        ? "bg-lovely text-creamey border-lovely"
+                                        : "bg-white/50 hover:text-creamey hover:bg-lovely/90 text-lovely border-pinkey/20"
+                                    }
+                                  `}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedCeremonyVariation(variation.id);
+                                  }}
+                                >
+                                  <div className={`
+                                    w-4 h-4 rounded-full border-2 flex items-center justify-center
+                                    ${selectedCeremonyVariation === variation.id ? "border-white" : "border-pinkey"}
+                                  `}>
+                                    {selectedCeremonyVariation === variation.id && (
+                                      <div className="w-2 h-2 rounded-full bg-white" />
+                                    )}
+                                  </div>
+                                  <span className="text-sm font-medium">{variation.label}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
                   <Button
-                    onClick={() => setStep(2)}
-                    className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8"
+                    disabled={!selectedCeremonyVariation}
+                    onClick={() => {
+                      if (
+                        selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                        selectedCeremonyVariation === "muslim_katb_ketab_wedding" ||
+                        selectedCeremonyVariation === "muslim_wedding_only" ||
+                        selectedCeremonyVariation === "christian_church_only" ||
+                        selectedCeremonyVariation === "christian_church_venue" ||
+                        selectedCeremonyVariation === "christian_venue_only"
+                      ) {
+                        setStep(2); // go to extra questions step
+                      } else {
+                        setStep(3); // skip extra questions, go to time picker
+                      }
+                    }}
+                    className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next Step <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -1185,6 +1701,268 @@ function WeddingTimelinePageContent() {
               )}
 
               {step === 2 && (
+                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
+                  {/* Q1: Where are you getting ready? */}
+                {selectedCeremonyVariation !== "christian_church_only" && (
+                  <div className="space-y-3">
+                    <Label className="text-xl text-lovely text-center block">
+                      Where are you getting ready?
+                    </Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(["home", "venue"] as const).map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setGettingReadyLocation(option)}
+                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
+                            gettingReadyLocation === option
+                              ? "bg-lovely text-creamey border-lovely"
+                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                          }`}
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <span>{option === "home" ? "🏠 Somewhere else" : (selectedCeremonyVariation === "muslim_katb_ketab_only" ? "🏛️ Katb ketab Venue" : "🏛️ Wedding Venue")}</span>
+                            {option === "home" && (
+                              <span className="text-[10px] normal-case font-normal opacity-70">
+                                (Home, other venue)
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    {gettingReadyLocation === "home" && (
+                      <p className="text-xs text-lovely/60 text-center">
+                        A 30-minute transportation to the photoshoot location will be added after preparations.
+                      </p>
+                    )}
+                  </div>
+              )}
+                  {/* Q2: Will bridesmaids come to preparations? */}
+                  <div className="space-y-3">
+                    <Label className="text-xl text-lovely text-center block">
+                      Will the bridesmaids come to preparations?
+                    </Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(["yes", "no"] as const).map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setBridesmaidsAtPrep(option)}
+                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
+                            bridesmaidsAtPrep === option
+                              ? "bg-lovely text-creamey border-lovely"
+                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                          }`}
+                        >
+                          {option === "yes" ? "✅ Yes" : "❌ No"}
+                        </button>
+                      ))}
+                    </div>
+                      {/* <p className="text-xs text-lovely/60 text-center">
+                        The &quot;Getting Ready Pictures&quot; event will be removed.
+                      </p> */}
+                  </div>
+                
+
+                  {/* Q3: Photo session location/timing */}
+                  {selectedCeremonyVariation && (
+                  <div className="space-y-3">
+                    {activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") ? (
+                      <>
+                        <Label className="text-xl text-lovely text-center block">
+                          When do you want to have the photo session?
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {(["before", "after"] as const).map((option) => (
+                            <button
+                              key={option}
+                              onClick={() => setPhotoshootTiming(option)}
+                              className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
+                                photoshootTiming === option
+                                  ? "bg-lovely text-creamey border-lovely"
+                                  : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                              }`}
+                            >
+                              {option === "before" ? "🕒 Before Church" : "🕓 After Church"}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : ( 
+                      // Muslim or variations where we ask location relative to anchor
+                      <>
+                        <Label className="text-xl text-lovely text-center block">
+                          Is the photo session at the same location as the {
+                            selectedCeremonyVariation?.includes("church") ? "church" : 
+                            selectedCeremonyVariation?.includes("katb_ketab") ? "Katb ketab location" : 
+                            "venue"
+                          }?
+                        </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {(["yes", "no"] as const).map((option) => (
+                            <button
+                              key={option}
+                              onClick={() => {
+                                if (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only") {
+                                  setPhotoshootLocation(option === "yes" ? "venue" : "another_place");
+                                } else {
+                                  setPhotoAtKatbLocation(option);
+                                }
+                              }}
+                              className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
+                                (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? (photoshootLocation === (option === "yes" ? "venue" : "another_place")) : (photoAtKatbLocation === option))
+                                  ? "bg-lovely text-creamey border-lovely"
+                                  : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                              }`}
+                            >
+                              {option === "yes" ? "✅ Yes, same place" : "📍 No, different"}
+                            </button>
+                          ))}
+                        </div>
+                        {(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? photoshootLocation === "another_place" : photoAtKatbLocation === "no") && (
+                          <p className="text-xs text-lovely/60 text-center">
+                            A 30-minute transportation to the will be added after the photoshoot.
+                            {/* A 30-minute transportation to the {getAnchorLabel(selectedCeremonyVariation)} will be added after the photoshoot. */}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  )}
+
+                        <div className="flex gap-4 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setStep(1)}
+                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      disabled={
+                        !gettingReadyLocation && selectedCeremonyVariation !== "christian_church_only"||
+                        (selectedCeremonyVariation !== "christian_church_venue" && !bridesmaidsAtPrep) ||
+                        (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
+                          ? !photoshootTiming 
+                          : (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? !photoshootLocation : !photoAtKatbLocation))
+                      }
+                      onClick={() => setStep(3)}
+                      className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
+                  {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && !selectedAnchor ? (
+                    <div className="space-y-4">
+                      <h2 className="text-xl text-lovely text-center block font-semibold">
+                        Which event should we build your timeline around?
+                      </h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {selectedCeremonyVariation === "christian_church_venue" ? (
+                          <>
+                            <button
+                              onClick={() => setSelectedAnchor("church")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              ⛪ Church Ceremony
+                            </button>
+                            <button
+                              onClick={() => setSelectedAnchor("Grand_Entrance")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              🚪 Venue Entrance
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setSelectedAnchor("katb_ketab")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              📜 Katb Ketab Ceremony
+                            </button>
+                            <button
+                              onClick={() => setSelectedAnchor("Grand_Entrance")}
+                              className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            >
+                              🥁 Grand Entrance
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      <p className="text-sm text-lovely/60 text-center">
+                        This event will be the anchor that everything else is calculated from.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Label className="text-xl text-lovely text-center block">
+                        When does the {getAnchorLabel(selectedCeremonyVariation, selectedAnchor)} start?
+                      </Label>
+                      <div className="flex w-full justify-center px-2">
+                        <input
+                          type="time"
+                          value={zaffaTime}
+                          onChange={(e) => setZaffaTime(e.target.value)}
+                          className="w-full px-3 py-3 bg-creamey border-pinkey border-2 text-lovely md:px-6 md:py-4 rounded-md border-input focus:outline-none focus:ring-2 focus:ring-pinkey focus:border-pinkey"
+                          style={{
+                            colorScheme: 'light'
+                          }}
+                        />
+                      </div>
+                      {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor && (
+                        <div className="flex justify-center">
+                          <Button 
+                            variant="link" 
+                            onClick={() => setSelectedAnchor(null)}
+                            className="text-lovely/60 text-xs underline"
+                          >
+                            Change reference event
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-4 mt-8">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                      if ((selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor) {
+                        setSelectedAnchor(null);
+                      } else {
+                        setStep(
+                          selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                          selectedCeremonyVariation === "muslim_katb_ketab_wedding" ||
+                          selectedCeremonyVariation === "muslim_wedding_only" ||
+                          selectedCeremonyVariation === "christian_church_only" ||
+                          selectedCeremonyVariation === "christian_church_venue" ||
+                          selectedCeremonyVariation === "christian_venue_only"
+                            ? 2
+                            : 1
+                        );
+                      }
+                      }}
+                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      disabled={selectedCeremonyVariation === "christian_church_venue" && !selectedAnchor}
+                      onClick={() => setStep(4)}
+                      className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {step === 4 && (
                 <div className="space-y-6 animate-in  text-lovely fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl  block mb-4">
@@ -1196,7 +1974,27 @@ function WeddingTimelinePageContent() {
                     </p>
 
                     <div className="grid gap-4 max-h-[50vh] overflow-y-auto pr-2">
-                      {FEATURES.filter((f) => !f.hidden).map((feature) => (
+                      {(selectedCeremonyVariation
+                        ? FEATURES_BY_VARIATION[selectedCeremonyVariation]
+                        : ALL_FEATURES
+                      )
+                        .filter((f) => {
+                          if (f.hidden) return false;
+                          if (f.showIf) {
+                            const conditions = Array.isArray(f.showIf) ? f.showIf : [f.showIf];
+                            const hasMatch = conditions.some((cond) => {
+                              if (cond.gettingReadyLocation && cond.gettingReadyLocation !== gettingReadyLocation) return false;
+                              if (cond.bridesmaidsAtPrep && cond.bridesmaidsAtPrep !== bridesmaidsAtPrep) return false;
+                              if (cond.photoAtKatbLocation && cond.photoAtKatbLocation !== photoAtKatbLocation) return false;
+                              if (cond.photoshootLocation && cond.photoshootLocation !== photoshootLocation) return false;
+                              if (cond.photoshootTiming && cond.photoshootTiming !== photoshootTiming) return false;
+                              return true;
+                            });
+                            if (!hasMatch) return false;
+                          }
+                          return true;
+                        })
+                        .map((feature) => (
                         <div
                           key={feature.id}
                           className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
@@ -1219,15 +2017,27 @@ function WeddingTimelinePageContent() {
                               className="text-base font-medium cursor-pointer"
                             >
                               {feature.label}
+                              {(feature.id === "hair" && activeCeremonyType !== "christian") && (
+                                <span className="block text-xs font-normal text-lovely/70 mt-1">
+                                  (for hijabis we recommend make up to be first, you can swap them later.)
+                                </span>
+                              )}
                             </Label>
                           </div>
                           {selectedFeatures[feature.id].enabled && (
                             <div className="flex items-center gap-2">
-                              <Input
+                              <input
                                 type="number"
-                                value={selectedFeatures[feature.id].duration}
+                                value={selectedFeatures[feature.id]?.duration ?? feature.defaultDuration}
+                                onFocus={(e) => setOriginalDuration(parseInt(e.target.value) || 0)}
                                 onChange={(e) =>
                                   handleFeatureDurationChange(
+                                    feature.id,
+                                    parseInt(e.target.value) || 0
+                                  )
+                                }
+                                onBlur={(e) =>
+                                  handleFeatureDurationBlur(
                                     feature.id,
                                     parseInt(e.target.value) || 0
                                   )
@@ -1245,28 +2055,160 @@ function WeddingTimelinePageContent() {
                   <div className="flex gap-4 pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => setStep(1)}
+                      onClick={() => setStep(3)}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
                       Prev step
                     </Button>
                     <Button
-                      onClick={handlePlan}
+                      onClick={() => setStep(5)}
                       disabled={loading}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90  font-bold  text-lovely"
                     >
-                      Plan My Day
+                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {step === 5 && !isAuthenticated ? (
+                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="mb-6 text-center">
+                    <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
+                      Login Required
+                    </h2>
+                    <p className="text-lovely/90 text-base">
+                      To be able to view your wedding day timeline later, you’ll need to sign up or login if you already have an account 💗
+                    </p>
+                  </div>
+                  <div className="flex gap-4 flex-col sm:flex-row">
+                    <Button
+                      className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
+                      onClick={() => {
+                        const stateToSave = {
+                          activeCeremonyType,
+                          selectedCeremonyVariation,
+                          gettingReadyLocation,
+                          bridesmaidsAtPrep,
+                          photoAtKatbLocation,
+                          photoshootLocation,
+                          photoshootTiming,
+                          zaffaTime,
+                          selectedFeatures,
+                          brideFirstName,
+                          groomFirstName,
+                        };
+                        localStorage.setItem('pendingWeddingTimelineState', JSON.stringify(stateToSave));
+                        router.push("/login?callbackUrl=/wedding-timeline?step=5");
+                      }}
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-2 border-lovely text-lovely hover:bg-pinkey/20"
+                      onClick={() => {
+                        const stateToSave = {
+                          activeCeremonyType,
+                          selectedCeremonyVariation,
+                          gettingReadyLocation,
+                          bridesmaidsAtPrep,
+                          photoAtKatbLocation,
+                          photoshootLocation,
+                          photoshootTiming,
+                          zaffaTime,
+                          selectedFeatures,
+                          brideFirstName,
+                          groomFirstName,
+                        };
+                        localStorage.setItem('pendingWeddingTimelineState', JSON.stringify(stateToSave));
+                        router.push("/register?callbackUrl=/wedding-timeline?step=5");
+                      }}
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
+                  <div className="flex gap-4 pt-2 mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setStep(4)}
+                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
+                    >
+                      Back
+                    </Button>
+                  </div>
+                </div>
+              ) : step === 5 && isAuthenticated && (
+                <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-4">
+                    <Label className="text-xl text-lovely text-center block">
+                      One last thing! 💕
+                    </Label>
+                    <p className="text-sm text-lovely/60 text-center">
+                      Optionally, enter the bride&apos;s and groom&apos;s first names to personalise your PDF file name.
+                    </p>
+
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm font-semibold text-lovely mb-1 block">
+                          Bride&apos;s First Name
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="e.g. Nour"
+                          value={brideFirstName}
+                          onChange={(e) => setBrideFirstName(e.target.value)}
+                          className="bg-creamey border-pinkey border-2 text-lovely placeholder:text-lovely/40 focus-visible:ring-pinkey"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-lovely mb-1 block">
+                          Groom&apos;s First Name
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="e.g. Ahmed"
+                          value={groomFirstName}
+                          onChange={(e) => setGroomFirstName(e.target.value)}
+                          className="bg-creamey border-pinkey border-2 text-lovely placeholder:text-lovely/40 focus-visible:ring-pinkey"
+                        />
+                      </div>
+                    </div>
+
+                    {brideFirstName.trim() && groomFirstName.trim() && (
+                      <p className="text-xs text-lovely/60 text-center">
+                        Your PDF will be saved as: <span className="font-semibold text-lovely">&ldquo;{brideFirstName.trim()} &amp; {groomFirstName.trim()} wedding.pdf&rdquo;</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-4 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setStep(4)}
+                      className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handlePlan}
+                      disabled={loading}
+                      className="flex-1 bg-pinkey hover:bg-pinkey/90 font-bold text-lovely"
+                    >
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                      Plan My Day 💍
                     </Button>
                   </div>
                 </div>
               )}
             </>
-          )}
-        </div>
-      )}
+          )
+        }
+      </div>
+    )}
 
-      {/* Timeline Editor Step 3 */}
-      {step === 3 && (
+      {/* Timeline Editor Step 6 */}
+      {step === 6 && (
         <div
           ref={contentRef}
           className="max-w-7xl mx-auto w-full rounded-lg shadow-xl overflow-hidden border-4 border-pinkey animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -1276,7 +2218,7 @@ function WeddingTimelinePageContent() {
               <h1
                 className={`${thirdFont.className} text-4xl font-display text-white`}
               >
-                Your Wedding Day planner
+                Your Timeline Bestie
               </h1>
             </div>
             {/* Desktop: Show all buttons */}
@@ -1349,6 +2291,64 @@ function WeddingTimelinePageContent() {
               </Button>
             </div>
           </div>
+          {/* testing */}
+          {/* <div className="mx-6 mt-6 mb-2 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-pinkey/30 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+            <h3 className={`${thirdFont.className} text-xl text-lovely mb-3 flex items-center gap-2`}>
+              <Clock className="h-5 w-5" /> Your Timeline Details
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+              {activeCeremonyType && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Ceremony Type</span>
+                  <span className="text-lovely font-medium capitalize">{activeCeremonyType.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {selectedCeremonyVariation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Format</span>
+                  <span className="text-lovely font-medium capitalize">{selectedCeremonyVariation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {zaffaTime && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Reference Time</span>
+                  <span className="text-lovely font-medium">
+                    {new Date(`2000-01-01T${zaffaTime}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                  </span>
+                </div>
+              )}
+              {gettingReadyLocation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Prep Location</span>
+                  <span className="text-lovely font-medium capitalize">{gettingReadyLocation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {bridesmaidsAtPrep && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Bridesmaids at Prep</span>
+                  <span className="text-lovely font-medium capitalize">{bridesmaidsAtPrep}</span>
+                </div>
+              )}
+              {photoAtKatbLocation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photos at Katb Ketab</span>
+                  <span className="text-lovely font-medium capitalize">{photoAtKatbLocation}</span>
+                </div>
+              )}
+              {photoshootLocation && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photoshoot Location</span>
+                  <span className="text-lovely font-medium capitalize">{photoshootLocation.replace(/_/g, ' ')}</span>
+                </div>
+              )}
+              {photoshootTiming && (
+                <div>
+                  <span className="text-lovely/60 block text-xs uppercase font-bold tracking-wider mb-1">Photoshoot Timing</span>
+                  <span className="text-lovely font-medium capitalize">{photoshootTiming} church</span>
+                </div>
+              )}
+            </div>
+          </div> */}
 
           <div className="overflow-x-auto">
             <DndContext
@@ -1359,19 +2359,21 @@ function WeddingTimelinePageContent() {
               <Table className="w-full relative">
                 <TableHeader className="bg-lovely sticky top-0 z-10 shadow-sm">
                   <TableRow className="hover:bg-lovely">
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-24 md:w-auto">
+                    {/* Drag Handle Header */}
+                    <TableHead className="w-8 p-1 md:p-2"></TableHead>
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-32 md:w-auto text-center">
                       TIME
                     </TableHead>
                     <TableHead className="text-center text-white text-xs md:text-sm p-1 md:p-4 w-16 md:w-auto">
                       Duration (min)
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4">
-                      <div className="md:hidden">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 text-center">
+                      <div className="md:hidden flex justify-center w-full">
                         <Select
                           value={mobileActiveColumn}
                           onValueChange={setMobileActiveColumn}
                         >
-                          <SelectTrigger className="h-6 text-xs bg-transparent border-none text-white p-0 focus:ring-0 focus:ring-offset-0 font-bold uppercase">
+                          <SelectTrigger className="h-6 text-xs bg-transparent border-none text-white p-0 focus:ring-0 focus:ring-offset-0 font-bold uppercase text-center justify-center">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -1388,16 +2390,16 @@ function WeddingTimelinePageContent() {
                       </div>
                       <span className="hidden md:inline">BRIDE</span>
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
                       GROOM
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
                       BRIDESMAIDS
                     </TableHead>
-                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
+                    <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
                       GROOMSMEN
                     </TableHead>
-                    <TableHead className="w-8 md:w-auto p-1 md:p-4"></TableHead>
+                    <TableHead className="w-8 md:w-auto p-1 md:p-4 text-center"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="text-lovely">
@@ -1411,9 +2413,11 @@ function WeddingTimelinePageContent() {
                         event={event}
                         index={index}
                         handleDurationChange={handleDurationChange}
+                        handleDurationBlur={handleDurationBlur}
                         handleActivityChange={handleActivityChange}
                         handleDeleteEvent={handleDeleteEvent}
                         mobileActiveColumn={mobileActiveColumn}
+                        setOriginalDuration={setOriginalDuration}
                       />
                     ))}
                   </SortableContext>
@@ -1437,15 +2441,57 @@ function WeddingTimelinePageContent() {
         </div>
       )}
 
+      {/* Blog Suggestion Popup */}
+      {showBlogSuggestion && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-creamey border-4 border-lovely rounded-2xl shadow-2xl max-w-md w-full p-7 relative animate-in fade-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowBlogSuggestion(false)}
+              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <h2 className={`${thirdFont.className} text-2xl text-lovely text-center mb-3`}>
+              Quick Tip Before You Go!
+            </h2>
+            <p className="text-lovely/80 text-sm text-center mb-5 leading-relaxed">
+              We noticed your ratings were a bit low. Our blog post on{" "}
+              <strong>creating the perfect wedding day timeline</strong> might have the answers you're looking for — from ordering events to timing tips! 🌸
+            </p>
+
+            {/* Blog image */}
+            <div className="flex shadow-lg justify-center mb-4 rounded-xl overflow-hidden">
+              <NextImage
+                src="/timeline/blog.png"
+                alt="Wedding Timeline Blog"
+                width={400}
+                height={220}
+                className="w-full object-cover rounded-xl"
+                unoptimized
+              />
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <a
+                href="/blogs/how-to-create-your-perfect-wedding-day-timeline-with-free-canva-template"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full bg-lovely hover:bg-lovely/90 text-white font-semibold py-3 px-4 rounded-lg transition-all hover:scale-[1.02]"
+              >
+                <span>📖</span> Read the Blog Post
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Feedback Dialog */}
-      {showFeedbackDialog && step === 3 && (
+      {showFeedbackDialog && step === 4 && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-lg w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
             <button
-              onClick={() => {
-                setShowFeedbackDialog(false);
-                setShowFeedbackPrompt(false);
-              }}
+              onClick={() => setShowFeedbackDialog(false)}
               className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors z-10"
             >
               <X className="h-5 w-5" />
@@ -1471,12 +2517,13 @@ function WeddingTimelinePageContent() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      onClick={() =>
+                      onClick={() => {
                         setFeedbackRatings((prev) => ({
                           ...prev,
                           easeOfUse: star,
-                        }))
-                      }
+                        }));
+                        if (star < 4) setShowBlogSuggestion(true);
+                      }}
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star
@@ -1500,12 +2547,13 @@ function WeddingTimelinePageContent() {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
-                      onClick={() =>
+                      onClick={() => {
                         setFeedbackRatings((prev) => ({
                           ...prev,
                           satisfaction: star,
-                        }))
-                      }
+                        }));
+                        if (star < 4) setShowBlogSuggestion(true);
+                      }}
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star
@@ -1614,22 +2662,20 @@ function WeddingTimelinePageContent() {
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
                   Any additional comments?
+                  <span className="text-lovely ml-1">*</span>
                 </label>
                 <Textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Share your thoughts..."
-                  className="min-h-[80px] placeholder:text-lovely/60 border-2 border-pinkey bg-creamey resize-none focus:border-lovely"
+                  className="min-h-[80px] placeholder:text-lovely/60 border-2 bg-creamey resize-none focus:border-lovely border-pinkey"
                 />
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <Button
-                onClick={() => {
-                  setShowFeedbackDialog(false);
-                  setShowFeedbackPrompt(false);
-                }}
+                onClick={() => setShowFeedbackDialog(false)}
                 variant="outline"
                 className="flex-1 border-2 border-pinkey bg-creamey hover:text-lovely text-lovely hover:bg-pinkey/20"
               >
@@ -1650,33 +2696,10 @@ function WeddingTimelinePageContent() {
         </div>
       )}
 
-      {/* Feedback Prompt (appears after using features) */}
-      {showFeedbackPrompt && !showFeedbackDialog && step === 3 && (
-        <div className="fixed bottom-24 right-6 bg-lovely text-white p-4 rounded-lg shadow-xl max-w-xs animate-in slide-in-from-bottom-4 duration-300 z-40">
-          <button
-            onClick={() => setShowFeedbackPrompt(false)}
-            className="absolute top-2 right-2 text-white/70 hover:text-white transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <p className="text-sm mb-3 pr-4">
-            Enjoying the timeline feature? We'd love to hear your thoughts!
-          </p>
-          <Button
-            onClick={() => {
-              setShowFeedbackPrompt(false);
-              setShowFeedbackDialog(true);
-            }}
-            size="sm"
-            className="w-full bg-creamey text-lovely hover:bg-creamey"
-          >
-            Share Feedback
-          </Button>
-        </div>
-      )}
+
 
       {/* Floating Feedback Button (always visible if no feedback given) */}
-      {!hasFeedback && step === 3 && !showFeedbackDialog && (
+      {!hasFeedback && step === 4 && !showFeedbackDialog && (
         <button
           onClick={() => setShowFeedbackDialog(true)}
           className="fixed bottom-6 right-6 bg-lovely text-white p-4 rounded-full shadow-lg hover:bg-lovely/90 transition-all hover:scale-110 z-40 flex items-center gap-2 group"
@@ -1687,53 +2710,151 @@ function WeddingTimelinePageContent() {
           </span>
         </button>
       )}
-      {/* Login Dialog */}
-      {showLoginDialog && (
+
+      {/* Add New Event Modal */}
+      {showAddEventModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
             <button
-              onClick={() => setShowLoginDialog(false)}
+              onClick={() => setShowAddEventModal(false)}
               className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
 
             <div className="mb-6 text-center">
-              <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
-                Login Required
+              <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2`}>
+                Add New Event
               </h2>
-              <p className="text-lovely/90 text-base">
-                You need to have an account to create your wedding plan. <br />
-                Please login or sign up to continue.
+              <p className="text-lovely/70 text-sm">
+                Customize your event details below ✨
               </p>
             </div>
 
-            <div className="flex gap-4 flex-col sm:flex-row">
-              <Button
-                className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
-                onClick={() => {
-                  router.push("/login?callbackUrl=/wedding-timeline");
-                  setShowLoginDialog(false);
-                }}
-              >
-                Login
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 border-2 border-lovely text-lovely hover:bg-pinkey/20"
-                onClick={() => {
-                  router.push("/signup?callbackUrl=/wedding-timeline");
-                  setShowLoginDialog(false);
-                }}
-              >
-                Sign Up
-              </Button>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-lovely font-bold">Activity Name</Label>
+                <Input
+                  value={newEventName}
+                  onChange={(e) => setNewEventName(e.target.value)}
+                  placeholder="e.g., Quick Snack, Coffee Break..."
+                  className="border-2 border-pinkey focus:border-lovely bg-creamey placeholder:text-lovely/40"
+                />
+                <p className="text-[10px] text-lovely/60">This will be the default activity for everyone.</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-lovely font-bold">Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  value={newEventDuration}
+                  onChange={(e) => setNewEventDuration(parseInt(e.target.value) || 0)}
+                  className="border-2 border-pinkey focus:border-lovely bg-creamey"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-lovely font-bold">Fixing the Beginning or the end of the day? <span className="text-pinkey/60 text-sm">()</span></Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setNewEventPosition("start")}
+                    className={`p-3 rounded-lg border-2 font-medium transition-all ${
+                      newEventPosition === "start"
+                        ? "bg-lovely text-white border-lovely shadow-md"
+                        : "bg-creamey text-lovely border-pinkey hover:border-lovely"
+                    }`}
+                  >
+                    Beginning of day
+                  </button>
+                  <button
+                    onClick={() => setNewEventPosition("end")}
+                    className={`p-3 rounded-lg border-2 font-medium transition-all ${
+                      newEventPosition === "end"
+                        ? "bg-lovely text-white border-lovely shadow-md"
+                        : "bg-creamey text-lovely border-pinkey hover:border-lovely"
+                    }`}
+                  >
+                    End of day
+                  </button>
+                </div>
+              </div>
             </div>
 
+            <div className="flex gap-3 mt-8">
+              <Button
+                onClick={() => setShowAddEventModal(false)}
+                variant="outline"
+                className="flex-1 border-2 border-pinkey bg-creamey hover:bg-pinkey/20 text-lovely font-bold"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmAddNewEvent}
+                className="flex-1 bg-lovely hover:bg-lovely/90 text-white font-bold"
+              >
+                Add Event
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Time Shift Dialog */}
+      {showShiftDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="mb-6 text-center">
+              <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2`}>
+                Adjust Timeline
+              </h2>
+              <p className="text-lovely/70 text-sm">
+                How should this time change affect your day?
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                onClick={() => confirmShift("start-earlier")}
+                className="w-full p-4 rounded-lg border-2 border-pinkey bg-white hover:border-lovely hover:bg-pinkey/10 transition-all text-left group"
+              >
+                <div className="font-bold text-lovely group-hover:text-lovely flex items-center justify-between">
+                  Start the day earlier
+                  <Clock className="w-5 h-5 opacity-40 group-hover:opacity-100" />
+                </div>
+                <p className="text-xs text-lovely/60 mt-1">
+                  The beginning of your day will shift to accommodate the extra time.
+                </p>
+              </button>
+
+              <button
+                onClick={() => confirmShift("end-later")}
+                className="w-full p-4 rounded-lg border-2 border-pinkey bg-white hover:border-lovely hover:bg-pinkey/10 transition-all text-left group"
+              >
+                <div className="font-bold text-lovely group-hover:text-lovely flex items-center justify-between">
+                  End the day later
+                  <Clock className="w-5 h-5 opacity-40 group-hover:opacity-100" />
+                </div>
+                <p className="text-xs text-lovely/60 mt-1">
+                  The end of your day will be pushed back for the extra time.
+                </p>
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <Button
+                onClick={() => {
+                  setShowShiftDialog(false);
+                  setPendingShift(null);
+                }}
+                variant="ghost"
+                className="w-full text-lovely/60 hover:text-lovely"
+              >
+                Cancel Change
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Tutorial Modal */}
       {showTutorial && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -1747,7 +2868,7 @@ function WeddingTimelinePageContent() {
 
             <div className="p-4">
               <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2 max-md:mt-8 text-center`}>
-                How to Use Wedding Timeline Planner
+                How to Use Timeline Bestie
               </h2>
               <p className="text-lovely/70 text-center mb-2">
                 Step {currentTutorialStep + 1} of {tutorialSteps.length}

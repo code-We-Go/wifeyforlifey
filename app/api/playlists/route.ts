@@ -3,104 +3,10 @@ import playlistModel from "@/app/modals/playlistModel";
 import videoModel from "@/app/modals/videoModel";
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
-
-const loadDB = async () => {
-  await ConnectDB();
-};
-
-loadDB();
-console.log("reagistering" + videoModel);
-
-// export async function POST(req: Request) {
-//   // Authenticate the request
-//   // const { isAuthenticated, user } = await authenticateRequest(req);
-
-//   // if (!isAuthenticated) {
-//   //   return NextResponse.json(
-//   //     { error: "Authentication required" },
-//   //     { status: 401 }
-//   //   );
-//   // }
-
-//   try {
-//     const data = await req.json();
-//     console.log("Creating playlist:", data);
-//     const newPlaylist = await playlistModel.create(data);
-//     return NextResponse.json({ data: newPlaylist }, { status: 200 });
-//   } catch (error: any) {
-//     console.error("Error creating playlist:", error);
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
-
-// export async function DELETE(request: Request) {
-//   // Authenticate the request
-//   // const { isAuthenticated, user } = await authenticateRequest(request);
-
-//   // if (!isAuthenticated) {
-//   //   return NextResponse.json(
-//   //     { error: "Authentication required" },
-//   //     { status: 401 }
-//   //   );
-//   // }
-
-//   try {
-//     const req = await request.json();
-//     console.log("Deleting playlist:", req.playlistID);
-
-//     const res = await playlistModel.findByIdAndDelete(req.playlistID);
-//     if (!res) {
-//       return NextResponse.json(
-//         { error: "Playlist not found" },
-//         { status: 404 }
-//       );
-//     }
-
-//     return NextResponse.json({ data: res }, { status: 200 });
-//   } catch (error: any) {
-//     console.error("Error deleting playlist:", error);
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
-
-// export async function PUT(request: Request) {
-//   // Authenticate the request
-//   const { isAuthenticated, user } = await authenticateRequest(request);
-
-//   if (!isAuthenticated) {
-//     return NextResponse.json(
-//       { error: "Authentication required" },
-//       { status: 401 }
-//     );
-//   }
-
-//   try {
-//     const { searchParams } = new URL(request.url);
-//     const playlistID = searchParams.get("playlistID");
-//     const req = await request.json();
-
-//     console.log("Updating playlist:", playlistID, req);
-
-//     const res = await playlistModel.findByIdAndUpdate(playlistID, req, {
-//       new: true,
-//       runValidators: true,
-//     });
-
-//     if (!res) {
-//       return NextResponse.json(
-//         { error: "Playlist not found" },
-//         { status: 404 }
-//       );
-//     }
-
-//     return NextResponse.json({ data: res }, { status: 200 });
-//   } catch (error: any) {
-//     console.error("Error updating playlist:", error);
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
+import packageModel from "@/app/modals/packageModel";
 
 export async function GET(req: Request) {
+  await ConnectDB();
   // Authenticate the request using our mixed auth middleware
   // const { isAuthenticated, user } = await authenticateRequest(req);
 
@@ -119,6 +25,7 @@ export async function GET(req: Request) {
   const limit = all ? 0 : 10;
   const skip = all ? 0 : (page - 1) * limit;
   const featured = searchParams.get("featured") === "true";
+  const packageId = searchParams.get("packageId");
 
   try {
     // Create search query
@@ -135,6 +42,25 @@ export async function GET(req: Request) {
     if (featured) {
       searchQuery = { ...searchQuery, featured: true };
     }
+
+    if (packageId) {
+      const pkg = await packageModel.findById(packageId);
+      if (pkg && pkg.packagePlaylists && pkg.packagePlaylists.length > 0) {
+        searchQuery = { ...searchQuery, _id: { $in: pkg.packagePlaylists } };
+      } else {
+        // If package doesn't exist or has no playlists, return empty
+        return NextResponse.json(
+          {
+            data: [],
+            total: 0,
+            currentPage: page,
+            totalPages: 1,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     searchQuery = { ...searchQuery, isPublic: true };
 
     // Get total count
@@ -146,7 +72,7 @@ export async function GET(req: Request) {
       .populate({
         path: "videos",
         model: "videos",
-        select: "title description thumbnailUrl duration isPublished",
+        select: "title description thumbnailUrl duration isPublished playlistFolder",
       })
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)

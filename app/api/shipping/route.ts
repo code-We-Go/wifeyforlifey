@@ -2,15 +2,9 @@ import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
 import shippingZonesModel from "@/app/modals/shippingZones";
 
-const loadDB = async () => {
-  console.log("hna");
-  await ConnectDB();
-};
-
-loadDB();
-
 export async function GET(request: Request) {
   try {
+    await ConnectDB();
     console.log("Fetching shipping zones...");
     const zones = await shippingZonesModel.find({}).lean();
 

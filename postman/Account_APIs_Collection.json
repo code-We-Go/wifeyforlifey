@@ -1,0 +1,484 @@
+{
+  "info": {
+    "name": "Wifey Account APIs",
+    "description": "Complete API collection for the account page tabs including user profile, orders, notifications, loyalty, wishlist, favorites, partners, and inspiration boards",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User Profile",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/user/profile?email={{user_email}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", "profile"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{user_email}}",
+                  "description": "User's email address"
+                }
+              ]
+            },
+            "description": "Fetches user profile information including username, firstName, lastName, email, imageURL, birthDate, and weddingDate"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"username\": \"JaneDoe\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"imageURL\": \"https://example.com/image.jpg\",\n  \"birthDate\": \"1995-05-15\",\n  \"weddingDate\": \"2026-06-20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", "profile"]
+            },
+            "description": "Updates user profile information. Awards loyalty points for first-time entries (birthday, wedding date, first name, last name)"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for managing user profile information (Info Tab)"
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/orders?email={{user_email}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{user_email}}",
+                  "description": "User's email address"
+                }
+              ]
+            },
+            "description": "Fetches all orders for the user including order details, status, payment status, and items"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for fetching user orders (Orders Tab)"
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Fetches all notifications for the authenticated user including likes, comments, and replies"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notificationId\": \"notification_id_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Marks a specific notification as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"markAll\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "Marks all notifications as read for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification as Read (By ID)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/:notificationId/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", ":notificationId", "read"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": "notification_id_here",
+                  "description": "The ID of the notification to mark as read"
+                }
+              ]
+            },
+            "description": "Marks a specific notification as read using the notification ID in the URL path"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for managing user notifications (Notifications Tab)"
+    },
+    {
+      "name": "Loyalty",
+      "item": [
+        {
+          "name": "Get Loyalty Transactions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/loyalty/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "loyalty", "transactions"]
+            },
+            "description": "Fetches all loyalty point transactions for the user including earn/spend history, reasons, and bonuses"
+          },
+          "response": []
+        },
+        {
+          "name": "Award Loyalty Bonus",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"bonusType\": \"birthday\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/loyalty/award-bonus",
+              "host": ["{{base_url}}"],
+              "path": ["api", "loyalty", "award-bonus"]
+            },
+            "description": "Awards loyalty bonus points for specific actions. Bonus types: birthday, wedding, firstname, lastname"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for managing loyalty points and transactions (Loyalty Tab)"
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        {
+          "name": "Get Wishlist (Context)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/wishlist",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wishlist"]
+            },
+            "description": "Note: Wishlist is managed via client-side context (wishListContext). This endpoint may not exist on the backend. Wishlist items are stored in the browser's local storage or session."
+          },
+          "response": []
+        }
+      ],
+      "description": "Wishlist is managed client-side via context (Wishlist Tab)"
+    },
+    {
+      "name": "Partners (Discounts)",
+      "item": [
+        {
+          "name": "Get Partners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/partners",
+              "host": ["{{base_url}}"],
+              "path": ["api", "partners"]
+            },
+            "description": "Fetches all partner discounts available to subscribed users"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for fetching partner discounts (Partners/Discounts Tab) - Requires subscription"
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "Get Favorites",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/favorites",
+              "host": ["{{base_url}}"],
+              "path": ["api", "favorites"]
+            },
+            "description": "Fetches user's favorite items - Requires subscription"
+          },
+          "response": []
+        },
+        {
+          "name": "Add to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"item_id_here\",\n  \"itemType\": \"product\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/favorites",
+              "host": ["{{base_url}}"],
+              "path": ["api", "favorites"]
+            },
+            "description": "Adds an item to user's favorites - Requires subscription"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove from Favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/favorites/:itemId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "favorites", ":itemId"],
+              "variable": [
+                {
+                  "key": "itemId",
+                  "value": "item_id_here",
+                  "description": "The ID of the item to remove from favorites"
+                }
+              ]
+            },
+            "description": "Removes an item from user's favorites - Requires subscription"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for managing user favorites (Favorites Tab) - Requires subscription"
+    },
+    {
+      "name": "Inspo (Inspiration Boards)",
+      "item": [
+        {
+          "name": "Get Inspo Boards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/inspos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspos"]
+            },
+            "description": "Fetches user's inspiration boards - Requires subscription"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Inspo Board",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Wedding Inspo\",\n  \"description\": \"Ideas for my dream wedding\",\n  \"items\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inspos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspos"]
+            },
+            "description": "Creates a new inspiration board - Requires subscription"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Inspo Board",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"boardId\": \"board_id_here\",\n  \"title\": \"Updated Title\",\n  \"description\": \"Updated description\",\n  \"items\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inspos/:boardId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspos", ":boardId"],
+              "variable": [
+                {
+                  "key": "boardId",
+                  "value": "board_id_here",
+                  "description": "The ID of the inspiration board to update"
+                }
+              ]
+            },
+            "description": "Updates an existing inspiration board - Requires subscription"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Inspo Board",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/inspos/:boardId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inspos", ":boardId"],
+              "variable": [
+                {
+                  "key": "boardId",
+                  "value": "board_id_here",
+                  "description": "The ID of the inspiration board to delete"
+                }
+              ]
+            },
+            "description": "Deletes an inspiration board - Requires subscription"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for managing inspiration boards (Inspo Tab) - Requires subscription"
+    },
+    {
+      "name": "Playlist Progress",
+      "item": [
+        {
+          "name": "Get Playlist Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/playlist-progress",
+              "host": ["{{base_url}}"],
+              "path": ["api", "playlist-progress"]
+            },
+            "description": "Fetches user's playlist progress for Continue Watching feature - Requires subscription"
+          },
+          "response": []
+        }
+      ],
+      "description": "APIs for tracking video playlist progress (Continue Watching)"
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login Tracking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_id_here\",\n  \"email\": \"{{user_email}}\",\n  \"firstName\": \"Jane\",\n  \"success\": true,\n  \"fingerprint\": \"device_fingerprint_here\",\n  \"userAgent\": \"Mozilla/5.0...\",\n  \"timestamp\": \"2026-02-01T21:51:37+02:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login-tracking",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login-tracking"]
+            },
+            "description": "Records login attempt with device fingerprint and tracking information"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication and tracking APIs"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "user@example.com",
+      "type": "string"
+    }
+  ]
+}

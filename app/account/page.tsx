@@ -50,9 +50,18 @@ import { compressImage } from "@/utils/imageCompression";
 import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import InspoTab from "./inspo/InspoTab";
+import ShoppingBestieTab from "./shopping-bestie/ShoppingBestieTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { VideoPlaylist } from "@/app/interfaces/interfaces";
 
 const AccountPage = () => {
   const { data: session, status } = useSession();
@@ -88,6 +97,17 @@ const AccountPage = () => {
   const [modalStatus, setModalStatus] = useState<string>("pending");
   const [modalPayment, setModalPayment] = useState<string>("pending");
   const [showUploader, setShowUploader] = useState(false);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const [playlists, setPlaylists] = useState<VideoPlaylist[]>([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+  const [playlistsError, setPlaylistsError] = useState<string | null>(null);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(
+    null
+  );
+  const [savingSelection, setSavingSelection] = useState(false);
+  const [subscriptionDoc, setSubscriptionDoc] = useState<any | null>(null);
+  const [shouldPromptChoosePlaylist, setShouldPromptChoosePlaylist] =
+    useState(false);
 
   // Continue Watching (latest progress record)
   type ContinueItem = {
@@ -290,14 +310,91 @@ const AccountPage = () => {
     }
   }, [session]);
 
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        if (!session?.user?.email) return;
+        const res = await axios.get(
+          `/api/subscriptions/track?email=${encodeURIComponent(
+            session.user.email
+          )}`
+        );
+        setSubscriptionDoc(res.data || null);
+      } catch (e) {
+        setSubscriptionDoc(null);
+      }
+    };
+    fetchSubscription();
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    try {
+      if (!session?.user?.isSubscribed && subscriptionDoc) {
+        const pkg = String(subscriptionDoc?.packageID || "");
+        const targetPkg = "68bf6ae9c4d5c1af12cdcd37";
+        const subscribed = !!subscriptionDoc?.subscribed;
+        const createdAt = subscriptionDoc?.createdAt
+          ? new Date(subscriptionDoc.createdAt)
+          : null;
+        const cutoff = new Date("2025-11-15");
+        const allowed = Array.isArray(subscriptionDoc?.allowedPlaylists)
+          ? subscriptionDoc.allowedPlaylists
+          : [];
+        const emptyAllowed = allowed.length === 0;
+        const cond =
+          pkg === targetPkg &&
+          subscribed &&
+          createdAt &&
+          createdAt > cutoff &&
+          emptyAllowed;
+        setShouldPromptChoosePlaylist(!!cond);
+      } else {
+        setShouldPromptChoosePlaylist(false);
+      }
+    } catch {
+      setShouldPromptChoosePlaylist(false);
+    }
+  }, [session?.user?.isSubscribed, subscriptionDoc]);
+
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      setLoadingPlaylists(true);
+      setPlaylistsError(null);
+      try {
+        const pkgId =
+          subscriptionDoc?.packageID?._id ||
+          subscriptionDoc?.packageID ||
+          session?.user?.subscription?.packageId;
+        const url =
+          pkgId === "68bf6ae9c4d5c1af12cdcd37"
+            ? `/api/playlists?all=true&packageId=${pkgId}`
+            : "/api/playlists?all=true";
+        const res = await fetch(url, {
+          cache: "no-store",
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setPlaylists(data.data || []);
+        } else {
+          setPlaylistsError(data.error || "Failed to load playlists");
+        }
+      } catch (e) {
+        setPlaylistsError("Failed to load playlists");
+      } finally {
+        setLoadingPlaylists(false);
+      }
+    };
+    if (isPlaylistModalOpen) fetchPlaylists();
+  }, [isPlaylistModalOpen]);
+
   // Fetch latest progress for subscribed users to power Continue Watching
   useEffect(() => {
     const loadContinueWatching = async () => {
       try {
-        if (!session?.user?.isSubscribed) {
-          setContinueItem(null);
-          return;
-        }
+        // if (!session?.user?.isSubscribed) {
+        //   setContinueItem(null);
+        //   return;
+        // }
         setContinueLoading(true);
         const res = await fetch(`/api/playlist-progress`, {
           cache: "no-store",
@@ -577,6 +674,8 @@ const AccountPage = () => {
     name: session.user.name || "User",
     email: session.user.email || "user@example.com",
     isSubscribed: session.user.isSubscribed || false,
+    subscription: session.user.subscription,
+    weddingPlanningBestie: session.user.weddingPlanningBestie,
     subscriptionExpiryDate: session.user.subscriptionExpiryDate,
     imgUrl: session.user.image,
     loyaltyPoints: loyaltyPoints,
@@ -612,6 +711,7 @@ const AccountPage = () => {
     { id: "partners", label: "Discounts", icon: CirclePercent },
     { id: "favorites", label: "Favorites", icon: Star },
     { id: "inspo", label: "Inspo", icon: Sparkles },
+    { id: "shopping-bestie", label: "Shopping Bestie", icon: ShoppingCart },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
@@ -651,20 +751,72 @@ const AccountPage = () => {
             <p className="text-sm font-semibold text-lovely/80 break-all">
               {user.email}
             </p>
-            <p className="text-sm font-semibold flex items-center gap-2 text-lovely/80">
-              Subscription :{" "}
-              <span>
-                {user.isSubscribed ? (
-                  <BadgeCheck className="text-lovely/80" />
-                ) : (
-                  <BadgeAlert />
-                )}
-              </span>
-            </p>
+            <div className="text-sm font-semibold flex flex-col gap-2 text-lovely/80 mb-4 mt-2">
+              <span className="font-bold underline">Your Subscriptions:</span>
+              
+              {/* No Subscriptions at all */}
+              {!user.subscription?.packageId && !user.weddingPlanningBestie && (
+                <span className="flex items-center gap-2">None <BadgeAlert className="h-4 w-4" /></span>
+              )}
+
+              {/* Full Experience */}
+              {user.subscription?.packageId === "687396821b4da119eb1c13fe" && (
+                <div className="flex items-center gap-2">
+                  {user.isSubscribed ? (
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" />
+                  ) : (
+                    <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
+                  )}
+                  <span className={user.isSubscribed ? "" : "text-red-500"}>Full Wifey Experience</span>
+                  {user.subscriptionExpiryDate && (
+                    <span className={`text-xs  ${user.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
+                      {(() => {
+                        const expiry = new Date(user.subscriptionExpiryDate);
+                        const now = new Date();
+                        const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
+                        
+                        if (expiry > tenYearsFromNow) {
+                          return <span className="inline-flex gap-2 items-end">Lifetime Wifey <Crown className="h-3 w-3"/></span>;
+                        }
+                        
+                        const prefix = expiry < new Date() ? "Expired" : "Expires";
+                        return `(${prefix}: ${expiry.toLocaleDateString()})`;
+                      })()}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Mini Experience */}
+              {user.subscription?.packageId === "68bf6ae9c4d5c1af12cdcd37" && (
+                <div className="flex items-center gap-2">
+                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Experience 
+                </div>
+              )}
+
+              {/* Wedding Planning Bestie */}
+              {user.weddingPlanningBestie && (
+                <div className="flex items-center gap-2">
+                  {user.weddingPlanningBestie.isSubscribed ? (
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" />
+                  ) : (
+                    <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
+                  )}
+                  <span className={user.weddingPlanningBestie.isSubscribed ? "" : "text-red-500"}>Wedding Planning Bestie</span>
+                  {user.weddingPlanningBestie.expiryDate && (
+                    <span className={`text-xs  ${user.weddingPlanningBestie.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
+                      ({new Date(user.weddingPlanningBestie.expiryDate) < new Date() ? "Expired" : "Expires"}: {new Date(user.weddingPlanningBestie.expiryDate).toLocaleDateString()})
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex md:gap-4 flex-col md:flex-row">
             {session?.user?.subscription?.packageId ===
               "68bf6ae9c4d5c1af12cdcd37" && (
               // "68bf6ae9c4d5c1af12cdcd37" && (
-              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=1000">
+              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=true">
                 <Button
                   size="sm"
                   className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
@@ -673,27 +825,22 @@ const AccountPage = () => {
                 </Button>
               </Link>
             )}
-            {user.isSubscribed && (
-              <p className="text-lovely/80 text-sm font-semibold">
-                Expires at :{" "}
-                {user.subscriptionExpiryDate
-                  ? (() => {
-                      const expiry = new Date(user.subscriptionExpiryDate);
-                      const now = new Date();
-                      const tenYearsFromNow = new Date(
-                        now.setFullYear(now.getFullYear() + 10)
-                      );
-                      return expiry > tenYearsFromNow ? (
-                        <span className="inline-flex gap-2 items-end">
-                          Lifetime Wifey <Crown />
-                        </span>
-                      ) : (
-                        expiry.toLocaleDateString()
-                      );
-                    })()
-                  : ""}
-              </p>
-            )}
+            {(subscriptionDoc?.packageID?._id ||
+              subscriptionDoc?.packageID ||
+              session?.user?.subscription?.packageId) ===
+              "68bf6ae9c4d5c1af12cdcd37" &&
+              !subscriptionDoc?.miniSubscriptionActivated && (
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    className="bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                    onClick={() => setIsPlaylistModalOpen(true)}
+                  >
+                    Activate your mini experience
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -726,7 +873,8 @@ const AccountPage = () => {
       </div>
 
       {/* Continue Watching (subscribed users) */}
-      {session?.user?.isSubscribed && continueLoading && (
+      {/* {session?.user?.isSubscribed && continueLoading && ( */}
+      {continueLoading && (
         <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
           <div className="flex items-center gap-4">
             <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
@@ -744,7 +892,8 @@ const AccountPage = () => {
         </div>
       )}
 
-      {session?.user?.isSubscribed && !continueLoading && continueItem && (
+      {/* {session?.user?.isSubscribed && !continueLoading && continueItem && ( */}
+      {!continueLoading && continueItem && (
         <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
           <div className="flex items-center gap-4">
             <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
@@ -1561,6 +1710,11 @@ const AccountPage = () => {
         )}
 
         {activeTab === "inspo" && (
+          // <div>
+
+          //     <InspoTab />
+
+          // </div>
           <div>
             {user.isSubscribed ? (
               <InspoTab />
@@ -1569,6 +1723,12 @@ const AccountPage = () => {
                 Subscribe to access your inspiration boards!
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "shopping-bestie" && (
+          <div>
+            <ShoppingBestieTab isSubscribed={user.isSubscribed} />
           </div>
         )}
       </div>
@@ -1831,6 +1991,101 @@ const AccountPage = () => {
           </div>
         </div>
       )}
+      <Dialog open={isPlaylistModalOpen} onOpenChange={setIsPlaylistModalOpen}>
+        <DialogContent className="bg-creamey text-lovely max-h-[90vh] overflow-y-auto sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Choose Your Playlist</DialogTitle>
+            <p>
+              Note: you have to choose only one playlist. If you click confirm
+              there&apos;s no way to choose another one.
+              <br />
+              It expires after 6 months from activation.
+            </p>
+          </DialogHeader>
+          {loadingPlaylists ? (
+            <div className="py-6 text-center">Loading playlists...</div>
+          ) : playlistsError ? (
+            <div className="py-6 text-center text-red-500">
+              {playlistsError}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+              {playlists.map((p) => (
+                <div
+                  key={p._id as string}
+                  onClick={() => setSelectedPlaylistId(p._id as string)}
+                  className={`cursor-pointer border rounded-lg overflow-hidden ${
+                    selectedPlaylistId === p._id
+                      ? "border-pinkey border-8"
+                      : "border-lovely"
+                  }`}
+                >
+                  <div className="relative aspect-video">
+                    <img
+                      src={p.thumbnailUrl}
+                      alt={p.title}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium line-clamp-1">{p.title}</h3>
+                      <span className="text-xs">
+                        {p.videos?.length || 0}{" "}
+                        {(p.videos?.length || 0) === 1 ? "video" : "videos"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-lovely/80 mt-1 line-clamp-2">
+                      {Array.isArray(p.description)
+                        ? p.description.join(" ")
+                        : (p as any).description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {playlists.length === 0 && (
+                <div className="col-span-2 text-center py-8">
+                  No playlists found.
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <button
+              className="px-6 py-2 border-2 border-lovely text-lovely rounded-2xl font-semibold"
+              onClick={() => setIsPlaylistModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              disabled={!selectedPlaylistId || savingSelection}
+              className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold disabled:opacity-50"
+              onClick={async () => {
+                if (!selectedPlaylistId || savingSelection) return;
+                setSavingSelection(true);
+                try {
+                  const res = await fetch(
+                    "/api/subscriptions/allowed-playlists",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ playlistId: selectedPlaylistId }),
+                    }
+                  );
+                  if (res.ok) {
+                    setIsPlaylistModalOpen(false);
+                    router.push(`/playlists/${selectedPlaylistId}`);
+                  }
+                } finally {
+                  setSavingSelection(false);
+                }
+              }}
+            >
+              {savingSelection ? "Saving..." : "Confirm"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { thirdFont } from "@/fonts";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { headerStyle } from "@/app/styles/style";
 
 const Newsletters = () => {
   const [email, setEmail] = useState("");
@@ -54,7 +55,7 @@ const Newsletters = () => {
     <section className="bg-pinkey/80 py-16">
       <div className="container-custom text-center">
         <h2
-          className={`${thirdFont.className} text-4xl md:text-5xl lg:text-6xl font-semibold text-lovely mb-4`}
+          className={`${thirdFont.className} ${headerStyle} text-lovely mb-4`}
         >
           Join Our Community
         </h2>

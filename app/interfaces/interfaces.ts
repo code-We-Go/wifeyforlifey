@@ -42,11 +42,16 @@ export interface Video {
   isPublic: boolean;
   likes?: (CommentUser | string)[]; // Array of users or user IDs who liked the video
   comments?: VideoComment[]; // Array of comments
-
+  playlistFolder?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface playlistFolder {
+  _id?: string;
+  name: string;   // e.g. "Behind the Scenes"
+  slug: string;   // e.g. "behind-the-scenes"
+}
 // types/Playlist.ts
 export interface Playlist {
   _id?: string;
@@ -57,6 +62,8 @@ export interface Playlist {
   isPublic: boolean;
   category?: string;
   tags?: string[];
+  folders: playlistFolder[];          // ordered list of folders
+
   featured: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -89,6 +96,8 @@ export interface Variant {
   attributeName: string;
   attributes: attribute[]; // e.g., [{ name: "Color", value: "Black" }, { name: "Capacity", value: "2L" }]
   images: media[];
+    mobImages?: media[];
+
 }
 
 export interface Category {
@@ -271,17 +280,40 @@ export interface PackageItem {
   included: boolean;
 }
 
+export interface SupportCard {
+  id: number;
+  title: string;
+  description: string[];
+  imagePath: string;
+}
+
+export interface PackageVariant {
+  price: number;
+  duration: number;
+  saving?: string;
+}
+
 export interface Ipackage {
   _id?: string;
+  slug?: string;
   name: string;
   imgUrl: string; // Main image (keeping for backward compatibility)
   images: string[]; // Array of image URLs
+  mobMainImage?: string;
+  mobImages?: string[];
   price: number;
-  duration: string;
+  duration: number;
+  saving?: string;
+  cost?: number;
+  variants?: PackageVariant[];
   items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
   active: boolean;
+  partOf?: string;
+  supportCards?: SupportCard[]; // Support/feature cards shown on the package page
+  packagePlaylists?: string[]; // Playlist IDs included in this package
+  accessAllPlaylists?: boolean; // If true, package grants access to all packagePlaylists
 }
 
 export interface ISubscription {
@@ -290,6 +322,7 @@ export interface ISubscription {
   packageID?: string;
   email?: string;
   subscribed?: boolean;
+  selectedDuration?: number;
   redeemedLoyaltyPoints?: number;
   appliedDiscount?: string;
   appliedDiscountAmount?: number;

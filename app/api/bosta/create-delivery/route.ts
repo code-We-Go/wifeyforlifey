@@ -4,11 +4,11 @@ import ordersModel from "@/app/modals/ordersModel";
 import BostaService, { BostaAddress } from "@/app/services/bostaService";
 
 // Connect to database
-const loadDB = async () => {
-  await ConnectDB();
-};
+// const loadDB = async () => {
+//   await ConnectDB();
+// };
 
-loadDB();
+// loadDB();
 
 // Default pickup and return addresses (you should configure these)
 const DEFAULT_PICKUP_ADDRESS: BostaAddress = {
@@ -34,6 +34,8 @@ const DEFAULT_RETURN_ADDRESS: BostaAddress = {
 };
 
 export async function POST(request: Request) {
+    await ConnectDB();
+
   try {
     const { orderId, pickupAddress, returnAddress } = await request.json();
 
@@ -115,6 +117,8 @@ export async function POST(request: Request) {
 
 // GET endpoint to check delivery status
 export async function GET(request: Request) {
+    await ConnectDB();
+  
   try {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get("orderId");

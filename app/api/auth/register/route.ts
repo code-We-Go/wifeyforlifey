@@ -2,6 +2,7 @@ import { ConnectDB } from "@/app/config/db";
 import verificationsModel from "@/app/modals/sessionModel";
 import sessionsModel from "@/app/modals/sessionModel";
 import UserModel from "@/app/modals/userModel";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import { sendMail } from "@/lib/email";
 import { User } from "@/models/User";
 import { SubscriprtionMail } from "@/utils/subscriptionMail";
@@ -53,10 +54,21 @@ export async function POST(req: Request) {
     const hashedPassword = await hash(password, 10);
     console.log(username, normalizedEmail, hashedPassword);
 
+    const subscriptions = await subscriptionsModel.find({
+      $or: [
+        { email: normalizedEmail },
+        { giftRecipientEmail: normalizedEmail }
+      ],
+      subscribed: true,
+    });
+
+    const subscriptionIds = subscriptions.map(sub => sub._id);
+
     const user = await UserModel.create({
       username: username,
       email: normalizedEmail,
       password: hashedPassword,
+      subscriptions: subscriptionIds,
     });
 
     // Remove password from response

@@ -11,6 +11,13 @@ export interface ISubscription extends Document {
   createdAt: Date;
   updatedAt: Date; // Because of timestamps: true
 }
+
+// Known package IDs for subscription type identification
+export const PACKAGE_IDS = {
+  FULL_EXPERIENCE: "687396821b4da119eb1c13fe",
+  MINI: "68bf6ae9c4d5c1af12cdcd37",
+  WEDDING_PLANNING_BESTIE: "6965e63c6df4503dda02c12b",
+} as const;
 // Define the User interface
 export interface IUser extends Document {
   _id: string;
@@ -24,11 +31,16 @@ export interface IUser extends Document {
   emailVerified: boolean;
   isSubscribed: boolean;
   imageURL?: string;
-  subscription: ISubscription;
+  subscriptions: ISubscription[];
   birthDate?: Date;
   weddingDate?: Date;
   inspoFavorites?: string[];
   isTesting?: boolean;
+  pushToken?: string;
+  tags?: string[];
+  appleUserId?: string;
+  googleUserId?: string;
+  authProvider?: 'email' | 'apple' | 'google';
 
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -74,11 +86,10 @@ const UserSchema = new Schema<IUser>(
     emailVerified: { type: Boolean, default: false },
     isSubscribed: { type: Boolean, default: false },
     isTesting: { type: Boolean, default: false },
-    subscription: {
+    subscriptions: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "subscriptions",
-      required: false,
-    },
+    }],
     inspoFavorites: {
       type: [String],
       default: [],
@@ -91,8 +102,33 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       required: false,
     },
+    
+    pushToken: {
+      type: String,
+      required: false,
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    appleUserId: {
+      type: String,
+      required: false,
+      index: true,
+    },
+    googleUserId: {
+      type: String,
+      required: false,
+      index: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ['email', 'apple', 'google'],
+      default: 'email',
+      required: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 // Hash password before saving

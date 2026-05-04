@@ -6,15 +6,17 @@ import shippingZones from "@/app/modals/shippingZones";
 
 // // import clientPromise from '../../lib/mongodb';
 
-const loadDB =async()=>{
-    console.log('hna');
-    await ConnectDB();
-}
+// const loadDB =async()=>{
+//     console.log('hna');
+//     await ConnectDB();
+// }
 
-loadDB();
+// loadDB();
 
 console.log("register",shippingZones)
 export async function GET(request: Request) {
+    await ConnectDB();
+  
 //     const shippingZoneId = new mongoose.Types.ObjectId('677990f0182d49dad7ebb9ee');
 
 // const result = await countriesModel.updateMany(

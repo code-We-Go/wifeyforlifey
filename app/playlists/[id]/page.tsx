@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, Lock, Play, Clock, Calendar, Check } from "lucide-react";
+import { ChevronLeft, ChevronDown, Lock, Play, Clock, Calendar, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +100,12 @@ export default function PlaylistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seeMore, setSeeMore] = useState(false); // <-- Add this line
+  const [collapsedFolders, setCollapsedFolders] = useState<Record<string, boolean>>({});
+
+  const toggleFolder = (slug: string) => {
+    // We allow manually toggling, it just updates this specific slug state
+    setCollapsedFolders((prev) => ({ ...prev, [slug]: !prev[slug] }));
+  };
   const [isVideoHovered, setIsVideoHovered] = useState(false);
   const [watchedVideos, setWatchedVideos] = useState<Set<string>>(new Set());
   const [lastWatchedVideoId, setLastWatchedVideoId] = useState<string | null>(
@@ -113,6 +119,7 @@ export default function PlaylistPage() {
 
   const { data: session, status } = useSession();
   const isSubscribed = session?.user.isSubscribed || false;
+  const [hasPlaylistAccess, setHasPlaylistAccess] = useState(false);
 
   const watermarkText = session?.user.email || "";
   // VdoCipher expects watermark config as an array of objects, as a JSON string
@@ -132,7 +139,8 @@ export default function PlaylistPage() {
   const [videoLoading, setVideoLoading] = useState(false);
 
   // Check if the selected video requires subscription
-  const videoLocked = !selectedVideo?.isPublic && !isSubscribed;
+  const canAccessPremium = hasPlaylistAccess;
+  const videoLocked = !selectedVideo?.isPublic && !canAccessPremium;
 
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
@@ -206,6 +214,91 @@ export default function PlaylistPage() {
     }
   }, [playlistId]);
 
+  // Check allowed playlist access when not subscribed
+  useEffect(() => {
+    //User opens a playlist →
+  // 1. Check subscription's `allowedPlaylists` (always checked first)
+  //    → If playlist found with valid expiry → ✅ GRANT ACCESS
+  // 2. If not found, check `sub.packageID.accessAllPlaylists`
+  //    → If true: check if playlist is in `packageID.packagePlaylists`
+  //      → If found → ✅ GRANT ACCESS
+  //    → If false: skip (only allowedPlaylists matter)
+  // 3. No match → ❌ DENY ACCESS
+
+    const checkAccess = async () => {
+      try {
+        if (
+          status === "authenticated" &&
+          (isSubscribed || session?.user?.weddingPlanningBestie?.isSubscribed) &&
+          session?.user?.email &&
+          playlistId
+        ) {
+          // Fetch all subscriptions for this user
+          const res = await axios.get(
+            `/api/subscriptions/track?email=${encodeURIComponent(
+              session.user.email!
+            )}&all=true`
+          );
+          console.log("userSubscriptions", res.data)
+          // Support both array and single subscription responses
+          const subs = Array.isArray(res.data) ? res.data : [res.data];
+          const now = Date.now();
+
+          for (const sub of subs) {
+            if (!sub || !sub.subscribed) continue;
+
+            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37";
+            const isExpired = !isMini && sub.expiryDate && new Date(sub.expiryDate).getTime() < now;
+            
+            if (isExpired) continue;
+
+            // Check subscription's allowedPlaylists (always considered)
+            const allowed = Array.isArray(sub?.allowedPlaylists)
+              ? sub.allowedPlaylists
+              : [];
+            const matchAllowed = allowed.find(
+              (p: any) =>
+                String(p?.playlistID) === String(playlistId) &&
+                p.expiryDate &&
+                new Date(p.expiryDate).getTime() > now
+            );
+
+            if (matchAllowed) {
+              setHasPlaylistAccess(true);
+              return;
+            }
+
+            // Check package-level playlist access
+            const pkg = sub?.packageID; // populated package object
+            if (pkg && pkg.accessAllPlaylists) {
+              console.log("accessAllPlaylists is true")
+              // accessAllPlaylists is true → grant access to all packagePlaylists
+              const pkgPlaylists = Array.isArray(pkg.packagePlaylists)
+                ? pkg.packagePlaylists
+                : [];
+              const matchPkg = pkgPlaylists.some(
+                (pid: any) => String(pid) === String(playlistId)
+              );
+              if (matchPkg) {
+                setHasPlaylistAccess(true);
+                return;
+              }
+            }
+          }
+
+          // No match found in any subscription
+          setHasPlaylistAccess(false);
+        } else {
+          setHasPlaylistAccess(false);
+        }
+      } catch (e) {
+        setHasPlaylistAccess(false);
+      }
+    };
+
+    checkAccess();
+  }, [status, isSubscribed, session?.user?.email, playlistId]);
+
   // Fetch related playlists
   const fetchRelatedPlaylists = useCallback(async () => {
     try {
@@ -274,14 +367,14 @@ export default function PlaylistPage() {
 
   // Create a playlist progress record when user enters the playlist
   useEffect(() => {
-    if (status === "authenticated" && isSubscribed && playlistId) {
+    if (status === "authenticated" && canAccessPremium && playlistId) {
       axios
         .post("/api/playlist-progress", { playlistId })
         .catch((err) =>
           console.warn("Failed to create playlist progress", err)
         );
     }
-  }, [status, isSubscribed, playlistId]);
+  }, [status, canAccessPremium, playlistId]);
 
   // Fetch watched videos for this playlist
   const fetchPlaylistProgress = useCallback(async () => {
@@ -305,10 +398,10 @@ export default function PlaylistPage() {
   }, [playlistId]);
 
   useEffect(() => {
-    if (status === "authenticated" && isSubscribed && playlistId) {
+    if (status === "authenticated" && canAccessPremium && playlistId) {
       fetchPlaylistProgress();
     }
-  }, [status, isSubscribed, playlistId, fetchPlaylistProgress]);
+  }, [status, canAccessPremium, playlistId, fetchPlaylistProgress]);
 
   // Sync selectedVideo with currentIndex when playlist loads
   useEffect(() => {
@@ -325,6 +418,27 @@ export default function PlaylistPage() {
       }
     }
   }, [playlist, currentIndex, selectedVideo]);
+
+  // Adjust folder collapsed state based on the selected video
+  useEffect(() => {
+    if (playlist && selectedVideo) {
+      // Find what folder the selected video belongs to
+      const targetSlug = selectedVideo.playlistFolder;
+      
+      const newCollapsedState: Record<string, boolean> = {};
+      
+      if (playlist.folders && Array.isArray(playlist.folders)) {
+        playlist.folders.forEach((folder: any) => {
+          // If this is the active folder, close it (false). Otherwise open it (true).
+          // Well wait, "collapsed" means true = closed, false = open.
+          // So if folder.slug === targetSlug, collapsed is FALSE. Otherwise TRUE.
+          newCollapsedState[folder.slug] = folder.slug !== targetSlug;
+        });
+      }
+      
+      setCollapsedFolders(newCollapsedState);
+    }
+  }, [playlist, selectedVideo]);
 
   // Fetch OTP when selectedVideo changes and is not locked
   useEffect(() => {
@@ -365,7 +479,7 @@ export default function PlaylistPage() {
     if (vidParam) return;
     // Only apply once to avoid loops
     if (preferLastAppliedRef.current) return;
-    if (status === "authenticated" && isSubscribed && lastWatchedVideoId) {
+    if (status === "authenticated" && canAccessPremium && lastWatchedVideoId) {
       // If current selection already matches last watched, mark applied and exit
       if (selectedVideo && String((selectedVideo as any)._id) === String(lastWatchedVideoId)) {
         preferLastAppliedRef.current = true;
@@ -388,7 +502,7 @@ export default function PlaylistPage() {
     lastWatchedVideoId,
     searchParams,
     status,
-    isSubscribed,
+    canAccessPremium,
     selectedVideo,
   ]);
 
@@ -398,7 +512,7 @@ export default function PlaylistPage() {
       try {
         if (
           status === "authenticated" &&
-          isSubscribed &&
+          canAccessPremium &&
           playlistId &&
           selectedVideo?._id
         ) {
@@ -693,7 +807,7 @@ export default function PlaylistPage() {
 
           <div className="bg-card border border-lovely rounded-lg overflow-hidden shadow-sm">
             {/* Playlist progress (subscribed users only) */}
-            {status === "authenticated" && isSubscribed && (
+            {status === "authenticated" && canAccessPremium && (
               <div className="p-4  bg-creamey/90">
                 <div className="flex items-center justify-between text-sm text-lovely  mb-2">
                   <span>
@@ -727,14 +841,36 @@ export default function PlaylistPage() {
             )}
 
             <div className="divide-y max-h-[70vh] overflow-y-auto ">
-              {Array.isArray(playlist.videos) &&
-                playlist.videos.map((video: any, index) => {
-                  console.log(
-                    "isLocked" + video.isPublic + isSubscribed + video.title
-                  );
-                  const isLocked = !video.isPublic && !isSubscribed;
-                  const isActive = selectedVideo?._id === video._id;
+              {(() => {
+                if (!Array.isArray(playlist.videos)) return null;
 
+                const videos: any[] = playlist.videos;
+                const folders: any[] = Array.isArray(playlist.folders) ? playlist.folders : [];
+
+                // Separate videos into grouped (have a playlistFolder) and ungrouped
+                const grouped: Record<string, any[]> = {};
+                const ungrouped: any[] = [];
+
+                videos.forEach((video: any) => {
+                  if (video.playlistFolder) {
+                    if (!grouped[video.playlistFolder]) grouped[video.playlistFolder] = [];
+                    grouped[video.playlistFolder].push(video);
+                  } else {
+                    ungrouped.push(video);
+                  }
+                });
+
+                // Determine folder display order: use playlist.folders order, then any stray slugs
+                const orderedSlugs: string[] = [
+                  ...folders.map((f: any) => f.slug).filter((slug: string) => grouped[slug]),
+                  ...Object.keys(grouped).filter(
+                    (slug) => !folders.some((f: any) => f.slug === slug)
+                  ),
+                ];
+
+                const renderVideoItem = (video: any) => {
+                  const isLocked = !video.isPublic && !canAccessPremium;
+                  const isActive = selectedVideo?._id === video._id;
                   return (
                     <div
                       key={video._id}
@@ -752,7 +888,6 @@ export default function PlaylistPage() {
                         if (videoIndex !== -1) {
                           setCurrentIndex(videoIndex);
                           setSelectedVideo(video);
-                          // Update URL using Next router so searchParams updates
                           router.push(
                             `/playlists/${playlistId}?videoId=${video._id}`
                           );
@@ -761,13 +896,6 @@ export default function PlaylistPage() {
                     >
                       <div className="flex gap-3">
                         <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
-                          {/* <Image
-                            src={video.thumbnailUrl || "/video/1.png"}
-                            alt={video.title}
-                            fill
-                            unoptimized
-                            className="object-cover aspect-video"
-                          /> */}
                           <img
                             src={video.thumbnailUrl || "/video/1.png"}
                             alt={video.title}
@@ -802,7 +930,52 @@ export default function PlaylistPage() {
                       </div>
                     </div>
                   );
-                })}
+                };
+
+                return (
+                  <>
+                    {/* Folder sections */}
+                    {orderedSlugs.map((slug) => {
+                      const folderDef = folders.find((f: any) => f.slug === slug);
+                      const folderName = folderDef?.name || slug;
+                      const folderVideos = grouped[slug];
+                      const isCollapsed = !!collapsedFolders[slug];
+
+                      return (
+                        <div key={slug}>
+                          {/* Folder header */}
+                          <button
+                            onClick={() => toggleFolder(slug)}
+                            className={`${thirdFont.className} w-full flex items-center justify-between px-4 py-3 bg-lovely/90 text-creamey font-semibold text-sm hover:bg-lovely transition-colors`}
+                          >
+                            <span className="line-clamp-1 tracking-wide text-lg md:text-xl text-left">{folderName}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                              <span className="text-xs font-normal opacity-80">
+                                {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
+                              </span>
+                              <ChevronDown
+                                className={`h-4 w-4 transition-transform duration-200 ${
+                                  isCollapsed ? "-rotate-90" : ""
+                                }`}
+                              />
+                            </div>
+                          </button>
+
+                          {/* Folder videos */}
+                          {!isCollapsed && (
+                            <div className="divide-y">
+                              {folderVideos.map(renderVideoItem)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Ungrouped videos (no folder) */}
+                    {ungrouped.map(renderVideoItem)}
+                  </>
+                );
+              })()}
             </div>
           </div>
 

@@ -70,6 +70,7 @@ const OrderSchema = new Schema(
             enum: ["pending","failed" ,"confirmed"],
             default: "pending",
         },
+        expiryDate:{type:Date,required:false},
         shipmentID: { type: String, required: false ,default:""}, // Bosta shipment ID
         billingCountry:{ type: String, required: false },
         billingFirstName: { type: String, required: false },
@@ -88,6 +89,8 @@ const OrderSchema = new Schema(
         bostaDistrictName: { type: String, required: false },
         isMob: { type: Boolean, default: false },
         createdAt: { type: Date, default: Date.now },
+            expiresAt: { type: Date, required: false },
+
     },
     { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
