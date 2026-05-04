@@ -831,6 +831,18 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
   }
 }
 
+// CORS headers for cross-origin API calls (e.g. from dashboard)
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+// ─── OPTIONS Handler (CORS Preflight) ────────────────────────────────
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 // ─── GET Handler (Transaction Response Callback — browser redirect) ──
 export async function GET(request: Request) {
   await loadDB();
@@ -861,10 +873,36 @@ export async function GET(request: Request) {
 
     if (!paymobOrderId) {
       console.error("❌ No order ID in callback");
+      // If it's an API call, return JSON with CORS headers
+      if (searchParams.get("json") === "true") {
+        return NextResponse.json(
+          { success: false, message: "No order ID in callback" },
+          { status: 400, headers: corsHeaders }
+        );
+      }
       return NextResponse.redirect(`${process.env.testUrl}payment/failed`);
     }
 
     const result = await processCallback(paymobOrderId, isSuccess);
+
+    // If it's an API call (like from the dashboard or mobile), return JSON instead of a redirect
+    // We check for Accept header, CORS mode, or an explicit json=true parameter
+    const isApiCall = 
+      request.headers.get("accept")?.includes("application/json") || 
+      request.headers.get("sec-fetch-mode") === "cors" ||
+      searchParams.get("json") === "true";
+
+    if (isApiCall) {
+      return NextResponse.json(
+        {
+          success: result.success,
+          redirect: result.redirect,
+          message: "GET Callback handled successfully",
+        },
+        { headers: corsHeaders }
+      );
+    }
+
     return NextResponse.redirect(
       `${process.env.testUrl}${result.redirect}`
     );
@@ -872,7 +910,7 @@ export async function GET(request: Request) {
     console.error("Error handling GET request:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

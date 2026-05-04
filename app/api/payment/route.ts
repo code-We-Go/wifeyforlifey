@@ -271,46 +271,192 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: err.message }, { status: 400 });
     }
   }
-  // else if(data.cash==="instapay"){
-  //   const res = await ordersModel.create({
-  //     email:data.email,
-  //      orderID:''
-  //     ,country: data.country,
-  //     firstName: data.firstName,
-  //     lastName: data.lastName,
-  //     address: data.address,
-  //     apartment: data.apartment,
-  //     postalZip: data.postalZip,
-  //     city: data.city ,
-  //     state:data.state ,
-  //     phone:data.phone ,
-  //     cash: data.cash, // Payment method: Cash or not
-  //     cart: items,
-  //     total: data.total,
-  //     billingCountry: data.billingCountry,
-  //     billingFirstName: data.billingFirstName,
-  //     billingState:data.billingState,
-  //     billingLastName: data.billingLastName,
-  //     billingEmail: data.billingEmail,
-  //     billingPhone: data.billingPhone,
-  //     billingAddress: data.billingAddress,
-  //     billingApartment: data.billingApartment,
-  //     billingPostalZip: data.billingPostalZip,
-  //   })
-  //   console.log('orderID' + res._id)
-  //   console.log(data.subTotal)
-  //   console.log(data.shipping)
-  //   console.log(data.state)
-  //               await sendMail({
-  //                   to: `${data.email}, anchuva.store@gmail.com`,
-  //                   name: "Order Confirmation",
-  //                   subject: "Order Confirmation",
-  //                   body:generateEmailInstaBody(items,data.firstName,data.lastName,data.phone,data.email, data.total,data.subTotal,data.shipping,data.currency,data.address,res._id,data.cash,data.country,data.state,data.city,data.postalZip,data.apartment)
-  //                   // body: `<a href=${verificationLink}> click here to verify your account</a>`,
-  //                   //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
-  //               });
-  //   return NextResponse.json({token:'wiig'}, { status: 200 })
-  // }
+  else if (data.cash === "instapay") {
+    const specialReference = `instapay-ref-${Date.now()}-${Math.floor(
+      Math.random() * 1000
+    )}`;
+
+    try {
+      if (data.subscription) {
+        // Subscription flow for Instapay
+        const user = await UserModel.findOne({ email: data.email }).populate({
+          path: "subscriptions",
+          options: { sort: { expiryDate: -1 } },
+        });
+
+        // Find the main subscription (exclude Bestie)
+        const mainSub = user?.subscriptions?.find(
+          (sub: any) =>
+            sub.packageID?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+        ) as any;
+        const fromPackageID = mainSub?.packageID || null;
+
+        const subPayment = await subscriptionPaymentModel.create({
+          paymentID: specialReference,
+          email: data.email,
+          userID: user?._id,
+          process: data.process || "new",
+          from: fromPackageID,
+          to: data.subscription,
+          paymentMethod: "instapay",
+          // Parity fields from subscription schema
+          packageID: data.subscription,
+          selectedDuration: data.selectedDuration,
+          subscribed: false,
+          redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
+          appliedDiscount: data.appliedDiscount,
+          appliedDiscountAmount: data.appliedDiscountAmount,
+          // User information
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
+          whatsAppNumber: data.whatsAppNumber,
+          // Gift information
+          isGift: data.isGift,
+          giftRecipientEmail: data.giftRecipientEmail,
+          specialMessage: data.specialMessage,
+          giftCardName: data.giftCardName,
+          // Address information
+          country: data.country,
+          address: data.address,
+          apartment: data.apartment,
+          city: data.bostaCityName,
+          state: data.bostaZoneName,
+          postalZip: data.postalZip,
+          // Billing information
+          billingCountry: data.billingCountry,
+          billingFirstName: data.billingFirstName,
+          billingLastName: data.billingLastName,
+          billingState: data.billingState,
+          billingAddress: data.billingAddress,
+          billingApartment: data.billingApartment,
+          billingPostalZip: data.billingPostalZip,
+          billingCity: data.billingCity,
+          billingPhone: data.billingPhone,
+          // Payment information
+          total: data.total,
+          subTotal: data.subTotal,
+          shipping: data.shipping,
+          currency: data.currency,
+          // Bosta
+          bostaCity: data.bostaCity,
+          bostaCityName: data.bostaCityName,
+          bostaZone: data.bostaZone,
+          bostaZoneName: data.bostaZoneName,
+          bostaDistrict: data.bostaDistrict,
+          bostaDistrictName: data.bostaDistrictName,
+          // Status
+          status: "pending",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        });
+
+        // Register in PendingPayment for tracking
+        await PendingPaymentModel.create({
+          paymobOrderId: specialReference,
+          productType: "subscription",
+          referenceId: subPayment._id,
+        });
+
+        return NextResponse.json(
+          {
+            token: "wiig",
+            success: true,
+            subscriptionId: subPayment._id.toString(),
+          },
+          { status: 200 }
+        );
+      } else {
+        // Order flow for Instapay
+        const res = await ordersModel.create({
+          email: data.email,
+          orderID: specialReference,
+          country: data.country,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          address: data.address,
+          apartment: data.apartment,
+          postalZip: data.postalZip,
+          city: data.bostaCityName || data.city,
+          state: data.bostaZoneName || data.state,
+          phone: data.phone,
+          isGift: data.isGift,
+          giftRecipientEmail: data.giftRecipientEmail,
+          specialMessage: data.specialMessage,
+          giftCardName: data.giftCardName,
+          redeemedLoyaltyPoints: data.loyalty?.redeemedPoints || 0,
+          appliedDiscount: data.appliedDiscount,
+          appliedDiscountAmount: data.appliedDiscountAmount,
+          cash: data.cash,
+          cart: items,
+          subTotal: data.subTotal,
+          shipping: data.shipping,
+          total: data.total,
+          billingCountry: data.billingCountry,
+          billingFirstName: data.billingFirstName,
+          billingState: data.billingState,
+          billingLastName: data.billingLastName,
+          billingEmail: data.billingEmail,
+          billingPhone: data.billingPhone,
+          billingAddress: data.billingAddress,
+          billingApartment: data.billingApartment,
+          billingPostalZip: data.billingPostalZip,
+          bostaCity: data.bostaCity,
+          bostaCityName: data.bostaCityName,
+          bostaZone: data.bostaZone || "",
+          bostaZoneName: data.bostaZoneName || "",
+          bostaDistrict: data.bostaDistrict || "",
+          bostaDistrictName: data.bostaDistrictName || "",
+        });
+
+        // Register in PendingPayment for consistency
+        await PendingPaymentModel.create({
+          paymobOrderId: specialReference,
+          productType: "order",
+          referenceId: res._id,
+        });
+
+        console.log("orderID" + res._id);
+
+        await sendMail({
+          to: `${data.email}, orders@shopwifeyforlifey.com`,
+          from: "noreply@shopwifeyforlifey.com",
+          name: "Order Confirmation",
+          subject: "Order Confirmation",
+          body: generateEmailBody(
+            items,
+            data.firstName,
+            data.lastName,
+            data.phone,
+            data.email,
+            data.total,
+            data.subTotal,
+            data.shipping,
+            data.currency,
+            data.address,
+            res._id,
+            data.cash,
+            data.country,
+            data.state,
+            data.city,
+            data.postalZip,
+            data.apartment
+          ),
+        });
+
+        return NextResponse.json(
+          {
+            token: "wiig",
+            success: true,
+            orderId: res._id.toString(),
+          },
+          { status: 200 }
+        );
+      }
+    } catch (err: any) {
+      console.error("Instapay error:", err);
+      return NextResponse.json({ message: err.message }, { status: 400 });
+    }
+  }
   else if (data.cash === "card") {
     console.log("amount" + data.total);
     try {

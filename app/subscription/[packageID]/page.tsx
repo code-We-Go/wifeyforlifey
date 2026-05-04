@@ -854,7 +854,7 @@ We’re beyond excited to share this experience with you… your planner will be
           },
         };
 
-        const res = await axios.post("/api/subscription/instapay", instapayPayload);
+        const res = await axios.post("/api/payment/", instapayPayload);
         setLoading(false);
 
         if (res.data.success) {
