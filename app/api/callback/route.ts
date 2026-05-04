@@ -738,7 +738,7 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
   // Uses findOneAndUpdate so that the check + status change is a single
   // atomic operation, preventing the race where both GET and POST read
   // status "pending" simultaneously and both proceed to process.
-  const pendingPayment = await PendingPaymentModel.findOneAndUpdate(
+  let pendingPayment = await PendingPaymentModel.findOneAndUpdate(
     {
       paymobOrderId: String(paymobOrderId),
       status: "pending",               // only claim if still pending
@@ -761,23 +761,48 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
       return { success: false, redirect: "payment/failed" };
     }
 
-    // Already processing or processed — return appropriate redirect
-    console.log(
-      `⏭️ Payment already processed (status: ${existing.status}), skipping`
-    );
-    if (existing.status === "confirmed" || existing.status === "processing") {
-      if (existing.productType === "partner_session") {
-        return {
-          success: true,
-          redirect: `payment/success?session=true&orderId=${existing.referenceId}`,
-        };
-      } else if (existing.productType === "subscription") {
-        return { success: true, redirect: "payment/success?subscription=true" };
-      } else {
+    // BUG FIX: If the record was marked "failed" by a previous callback
+    // (e.g. POST sent success:false for a declined attempt), but THIS
+    // callback says success:true (e.g. the GET browser redirect after
+    // the customer retried/approved), re-claim and process it.
+    if (existing.status === "failed" && isSuccess) {
+      console.log(
+        `🔄 Re-claiming previously failed payment (order: ${paymobOrderId}) — new callback says success`
+      );
+      pendingPayment = await PendingPaymentModel.findOneAndUpdate(
+        {
+          paymobOrderId: String(paymobOrderId),
+          status: "failed",
+        },
+        { status: "processing" },
+        { new: true }
+      );
+
+      if (!pendingPayment) {
+        // Another caller already re-claimed it between our check and update
+        console.log(`⏭️ Re-claim race lost for order: ${paymobOrderId}`);
         return { success: true, redirect: "payment/success" };
       }
+      // Fall through to normal processing below
+    } else {
+      // Already processing or processed — return appropriate redirect
+      console.log(
+        `⏭️ Payment already processed (status: ${existing.status}), skipping`
+      );
+      if (existing.status === "confirmed" || existing.status === "processing") {
+        if (existing.productType === "partner_session") {
+          return {
+            success: true,
+            redirect: `payment/success?session=true&orderId=${existing.referenceId}`,
+          };
+        } else if (existing.productType === "subscription") {
+          return { success: true, redirect: "payment/success?subscription=true" };
+        } else {
+          return { success: true, redirect: "payment/success" };
+        }
+      }
+      return { success: false, redirect: "payment/failed" };
     }
-    return { success: false, redirect: "payment/failed" };
   }
 
   console.log(
