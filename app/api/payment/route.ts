@@ -103,6 +103,7 @@ export async function POST(request: Request) {
         appliedDiscount: data.appliedDiscount,
         appliedDiscountAmount: data.appliedDiscountAmount,
         cash: data.cash, // Payment method: Cash or not
+        paymentMethod: data.paymentMethod,
         cart: items,
         subTotal: data.subTotal,
         shipping: data.shipping,
@@ -299,6 +300,7 @@ export async function POST(request: Request) {
           from: fromPackageID,
           to: data.subscription,
           paymentMethod: "instapay",
+          instapayReciept: data.instapayReciept,
           // Parity fields from subscription schema
           packageID: data.subscription,
           selectedDuration: data.selectedDuration,
@@ -387,6 +389,8 @@ export async function POST(request: Request) {
           appliedDiscount: data.appliedDiscount,
           appliedDiscountAmount: data.appliedDiscountAmount,
           cash: data.cash,
+          paymentMethod: "instapay",
+          instapayReciept: data.instapayReciept,
           cart: items,
           subTotal: data.subTotal,
           shipping: data.shipping,
@@ -537,7 +541,7 @@ export async function POST(request: Request) {
             process: data.process,
             from: fromPackageID,
             to: data.subscription,
-            paymentMethod: "card",
+            paymentMethod: data.paymentMethod,
             // Parity fields from subscription schema
             packageID: data.subscription,
             selectedDuration: data.selectedDuration,
@@ -620,7 +624,7 @@ export async function POST(request: Request) {
             process: "new",
             from: fromPackageID,
             to: data.subscription,
-            paymentMethod: "card",
+            paymentMethod: data.paymentMethod,
             // Parity fields from subscription schema
             packageID: data.subscription,
             selectedDuration: data.selectedDuration,
@@ -750,6 +754,7 @@ export async function POST(request: Request) {
           specialMessage: data.specialMessage,
           giftCardName: data.giftCardName,
           cash: data.cash, // Payment method: Cash or not
+          paymentMethod: data.paymentMethod,
           cart: items,
           shipping: data.shipping,
           total: data.total,

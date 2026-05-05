@@ -88,6 +88,7 @@ const OrderSchema = new Schema(
         bostaDistrict: { type: String, required: false },
         bostaDistrictName: { type: String, required: false },
         isMob: { type: Boolean, default: false },
+        instapayReciept: { type: String, required: false },
         createdAt: { type: Date, default: Date.now },
             expiresAt: { type: Date, required: false },
 

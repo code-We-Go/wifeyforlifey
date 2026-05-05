@@ -63,8 +63,8 @@ export default function InstapaySuccessPage() {
           🎉 Congratulations! 🎉
         </h1>
 
-        <p className="text-center text-lovely text-lg mb-8">
-          Your subscription order has been created successfully!
+        <p className="text-center text-lovely text-lg mb-4">
+          Your Request has been created successfully!
         </p>
 
         {/* Instructions */}
@@ -72,11 +72,10 @@ export default function InstapaySuccessPage() {
           <h2
             className={`${thirdFont.className} text-3xl text-lovely mb-6 text-center`}
           >
-            Follow these steps to confirm your order:
+            our team will review your request and we will send you a confirmation email as soon as possible
           </h2>
 
-          <div className="space-y-4">
-            {/* Step 1 */}
+         {/* <div className="space-y-4">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-8 h-8 bg-lovely text-white rounded-full flex items-center justify-center font-bold">
                 1
@@ -104,7 +103,6 @@ export default function InstapaySuccessPage() {
               </div>
             </div>
 
-            {/* Step 2 */}
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-8 h-8 bg-lovely text-white rounded-full flex items-center justify-center font-bold">
                 2
@@ -120,7 +118,6 @@ export default function InstapaySuccessPage() {
               </div>
             </div>
 
-            {/* Step 3 */}
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-8 h-8 bg-lovely text-white rounded-full flex items-center justify-center font-bold">
                 3
@@ -146,8 +143,8 @@ export default function InstapaySuccessPage() {
                 </a>
               </div>
             </div>
-          </div>
-        </div>
+          </div>  */}
+        </div> 
 
         {/* Important Note */}
         <div className="bg-pinkey/20 border-l-4 border-lovely p-4 mb-6">
@@ -170,6 +167,11 @@ export default function InstapaySuccessPage() {
               <p className="text-sm text-lovely/80">
                 Your subscription will be activated once we verify your payment.
                 This usually takes a few minutes during business hours.
+                <br></br>
+                Business days are from Monday to Friday.
+                Business hours are from 5 PM to 11 PM.
+                <br></br>
+                Requests made on Saturday and Sunday will be reviewed on Monday.
               </p>
             </div>
           </div>

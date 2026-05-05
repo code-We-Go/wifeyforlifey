@@ -317,6 +317,8 @@ async function handleSubscription(
     subTotal: paymentOp.subTotal,
     shipping: paymentOp.shipping,
     currency: paymentOp.currency,
+    paymentMethod: paymentOp.paymentMethod,
+    instapayReciept: paymentOp.instapayReciept,
     // Bosta fields
     bostaCity: paymentOp.bostaCity,
     bostaCityName: paymentOp.bostaCityName,

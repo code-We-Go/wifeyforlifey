@@ -30,6 +30,7 @@ import {
   BostaDistrict,
 } from "@/app/services/bostaLocationService";
 import DiscountSection from "../components/DiscountSection";
+import { CldUploadWidget } from "next-cloudinary";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -206,6 +207,7 @@ const SubscriptionPage = () => {
   const [variantPrice, setVariantPrice] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [isUpgrade, setIsUpgrade] = useState(false);
+  const [instapayReciept, setInstapayReciept] = useState("");
 
   // Read upgrade price from query param and set override
   useEffect(() => {
@@ -436,6 +438,7 @@ We’re beyond excited to share this experience with you… your planner will be
     zone: bostaLocation.zone?._id || "",
     district: bostaLocation.district?.districtId || "",
     cash: payment,
+    paymentMethod: payment,
     total: total,
     shipping: shipping,
     isGift: false,
@@ -605,8 +608,12 @@ We’re beyond excited to share this experience with you… your planner will be
     }
   }, [countryID]);
   useEffect(() => {
-    formData.cash = payment;
-  }, [setPayment]);
+    setFormData((prev) => ({
+      ...prev,
+      cash: payment,
+      paymentMethod: payment,
+    }));
+  }, [payment]);
 
   // Sync state changes with formData
   useEffect(() => {
@@ -830,10 +837,17 @@ We’re beyond excited to share this experience with you… your planner will be
 
     // Handle instapay payment method
     if (payment === "instapay") {
+      if (!instapayReciept) {
+        alert("Please upload your Instapay transaction screenshot to proceed.");
+        setLoading(false);
+        return;
+      }
       try {
         // Create subscription payment record directly
         const instapayPayload = {
           ...formData,
+          paymentMethod: payment,
+          instapayReciept: instapayReciept,
           subscription: packageID,
           appliedDiscount: appliedDiscount?._id,
           appliedDiscountAmount:
@@ -875,6 +889,7 @@ We’re beyond excited to share this experience with you… your planner will be
     // Add discount and loyalty info to payload
     const payload = {
       ...formData,
+      paymentMethod: payment,
       appliedDiscount: appliedDiscount?._id,
       appliedDiscountAmount:
         appliedDiscount?.calculationType === "FREE_SHIPPING"
@@ -1723,6 +1738,82 @@ We’re beyond excited to share this experience with you… your planner will be
                     />
                     <label className="text-base"> Pay with instapay</label>
                   </div>
+                  {payment === "instapay" && (
+                    <div className="mt-4 p-4 border border-lovely/20 rounded-xl bg-lovely/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 text-lovely font-semibold">
+                        <span className="p-1 bg-lovely/10 rounded-full">💰</span>
+                        <p className="text-sm">Instapay Instructions</p>
+                      </div>
+                      
+                      <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">1.</span> 
+                          <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">2.</span> 
+                          <span>Select <b>"Bank Account"</b></span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">3.</span> 
+                          <span>Enter Account Number: <b className="font-mono text-base select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">4.</span> 
+                          <span>Select <b>Credit Agricole</b> as the bank</span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">5.</span> 
+                          <span>Type <b>Wifey</b> in the receiver field</span>
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <label className="block text-[13px] font-medium text-gray-700">
+                          Transaction Screenshot / Receipt
+                        </label>
+                        <CldUploadWidget
+                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
+                          onSuccess={(result: any) => {
+                            if (result.info && typeof result.info !== 'string') {
+                              setInstapayReciept(result.info.secure_url);
+                            }
+                          }}
+                        >
+                          {({ open }) => (
+                            <button
+                              type="button"
+                              onClick={() => open()}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-sm font-medium"
+                            >
+                              {instapayReciept ? (
+                                <>
+                                  <span className="text-green-600 font-bold">✓</span>
+                                  Change Screenshot
+                                </>
+                              ) : (
+                                <>
+                                  <span>📸</span>
+                                  Upload Screenshot
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </CldUploadWidget>
+                        
+                        {instapayReciept && (
+                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 shadow-sm">
+                            <Image 
+                              src={instapayReciept} 
+                              alt="Instapay Receipt" 
+                              fill 
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {/* paymob */}

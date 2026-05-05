@@ -98,6 +98,7 @@ const SubscriptionSchema = new Schema(
     //   enum: ["new", "upgrade", "renew"],
     //   default: "new",
     // },
+    instapayReciept: { type: String, required: false },
     createdAt: {
       type: Date,
       default: Date.now,
