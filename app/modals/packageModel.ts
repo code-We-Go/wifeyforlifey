@@ -55,6 +55,16 @@ const PackageSchema = new Schema<Ipackage>(
       default: [],
     },
     accessAllPlaylists: { type: Boolean, default: false },
+    packageInspos: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "inspos" }],
+      default: [],
+    },
+    accessAllInspos: { type: Boolean, default: false },
+    packagePartners: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "partners" }],
+      default: [],
+    },
+    accessAllPartners: { type: Boolean, default: false },
   },
   {
     timestamps: true,

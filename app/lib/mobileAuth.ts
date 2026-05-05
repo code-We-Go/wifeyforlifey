@@ -25,6 +25,7 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
 
         // Fetch full user data to ensure user still exists and get latest details
         try {
+          
           const dbUser = await UserModel.findById(decodedUser.id).populate(
             "subscriptions"
           );

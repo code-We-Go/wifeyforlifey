@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authenticateRequest } from "@/app/lib/mobileAuth";
 import { ConnectDB } from "@/app/config/db";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import ordersModel from "@/app/modals/ordersModel";
@@ -6,35 +7,58 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import packageModel from "@/app/modals/packageModel";
 import mongoose from "mongoose";
+import playlistModel from "@/app/modals/playlistModel";
 
 export async function GET(request: NextRequest) {
+  
   try {
     await ConnectDB();
 
+    // 1. Authenticate Request
+    const auth = await authenticateRequest(request);
+    
+    // We can still use userID from query as a fallback or for admin purposes, 
+    // but primary source for mobile is the token
     const { searchParams } = new URL(request.url);
-    const userID = searchParams.get("userID");
+    const queryUserID = searchParams.get("userID");
+    
+    let user = auth.user;
 
-    if (!userID) {
+    // If not authenticated via token and no query ID, return error
+    if (!user && !queryUserID) {
       return NextResponse.json(
-        { error: "userID parameter is required" },
-        { status: 400 }
+        { error: "Authentication required or userID parameter missing" },
+        { status: 401 }
       );
     }
 
-    if (!mongoose.Types.ObjectId.isValid(userID)) {
+    // Determine the user ID to fetch (prioritize queryUserID if provided)
+    const targetUserID = queryUserID || user?._id;
+
+    if (!mongoose.Types.ObjectId.isValid(targetUserID)) {
       return NextResponse.json(
         { error: "Invalid userID format" },
         { status: 400 }
       );
     }
-    console.log(packageModel + "registerd");
-    // 1. Fetch User with all subscriptions populated
-    const user = await UserModel.findById(userID).populate({
+
+    // Always (re)fetch the user with specific population selection to ensure 
+    // only the 'important features' are returned.
+    user = await UserModel.findById(targetUserID).populate({
       path: "subscriptions",
-      populate: {
-        path: "packageID",
-        model: "packages",
-      },
+      select: "subscribed expiryDate allowedPlaylists miniSubscriptionActivated packageID",
+      populate: [
+        {
+          path: "packageID",
+          model: "packages",
+          select: "name packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners",
+        },
+        {
+          path: "allowedPlaylists.playlistID",
+          model: "playlists",
+          select: "name",
+        }
+      ]
     });
 
     if (!user) {
@@ -71,37 +95,7 @@ export async function GET(request: NextRequest) {
         ? (loyaltyStats[0].totalEarned || 0) - (loyaltyStats[0].totalSpent || 0)
         : 0;
 
-    // 4. Extract Subscription Details from the subscriptions array
-    let packageName = null;
-    let expiryDate = null;
-    let isSubscribed = user.isSubscribed;
-
-    // Find the active main subscription (Full Experience or Mini — non-bestie)
-    const now = new Date();
-    const activeSubs = ((user.subscriptions as any[]) || []).filter(
-      (s: any) => s.subscribed && s.expiryDate && new Date(s.expiryDate) > now
-    );
-
-    // Main subscription: any active sub that is NOT the Wedding Planning Bestie package
-    const mainSub = activeSubs.find(
-      (s: any) =>
-        s.packageID?._id?.toString() !== PACKAGE_IDS.WEDDING_PLANNING_BESTIE
-    );
-
-    if (mainSub && isSubscribed) {
-      expiryDate = mainSub.expiryDate;
-      if (mainSub.packageID) {
-        packageName = mainSub.packageID.name;
-      }
-    }
-
-    // Wedding Planning Bestie subscription (separate package)
-    const bestieSub = activeSubs.find(
-      (s: any) =>
-        s.packageID?._id?.toString() === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
-    );
-
-    // 5. Construct Response
+    // 4. Construct Response
     const responseData: any = {
       name:
         user.firstName && user.lastName
@@ -113,19 +107,11 @@ export async function GET(request: NextRequest) {
       email: user.email,
       imageURL: user.imageURL,
       numberOfOrders: ordersCount,
-      isSubscribed: isSubscribed,
-      packageName: packageName,
-      expiryDate: expiryDate,
       loyaltyPoints: loyaltyPoints,
       weddingDate: user.weddingDate,
       birthDate: user.birthDate,
-      // Wedding Planning Bestie data (null if not subscribed to this package)
-      weddingPlanningBestie: bestieSub
-        ? {
-            expiryDate: bestieSub.expiryDate,
-            packageName: bestieSub.packageID?.name || null,
-          }
-        : null,
+      isSubscribed: user.isSubscribed,
+      subscriptions: user.subscriptions,
     };
 
     return NextResponse.json(responseData);
