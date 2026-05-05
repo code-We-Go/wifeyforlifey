@@ -30,13 +30,13 @@ export async function GET(request: NextRequest) {
       try {
         if (ObjectId.isValid(subscriptionId)) {
           subscription = await subscriptionsModel.findOne({ _id: new ObjectId(subscriptionId) })
-            .populate("packageID", "packagePlaylists accessAllPlaylists");
+            .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners");
         }
 
         // If not found by ObjectId, try by shipmentID
         if (!subscription) {
           subscription = await subscriptionsModel.findOne({ shipmentID: subscriptionId })
-            .populate("packageID", "packagePlaylists accessAllPlaylists");
+            .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners");
         }
       } catch (error) {
         console.error("Error finding by ID:", error);
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
           ],
           subscribed: true,
         }).sort({ expiryDate: -1 })
-          .populate("packageID", "packagePlaylists accessAllPlaylists");
+          .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners");
 
         if (!subscriptions || subscriptions.length === 0) {
           return NextResponse.json({ message: "Subscription not found" }, { status: 404 });
@@ -79,7 +79,7 @@ console.log("userSubscriptions",subscriptions)
           { giftRecipientEmail: email }
         ]
       }).sort({ createdAt: -1 }) // Get the most recent subscription for this email
-        .populate("packageID", "packagePlaylists accessAllPlaylists");
+        .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners");
     }
 
     if (!subscription) {

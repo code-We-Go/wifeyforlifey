@@ -898,9 +898,10 @@ We’re beyond excited to share this experience with you… your planner will be
     if (packageData && packageID && !isUpgrade) {
       const modalContent = getModalContent(packageID as string);
       if (modalContent) {
+
         setShowModal(false);
-        //not a pre-order now
-        //setShowModal(true); 
+        //not a pre order now
+        // setShowModal(true);
       }
     }
   }, [packageData, packageID]);

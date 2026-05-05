@@ -32,32 +32,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // If queryUserID is provided (e.g. for testing or admin), and it's different from auth.user,
-    // fetch that specific user instead.
-    if (queryUserID && (!user || user._id.toString() !== queryUserID)) {
-      if (!mongoose.Types.ObjectId.isValid(queryUserID)) {
-        return NextResponse.json(
-          { error: "Invalid userID format" },
-          { status: 400 }
-        );
-      }
-          console.log(packageModel  +"packgemodel");
-          console.log(playlistModel +"playlistModel");
+    // Determine the user ID to fetch (prioritize queryUserID if provided)
+    const targetUserID = queryUserID || user?._id;
 
-      user = await UserModel.findById(queryUserID).populate({
-        path: "subscriptions",
-        populate: [
-          {
-            path: "packageID",
-            model: "packages",
-          },
-          {
-            path: "allowedPlaylists.playlistID",
-            model: "playlists",
-          }
-        ]
-      });
+    if (!mongoose.Types.ObjectId.isValid(targetUserID)) {
+      return NextResponse.json(
+        { error: "Invalid userID format" },
+        { status: 400 }
+      );
     }
+
+    // Always (re)fetch the user with specific population selection to ensure 
+    // only the 'important features' are returned.
+    user = await UserModel.findById(targetUserID).populate({
+      path: "subscriptions",
+      select: "subscribed expiryDate allowedPlaylists miniSubscriptionActivated packageID",
+      populate: [
+        {
+          path: "packageID",
+          model: "packages",
+          select: "name packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners",
+        },
+        {
+          path: "allowedPlaylists.playlistID",
+          model: "playlists",
+          select: "name",
+        }
+      ]
+    });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
