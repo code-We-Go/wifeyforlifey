@@ -867,7 +867,7 @@ export async function GET(request: Request) {
     // HMAC verification
     // if (!verifyHmac(data)) {
     //   console.error("❌ HMAC verification failed — rejecting callback");
-    //   return NextResponse.redirect(`${process.env.testUrl}payment/failed`);
+    //   return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/payment/failed`);
     // }
 
     const isSuccess = data.success === "true";
@@ -887,12 +887,12 @@ export async function GET(request: Request) {
 
     const result = await processCallback(paymobOrderId, isSuccess);
 
-    // If it's an API call (like from the dashboard or mobile), return JSON instead of a redirect
-    // We check for Accept header, CORS mode, or an explicit json=true parameter
-    const isApiCall = 
-      request.headers.get("accept")?.includes("application/json") || 
-      request.headers.get("sec-fetch-mode") === "cors" ||
-      searchParams.get("json") === "true";
+    // If it's an explicit API call (e.g. dashboard Instapay Approve button),
+    // return JSON instead of a browser redirect.
+    // IMPORTANT: Only trust the explicit `json=true` query param.
+    // Do NOT sniff Accept / sec-fetch-mode — a real Paymob browser redirect
+    // can satisfy those conditions and would then serve raw JSON to the customer.
+    const isApiCall = searchParams.get("json") === "true";
 
     if (isApiCall) {
       return NextResponse.json(
