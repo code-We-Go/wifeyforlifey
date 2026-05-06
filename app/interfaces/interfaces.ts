@@ -241,7 +241,7 @@ export interface IOrder {
   city?: string;
   state?: string;
   phone?: string;
-  cash?: boolean;
+  cash?: "card" | "cash" | "instapay";
   cart?: CartItem[]; // Assuming CartItem interface exists
   subTotal?: number;
   total?: number;
