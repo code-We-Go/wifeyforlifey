@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
 
     // Always (re)fetch the user with specific population selection to ensure 
     // only the 'important features' are returned.
+    console.log("register ",subscriptionsModel,ordersModel,LoyaltyTransactionModel,packageModel,playlistModel)
     user = await UserModel.findById(targetUserID).populate({
       path: "subscriptions",
       select: "subscribed expiryDate allowedPlaylists miniSubscriptionActivated packageID",
