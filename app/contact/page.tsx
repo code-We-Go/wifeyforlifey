@@ -22,7 +22,7 @@ export default function ContactUsPage() {
               </h3>
               <p>
                 <strong>Email:</strong>{" "}
-                <a href="mailto:info@example.com">info@shopwifeyforlifey.com</a>
+                <a href="mailto:support@shopwifeyforlifey.com">support@shopwifeyforlifey.com</a>
               </p>
               <p>
                 <strong>Phone:</strong>{" "}
@@ -39,7 +39,7 @@ export default function ContactUsPage() {
               unoptimized
               width={400}
               height={300}
-              src="/characters/Callcentergirlie.png"
+              src="/characters/CallCenterGirlie.png"
               alt="Contact Us"
               className="h-full aspect-video mb-4 w-full rounded-2xl object-cover"
             />
@@ -52,7 +52,7 @@ export default function ContactUsPage() {
             </h2>
             <p>
               <strong>Email:</strong>{" "}
-              <a href="mailto:info@example.com">info@shopwifeyforlifey.com</a>
+              <a href="support@shopwifeyforlifey.com">support@shopwifeyforlifey.com</a>
             </p>
             <p>
               <strong>Phone:</strong>{" "}
