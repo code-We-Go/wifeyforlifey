@@ -14,13 +14,13 @@ export async function sendContactMail({
 }) {
   const { SMTP_EMAIL, SMTP_PASSWORD } = process.env;
 
- const transport = nodemailer.createTransport({
-    host: "mail.smtp2go.com",
+  const transport = nodemailer.createTransport({
+    host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {
-      user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_PASSWORD,
+      user: SMTP_EMAIL,
+      pass: SMTP_PASSWORD,
     },
   });
   try {
