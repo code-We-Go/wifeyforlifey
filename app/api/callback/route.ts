@@ -658,11 +658,38 @@ async function handleOrder(
     console.error("Bosta integration error:", bostaError);
   }
 
-  // Send order confirmation email
+  // Send order confirmation email to customer
   await sendMail({
-    to: `${res.email}, orders@shopwifeyforlifey.com`,
+    to: res.email,
     name: res.firstName + " " + res.lastName,
     subject: "Order Confirmation",
+    body: generateEmailBody(
+      res.cart,
+      res.firstName,
+      res.lastName,
+      res.phone,
+      res.email,
+      res.total,
+      res.subTotal,
+      res.shipping,
+      res.currency,
+      res.address,
+      res._id,
+      res.cash,
+      res.country,
+      res.state,
+      res.city,
+      res.postalZip,
+      res.apartment
+    ),
+    from: "orders@shopwifeyforlifey.com",
+  });
+
+  // Send order confirmation email to admin
+  await sendMail({
+    to: "orders@shopwifeyforlifey.com",
+    name: res.firstName + " " + res.lastName,
+    subject: "Order Confirmation (Admin Copy)",
     body: generateEmailBody(
       res.cart,
       res.firstName,
