@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import subCategoryModel from '@/app/modals/subCategoryModel';
+import categoriesModel from '@/app/modals/categoriesModel';
 import { ConnectDB } from '@/app/config/db';
+import mongoose from 'mongoose';
 
 export async function GET(request: Request) {
   try {
@@ -20,13 +22,40 @@ export async function GET(request: Request) {
       query.active = true;
     }
 
-    const subcategories = await subCategoryModel.find(query).sort({ subCategoryName: 1 });
+    let typeQuery: any = {};
+    const type = searchParams.get('type');
+    if (type) {
+      typeQuery = type === 'product'
+        ? { $or: [{ type: 'product' }] }
+        : { type };
+    }
+
+    let subcategories = await subCategoryModel.find(query)
+      .populate({
+        path: 'categoryID',
+        match: type ? typeQuery : undefined,
+      })
+      .sort({ subCategoryName: 1 });
+
+    // If we are filtering by type, remove subcategories whose category didn't match (and thus categoryID is null)
+    if (type) {
+      subcategories = subcategories.filter((sub: any) => sub.categoryID !== null);
+    }
+    
     console.log("subcategories length " + subcategories.length);
     
-    // Return array directly to simplify frontend usage if requested, or keep { data } wrapper?
-    // The previous implementation returned { data: subcategories }. 
-    // I will return it as is but be mindful in frontend.
-    return NextResponse.json({ data: subcategories });
+
+    
+    // Map populated categoryID back to string ID for frontend compatibility
+    const responseData = subcategories.map((sub: any) => {
+      const subObj = sub.toObject ? sub.toObject() : sub;
+      if (subObj.categoryID && typeof subObj.categoryID === 'object') {
+        subObj.categoryID = subObj.categoryID._id.toString();
+      }
+      return subObj;
+    });
+
+    return NextResponse.json({ data: responseData });
   } catch (error) {
     console.error('Error fetching subcategories:', error);
     return NextResponse.json(

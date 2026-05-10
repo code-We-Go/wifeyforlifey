@@ -124,7 +124,7 @@ function ShopPage() {
   useEffect(() => {
     const fetchSubcategories = async () => {
       try {
-        const response = await fetch("/api/subcategories?active=true");
+        const response = await fetch("/api/subcategories?active=true&type=product");
         const data = await response.json();
         // The API returns { data: [...] } or [...] depending on my previous thought.
         // My edit to api/subcategories/route.ts returns { data: ... }

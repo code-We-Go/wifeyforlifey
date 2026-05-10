@@ -4,9 +4,8 @@ import path from "path";
 const subCategorySchema = new mongoose.Schema({
   subCategoryName: { type: String, required: true },
   categoryID: {
-    type: String,
-    // ref: "categories",
-    // path: path.join(__dirname, "categoriesModel"),
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "categories",
   },
   image:{type:String,required:false},
   description: { type: String },
