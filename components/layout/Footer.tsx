@@ -46,7 +46,7 @@ export default function Footer() {
   useEffect(() => {
     setShopCategoriesLoading(true);
     setShopCategoriesError(null);
-    fetch("/api/categories")
+    fetch("/api/categories?type=product")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
