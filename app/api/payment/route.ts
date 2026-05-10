@@ -231,8 +231,9 @@ export async function POST(request: Request) {
         });
       }
 
+      // Send to customer
       await sendMail({
-        to: `${data.email}, orders@shopwifeyforlifey.com`,
+        to: data.email,
         from: "noreply@shopwifeyforlifey.com",
         name: "Order Confirmation",
         subject: "Order Confirmation",
@@ -255,8 +256,33 @@ export async function POST(request: Request) {
           data.postalZip,
           data.apartment
         ),
-        // body: `<a href=${verificationLink}> click here to verify your account</a>`,
-        //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
+      });
+
+      // Send to admin
+      await sendMail({
+        to: "orders@shopwifeyforlifey.com",
+        from: "noreply@shopwifeyforlifey.com",
+        name: "Order Confirmation",
+        subject: "Order Confirmation (Admin Copy)",
+        body: generateEmailBody(
+          items,
+          data.firstName,
+          data.lastName,
+          data.phone,
+          data.email,
+          data.total,
+          data.subTotal,
+          data.shipping,
+          data.currency,
+          data.address,
+          res._id,
+          data.cash,
+          data.country,
+          data.state,
+          data.city,
+          data.postalZip,
+          data.apartment
+        ),
       });
 
       // await sendMail({
@@ -421,11 +447,39 @@ export async function POST(request: Request) {
 
         console.log("orderID" + res._id);
 
+        // Send to customer
         await sendMail({
-          to: `${data.email}, orders@shopwifeyforlifey.com`,
+          to: data.email,
           from: "noreply@shopwifeyforlifey.com",
           name: "Order Confirmation",
           subject: "Order Confirmation",
+          body: generateEmailBody(
+            items,
+            data.firstName,
+            data.lastName,
+            data.phone,
+            data.email,
+            data.total,
+            data.subTotal,
+            data.shipping,
+            data.currency,
+            data.address,
+            res._id,
+            data.cash,
+            data.country,
+            data.state,
+            data.city,
+            data.postalZip,
+            data.apartment
+          ),
+        });
+
+        // Send to admin
+        await sendMail({
+          to: "orders@shopwifeyforlifey.com",
+          from: "noreply@shopwifeyforlifey.com",
+          name: "Order Confirmation",
+          subject: "Order Confirmation (Admin Copy)",
           body: generateEmailBody(
             items,
             data.firstName,
