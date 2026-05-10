@@ -51,6 +51,7 @@ import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import InspoTab from "./inspo/InspoTab";
 import ShoppingBestieTab from "./shopping-bestie/ShoppingBestieTab";
+import WeddingBestieTab from "./wedding-bestie/WeddingBestieTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -712,6 +713,7 @@ const AccountPage = () => {
     { id: "favorites", label: "Favorites", icon: Star },
     { id: "inspo", label: "Inspo", icon: Sparkles },
     { id: "shopping-bestie", label: "Shopping Bestie", icon: ShoppingCart },
+    { id: "wedding-planning-bestie", label: "Wedding Planning Bestie", icon: Heart },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
@@ -1729,6 +1731,12 @@ const AccountPage = () => {
         {activeTab === "shopping-bestie" && (
           <div>
             <ShoppingBestieTab isSubscribed={user.isSubscribed} />
+          </div>
+        )}
+        
+        {activeTab === "wedding-planning-bestie" && (
+          <div>
+            <WeddingBestieTab />
           </div>
         )}
       </div>

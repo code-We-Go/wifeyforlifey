@@ -3,13 +3,25 @@ import categoriesModel from '@/app/modals/categoriesModel';
 import subCategoryModel from '@/app/modals/subCategoryModel';
 import { ConnectDB } from '@/app/config/db';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // Connect to database with proper error handling
     await ConnectDB();
 
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get('type');
+
+    let query: any = { active: true };
+    if (type) {
+      if (type === 'product') {
+        query.$or = [{ type: 'product' }, { type: { $exists: false } }, { type: null }];
+      } else {
+        query.type = type;
+      }
+    }
+
     // Fetch only active categories
-    const categories = await categoriesModel.find({ active: true }).sort({ categoryName: 1 });
+    const categories = await categoriesModel.find(query).sort({ categoryName: 1 });
 
     // Fetch subcategories for each category
     const categoriesWithSubcategories = await Promise.all(
