@@ -9,8 +9,16 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight, ExternalLink, Package } from "lucide-react";
+import { ChevronRight, ExternalLink, Package, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { thirdFont } from "@/fonts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const WEDDING_EXPERIENCE_PACKAGE_ID = "6965e63c6df4503dda02c12b";
 const WEDDING_BESTIE_SLUG = "wedding-bestie-planner";
@@ -28,6 +36,9 @@ const WeddingBestieTab = () => {
   const [loadingVendors, setLoadingVendors] = useState(false);
   const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(0);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -74,11 +85,34 @@ const WeddingBestieTab = () => {
     const isSubscribed = await checkSubscription();
     if (isSubscribed) {
       setSelectedCategory(category);
-      setSubcategories(category.subcategories || []);
+      const subs = category.subcategories || [];
+      setSubcategories(subs);
       setSelectedSubcategory(null);
-      setVendors([]);
+      // Fetch all vendors for all subcategories in this category
+      fetchAllVendorsForCategory(subs);
     } else {
       // Logic for non-subscribed users is handled in the render phase when hasSubscription is false
+    }
+  };
+
+  const fetchAllVendorsForCategory = async (subs: any[]) => {
+    if (!subs.length) {
+      setVendors([]);
+      return;
+    }
+    try {
+      setLoadingVendors(true);
+      const ids = subs.map((s: any) => s._id).join(",");
+      let url = `/api/wedding-planning-vendors?subCategoryIDs=${ids}`;
+      if (minPrice) url += `&minPrice=${minPrice}`;
+      if (maxPrice) url += `&maxPrice=${maxPrice}`;
+      if (sortOrder) url += `&sortBy=price&sortOrder=${sortOrder}`;
+      const res = await axios.get(url);
+      setVendors(res.data.data || []);
+    } catch (error) {
+      console.error("Error fetching vendors:", error);
+    } finally {
+      setLoadingVendors(false);
     }
   };
 
@@ -87,10 +121,19 @@ const WeddingBestieTab = () => {
     fetchVendors(subcategory._id);
   };
 
+  const handleShowAll = () => {
+    setSelectedSubcategory(null);
+    fetchAllVendorsForCategory(subcategories);
+  };
+
   const fetchVendors = async (subCategoryID: string) => {
     try {
       setLoadingVendors(true);
-      const res = await axios.get(`/api/wedding-planning-vendors?subCategoryID=${subCategoryID}`);
+      let url = `/api/wedding-planning-vendors?subCategoryID=${subCategoryID}`;
+      if (minPrice) url += `&minPrice=${minPrice}`;
+      if (maxPrice) url += `&maxPrice=${maxPrice}`;
+      if (sortOrder) url += `&sortBy=price&sortOrder=${sortOrder}`;
+      const res = await axios.get(url);
       setVendors(res.data.data || []);
     } catch (error) {
       console.error("Error fetching vendors:", error);
@@ -98,6 +141,20 @@ const WeddingBestieTab = () => {
       setLoadingVendors(false);
     }
   };
+
+  const handleApplyFilters = () => {
+    if (selectedSubcategory) {
+      fetchVendors(selectedSubcategory._id);
+    } else if (selectedCategory) {
+      fetchAllVendorsForCategory(subcategories);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSubcategory || selectedCategory) {
+      handleApplyFilters();
+    }
+  }, [sortOrder]);
 
   if (loading) {
     return (
@@ -112,21 +169,21 @@ const WeddingBestieTab = () => {
   if (hasSubscription === false) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-saga/10 rounded-2xl border-2 border-saga/20">
-        <Package className="h-16 w-16 text-saga mb-4" />
-        <h2 className={`text-2xl font-bold text-saga mb-2 ${thirdFont.className}`}>
+        <Package className="h-16 w-16 text-lovely mb-4" />
+        <h2 className={`text-2xl font-bold text-lovely mb-2 ${thirdFont.className}`}>
           Subscription Required
         </h2>
-        <p className="text-saga/80 max-w-md mb-6">
+        <p className="text-lovely/80 max-w-md mb-6">
           To access the Wedding Planning Bestie features, you need to subscribe to the Wedding Experience package.
         </p>
         <Link href={`/package/${WEDDING_BESTIE_SLUG}`}>
-          <Button className="bg-saga text-creamey hover:bg-saga/80">
+          <Button className="bg-lovely text-creamey hover:bg-lovely/80">
             Subscribe Now
           </Button>
         </Link>
         <Button 
           variant="ghost" 
-          className="mt-4 text-saga/60 text-xs"
+          className="mt-4 text-lovely/60 text-xs"
           onClick={() => setHasSubscription(null)}
         >
           Back to categories
@@ -175,11 +232,18 @@ const WeddingBestieTab = () => {
           </div>
 
           <div className="flex flex-wrap gap-3">
+            <Button
+              variant={!selectedSubcategory ? "default" : "outline"}
+              className={!selectedSubcategory ? "bg-lovely text-creamey" : "border-lovely hover:bg-pinkey hover:text-lovely text-lovely"}
+              onClick={handleShowAll}
+            >
+              All
+            </Button>
             {subcategories.map((sub) => (
               <Button
                 key={sub._id}
                 variant={selectedSubcategory?._id === sub._id ? "default" : "outline"}
-                className={selectedSubcategory?._id === sub._id ? "bg-lovely text-creamey" : "border-lovely text-lovely"}
+                className={selectedSubcategory?._id === sub._id ? "bg-lovely text-creamey" : "border-lovely bg-creamey hover:bg-pinkey hover:text-lovely text-lovely"}
                 onClick={() => handleSubcategoryClick(sub)}
               >
                 {sub.name}
@@ -187,62 +251,166 @@ const WeddingBestieTab = () => {
             ))}
           </div>
 
-          {selectedSubcategory && (
-            <div className="mt-8">
-              <h3 className={`text-2xl font-bold text-lovely mb-6 ${thirdFont.className}`}>
-                {selectedSubcategory.name} Vendors
-              </h3>
-              
-              {loadingVendors ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[1, 2].map((i) => (
-                    <Skeleton key={i} className="h-64 w-full rounded-xl" />
-                  ))}
-                </div>
-              ) : vendors.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {vendors.map((vendor) => (
-                    <Card key={vendor._id} className="overflow-hidden border-lovely/10 shadow-md">
-                      {vendor.images && vendor.images.length > 0 && (
-                        <div className="relative h-48 w-full">
-                          <Image
-                            src={vendor.images[0]}
-                            alt={vendor.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-                      <CardContent className="p-4 bg-creamey">
-                        <h4 className="text-lg font-bold text-lovely mb-1">{vendor.name}</h4>
-                        {vendor.price && (
-                          <p className="text-sm text-lovely/80 mb-2 font-medium">Starting from: {vendor.price}</p>
-                        )}
-                        {vendor.notes && (
-                          <p className="text-xs text-lovely/60 mb-4 line-clamp-2 italic">
-                            &quot;{vendor.notes}&quot;
-                          </p>
-                        )}
-                        {vendor.link && (
-                          <Link 
-                            href={vendor.link} 
-                            target="_blank"
-                            className="inline-flex items-center text-sm font-bold text-lovely hover:underline gap-1"
-                          >
-                            View Portfolio <ExternalLink className="h-3 w-3" />
-                          </Link>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-lovely/60">
-                  No vendors found for this subcategory yet.
-                </div>
-              )}
+          <div className="bg-pinkey/50 p-4 rounded-xl border border-lovely/20 flex flex-wrap items-end gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-lovely">Min Price (EGP)</label>
+              <input
+                type="number"
+                value={minPrice}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setMinPrice(val);
+                }}
+                placeholder="From"
+                className="w-32  placeholder:text-pinkey p-2 ml-2 rounded-lg border border-lovely/30 bg-creamey text-lovely focus:outline-none focus:ring-2 focus:ring-lovely/50"
+              />
             </div>
-          )}
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-lovely">Max Price (EGP)</label>
+              <input
+                type="number"
+                value={maxPrice}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setMaxPrice(val);
+                }}
+                placeholder="To"
+                className="w-32  placeholder:text-pinkey p-2 ml-2 rounded-lg border border-lovely/30 bg-creamey text-lovely focus:outline-none focus:ring-2 focus:ring-lovely/50"
+              />
+            </div>
+            <Button 
+              onClick={handleApplyFilters}
+              className="bg-lovely text-creamey hover:bg-lovely/80"
+            >
+              Apply Filters
+            </Button>
+            {(minPrice || maxPrice) && (
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  setMinPrice(0);
+                  setMaxPrice(0);
+                  // Trigger fetch with cleared filters
+                  if (selectedSubcategory) {
+                    setLoadingVendors(true);
+                    axios.get(`/api/wedding-planning-vendors?subCategoryID=${selectedSubcategory._id}`)
+                      .then(res => setVendors(res.data.data || []))
+                      .finally(() => setLoadingVendors(false));
+                  } else {
+                    fetchAllVendorsForCategory(subcategories);
+                  }
+                }}
+                className="text-lovely/60 hover:text-lovely"
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+
+          <div className="mt-8">
+            <h3 className={`text-2xl tracking-wide font-bold text-lovely mb-6 ${thirdFont.className}`}>
+              {selectedSubcategory ? `${selectedSubcategory.name} Vendors` : `All ${selectedCategory.name} Vendors`}
+            </h3>
+            
+            {loadingVendors ? (
+              <div className="rounded-xl border border-lovely/10 shadow-lg overflow-hidden">
+                <Table className="bg-creamey">
+                  <TableHeader>
+                    <TableRow className="bg-lovely/5 border-lovely/10">
+                      <TableHead className="w-20 bg-creamey">Image</TableHead>
+                      <TableHead className="bg-creamey">Name</TableHead>
+                      <TableHead className="bg-creamey">Price Range</TableHead>
+                      <TableHead className="bg-creamey">Notes</TableHead>
+                      <TableHead className="text-right bg-creamey">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <TableRow key={i} className="border-lovely/10">
+                        <TableCell><Skeleton className="h-12 w-12 rounded-lg" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-full max-w-xs" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-8 w-24 rounded-full ml-auto" /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : vendors.length > 0 ? (
+              <div className="overflow-auto rounded-xl border border-lovely/10 shadow-lg max-h-[85vh]">
+                <Table className="bg-creamey relative border-separate border-spacing-0">
+                  <TableHeader className="sticky top-0 z-10 bg-creamey shadow-sm">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="text-lovely font-bold w-20 bg-creamey border-b border-lovely/10 sticky top-0">Image</TableHead>
+                      <TableHead className="text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0">Name</TableHead>
+                      <TableHead 
+                        className="text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 cursor-pointer hover:text-lovely/80 transition-colors"
+                        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                      >
+                        <div className="flex items-center gap-1">
+                          Price Range
+                          {sortOrder === "asc" && <ChevronUp className="h-4 w-4" />}
+                          {sortOrder === "desc" && <ChevronDown className="h-4 w-4" />}
+                          {!sortOrder && <ArrowUpDown className="h-3 w-3 opacity-50" />}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0">Notes</TableHead>
+                      <TableHead className="text-lovely font-bold text-right bg-creamey border-b border-lovely/10 sticky top-0">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {vendors.map((vendor) => (
+                      <TableRow key={vendor._id} className="border-lovely/10 hover:bg-lovely/5 transition-colors">
+                        <TableCell>
+                          {vendor.images && vendor.images.length > 0 ? (
+                            <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-lovely/10 shadow-sm">
+                              <Image
+                                src={vendor.images[0]}
+                                alt={vendor.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="h-12 w-12 rounded-lg bg-lovely/10 flex items-center justify-center text-lovely/40 text-[10px]">
+                              No Image
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-bold text-lovely">{vendor.name}</TableCell>
+                        <TableCell className="text-lovely/80 font-medium">
+                          {(vendor.fromPrice != null || vendor.toPrice != null) ? (
+                            (vendor.fromPrice === vendor.toPrice || vendor.fromPrice === 0 || vendor.fromPrice == null)
+                              ? `${vendor.toPrice ?? ""} EGP`
+                              : `${vendor.fromPrice ? `From ${vendor.fromPrice} ` : ""}${vendor.toPrice ? `To ${vendor.toPrice}` : ""} EGP`
+                          ) : "N/A"}
+                        </TableCell>
+                        <TableCell className="text-lovely/60 text-xs italic max-w-xs truncate">
+                          {vendor.notes || "—"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {vendor.link && (
+                            <Link 
+                              href={vendor.link} 
+                              target="_blank"
+                              className="inline-flex items-center text-xs font-bold text-lovely hover:underline gap-1 bg-lovely/10 px-3 py-1.5 rounded-full transition-all hover:bg-lovely/20"
+                            >
+                              Portfolio <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-lovely/60">
+                No vendors found yet.
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

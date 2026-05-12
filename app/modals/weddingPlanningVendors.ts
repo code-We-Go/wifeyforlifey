@@ -3,7 +3,8 @@ import path from "path";
 
 const weddingPlanningVendorsSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  price:{type:String,required:false},
+  fromPrice: { type: Number, required: false },
+  toPrice: { type: Number, required: false },
   link:{type:String,required:false},
   images:{type:[String],required:false},
   package:{type:String,required:false},
@@ -15,7 +16,6 @@ const weddingPlanningVendorsSchema = new mongoose.Schema({
     // path: path.join(__dirname, "categoriesModel"),
   },
 
-  active: { type: Boolean, default: true },
   visitedCount: { type: Number, default: 0 },
 });
 // console.log("Registering subCategoriesMode");
