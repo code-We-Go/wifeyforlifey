@@ -385,6 +385,49 @@ export async function POST(request: Request) {
           referenceId: subPayment._id,
         });
 
+
+        // Send to admin about this subscription
+      await sendMail({
+        to: "orders@shopwifeyforlifey.com",
+        name: "NEW Pending Subscription Request",
+        subject: "NEW Pending Subscription Request",
+        body: `
+          <h2>New Subscription Notification</h2>
+          <p>A new subscription has been successfully created:</p>
+          <ul>
+            <li><strong>Email:</strong> ${subPayment.email}</li>
+            ${
+              subPayment.isGift
+                ? `<li><strong>Gift:</strong> Yes</li>
+            <li><strong>Gift Recipient Email:</strong> ${
+              subPayment.giftRecipientEmail || "N/A"
+            }</li>
+            <li><strong>Special Message:</strong> ${
+              subPayment.specialMessage || "N/A"
+            }</li>
+             <li><strong>Gift Card:</strong> ${
+               subPayment.giftCardName || "N/A"
+             }</li>`
+                : ""
+            }
+            <li><strong>Package:</strong> ${
+              (subPayment.packageID as any)?.name || "N/A"
+            }</li>
+            <li><strong>First Name:</strong> ${
+              subPayment.firstName || "N/A"
+            }</li>
+            <li><strong>Last Name:</strong> ${
+              subPayment.lastName || "N/A"
+            }</li>
+            <li><strong>Phone:</strong> ${subPayment.phone || "N/A"}</li>
+            <li><strong>Country:</strong> ${
+              subPayment.country || "N/A"
+            }</li>
+          </ul>
+        `,
+        from: "noreply@shopwifeyforlifey.com",
+      });
+
         return NextResponse.json(
           {
             token: "wiig",
@@ -448,31 +491,7 @@ export async function POST(request: Request) {
         console.log("orderID" + res._id);
 
         // Send to customer
-        await sendMail({
-          to: data.email,
-          from: "noreply@shopwifeyforlifey.com",
-          name: "Order Confirmation",
-          subject: "Order Confirmation",
-          body: generateEmailBody(
-            items,
-            data.firstName,
-            data.lastName,
-            data.phone,
-            data.email,
-            data.total,
-            data.subTotal,
-            data.shipping,
-            data.currency,
-            data.address,
-            res._id,
-            data.cash,
-            data.country,
-            data.state,
-            data.city,
-            data.postalZip,
-            data.apartment
-          ),
-        });
+
 
         // Send to admin
         await sendMail({
