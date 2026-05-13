@@ -116,7 +116,7 @@ export default function Header() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
   const { wishList } = useContext(wishListContext);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -395,19 +395,35 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "text-base font-medium transition-colors hover:text-red-900",
-                    pathname === item.href ? "text-red-900 " : "text-creamey"
-                  )}
-                >
-                  <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
-                    {item.icon}
-                    {item.name}
-                  </div>
-                </Link>
+                item.name === "Cart" ? (
+                  <button
+                    key={item.name}
+                    onClick={openCart}
+                    className={cn(
+                      "text-base font-medium transition-colors hover:text-red-900 bg-transparent border-0 cursor-pointer",
+                      "text-creamey"
+                    )}
+                  >
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                      {item.icon}
+                      {item.name}
+                    </div>
+                  </button>
+                ) : (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "text-base font-medium transition-colors hover:text-red-900",
+                      pathname === item.href ? "text-red-900 " : "text-creamey"
+                    )}
+                  >
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                      {item.icon}
+                      {item.name}
+                    </div>
+                  </Link>
+                )
               )
             ))}
 
@@ -696,9 +712,9 @@ export default function Header() {
                   <User className="text-creamey" />
                 </div>
               )}
-              <Link href={"/cart"}>
+              <button onClick={openCart} className="bg-transparent border-0 cursor-pointer">
                 <ShoppingBag />
-              </Link>
+              </button>
             </div>
             {/* <Link href="/cart" className="relative mr-4">
               <Button variant="ghost" size="icon" aria-label="Cart">

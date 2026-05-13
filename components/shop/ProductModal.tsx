@@ -15,7 +15,7 @@ import { Product, Variant, attribute } from "@/app/interfaces/interfaces";
 
 export default function ProductModal() {
   const { isModalOpen, closeModal, modalProduct } = useModal();
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>();
   const [selectedAttribute, setSelectedAttribute] = useState<
     attribute | undefined
@@ -80,6 +80,7 @@ export default function ProductModal() {
     });
 
     closeModal();
+    openCart();
   };
 
   return (

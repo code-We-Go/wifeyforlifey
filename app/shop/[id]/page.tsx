@@ -26,7 +26,7 @@ export default function ProductPage() {
   const params = useParams();
   const productId = params.id as string;
   const { toast } = useToast();
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const [product, setProduct] = useState<Product | null | undefined>();
   const [loading, setLoading] = useState(true);
   const [stickerSelected, setStickerSelected] = useState(true); // Set to true by default
@@ -167,6 +167,7 @@ export default function ProductPage() {
       }) has been added to your cart.`,
       variant: "added",
     });
+    openCart();
   };
 
   // Related products (simple implementation: same category but different product)
