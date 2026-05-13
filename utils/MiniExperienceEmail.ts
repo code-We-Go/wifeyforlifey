@@ -217,7 +217,7 @@ export function generateMiniExperienceMail(
 																										item.variant
 																											? `(${
 																													item.attributes?.name
-																														? `: ${item.attributes.name}`
+																														? ` ${item.attributes.name}`
 																														: ""
 																												})`
 																											: ""
