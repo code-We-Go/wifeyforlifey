@@ -377,6 +377,7 @@ export interface ISubscription {
     | "delivered"
     | "cancelled"
     | "returned";
+  cart?: CartItem[];
   createdAt?: Date;
   updatedAt: Date;
 }

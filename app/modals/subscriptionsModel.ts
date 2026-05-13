@@ -1,8 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { CartItemSchema } from "./cartItemSchema";
 
 // Define the Subscription schema with TTL
 const SubscriptionSchema = new Schema(
   {
+    cart: {
+      type: [CartItemSchema],
+      default: [],
+    },
     paymentID: {
       type: String,
       required: true,

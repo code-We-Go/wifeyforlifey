@@ -206,6 +206,27 @@ export function generateMiniExperienceMail(
 																	<p style="margin: 0; margin-bottom: 16px;">Yaaay! Congratulations on joining the Mini Wifey Experience 💕 
 																	</p><p style="margin: 0; margin-bottom: 16px;">Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸</p>
 																	<p style="margin: 0; margin-bottom: 16px;">📔 Your Gehaz Bestie Planner is packed and ready to be shipped (track it here → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's going to be your new bridal era bestie, guiding you every step of the way 💗</p>
+																	${
+																		subscription.cart && subscription.cart.length > 0
+																			? `<p style="margin: 0; margin-bottom: 8px;"><strong>📦 Bundled Items included in your order:</strong></p>
+																				 <ul style="margin: 0; margin-bottom: 16px; padding-left: 20px;">
+																					 ${subscription.cart
+																							.map(
+																								(item) =>
+																									`<li>${item.productName} x ${item.quantity} ${
+																										item.variant
+																											? `(${
+																													item.attributes?.name
+																														? `: ${item.attributes.name}`
+																														: ""
+																												})`
+																											: ""
+																									}</li>`
+																							)
+																							.join("")}
+																				 </ul>`
+																			: ""
+																	}
 																	<p style="margin: 0; margin-bottom: 16px;">🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!</p>
 																	<p style="margin: 0; margin-bottom: 16px;">👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></p>
 																	<p style="margin: 0; margin-bottom: 16px;">So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗</p>

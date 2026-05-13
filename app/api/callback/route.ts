@@ -13,6 +13,7 @@ import BostaService from "@/app/services/bostaService";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
+import { decreaseStock } from "@/app/utils/productUtils";
 
 // ─── Database Connection ─────────────────────────────────────────────
 const loadDB = async () => {
@@ -282,6 +283,7 @@ async function handleSubscription(
     expiryDate,
     status: "confirmed",
     process: paymentOp.process,
+    cart: paymentOp.cart || [],
     redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,
     appliedDiscount: paymentOp.appliedDiscount,
     appliedDiscountAmount: paymentOp.appliedDiscountAmount,
@@ -344,6 +346,12 @@ async function handleSubscription(
       $push: { subscriptions: created._id },
     }
   );
+
+  // Decrease stock for cart items if included in the subscription
+  if (paymentOp.cart && paymentOp.cart.length > 0) {
+    console.log("Decreasing stock for cart items in subscription:", paymentOp.cart.length);
+    await decreaseStock(paymentOp.cart);
+  }
 
   // Ensure package is populated for downstream logic
   if (updatedSub?._id) {
@@ -470,6 +478,28 @@ async function handleSubscription(
             <li><strong>Country:</strong> ${
               updatedSub.country || "N/A"
             }</li>
+            ${
+              updatedSub.cart && updatedSub.cart.length > 0
+                ? `<li><strong>Bundled Cart Items:</strong>
+                    <ul>
+                      ${updatedSub.cart
+                        .map(
+                          (item: any) =>
+                            `<li>${item.productName} x ${item.quantity} ${
+                              item.variant
+                                ? `(${item.variant.name}${
+                                    item.attributes?.name
+                                      ? `: ${item.attributes.name}`
+                                      : ""
+                                  })`
+                                : ""
+                            }</li>`
+                        )
+                        .join("")}
+                    </ul>
+                   </li>`
+                : ""
+            }
           </ul>
         `,
         from: "noreply@shopwifeyforlifey.com",
@@ -484,7 +514,7 @@ async function handleSubscription(
           to: updatedSub.email,
           name: firstName,
           subject: "Thank You for Your Gift Purchase! 🎁",
-          body: giftMail(updatedSub._id.toString()),
+          body: giftMail(updatedSub._id.toString(), updatedSub.cart),
           from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
         });
         console.log("Gift email sent successfully to", updatedSub.email);
@@ -720,7 +750,7 @@ async function handleOrder(
       to: res.email,
       name: res.firstName,
       subject: "Thank You for Your Gift Purchase! 🎁",
-      body: giftMail(res._id.toString()),
+      body: giftMail(res._id.toString(), res.cart),
       from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
     });
   }

@@ -1,8 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { CartItemSchema } from "./cartItemSchema";
 
 // Subscription Payment schema mirrors Subscription fields + from/to/process
 const SubscriptionPaymentSchema = new Schema(
   {
+    cart: {
+      type: [CartItemSchema],
+      default: [],
+    },
     // Core payment and context
     paymentID: { type: String, required: true },
     email: { type: String, required: true },

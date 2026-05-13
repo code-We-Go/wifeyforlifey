@@ -31,6 +31,16 @@ import {
 } from "@/app/services/bostaLocationService";
 import DiscountSection from "../components/DiscountSection";
 import { CldUploadWidget } from "next-cloudinary";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ShoppingBag, Zap } from "lucide-react";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -208,6 +218,8 @@ const SubscriptionPage = () => {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [isUpgrade, setIsUpgrade] = useState(false);
   const [instapayReciept, setInstapayReciept] = useState("");
+  const [includeCartItems, setIncludeCartItems] = useState(true);
+  const [showCartBundleModal, setShowCartBundleModal] = useState(false);
 
   // Read upgrade price from query param and set override
   useEffect(() => {
@@ -258,6 +270,8 @@ const SubscriptionPage = () => {
     }
   }, [searchParams, packageID]);
 
+
+
   // Compute effective price used across calculations and UI
   const price = overridePrice ?? variantPrice ?? packageData?.price ?? 0;
 
@@ -282,8 +296,6 @@ const SubscriptionPage = () => {
 
   Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
-  //for later
-      // "68bf6ae9c4d5c1af12cdcd37": {
       "68bf6ae9c4d5c1af12cdcd37": {
         header: "This is a pre-order",
         content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
@@ -307,6 +319,16 @@ We’re beyond excited to share this experience with you… your planner will be
     totalPrice,
     clearCart,
   } = useCart();
+
+  // Show bundling modal on entry if cart has items
+  useEffect(() => {
+    if (items.length > 0) {
+      const timer = setTimeout(() => {
+        setShowCartBundleModal(true);
+      }, 1000); // 1 second delay for better UX
+      return () => clearTimeout(timer);
+    }
+  }, [items.length]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
@@ -352,9 +374,9 @@ We’re beyond excited to share this experience with you… your planner will be
       total: total,
       shipping: shipping,
       subTotal: subTotal,
-      cart: items,
+      cart: includeCartItems ? items : [],
     }));
-  }, [items]);
+  }, [items, includeCartItems]);
   useEffect(() => {
     const countryName = countries.find((countryy) => countryy.id === countryID);
 
@@ -429,7 +451,7 @@ We’re beyond excited to share this experience with you… your planner will be
     apartment: "",
     postalZip: "0000",
     city: "",
-    cart: items,
+    cart: includeCartItems ? items : [],
     phone: "",
     whatsAppNumber: "", // Added WhatsApp number field
     subscription: packageID,
@@ -872,6 +894,9 @@ We’re beyond excited to share this experience with you… your planner will be
         setLoading(false);
 
         if (res.data.success) {
+          // Clear cart if items were included
+          if (includeCartItems) clearCart();
+          
           // Redirect to instapay success page with instructions
           const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201007728799";
           router.push(
@@ -917,10 +942,11 @@ We’re beyond excited to share this experience with you… your planner will be
       // const paymobIframeURL = `https://accept.paymob.com/api/acceptance/iframes/890332?payment_token=${res.data.token}`;
       const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
 
+      if (includeCartItems) clearCart();
       router.push(paymobIframeURL);
     } else {
       if (res.data.token === "wiig") {
-        clearCart();
+        if (includeCartItems) clearCart();
         router.replace("/payment/success");
       }
     }
@@ -965,10 +991,16 @@ We’re beyond excited to share this experience with you… your planner will be
     }
   }, [packageData, packageID]);
 
+  const handleBundleResponse = (include: boolean) => {
+    setIncludeCartItems(include);
+    setShowCartBundleModal(false);
+  };
+
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
     // Calculate subtotal
-    const calculatedSubTotal = price;
+    const cartTotal = (includeCartItems && items) ? items.reduce((acc, item) => acc + (item.price * item.quantity), 0) : 0;
+    const calculatedSubTotal = price + cartTotal;
     setSubTotal(calculatedSubTotal);
 
     // Calculate discount amount
@@ -1032,7 +1064,9 @@ We’re beyond excited to share this experience with you… your planner will be
     subTotal,
     formData.giftCardName,
     price,
-    overridePrice
+    overridePrice,
+    includeCartItems,
+    items
   ]);
 
   if (loadingPackage) {
@@ -2187,6 +2221,28 @@ We’re beyond excited to share this experience with you… your planner will be
               showTooltip={showTooltip}
               setShowTooltip={setShowTooltip}
             />
+            {items.length > 0 && (
+              <div className="mt-6 border-t border-lovely/30 pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className={`${thirdFont.className} text-lg font-medium text-lovely`}>Include Cart Products?</h3>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={includeCartItems}
+                      onChange={() => setIncludeCartItems(!includeCartItems)}
+                    />
+                    <div className="w-11 h-6 bg-pinkey/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-creamey after:border-pinkey after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lovely"></div>
+                  </label>
+                </div>
+                <p className="text-xs mb-4 text-lovely/60">Bundle your shopping cart items into this subscription order for a single shipment.</p>
+                {includeCartItems && (
+                  <div className="space-y-3 mb-4 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar border-b border-lovely/10 pb-4">
+                    {cartItems()}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="mt-6 space-y-2 text-lovely">
               <div className="flex justify-between text-base">
                 <span>Subtotal</span>
@@ -2293,6 +2349,67 @@ We’re beyond excited to share this experience with you… your planner will be
           </div>
         </div>
       )}
+      {/* Cart Bundling Modal */}
+      <Dialog open={showCartBundleModal} onOpenChange={setShowCartBundleModal}>
+        <DialogContent className="sm:max-w-md bg-creamey border-lovely/20 shadow-2xl rounded-3xl p-0 overflow-hidden">
+          {/* <div className="relative h-32 bg-lovely flex items-center justify-center">
+            <div className="absolute top-0 right-0 p-4 opacity-20">
+              <ShoppingBag className="w-24 h-24 text-creamey" />
+            </div>
+            <div className="z-10 bg-creamey/10 backdrop-blur-md p-4 rounded-full border border-creamey/20">
+              <Zap className="w-8 h-8 text-creamey animate-pulse" />
+            </div>
+          </div> */}
+          
+          <div className="p-6 text-center">
+            <DialogHeader className="mb-4">
+              <DialogTitle className={`${thirdFont.className} text-2xl text-lovely text-center`}>
+                Save on Shipping! 💗
+              </DialogTitle>
+              <DialogDescription className="text-lovely/70 text-center text-base pt-2">
+                We noticed you have items in your cart. Would you like to add them to this order and receive them in <span className="font-bold text-lovely">one shipment</span>?
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="bg-pinkey/10 rounded-2xl p-4 mb-6 border border-pinkey/20">
+              <p className="text-sm text-lovely font-medium mb-2">Items to bundle:</p>
+              <div className="flex -space-x-3 justify-center overflow-hidden py-2">
+                {items.slice(0, 5).map((item, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-full border-2 border-creamey overflow-hidden shadow-sm">
+                      <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" />
+                    </div>
+                    <span className="text-[10px] md:text-xs text-lovely mt-2 font-medium max-w-[80px] md:max-w-[120px] truncate text-center">
+                      {item.productName}
+                    </span>
+                  </div>
+                ))}
+                {items.length > 5 && (
+                  <div className="w-12 h-12 rounded-full bg-lovely text-creamey flex items-center justify-center text-xs font-bold border-2 border-creamey shadow-sm">
+                    +{items.length - 5}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+              <Button 
+                onClick={() => handleBundleResponse(true)}
+                className="w-full rounded-full bg-lovely text-creamey hover:bg-lovely/90 h-12 text-base font-semibold shadow-lg shadow-lovely/20 transition-all active:scale-95"
+              >
+                Yes, Bundle & Save!
+              </Button>
+              <Button 
+                variant="ghost"
+                onClick={() => handleBundleResponse(false)}
+                className="w-full rounded-full text-lovely/60 hover:text-lovely hover:bg-transparent h-12 text-sm"
+              >
+                No thanks, keep separate
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

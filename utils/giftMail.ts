@@ -1,4 +1,6 @@
-export function giftMail(subscriptionID: string) {
+import { CartItem } from "@/app/interfaces/interfaces";
+
+export function giftMail(subscriptionID: string, cart?: CartItem[]) {
   return `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 
@@ -208,6 +210,28 @@ export function giftMail(subscriptionID: string) {
 															<td class="pad">
 																<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
 																	<p style="margin: 0;">Here's the link to track her Gehaz Bestie Planner shipment:<br>👉 <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a></p>
+																	${
+																		cart && cart.length > 0
+																			? `<p style="margin: 0; margin-top: 10px;"><strong>Bundled Items included in your gift:</strong></p>
+																				 <ul style="margin: 0; padding-left: 20px;">
+																					 ${cart
+																							.map(
+																								(item) =>
+																									`<li>${item.productName} x ${item.quantity} ${
+																										item.variant
+																											? `(${item.variant.name}${
+																													item.attributes?.name
+																														? `: ${item.attributes.name}`
+																														: ""
+																												})`
+																											: ""
+																									}</li>`
+																							)
+																							.join("")}
+																				 </ul>`
+																			: ""
+																	}
+																	}
 																</div>
 															</td>
 														</tr>
