@@ -17,10 +17,10 @@ export async function GET(request: Request) {
     }
     
     // Check for active param
-    const active = searchParams.get('active');
-    if (active === 'true') {
-      query.active = true;
-    }
+    // const active = searchParams.get('active');
+    // if (active === 'true') {
+    //   query.active = true;
+    // }
 
     let typeQuery: any = {};
     const type = searchParams.get('type');
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         : { type };
     }
 
-    let subcategories = await subCategoryModel.find(query)
+    let subcategories = await subCategoryModel.find({...query, active: true})
       .populate({
         path: 'categoryID',
         match: type ? typeQuery : undefined,
