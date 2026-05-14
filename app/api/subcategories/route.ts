@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 export async function GET(request: Request) {
   try {
     await ConnectDB();
-
+    console.log("registering"+categoriesModel)
     const { searchParams } = new URL(request.url);
     const homepage = searchParams.get('homepage');
 
