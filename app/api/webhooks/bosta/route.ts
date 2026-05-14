@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import mongoose from "mongoose";
 
 // Connect to database
 // const loadDB = async () => {
@@ -97,10 +98,15 @@ export async function POST(request: Request) {
   try {
     const payload: BostaWebhookPayload = await request.json();
 
+    // Convert state to string to handle both numeric and string values from Bosta
+    const stateCode = String(payload.state);
+
     console.log("Received Bosta webhook:", {
       _id: payload._id,
       trackingNumber: payload.trackingNumber,
       state: payload.state,
+      stateCode,
+      stateType: typeof payload.state,
       type: payload.type,
       businessReference: payload.businessReference,
       timeStamp: payload.timeStamp,
@@ -108,7 +114,8 @@ export async function POST(request: Request) {
     });
 
     // Validate required fields
-    if (!payload.businessReference || !payload.state) {
+    if (!payload.businessReference || payload.state === undefined || payload.state === null) {
+      console.error("Bosta webhook missing required fields:", { businessReference: payload.businessReference, state: payload.state });
       return NextResponse.json(
         { error: "Missing required fields: businessReference or state" },
         { status: 400 }
@@ -116,11 +123,22 @@ export async function POST(request: Request) {
     }
 
     // Map Bosta status to our order status
-    // Handle both numeric state codes and string states
+    // Handle both numeric state codes (e.g. 45) and string states
     const orderStatus =
-      BOSTA_STATUS_MAPPING[payload.state] ||
-      BOSTA_STATUS_MAPPING[payload.state.toUpperCase()] ||
+      BOSTA_STATUS_MAPPING[stateCode] ||
+      BOSTA_STATUS_MAPPING[stateCode.toUpperCase()] ||
       "pending";
+
+    console.log(`Bosta state mapping: ${stateCode} -> ${orderStatus}`);
+
+    // Validate businessReference is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(payload.businessReference)) {
+      console.error(`Invalid ObjectId for businessReference: ${payload.businessReference}`);
+      return NextResponse.json(
+        { error: `Invalid businessReference format: ${payload.businessReference}` },
+        { status: 400 }
+      );
+    }
 
     // Find order by businessReference (which should be the order ID)
     const order = await ordersModel.findById(payload.businessReference);
@@ -132,6 +150,7 @@ export async function POST(request: Request) {
       );
 
       if (!subscription) {
+        console.error(`Neither order nor subscription found for businessReference: ${payload.businessReference}`);
         return NextResponse.json(
           {
             error: `Order or subscription not found for businessReference: ${payload.businessReference}`,
@@ -140,16 +159,26 @@ export async function POST(request: Request) {
         );
       }
 
-      // Update subscription status
-      await subscriptionsModel.findByIdAndUpdate(
+      // Update subscription status, shipmentID, and tracking number
+      const updatedSubscription = await subscriptionsModel.findByIdAndUpdate(
         payload.businessReference,
-        { status: orderStatus },
+        {
+          status: orderStatus,
+          shipmentID: payload._id,
+        },
         { new: true }
       );
 
       console.log(
         `Subscription ${payload.businessReference} updated to status: ${orderStatus}`,
-        new Date().toISOString()
+        {
+          trackingNumber: payload.trackingNumber,
+          bostaState: stateCode,
+          previousStatus: subscription.status,
+          newStatus: updatedSubscription?.status,
+          deliveryAttempts: payload.numberOfAttempts,
+          timestamp: new Date().toISOString(),
+        }
       );
 
       return NextResponse.json({
