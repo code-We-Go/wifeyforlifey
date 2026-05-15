@@ -68,65 +68,132 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
     }
   };
 
-  // Load cities on component mount or when selectedCity changes
+  // Track whether we've done the initial parallel load
+  const initialLoadDone = useRef(false);
+
+  // Load all saved location data in parallel on mount
   useEffect(() => {
-    const loadCities = async () => {
-      setLoading((prev) => ({ ...prev, cities: true }));
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+
+    const loadInitialData = async () => {
+      // Always load cities
+      setLoading({ cities: true, zones: !!selectedCity, districts: !!(selectedCity && selectedZone) });
+
       try {
-        const citiesData = await bostaClientService.getCities();
+        // Fire all needed API calls in parallel
+        const promises: [
+          Promise<BostaCity[]>,
+          Promise<BostaZone[]> | null,
+          Promise<BostaDistrict[]> | null
+        ] = [
+          bostaClientService.getCities(),
+          selectedCity ? bostaClientService.getZones(selectedCity) : null,
+          selectedCity && selectedZone
+            ? bostaClientService.getDistrictsByZone(selectedCity, selectedZone)
+            : null,
+        ];
+
+        const [citiesData, zonesData, districtsData] = await Promise.all([
+          promises[0],
+          promises[1] || Promise.resolve([]),
+          promises[2] || Promise.resolve([]),
+        ]);
+
         setCities(citiesData);
+
+        // Match and set city
+        if (selectedCity) {
+          const cityObj = citiesData.find(
+            (city) => city._id === selectedCity || city.name === selectedCity
+          );
+          if (cityObj) {
+            setSelectedCityObj(cityObj);
+          }
+        }
+
+        // Match and set zone
+        if (zonesData.length > 0) {
+          setZones(zonesData);
+          if (selectedZone) {
+            const zoneObj = zonesData.find(
+              (zone) => zone._id === selectedZone || zone.name === selectedZone
+            );
+            if (zoneObj) {
+              setSelectedZoneObj(zoneObj);
+            }
+          }
+        }
+
+        // Match and set district
+        if (districtsData.length > 0) {
+          setDistricts(districtsData);
+          if (selectedDistrict) {
+            const districtObj = districtsData.find(
+              (district) =>
+                district.districtId === selectedDistrict ||
+                district.districtName === selectedDistrict
+            );
+            if (districtObj) {
+              setSelectedDistrictObj(districtObj);
+            }
+          }
+        }
       } catch (error) {
-        console.error("Error loading cities:", error);
+        console.error("Error loading initial location data:", error);
       } finally {
-        setLoading((prev) => ({ ...prev, cities: false }));
+        setLoading({ cities: false, zones: false, districts: false });
       }
     };
 
-    loadCities();
+    loadInitialData();
   }, []);
 
-  // Handle initial city selection from props
+  // React to prop changes AFTER initial load (e.g., saved data arrives late)
   useEffect(() => {
+    if (!initialLoadDone.current) return;
     if (selectedCity && cities.length > 0) {
       const cityObj = cities.find(
         (city) => city._id === selectedCity || city.name === selectedCity
       );
       if (cityObj && cityObj._id !== selectedCityObj?._id) {
         setSelectedCityObj(cityObj);
-        loadZones(cityObj._id);
+        // Load zones + districts in parallel
+        const loadDependents = async () => {
+          setLoading((prev) => ({ ...prev, zones: true, districts: !!selectedZone }));
+          try {
+            const [zonesData, districtsData] = await Promise.all([
+              bostaClientService.getZones(cityObj._id),
+              selectedZone
+                ? bostaClientService.getDistrictsByZone(cityObj._id, selectedZone)
+                : Promise.resolve([]),
+            ]);
+            setZones(zonesData);
+            if (selectedZone) {
+              const zoneObj = zonesData.find(
+                (zone) => zone._id === selectedZone || zone.name === selectedZone
+              );
+              if (zoneObj) setSelectedZoneObj(zoneObj);
+            }
+            if (districtsData.length > 0) {
+              setDistricts(districtsData);
+              if (selectedDistrict) {
+                const districtObj = districtsData.find(
+                  (d) => d.districtId === selectedDistrict || d.districtName === selectedDistrict
+                );
+                if (districtObj) setSelectedDistrictObj(districtObj);
+              }
+            }
+          } catch (error) {
+            console.error("Error loading dependents:", error);
+          } finally {
+            setLoading({ cities: false, zones: false, districts: false });
+          }
+        };
+        loadDependents();
       }
     }
   }, [selectedCity, cities]);
-
-  // Handle initial zone selection from props
-  useEffect(() => {
-    if (selectedZone && zones.length > 0 && selectedCityObj) {
-      const zoneObj = zones.find(
-        (zone) => zone._id === selectedZone || zone.name === selectedZone
-      );
-      if (zoneObj && zoneObj._id !== selectedZoneObj?._id) {
-        setSelectedZoneObj(zoneObj);
-        loadDistricts(selectedCityObj._id, zoneObj._id);
-      }
-    }
-  }, [selectedZone, zones, selectedCityObj]);
-
-  // Handle initial district selection from props
-  useEffect(() => {
-    if (selectedDistrict && districts.length > 0) {
-      const districtObj = districts.find(
-        (district) =>
-          district.districtId === selectedDistrict ||
-          district.districtName === selectedDistrict
-      );
-      if (
-        districtObj &&
-        districtObj.districtId !== selectedDistrictObj?.districtId
-      ) {
-        setSelectedDistrictObj(districtObj);
-      }
-    }
-  }, [selectedDistrict, districts]);
   
   // Cache to store the last fetched shipping cost for a city and order total
   const lastCostRef = useRef({
