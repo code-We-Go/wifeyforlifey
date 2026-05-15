@@ -16,6 +16,7 @@ const OrderSchema = new Schema(
         city: { type: String, required: false },
         state: { type: String, required: false },
         phone: { type: String, required: false },
+        whatsAppNumber: { type: String, required: false },
         // Gift info
         isGift: { type: Boolean, default: false },
         giftRecipientEmail: { type: String, required: false },
@@ -53,6 +54,7 @@ const OrderSchema = new Schema(
         billingPostalZip:{ type: String, required: false },
         billingCity:{ type: String, required: false },
         billingPhone:{ type: String, required: false },
+        billingWhatsAppNumber:{ type: String, required: false },
         bostaCity: { type: String, required: false },
         bostaCityName: { type: String, required: false },
         bostaZone: { type: String, required: false },

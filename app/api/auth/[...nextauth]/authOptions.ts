@@ -11,53 +11,8 @@ import { v4 as uuidv4 } from "uuid";
 import SessionModel from "@/app/modals/sessionsModel";
 import { Types } from "mongoose"; // For ObjectId
 
-// Extend NextAuth types to include isSubscribed
-let loyaltyPoints = 0;
+// NextAuth types are extended in next-auth.d.ts in the root directory
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id?: string;
-      firstName?: string;
-      lastName?: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      isSubscribed: boolean;
-      subscription?: {
-        packageId?: string;
-        paid?: boolean;
-      };
-      subscriptionExpiryDate?: Date | null;
-      weddingPlanningBestie?: {
-        expiryDate?: Date | null;
-        isSubscribed: boolean;
-      } | null;
-      // loyaltyPoints?: number;
-      sessionId?: string; // Add sessionId here
-      deviceFingerprint?: string; // Add device fingerprint
-      isTesting?: boolean;
-    };
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    isSubscribed?: boolean;
-    subscription?: {
-      packageId?: string;
-      paid?: boolean;
-    };
-    weddingPlanningBestie?: {
-      expiryDate?: string | null;
-      isSubscribed: boolean;
-    } | null;
-    // loyaltyPoints?: number;
-    sessionId?: string; // Add sessionId here
-    deviceFingerprint?: string; // Add device fingerprint
-    isTesting?: boolean;
-  }
-}
 
 // Helper function to calculate loyalty points
 // async function calculateLoyaltyPoints(email: string) {
@@ -339,6 +294,7 @@ export const authOptions: NextAuthOptions = {
               userData.firstName || userData.username || "";
             session.user.lastName = userData.lastName || "";
             session.user.isTesting = userData.isTesting || false;
+            session.user.shippingData = userData.shippingData;
 
             // Fetch fresh subscription data to avoid stale JWT
             if (userData.email) {

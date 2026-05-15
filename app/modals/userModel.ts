@@ -42,6 +42,22 @@ export interface IUser extends Document {
   googleUserId?: string;
   authProvider?: 'email' | 'apple' | 'google';
 
+  shippingData?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    address?: string;
+    apartment?: string;
+    phone?: string;
+    whatsAppNumber?: string;
+    bostaCity?: string;
+    bostaCityName?: string;
+    bostaZone?: string;
+    bostaZoneName?: string;
+    bostaDistrict?: string;
+    bostaDistrictName?: string;
+  };
+
   // comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -126,6 +142,21 @@ const UserSchema = new Schema<IUser>(
       enum: ['email', 'apple', 'google'],
       default: 'email',
       required: false,
+    },
+    shippingData: {
+      email: { type: String },
+      firstName: { type: String },
+      lastName: { type: String },
+      address: { type: String },
+      apartment: { type: String },
+      phone: { type: String },
+      whatsAppNumber: { type: String },
+      bostaCity: { type: String },
+      bostaCityName: { type: String },
+      bostaZone: { type: String },
+      bostaZoneName: { type: String },
+      bostaDistrict: { type: String },
+      bostaDistrictName: { type: String },
     },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }

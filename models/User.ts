@@ -11,6 +11,21 @@ export interface User {
   orders?: Order[];
   createdAt?: Date;
   updatedAt?: Date;
+  shippingData?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    address?: string;
+    apartment?: string;
+    phone?: string;
+    whatsAppNumber?: string;
+    bostaCity?: string;
+    bostaCityName?: string;
+    bostaZone?: string;
+    bostaZoneName?: string;
+    bostaDistrict?: string;
+    bostaDistrictName?: string;
+  };
 }
 
 export interface CartItem {

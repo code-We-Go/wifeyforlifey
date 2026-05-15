@@ -341,6 +341,49 @@ We’re beyond excited to share this experience with you… your planner will be
     { name: string; shipping_zone: string }[]
   >([]);
   const [useSameAsShipping, setUseSameAsShipping] = useState(true);
+  const [saveShippingData, setSaveShippingData] = useState(false);
+
+  useEffect(() => {
+    if (user?.shippingData && isAuthenticated) {
+      const sd = user.shippingData;
+      setFormData((prev) => ({
+        ...prev,
+        email: sd.email || prev.email,
+        firstName: sd.firstName || prev.firstName,
+        lastName: sd.lastName || prev.lastName,
+        address: sd.address || prev.address,
+        apartment: sd.apartment || prev.apartment,
+        phone: sd.phone || prev.phone,
+        whatsAppNumber: sd.whatsAppNumber || prev.whatsAppNumber,
+        state: sd.bostaCity || prev.state,
+        bostaCity: sd.bostaCity || "",
+        bostaCityName: sd.bostaCityName || "",
+        bostaZone: sd.bostaZone || "",
+        bostaZoneName: sd.bostaZoneName || "",
+        bostaDistrict: sd.bostaDistrict || "",
+        bostaDistrictName: sd.bostaDistrictName || "",
+      }));
+      if (sd.bostaCity) {
+        setState(sd.bostaCity);
+        setBostaLocation((prev) => ({
+          ...prev,
+          city: sd.bostaCity
+            ? ({ _id: sd.bostaCity, name: sd.bostaCityName || "" } as any)
+            : null,
+          zone: sd.bostaZone
+            ? ({ _id: sd.bostaZone, name: sd.bostaZoneName || "" } as any)
+            : null,
+          district: sd.bostaDistrict
+            ? ({
+                districtId: sd.bostaDistrict,
+                districtName: sd.bostaDistrictName || "",
+              } as any)
+            : null,
+        }));
+      }
+    }
+  }, [user, isAuthenticated]);
+
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // const [state,setState]=useState(states.length>0?states[0].name:'')
@@ -808,6 +851,33 @@ We’re beyond excited to share this experience with you… your planner will be
 
     try {
       const res = await axios.post("/api/payment/", payload);
+      
+      // Save shipping data if requested
+      if (saveShippingData && isAuthenticated && user?.email) {
+        try {
+          await axios.put("/api/user/profile", {
+            email: user.email,
+            shippingData: {
+              email: formData.email,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              address: formData.address,
+              apartment: formData.apartment,
+              phone: formData.phone,
+              whatsAppNumber: formData.whatsAppNumber,
+              bostaCity: formData.bostaCity,
+              bostaCityName: formData.bostaCityName,
+              bostaZone: formData.bostaZone,
+              bostaZoneName: formData.bostaZoneName,
+              bostaDistrict: formData.bostaDistrict,
+              bostaDistrictName: formData.bostaDistrictName,
+            },
+          });
+        } catch (err) {
+          console.error("Failed to save shipping data:", err);
+        }
+      }
+
       console.log(res.data.token);
       setLoading(false);
 
@@ -935,6 +1005,33 @@ We’re beyond excited to share this experience with you… your planner will be
     };
 
     const res = await axios.post("/api/payment/", payload);
+    
+    // Save shipping data if requested
+    if (saveShippingData && isAuthenticated && user?.email) {
+      try {
+        await axios.put("/api/user/profile", {
+          email: user.email,
+          shippingData: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            apartment: formData.apartment,
+            phone: formData.phone,
+            whatsAppNumber: formData.whatsAppNumber,
+            bostaCity: formData.bostaCity,
+            bostaCityName: formData.bostaCityName,
+            bostaZone: formData.bostaZone,
+            bostaZoneName: formData.bostaZoneName,
+            bostaDistrict: formData.bostaDistrict,
+            bostaDistrictName: formData.bostaDistrictName,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to save shipping data:", err);
+      }
+    }
+
     console.log(res.data.token);
     setLoading(false);
 
@@ -1215,6 +1312,8 @@ We’re beyond excited to share this experience with you… your planner will be
                 I&apos;m buying this as a gift 💖
               </label>
             </div>
+
+
 
             {isGift && (
               <>
@@ -2127,6 +2226,20 @@ We’re beyond excited to share this experience with you… your planner will be
                 </Link>
               </span>
             </div>
+                        {isAuthenticated && (
+              <div className="flex items-center gap-2 w-full mt-1 mb-1">
+                <input
+                  type="checkbox"
+                  id="saveShippingData"
+                  checked={saveShippingData}
+                  onChange={(e) => setSaveShippingData(e.target.checked)}
+                  className="w-4 h-4 accent-lovely"
+                />
+                <label htmlFor="saveShippingData" className="text-lovely text-base cursor-pointer">
+                  Save my data for next time
+                </label>
+              </div>
+            )}
             <div className="flex justify-end">
               <button
                 disabled={loading || !acceptedTerms}
