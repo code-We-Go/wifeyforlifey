@@ -15,8 +15,8 @@ declare module "next-auth" {
       expiryDate?: Date | null;
       isSubscribed?: boolean;
     } | null;
-    sessionId?: string;
-    deviceFingerprint?: string;
+    sessionId?: string | null;
+    deviceFingerprint?: string | null;
     isTesting?: boolean;
     shippingData?: {
       email?: string;
@@ -51,8 +51,8 @@ declare module "next-auth/jwt" {
       expiryDate?: string | null;
       isSubscribed?: boolean;
     } | null;
-    sessionId?: string;
-    deviceFingerprint?: string;
+    sessionId?: string | null;
+    deviceFingerprint?: string | null;
     isTesting?: boolean;
   }
 }
