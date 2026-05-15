@@ -1465,7 +1465,7 @@ We’re beyond excited to share this experience with you… your planner will be
               delivery
             </div>
 
-            <div className="flex gap-2 items-center text-base w-full">
+            {/* <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -1494,7 +1494,7 @@ We’re beyond excited to share this experience with you… your planner will be
                   <option value="SA">SAUDI ARABIA</option>
                 </select>
               )}
-            </div>
+            </div> */}
             <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
@@ -1584,7 +1584,7 @@ We’re beyond excited to share this experience with you… your planner will be
                 className="border w-full h-10 bg-creamey border-pinkey  rounded-2xl py-2 px-2 text-base"
               />
             </div>
-            <div className="flex flex-col sm:flex-row w-full gap-2">
+            {/* <div className="flex flex-col sm:flex-row w-full gap-2"> */}
               {/* <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
@@ -1612,7 +1612,7 @@ We’re beyond excited to share this experience with you… your planner will be
                 </div>
               </div> */}
 
-              <div className="flex flex-col w-full   gap-2 ">
+              {/* <div className="flex flex-col w-full   gap-2 ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
                     City
@@ -1636,8 +1636,8 @@ We’re beyond excited to share this experience with you… your planner will be
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
@@ -1900,7 +1900,7 @@ We’re beyond excited to share this experience with you… your planner will be
                   padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
                 }}
               >
-                <div className="flex gap-2 w-full">
+                {/* <div className="flex gap-2 w-full">
                   <p>Country</p>
                   {countries ? (
                     <select
@@ -1929,9 +1929,9 @@ We’re beyond excited to share this experience with you… your planner will be
                     >
                       {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
-                    </select>
+                    {/* </select>
                   )}
-                </div>
+                </div> */}
                 <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
                   <div className="flex gap-2 w-full md:w-2/4">
                     <label className="text-lovely">First Name</label>

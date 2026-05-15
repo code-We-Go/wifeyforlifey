@@ -385,7 +385,7 @@ const CheckoutClientPage = () => {
     lastName: "",
     address: "",
     apartment: "",
-    postalZip: "",
+    postalZip: "00000",
     city: "",
     appliedDiscount: "",
     appliedDiscountAmount: 0,
@@ -413,7 +413,7 @@ const CheckoutClientPage = () => {
     billingState: useSameAsShipping ? state : billingState,
     billingAddress: "",
     billingApartment: "",
-    billingPostalZip: "",
+    billingPostalZip: "00000",
     billingCity: "",
     billingPhone: "",
     subTotal: subTotal,
@@ -990,7 +990,7 @@ const CheckoutClientPage = () => {
               delivery
             </div>
 
-            <div className="flex gap-2 items-center text-base w-full">
+            {/* <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -1019,7 +1019,7 @@ const CheckoutClientPage = () => {
                   <option value="SA">SAUDI ARABIA</option>
                 </select>
               )}
-            </div>
+            </div> */}
             <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
@@ -1109,7 +1109,7 @@ const CheckoutClientPage = () => {
                 className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
               />
             </div>
-            <div className="flex flex-col sm:flex-row w-full gap-2">
+            {/* <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
@@ -1162,7 +1162,7 @@ const CheckoutClientPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
