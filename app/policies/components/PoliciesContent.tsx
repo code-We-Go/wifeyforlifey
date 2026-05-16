@@ -17,7 +17,7 @@ const PoliciesContent = () => {
     "terms-and-conditions",
     "privacy-policy",
     "return-and-exchange",
-    "shipping-policy",
+    // "shipping-policy",
     "loyalty-policy",
   ];
 
@@ -34,7 +34,7 @@ const PoliciesContent = () => {
     { title: "PRIVACY POLICY", value: "privacy-policy" },
     { title: "TERMS AND CONDITIONS", value: "terms-and-conditions" },
     { title: "RETURN AND EXCHANGE", value: "return-and-exchange" },
-    { title: "SHIPMENT INFO", value: "shipping-policy" },
+    // { title: "SHIPMENT INFO", value: "shipping-policy" },
     { title: "LOYALTY POLICY", value: "loyalty" },
   ];
 
@@ -100,10 +100,10 @@ const PoliciesContent = () => {
             selectedTab={activeTab}
             setSelectedTab={setActiveTab}
           />
-          <ShippingPolicy
+          {/* <ShippingPolicy
             selectedTab={activeTab}
             setSelectedTab={setSelectedTab}
-          />
+          /> */}
           <LoyaltyPolicy
             selectedTab={activeTab}
             setSelectedTab={setSelectedTab}

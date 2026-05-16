@@ -302,12 +302,12 @@ export default function Footer() {
             >
               Return & Exchange
             </Link>
-            <Link
+            {/* <Link
               href="/policies?shipping-policy"
               className="hover:text-foreground"
             >
               Shipping Details
-            </Link>
+            </Link> */}
             <Link href="/contact" className="hover:text-foreground">
               Contact Us
             </Link>
