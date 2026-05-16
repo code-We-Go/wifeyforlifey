@@ -1839,29 +1839,31 @@ We’re beyond excited to share this experience with you… your planner will be
                 )}
               </div>
             </div>
-            <div className="flex w-full gap-2 items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                Bride&apos;s WhatsApp Number
-              </label>
-              <div className="flex w-full gap-1 flex-col">
-                <input
-                  onChange={handleInputChange}
-                  type="text"
-                  value={formData.whatsAppNumber}
-                  name="whatsAppNumber"
-                  className={`border ${
-                    formErrors.whatsAppNumber ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
-                />
-                {formErrors.whatsAppNumber ? (
-                  <p className="uppercase text-xs text-red-500">
-                    {formErrors.whatsAppNumber}
-                  </p>
-                ) : (
-                  ""
-                )}
+            {isGift && (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  Bride&apos;s WhatsApp Number
+                </label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={formData.whatsAppNumber}
+                    name="whatsAppNumber"
+                    className={`border ${
+                      formErrors.whatsAppNumber ? "border-red-500" : ""
+                    } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                  />
+                  {formErrors.whatsAppNumber ? (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.whatsAppNumber}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                </div>
               </div>
-            </div>
+            )}
             <div className="flex items-center gap-1 text-xs text-lovely/80">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
