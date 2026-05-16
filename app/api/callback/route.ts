@@ -246,6 +246,7 @@ async function handleSubscription(
   console.log("paymentOp.email:", paymentOp.email);
 
   const isUpgradeProcess = paymentOp?.process === "upgrade";
+  const isRenewProcess = paymentOp?.process === "renew";
 
   // Compute expiry for subscription based on package duration
   const expiryDate = new Date();
@@ -402,9 +403,9 @@ async function handleSubscription(
     });
   }
 
-  // Bosta integration (skip for upgrade)
+  // Bosta integration (skip for upgrade or renew)
   try {
-    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess) {
+    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess && !isRenewProcess) {
       const bostaService = new BostaService();
       const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
       const deliveryPayload = bostaService.createDeliveryPayload(
@@ -429,9 +430,9 @@ async function handleSubscription(
       } else {
         console.error("Failed to create Bosta delivery:", bostaResult.error);
       }
-    } else if (isUpgradeProcess) {
+    } else if (isUpgradeProcess || isRenewProcess) {
       console.log(
-        "Skipping Bosta delivery for upgrade process:",
+        `Skipping Bosta delivery for ${paymentOp.process} process:`,
         updatedSub?._id
       );
     }
@@ -442,11 +443,13 @@ async function handleSubscription(
   // Send email notifications
   try {
     if (updatedSub) {
-      await sendMail({
-        to: "orders@shopwifeyforlifey.com",
-        name: "NEW BESTIEEE",
-        subject: "NEW BESTIEEEE",
-        body: `
+      // Admin notification (skip for upgrade or renew)
+      if (!isUpgradeProcess && !isRenewProcess) {
+        await sendMail({
+          to: "orders@shopwifeyforlifey.com",
+          name: "NEW BESTIEEE",
+          subject: "NEW BESTIEEEE",
+          body: `
           <h2>New Subscription Notification</h2>
           <p>A new subscription has been successfully created:</p>
           <ul>
@@ -503,8 +506,9 @@ async function handleSubscription(
           </ul>
         `,
         from: "noreply@shopwifeyforlifey.com",
-      });
-      console.log("Subscription notification email sent successfully");
+        });
+        console.log("Subscription notification email sent successfully");
+      }
 
       // Gift flow
       if (updatedSub.isGift) {
@@ -625,14 +629,14 @@ async function handleSubscription(
       success: true,
       redirect: `payment/success?subscription=mini${
         subscribedUser ? "&account=true" : ""
-      }`,
+      }&process=${paymentOp.process}`,
     };
   }
   return {
     success: true,
     redirect: `payment/success?subscription=true${
       subscribedUser ? "&account=true" : ""
-    }`,
+    }&process=${paymentOp.process}`,
   };
 }
 

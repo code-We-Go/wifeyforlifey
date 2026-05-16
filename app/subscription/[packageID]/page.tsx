@@ -217,6 +217,7 @@ const SubscriptionPage = () => {
   const [variantPrice, setVariantPrice] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [isUpgrade, setIsUpgrade] = useState(false);
+  const [isRenew, setIsRenew] = useState(false);
   const [instapayReciept, setInstapayReciept] = useState("");
   const [includeCartItems, setIncludeCartItems] = useState(true);
   const [showCartBundleModal, setShowCartBundleModal] = useState(false);
@@ -224,6 +225,7 @@ const SubscriptionPage = () => {
   // Read upgrade price from query param and set override
   useEffect(() => {
     const upgradeParam = searchParams.get("upgrade");
+    const renewParam = searchParams.get("renew");
     const priceParam = searchParams.get("price");
     const durationParam = searchParams.get("duration");
 
@@ -236,6 +238,7 @@ const SubscriptionPage = () => {
 
     if (upgradeParam === "true") {
       setIsUpgrade(true);
+      setIsRenew(false);
       setShipping(0); // Free shipping on upgrade
       setFormData((prevData) => ({
         ...prevData,
@@ -253,11 +256,21 @@ const SubscriptionPage = () => {
         }
       };
       fetchUpgradeInfo();
+    } else if (renewParam === "true") {
+      setIsRenew(true);
+      setIsUpgrade(false);
+      setOverridePrice(null);
+      setShipping(0); // Free shipping on renewal
+      setFormData((prevData) => ({
+        ...prevData,
+        process: "renew",
+      }));
     } else {
       const parsed = upgradeParam ? Number(upgradeParam) : NaN;
       if (!Number.isNaN(parsed) && parsed > 0) {
         setOverridePrice(parsed);
         setIsUpgrade(true);
+        setIsRenew(false);
         setShipping(0); // Free shipping on upgrade
         setFormData((prevData) => ({
           ...prevData,
@@ -266,6 +279,7 @@ const SubscriptionPage = () => {
       } else {
         setOverridePrice(null);
         setIsUpgrade(false);
+        setIsRenew(false);
       }
     }
   }, [searchParams, packageID]);
@@ -810,12 +824,15 @@ We’re beyond excited to share this experience with you… your planner will be
       <OrderSummaryItem cartItem={cartItem} key={index} />
     ));
   };
-  const handleUpgradeSubmit = async (e: React.FormEvent) => {
+  const handleSimplifiedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     let errors: any = {};
     if (!user?.email || !/\S+@\S+\.\S+/.test(user.email)) {
       errors.email = "Please enter a valid email address.";
+    }
+    if (isRenew && !selectedDuration) {
+      errors.duration = "Please select a renewal option.";
     }
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
@@ -1088,6 +1105,13 @@ We’re beyond excited to share this experience with you… your planner will be
     }
   }, [packageData, packageID]);
 
+  useEffect(() => {
+    if (isRenew && packageData?.renewals && packageData.renewals.length > 0 && !selectedDuration) {
+      setVariantPrice(packageData.renewals[0].price);
+      setSelectedDuration(packageData.renewals[0].duration);
+    }
+  }, [isRenew, packageData]);
+
   const handleBundleResponse = (include: boolean) => {
     setIncludeCartItems(include);
     setShowCartBundleModal(false);
@@ -1194,22 +1218,53 @@ We’re beyond excited to share this experience with you… your planner will be
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
         <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
-          {isUpgrade ? (
+          {isUpgrade || isRenew ? (
             <form
-              onSubmit={handleUpgradeSubmit}
+              onSubmit={handleSimplifiedSubmit}
               className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2 border-lovely text-nowrap"
             >
               <div
                 className={`${thirdFont.className} w-full text-base lg:text-2xl border-b border-lovely`}
               >
-                Upgrade Subscription
+                {isUpgrade ? "Upgrade Subscription" : "Renew Subscription"}
               </div>
+
+              {isRenew && packageData?.renewals && packageData.renewals.length > 0 && (
+                <div className="flex flex-col gap-3 w-full mt-4 mb-4">
+                  <label className="text-lovely text-lg font-semibold">Select Renewal Option:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                    {packageData.renewals.map((option, idx) => (
+                      <div 
+                        key={idx}
+                        onClick={() => {
+                          setVariantPrice(option.price);
+                          setSelectedDuration(option.duration);
+                        }}
+                        className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${
+                          selectedDuration === option.duration && variantPrice === option.price
+                            ? "border-lovely bg-lovely/10 shadow-md"
+                            : "border-pinkey hover:border-lovely/50 bg-creamey"
+                        }`}
+                      >
+                        <span className="text-lovely font-bold text-lg">{option.duration} Months</span>
+                        <span className="text-lovely text-base">{option.price} LE</span>
+                      </div>
+                    ))}
+                  </div>
+                  {formErrors.duration && (
+                    <p className="uppercase text-xs text-red-500">
+                      Please select a renewal option
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex items-center gap-2 w-full">
                 <label className="text-lovely text-base">Email</label>
                 <div className="flex w-full gap-1 flex-col">
                   <input
                     onChange={handleInputChange}
                     name="email"
+                    disabled={isRenew || isUpgrade}
                     value={formData.email || user?.email || ""}
                     type="email"
                     className={`border ${

@@ -15,6 +15,11 @@ const SubscriptionSchema = new Schema(
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" },
     selectedDuration: { type: Number, required: false },
     email: { type: String },
+    process: {
+      type: String,
+      enum: ["upgrade", "renew", "new"],
+      default: "new",
+    },
 
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },

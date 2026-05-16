@@ -306,6 +306,7 @@ export interface Ipackage {
   saving?: string;
   cost?: number;
   variants?: PackageVariant[];
+  renewals: {price:number,duration:number}[];
   items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
@@ -325,6 +326,7 @@ export interface ISubscription {
   paymentID: string;
   packageID?: string;
   email?: string;
+  process?: "upgrade" | "renew" | "new";
   subscribed?: boolean;
   selectedDuration?: number;
   redeemedLoyaltyPoints?: number;
