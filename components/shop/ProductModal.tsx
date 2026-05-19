@@ -213,7 +213,7 @@ export default function ProductModal() {
                   <span className="sr-only">Increase quantity</span>
                   <span aria-hidden>+</span>
                 </Button>
-                {selectedAttribute && (
+                {/* {selectedAttribute && (
                   <span
                     className={`text-sm ml-2 ${
                       selectedAttribute.stock === 0
@@ -225,9 +225,9 @@ export default function ProductModal() {
                   >
                     {selectedAttribute.stock === 0
                       ? "Out of stock"
-                      : `${selectedAttribute.stock} available`}
+                      : ` Available`}
                   </span>
-                )}
+                )} */}
               </div>
             </div>
 
