@@ -453,7 +453,7 @@ async function handleSubscription(
           <h2>New Subscription Notification</h2>
           <p>A new subscription has been successfully created:</p>
           <ul>
-            <li><strong>Email:</strong> ${updatedSub.email}</li>
+            <li><strong>Email:</strong> ${paymentOp.email}</li>
             ${
               updatedSub.isGift
                 ? `<li><strong>Gift:</strong> Yes</li>
@@ -515,7 +515,7 @@ async function handleSubscription(
         const { giftMail } = await import("@/utils/giftMail");
         const firstName = updatedSub.firstName || "Wifey";
         await sendMail({
-          to: updatedSub.email,
+          to: paymentOp.email,
           name: firstName,
           subject: "Thank You for Your Gift Purchase! 🎁",
           body: giftMail(updatedSub._id.toString(), updatedSub.cart),
