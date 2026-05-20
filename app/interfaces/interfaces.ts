@@ -45,6 +45,7 @@ export interface Video {
   playlistFolder?: string;
   createdAt: Date;
   updatedAt: Date;
+  tags?: ("groom" | "bridesmaids")[]; // Array of tags (e.g., ["bride", "groom"])
 }
 
 export interface playlistFolder {
