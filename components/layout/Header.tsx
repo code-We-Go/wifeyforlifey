@@ -335,8 +335,8 @@ export default function Header() {
                 alt="logo"
                 width={200}
                 height={150}
-                src={"/cristmas/logo.png"}
-                // src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
+                // src={"/cristmas/logo.png"}
+                src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
               />
             </Link>
             {rightNavigation.map((item) => (
@@ -579,10 +579,10 @@ export default function Header() {
                         alt="logo"
                         width={200}
                         height={150}
-                        src={"/cristmas/logo.png"}
-                        // src={
-                        //   "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
-                        // }
+                        // src={"/cristmas/logo.png"}
+                        src={
+                          "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
+                        }
                       />
                     </Link>
                   </div>
@@ -681,7 +681,7 @@ export default function Header() {
                 alt="logo"
                 width={200}
                 height={150}
-                src={"/cristmas/mobile.png"}
+                src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
               />
             </Link>
             <div className="mr-2 gap-4 flex">
@@ -730,14 +730,8 @@ export default function Header() {
         </div>
       </div>
       {/* Christmas Decoration - Desktop */}
-      <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
-        {/* <Image
-          src="/cristmas/kharb2Full.png"
-          alt="Christmas Decoration"
-          width={960}
-          height={100}
-          className="w-1/2  object-contain"
-        /> */}
+      {/* <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
+
         <Image
           src="/cristmas/kharb2FullDesktop.png"
           alt="Christmas Decoration"
@@ -745,9 +739,9 @@ export default function Header() {
           height={100}
           className="w-full h-auto object-contain"
         />
-      </div>
+      </div> */}
       {/* Christmas Decoration - Mobile */}
-      <div className="block md:hidden w-full absolute top-full left-0 -mt-10 z-40 pointer-events-none">
+      {/* <div className="block md:hidden w-full absolute top-full left-0 -mt-10 z-40 pointer-events-none">
         <Image
           src="/cristmas/kharb2Long.png"
           alt="Christmas Decoration"
@@ -755,7 +749,7 @@ export default function Header() {
           height={100}
           className="w-full h-auto"
         />
-      </div>
+      </div> */}
       {/* Notifications Modal */}
       <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
         <DialogContent className="sm:max-w-md bg-creamey">

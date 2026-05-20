@@ -41,7 +41,7 @@ const HeroSection = () => {
               </p>
             </div> */}
           </div>
-          {/* <div className="absolute -bottom-[5vh] -left-[5vw] sm:-left-[4vw] lg:-left-[2vw]">
+          <div className="absolute -bottom-[6vh] md:-bottom-[15vh] -left-[5vw] sm:-left-[4vw] lg:-left-[2vw]">
             <Image
               unoptimized
               className="-rotate-12"
@@ -50,8 +50,8 @@ const HeroSection = () => {
               alt="ring"
               src={"/hero/WifeyForLifey Illustrations-26.png"}
             />
-          </div> */}
-          <div className="absolute rotate-12  -top-[8vh] md:-top-[10vh] right-[5vw] sm:right-[10vw] lg:right-[1vw]">
+          </div>
+          <div className="absolute rotate-12  -top-[8vh] md:-top-[15vh] right-[5vw] sm:right-[10vw] lg:right-[1vw]">
             <Image
               unoptimized
               width={50}
@@ -99,13 +99,13 @@ const HeroSection = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: false, amount: 0.6 }}
-          className="aspect-auto absolute -top-[200px] sm:-top-[330px] right-[3vw] sm:right-[9vw] md:right-[8vw]"
+          className="aspect-auto absolute -top-[250px] sm:-top-[330px] right-[3vw] sm:right-[9vw] md:right-[8vw]"
         >
           <Image
             // className=" max-sm:scale-105 max-md:scale-125 md:aspect-auto"
             className=" max-sm:scale-110 max-md:scale-125 md:scale-105"
-            // src="/hero/Brides Together.png"
-            src="/cristmas/hero.png"
+            src="/hero/Brides Together.png"
+            // src="/cristmas/hero.png"
             alt="Brides Together"
             width={500}
             height={500}
