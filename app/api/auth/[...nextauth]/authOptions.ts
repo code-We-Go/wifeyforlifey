@@ -5,6 +5,7 @@ import { ConnectDB } from "@/app/config/db";
 import { compare } from "bcryptjs";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
 import { v4 as uuidv4 } from "uuid";
@@ -176,6 +177,29 @@ export const authOptions: NextAuthOptions = {
               paid: false,
             };
             token.weddingPlanningBestie = null;
+            
+            // Check for sub-subscriptions (groom/bridesmaid) if no main subscription
+            const subSub = await SubSubscriptionModel.findOne({
+              inviteeEmail: email,
+              status: "accepted",
+            }).populate("parentSubscription");
+
+            if (subSub && subSub.parentSubscription?.subscribed) {
+              const parentExpiry = subSub.parentSubscription.expiryDate;
+              const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
+              
+              if (isParentActive) {
+                token.subSubscription = {
+                  role: subSub.role,
+                  parentSubscriptionId: subSub.parentSubscription._id.toString(),
+                  parentEmail: subSub.parentSubscription.email || "",
+                  allowedTags: [subSub.role],
+                };
+                // Grant subscription access for playlist viewing
+                token.isSubscribed = true;
+                token.subscriptionExpiryDate = parentExpiry ? new Date(parentExpiry).toISOString() : null;
+              }
+            }
             return token;
           }
 
@@ -271,6 +295,8 @@ export const authOptions: NextAuthOptions = {
                 isSubscribed: token.weddingPlanningBestie.isSubscribed
               }
             : null;
+            
+          session.user.subSubscription = token.subSubscription || null;
         }
         // session.user.loyaltyPoints = token.loyaltyPoints;
       }
@@ -347,6 +373,34 @@ export const authOptions: NextAuthOptions = {
                 session.user.isSubscribed = false;
                 session.user.subscription = undefined;
                 session.user.weddingPlanningBestie = null;
+              }
+              
+              // Refetch SubSubscription fresh
+              const subSub = await SubSubscriptionModel.findOne({
+                inviteeEmail: userData.email,
+                status: "accepted",
+              }).populate("parentSubscription");
+
+              if (subSub && subSub.parentSubscription?.subscribed) {
+                const parentExpiry = subSub.parentSubscription.expiryDate;
+                const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
+                
+                if (isParentActive) {
+                  session.user.subSubscription = {
+                    role: subSub.role,
+                    parentSubscriptionId: subSub.parentSubscription._id.toString(),
+                    parentEmail: subSub.parentSubscription.email || "",
+                    allowedTags: [subSub.role],
+                  };
+                  if (!session.user.isSubscribed) {
+                    session.user.isSubscribed = true;
+                    session.user.subscriptionExpiryDate = parentExpiry ? new Date(parentExpiry) : null;
+                  }
+                } else {
+                  session.user.subSubscription = null;
+                }
+              } else {
+                session.user.subSubscription = null;
               }
             }
           }
