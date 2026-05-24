@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/authOptions";
 import packageModel from "@/app/modals/packageModel";
 import { sendMail } from "@/lib/email";
+import { groomEmail } from "@/utils/groomEmail";
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,11 +48,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role, inviteeEmail, inviteMessage, parentSubscriptionId } = await request.json();
+    const { role, inviteeName, inviteeEmail, inviteMessage, parentSubscriptionId } = await request.json();
 
-    if (!role || !inviteeEmail || !parentSubscriptionId) {
+    if (!role || !inviteeEmail || !parentSubscriptionId || !inviteeName) {
       return NextResponse.json(
-        { error: "Role, inviteeEmail, and parentSubscriptionId are required." },
+        { error: "Role, inviteeName, inviteeEmail, and parentSubscriptionId are required." },
         { status: 400 }
       );
     }
@@ -102,23 +103,61 @@ export async function POST(request: NextRequest) {
       status: existingUser ? "accepted" : "pending", 
     });
 
-    if (!existingUser) {
-      // Send Invitation Email here
+    const brideUser = await UserModel.findOne({ email: session.user.email });
+    const brideName = brideUser?.firstName || session.user?.name || session.user.email.split("@")[0];
+    const emailTo = inviteeEmail.toLowerCase().trim();
+
+    if (role === "groom") {
+      const emailBody = groomEmail(
+        inviteeName,
+        brideName,
+        !!existingUser,
+        inviteMessage || ""
+      );
+
       await sendMail({
-        to: inviteeEmail.toLowerCase().trim(),
-        name: inviteeEmail.split("@")[0],
-        subject: `You've been invited to join the Bridal Party!`,
-        body: `
-          <div style="font-family: Arial, sans-serif; padding: 20px;">
-            <h2>You've been invited!</h2>
-            <p>You have been invited as a ${role} to join the bridal party and access exclusive content.</p>
-            ${inviteMessage ? `<p><strong>Message from the bride:</strong> ${inviteMessage}</p>` : ''}
-            <p>To accept the invitation, please sign up for an account using this email address.</p>
-            <p><a href="${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || "https://wifeybolt.com"}/register" style="display: inline-block; padding: 10px 20px; background-color: #d1bfae; color: white; text-decoration: none; border-radius: 5px;">Sign Up Now</a></p>
-          </div>
-        `,
-        from: process.env.SMTP_EMAIL || "noreply@wifeybolt.com",
+        to: emailTo,
+        name: inviteeName,
+        subject: `You’ve Been Invited by ${brideName}`,
+        body: emailBody,
+        from: "wifeyforlifey@shopwifeyforlifey.com",
       });
+    } else if (role === "bridesmaids") {
+      // TODO: Implement Bridesmaids email template when ready
+      // Fallback for now
+      if (!existingUser) {
+        await sendMail({
+          to: emailTo,
+          name: inviteeName,
+          subject: `You've been invited to join the Bridal Party!`,
+          body: `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+              <h2>You've been invited!</h2>
+              <p>You have been invited as a bridesmaids to join the bridal party and access exclusive content.</p>
+              ${inviteMessage ? `<p><strong>Message from the bride:</strong> ${inviteMessage}</p>` : ''}
+              <p>To accept the invitation, please sign up for an account using this email address.</p>
+              <p><a href="${process.env.NEXTAUTH_URL}/register" style="display: inline-block; padding: 10px 20px; background-color: #d1bfae; color: white; text-decoration: none; border-radius: 5px;">Sign Up Now</a></p>
+            </div>
+          `,
+          from: "noreply@shopwifeyforlifey.com",
+        });
+      } else {
+        await sendMail({
+          to: emailTo,
+          name: inviteeName,
+          subject: `You've been invited to join the Bridal Party!`,
+          body: `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+              <h2>Great News!</h2>
+              <p>You have been invited as a bridesmaids to join the bridal party!</p>
+              ${inviteMessage ? `<p><strong>Message from the bride:</strong> ${inviteMessage}</p>` : ''}
+              <p>Since you already have an account, you now have access to some of the package benefits directly in your dashboard.</p>
+              <p><a href="${process.env.NEXTAUTH_URL}/login" style="display: inline-block; padding: 10px 20px; background-color: #d1bfae; color: white; text-decoration: none; border-radius: 5px;">Login to Your Account</a></p>
+            </div>
+          `,
+          from: "noreply@shopwifeyforlifey.com",
+        });
+      }
     }
 
     return NextResponse.json({ data: newSub }, { status: 201 });

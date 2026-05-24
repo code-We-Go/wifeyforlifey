@@ -132,6 +132,12 @@ export const authOptions: NextAuthOptions = {
             imageURL: user.image,
             subscriptions: subscriptionIds
           });
+
+          // Accept any pending sub-subscriptions for this new Google user
+          await SubSubscriptionModel.updateMany(
+            { inviteeEmail: googleEmail, status: "pending" },
+            { $set: { status: "accepted", inviteeUser: existingUser._id } }
+          );
         }
         userId = (existingUser as any)._id?.toString();
         user.id = userId ?? "";

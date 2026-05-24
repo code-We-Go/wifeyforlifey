@@ -27,8 +27,10 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
   const [invitations, setInvitations] = useState<SubSubscription[]>([]);
   const [loading, setLoading] = useState(true);
   
+  const [newInviteName, setNewInviteName] = useState("");
   const [newInviteEmail, setNewInviteEmail] = useState("");
   const [newInviteRole, setNewInviteRole] = useState<"groom" | "bridesmaids">("groom");
+  const [newInviteMessage, setNewInviteMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Extract slot config from package
@@ -44,7 +46,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       console.error("Failed to fetch invitations", error);
       toast({
         title: "Error",
-        description: "Failed to load your bridal party invitations.",
+        description: "Failed to load your invitations.",
         variant: "destructive",
       });
     } finally {
@@ -66,8 +68,10 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       setIsSubmitting(true);
       const res = await axios.post("/api/sub-subscriptions", {
         role: newInviteRole,
+        inviteeName: newInviteName,
         inviteeEmail: newInviteEmail,
         parentSubscriptionId: subscriptionDoc._id,
+        inviteMessage: newInviteMessage,
       });
 
       toast({
@@ -76,7 +80,9 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
         variant: "added",
       });
       
+      setNewInviteName("");
       setNewInviteEmail("");
+      setNewInviteMessage("");
       fetchInvitations();
     } catch (error: any) {
       console.error("Failed to send invite:", error);
@@ -90,31 +96,31 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
     }
   };
 
-  const handleRevoke = async (id: string) => {
-    try {
-      await axios.patch("/api/sub-subscriptions", {
-        id,
-        action: "revoke"
-      });
+  // const handleRevoke = async (id: string) => {
+  //   try {
+  //     await axios.patch("/api/sub-subscriptions", {
+  //       id,
+  //       action: "revoke"
+  //     });
       
-      toast({
-        title: "Invitation Revoked",
-        description: "The invitation access has been removed.",
-        variant: "added",
-      });
+  //     toast({
+  //       title: "Invitation Revoked",
+  //       description: "The invitation access has been removed.",
+  //       variant: "added",
+  //     });
       
-      fetchInvitations();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to revoke invitation.",
-        variant: "destructive",
-      });
-    }
-  };
+  //     fetchInvitations();
+  //   } catch (error: any) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to revoke invitation.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
 
   if (loading) {
-    return <div className="text-center py-8 text-lovely animate-pulse">Loading bridal party details...</div>;
+    return <div className="text-center py-8 text-lovely animate-pulse">Loading yout invitations details...</div>;
   }
 
   // Calculate used slots
@@ -134,7 +140,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
     return (
       <div className="text-center py-8 text-lovely/80">
         <h3 className="text-xl font-medium mb-2">No Sub-Subscriptions Available</h3>
-        <p>Your current package does not include bridal party invitations.</p>
+        <p>Your current package does not include party invitations.</p>
       </div>
     );
   }
@@ -142,7 +148,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-lovely mb-2">Bridal Party Access</h2>
+        <h2 className="text-2xl font-bold text-lovely mb-2">Your Package Invitations</h2>
         <p className="text-lovely/80 mb-6">
           Invite your groom and bridesmaids to get their own accounts and access exclusive content tailored just for them!
         </p>
@@ -182,46 +188,74 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       {(groomRemaining > 0 || bridesmaidsRemaining > 0) && (
         <div className="bg-creamey p-6 rounded-xl border border-lovely/20 shadow-sm">
           <h3 className="text-lg font-semibold text-lovely mb-4">Send New Invitation</h3>
-          <form onSubmit={handleInvite} className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1 space-y-2 w-full">
-              <Label htmlFor="inviteEmail" className="text-lovely font-medium">Invitee Email</Label>
-              <Input 
-                id="inviteEmail"
-                type="email"
-                placeholder="email@example.com"
-                value={newInviteEmail}
-                onChange={(e) => setNewInviteEmail(e.target.value)}
-                required
-                className="bg-white border-lovely/30"
+          <form onSubmit={handleInvite} className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4 w-full">
+              <div className="flex-1 space-y-2 w-full placeholder:text-lovely/80">
+                <Label htmlFor="inviteName" className="text-lovely font-medium">Invitee Name</Label>
+                <Input 
+                  id="inviteName"
+                  type="text"
+                  placeholder="Invitee Name"
+                  value={newInviteName}
+                  onChange={(e) => setNewInviteName(e.target.value)}
+                  required
+                  className="bg-white placeholder:text-lovely/60 text-lovely border-lovely/30"
+                />
+              </div>
+              <div className="flex-1 space-y-2 w-full">
+                <Label htmlFor="inviteEmail" className="text-lovely font-medium">Invitee Email</Label>
+                <Input 
+                  id="inviteEmail"
+                  type="email"
+                  placeholder="email@example.com"
+                  value={newInviteEmail}
+                  onChange={(e) => setNewInviteEmail(e.target.value)}
+                  required
+                  className="bg-white placeholder:text-lovely/60 text-lovely border-lovely/30"
+                />
+              </div>
+              <div className="flex-1 space-y-2 w-full">
+                <Label htmlFor="inviteRole" className="text-lovely font-medium">Role</Label>
+                <select 
+                  id="inviteRole"
+                  value={newInviteRole}
+                  onChange={(e) => setNewInviteRole(e.target.value as "groom" | "bridesmaids")}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-lovely/30 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-lovely"
+                >
+                  {groomRemaining > 0 && <option value="groom">Groom</option>}
+                  {bridesmaidsRemaining > 0 && <option value="bridesmaids">Bridesmaid</option>}
+                </select>
+              </div>
+            </div>
+            
+            <div className="space-y-2 w-full">
+              <Label htmlFor="inviteMessage" className="text-lovely font-medium">Message (Optional)</Label>
+              <textarea 
+                id="inviteMessage"
+                placeholder="Write a personal message to your invitee..."
+                value={newInviteMessage}
+                onChange={(e) => setNewInviteMessage(e.target.value)}
+                className="flex min-h-[80px] w-full placeholder:text-lovely/60 rounded-md border border-lovely/30 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-lovely"
               />
             </div>
-            <div className="flex-1 space-y-2 w-full">
-              <Label htmlFor="inviteRole" className="text-lovely font-medium">Role</Label>
-              <select 
-                id="inviteRole"
-                value={newInviteRole}
-                onChange={(e) => setNewInviteRole(e.target.value as "groom" | "bridesmaids")}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-lovely/30 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-lovely"
+            
+            <div className="flex justify-end mt-2">
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || !newInviteEmail || !newInviteName}
+                className="bg-lovely text-white hover:bg-lovely/90 w-full md:w-auto"
               >
-                {groomRemaining > 0 && <option value="groom">Groom</option>}
-                {bridesmaidsRemaining > 0 && <option value="bridesmaids">Bridesmaid</option>}
-              </select>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Send Invite
+              </Button>
             </div>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || !newInviteEmail}
-              className="bg-lovely text-white hover:bg-lovely/90 w-full md:w-auto"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Send Invite
-            </Button>
           </form>
         </div>
       )}
 
       {/* Sent Invitations List */}
       <div>
-        <h3 className="text-lg font-semibold text-lovely mb-4">Manage Access</h3>
+        <h3 className="text-lg font-semibold text-lovely mb-4">Your Invitations List</h3>
         {invitations.length === 0 ? (
           <p className="text-lovely/70 italic text-sm">No invitations sent yet.</p>
         ) : (
@@ -251,7 +285,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                   </div>
 
                   {/* Revoke Button */}
-                  {invite.status !== "revoked" && (
+                  {/* {invite.status !== "revoked" && (
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -260,7 +294,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                     >
                       <UserMinus className="h-4 w-4 mr-1" /> Revoke
                     </Button>
-                  )}
+                  )} */}
                 </div>
               </div>
             ))}

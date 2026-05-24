@@ -147,9 +147,12 @@ export default function PlaylistPage() {
     if (!canAccessPremium) return true;
     
     // Sub-subscription specific logic
-    const userTags = session?.user?.subSubscription?.allowedTags;
-    if (userTags && userTags.length > 0) {
-      const hasMatchingTag = video.tags?.some((tag: string) => userTags.includes(tag as any));
+    const subRole = session?.user?.subSubscription?.role;
+    console.log("subRole"+subRole);
+    if (subRole) {
+      console.log("video tags: ", video.tags);
+      const hasMatchingTag = Array.isArray(video.tags) ? video.tags.includes(subRole) : false;
+      console.log("hasMatchingTag", hasMatchingTag)
       if (!hasMatchingTag) return true;
     }
     

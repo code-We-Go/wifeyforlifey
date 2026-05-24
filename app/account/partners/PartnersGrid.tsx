@@ -82,9 +82,10 @@ export default function PartnersGrid() {
       try {
         setLoadingSubs(true);
         // Fetch subscriptions
+        const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
         const subRes = await fetch(
           `/api/subscriptions/track?email=${encodeURIComponent(
-            session.user.email
+            trackEmail
           )}&all=true`
         );
         if (subRes.ok) {
