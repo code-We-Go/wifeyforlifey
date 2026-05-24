@@ -49,15 +49,15 @@ export default function SessionCard({ session, onDetailsClick, onBookClick }: Se
         
         {/* Action Button */}
         <div className="flex text-sm flex-col sm:flex-row gap-3 w-full">
-                  <p 
-          className="text-sm hover:cursor-pointer underline font-medium text-lovely/60"           
-          onClick={onDetailsClick}
-        >
-          More Details
-        </p>
+          <Button
+            onClick={onDetailsClick}
+            className="flex-1 bg-creamey border border-lovely text-lovely hover:bg-creamey/80 font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
+          >
+            More Details
+          </Button>
           <Button
             onClick={onBookClick}
-            className="flex-1 bg-lovely hover:bg-lovely/90 text-white font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
+            className="flex-[2] bg-lovely hover:bg-lovely/90 text-white font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
           >
             Book Now
           </Button>
