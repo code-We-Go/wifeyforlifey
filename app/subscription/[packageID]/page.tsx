@@ -205,7 +205,7 @@ const SubscriptionPage = () => {
     city: null,
     zone: null,
     district: null,
-    shippingCost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 },
+    shippingCost: { priceBeforeVat: 90, priceAfterVat: 90, shippingFee: 90 },
   });
   const [payment, setPayment] = useState<"card" | "cash" | "instapay">("card");
   const [redeemPoints, setRedeemPoints] = useState(0);
@@ -655,7 +655,7 @@ We’re beyond excited to share this experience with you… your planner will be
               setShipping(0);
             }
           } else {
-            setShipping(80);
+            setShipping(90);
           }
         }
       }
@@ -2443,7 +2443,7 @@ We’re beyond excited to share this experience with you… your planner will be
                       {(() => {
                         // Show the shipping cost that would have been charged
                         if (countryID === 65 && bostaLocation.city) {
-                          return bostaLocation.shippingCost?.shippingFee || 70;
+                          return bostaLocation.shippingCost?.shippingFee || 90;
                         } else {
                           const realShipping = calculateShippingRate(
                             countryID,
