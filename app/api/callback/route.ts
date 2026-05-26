@@ -295,6 +295,7 @@ async function handleSubscription(
     whatsAppNumber: paymentOp.whatsAppNumber,
     // Gift info
     isGift: paymentOp.isGift,
+    giftSenderEmail: paymentOp.isGift ? paymentOp.email : undefined,
     giftRecipientEmail: paymentOp.giftRecipientEmail,
     specialMessage: paymentOp.specialMessage,
     giftCardName: paymentOp.giftCardName,
@@ -457,9 +458,13 @@ async function handleSubscription(
             ${
               updatedSub.isGift
                 ? `<li><strong>Gift:</strong> Yes</li>
-            <li><strong>Gift Recipient Email:</strong> ${
-              updatedSub.giftRecipientEmail || "N/A"
-            }</li>
+                <li><strong>Gift Recipient Email:</strong> ${
+                  updatedSub.giftRecipientEmail || "N/A"
+                }</li>
+                <li><strong>Gift Sender Email:</strong> ${
+                  updatedSub.giftSenderEmail || "N/A"
+                }</li>
+                
             <li><strong>Special Message:</strong> ${
               updatedSub.specialMessage || "N/A"
             }</li>

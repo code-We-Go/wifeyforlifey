@@ -583,6 +583,7 @@ export async function POST(request: Request) {
             whatsAppNumber: data.whatsAppNumber,
             // Gift information
             isGift: data.isGift,
+            giftSenderEmail: data.isGift ? data.email : undefined,
             giftRecipientEmail: data.giftRecipientEmail,
             specialMessage: data.specialMessage,
             giftCardName: data.giftCardName,
@@ -668,6 +669,7 @@ export async function POST(request: Request) {
             // Gift information
             isGift: data.isGift,
             giftRecipientEmail: data.giftRecipientEmail,
+            giftSenderEmail: data.isGift ? data.email : undefined,
             specialMessage: data.specialMessage,
             giftCardName: data.giftCardName,
             // Address information

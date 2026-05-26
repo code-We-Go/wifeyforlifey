@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
-import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 console.log(giftSenderEmail)
-    const subscription = await subscriptionPaymentModel.findOne({ email: giftSenderEmail,status:"confirmed",isGift:true });
+    const subscription = await subscriptionsModel.findOne({ giftSenderEmail: giftSenderEmail  });
     console.log("SubscriptionCheck:", subscription);
     
     if (!subscription) {
@@ -35,7 +34,7 @@ console.log(giftSenderEmail)
     }
 
     // Verify the gift sender email matches the subscription email
-    if ((subscription as any).email?.toLowerCase() !== giftSenderEmail.toLowerCase()) {
+    if ((subscription as any).giftSenderEmail?.toLowerCase() !== giftSenderEmail.toLowerCase()) {
       return NextResponse.json(
         { error: "Gift sender email does not match" },
         { status: 403 }
