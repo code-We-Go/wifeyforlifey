@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 console.log(giftSenderEmail)
-    const subscription = await subscriptionsModel.findOne({ email: giftSenderEmail });
+    const subscription = await subscriptionPaymentModel.findOne({ email: giftSenderEmail,status:"confirmed",isGift:true });
     console.log("SubscriptionCheck:", subscription);
     
     if (!subscription) {
