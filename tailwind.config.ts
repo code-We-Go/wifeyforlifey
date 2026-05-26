@@ -34,11 +34,11 @@ const config: Config = {
 
 
       colors: {
-        pinkey:"#FFB6C7",
-        creamey:"#FBF3E0",
-        lovely:"#D32333",
-        everGreen:"#12665C",
-        saga:"#81C8BB",
+        pinkey:"rgb(var(--color-pinkey, 255 182 199) / <alpha-value>)",
+        creamey:"rgb(var(--color-creamey, 251 243 224) / <alpha-value>)",
+        lovely:"rgb(var(--color-lovely, 211 35 51) / <alpha-value>)",
+        everGreen:"rgb(var(--color-everGreen, 18 102 92) / <alpha-value>)",
+        saga:"rgb(var(--color-saga, 129 200 187) / <alpha-value>)",
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
