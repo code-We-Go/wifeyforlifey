@@ -8,8 +8,6 @@ import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import SessionCard from "@/components/shared/SessionCard";
-import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type PartnerSession = {
   _id: string;
@@ -65,36 +63,6 @@ export default function PartnerSessionsSection() {
     fetchSessions();
   }, []);
 
-  // Embla Carousel
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: false,
-    align: "start",
-    slidesToScroll: 1,
-  });
-
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on("select", onSelect);
-    emblaApi.on("reInit", onSelect);
-  }, [emblaApi, onSelect]);
 
   const openModal = (s: PartnerSession) => {
     setSelected(s);
@@ -209,47 +177,16 @@ export default function PartnerSessionsSection() {
           <p className="mt-4 text-lovely/90">Loading sessions...</p>
         </div>
       ) : sessions.length > 0 ? (
-        <div className="relative">
-          {/* Navigation Arrows */}
-          {sessions.length > 4 && (
-            <>
-              <button
-                onClick={scrollPrev}
-                disabled={!canScrollPrev}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-              <button
-                onClick={scrollNext}
-                disabled={!canScrollNext}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
-                aria-label="Next slide"
-              >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-            </>
-          )}
-
-          {/* Embla Carousel */}
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-6 md:gap-12">
-              {sessions.map((session) => (
-                <div key={session._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
-                  <SessionCard
-                    session={session}
-                    onDetailsClick={() => setSelectedForDetails(session)}
-                    onBookClick={() => openModal(session)}
-                  />
-                </div>
-              ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-12">
+          {sessions.map((session) => (
+            <div key={session._id} className="min-w-0">
+              <SessionCard
+                session={session}
+                onDetailsClick={() => setSelectedForDetails(session)}
+                onBookClick={() => openModal(session)}
+              />
             </div>
-          </div>
+          ))}
         </div>
       ) : (
         <p className="text-lovely/90">No sessions available at the moment.</p>
