@@ -860,14 +860,8 @@ export default function PlaylistPage() {
                   }
                 });
 
-                // Determine folder display order: use playlist.folders order, then any stray slugs
-                const orderedSlugs: string[] = [
-                  ...folders.map((f: any) => f.slug).filter((slug: string) => grouped[slug]),
-                  ...Object.keys(grouped).filter(
-                    (slug) => !folders.some((f: any) => f.slug === slug)
-                  ),
-                ];
-
+                // Build a unified ordered list: folders get the index of their first video,
+                // ungrouped videos get their own index. Everything is then sorted together.
                 const renderVideoItem = (video: any) => {
                   const isLocked = !video.isPublic && !canAccessPremium;
                   const isActive = selectedVideo?._id === video._id;
@@ -879,7 +873,7 @@ export default function PlaylistPage() {
                       } cursor-pointer relative transition-colors p-4 text-creamey ${
                         isActive
                           ? "bg-lovely text-creamey"
-                          : "bg-pinkey text-lovely  hover:bg-lovely hover:text-creamey "
+                          : "bg-pinkey text-lovely hover:bg-lovely hover:text-creamey"
                       }`}
                       onClick={() => {
                         const videoIndex = playlist.videos.findIndex(
@@ -909,16 +903,13 @@ export default function PlaylistPage() {
                             )}
                           </div>
                         </div>
-                        {isSubscribed &&
-                          watchedVideos.has(String(video._id)) && (
-                            <div className="absolute top-1 right-1 bg-white/80 rounded-2xl p-0.5">
-                              <Check className="h-4 w-4 text-lovely" />
-                            </div>
-                          )}
+                        {isSubscribed && watchedVideos.has(String(video._id)) && (
+                          <div className="absolute top-1 right-1 bg-white/80 rounded-2xl p-0.5">
+                            <Check className="h-4 w-4 text-lovely" />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
-                          <h5 className="font-medium line-clamp-2">
-                            {video.title}
-                          </h5>
+                          <h5 className="font-medium line-clamp-2">{video.title}</h5>
                           <div className="flex items-center mt-1">
                             {!video.isPublic && (
                               <span className="text-xs bg-muted text-everGreen px-1.5 py-0.5 rounded-full">
@@ -932,13 +923,41 @@ export default function PlaylistPage() {
                   );
                 };
 
+                const seenFolders = new Set<string>();
+                const unifiedItems: Array<
+                  | { type: "folder"; slug: string; firstIndex: number }
+                  | { type: "video"; video: any; firstIndex: number }
+                > = [];
+
+                videos.forEach((video: any, idx: number) => {
+                  if (video.playlistFolder) {
+                    const slug = video.playlistFolder;
+                    if (!seenFolders.has(slug)) {
+                      seenFolders.add(slug);
+                      unifiedItems.push({ type: "folder", slug, firstIndex: idx });
+                    }
+                    // subsequent videos of the same folder are already in grouped[slug]
+                  } else {
+                    unifiedItems.push({ type: "video", video, firstIndex: idx });
+                  }
+                });
+
+                // Already in natural order since we iterated videos in order,
+                // but sort defensively to be safe.
+                unifiedItems.sort((a, b) => a.firstIndex - b.firstIndex);
+
                 return (
                   <>
-                    {/* Folder sections */}
-                    {orderedSlugs.map((slug) => {
+                    {unifiedItems.map((item) => {
+                      if (item.type === "video") {
+                        return renderVideoItem(item.video);
+                      }
+
+                      // Folder block
+                      const { slug } = item;
                       const folderDef = folders.find((f: any) => f.slug === slug);
                       const folderName = folderDef?.name || slug;
-                      const folderVideos = grouped[slug];
+                      const folderVideos = grouped[slug] || [];
                       const isCollapsed = !!collapsedFolders[slug];
 
                       return (
@@ -970,11 +989,9 @@ export default function PlaylistPage() {
                         </div>
                       );
                     })}
-
-                    {/* Ungrouped videos (no folder) */}
-                    {ungrouped.map(renderVideoItem)}
                   </>
                 );
+
               })()}
             </div>
           </div>
