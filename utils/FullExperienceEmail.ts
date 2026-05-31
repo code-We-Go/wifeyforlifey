@@ -288,6 +288,35 @@ export function generateWelcomeEmail(
 															</td>
 														</tr>
 													</table>
+													${
+														subscription.cart && subscription.cart.length > 0
+															? `<table class="paragraph_block block-10-cart" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																	<tr>
+																		<td class="pad">
+																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
+																				<p style="margin: 0;"><strong>📦 Bundled Items included in your order:</strong></p>
+																				<ul style="margin-top: 5px;">
+																					${subscription.cart
+																						.map(
+																							(item) =>
+																								`<li>${item.productName} x ${item.quantity} ${
+																									item.variant
+																										? `(${
+																												item.attributes?.name
+																													? ` ${item.attributes.name}`
+																													: ""
+																											})`
+																										: ""
+																								}</li>`
+																						)
+																						.join("")}
+																				</ul>
+																			</div>
+																		</td>
+																	</tr>
+																</table>`
+															: ""
+													}
 													<table class="paragraph_block block-11" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">

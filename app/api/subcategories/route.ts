@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 export async function GET(request: Request) {
   try {
     await ConnectDB();
-
+    console.log("registering"+categoriesModel)
     const { searchParams } = new URL(request.url);
     const homepage = searchParams.get('homepage');
 
@@ -17,10 +17,10 @@ export async function GET(request: Request) {
     }
     
     // Check for active param
-    const active = searchParams.get('active');
-    if (active === 'true') {
-      query.active = true;
-    }
+    // const active = searchParams.get('active');
+    // if (active === 'true') {
+    //   query.active = true;
+    // }
 
     let typeQuery: any = {};
     const type = searchParams.get('type');
@@ -30,17 +30,15 @@ export async function GET(request: Request) {
         : { type };
     }
 
-    let subcategories = await subCategoryModel.find(query)
+    let subcategories = await subCategoryModel.find({...query, active: true})
       .populate({
         path: 'categoryID',
-        match: type ? typeQuery : undefined,
+        match: { ...(type ? typeQuery : {}), active: true },
       })
       .sort({ subCategoryName: 1 });
 
-    // If we are filtering by type, remove subcategories whose category didn't match (and thus categoryID is null)
-    if (type) {
-      subcategories = subcategories.filter((sub: any) => sub.categoryID !== null);
-    }
+    // Remove subcategories whose category didn't match (and thus categoryID is null)
+    subcategories = subcategories.filter((sub: any) => sub.categoryID !== null);
     
     console.log("subcategories length " + subcategories.length);
     

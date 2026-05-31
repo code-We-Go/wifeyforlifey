@@ -1,37 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { object } from "zod";
-
-// Define the Cart Item schema
-
-const attributeSchema = new Schema({
-    name: { type: String, required: true },
-    stock: { type: Number, required: true },
-  }, { _id: false });
-  
-  const mediaSchema = new Schema({
-    url: { type: String, required: true },
-    type: { type: String, default: 'image' }, // Optional if you're supporting videos etc.
-  }, { _id: false });
-  
-  const variantSchema = new Schema({
-    name: { type: String, required: true },
-    attributeName: { type: String, required: true },
-    attributes: { type: [attributeSchema], required: true },
-    images: { type: [mediaSchema], default: [] },
-  }, { _id: false });
-  
-  const CartItemSchema = new Schema({
-    productId: { type: String, required: true },
-    productName: { type: String, required: true },
-    price: { type: Number, required: true },
-    quantity: { type: Number, required: true },
-    imageUrl: { type: String, required: true },
-    attributes: { type: attributeSchema, required: false },
-    variant: { type: variantSchema, required: false },
-    collections: [{ type: String }], // optional
-  });
+import { CartItemSchema } from "./cartItemSchema";
 
 // Define the Order schema
+
 const OrderSchema = new Schema(
     { email:{type: String, required: false},
     orderID:{type:String , required : false}
@@ -44,6 +16,7 @@ const OrderSchema = new Schema(
         city: { type: String, required: false },
         state: { type: String, required: false },
         phone: { type: String, required: false },
+        whatsAppNumber: { type: String, required: false },
         // Gift info
         isGift: { type: Boolean, default: false },
         giftRecipientEmail: { type: String, required: false },
@@ -81,6 +54,7 @@ const OrderSchema = new Schema(
         billingPostalZip:{ type: String, required: false },
         billingCity:{ type: String, required: false },
         billingPhone:{ type: String, required: false },
+        billingWhatsAppNumber:{ type: String, required: false },
         bostaCity: { type: String, required: false },
         bostaCityName: { type: String, required: false },
         bostaZone: { type: String, required: false },

@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest) {
     await ConnectDB();
     
     const body = await request.json();
-    const { email, username, firstName, lastName, imageURL, birthDate, weddingDate } = body;
+    const { email, username, firstName, lastName, imageURL, birthDate, weddingDate, shippingData } = body;
     
     if (!email) {
       return NextResponse.json(
@@ -66,16 +66,22 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const updateData: any = {
+      username,
+      firstName,
+      lastName,
+      imageURL,
+      birthDate: birthDate ? new Date(birthDate) : undefined,
+      weddingDate: weddingDate ? new Date(weddingDate) : undefined
+    };
+
+    if (shippingData) {
+      updateData.shippingData = shippingData;
+    }
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { email },
-      {
-        username,
-        firstName,
-        lastName,
-        imageURL,
-        birthDate: birthDate ? new Date(birthDate) : undefined,
-        weddingDate: weddingDate ? new Date(weddingDate) : undefined
-      },
+      updateData,
       { new: true, runValidators: true }
     ).select('-password');
     

@@ -46,7 +46,7 @@ export default function Footer() {
   useEffect(() => {
     setShopCategoriesLoading(true);
     setShopCategoriesError(null);
-    fetch("/api/categories")
+    fetch("/api/categories?type=product")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -302,12 +302,12 @@ export default function Footer() {
             >
               Return & Exchange
             </Link>
-            <Link
+            {/* <Link
               href="/policies?shipping-policy"
               className="hover:text-foreground"
             >
               Shipping Details
-            </Link>
+            </Link> */}
             <Link href="/contact" className="hover:text-foreground">
               Contact Us
             </Link>

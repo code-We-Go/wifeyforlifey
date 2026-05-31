@@ -145,7 +145,7 @@ class BostaLocationService {
   calculateShippingCost(city: BostaCity): number {
     // Basic shipping cost calculation based on sector
     // You can adjust these rates based on your business needs
-    const baseCost = 50;
+    const baseCost = 90;
     const sectorMultiplier = city.sector || 1;
 
     return baseCost + sectorMultiplier * 10;

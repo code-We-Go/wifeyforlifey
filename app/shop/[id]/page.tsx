@@ -26,7 +26,7 @@ export default function ProductPage() {
   const params = useParams();
   const productId = params.id as string;
   const { toast } = useToast();
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const [product, setProduct] = useState<Product | null | undefined>();
   const [loading, setLoading] = useState(true);
   const [stickerSelected, setStickerSelected] = useState(true); // Set to true by default
@@ -167,6 +167,7 @@ export default function ProductPage() {
       }) has been added to your cart.`,
       variant: "added",
     });
+    openCart();
   };
 
   // Related products (simple implementation: same category but different product)
@@ -175,9 +176,9 @@ export default function ProductPage() {
   //   .slice(0, 4);
 
   return (
-    <div className="container-custom py-8 md:py-12">
+    <div className="container-custom py-3 md:py-6">
       {/* Breadcrumbs */}
-      <div className="mb-6">
+      <div className="mb-2 md:mb-3">
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
             <li className="inline-flex items-center">
@@ -223,20 +224,19 @@ export default function ProductPage() {
       </div>
 
       {/* Back to shop button - mobile only */}
-      <div className="md:hidden mb-4">
+      {/* <div className="md:hidden mb-4">
         <Button variant="ghost" size="sm" asChild>
           <Link className="text-lovely" href="/shop">
             <ChevronLeft className="mr-1 text-lovely h-4 w-4" />
             Back to Shop
           </Link>
         </Button>
-      </div>
+      </div> */}
 
       {/* Product Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Product Images */}
-        <div className="space-y-4">
-          <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-8 lg:gap-12">
+        <div className="flex flex-col md:flex-row-reverse gap-4 w-full md:col-span-1 items-start">
+          <div className="relative w-full md:flex-1 aspect-square overflow-hidden rounded-lg bg-muted">
             {selectedVariant && (
               <Image
                 src={selectedVariant.images[selectedImage].url}
@@ -248,7 +248,7 @@ export default function ProductPage() {
           </div>
 
           {selectedVariant && selectedVariant.images.length > 1 && (
-            <div className="flex space-x-2 overflow-auto pb-1">
+            <div className="flex md:flex-col space-x-2 md:space-x-0 md:space-y-2  pb-1 md:pb-0 md:w-20 md:shrink-0 max-h-[500px] pr-1">
               {selectedVariant.images.map((image, index) => (
                 <button
                   key={index}
@@ -273,7 +273,7 @@ export default function ProductPage() {
         </div>
 
         {/* Product Info */}
-        <div className="space-y-6">
+        <div className="space-y-2 md:space-y-3 md:col-span-1">
           <div>
             <h1
               className={`${thirdFont.className} text-lovely tracking-normal text-4xl  font-medium`}

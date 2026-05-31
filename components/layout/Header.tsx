@@ -116,7 +116,7 @@ export default function Header() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
   const { wishList } = useContext(wishListContext);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -335,8 +335,8 @@ export default function Header() {
                 alt="logo"
                 width={200}
                 height={150}
-                src={"/cristmas/logo.png"}
-                // src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
+                // src={"/cristmas/logo.png"}
+                src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
               />
             </Link>
             {rightNavigation.map((item) => (
@@ -395,19 +395,35 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "text-base font-medium transition-colors hover:text-red-900",
-                    pathname === item.href ? "text-red-900 " : "text-creamey"
-                  )}
-                >
-                  <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
-                    {item.icon}
-                    {item.name}
-                  </div>
-                </Link>
+                item.name === "Cart" ? (
+                  <button
+                    key={item.name}
+                    onClick={openCart}
+                    className={cn(
+                      "text-base font-medium transition-colors hover:text-red-900 bg-transparent border-0 cursor-pointer",
+                      "text-creamey"
+                    )}
+                  >
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                      {item.icon}
+                      {item.name}
+                    </div>
+                  </button>
+                ) : (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "text-base font-medium transition-colors hover:text-red-900",
+                      pathname === item.href ? "text-red-900 " : "text-creamey"
+                    )}
+                  >
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                      {item.icon}
+                      {item.name}
+                    </div>
+                  </Link>
+                )
               )
             ))}
 
@@ -563,10 +579,10 @@ export default function Header() {
                         alt="logo"
                         width={200}
                         height={150}
-                        src={"/cristmas/logo.png"}
-                        // src={
-                        //   "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
-                        // }
+                        // src={"/cristmas/logo.png"}
+                        src={
+                          "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
+                        }
                       />
                     </Link>
                   </div>
@@ -665,7 +681,7 @@ export default function Header() {
                 alt="logo"
                 width={200}
                 height={150}
-                src={"/cristmas/mobile.png"}
+                src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
               />
             </Link>
             <div className="mr-2 gap-4 flex">
@@ -696,9 +712,9 @@ export default function Header() {
                   <User className="text-creamey" />
                 </div>
               )}
-              <Link href={"/cart"}>
+              <button onClick={openCart} className="bg-transparent border-0 cursor-pointer">
                 <ShoppingBag />
-              </Link>
+              </button>
             </div>
             {/* <Link href="/cart" className="relative mr-4">
               <Button variant="ghost" size="icon" aria-label="Cart">
@@ -714,14 +730,8 @@ export default function Header() {
         </div>
       </div>
       {/* Christmas Decoration - Desktop */}
-      <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
-        {/* <Image
-          src="/cristmas/kharb2Full.png"
-          alt="Christmas Decoration"
-          width={960}
-          height={100}
-          className="w-1/2  object-contain"
-        /> */}
+      {/* <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
+
         <Image
           src="/cristmas/kharb2FullDesktop.png"
           alt="Christmas Decoration"
@@ -729,9 +739,9 @@ export default function Header() {
           height={100}
           className="w-full h-auto object-contain"
         />
-      </div>
+      </div> */}
       {/* Christmas Decoration - Mobile */}
-      <div className="block md:hidden w-full absolute top-full left-0 -mt-10 z-40 pointer-events-none">
+      {/* <div className="block md:hidden w-full absolute top-full left-0 -mt-10 z-40 pointer-events-none">
         <Image
           src="/cristmas/kharb2Long.png"
           alt="Christmas Decoration"
@@ -739,7 +749,7 @@ export default function Header() {
           height={100}
           className="w-full h-auto"
         />
-      </div>
+      </div> */}
       {/* Notifications Modal */}
       <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
         <DialogContent className="sm:max-w-md bg-creamey">

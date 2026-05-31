@@ -15,7 +15,7 @@ import { Product, Variant, attribute } from "@/app/interfaces/interfaces";
 
 export default function ProductModal() {
   const { isModalOpen, closeModal, modalProduct } = useModal();
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>();
   const [selectedAttribute, setSelectedAttribute] = useState<
     attribute | undefined
@@ -80,6 +80,7 @@ export default function ProductModal() {
     });
 
     closeModal();
+    openCart();
   };
 
   return (
@@ -212,7 +213,7 @@ export default function ProductModal() {
                   <span className="sr-only">Increase quantity</span>
                   <span aria-hidden>+</span>
                 </Button>
-                {selectedAttribute && (
+                {/* {selectedAttribute && (
                   <span
                     className={`text-sm ml-2 ${
                       selectedAttribute.stock === 0
@@ -224,9 +225,9 @@ export default function ProductModal() {
                   >
                     {selectedAttribute.stock === 0
                       ? "Out of stock"
-                      : `${selectedAttribute.stock} available`}
+                      : ` Available`}
                   </span>
-                )}
+                )} */}
               </div>
             </div>
 

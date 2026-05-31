@@ -20,6 +20,7 @@ function SuccessPage() {
   const { clearCart } = useCart();
   const [subscription, setSubscription] = useState<string | null>(null);
   const [account, setAccount] = useState<string | null>(null);
+  const [process, setProcess] = useState<string | null>(null);
   const [sessionOrder, setSessionOrder] = useState<any | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -36,11 +37,15 @@ function SuccessPage() {
     const account = searchParams.get("account");
     const partnerSession = searchParams.get("session");
     const orderId = searchParams.get("orderId");
+    const processParam = searchParams.get("process");
     if (subscription) {
       setSubscription(subscription);
     }
     if (account) {
       setAccount(account);
+    }
+    if (processParam) {
+      setProcess(processParam);
     }
     if (partnerSession && orderId) {
       fetch(`/api/partner-sessions/order?orderId=${orderId}`)
@@ -99,24 +104,30 @@ function SuccessPage() {
           <div className="text-lovely">
             {" "}
             <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">
-              🎉 Your Subscription was created successfully. 🎉
+              {process === "upgrade" 
+                ? "🎉 Your Subscription was upgraded successfully. 🎉" 
+                : process === "renew" 
+                  ? "🎉 Your Subscription was renewed successfully. 🎉" 
+                  : "🎉 Your Subscription was created successfully. 🎉"}
             </h1>
             <>
               {!account &&
                 (subscription !== "mini" ? (
                   <p>
-                    Your subscription was created successfully, now create your
-                    account to enjoy our exclusive educational channel and
-                    partnerships
+                    {process === "upgrade" 
+                      ? "Your subscription has been upgraded. You now have access to more exclusive content!"
+                      : process === "renew"
+                        ? "Your subscription has been renewed. Thank you for staying with us!"
+                        : "Your subscription was created successfully, now create your account to enjoy our exclusive educational channel and partnerships"}
                   </p>
                 ) : (
                   <p className="px-2 md:px-6 xl:px-12">
-                    {/* hnsheel alsession  */}
-                    Your subscription was created successfully, 
-                    Once you receive your planner, you'll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you'll find a thank-you card with a QR code that lets you browse and select your favorite playlist.
+                    {process === "renew"
+                      ? "Your mini experience has been renewed! Enjoy your chosen playlist for another 6 months."
+                      : "Your subscription was created successfully, Once you receive your planner, you'll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you'll find a thank-you card with a QR code that lets you browse and select your favorite playlist."}
                  </p>
                 ))}
-              <p>Look out for an email from your bestie 👯‍♀️.</p>
+              {process === "new" && <p>Look out for an email from your bestie 👯♀️.</p>}
             </>
           </div>
         ) : sessionOrder ? (
@@ -151,7 +162,7 @@ function SuccessPage() {
             🎉 Your Order was created successfully. 🎉
           </h1>
         )}
-        {account && subscription && (
+        {(account || process === "upgrade" || process === "renew") && subscription && (
           <div className="mt-6 flex gap-4 justify-center">
             <Link href="/account" passHref>
               <button className="px-6 border-2 border-lovely py-2   text-lovely rounded-2xl font-semibold  transition">
@@ -190,7 +201,7 @@ function SuccessPage() {
             </Link>
           </div>
         )}
-        {!account && subscription && (
+        {!account && process === "new" && subscription && (
           <div className="mt-6 flex gap-4 justify-center">
             {/* <Link href="/register" passHref>
             <button className="px-6 border-2 border-lovely py-2   text-lovely rounded-2xl font-semibold  transition">

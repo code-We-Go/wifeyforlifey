@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import bostaClientService, {
   BostaCity,
   BostaZone,
@@ -68,39 +68,162 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
     }
   };
 
-  // Load cities on component mount
+  // Track whether we've done the initial parallel load
+  const initialLoadDone = useRef(false);
+
+  // Load all saved location data in parallel on mount
   useEffect(() => {
-    const loadCities = async () => {
-      setLoading((prev) => ({ ...prev, cities: true }));
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+
+    const loadInitialData = async () => {
+      // Always load cities
+      setLoading({ cities: true, zones: !!selectedCity, districts: !!(selectedCity && selectedZone) });
+
       try {
-        const citiesData = await bostaClientService.getCities();
+        // Fire all needed API calls in parallel
+        const promises: [
+          Promise<BostaCity[]>,
+          Promise<BostaZone[]> | null,
+          Promise<BostaDistrict[]> | null
+        ] = [
+          bostaClientService.getCities(),
+          selectedCity ? bostaClientService.getZones(selectedCity) : null,
+          selectedCity && selectedZone
+            ? bostaClientService.getDistrictsByZone(selectedCity, selectedZone)
+            : null,
+        ];
+
+        const [citiesData, zonesData, districtsData] = await Promise.all([
+          promises[0],
+          promises[1] || Promise.resolve([]),
+          promises[2] || Promise.resolve([]),
+        ]);
+
         setCities(citiesData);
 
-        // If there's a pre-selected city, find and set it
+        // Match and set city
         if (selectedCity) {
           const cityObj = citiesData.find(
             (city) => city._id === selectedCity || city.name === selectedCity
           );
           if (cityObj) {
             setSelectedCityObj(cityObj);
-            loadZones(cityObj._id);
+          }
+        }
+
+        // Match and set zone
+        if (zonesData.length > 0) {
+          setZones(zonesData);
+          if (selectedZone) {
+            const zoneObj = zonesData.find(
+              (zone) => zone._id === selectedZone || zone.name === selectedZone
+            );
+            if (zoneObj) {
+              setSelectedZoneObj(zoneObj);
+            }
+          }
+        }
+
+        // Match and set district
+        if (districtsData.length > 0) {
+          setDistricts(districtsData);
+          if (selectedDistrict) {
+            const districtObj = districtsData.find(
+              (district) =>
+                district.districtId === selectedDistrict ||
+                district.districtName === selectedDistrict
+            );
+            if (districtObj) {
+              setSelectedDistrictObj(districtObj);
+            }
           }
         }
       } catch (error) {
-        console.error("Error loading cities:", error);
+        console.error("Error loading initial location data:", error);
       } finally {
-        setLoading((prev) => ({ ...prev, cities: false }));
+        setLoading({ cities: false, zones: false, districts: false });
       }
     };
 
-    loadCities();
+    loadInitialData();
   }, []);
+
+  // React to prop changes AFTER initial load (e.g., saved data arrives late)
+  useEffect(() => {
+    if (!initialLoadDone.current) return;
+    if (selectedCity && cities.length > 0) {
+      const cityObj = cities.find(
+        (city) => city._id === selectedCity || city.name === selectedCity
+      );
+      if (cityObj && cityObj._id !== selectedCityObj?._id) {
+        setSelectedCityObj(cityObj);
+        // Load zones + districts in parallel
+        const loadDependents = async () => {
+          setLoading((prev) => ({ ...prev, zones: true, districts: !!selectedZone }));
+          try {
+            const [zonesData, districtsData] = await Promise.all([
+              bostaClientService.getZones(cityObj._id),
+              selectedZone
+                ? bostaClientService.getDistrictsByZone(cityObj._id, selectedZone)
+                : Promise.resolve([]),
+            ]);
+            setZones(zonesData);
+            if (selectedZone) {
+              const zoneObj = zonesData.find(
+                (zone) => zone._id === selectedZone || zone.name === selectedZone
+              );
+              if (zoneObj) setSelectedZoneObj(zoneObj);
+            }
+            if (districtsData.length > 0) {
+              setDistricts(districtsData);
+              if (selectedDistrict) {
+                const districtObj = districtsData.find(
+                  (d) => d.districtId === selectedDistrict || d.districtName === selectedDistrict
+                );
+                if (districtObj) setSelectedDistrictObj(districtObj);
+              }
+            }
+          } catch (error) {
+            console.error("Error loading dependents:", error);
+          } finally {
+            setLoading({ cities: false, zones: false, districts: false });
+          }
+        };
+        loadDependents();
+      }
+    }
+  }, [selectedCity, cities]);
   
+  // Cache to store the last fetched shipping cost for a city and order total
+  const lastCostRef = useRef({
+    cityId: "",
+    orderTotal: orderTotal,
+    cost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 }
+  });
+
   // Update parent component when selected location objects change
   useEffect(() => {
     const updateParent = async () => {
+      // Skip updating parent if we're still resolving initial props
+      if (loading.cities || loading.zones || loading.districts) return;
+
       if (selectedCityObj) {
-        const shippingCost = await calculateShippingCost(selectedCityObj, orderTotal);
+        let shippingCost = lastCostRef.current.cost;
+
+        // Only calculate if the city or order total has changed since the last calculation
+        if (
+          lastCostRef.current.cityId !== selectedCityObj._id ||
+          lastCostRef.current.orderTotal !== orderTotal
+        ) {
+          shippingCost = await calculateShippingCost(selectedCityObj, orderTotal);
+          lastCostRef.current = {
+            cityId: selectedCityObj._id,
+            orderTotal,
+            cost: shippingCost,
+          };
+        }
+
         onLocationChange({
           city: selectedCityObj,
           zone: selectedZoneObj,
@@ -109,9 +232,17 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
         });
       }
     };
-    
+
     updateParent();
-  }, [selectedCityObj, selectedZoneObj, selectedDistrictObj]);
+  }, [
+    selectedCityObj,
+    selectedZoneObj,
+    selectedDistrictObj,
+    orderTotal,
+    loading.cities,
+    loading.zones,
+    loading.districts,
+  ]);
 
   // Load zones when city changes
   const loadZones = async (cityId: string) => {
@@ -124,17 +255,6 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
     try {
       const zonesData = await bostaClientService.getZones(cityId);
       setZones(zonesData);
-
-      // If there's a pre-selected zone, find and set it
-      if (selectedZone) {
-        const zoneObj = zonesData.find(
-          (zone) => zone._id === selectedZone || zone.name === selectedZone
-        );
-        if (zoneObj) {
-          setSelectedZoneObj(zoneObj);
-          loadDistricts(cityId, zoneObj._id);
-        }
-      }
     } catch (error) {
       console.error("Error loading zones:", error);
     } finally {
@@ -154,18 +274,6 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
         zoneId
       );
       setDistricts(districtsData);
-
-      // If there's a pre-selected district, find and set it
-      if (selectedDistrict) {
-        const districtObj = districtsData.find(
-          (district) =>
-            district.districtId === selectedDistrict ||
-            district.districtName === selectedDistrict
-        );
-        if (districtObj) {
-          setSelectedDistrictObj(districtObj);
-        }
-      }
     } catch (error) {
       console.error("Error loading districts:", error);
     } finally {
@@ -174,7 +282,7 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
   };
 
   // Handle city selection
-  const handleCityChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const cityId = e.target.value;
     const cityObj = cities.find((city) => city._id === cityId) || null;
 
@@ -184,14 +292,6 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
 
     if (cityObj) {
       loadZones(cityId);
-      // Calculate shipping cost and notify parent
-      const shippingCost = await calculateShippingCost(cityObj, orderTotal);
-      onLocationChange({
-        city: cityObj,
-        zone: null,
-        district: null,
-        shippingCost,
-      });
     } else {
       setZones([]);
       setDistricts([]);
@@ -209,7 +309,7 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
   };
 
   // Handle zone selection
-  const handleZoneChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleZoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const zoneId = e.target.value;
     const zoneObj = zones.find((zone) => zone._id === zoneId) || null;
 
@@ -218,33 +318,13 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
 
     if (zoneObj && selectedCityObj) {
       loadDistricts(selectedCityObj._id, zoneId);
-      // Calculate shipping cost and notify parent
-      const shippingCost = await calculateShippingCost(
-        selectedCityObj,
-        orderTotal
-      );
-      onLocationChange({
-        city: selectedCityObj,
-        zone: zoneObj,
-        district: null,
-        shippingCost,
-      });
     } else {
       setDistricts([]);
-      const shippingCost = selectedCityObj
-        ? await calculateShippingCost(selectedCityObj, orderTotal)
-        : { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 };
-      onLocationChange({
-        city: selectedCityObj,
-        zone: null,
-        district: null,
-        shippingCost,
-      });
     }
   };
 
   // Handle district selection
-  const handleDistrictChange = async (
+  const handleDistrictChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const districtId = e.target.value;
@@ -252,16 +332,6 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
       districts.find((district) => district.districtId === districtId) || null;
 
     setSelectedDistrictObj(districtObj);
-
-    if (districtObj && selectedCityObj && selectedZoneObj) {
-      const cost = await calculateShippingCost(selectedCityObj, orderTotal);
-      onLocationChange({
-        city: selectedCityObj,
-        zone: selectedZoneObj,
-        district: districtObj,
-        shippingCost: cost,
-      });
-    }
   };
 
   return (

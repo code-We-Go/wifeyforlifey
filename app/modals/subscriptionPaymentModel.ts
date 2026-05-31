@@ -1,8 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { CartItemSchema } from "./cartItemSchema";
 
 // Subscription Payment schema mirrors Subscription fields + from/to/process
 const SubscriptionPaymentSchema = new Schema(
   {
+    cart: {
+      type: [CartItemSchema],
+      default: [],
+    },
     // Core payment and context
     paymentID: { type: String, required: true },
     email: { type: String, required: true },
@@ -47,6 +52,7 @@ const SubscriptionPaymentSchema = new Schema(
 
     // Gift information
     isGift: { type: Boolean, default: false },
+    giftSenderEmail: { type: String, required: false },
     giftRecipientEmail: { type: String, required: false },
     specialMessage: { type: String, required: false },
     giftCardName: { type: String, required: false },
@@ -69,6 +75,7 @@ const SubscriptionPaymentSchema = new Schema(
     billingPostalZip: { type: String, required: false },
     billingCity: { type: String, required: false },
     billingPhone: { type: String, required: false },
+    billingWhatsAppNumber: { type: String, required: false },
 
     // Payment information
     total: { type: Number, required: false },

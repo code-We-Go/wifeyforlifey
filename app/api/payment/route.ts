@@ -12,60 +12,12 @@ import BostaService, { BostaAddress } from "@/app/services/bostaService";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
+import { decreaseStock } from "@/app/utils/productUtils";
 
 const loadDB = async () => {
   console.log("hna");
   await ConnectDB();
 };
-
-
-async function decreaseStock(cart: any[]) {
-  // product(variants)=>variant (attribures)=>attribute
-  for (const item of cart) {
-    const product = await productsModel.findById(item.productId);
-    if (!product) {
-      console.log("note");
-      console.log(
-        `Product not found: ${item.productId}, but continuing execution`
-      );
-      continue; // Skip this item but continue processing other items
-    }
-    console.log("productFound");
-    // Find the variation with matching color
-    const variatiant = product.variations.find(
-      (v: any) => v.name === item.variant.name
-    );
-
-    if (!variatiant) {
-      console.log(
-        `Variant not found: ${item.variant.name}, but continuing execution`
-      );
-      continue; // Skip this item but continue processing other items
-    }
-    console.log("variantFound");
-    const attribute = variatiant.attributes.find(
-      (a: any) => a.name === item.attributes.name
-    );
-    console.log("attributesFound");
-
-    // Find the size within the variation
-
-    // Check if enough stock is available
-    if (attribute?.stock < item.quantity) {
-      console.log("stock problem");
-      console.log(
-        `Insufficient stock for ${item.productId}, but continuing execution`
-      );
-      continue; // Skip this item but continue processing other items
-    }
-
-    // Decrease stock
-    attribute.stock -= item.quantity;
-
-    // Save the updated product
-    await product.save();
-  }
-}
 
 export async function POST(request: Request) {
   await loadDB();
@@ -327,6 +279,7 @@ export async function POST(request: Request) {
           to: data.subscription,
           paymentMethod: "instapay",
           instapayReciept: data.instapayReciept,
+          cart: items,
           // Parity fields from subscription schema
           packageID: data.subscription,
           selectedDuration: data.selectedDuration,
@@ -384,6 +337,49 @@ export async function POST(request: Request) {
           productType: "subscription",
           referenceId: subPayment._id,
         });
+
+
+        // Send to admin about this subscription
+      await sendMail({
+        to: "orders@shopwifeyforlifey.com",
+        name: "NEW Pending Subscription Request",
+        subject: "NEW Pending Subscription Request",
+        body: `
+          <h2>New Subscription Notification</h2>
+          <p>A new subscription has been successfully created:</p>
+          <ul>
+            <li><strong>Email:</strong> ${subPayment.email}</li>
+            ${
+              subPayment.isGift
+                ? `<li><strong>Gift:</strong> Yes</li>
+            <li><strong>Gift Recipient Email:</strong> ${
+              subPayment.giftRecipientEmail || "N/A"
+            }</li>
+            <li><strong>Special Message:</strong> ${
+              subPayment.specialMessage || "N/A"
+            }</li>
+             <li><strong>Gift Card:</strong> ${
+               subPayment.giftCardName || "N/A"
+             }</li>`
+                : ""
+            }
+            <li><strong>Package:</strong> ${
+              (subPayment.packageID as any)?.name || "N/A"
+            }</li>
+            <li><strong>First Name:</strong> ${
+              subPayment.firstName || "N/A"
+            }</li>
+            <li><strong>Last Name:</strong> ${
+              subPayment.lastName || "N/A"
+            }</li>
+            <li><strong>Phone:</strong> ${subPayment.phone || "N/A"}</li>
+            <li><strong>Country:</strong> ${
+              subPayment.country || "N/A"
+            }</li>
+          </ul>
+        `,
+        from: "noreply@shopwifeyforlifey.com",
+      });
 
         return NextResponse.json(
           {
@@ -448,31 +444,7 @@ export async function POST(request: Request) {
         console.log("orderID" + res._id);
 
         // Send to customer
-        await sendMail({
-          to: data.email,
-          from: "noreply@shopwifeyforlifey.com",
-          name: "Order Confirmation",
-          subject: "Order Confirmation",
-          body: generateEmailBody(
-            items,
-            data.firstName,
-            data.lastName,
-            data.phone,
-            data.email,
-            data.total,
-            data.subTotal,
-            data.shipping,
-            data.currency,
-            data.address,
-            res._id,
-            data.cash,
-            data.country,
-            data.state,
-            data.city,
-            data.postalZip,
-            data.apartment
-          ),
-        });
+
 
         // Send to admin
         await sendMail({
@@ -596,6 +568,7 @@ export async function POST(request: Request) {
             from: fromPackageID,
             to: data.subscription,
             paymentMethod: data.paymentMethod,
+            cart: items,
             // Parity fields from subscription schema
             packageID: data.subscription,
             selectedDuration: data.selectedDuration,
@@ -610,6 +583,7 @@ export async function POST(request: Request) {
             whatsAppNumber: data.whatsAppNumber,
             // Gift information
             isGift: data.isGift,
+            giftSenderEmail: data.isGift ? data.email : undefined,
             giftRecipientEmail: data.giftRecipientEmail,
             specialMessage: data.specialMessage,
             giftCardName: data.giftCardName,
@@ -679,6 +653,7 @@ export async function POST(request: Request) {
             from: fromPackageID,
             to: data.subscription,
             paymentMethod: data.paymentMethod,
+            cart: items,
             // Parity fields from subscription schema
             packageID: data.subscription,
             selectedDuration: data.selectedDuration,
@@ -694,6 +669,7 @@ export async function POST(request: Request) {
             // Gift information
             isGift: data.isGift,
             giftRecipientEmail: data.giftRecipientEmail,
+            giftSenderEmail: data.isGift ? data.email : undefined,
             specialMessage: data.specialMessage,
             giftCardName: data.giftCardName,
             // Address information

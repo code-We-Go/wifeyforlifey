@@ -159,6 +159,15 @@ const InspoTab = () => {
     fetchSubsAndPackages();
   }, [session?.user?.email, sessionStatus]);
 
+  const hasMiniPackage = useMemo(() => {
+    return userSubs.some(
+      (sub) =>
+        sub.subscribed &&
+        extractId(sub.packageID?._id || sub.packageID) ===
+          "68bf6ae9c4d5c1af12cdcd37"
+    );
+  }, [userSubs]);
+
   const checkAccess = (boardId: string) => {
     if (!boardId) return true;
     if (sessionStatus !== "authenticated") return false;
@@ -762,7 +771,18 @@ const InspoTab = () => {
                   {pkgs.map((pkg) => (
                     <Button
                       key={pkg._id}
-                      onClick={() => router.push(`/subscription/${pkg._id}`)}
+                      onClick={() => {
+                        const pkgId = extractId(pkg._id);
+                        const isFullExperience =
+                          pkgId === "687396821b4da119eb1c13fe";
+                        router.push(
+                          `/subscription/${pkgId}${
+                            isFullExperience && hasMiniPackage
+                              ? "?upgrade=true"
+                              : ""
+                          }`
+                        );
+                      }}
                       className="bg-lovely text-white hover:bg-lovely/90 rounded-full px-6"
                     >
                       Subscribe to {pkg.name}
@@ -954,7 +974,14 @@ const InspoTab = () => {
                 <button
                   key={pkg._id}
                   onClick={() => {
-                    router.push(`/subscription/${pkg._id}`);
+                    const pkgId = extractId(pkg._id);
+                    const isFullExperience =
+                      pkgId === "687396821b4da119eb1c13fe";
+                    router.push(
+                      `/subscription/${pkgId}${
+                        isFullExperience && hasMiniPackage ? "?upgrade=true" : ""
+                      }`
+                    );
                     setIsLockModalOpen(false);
                   }}
                   className="w-full flex items-center hover:bg-pinkey cursor-pointer justify-between p-4 hover:text-lovely bg-pinkey/80  rounded-2xl border border-lovely/60 transition-all group"

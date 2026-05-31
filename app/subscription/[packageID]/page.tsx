@@ -31,6 +31,16 @@ import {
 } from "@/app/services/bostaLocationService";
 import DiscountSection from "../components/DiscountSection";
 import { CldUploadWidget } from "next-cloudinary";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ShoppingBag, Zap } from "lucide-react";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -195,7 +205,7 @@ const SubscriptionPage = () => {
     city: null,
     zone: null,
     district: null,
-    shippingCost: { priceBeforeVat: 70, priceAfterVat: 80, shippingFee: 70 },
+    shippingCost: { priceBeforeVat: 90, priceAfterVat: 90, shippingFee: 90 },
   });
   const [payment, setPayment] = useState<"card" | "cash" | "instapay">("card");
   const [redeemPoints, setRedeemPoints] = useState(0);
@@ -207,11 +217,15 @@ const SubscriptionPage = () => {
   const [variantPrice, setVariantPrice] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [isUpgrade, setIsUpgrade] = useState(false);
+  const [isRenew, setIsRenew] = useState(false);
   const [instapayReciept, setInstapayReciept] = useState("");
+  const [includeCartItems, setIncludeCartItems] = useState(true);
+  const [showCartBundleModal, setShowCartBundleModal] = useState(false);
 
   // Read upgrade price from query param and set override
   useEffect(() => {
     const upgradeParam = searchParams.get("upgrade");
+    const renewParam = searchParams.get("renew");
     const priceParam = searchParams.get("price");
     const durationParam = searchParams.get("duration");
 
@@ -224,6 +238,7 @@ const SubscriptionPage = () => {
 
     if (upgradeParam === "true") {
       setIsUpgrade(true);
+      setIsRenew(false);
       setShipping(0); // Free shipping on upgrade
       setFormData((prevData) => ({
         ...prevData,
@@ -241,11 +256,21 @@ const SubscriptionPage = () => {
         }
       };
       fetchUpgradeInfo();
+    } else if (renewParam === "true") {
+      setIsRenew(true);
+      setIsUpgrade(false);
+      setOverridePrice(null);
+      setShipping(0); // Free shipping on renewal
+      setFormData((prevData) => ({
+        ...prevData,
+        process: "renew",
+      }));
     } else {
       const parsed = upgradeParam ? Number(upgradeParam) : NaN;
       if (!Number.isNaN(parsed) && parsed > 0) {
         setOverridePrice(parsed);
         setIsUpgrade(true);
+        setIsRenew(false);
         setShipping(0); // Free shipping on upgrade
         setFormData((prevData) => ({
           ...prevData,
@@ -254,9 +279,12 @@ const SubscriptionPage = () => {
       } else {
         setOverridePrice(null);
         setIsUpgrade(false);
+        setIsRenew(false);
       }
     }
   }, [searchParams, packageID]);
+
+
 
   // Compute effective price used across calculations and UI
   const price = overridePrice ?? variantPrice ?? packageData?.price ?? 0;
@@ -282,8 +310,6 @@ const SubscriptionPage = () => {
 
   Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
-  //for later
-      // "68bf6ae9c4d5c1af12cdcd37": {
       "68bf6ae9c4d5c1af12cdcd37": {
         header: "This is a pre-order",
         content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
@@ -307,6 +333,16 @@ We’re beyond excited to share this experience with you… your planner will be
     totalPrice,
     clearCart,
   } = useCart();
+
+  // Show bundling modal on entry if cart has items
+  useEffect(() => {
+    if (items.length > 0) {
+      const timer = setTimeout(() => {
+        setShowCartBundleModal(true);
+      }, 1000); // 1 second delay for better UX
+      return () => clearTimeout(timer);
+    }
+  }, [items.length]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [summary, setSummary] = useState(false);
@@ -319,6 +355,49 @@ We’re beyond excited to share this experience with you… your planner will be
     { name: string; shipping_zone: string }[]
   >([]);
   const [useSameAsShipping, setUseSameAsShipping] = useState(true);
+  const [saveShippingData, setSaveShippingData] = useState(false);
+
+  useEffect(() => {
+    if (user?.shippingData && isAuthenticated) {
+      const sd = user.shippingData;
+      setFormData((prev) => ({
+        ...prev,
+        email: sd.email || prev.email,
+        firstName: sd.firstName || prev.firstName,
+        lastName: sd.lastName || prev.lastName,
+        address: sd.address || prev.address,
+        apartment: sd.apartment || prev.apartment,
+        phone: sd.phone || prev.phone,
+        whatsAppNumber: sd.whatsAppNumber || prev.whatsAppNumber,
+        state: sd.bostaCity || prev.state,
+        bostaCity: sd.bostaCity || "",
+        bostaCityName: sd.bostaCityName || "",
+        bostaZone: sd.bostaZone || "",
+        bostaZoneName: sd.bostaZoneName || "",
+        bostaDistrict: sd.bostaDistrict || "",
+        bostaDistrictName: sd.bostaDistrictName || "",
+      }));
+      if (sd.bostaCity) {
+        setState(sd.bostaCity);
+        setBostaLocation((prev) => ({
+          ...prev,
+          city: sd.bostaCity
+            ? ({ _id: sd.bostaCity, name: sd.bostaCityName || "" } as any)
+            : null,
+          zone: sd.bostaZone
+            ? ({ _id: sd.bostaZone, name: sd.bostaZoneName || "" } as any)
+            : null,
+          district: sd.bostaDistrict
+            ? ({
+                districtId: sd.bostaDistrict,
+                districtName: sd.bostaDistrictName || "",
+              } as any)
+            : null,
+        }));
+      }
+    }
+  }, [user, isAuthenticated]);
+
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // const [state,setState]=useState(states.length>0?states[0].name:'')
@@ -352,9 +431,9 @@ We’re beyond excited to share this experience with you… your planner will be
       total: total,
       shipping: shipping,
       subTotal: subTotal,
-      cart: items,
+      cart: includeCartItems ? items : [],
     }));
-  }, [items]);
+  }, [items, includeCartItems]);
   useEffect(() => {
     const countryName = countries.find((countryy) => countryy.id === countryID);
 
@@ -429,7 +508,7 @@ We’re beyond excited to share this experience with you… your planner will be
     apartment: "",
     postalZip: "0000",
     city: "",
-    cart: items,
+    cart: includeCartItems ? items : [],
     phone: "",
     whatsAppNumber: "", // Added WhatsApp number field
     subscription: packageID,
@@ -576,7 +655,7 @@ We’re beyond excited to share this experience with you… your planner will be
               setShipping(0);
             }
           } else {
-            setShipping(80);
+            setShipping(90);
           }
         }
       }
@@ -745,12 +824,15 @@ We’re beyond excited to share this experience with you… your planner will be
       <OrderSummaryItem cartItem={cartItem} key={index} />
     ));
   };
-  const handleUpgradeSubmit = async (e: React.FormEvent) => {
+  const handleSimplifiedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     let errors: any = {};
     if (!user?.email || !/\S+@\S+\.\S+/.test(user.email)) {
       errors.email = "Please enter a valid email address.";
+    }
+    if (isRenew && !selectedDuration) {
+      errors.duration = "Please select a renewal option.";
     }
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
@@ -786,6 +868,33 @@ We’re beyond excited to share this experience with you… your planner will be
 
     try {
       const res = await axios.post("/api/payment/", payload);
+      
+      // Save shipping data if requested
+      if (saveShippingData && isAuthenticated && user?.email) {
+        try {
+          await axios.put("/api/user/profile", {
+            email: user.email,
+            shippingData: {
+              email: formData.email,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              address: formData.address,
+              apartment: formData.apartment,
+              phone: formData.phone,
+              whatsAppNumber: formData.whatsAppNumber,
+              bostaCity: formData.bostaCity,
+              bostaCityName: formData.bostaCityName,
+              bostaZone: formData.bostaZone,
+              bostaZoneName: formData.bostaZoneName,
+              bostaDistrict: formData.bostaDistrict,
+              bostaDistrictName: formData.bostaDistrictName,
+            },
+          });
+        } catch (err) {
+          console.error("Failed to save shipping data:", err);
+        }
+      }
+
       console.log(res.data.token);
       setLoading(false);
 
@@ -872,6 +981,9 @@ We’re beyond excited to share this experience with you… your planner will be
         setLoading(false);
 
         if (res.data.success) {
+          // Clear cart if items were included
+          if (includeCartItems) clearCart();
+          
           // Redirect to instapay success page with instructions
           const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201007728799";
           router.push(
@@ -910,6 +1022,33 @@ We’re beyond excited to share this experience with you… your planner will be
     };
 
     const res = await axios.post("/api/payment/", payload);
+    
+    // Save shipping data if requested
+    if (saveShippingData && isAuthenticated && user?.email) {
+      try {
+        await axios.put("/api/user/profile", {
+          email: user.email,
+          shippingData: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            apartment: formData.apartment,
+            phone: formData.phone,
+            whatsAppNumber: formData.whatsAppNumber,
+            bostaCity: formData.bostaCity,
+            bostaCityName: formData.bostaCityName,
+            bostaZone: formData.bostaZone,
+            bostaZoneName: formData.bostaZoneName,
+            bostaDistrict: formData.bostaDistrict,
+            bostaDistrictName: formData.bostaDistrictName,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to save shipping data:", err);
+      }
+    }
+
     console.log(res.data.token);
     setLoading(false);
 
@@ -917,10 +1056,11 @@ We’re beyond excited to share this experience with you… your planner will be
       // const paymobIframeURL = `https://accept.paymob.com/api/acceptance/iframes/890332?payment_token=${res.data.token}`;
       const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
 
+      if (includeCartItems) clearCart();
       router.push(paymobIframeURL);
     } else {
       if (res.data.token === "wiig") {
-        clearCart();
+        if (includeCartItems) clearCart();
         router.replace("/payment/success");
       }
     }
@@ -965,10 +1105,23 @@ We’re beyond excited to share this experience with you… your planner will be
     }
   }, [packageData, packageID]);
 
+  useEffect(() => {
+    if (isRenew && packageData?.renewals && packageData.renewals.length > 0 && !selectedDuration) {
+      setVariantPrice(packageData.renewals[0].price);
+      setSelectedDuration(packageData.renewals[0].duration);
+    }
+  }, [isRenew, packageData]);
+
+  const handleBundleResponse = (include: boolean) => {
+    setIncludeCartItems(include);
+    setShowCartBundleModal(false);
+  };
+
   // Fix total calculation to always consider discount and loyalty after shipping/state changes
   useEffect(() => {
     // Calculate subtotal
-    const calculatedSubTotal = price;
+    const cartTotal = (includeCartItems && items) ? items.reduce((acc, item) => acc + (item.price * item.quantity), 0) : 0;
+    const calculatedSubTotal = price + cartTotal;
     setSubTotal(calculatedSubTotal);
 
     // Calculate discount amount
@@ -1032,7 +1185,9 @@ We’re beyond excited to share this experience with you… your planner will be
     subTotal,
     formData.giftCardName,
     price,
-    overridePrice
+    overridePrice,
+    includeCartItems,
+    items
   ]);
 
   if (loadingPackage) {
@@ -1063,22 +1218,53 @@ We’re beyond excited to share this experience with you… your planner will be
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
         <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-5/7 text-[12px] lg:text-lg gap-6 text-nowrap">
-          {isUpgrade ? (
+          {isUpgrade || isRenew ? (
             <form
-              onSubmit={handleUpgradeSubmit}
+              onSubmit={handleSimplifiedSubmit}
               className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2 border-lovely text-nowrap"
             >
               <div
                 className={`${thirdFont.className} w-full text-base lg:text-2xl border-b border-lovely`}
               >
-                Upgrade Subscription
+                {isUpgrade ? "Upgrade Subscription" : "Renew Subscription"}
               </div>
+
+              {isRenew && packageData?.renewals && packageData.renewals.length > 0 && (
+                <div className="flex flex-col gap-3 w-full mt-4 mb-4">
+                  <label className="text-lovely text-lg font-semibold">Select Renewal Option:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                    {packageData.renewals.map((option, idx) => (
+                      <div 
+                        key={idx}
+                        onClick={() => {
+                          setVariantPrice(option.price);
+                          setSelectedDuration(option.duration);
+                        }}
+                        className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${
+                          selectedDuration === option.duration && variantPrice === option.price
+                            ? "border-lovely bg-lovely/10 shadow-md"
+                            : "border-pinkey hover:border-lovely/50 bg-creamey"
+                        }`}
+                      >
+                        <span className="text-lovely font-bold text-lg">{option.duration} Months</span>
+                        <span className="text-lovely text-base">{option.price} LE</span>
+                      </div>
+                    ))}
+                  </div>
+                  {formErrors.duration && (
+                    <p className="uppercase text-xs text-red-500">
+                      Please select a renewal option
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex items-center gap-2 w-full">
                 <label className="text-lovely text-base">Email</label>
                 <div className="flex w-full gap-1 flex-col">
                   <input
                     onChange={handleInputChange}
                     name="email"
+                    disabled={isRenew || isUpgrade}
                     value={formData.email || user?.email || ""}
                     type="email"
                     className={`border ${
@@ -1181,6 +1367,8 @@ We’re beyond excited to share this experience with you… your planner will be
                 I&apos;m buying this as a gift 💖
               </label>
             </div>
+
+
 
             {isGift && (
               <>
@@ -1431,7 +1619,7 @@ We’re beyond excited to share this experience with you… your planner will be
               delivery
             </div>
 
-            <div className="flex gap-2 items-center text-base w-full">
+            {/* <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -1460,7 +1648,7 @@ We’re beyond excited to share this experience with you… your planner will be
                   <option value="SA">SAUDI ARABIA</option>
                 </select>
               )}
-            </div>
+            </div> */}
             <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
@@ -1550,7 +1738,7 @@ We’re beyond excited to share this experience with you… your planner will be
                 className="border w-full h-10 bg-creamey border-pinkey  rounded-2xl py-2 px-2 text-base"
               />
             </div>
-            <div className="flex flex-col sm:flex-row w-full gap-2">
+            {/* <div className="flex flex-col sm:flex-row w-full gap-2"> */}
               {/* <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
@@ -1578,7 +1766,7 @@ We’re beyond excited to share this experience with you… your planner will be
                 </div>
               </div> */}
 
-              <div className="flex flex-col w-full   gap-2 ">
+              {/* <div className="flex flex-col w-full   gap-2 ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
                     City
@@ -1602,8 +1790,8 @@ We’re beyond excited to share this experience with you… your planner will be
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
@@ -1651,29 +1839,31 @@ We’re beyond excited to share this experience with you… your planner will be
                 )}
               </div>
             </div>
-            <div className="flex w-full gap-2 items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                Bride&apos;s WhatsApp Number
-              </label>
-              <div className="flex w-full gap-1 flex-col">
-                <input
-                  onChange={handleInputChange}
-                  type="text"
-                  value={formData.whatsAppNumber}
-                  name="whatsAppNumber"
-                  className={`border ${
-                    formErrors.whatsAppNumber ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
-                />
-                {formErrors.whatsAppNumber ? (
-                  <p className="uppercase text-xs text-red-500">
-                    {formErrors.whatsAppNumber}
-                  </p>
-                ) : (
-                  ""
-                )}
+            {isGift && (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  Bride&apos;s WhatsApp Number
+                </label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={formData.whatsAppNumber}
+                    name="whatsAppNumber"
+                    className={`border ${
+                      formErrors.whatsAppNumber ? "border-red-500" : ""
+                    } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                  />
+                  {formErrors.whatsAppNumber ? (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.whatsAppNumber}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                </div>
               </div>
-            </div>
+            )}
             <div className="flex items-center gap-1 text-xs text-lovely/80">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1866,7 +2056,7 @@ We’re beyond excited to share this experience with you… your planner will be
                   padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
                 }}
               >
-                <div className="flex gap-2 w-full">
+                {/* <div className="flex gap-2 w-full">
                   <p>Country</p>
                   {countries ? (
                     <select
@@ -1895,9 +2085,9 @@ We’re beyond excited to share this experience with you… your planner will be
                     >
                       {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
-                    </select>
+                    {/* </select>
                   )}
-                </div>
+                </div> */}
                 <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
                   <div className="flex gap-2 w-full md:w-2/4">
                     <label className="text-lovely">First Name</label>
@@ -2093,6 +2283,20 @@ We’re beyond excited to share this experience with you… your planner will be
                 </Link>
               </span>
             </div>
+                        {isAuthenticated && (
+              <div className="flex items-center gap-2 w-full mt-1 mb-1">
+                <input
+                  type="checkbox"
+                  id="saveShippingData"
+                  checked={saveShippingData}
+                  onChange={(e) => setSaveShippingData(e.target.checked)}
+                  className="w-4 h-4 accent-lovely"
+                />
+                <label htmlFor="saveShippingData" className="text-lovely text-base cursor-pointer">
+                  Save my data for next time
+                </label>
+              </div>
+            )}
             <div className="flex justify-end">
               <button
                 disabled={loading || !acceptedTerms}
@@ -2187,6 +2391,28 @@ We’re beyond excited to share this experience with you… your planner will be
               showTooltip={showTooltip}
               setShowTooltip={setShowTooltip}
             />
+            {items.length > 0 && (
+              <div className="mt-6 border-t border-lovely/30 pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className={`${thirdFont.className} text-lg font-medium text-lovely`}>Include Cart Products?</h3>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={includeCartItems}
+                      onChange={() => setIncludeCartItems(!includeCartItems)}
+                    />
+                    <div className="w-11 h-6 bg-pinkey/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-creamey after:border-pinkey after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lovely"></div>
+                  </label>
+                </div>
+                <p className="text-xs mb-4 text-lovely/60">Bundle your shopping cart items into this subscription order for a single shipment.</p>
+                {includeCartItems && (
+                  <div className="space-y-3 mb-4 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar border-b border-lovely/10 pb-4">
+                    {cartItems()}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="mt-6 space-y-2 text-lovely">
               <div className="flex justify-between text-base">
                 <span>Subtotal</span>
@@ -2217,7 +2443,7 @@ We’re beyond excited to share this experience with you… your planner will be
                       {(() => {
                         // Show the shipping cost that would have been charged
                         if (countryID === 65 && bostaLocation.city) {
-                          return bostaLocation.shippingCost?.shippingFee || 70;
+                          return bostaLocation.shippingCost?.shippingFee || 90;
                         } else {
                           const realShipping = calculateShippingRate(
                             countryID,
@@ -2293,6 +2519,67 @@ We’re beyond excited to share this experience with you… your planner will be
           </div>
         </div>
       )}
+      {/* Cart Bundling Modal */}
+      <Dialog open={showCartBundleModal} onOpenChange={setShowCartBundleModal}>
+        <DialogContent className="sm:max-w-md bg-creamey border-lovely/20 shadow-2xl rounded-3xl p-0 overflow-hidden">
+          {/* <div className="relative h-32 bg-lovely flex items-center justify-center">
+            <div className="absolute top-0 right-0 p-4 opacity-20">
+              <ShoppingBag className="w-24 h-24 text-creamey" />
+            </div>
+            <div className="z-10 bg-creamey/10 backdrop-blur-md p-4 rounded-full border border-creamey/20">
+              <Zap className="w-8 h-8 text-creamey animate-pulse" />
+            </div>
+          </div> */}
+          
+          <div className="p-6 text-center">
+            <DialogHeader className="mb-4">
+              <DialogTitle className={`${thirdFont.className} text-2xl text-lovely text-center`}>
+                Save on Shipping! 💗
+              </DialogTitle>
+              <DialogDescription className="text-lovely/70 text-center text-base pt-2">
+                We noticed you have items in your cart. Would you like to add them to this order and receive them in <span className="font-bold text-lovely">one shipment</span>?
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="bg-pinkey/10 rounded-2xl p-4 mb-6 border border-pinkey/20">
+              <p className="text-sm text-lovely font-medium mb-2">Items to bundle:</p>
+              <div className="flex -space-x-3 justify-center overflow-hidden py-2">
+                {items.slice(0, 5).map((item, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-full border-2 border-creamey overflow-hidden shadow-sm">
+                      <Image src={item.imageUrl} alt={item.productName} fill className="object-cover" />
+                    </div>
+                    <span className="text-[10px] md:text-xs text-lovely mt-2 font-medium max-w-[80px] md:max-w-[120px] truncate text-center">
+                      {item.productName}
+                    </span>
+                  </div>
+                ))}
+                {items.length > 5 && (
+                  <div className="w-12 h-12 rounded-full bg-lovely text-creamey flex items-center justify-center text-xs font-bold border-2 border-creamey shadow-sm">
+                    +{items.length - 5}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-2">
+              <Button 
+                onClick={() => handleBundleResponse(true)}
+                className="w-full rounded-full bg-lovely text-creamey hover:bg-lovely/90 h-12 text-base font-semibold shadow-lg shadow-lovely/20 transition-all active:scale-95"
+              >
+                Yes, Bundle & Save!
+              </Button>
+              <Button 
+                variant="ghost"
+                onClick={() => handleBundleResponse(false)}
+                className="w-full rounded-full text-lovely/60 hover:text-lovely hover:bg-transparent h-12 text-sm"
+              >
+                No thanks, keep separate
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

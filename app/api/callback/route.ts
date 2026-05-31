@@ -13,6 +13,7 @@ import BostaService from "@/app/services/bostaService";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
+import { decreaseStock } from "@/app/utils/productUtils";
 
 // ─── Database Connection ─────────────────────────────────────────────
 const loadDB = async () => {
@@ -245,6 +246,7 @@ async function handleSubscription(
   console.log("paymentOp.email:", paymentOp.email);
 
   const isUpgradeProcess = paymentOp?.process === "upgrade";
+  const isRenewProcess = paymentOp?.process === "renew";
 
   // Compute expiry for subscription based on package duration
   const expiryDate = new Date();
@@ -282,6 +284,7 @@ async function handleSubscription(
     expiryDate,
     status: "confirmed",
     process: paymentOp.process,
+    cart: paymentOp.cart || [],
     redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,
     appliedDiscount: paymentOp.appliedDiscount,
     appliedDiscountAmount: paymentOp.appliedDiscountAmount,
@@ -292,6 +295,7 @@ async function handleSubscription(
     whatsAppNumber: paymentOp.whatsAppNumber,
     // Gift info
     isGift: paymentOp.isGift,
+    giftSenderEmail: paymentOp.isGift ? paymentOp.email : undefined,
     giftRecipientEmail: paymentOp.giftRecipientEmail,
     specialMessage: paymentOp.specialMessage,
     giftCardName: paymentOp.giftCardName,
@@ -345,6 +349,12 @@ async function handleSubscription(
     }
   );
 
+  // Decrease stock for cart items if included in the subscription
+  if (paymentOp.cart && paymentOp.cart.length > 0) {
+    console.log("Decreasing stock for cart items in subscription:", paymentOp.cart.length);
+    await decreaseStock(paymentOp.cart);
+  }
+
   // Ensure package is populated for downstream logic
   if (updatedSub?._id) {
     updatedSub = await subscriptionsModel.findById(updatedSub._id).populate({
@@ -394,9 +404,9 @@ async function handleSubscription(
     });
   }
 
-  // Bosta integration (skip for upgrade)
+  // Bosta integration (skip for upgrade or renew)
   try {
-    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess) {
+    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess && !isRenewProcess) {
       const bostaService = new BostaService();
       const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
       const deliveryPayload = bostaService.createDeliveryPayload(
@@ -421,9 +431,9 @@ async function handleSubscription(
       } else {
         console.error("Failed to create Bosta delivery:", bostaResult.error);
       }
-    } else if (isUpgradeProcess) {
+    } else if (isUpgradeProcess || isRenewProcess) {
       console.log(
-        "Skipping Bosta delivery for upgrade process:",
+        `Skipping Bosta delivery for ${paymentOp.process} process:`,
         updatedSub?._id
       );
     }
@@ -434,21 +444,27 @@ async function handleSubscription(
   // Send email notifications
   try {
     if (updatedSub) {
-      await sendMail({
-        to: "orders@shopwifeyforlifey.com",
-        name: "NEW BESTIEEE",
-        subject: "NEW BESTIEEEE",
-        body: `
+      // Admin notification (skip for upgrade or renew)
+      if (!isUpgradeProcess && !isRenewProcess) {
+        await sendMail({
+          to: "orders@shopwifeyforlifey.com",
+          name: "NEW BESTIEEE",
+          subject: "NEW BESTIEEEE",
+          body: `
           <h2>New Subscription Notification</h2>
           <p>A new subscription has been successfully created:</p>
           <ul>
-            <li><strong>Email:</strong> ${updatedSub.email}</li>
+            <li><strong>Email:</strong> ${paymentOp.email}</li>
             ${
               updatedSub.isGift
                 ? `<li><strong>Gift:</strong> Yes</li>
-            <li><strong>Gift Recipient Email:</strong> ${
-              updatedSub.giftRecipientEmail || "N/A"
-            }</li>
+                <li><strong>Gift Recipient Email:</strong> ${
+                  updatedSub.giftRecipientEmail || "N/A"
+                }</li>
+                <li><strong>Gift Sender Email:</strong> ${
+                  updatedSub.giftSenderEmail || "N/A"
+                }</li>
+                
             <li><strong>Special Message:</strong> ${
               updatedSub.specialMessage || "N/A"
             }</li>
@@ -470,21 +486,44 @@ async function handleSubscription(
             <li><strong>Country:</strong> ${
               updatedSub.country || "N/A"
             }</li>
+            ${
+              updatedSub.cart && updatedSub.cart.length > 0
+                ? `<li><strong>Bundled Cart Items:</strong>
+                    <ul>
+                      ${updatedSub.cart
+                        .map(
+                          (item: any) =>
+                            `<li>${item.productName} x ${item.quantity} ${
+                              item.variant
+                                ? `(${item.variant.name}${
+                                    item.attributes?.name
+                                      ? `: ${item.attributes.name}`
+                                      : ""
+                                  })`
+                                : ""
+                            }</li>`
+                        )
+                        .join("")}
+                    </ul>
+                   </li>`
+                : ""
+            }
           </ul>
         `,
         from: "noreply@shopwifeyforlifey.com",
-      });
-      console.log("Subscription notification email sent successfully");
+        });
+        console.log("Subscription notification email sent successfully");
+      }
 
       // Gift flow
       if (updatedSub.isGift) {
         const { giftMail } = await import("@/utils/giftMail");
         const firstName = updatedSub.firstName || "Wifey";
         await sendMail({
-          to: updatedSub.email,
+          to: paymentOp.email,
           name: firstName,
           subject: "Thank You for Your Gift Purchase! 🎁",
-          body: giftMail(updatedSub._id.toString()),
+          body: giftMail(updatedSub._id.toString(), updatedSub.cart),
           from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
         });
         console.log("Gift email sent successfully to", updatedSub.email);
@@ -595,14 +634,14 @@ async function handleSubscription(
       success: true,
       redirect: `payment/success?subscription=mini${
         subscribedUser ? "&account=true" : ""
-      }`,
+      }&process=${paymentOp.process}`,
     };
   }
   return {
     success: true,
     redirect: `payment/success?subscription=true${
       subscribedUser ? "&account=true" : ""
-    }`,
+    }&process=${paymentOp.process}`,
   };
 }
 
@@ -720,7 +759,7 @@ async function handleOrder(
       to: res.email,
       name: res.firstName,
       subject: "Thank You for Your Gift Purchase! 🎁",
-      body: giftMail(res._id.toString()),
+      body: giftMail(res._id.toString(), res.cart),
       from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
     });
   }

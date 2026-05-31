@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 console.log(giftSenderEmail)
-    const subscription = await subscriptionsModel.findOne({ email: giftSenderEmail });
+    const subscription = await subscriptionsModel.findOne({ giftSenderEmail: giftSenderEmail  });
     console.log("SubscriptionCheck:", subscription);
     
     if (!subscription) {
@@ -34,7 +34,7 @@ console.log(giftSenderEmail)
     }
 
     // Verify the gift sender email matches the subscription email
-    if ((subscription as any).email?.toLowerCase() !== giftSenderEmail.toLowerCase()) {
+    if ((subscription as any).giftSenderEmail?.toLowerCase() !== giftSenderEmail.toLowerCase()) {
       return NextResponse.json(
         { error: "Gift sender email does not match" },
         { status: 403 }

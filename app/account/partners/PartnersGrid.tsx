@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import PartnerCard from "./PartnerCard";
 import PartnerCardSkeleton from "./PartnerCardSkeleton";
 import { thirdFont } from "@/fonts";
@@ -156,6 +156,14 @@ export default function PartnersGrid() {
     });
   };
 
+    const hasMiniPackage = useMemo(() => {
+      return userSubs.some(
+        (sub) =>
+          sub.subscribed &&
+          extractId(sub.packageID?._id || sub.packageID) ===
+            "68bf6ae9c4d5c1af12cdcd37"
+      );
+    }, [userSubs]);
   const handleLockedPartnerClick = (partnerId: string) => {
     const pkgs = getRequiredPackages(partnerId);
     setLockedPartnerPackages(pkgs);
@@ -316,7 +324,14 @@ export default function PartnersGrid() {
                 <button
                   key={pkg._id}
                   onClick={() => {
-                    router.push(`/subscription/${pkg._id}`);
+                    const pkgId = extractId(pkg._id);
+                    const isFullExperience =
+                      pkgId === "687396821b4da119eb1c13fe";
+                    router.push(
+                      `/subscription/${pkgId}${
+                        isFullExperience && hasMiniPackage ? "?upgrade=true" : ""
+                      }`
+                    );
                     setIsLockModalOpen(false);
                   }}
                   className="w-full flex items-center hover:bg-pinkey cursor-pointer justify-between p-4 hover:text-lovely bg-pinkey/80  rounded-2xl border border-lovely/60 transition-all group"

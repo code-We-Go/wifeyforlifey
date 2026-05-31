@@ -221,7 +221,7 @@ const CheckoutClientPage = () => {
     });
   };
   type Payment = "cash" | "card" | "instapay";
-  const { user } = useContext(userContext);
+  const { user } = useAuth();
   const [shipping, setShipping] = useState(90);
   const [bostaLocation, setBostaLocation] = useState<{
     city: BostaCity | null;
@@ -378,6 +378,49 @@ const CheckoutClientPage = () => {
       country: countryName ? countryName.name : "",
     }));
   }, [total, countryID, countries]);
+  const [saveShippingData, setSaveShippingData] = useState(false);
+
+  useEffect(() => {
+    if (user?.shippingData && isAuthenticated) {
+      const sd = user.shippingData;
+      setFormData((prev) => ({
+        ...prev,
+        email: sd.email || prev.email,
+        firstName: sd.firstName || prev.firstName,
+        lastName: sd.lastName || prev.lastName,
+        address: sd.address || prev.address,
+        apartment: sd.apartment || prev.apartment,
+        phone: sd.phone || prev.phone,
+        whatsAppNumber: sd.whatsAppNumber || prev.whatsAppNumber,
+        state: sd.bostaCity || prev.state,
+        bostaCity: sd.bostaCity || "",
+        bostaCityName: sd.bostaCityName || "",
+        bostaZone: sd.bostaZone || "",
+        bostaZoneName: sd.bostaZoneName || "",
+        bostaDistrict: sd.bostaDistrict || "",
+        bostaDistrictName: sd.bostaDistrictName || "",
+      }));
+      if (sd.bostaCity) {
+        setState(sd.bostaCity);
+        setBostaLocation((prev) => ({
+          ...prev,
+          city: sd.bostaCity
+            ? ({ _id: sd.bostaCity, name: sd.bostaCityName || "" } as any)
+            : null,
+          zone: sd.bostaZone
+            ? ({ _id: sd.bostaZone, name: sd.bostaZoneName || "" } as any)
+            : null,
+          district: sd.bostaDistrict
+            ? ({
+                districtId: sd.bostaDistrict,
+                districtName: sd.bostaDistrictName || "",
+              } as any)
+            : null,
+        }));
+      }
+    }
+  }, [user, isAuthenticated]);
+
   const [formData, setFormData] = useState({
     email: "",
     country: "",
@@ -385,7 +428,7 @@ const CheckoutClientPage = () => {
     lastName: "",
     address: "",
     apartment: "",
-    postalZip: "",
+    postalZip: "00000",
     city: "",
     appliedDiscount: "",
     appliedDiscountAmount: 0,
@@ -413,9 +456,17 @@ const CheckoutClientPage = () => {
     billingState: useSameAsShipping ? state : billingState,
     billingAddress: "",
     billingApartment: "",
-    billingPostalZip: "",
+    billingPostalZip: "00000",
     billingCity: "",
     billingPhone: "",
+    billingWhatsAppNumber: "",
+    whatsAppNumber: "",
+    bostaCity: "",
+    bostaCityName: "",
+    bostaZone: "",
+    bostaZoneName: "",
+    bostaDistrict: "",
+    bostaDistrictName: "",
     subTotal: subTotal,
     // currency:country===65?'LE':'USD'
     currency: "LE",
@@ -760,6 +811,33 @@ const CheckoutClientPage = () => {
     }
 
     const res = await axios.post("/api/payment/", orderPayload);
+    
+    // Save shipping data if requested
+    if (saveShippingData && isAuthenticated && user?.email) {
+      try {
+        await axios.put("/api/user/profile", {
+          email: user.email,
+          shippingData: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            apartment: formData.apartment,
+            phone: formData.phone,
+            whatsAppNumber: formData.whatsAppNumber,
+            bostaCity: formData.bostaCity,
+            bostaCityName: formData.bostaCityName,
+            bostaZone: formData.bostaZone,
+            bostaZoneName: formData.bostaZoneName,
+            bostaDistrict: formData.bostaDistrict,
+            bostaDistrictName: formData.bostaDistrictName,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to save shipping data:", err);
+      }
+    }
+
     console.log(res.data.token);
     setLoading(false);
 
@@ -838,6 +916,8 @@ const CheckoutClientPage = () => {
                 )}
               </div>
             </div>
+
+
 
             <div className="flex items-center gap-2 w-full mt-2">
               <input
@@ -990,7 +1070,7 @@ const CheckoutClientPage = () => {
               delivery
             </div>
 
-            <div className="flex gap-2 items-center text-base w-full">
+            {/* <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -1019,7 +1099,7 @@ const CheckoutClientPage = () => {
                   <option value="SA">SAUDI ARABIA</option>
                 </select>
               )}
-            </div>
+            </div> */}
             <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
@@ -1109,7 +1189,7 @@ const CheckoutClientPage = () => {
                 className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
               />
             </div>
-            <div className="flex flex-col sm:flex-row w-full gap-2">
+            {/* <div className="flex flex-col sm:flex-row w-full gap-2">
               <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
@@ -1162,7 +1242,7 @@ const CheckoutClientPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
@@ -1209,6 +1289,32 @@ const CheckoutClientPage = () => {
                 )}
               </div>
             </div>
+
+            {isGift && (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  WhatsApp Number
+                </label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={formData.whatsAppNumber}
+                    name="whatsAppNumber"
+                    className={`border ${
+                      formErrors.whatsAppNumber ? "border-red-500" : ""
+                    } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                  />
+                  {formErrors.whatsAppNumber ? (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.whatsAppNumber}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-col items-start w-full text-[12px] lg:text-base gap-2 text-nowrap">
               <div
@@ -1556,6 +1662,20 @@ const CheckoutClientPage = () => {
                     className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
                   />
                 </div>
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-lovely">WhatsApp Number</label>
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={
+                      useSameAsShipping
+                        ? formData.whatsAppNumber
+                        : formData.billingWhatsAppNumber
+                    }
+                    name="billingWhatsAppNumber"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
               </div>
             </div>
             {/* <div className='flex pb-5 justify-between'>
@@ -1570,6 +1690,20 @@ const CheckoutClientPage = () => {
              <p className='text-[12px] mt-6 lg:text-base'>{total} LE</p>
            </div>
          </div> */}
+                     {isAuthenticated && (
+              <div className="flex items-center gap-2 w-full mb-2">
+                <input
+                  type="checkbox"
+                  id="saveShippingData"
+                  checked={saveShippingData}
+                  onChange={(e) => setSaveShippingData(e.target.checked)}
+                  className="w-4 h-4 accent-lovely"
+                />
+                <label htmlFor="saveShippingData" className="text-lovely text-sm cursor-pointer">
+                  Save my data for next time
+                </label>
+              </div>
+            )}
             {payment === "cash" || "instapay" ? (
               <div className={`flex justify-end`}>
                 <button

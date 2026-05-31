@@ -828,6 +828,35 @@ const AccountPage = () => {
                 </Button>
               </Link>
             )}
+            
+            {/* Full Experience Renew */}
+            {user.subscription?.packageId === "687396821b4da119eb1c13fe" && !user.isSubscribed && 
+              subscriptionDoc?.packageID?._id === "687396821b4da119eb1c13fe" && 
+              subscriptionDoc?.packageID?.renewals?.length > 0 && (
+              <Link href={`/subscription/687396821b4da119eb1c13fe?renew=true`}>
+                <Button
+                  size="sm"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                >
+                  Renew your Full Wifey Experience
+                </Button>
+              </Link>
+            )}
+
+            {/* Wedding Planning Bestie Renew */}
+            {user.weddingPlanningBestie && !user.weddingPlanningBestie.isSubscribed && 
+              subscriptionDoc?.packageID?._id === "6965e63c6df4503dda02c12b" && 
+              subscriptionDoc?.packageID?.renewals?.length > 0 && (
+              <Link href={`/subscription/6965e63c6df4503dda02c12b?renew=true`}>
+                <Button
+                  size="sm"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                >
+                  Renew your Wedding Planning Bestie
+                </Button>
+              </Link>
+            )}
+
             {(subscriptionDoc?.packageID?._id ||
               subscriptionDoc?.packageID ||
               session?.user?.subscription?.packageId) ===

@@ -1,8 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { CartItemSchema } from "./cartItemSchema";
 
 // Define the Subscription schema with TTL
 const SubscriptionSchema = new Schema(
   {
+    cart: {
+      type: [CartItemSchema],
+      default: [],
+    },
     paymentID: {
       type: String,
       required: true,
@@ -10,6 +15,11 @@ const SubscriptionSchema = new Schema(
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" },
     selectedDuration: { type: Number, required: false },
     email: { type: String },
+    process: {
+      type: String,
+      enum: ["upgrade", "renew", "new"],
+      default: "new",
+    },
 
     subscribed: { type: Boolean, default: false },
     redeemedLoyaltyPoints: { type: Number, required: false },
@@ -27,6 +37,7 @@ const SubscriptionSchema = new Schema(
     whatsAppNumber: { type: String, required: false },
     // Gift information
     isGift: { type: Boolean, default: false },
+    giftSenderEmail: { type: String, required: false },
     giftRecipientEmail: { type: String, required: false },
     specialMessage: { type: String, required: false },
     giftCardName: { type: String, required: false },

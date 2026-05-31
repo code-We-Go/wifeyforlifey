@@ -64,6 +64,16 @@ const PackageSchema = new Schema<Ipackage>(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "partners" }],
       default: [],
     },
+        renewals: {
+      type: [
+        {
+          price: { type: Number, required: true },
+          duration: { type: Number, required: true },
+        },
+      ],
+      required: false,
+      default: [],
+    },
     accessAllPartners: { type: Boolean, default: false },
   },
   {

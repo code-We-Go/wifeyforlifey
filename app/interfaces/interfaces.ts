@@ -45,6 +45,7 @@ export interface Video {
   playlistFolder?: string;
   createdAt: Date;
   updatedAt: Date;
+  tags?: ("groom" | "bridesmaids")[]; // Array of tags (e.g., ["bride", "groom"])
 }
 
 export interface playlistFolder {
@@ -306,6 +307,7 @@ export interface Ipackage {
   saving?: string;
   cost?: number;
   variants?: PackageVariant[];
+  renewals?: {price:number,duration:number}[];
   items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
@@ -325,6 +327,7 @@ export interface ISubscription {
   paymentID: string;
   packageID?: string;
   email?: string;
+  process?: "upgrade" | "renew" | "new";
   subscribed?: boolean;
   selectedDuration?: number;
   redeemedLoyaltyPoints?: number;
@@ -377,6 +380,7 @@ export interface ISubscription {
     | "delivered"
     | "cancelled"
     | "returned";
+  cart?: CartItem[];
   createdAt?: Date;
   updatedAt: Date;
 }
