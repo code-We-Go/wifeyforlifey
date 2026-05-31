@@ -140,7 +140,26 @@ export default function PlaylistPage() {
 
   // Check if the selected video requires subscription
   const canAccessPremium = hasPlaylistAccess;
-  const videoLocked = !selectedVideo?.isPublic && !canAccessPremium;
+
+  const checkVideoLocked = (video: any) => {
+    if (!video) return true;
+    if (video.isPublic) return false;
+    if (!canAccessPremium) return true;
+    
+    // Sub-subscription specific logic
+    const subRole = session?.user?.subSubscription?.role;
+    console.log("subRole"+subRole);
+    if (subRole) {
+      console.log("video tags: ", video.tags);
+      const hasMatchingTag = Array.isArray(video.tags) ? video.tags.includes(subRole) : false;
+      console.log("hasMatchingTag", hasMatchingTag)
+      if (!hasMatchingTag) return true;
+    }
+    
+    return false;
+  };
+
+  const videoLocked = checkVideoLocked(selectedVideo);
 
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
@@ -149,6 +168,7 @@ export default function PlaylistPage() {
     try {
       const res = await axios.get(`/api/playlists/${playlistId}`);
       console.log("Playlist data:", res.data);
+
       setPlaylist(res.data.data);
 
       // Check if we have a videoId in the URL params
@@ -212,7 +232,7 @@ export default function PlaylistPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [playlistId]);
+  }, [playlistId, session, status, videoIdParam]);
 
   // Check allowed playlist access when not subscribed
   useEffect(() => {
@@ -233,10 +253,13 @@ export default function PlaylistPage() {
           session?.user?.email &&
           playlistId
         ) {
-          // Fetch all subscriptions for this user
+          // If sub-subscriber, check parent's email instead
+          const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
+          
+          // Fetch all subscriptions for this user or parent user
           const res = await axios.get(
             `/api/subscriptions/track?email=${encodeURIComponent(
-              session.user.email!
+              trackEmail
             )}&all=true`
           );
           console.log("userSubscriptions", res.data)
@@ -869,7 +892,7 @@ export default function PlaylistPage() {
                 ];
 
                 const renderVideoItem = (video: any) => {
-                  const isLocked = !video.isPublic && !canAccessPremium;
+                  const isLocked = checkVideoLocked(video);
                   const isActive = selectedVideo?._id === video._id;
                   return (
                     <div

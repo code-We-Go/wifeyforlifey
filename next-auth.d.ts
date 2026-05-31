@@ -15,6 +15,12 @@ declare module "next-auth" {
       expiryDate?: Date | null;
       isSubscribed?: boolean;
     } | null;
+    subSubscription?: {
+      role: "groom" | "bridesmaids";
+      parentSubscriptionId: string;
+      parentEmail: string;
+      allowedTags: ("groom" | "bridesmaids")[];
+    } | null;
     sessionId?: string | null;
     deviceFingerprint?: string | null;
     isTesting?: boolean;
@@ -50,6 +56,12 @@ declare module "next-auth/jwt" {
     weddingPlanningBestie?: {
       expiryDate?: string | null;
       isSubscribed?: boolean;
+    } | null;
+    subSubscription?: {
+      role: "groom" | "bridesmaids";
+      parentSubscriptionId: string;
+      parentEmail: string;
+      allowedTags: ("groom" | "bridesmaids")[];
     } | null;
     sessionId?: string | null;
     deviceFingerprint?: string | null;

@@ -3,6 +3,7 @@ import verificationsModel from "@/app/modals/sessionModel";
 import sessionsModel from "@/app/modals/sessionModel";
 import UserModel from "@/app/modals/userModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 import { sendMail } from "@/lib/email";
 import { User } from "@/models/User";
 import { SubscriprtionMail } from "@/utils/subscriptionMail";
@@ -70,6 +71,12 @@ export async function POST(req: Request) {
       password: hashedPassword,
       subscriptions: subscriptionIds,
     });
+
+    // Accept any pending sub-subscriptions for this user
+    await SubSubscriptionModel.updateMany(
+      { inviteeEmail: normalizedEmail, status: "pending" },
+      { $set: { status: "accepted", inviteeUser: user._id } }
+    );
 
     // Remove password from response
     const userResponse = {

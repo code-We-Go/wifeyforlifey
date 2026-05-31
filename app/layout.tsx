@@ -19,6 +19,7 @@ import DiscountPopup from "@/components/DiscountPopup";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import SideCart from "@/components/cart/SideCart";
 import { GoogleTagManager } from "@next/third-parties/google";
+import GlobalThemeWrapper from "./GlobalThemeWrapper";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -76,18 +77,20 @@ export default function RootLayout({
                 <WishListProvider>
                   <AnnouncementProvider>
                     <ModalProvider>
-                      <div className="relative flex min-h-screen flex-col">
-                        <ConditionalAnnouncmentBar />
-                        <Header />
-                        <main className="flex-1">{children}</main>
-                        <Footer />
-                      </div>
-                      <ProductModal />
-                      <SideCart />
+                      <GlobalThemeWrapper>
+                        <div className="relative flex min-h-screen flex-col">
+                          <ConditionalAnnouncmentBar />
+                          <Header />
+                          <main className="flex-1">{children}</main>
+                          <Footer />
+                        </div>
+                        <ProductModal />
+                        <SideCart />
 
-                      <DiscountPopup />
-                      <NewsletterPopup />
-                      <Toaster />
+                        <DiscountPopup />
+                        <NewsletterPopup />
+                        <Toaster />
+                      </GlobalThemeWrapper>
                     </ModalProvider>
                   </AnnouncementProvider>
                 </WishListProvider>

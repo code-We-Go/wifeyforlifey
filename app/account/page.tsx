@@ -25,6 +25,7 @@ import {
   MessageCircle,
   Reply,
   User,
+  UserPlus,
 } from "lucide-react";
 import { useEffect, useState, useContext, Suspense } from "react";
 import { useSession } from "next-auth/react";
@@ -52,6 +53,7 @@ import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import InspoTab from "./inspo/InspoTab";
 import ShoppingBestieTab from "./shopping-bestie/ShoppingBestieTab";
+import InvitationsTab from "./invitations/InvitationsTab";
 import WeddingBestieTab from "./wedding-bestie/WeddingBestieTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
@@ -110,6 +112,8 @@ const AccountPage = () => {
   const [subscriptionDoc, setSubscriptionDoc] = useState<any | null>(null);
   const [shouldPromptChoosePlaylist, setShouldPromptChoosePlaylist] =
     useState(false);
+  const [invitationsCount, setInvitationsCount] = useState(0);
+  const [totalSpotsCount, setTotalSpotsCount] = useState(0);
 
   // Continue Watching (latest progress record)
   type ContinueItem = {
@@ -321,7 +325,19 @@ const AccountPage = () => {
             session.user.email
           )}`
         );
-        setSubscriptionDoc(res.data || null);
+        const subDoc = res.data || null;
+        setSubscriptionDoc(subDoc);
+        
+        // Compute total spots allowed
+        const slotsConfig = subDoc?.packageID?.subSubscriptionSlots || [];
+        const totalSpots = slotsConfig.reduce((acc: number, curr: any) => acc + (curr.maxCount || 0), 0);
+        setTotalSpotsCount(totalSpots);
+
+        if (totalSpots > 0) {
+          const invRes = await axios.get("/api/sub-subscriptions");
+          const activeInvites = (invRes.data.data || []).filter((i: any) => i.status !== "revoked").length;
+          setInvitationsCount(activeInvites);
+        }
       } catch (e) {
         setSubscriptionDoc(null);
       }
@@ -718,6 +734,7 @@ const AccountPage = () => {
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
+    { id: "invitations", label: "Invitations", icon: UserPlus },
     { id: "wishlist", label: "Wishlist", icon: Heart },
     { id: "orders", label: "Recent Orders", icon: ShoppingBag },
   ];
@@ -872,7 +889,25 @@ const AccountPage = () => {
                   </Button>
                 </div>
               )}
+
+            {totalSpotsCount > 0 && (
+              <div className="">
+                <p
+                  className="bg-creamey font-bold hover:cursor-pointer underline text-sm text-lovely rounded-md  hover:bg-creamey/80 whitespace-normal h-auto py-2 text-center"
+                  onClick={() => {
+                    setActiveTab("invitations");
+                    router.push('/account?tab=invitations', { scroll: false });
+                    setTimeout(() => {
+                      document.getElementById("tabs-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 100);
+                  }}
+                >
+                  Invitations ({invitationsCount}/{totalSpotsCount})
+                </p>
+              </div>
+            )}
             </div>
+
           </div>
         </div>
       </div>
@@ -966,8 +1001,7 @@ const AccountPage = () => {
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="border-b border-pinkey overflow-x-auto">
+      <div id="tabs-section" className="border-b border-pinkey overflow-x-auto scrollbar-hide scroll-mt-20">
         <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
@@ -1442,6 +1476,10 @@ const AccountPage = () => {
               )}
             </div>
           </div>
+        )}
+
+        {activeTab === "invitations" && (
+          <InvitationsTab subscriptionDoc={subscriptionDoc} />
         )}
 
         {activeTab === "info" && (
