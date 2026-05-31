@@ -24,25 +24,27 @@ function orderValidation(formData: any) {
   if (!formData.lastName.trim()) {
     errors.lastName = "Beautiful Bride Last Name is required.";
   }
-  if (!formData.address.trim()) {
-    errors.address = "Address is required.";
+  // Skip address & location validation when pickup from bazar is selected
+  if (!formData.pickupFromBazar) {
+    if (!formData.address.trim()) {
+      errors.address = "Address is required.";
+    }
+    if (!formData.postalZip || !/^\d+$/.test(formData.postalZip)) {
+      errors.postalZip = "Zip code is required.";
+    }
+    if (!formData.bostaCityName.trim()) {
+      errors.bostaCityName = "Please select a governate.";
+    }
+    if (!formData.bostaZoneName.trim()) {
+      errors.bostaZoneName = "Please select your shipping zone";
+    }
+    if (!formData.bostaDistrictName.trim()) {
+      errors.bostaDistrictName = "Please select your district.";
+    }
   }
-  if (!formData.postalZip || !/^\d+$/.test(formData.postalZip)) {
-    errors.postalZip = "Zip code is required.";
-  }
-
 
   if (!formData.phone || !/^\+?\d+$/.test(formData.phone.trim())) {
     errors.phone = "Phone number is required.";
-  }
-  if (!formData.bostaCityName.trim()) {
-    errors.bostaCityName = "Please select a governate.";
-  }
-  if (!formData.bostaZoneName.trim()) {
-    errors.bostaZoneName = "Please select your shipping zone";
-  }
-  if (!formData.bostaDistrictName.trim()) {
-    errors.bostaDistrictName = "Please select your district.";
   }
 
   return errors;

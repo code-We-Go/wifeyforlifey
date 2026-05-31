@@ -295,6 +295,7 @@ async function handleSubscription(
     whatsAppNumber: paymentOp.whatsAppNumber,
     // Gift info
     isGift: paymentOp.isGift,
+    pickupFromBazar: paymentOp.pickupFromBazar,
     giftSenderEmail: paymentOp.isGift ? paymentOp.email : undefined,
     giftRecipientEmail: paymentOp.giftRecipientEmail,
     specialMessage: paymentOp.specialMessage,
@@ -404,9 +405,10 @@ async function handleSubscription(
     });
   }
 
-  // Bosta integration (skip for upgrade or renew)
+  // Bosta integration (skip for upgrade, renew, or pickup from bazar)
+  const isPickup = paymentOp.pickupFromBazar === true;
   try {
-    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess && !isRenewProcess) {
+    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess && !isRenewProcess && !isPickup) {
       const bostaService = new BostaService();
       const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
       const deliveryPayload = bostaService.createDeliveryPayload(
@@ -431,9 +433,9 @@ async function handleSubscription(
       } else {
         console.error("Failed to create Bosta delivery:", bostaResult.error);
       }
-    } else if (isUpgradeProcess || isRenewProcess) {
+    } else if (isUpgradeProcess || isRenewProcess || isPickup) {
       console.log(
-        `Skipping Bosta delivery for ${paymentOp.process} process:`,
+        `Skipping Bosta delivery for ${isPickup ? 'pickup from bazar' : paymentOp.process} process:`,
         updatedSub?._id
       );
     }
