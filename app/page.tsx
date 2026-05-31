@@ -5,6 +5,7 @@ import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
 import ProductCard from "@/components/shop/ProductCard";
 import VideoCard from "@/components/playlists/VideoCard";
 import HeroSection from "@/components/sections/HeroSection";
+import DoubleHero from "@/components/sections/DoubleHero";
 import HeroTwo from "@/components/sections/HeroTwo";
 import JoinNow from "@/components/sections/JoinNow";
 import FeaturedProducts from "@/components/sections/FeaturedProducts";
@@ -33,8 +34,11 @@ export default function Home() {
 
   return (
     <div className="flex  h-auto flex-col min-h-screen overflow-x-hidden">
+      {/* Double Hero Section */}
+      <DoubleHero />
+
       {/* Hero Section */}
-      <HeroSection />
+      {/* <HeroSection /> */}
       
       {/* Bridal Journey Section */}
       <BridalJourneyTwo />
