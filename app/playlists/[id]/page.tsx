@@ -965,18 +965,29 @@ export default function PlaylistPage() {
                           {/* Folder header */}
                           <button
                             onClick={() => toggleFolder(slug)}
-                            className={`${thirdFont.className} w-full flex items-center justify-between px-4 py-3 bg-lovely/90 text-creamey font-semibold text-sm hover:bg-lovely transition-colors`}
+                            className={`${thirdFont.className} w-full text-left cursor-pointer relative transition-colors p-4 text-creamey bg-lovely/90 hover:bg-lovely`}
                           >
-                            <span className="line-clamp-1 tracking-wide text-lg md:text-xl text-left">{folderName}</span>
-                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                              <span className="text-xs font-normal opacity-80">
-                                {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
-                              </span>
-                              <ChevronDown
-                                className={`h-4 w-4 transition-transform duration-200 ${
-                                  isCollapsed ? "-rotate-90" : ""
-                                }`}
-                              />
+                            <div className="flex gap-3 items-center">
+                              <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
+                                <img
+                                  src={folderVideos[0]?.thumbnailUrl || "/video/1.png"}
+                                  alt={folderName}
+                                  className="object-cover aspect-video w-full h-full"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0 flex items-center justify-between">
+                                <div className="flex flex-col">
+                                  <span className="line-clamp-1 tracking-wide text-lg md:text-xl font-semibold">{folderName}</span>
+                                  <span className="text-sm font-normal opacity-90 tracking-wide mt-1">
+                                    {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
+                                  </span>
+                                </div>
+                                <ChevronDown
+                                  className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ml-2 ${
+                                    isCollapsed ? "-rotate-90" : ""
+                                  }`}
+                                />
+                              </div>
                             </div>
                           </button>
 
