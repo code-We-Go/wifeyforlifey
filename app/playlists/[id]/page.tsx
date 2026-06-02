@@ -883,14 +883,8 @@ export default function PlaylistPage() {
                   }
                 });
 
-                // Determine folder display order: use playlist.folders order, then any stray slugs
-                const orderedSlugs: string[] = [
-                  ...folders.map((f: any) => f.slug).filter((slug: string) => grouped[slug]),
-                  ...Object.keys(grouped).filter(
-                    (slug) => !folders.some((f: any) => f.slug === slug)
-                  ),
-                ];
-
+                // Build a unified ordered list: folders get the index of their first video,
+                // ungrouped videos get their own index. Everything is then sorted together.
                 const renderVideoItem = (video: any) => {
                   const isLocked = checkVideoLocked(video);
                   const isActive = selectedVideo?._id === video._id;
@@ -902,7 +896,7 @@ export default function PlaylistPage() {
                       } cursor-pointer relative transition-colors p-4 text-creamey ${
                         isActive
                           ? "bg-lovely text-creamey"
-                          : "bg-pinkey text-lovely  hover:bg-lovely hover:text-creamey "
+                          : "bg-pinkey text-lovely hover:bg-lovely hover:text-creamey"
                       }`}
                       onClick={() => {
                         const videoIndex = playlist.videos.findIndex(
@@ -932,16 +926,13 @@ export default function PlaylistPage() {
                             )}
                           </div>
                         </div>
-                        {isSubscribed &&
-                          watchedVideos.has(String(video._id)) && (
-                            <div className="absolute top-1 right-1 bg-white/80 rounded-2xl p-0.5">
-                              <Check className="h-4 w-4 text-lovely" />
-                            </div>
-                          )}
+                        {isSubscribed && watchedVideos.has(String(video._id)) && (
+                          <div className="absolute top-1 right-1 bg-white/80 rounded-2xl p-0.5">
+                            <Check className="h-4 w-4 text-lovely" />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
-                          <h5 className="font-medium line-clamp-2">
-                            {video.title}
-                          </h5>
+                          <h5 className="font-medium line-clamp-2">{video.title}</h5>
                           <div className="flex items-center mt-1">
                             {!video.isPublic && (
                               <span className="text-xs bg-muted text-everGreen px-1.5 py-0.5 rounded-full">
@@ -955,13 +946,41 @@ export default function PlaylistPage() {
                   );
                 };
 
+                const seenFolders = new Set<string>();
+                const unifiedItems: Array<
+                  | { type: "folder"; slug: string; firstIndex: number }
+                  | { type: "video"; video: any; firstIndex: number }
+                > = [];
+
+                videos.forEach((video: any, idx: number) => {
+                  if (video.playlistFolder) {
+                    const slug = video.playlistFolder;
+                    if (!seenFolders.has(slug)) {
+                      seenFolders.add(slug);
+                      unifiedItems.push({ type: "folder", slug, firstIndex: idx });
+                    }
+                    // subsequent videos of the same folder are already in grouped[slug]
+                  } else {
+                    unifiedItems.push({ type: "video", video, firstIndex: idx });
+                  }
+                });
+
+                // Already in natural order since we iterated videos in order,
+                // but sort defensively to be safe.
+                unifiedItems.sort((a, b) => a.firstIndex - b.firstIndex);
+
                 return (
                   <>
-                    {/* Folder sections */}
-                    {orderedSlugs.map((slug) => {
+                    {unifiedItems.map((item) => {
+                      if (item.type === "video") {
+                        return renderVideoItem(item.video);
+                      }
+
+                      // Folder block
+                      const { slug } = item;
                       const folderDef = folders.find((f: any) => f.slug === slug);
                       const folderName = folderDef?.name || slug;
-                      const folderVideos = grouped[slug];
+                      const folderVideos = grouped[slug] || [];
                       const isCollapsed = !!collapsedFolders[slug];
 
                       return (
@@ -969,18 +988,29 @@ export default function PlaylistPage() {
                           {/* Folder header */}
                           <button
                             onClick={() => toggleFolder(slug)}
-                            className={`${thirdFont.className} w-full flex items-center justify-between px-4 py-3 bg-lovely/90 text-creamey font-semibold text-sm hover:bg-lovely transition-colors`}
+                            className={`${thirdFont.className} w-full text-left cursor-pointer relative transition-colors p-4 text-creamey bg-lovely/90 hover:bg-lovely`}
                           >
-                            <span className="line-clamp-1 tracking-wide text-lg md:text-xl text-left">{folderName}</span>
-                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                              <span className="text-xs font-normal opacity-80">
-                                {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
-                              </span>
-                              <ChevronDown
-                                className={`h-4 w-4 transition-transform duration-200 ${
-                                  isCollapsed ? "-rotate-90" : ""
-                                }`}
-                              />
+                            <div className="flex gap-3 items-center">
+                              <div className="relative w-24 h-16 rounded overflow-hidden flex-shrink-0">
+                                <img
+                                  src={folderVideos[0]?.thumbnailUrl || "/video/1.png"}
+                                  alt={folderName}
+                                  className="object-cover aspect-video w-full h-full"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0 flex items-center justify-between">
+                                <div className="flex flex-col">
+                                  <span className="line-clamp-1 tracking-wide text-lg md:text-xl font-semibold">{folderName}</span>
+                                  <span className="text-sm font-normal opacity-90 tracking-wide mt-1">
+                                    {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
+                                  </span>
+                                </div>
+                                <ChevronDown
+                                  className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ml-2 ${
+                                    isCollapsed ? "-rotate-90" : ""
+                                  }`}
+                                />
+                              </div>
                             </div>
                           </button>
 
@@ -993,11 +1023,9 @@ export default function PlaylistPage() {
                         </div>
                       );
                     })}
-
-                    {/* Ungrouped videos (no folder) */}
-                    {ungrouped.map(renderVideoItem)}
                   </>
                 );
+
               })()}
             </div>
           </div>
