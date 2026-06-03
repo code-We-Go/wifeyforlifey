@@ -721,9 +721,16 @@ export default function PlaylistPage() {
                         a half ✨.
                       </p>
                       <Button
-                        onClick={() =>
-                          router.push("/subscription/687396821b4da119eb1c13fe")
-                        }
+                        onClick={() => {
+                          if (
+                            playlist?.category === "Wedding Planning Experince" ||
+                            playlist?.category === "Wedding Planning Experience"
+                          ) {
+                            router.push("/subscription/6965e63c6df4503dda02c12b");
+                          } else {
+                            router.push("/subscription/687396821b4da119eb1c13fe");
+                          }
+                        }}
                         size="sm"
                         className="rounded-2xl text-xs md:text-base hover:bg-creamey hover:text-lovely text-creamey bg-lovely"
                       >
@@ -1036,9 +1043,16 @@ export default function PlaylistPage() {
                 Subscribe to unlock all premium videos in this playlist.
               </p>
               <Button
-                onClick={() =>
-                  router.push("/subscription/687396821b4da119eb1c13fe")
-                }
+                onClick={() => {
+                  if (
+                    playlist?.category === "Wedding Planning Experince" ||
+                    playlist?.category === "Wedding Planning Experience"
+                  ) {
+                    router.push("/subscription/6965e63c6df4503dda02c12b");
+                  } else {
+                    router.push("/subscription/687396821b4da119eb1c13fe");
+                  }
+                }}
                 size="sm"
                 className="rounded-2xl bg-creamey hover:text-lovely text-lovely hover:bg-creamey hover:font-semibold"
               >
