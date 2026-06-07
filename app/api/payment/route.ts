@@ -294,6 +294,7 @@ export async function POST(request: Request) {
           whatsAppNumber: data.whatsAppNumber,
           // Gift information
           isGift: data.isGift,
+          pickupFromBazar: data.pickupFromBazar,
           giftRecipientEmail: data.giftRecipientEmail,
           specialMessage: data.specialMessage,
           giftCardName: data.giftCardName,
@@ -583,6 +584,7 @@ export async function POST(request: Request) {
             whatsAppNumber: data.whatsAppNumber,
             // Gift information
             isGift: data.isGift,
+            pickupFromBazar: data.pickupFromBazar,
             giftSenderEmail: data.isGift ? data.email : undefined,
             giftRecipientEmail: data.giftRecipientEmail,
             specialMessage: data.specialMessage,
@@ -668,6 +670,7 @@ export async function POST(request: Request) {
             whatsAppNumber: data.whatsAppNumber,
             // Gift information
             isGift: data.isGift,
+            pickupFromBazar: data.pickupFromBazar,
             giftRecipientEmail: data.giftRecipientEmail,
             giftSenderEmail: data.isGift ? data.email : undefined,
             specialMessage: data.specialMessage,

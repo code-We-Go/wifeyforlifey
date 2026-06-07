@@ -37,6 +37,7 @@ const SubscriptionSchema = new Schema(
     whatsAppNumber: { type: String, required: false },
     // Gift information
     isGift: { type: Boolean, default: false },
+    pickupFromBazar: { type: Boolean, default: false },
     giftSenderEmail: { type: String, required: false },
     giftRecipientEmail: { type: String, required: false },
     specialMessage: { type: String, required: false },
