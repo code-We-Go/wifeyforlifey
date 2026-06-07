@@ -42,19 +42,19 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has subscription
-    const expiryDate = subscription.expiryDate
-      ? new Date(subscription.expiryDate)
-      : null;
+    // const expiryDate = subscription.expiryDate
+    //   ? new Date(subscription.expiryDate)
+    //   : null;
 
-    console.log(`[favorites] Subscription expiryDate: ${expiryDate}, now: ${new Date()}, valid: ${!!expiryDate && expiryDate > new Date()}`);
+    // console.log(`[favorites] Subscription expiryDate: ${expiryDate}, now: ${new Date()}, valid: ${!!expiryDate && expiryDate > new Date()}`);
 
-    if (!expiryDate || !(expiryDate > new Date())) {
-      console.warn(`[favorites] Subscription expired or missing for: ${authUser.email}`);
-      return NextResponse.json(
-        { error: "You need a subscription to access favorites" },
-        { status: 403 }
-      );
-    }
+    // if (!expiryDate || !(expiryDate > new Date())) {
+    //   console.warn(`[favorites] Subscription expired or missing for: ${authUser.email}`);
+    //   return NextResponse.json(
+    //     { error: "You need a subscription to access favorites" },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Get query parameters for filtering
     const url = new URL(req.url);

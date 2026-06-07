@@ -31,14 +31,14 @@ export async function GET(request: Request) {
     }
     else{
       typeQuery = {
-        $or: [{ type: 'product' }, { type: { $exists: false } }, { type: null }]
+         type: 'product' 
       }
     }
 
     let subcategories = await subCategoryModel.find({...query, active: true})
       .populate({
         path: 'categoryID',
-        match: { ...(type ? typeQuery : {}), active: true },
+        match: { ...typeQuery , active: true },
       })
       .sort({ subCategoryName: 1 });
 
