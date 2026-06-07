@@ -30,7 +30,39 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
             "subscriptions"
           );
           if (dbUser) {
-            return { user: dbUser, isAuthenticated: true, authType: "jwt" };
+            let isSubscribed = false;
+            if (dbUser.email) {
+              const allSubscriptions = await subscriptionsModel.find({
+                email: dbUser.email,
+                subscribed: true,
+              }).sort({ expiryDate: -1 });
+
+              // PACKAGE_IDS from userModel
+              const PACKAGE_IDS = {
+                FULL_EXPERIENCE: "687396821b4da119eb1c13fe",
+                MINI: "68bf6ae9c4d5c1af12cdcd37",
+                WEDDING_PLANNING_BESTIE: "6965e63c6df4503dda02c12b",
+              };
+
+              const mainSubscription = 
+                allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
+                allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+
+              if (mainSubscription) {
+                const isMini = mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+                isSubscribed = isMini
+                  ? !!mainSubscription.subscribed
+                  : !!(
+                      mainSubscription.expiryDate &&
+                      new Date(mainSubscription.expiryDate).getTime() > Date.now()
+                    );
+              }
+            }
+
+            const userObj = dbUser.toObject();
+            userObj.isSubscribed = isSubscribed;
+
+            return { user: userObj, isAuthenticated: true, authType: "jwt" };
           }
         } catch (error) {
           console.error(
