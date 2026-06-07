@@ -169,6 +169,8 @@ const InspoTab = () => {
   }, [userSubs]);
 
   const checkAccess = (boardId: string) => {
+    return true; // Opened for free temporarily
+    /*
     if (!boardId) return true;
     if (sessionStatus !== "authenticated") return false;
 
@@ -204,6 +206,7 @@ const InspoTab = () => {
       }
     }
     return false;
+    */
   };
 
   const getRequiredPackages = (boardId: string) => {

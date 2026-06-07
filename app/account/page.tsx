@@ -1728,7 +1728,9 @@ const AccountPage = () => {
 
         {activeTab === "favorites" && (
           <div>
-            {user.isSubscribed ? (
+            {user.isSubscribed || true  ? 
+            // {user.isSubscribed ? 
+            (
               <FavoritesGrid />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
@@ -1745,7 +1747,9 @@ const AccountPage = () => {
 
           // </div>
           <div>
-            {user.isSubscribed ? (
+            {user.isSubscribed ||true  ? 
+            // {user.isSubscribed ?
+             (
               <InspoTab />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
