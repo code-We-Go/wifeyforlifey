@@ -29,6 +29,11 @@ export async function GET(request: Request) {
         ? { $or: [{ type: 'product' }] }
         : { type };
     }
+    else{
+      typeQuery = {
+        $or: [{ type: 'product' }, { type: { $exists: false } }, { type: null }]
+      }
+    }
 
     let subcategories = await subCategoryModel.find({...query, active: true})
       .populate({
