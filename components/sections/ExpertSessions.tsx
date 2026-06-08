@@ -163,6 +163,50 @@ const ExpertSessions = () => {
     }
   };
 
+  const applyDiscount = async () => {
+    if (!selectedForBooking) return;
+    const code = form.discountCode.trim();
+    if (!code) {
+      setApplied(false);
+      if (subscriptionFinalPrice !== null) {
+        setFinalPrice(subscriptionFinalPrice);
+      } else {
+        setFinalPrice(selectedForBooking.price);
+      }
+      setError("");
+      return;
+    }
+    try {
+      const res = await axios.post("/api/apply-discount", {
+        cart: [{ price: selectedForBooking.price, quantity: 1 }],
+        discountCode: code,
+        redeemType: "Sessions",
+      });
+      const total = res.data?.finalTotal;
+      if (typeof total === "number") {
+        const codePrice = Math.round(total);
+        setCouponFinalPrice(codePrice);
+        const baseline = subscriptionFinalPrice ?? selectedForBooking.price;
+        const best = Math.min(codePrice, baseline);
+        setApplied(codePrice < baseline);
+        setFinalPrice(best);
+        setError("");
+      } else {
+        setApplied(false);
+        setCouponFinalPrice(null);
+        setFinalPrice(subscriptionFinalPrice ?? selectedForBooking.price);
+        setError("Invalid discount response");
+      }
+    } catch (e: any) {
+      setApplied(false);
+      setCouponFinalPrice(null);
+      setFinalPrice(subscriptionFinalPrice ?? selectedForBooking.price);
+      const msg = e?.response?.data?.error || "Invalid or expired discount code";
+      setError(msg);
+    }
+  };
+
+
   if (loading) {
     return (
       <section 
@@ -433,7 +477,24 @@ const ExpertSessions = () => {
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 required
               />
-              
+              <div className="flex gap-2">
+                <Input
+                  className="border-pinkey placeholder:text-lovely bg-creamey"
+                  placeholder="Discount code (optional)"
+                  value={form.discountCode}
+                  onChange={(e) =>
+                    setForm({ ...form, discountCode: e.target.value })
+                  }
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-lovely text-lovely rounded-2xl"
+                  onClick={applyDiscount}
+                >
+                  Apply
+                </Button>
+              </div>
               <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
                 <div className="flex items-center justify-between">
                   <span className="text-lovely">Price</span>
@@ -458,8 +519,12 @@ const ExpertSessions = () => {
                 )}
                 {applied && couponFinalPrice !== null && (
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-lovely">Coupon applied</span>
-                    <span className="text-lovely">EGP {couponFinalPrice}</span>
+                    <span className="text-lovely">
+                      Coupon discount ({Math.round((((subscriptionFinalPrice ?? selectedForBooking.price) - couponFinalPrice) / (subscriptionFinalPrice ?? selectedForBooking.price)) * 100)}%)
+                    </span>
+                    <span className="text-lovely">
+                      EGP {Math.max(0, (subscriptionFinalPrice ?? selectedForBooking.price) - couponFinalPrice)}
+                    </span>
                   </div>
                 )}
                 {finalPrice !== null && finalPrice !== selectedForBooking.price && (

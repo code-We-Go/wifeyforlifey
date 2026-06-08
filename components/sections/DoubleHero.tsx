@@ -35,7 +35,7 @@ export default function DoubleHero() {
         <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 z-10 w-full flex justify-center px-4">
           <Link href="/package/wedding-bestie-planner" passHref>
             <Button 
-              className="bg-creamey text-lovely hover:bg-creamey/90 border border-lovely/20 md:px-8 px-4 md:py-6 py-4 rounded-full font-bold shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 text-base md:text-lg tracking-wide"
+              className="bg-creamey text-lovely hover:bg-creamey border border-lovely md:px-8 px-4 md:py-6 py-4 rounded-full font-bold shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 text-base md:text-lg tracking-wide"
             >
               Wedding Planning Bestie 
             </Button>
@@ -60,7 +60,7 @@ export default function DoubleHero() {
         <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 z-10 w-full flex justify-center px-4">
           <Link href="/package/GehazBestiePlanner" passHref>
             <Button 
-              className="bg-lovely text-creamey hover:bg-lovely/90 md:px-8 px-4 md:py-6 py-4 rounded-full font-bold shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 text-base md:text-lg tracking-wide"
+              className="bg-creamey text-lovely hover:bg-creamey border border-lovely md:px-8 px-4 md:py-6 py-4 rounded-full font-bold shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 text-base md:text-lg tracking-wide"
             >
               Gehaz Bestie
             </Button>

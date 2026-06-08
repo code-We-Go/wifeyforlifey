@@ -112,7 +112,21 @@ function SuccessPage() {
             </h1>
             <>
               {!account &&
-                (subscription !== "mini" ? (
+                (subscription === "mini" ? (
+                  <p className="px-2 md:px-6 xl:px-12">
+                    {process === "renew"
+                      ? "Your mini experience has been renewed! Enjoy your chosen playlist for another 6 months."
+                      : "Your subscription was created successfully, Once you receive your planner, you'll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you'll find a thank-you card with a QR code that lets you browse and select your favorite playlist."}
+                 </p>
+                ) : subscription === "wedding" ? (
+                  <p>
+                    {process === "upgrade" 
+                      ? "Your Wedding Planning Experience has been upgraded. You now have access to more exclusive content!"
+                      : process === "renew"
+                        ? "Your Wedding Planning Experience has been renewed. Thank you for staying with us!"
+                        : "Your Wedding Planning Experience was created successfully, now create your account to enjoy our exclusive educational channel and partnerships!"}
+                  </p>
+                ) : (
                   <p>
                     {process === "upgrade" 
                       ? "Your subscription has been upgraded. You now have access to more exclusive content!"
@@ -120,12 +134,6 @@ function SuccessPage() {
                         ? "Your subscription has been renewed. Thank you for staying with us!"
                         : "Your subscription was created successfully, now create your account to enjoy our exclusive educational channel and partnerships"}
                   </p>
-                ) : (
-                  <p className="px-2 md:px-6 xl:px-12">
-                    {process === "renew"
-                      ? "Your mini experience has been renewed! Enjoy your chosen playlist for another 6 months."
-                      : "Your subscription was created successfully, Once you receive your planner, you'll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you'll find a thank-you card with a QR code that lets you browse and select your favorite playlist."}
-                 </p>
                 ))}
               {process === "new" && <p>Look out for an email from your bestie 👯♀️.</p>}
             </>

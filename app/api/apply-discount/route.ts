@@ -29,14 +29,21 @@ export async function POST(req: Request) {
     const discount = await DiscountModel.findOne({
       code: new RegExp(`^${escapeRegExp(discountCode)}$`, "i"),
       isActive: true,
-      redeemType: { $in: [redeemType, "All"] },
-
-      //   startDate: { $lte: new Date() },
-      //   endDate: { $gte: new Date() },
     });
     if (!discount) {
       return NextResponse.json(
         { error: "Invalid or expired discount code" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      discount.redeemType &&
+      discount.redeemType !== "All" &&
+      discount.redeemType !== redeemType
+    ) {
+      return NextResponse.json(
+        { error: `This discount code cannot be applied to ${redeemType.toLowerCase()}s.` },
         { status: 400 }
       );
     }

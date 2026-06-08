@@ -604,7 +604,44 @@ async function handleSubscription(
             "Mini Experience email sent successfully to",
             updatedSub.email
           );
+        } else if (
+          (updatedSub.packageID as any)?._id &&
+          (updatedSub.packageID as any)._id.toString() ===
+            "6965e63c6df4503dda02c12b"
+        ) {
+          const firstName = updatedSub.firstName || "Wifey";
+          const { generateWelcomeEmail } = await import(
+            "@/utils/weddingPlanningExperienceEmail"
+          );
+          await sendMail({
+            to: updatedSub.email,
+            name: firstName,
+            subject: "Welcome to the Wedding Planning Experience! 💕",
+            body: generateWelcomeEmail(firstName, updatedSub),
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+          });
+          const brevoApiKey = process.env.BREVO_API_KEY;
+          if (brevoApiKey) {
+            await fetch("https://api.brevo.com/v3/contacts", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "api-key": brevoApiKey,
+              },
+              body: JSON.stringify({
+                email: updatedSub.email,
+                listIds: [4],
+                updateEnabled: true,
+              }),
+            });
+          }
+          console.log(
+            "Wedding Planning Experience email sent successfully to",
+            updatedSub.email
+          );
         }
+        
       }
     }
   } catch (emailError) {
@@ -635,6 +672,16 @@ async function handleSubscription(
     return {
       success: true,
       redirect: `payment/success?subscription=mini${
+        subscribedUser ? "&account=true" : ""
+      }&process=${paymentOp.process}`,
+    };
+  } else if (
+    (updatedSub?.packageID as any)?._id?.toString() ===
+    "6965e63c6df4503dda02c12b"
+  ) {
+    return {
+      success: true,
+      redirect: `payment/success?subscription=wedding${
         subscribedUser ? "&account=true" : ""
       }&process=${paymentOp.process}`,
     };
