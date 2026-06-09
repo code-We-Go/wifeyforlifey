@@ -133,9 +133,8 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
       const pkg = sub?.packageID; // populated package object
       if (pkg) {
         if (pkg.accessAllPartners) {
-          return true;
-        }
-
+         
+          
         const pkgPartners = Array.isArray(pkg.packagePartners)
           ? pkg.packagePartners
           : [];
@@ -146,6 +145,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
         ) {
           return true;
         }
+      }
       }
     }
     return false;
