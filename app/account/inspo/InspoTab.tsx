@@ -22,7 +22,11 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Pin, Board, Section } from "./types";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const InspoTab = () => {
+interface InspoTabProps {
+  isFree?: boolean;
+}
+
+const InspoTab = ({ isFree }: InspoTabProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const boardTitle = searchParams.get("board");
@@ -169,6 +173,7 @@ const InspoTab = () => {
   }, [userSubs]);
 
   const checkAccess = (boardId: string) => {
+    if (isFree) return true;
     if (!boardId) return true;
     if (sessionStatus !== "authenticated") return false;
 
@@ -190,15 +195,15 @@ const InspoTab = () => {
       if (pkg) {
         if (pkg.accessAllInspos) {
           // If accessAllInspos is true, user has access to all inspos in the package
-          const pkgInspos = Array.isArray(pkg.packageInspos)
-            ? pkg.packageInspos
-            : [];
-          if (
-            pkgInspos.some(
-              (id: any) => String(extractId(id)) === String(boardId)
-            )
-          ) {
-            return true;
+        const pkgInspos = Array.isArray(pkg.packageInspos)
+          ? pkg.packageInspos
+          : [];
+        if (
+          pkgInspos.some(
+            (id: any) => String(extractId(id)) === String(boardId)
+          )
+        ) {
+          return true;
           }
         }
       }
@@ -692,14 +697,14 @@ const InspoTab = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {boards.map((board) => (
-                <BoardCard
-                  key={board.id}
-                  title={board.title}
-                  pinCount={board.pinCount}
-                  sectionCount={board.sectionCount}
-                  coverImages={board.coverImages}
+                  <BoardCard
+                    key={board.id}
+                    title={board.title}
+                    pinCount={board.pinCount}
+                    sectionCount={board.sectionCount}
+                    coverImages={board.coverImages}
                   onClick={() => navigateToBoard(board.title)}
-                />
+                  />
               ))}
             </div>
           )}

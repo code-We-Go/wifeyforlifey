@@ -15,11 +15,16 @@ export async function GET(request: Request) {
     if (type) {
       if (type === 'product') {
         query.$or = [{ type: 'product' }, { type: { $exists: false } }, { type: null }];
-      } else {
+        
+      } 
+      else {
         query.type = type;
       }
     }
-
+    
+    else {
+      query.$or = [{ type: 'product' }, { type: { $exists: false } }, { type: null }];
+    }
     // Fetch only active categories
     const categories = await categoriesModel.find(query).sort({ categoryName: 1 });
 

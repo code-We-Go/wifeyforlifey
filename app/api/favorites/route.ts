@@ -5,6 +5,7 @@ import FavoritesModel from "@/app/modals/favoritesModel";
 import UserModel from "@/app/modals/userModel";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import accountFeatureModel from "@/app/modals/accountFeatureModel";
 
 // GET /api/favorites - Get all favorites for the current user
 export async function GET(req: NextRequest) {
@@ -31,29 +32,28 @@ export async function GET(req: NextRequest) {
     console.log("register" + subscriptionsModel);
 
     let user = authUser;
-    const subscription = await subscriptionsModel.findOne({ email: user.email })
-    // if (authType === "session") {
-    //   console.log(`[favorites] DB user lookup — found: ${!!user}, subscription: ${JSON.stringify(subscription)}`);
-    // }
 
-    if (!user) {
-      console.warn(`[favorites] User not found in DB for email: ${authUser.email}`);
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const favConfig = await accountFeatureModel.findOne({ featureKey: "favorites" });
+    const isFree = favConfig?.accessType === "free";
 
-    // Check if user has subscription
-    const expiryDate = subscription.expiryDate
-      ? new Date(subscription.expiryDate)
-      : null;
+    if (!isFree) {
+      if (!user) {
+        console.warn(`[favorites] User not found in DB for email: ${authUser.email}`);
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
 
-    console.log(`[favorites] Subscription expiryDate: ${expiryDate}, now: ${new Date()}, valid: ${!!expiryDate && expiryDate > new Date()}`);
+      const subscription = await subscriptionsModel.findOne({ email: user.email });
+      const expiryDate = subscription?.expiryDate
+        ? new Date(subscription.expiryDate)
+        : null;
 
-    if (!expiryDate || !(expiryDate > new Date())) {
-      console.warn(`[favorites] Subscription expired or missing for: ${authUser.email}`);
-      return NextResponse.json(
-        { error: "You need a subscription to access favorites" },
-        { status: 403 }
-      );
+      if (!expiryDate || !(expiryDate > new Date())) {
+        console.warn(`[favorites] Subscription expired or missing for: ${authUser.email}`);
+        return NextResponse.json(
+          { error: "You need a subscription to access favorites" },
+          { status: 403 }
+        );
+      }
     }
 
     // Get query parameters for filtering

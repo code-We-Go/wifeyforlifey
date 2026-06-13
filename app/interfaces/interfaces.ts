@@ -418,3 +418,14 @@ export interface INotification {
   createdAt: string;
   content?: string;
 }
+
+export interface IAccountFeature extends mongoose.Document {
+  featureKey: string;
+  label: string;
+  accessType: "free" | "subscription";
+  requiredPackages: mongoose.Types.ObjectId[];
+  enabled: boolean;
+  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}

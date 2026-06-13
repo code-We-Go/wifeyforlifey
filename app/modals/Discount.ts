@@ -29,7 +29,7 @@ const discountSchema = new Schema<Discount>({
   },
   redeemType:{
     type:String,
-    enum:["Purchase","Subscription","All"],
+    enum:["Purchase","Subscription","All","Sessions"],
     required:false
   },
   value: {

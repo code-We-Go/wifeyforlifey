@@ -20,10 +20,13 @@ interface Partner {
   code: string;
   link: string;
   bookingMethod: string;
-  imagePath?: string; // Add optional image path field
 }
 
-export default function PartnersGrid() {
+interface PartnersGridProps {
+  isFree?: boolean;
+}
+
+export default function PartnersGrid({ isFree }: PartnersGridProps) {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
@@ -109,6 +112,7 @@ export default function PartnersGrid() {
   }, [session?.user?.email, sessionStatus]);
 
   const checkAccess = (partnerId: string) => {
+    if (isFree) return true;
     if (!partnerId) return true;
     if (sessionStatus !== "authenticated") return false;
 
@@ -129,17 +133,19 @@ export default function PartnersGrid() {
       const pkg = sub?.packageID; // populated package object
       if (pkg) {
         if (pkg.accessAllPartners) {
-          const pkgPartners = Array.isArray(pkg.packagePartners)
-            ? pkg.packagePartners
-            : [];
-          if (
-            pkgPartners.some(
-              (id: any) => String(extractId(id)) === String(partnerId)
-            )
-          ) {
-            return true;
-          }
+         
+          
+        const pkgPartners = Array.isArray(pkg.packagePartners)
+          ? pkg.packagePartners
+          : [];
+        if (
+          pkgPartners.some(
+            (id: any) => String(extractId(id)) === String(partnerId)
+          )
+        ) {
+          return true;
         }
+      }
       }
     }
     return false;
@@ -292,7 +298,7 @@ export default function PartnersGrid() {
                   <PartnerCard 
                     key={index} 
                     partner={partner} 
-                    isLocked={isLocked}
+                    isLocked={isFree?false:isLocked}
                     onLockedClick={() => handleLockedPartnerClick(partnerId)}
                     requiredPackages={requiredPkgs}
                   />

@@ -29,11 +29,16 @@ export async function GET(request: Request) {
         ? { $or: [{ type: 'product' }] }
         : { type };
     }
+    else{
+      typeQuery = {
+         type: 'product' 
+      }
+    }
 
     let subcategories = await subCategoryModel.find({...query, active: true})
       .populate({
         path: 'categoryID',
-        match: { ...(type ? typeQuery : {}), active: true },
+        match: { ...typeQuery , active: true },
       })
       .sort({ subCategoryName: 1 });
 

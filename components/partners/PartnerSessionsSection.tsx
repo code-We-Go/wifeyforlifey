@@ -136,7 +136,7 @@ export default function PartnerSessionsSection() {
       const res = await axios.post("/api/apply-discount", {
         cart: [{ price: selected.price, quantity: 1 }],
         discountCode: code,
-        redeemType: "All",
+        redeemType: "Sessions",
       });
       const total = res.data?.finalTotal;
       if (typeof total === "number") {
@@ -316,7 +316,7 @@ export default function PartnerSessionsSection() {
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 required
               />
-              {/* <div className="flex gap-2">
+              <div className="flex gap-2">
                 <Input
                   className="border-pinkey placeholder:text-lovely bg-creamey"
                   placeholder="Discount code (optional)"
@@ -333,7 +333,7 @@ export default function PartnerSessionsSection() {
                 >
                   Apply
                 </Button>
-              </div> */}
+              </div>
               <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
                 <div className="flex items-center justify-between">
                   <span className="text-lovely">Price</span>
@@ -363,8 +363,12 @@ export default function PartnerSessionsSection() {
                 )}
                 {applied && couponFinalPrice !== null && (
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-lovely">Coupon applied</span>
-                    <span className="text-lovely">EGP {couponFinalPrice}</span>
+                    <span className="text-lovely">
+                      Coupon discount ({Math.round((((subscriptionFinalPrice ?? selected.price) - couponFinalPrice) / (subscriptionFinalPrice ?? selected.price)) * 100)}%)
+                    </span>
+                    <span className="text-lovely">
+                      EGP {Math.max(0, (subscriptionFinalPrice ?? selected.price) - couponFinalPrice)}
+                    </span>
                   </div>
                 )}
                 {finalPrice !== null && finalPrice !== selected.price && (
