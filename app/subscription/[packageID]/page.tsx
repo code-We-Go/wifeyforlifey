@@ -458,11 +458,6 @@ We’re beyond excited to share this experience with you… your planner will be
     };
   }) => {
     setBostaLocation(location);
-    // Pickup from bazar always has free shipping
-    if (pickupFromBazar) {
-      setShipping(0);
-      return;
-    }
     // Upgrades always have free shipping
     if (isUpgrade) {
       setShipping(0);
@@ -504,7 +499,6 @@ We’re beyond excited to share this experience with you… your planner will be
   };
 
   const [isGift, setIsGift] = useState(false);
-  const [pickupFromBazar, setPickupFromBazar] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     country: "",
@@ -527,7 +521,6 @@ We’re beyond excited to share this experience with you… your planner will be
     total: total,
     shipping: shipping,
     isGift: false,
-    pickupFromBazar: false,
     giftRecipientEmail: "",
     specialMessage: "",
     giftCardName: "",
@@ -1709,74 +1702,6 @@ We’re beyond excited to share this experience with you… your planner will be
                 </div>
               </div>
             </div>
-            {/* Pickup from Bazar option */}
-            <div className="flex flex-col w-full mt-3 gap-1">
-              <div className="flex items-center gap-2">
-                <input
-                  id="pickupFromBazarCheckbox"
-                  type="checkbox"
-                  checked={pickupFromBazar}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setPickupFromBazar(checked);
-                    if (checked) {
-                      setShipping(0);
-                      setFormData((prev) => ({
-                        ...prev,
-                        pickupFromBazar: true,
-                        address: "Pickup from bazar - Wedding Fair by Ma Vie",
-                        apartment: "",
-                        bostaCity: "",
-                        bostaCityName: "",
-                        bostaZone: "",
-                        bostaZoneName: "",
-                        bostaDistrict: "",
-                        bostaDistrictName: "",
-                        shipping: 0,
-                      }));
-                    } else {
-                      setFormData((prev) => ({
-                        ...prev,
-                        pickupFromBazar: false,
-                        address: "",
-                      }));
-                    }
-                  }}
-                  className="w-4 h-4 accent-lovely"
-                />
-                <label
-                  htmlFor="pickupFromBazarCheckbox"
-                  className="text-lovely text-base font-semibold cursor-pointer"
-                >
-                  📍 Pickup from bazar
-                </label>
-              </div>
-              {pickupFromBazar && (
-                <div className="ml-6 mt-1 p-3 bg-creamey/40 rounded-xl border border-lovely/20 space-y-1">
-                  <p className="text-sm text-lovely/90 font-medium">
-                    Wedding Fair by Ma Vie
-                  </p>
-                  <p className="text-xs text-lovely/70">
-                    Free shipping — pick up your order at the event!
-                  </p>
-                  <a
-                    href="https://maps.app.goo.gl/fd85ZnBM2VLDchGz9?g_st=iw"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-lovely underline hover:text-lovely/80 transition-colors mt-1"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    View location on map
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {!pickupFromBazar && (
-              <>
             <div className="flex gap-2 w-full items-center">
               <label className="text-lovely text-base whitespace-nowrap">
                 {isGift ? "address" : "Lovely Bride's address"}
@@ -1890,8 +1815,6 @@ We’re beyond excited to share this experience with you… your planner will be
                   className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                 />
               </div>
-            )}
-              </>
             )}
             <div className="flex w-full gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
