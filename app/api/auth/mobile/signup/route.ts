@@ -50,6 +50,28 @@ export async function POST(req: Request) {
       emailVerified: false, // Default to false until verified
     });
 
+    // Sync subscriptions from subscriptionsModel
+    const subscriptionsModel = (await import("@/app/modals/subscriptionsModel")).default;
+    const userSubs = await subscriptionsModel.find({ email: newUser.email });
+    if (userSubs.length > 0) {
+      const subIds = userSubs.map(s => s._id.toString());
+      const existingIds = newUser.subscriptions.map((s: any) => s.toString());
+
+      let modified = false;
+      for (const id of subIds) {
+        if (!existingIds.includes(id)) {
+          newUser.subscriptions.push(id);
+          modified = true;
+        }
+      }
+      if (modified || !newUser.isSubscribed) {
+        newUser.isSubscribed = true;
+        await newUser.save();
+      }
+    }
+
+    // await newUser.populate("subscriptions");
+
     // Generate token
     const token = generateToken({
       id: newUser._id.toString(),

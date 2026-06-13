@@ -34,6 +34,28 @@ export async function POST(req: Request) {
       );
     }
 
+    // Sync subscriptions from subscriptionsModel
+    const subscriptionsModel = (await import("@/app/modals/subscriptionsModel")).default;
+    const userSubs = await subscriptionsModel.find({ email: user.email });
+    if (userSubs.length > 0) {
+      const subIds = userSubs.map(s => s._id.toString());
+      const existingIds = user.subscriptions.map((s: any) => s.toString());
+
+      let modified = false;
+      for (const id of subIds) {
+        if (!existingIds.includes(id)) {
+          user.subscriptions.push(id);
+          modified = true;
+        }
+      }
+      if (modified || !user.isSubscribed) {
+        user.isSubscribed = true;
+        await user.save();
+      }
+    }
+
+    // await user.populate("subscriptions");
+
     // Generate token
     const token = generateToken({
       id: user._id.toString(),

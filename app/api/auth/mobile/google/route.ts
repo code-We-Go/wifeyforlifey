@@ -90,8 +90,8 @@ export async function POST(req: Request) {
     // 3. Verify the token — accept both mobile and web client IDs
     // const GOOGLE_MOBILE_CLIENT_ID = process.env.googleClientId;
     const GOOGLE_WEB_CLIENT_ID = process.env.googleClientId;
-   const GOOGLE_IOS_CLIENT_ID= process.env.GOOGLE_IOS_CLIENT_ID;
-const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID;
+    const GOOGLE_IOS_CLIENT_ID = process.env.GOOGLE_IOS_CLIENT_ID;
+    const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID;
 
     const validAudiences = [
       // GOOGLE_MOBILE_CLIENT_ID,
@@ -184,6 +184,29 @@ const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID;
 
       isNewUser = true;
     }
+
+    // Sync subscriptions from subscriptionsModel
+    const subscriptionsModel = (await import("@/app/modals/subscriptionsModel")).default;
+    const userSubs = await subscriptionsModel.find({ email: user.email });
+    if (userSubs.length > 0) {
+      const subIds = userSubs.map(s => s._id.toString());
+      const existingIds = user.subscriptions?.map((s: any) => s.toString()) || [];
+
+      let modified = false;
+      for (const id of subIds) {
+        if (!existingIds.includes(id)) {
+          if (!user.subscriptions) user.subscriptions = [];
+          user.subscriptions.push(id);
+          modified = true;
+        }
+      }
+      if (modified || !user.isSubscribed) {
+        user.isSubscribed = true;
+        await user.save();
+      }
+    }
+
+    // await user.populate("subscriptions");
 
     // 6. Generate our app's JWT token
     const token = generateToken({
