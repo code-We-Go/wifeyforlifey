@@ -257,7 +257,7 @@ async function handleSubscription(
 
   if (typeof durationToUse === "number" && durationToUse > 0) {
     expiryDate.setMonth(expiryDate.getMonth() + durationToUse);
-  } else if (pkgId === "68bf6ae9c4d5c1af12cdcd37") {
+  } else if (pkgId === "68bf6ae9c4d5c1af12cdcd37" || pkgId === "6a2d9aec3def6ce76dc7babc") {
     // Mini subscription: expiry is now
   } else if (pkgId === "687396821b4da119eb1c13fe") {
     // Legacy fallback
@@ -383,8 +383,8 @@ async function handleSubscription(
       bonusID: isUpgradeProcess
         ? "69e35eba75941926796f40ce"
         : (updatedSub.packageID as any)?._id?.toString() ===
-          "68bf6ae9c4d5c1af12cdcd37"
-        ? "68c176b69c1ff0a2ad779c2d"
+          "68bf6ae9c4d5c1af12cdcd37" || (updatedSub.packageID as any)?._id?.toString() === "6a2d9aec3def6ce76dc7babc"
+        ? "68c176b69c1ff0a2ad779c2d" // TODO: Add a new bonus ID later for MINI_WEDDING
         : "687d67f459e6ba857a54ed53",
     });
   }
@@ -607,6 +607,42 @@ async function handleSubscription(
         } else if (
           (updatedSub.packageID as any)?._id &&
           (updatedSub.packageID as any)._id.toString() ===
+            "6a2d9aec3def6ce76dc7babc"
+        ) {
+          const firstName = updatedSub.firstName || "Wifey";
+          const { generateWelcomeEmail } = await import(
+            "@/utils/weddingPlanningExperienceEmail"
+          ); // Using wedding experience mail for now, will change later
+          await sendMail({
+            to: updatedSub.email,
+            name: firstName,
+            subject: "Welcome to the Mini Wedding Planning Experience! 💕",
+            body: generateWelcomeEmail(firstName, updatedSub),
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+          });
+          const brevoApiKey = process.env.BREVO_API_KEY;
+          if (brevoApiKey) {
+            await fetch("https://api.brevo.com/v3/contacts", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "api-key": brevoApiKey,
+              },
+              body: JSON.stringify({
+                email: updatedSub.email,
+                listIds: [4], // TODO: Change to a new Brevo list later
+                updateEnabled: true,
+              }),
+            });
+          }
+          console.log(
+            "Mini Wedding Planning Experience email sent successfully to",
+            updatedSub.email
+          );
+        } else if (
+          (updatedSub.packageID as any)?._id &&
+          (updatedSub.packageID as any)._id.toString() ===
             "6965e63c6df4503dda02c12b"
         ) {
           const firstName = updatedSub.firstName || "Wifey";
@@ -665,9 +701,12 @@ async function handleSubscription(
   });
 
   // Determine redirect
+  // TODO: We will change things in the success page later for the new MINI_WEDDING package
   if (
     (updatedSub?.packageID as any)?._id?.toString() ===
-    "68bf6ae9c4d5c1af12cdcd37"
+    "68bf6ae9c4d5c1af12cdcd37" || 
+    (updatedSub?.packageID as any)?._id?.toString() ===
+    "6a2d9aec3def6ce76dc7babc"
   ) {
     return {
       success: true,

@@ -37,7 +37,14 @@ export async function POST(request: NextRequest) {
     }
 
     const expiryDate = new Date();
-    expiryDate.setMonth(expiryDate.getMonth() + 6);
+    const isMiniWedding = subscription.packageID?.toString() === "6a2d9aec3def6ce76dc7babc" || 
+                          (subscription.packageID as any)?._id?.toString() === "6a2d9aec3def6ce76dc7babc";
+    
+    if (isMiniWedding) {
+      expiryDate.setMonth(expiryDate.getMonth() + 3);
+    } else {
+      expiryDate.setMonth(expiryDate.getMonth() + 6);
+    }
 
     const existingIndex = (subscription as any).allowedPlaylists?.findIndex(
       (p: any) => p.playlistID?.toString() === playlistId

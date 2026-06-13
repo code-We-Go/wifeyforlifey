@@ -212,7 +212,8 @@ function MiniSubscriptionVerificationContent() {
       setLoadingPlaylists(true);
       setPlaylistsError(null);
       try {
-        const res = await fetch("/api/playlists?all=true&packageId=68bf6ae9c4d5c1af12cdcd37", {
+        const pkgId = subscriptionData?.packageID?._id || subscriptionData?.packageID || "68bf6ae9c4d5c1af12cdcd37";
+        const res = await fetch(`/api/playlists?all=true&packageId=${pkgId}`, {
           cache: "no-store",
         });
         const data = await res.json();
@@ -262,7 +263,7 @@ function MiniSubscriptionVerificationContent() {
         <div className="text-center mb-2 md:mb-4">
           <div className="relative h-[200px] mb-2 md:mb-4 rounded-lg overflow-hidden">
             <Image
-              src="/cristmas/hero.png"
+              src="/characters/WifeyForLifeyCharacterIllustrations.png"
               alt="Mini Experience"
               fill
               priority

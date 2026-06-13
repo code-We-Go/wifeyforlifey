@@ -203,6 +203,7 @@ export const authOptions: NextAuthOptions = {
                   parentSubscriptionId: subSub.parentSubscription._id.toString(),
                   parentEmail: subSub.parentSubscription.email || "",
                   allowedTags: [subSub.role],
+                  createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
                 };
                 // Grant subscription access for playlist viewing
                 token.isSubscribed = true;
@@ -215,11 +216,13 @@ export const authOptions: NextAuthOptions = {
           // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
           const mainSubscription = 
             allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
+            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
 
           if (mainSubscription) {
             const isMini =
-              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
 
             // Mini is active if subscribed=true (no expiry check)
             // Others are active if expiryDate is in the future
@@ -342,11 +345,13 @@ export const authOptions: NextAuthOptions = {
                 // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
                 const mainSubscription = 
                   allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
+                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
 
                 if (mainSubscription) {
                   const isMini =
-                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
 
                   session.user.isSubscribed = isMini
                     ? !!mainSubscription.subscribed
@@ -400,6 +405,7 @@ export const authOptions: NextAuthOptions = {
                     parentSubscriptionId: subSub.parentSubscription._id.toString(),
                     parentEmail: subSub.parentSubscription.email || "",
                     allowedTags: [subSub.role],
+                    createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
                   };
                   if (!session.user.isSubscribed) {
                     session.user.isSubscribed = true;

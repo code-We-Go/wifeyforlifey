@@ -133,6 +133,7 @@ export async function GET(request: NextRequest) {
           parentSubscriptionId: subSub.parentSubscription._id.toString(),
           parentEmail: subSub.parentSubscription.email || "",
           allowedTags: [subSub.role],
+          createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
         };
         // Grant subscription access via sub-subscription if not already subscribed
         if (!responseData.isSubscribed) {

@@ -270,12 +270,12 @@ export default function PlaylistPage() {
           for (const sub of subs) {
             if (!sub || !sub.subscribed) continue;
 
-            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37";
+            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37" || 
+                           String(sub.packageID?._id || sub.packageID) === "6a2d9aec3def6ce76dc7babc";
             const isExpired = !isMini && sub.expiryDate && new Date(sub.expiryDate).getTime() < now;
             
             if (isExpired) continue;
 
-            // Check subscription's allowedPlaylists (always considered)
             const allowed = Array.isArray(sub?.allowedPlaylists)
               ? sub.allowedPlaylists
               : [];

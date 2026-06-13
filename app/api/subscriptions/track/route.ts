@@ -58,7 +58,8 @@ export async function GET(request: NextRequest) {
             {
               $or: [
                 { expiryDate: { $gt: new Date() } },
-                { packageID: PACKAGE_IDS.MINI }
+                { packageID: PACKAGE_IDS.MINI },
+                { packageID: PACKAGE_IDS.MINI_WEDDING }
               ]
             }
           ],

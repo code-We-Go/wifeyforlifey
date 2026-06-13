@@ -20,6 +20,7 @@ declare module "next-auth" {
       parentSubscriptionId: string;
       parentEmail: string;
       allowedTags: ("groom" | "bridesmaids")[];
+      createdAt?: string | null;
     } | null;
     sessionId?: string | null;
     deviceFingerprint?: string | null;
@@ -62,6 +63,7 @@ declare module "next-auth/jwt" {
       parentSubscriptionId: string;
       parentEmail: string;
       allowedTags: ("groom" | "bridesmaids")[];
+      createdAt?: string | null;
     } | null;
     sessionId?: string | null;
     deviceFingerprint?: string | null;
