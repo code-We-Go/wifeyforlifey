@@ -4,6 +4,7 @@ import { ConnectDB } from "@/app/config/db";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import packageModel from "@/app/modals/packageModel";
 import mongoose from "mongoose";
@@ -113,7 +114,33 @@ export async function GET(request: NextRequest) {
       birthDate: user.birthDate,
       isSubscribed: user.isSubscribed,
       subscriptions: user.subscriptions,
+      subSubscription: null,
     };
+
+    // Check for sub-subscriptions (groom/bridesmaid)
+    const subSub = await SubSubscriptionModel.findOne({
+      inviteeEmail: email,
+      status: "accepted",
+    }).populate("parentSubscription");
+
+    if (subSub && subSub.parentSubscription?.subscribed) {
+      const parentExpiry = subSub.parentSubscription.expiryDate;
+      const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
+
+      if (isParentActive) {
+        responseData.subSubscription = {
+          role: subSub.role,
+          parentSubscriptionId: subSub.parentSubscription._id.toString(),
+          parentEmail: subSub.parentSubscription.email || "",
+          allowedTags: [subSub.role],
+        };
+        // Grant subscription access via sub-subscription if not already subscribed
+        if (!responseData.isSubscribed) {
+          responseData.isSubscribed = true;
+          responseData.subscriptionExpiryDate = parentExpiry ? new Date(parentExpiry).toISOString() : null;
+        }
+      }
+    }
 
     return NextResponse.json(responseData);
   } catch (error) {

@@ -4,7 +4,7 @@ import jwkToPem from "jwk-to-pem";
 import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import { generateToken } from "@/app/utils/jwtUtils";
-
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 // Google's public keys endpoint
 const GOOGLE_KEYS_URL = "https://www.googleapis.com/oauth2/v3/certs";
 
@@ -184,6 +184,17 @@ const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID;
 
       isNewUser = true;
     }
+
+    if (email) {
+      // Accept any pending sub-subscriptions for this user
+      await SubSubscriptionModel.updateMany(
+        { inviteeEmail: email, status: "pending" },
+        { $set: { status: "accepted", inviteeUser: user._id } }
+      );
+    }
+
+    // Check for sub-subscriptions
+
 
     // 6. Generate our app's JWT token
     const token = generateToken({

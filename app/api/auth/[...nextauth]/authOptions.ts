@@ -132,12 +132,6 @@ export const authOptions: NextAuthOptions = {
             imageURL: user.image,
             subscriptions: subscriptionIds
           });
-
-          // Accept any pending sub-subscriptions for this new Google user
-          await SubSubscriptionModel.updateMany(
-            { inviteeEmail: googleEmail, status: "pending" },
-            { $set: { status: "accepted", inviteeUser: existingUser._id } }
-          );
         }
         userId = (existingUser as any)._id?.toString();
         user.id = userId ?? "";
@@ -149,6 +143,15 @@ export const authOptions: NextAuthOptions = {
         // Credentials provider
         userId = user.id || (user as any)._id?.toString();
         user.id = userId ?? ""; // Always set user.id for NextAuth
+      }
+
+      const userEmail = user.email?.trim().toLowerCase();
+      if (userEmail && userId) {
+        // Accept any pending sub-subscriptions for this user
+        await SubSubscriptionModel.updateMany(
+          { inviteeEmail: userEmail, status: "pending" },
+          { $set: { status: "accepted", inviteeUser: userId } }
+        );
       }
 
       // Generate and store sessionId for single-session enforcement

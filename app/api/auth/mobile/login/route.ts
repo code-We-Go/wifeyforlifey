@@ -3,7 +3,7 @@ import { generateToken } from "@/app/utils/jwtUtils";
 import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import bcrypt from "bcryptjs";
-
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 export async function POST(req: Request) {
   try {
     await ConnectDB();
@@ -33,6 +33,18 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    // Accept any pending sub-subscriptions for this user
+    await SubSubscriptionModel.updateMany(
+      { inviteeEmail: email, status: "pending" },
+      { $set: { status: "accepted", inviteeUser: user._id } }
+    );
+
+    // Check for sub-subscriptions
+    
+
+  
+    // }
 
     // Generate token
     const token = generateToken({
