@@ -10,8 +10,8 @@ const AccountFeatureSchema = new Schema<IAccountFeature>(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "packages" }],
       default: [],
     },
-    enabled: { type: Boolean, default: true },
-    order: { type: Number, default: 0 },
+    // enabled: { type: Boolean, default: true },
+    // order: { type: Number, default: 0 },
   },
   {
     timestamps: true,

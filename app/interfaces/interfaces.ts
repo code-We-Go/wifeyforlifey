@@ -424,8 +424,8 @@ export interface IAccountFeature extends mongoose.Document {
   label: string;
   accessType: "free" | "subscription";
   requiredPackages: mongoose.Types.ObjectId[];
-  enabled: boolean;
-  order: number;
+  // enabled: boolean;
+  // order: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
