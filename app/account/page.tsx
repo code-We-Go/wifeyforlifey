@@ -73,6 +73,32 @@ const AccountPage = () => {
   const { wishList, setWishList } = useContext(wishListContext);
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get("tab") || "partners";
+  
+  const [isPartnersFree, setIsPartnersFree] = useState(false);
+  const [isFavoritesFree, setIsFavoritesFree] = useState(false);
+  const [isInspoFree, setIsInspoFree] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/account-features")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const pConfig = data.data.find((f: any) => f.featureKey === "partners");
+          if (pConfig?.accessType === "free") {
+            setIsPartnersFree(true);
+          }
+          const fConfig = data.data.find((f: any) => f.featureKey === "favorites");
+          if (fConfig?.accessType === "free") {
+            setIsFavoritesFree(true);
+          }
+          const iConfig = data.data.find((f: any) => f.featureKey === "inspo");
+          if (iConfig?.accessType === "free") {
+            setIsInspoFree(true);
+          }
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const [activeTab, setActiveTab] = useState(defaultTab);
 
@@ -1757,21 +1783,13 @@ const AccountPage = () => {
         )}
         {activeTab === "partners" && (
           <div>
-            {user.isSubscribed ? (
-              <PartnersGrid />
-            ) : (
-              <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
-                Subscribe to get our partners discounts!
-              </div>
-            )}
+            <PartnersGrid isFree={isPartnersFree} />
           </div>
         )}
 
         {activeTab === "favorites" && (
           <div>
-            {user.isSubscribed || true  ? 
-            // {user.isSubscribed ? 
-            (
+            {isFavoritesFree || user.isSubscribed || (user.weddingPlanningBestie && !user.weddingPlanningBestie.isSubscribed)? (
               <FavoritesGrid />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
@@ -1782,16 +1800,9 @@ const AccountPage = () => {
         )}
 
         {activeTab === "inspo" && (
-          // <div>
-
-          //     <InspoTab />
-
-          // </div>
           <div>
-            {user.isSubscribed ||true  ? 
-            // {user.isSubscribed ?
-             (
-              <InspoTab />
+            {isInspoFree || user.isSubscribed || (user.weddingPlanningBestie && user.weddingPlanningBestie.isSubscribed) ? (
+              <InspoTab isFree={isInspoFree} />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
                 Subscribe to access your inspiration boards!

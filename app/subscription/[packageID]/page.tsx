@@ -1135,8 +1135,8 @@ We’re beyond excited to share this experience with you… your planner will be
     let newDiscountAmount = 0;
     let effectiveShipping = shipping;
 
-    // Apply free shipping if subtotal is greater than 2000
-    const isFreeShipping = calculatedSubTotal > 2000;
+    // Apply free shipping if subtotal is greater than 2000 or specific packages
+    const isFreeShipping = calculatedSubTotal > 2000 || packageID === "687396821b4da119eb1c13fe" || packageID === "6965e63c6df4503dda02c12b";
 
     if (appliedDiscount && appliedDiscount.value !== undefined) {
       if (appliedDiscount.calculationType === "PERCENTAGE") {
@@ -2513,7 +2513,7 @@ We’re beyond excited to share this experience with you… your planner will be
               )}
               <div className="flex justify-between text-base">
                 {appliedDiscount?.calculationType === "FREE_SHIPPING" ||
-                subTotal > 2000 ? (
+                subTotal > 2000 || packageID === "687396821b4da119eb1c13fe" || packageID === "6965e63c6df4503dda02c12b" ? (
                   <>
                     <span className="line-through">Shipping</span>
                     <span className="line-through">
