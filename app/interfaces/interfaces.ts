@@ -286,6 +286,7 @@ export interface SupportCard {
   title: string;
   description: string[];
   imagePath: string;
+  enable?: boolean;
 }
 
 export interface PackageVariant {

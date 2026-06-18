@@ -120,7 +120,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
   // };
 
   if (loading) {
-    return <div className="text-center py-8 text-lovely animate-pulse">Loading yout invitations details...</div>;
+    return <div className="text-center py-8 text-lovely animate-pulse">Loading your invitations details...</div>;
   }
 
   // Calculate used slots
@@ -140,7 +140,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
     return (
       <div className="text-center py-8 text-lovely/80">
         <h3 className="text-xl font-medium mb-2">No Sub-Subscriptions Available</h3>
-        <p>Your current package does not include party invitations.</p>
+        <p>Your current package does not include invitations.</p>
       </div>
     );
   }

@@ -161,8 +161,12 @@ export default function PlaylistPage() {
 
   const videoLocked = checkVideoLocked(selectedVideo);
 
+  const fetchedPlaylistIdRef = useRef<string | null>(null);
+
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
+    if (fetchedPlaylistIdRef.current === playlistId && !error) return;
+    
     setIsLoading(true);
     setError(null);
     try {
@@ -170,6 +174,7 @@ export default function PlaylistPage() {
       console.log("Playlist data:", res.data);
 
       setPlaylist(res.data.data);
+      fetchedPlaylistIdRef.current = playlistId;
 
       // Check if we have a videoId in the URL params
       if (res.data.data.videos && res.data.data.videos.length > 0) {
@@ -723,7 +728,7 @@ export default function PlaylistPage() {
                       <Button
                         onClick={() => {
                           if (
-                            playlist?.category === "Wedding Planning Experince" ||
+                            playlist?.category === "Wedding planning" ||
                             playlist?.category === "Wedding Planning Experience"
                           ) {
                             router.push("/subscription/6965e63c6df4503dda02c12b");
@@ -1045,7 +1050,7 @@ export default function PlaylistPage() {
               <Button
                 onClick={() => {
                   if (
-                    playlist?.category === "Wedding Planning Experince" ||
+                    playlist?.category === "Wedding planning" ||
                     playlist?.category === "Wedding Planning Experience"
                   ) {
                     router.push("/subscription/6965e63c6df4503dda02c12b");

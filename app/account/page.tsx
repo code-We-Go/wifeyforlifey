@@ -110,6 +110,7 @@ const AccountPage = () => {
   }, []);
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const [editingInfo, setEditingInfo] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
   const { loyaltyPoints, refreshLoyaltyPoints } = useAuth();
@@ -291,7 +292,7 @@ const AccountPage = () => {
     } else if (activeTab === "notifications") {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, session]);
+  }, [activeTab, session?.user?.email]);
 
   const handleMoveToCart = (item: any) => {
     addItem(item);
@@ -310,9 +311,14 @@ const AccountPage = () => {
 
   useEffect(() => {
     if (session?.user) {
-      fetchUserData();
-      fetchUserOrders();
-      fetchNotifications();
+      setIsDataLoading(true);
+      Promise.all([
+        fetchUserData(),
+        fetchUserOrders(),
+        fetchNotifications()
+      ]).finally(() => {
+        setIsDataLoading(false);
+      });
 
       // Check for fingerprint in sessionStorage for Google login tracking
       if (typeof window !== "undefined") {
@@ -340,7 +346,8 @@ const AccountPage = () => {
         }
       }
     }
-  }, [session]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id, session?.user?.email, session?.user?.firstName]);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -705,9 +712,18 @@ const AccountPage = () => {
     }
   };
 
-  // Show loading state while session is loading
-  if (status === "loading") {
-    return <ProfileSkeleton />;
+  // Show loading state while session is loading or data is fetching
+  if (status === "loading" || (status === "authenticated" && isDataLoading)) {
+    return (
+      <div className="fixed min-h-screen w-full inset-0 z-50 bg-[#f9f2de] flex items-center justify-center">
+        <Image
+          src="/weddingPlanningPlanner/loadingAccount.GIF"
+          alt="Loading..."
+     width={500}
+     height={500}
+        />
+      </div>
+    );
   }
 
   // Show loading state while session is loading
@@ -887,7 +903,7 @@ const AccountPage = () => {
                   size="sm"
                   className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                 >
-                  Upgrade now to Wedding Planning Bestie
+                  Upgrade now to the Full Wedding Planning Bestie
                 </Button>
               </Link>
             )}

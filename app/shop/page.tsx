@@ -203,14 +203,27 @@ function ShopPage() {
           cards: [],
           active: true,
         };
+        const weddingBestiePlanner: Ipackage = {
+          _id: "custom-wedding-bestie-planner",
+          slug: "wedding-bestie-planner",
+          name: "Wedding Bestie Planner",
+          imgUrl: "/weddingPlanningPlanner/desktop.png",
+          images: ["/weddingPlanningPlanner/desktop.png"],
+          price: 1700,
+          duration: 0,
+          items: [],
+          notes: [],
+          cards: [],
+          active: true,
+        };
         
         // Filter out any fetched packages with slug "GehazBestiePlanner" to avoid duplicates
         const filteredPackages = fetchedPackages.filter(
-          (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner"
+          (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner" && pkg.slug !== "wedding-bestie-planner"
         );
         
         // Prepend the custom package to the filtered packages
-        setPackages([gehazBestiePlanner, ...filteredPackages]);
+        setPackages([gehazBestiePlanner, weddingBestiePlanner, ...filteredPackages]);
       } catch (error) {
         console.error("Error fetching packages:", error);
       } finally {

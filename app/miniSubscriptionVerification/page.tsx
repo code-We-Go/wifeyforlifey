@@ -451,7 +451,7 @@ Let’s verify your experience and choose your playlist! your bridal era officia
                 Note: you have to choose only one playlist. If you click confirm
                 there's no way to choose another one.
                 <br />
-                It expires after 6 months from activation.
+                It expires after {(subscriptionData?.packageID?._id || subscriptionData?.packageID) === "6a2d9aec3def6ce76dc7babc" ? "3" : "6"} months from activation.
               </p>
             </DialogHeader>
             {loadingPlaylists ? (

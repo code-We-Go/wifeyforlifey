@@ -284,7 +284,7 @@ const WeddingBestieTab = () => {
             >
               Apply Filters
             </Button>
-            {(minPrice || maxPrice) && (
+            {/* {(minPrice || maxPrice) && (
               <Button 
                 variant="ghost" 
                 onClick={() => {
@@ -304,7 +304,7 @@ const WeddingBestieTab = () => {
               >
                 Clear
               </Button>
-            )}
+            )} */}
           </div>
 
           <div className="mt-8">
