@@ -5,6 +5,7 @@ import { ConnectDB } from "@/app/config/db";
 import { compare } from "bcryptjs";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import { LoyaltyPointsModel } from "@/app/modals/rewardModel";
 import { v4 as uuidv4 } from "uuid";
@@ -144,6 +145,15 @@ export const authOptions: NextAuthOptions = {
         user.id = userId ?? ""; // Always set user.id for NextAuth
       }
 
+      const userEmail = user.email?.trim().toLowerCase();
+      if (userEmail && userId) {
+        // Accept any pending sub-subscriptions for this user
+        await SubSubscriptionModel.updateMany(
+          { inviteeEmail: userEmail, status: "pending" },
+          { $set: { status: "accepted", inviteeUser: userId } }
+        );
+      }
+
       // Generate and store sessionId for single-session enforcement
       if (user?.email && userId) {
         const sessionId = uuidv4();
@@ -176,17 +186,43 @@ export const authOptions: NextAuthOptions = {
               paid: false,
             };
             token.weddingPlanningBestie = null;
+            
+            // Check for sub-subscriptions (groom/bridesmaid) if no main subscription
+            const subSub = await SubSubscriptionModel.findOne({
+              inviteeEmail: email,
+              status: "accepted",
+            }).populate("parentSubscription");
+
+            if (subSub && subSub.parentSubscription?.subscribed) {
+              const parentExpiry = subSub.parentSubscription.expiryDate;
+              const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
+              
+              if (isParentActive) {
+                token.subSubscription = {
+                  role: subSub.role,
+                  parentSubscriptionId: subSub.parentSubscription._id.toString(),
+                  parentEmail: subSub.parentSubscription.email || "",
+                  allowedTags: [subSub.role],
+                  createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
+                };
+                // Grant subscription access for playlist viewing
+                token.isSubscribed = true;
+                token.subscriptionExpiryDate = parentExpiry ? new Date(parentExpiry).toISOString() : null;
+              }
+            }
             return token;
           }
 
           // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
           const mainSubscription = 
             allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
+            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
 
           if (mainSubscription) {
             const isMini =
-              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
 
             // Mini is active if subscribed=true (no expiry check)
             // Others are active if expiryDate is in the future
@@ -271,6 +307,8 @@ export const authOptions: NextAuthOptions = {
                 isSubscribed: token.weddingPlanningBestie.isSubscribed
               }
             : null;
+            
+          session.user.subSubscription = token.subSubscription || null;
         }
         // session.user.loyaltyPoints = token.loyaltyPoints;
       }
@@ -307,11 +345,13 @@ export const authOptions: NextAuthOptions = {
                 // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
                 const mainSubscription = 
                   allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI);
+                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
+                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
 
                 if (mainSubscription) {
                   const isMini =
-                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI;
+                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
 
                   session.user.isSubscribed = isMini
                     ? !!mainSubscription.subscribed
@@ -347,6 +387,35 @@ export const authOptions: NextAuthOptions = {
                 session.user.isSubscribed = false;
                 session.user.subscription = undefined;
                 session.user.weddingPlanningBestie = null;
+              }
+              
+              // Refetch SubSubscription fresh
+              const subSub = await SubSubscriptionModel.findOne({
+                inviteeEmail: userData.email,
+                status: "accepted",
+              }).populate("parentSubscription");
+
+              if (subSub && subSub.parentSubscription?.subscribed) {
+                const parentExpiry = subSub.parentSubscription.expiryDate;
+                const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
+                
+                if (isParentActive) {
+                  session.user.subSubscription = {
+                    role: subSub.role,
+                    parentSubscriptionId: subSub.parentSubscription._id.toString(),
+                    parentEmail: subSub.parentSubscription.email || "",
+                    allowedTags: [subSub.role],
+                    createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
+                  };
+                  if (!session.user.isSubscribed) {
+                    session.user.isSubscribed = true;
+                    session.user.subscriptionExpiryDate = parentExpiry ? new Date(parentExpiry) : null;
+                  }
+                } else {
+                  session.user.subSubscription = null;
+                }
+              } else {
+                session.user.subSubscription = null;
               }
             }
           }

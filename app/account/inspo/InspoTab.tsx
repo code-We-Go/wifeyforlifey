@@ -137,9 +137,10 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
       try {
         setLoadingSubs(true);
         // Fetch subscriptions
+        const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
         const subRes = await fetch(
           `/api/subscriptions/track?email=${encodeURIComponent(
-            session.user.email
+            trackEmail
           )}&all=true`
         );
         if (subRes.ok) {
@@ -167,8 +168,10 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
     return userSubs.some(
       (sub) =>
         sub.subscribed &&
+        (extractId(sub.packageID?._id || sub.packageID) ===
+          "68bf6ae9c4d5c1af12cdcd37" ||
         extractId(sub.packageID?._id || sub.packageID) ===
-          "68bf6ae9c4d5c1af12cdcd37"
+          "6a2d9aec3def6ce76dc7babc")
     );
   }, [userSubs]);
 
@@ -183,7 +186,9 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
 
       const isMini =
         String(sub.packageID?._id || sub.packageID) ===
-        "68bf6ae9c4d5c1af12cdcd37";
+        "68bf6ae9c4d5c1af12cdcd37" ||
+        String(sub.packageID?._id || sub.packageID) ===
+        "6a2d9aec3def6ce76dc7babc";
       const isExpired =
         !isMini &&
         sub.expiryDate &&
@@ -779,7 +784,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                       onClick={() => {
                         const pkgId = extractId(pkg._id);
                         const isFullExperience =
-                          pkgId === "687396821b4da119eb1c13fe";
+                          pkgId === "687396821b4da119eb1c13fe" || pkgId === "6965e63c6df4503dda02c12b";
                         router.push(
                           `/subscription/${pkgId}${
                             isFullExperience && hasMiniPackage

@@ -1,9 +1,10 @@
 "use client";
 import { Suspense } from "react";
 import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Play, Lock, Filter } from "lucide-react";
+import Image from "next/image";
+import { Play, Lock, Filter, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -47,6 +48,7 @@ function PlaylistsPageFallback() {
 
 function PlaylistsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, status } = useSession();
 
   const searchParams = useSearchParams();
@@ -63,6 +65,32 @@ function PlaylistsPage() {
     search: "",
     // sortBy: "",
   });
+
+  const [selectedCategoryFolder, setSelectedCategoryFolder] = useState<string | null>(initialCategory || null);
+
+  const handleCategorySelect = (folderId: string | null) => {
+    setSelectedCategoryFolder(folderId);
+    const params = new URLSearchParams(searchParams.toString());
+    if (folderId) {
+      params.set("category", folderId);
+    } else {
+      params.delete("category");
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const categoryFolders = [
+    {
+      id: "Gehaz Bestie Experience",
+      name: "Gehaz Bestie Experience",
+      image: "/experience/gehaz1.png"
+    },
+    {
+      id: "Wedding Planning Experience",
+      name: "Wedding Planning Experience",
+      image: "/weddingPlanningPlanner/desktop.png"
+    }
+  ];
 
   // Continue Watching (latest progress record)
   type ContinueItem = {
@@ -479,28 +507,70 @@ function PlaylistsPage() {
               <VideoCardSkeleton key={i} />
             ))}
           </div>
-        ) : filteredPlaylists.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPlaylists.map((playlist) => (
-              <VideoCard key={playlist._id} playlist={playlist} />
+        ) : !selectedCategoryFolder ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-6">
+            {categoryFolders.map((folder) => (
+              <div 
+                key={folder.id} 
+                className="cursor-pointer overflow-hidden border-none shadow-lg hover:scale-[1.02] transition-transform duration-300 rounded-xl bg-creamey"
+                onClick={() => handleCategorySelect(folder.id)}
+              >
+                <div className="relative h-56 md:h-80 lg:h-96 w-full">
+                  <Image
+                    src={folder.image}
+                    alt={folder.name}
+                    fill
+                    className="object-cover blur-[1px]"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center p-4 text-center hover:bg-black/10 transition-colors">
+                    <h3 className={`text-3xl leading-relaxed lg:text-4xl tracking-wide font-bold text-creamey drop-shadow-md ${thirdFont.className}`}>
+                      {folder.name}
+                    </h3>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 mb-4 text-lovely/90">
-              <Filter className="w-full h-full" />
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 text-creamey mb-4">
+              <button 
+                onClick={() => handleCategorySelect(null)}
+                className="text-sm font-medium hover:underline"
+              >
+                Categories
+              </button>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-sm font-bold">{selectedCategoryFolder}</span>
             </div>
-            <h3 className="text-lg font-medium">No playlists found</h3>
-            <p className="text-lovely/90 mt-2">
-              Try adjusting your filters or search term.
-            </p>
-            <Button
-              onClick={resetFilters}
-              variant="outline"
-              className="mt-4 bg-creamey text-lovely/90 hover:bg-everGreen hover:text-creamey"
-            >
-              Reset Filters
-            </Button>
+
+            {(() => {
+              const categoryPlaylists = filteredPlaylists.filter(p => p.category === selectedCategoryFolder || (!p.category && selectedCategoryFolder === "Gehaz Bestie Experience"));
+              return categoryPlaylists.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {categoryPlaylists.map((playlist) => (
+                    <VideoCard key={playlist._id} playlist={playlist} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-24 h-24 mb-4 text-creamey/50">
+                    <Filter className="w-full h-full" />
+                  </div>
+                  <h3 className="text-lg font-medium">No playlists found</h3>
+                  <p className="text-creamey/80 mt-2">
+                    Try adjusting your filters or search term.
+                  </p>
+                  <Button
+                    onClick={resetFilters}
+                    variant="outline"
+                    className="mt-4 bg-creamey text-lovely hover:bg-lovely hover:text-creamey"
+                  >
+                    Reset Filters
+                  </Button>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

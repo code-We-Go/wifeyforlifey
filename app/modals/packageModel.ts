@@ -13,6 +13,7 @@ const SupportCardSchema = new Schema<SupportCard>({
   title: { type: String, required: true },
   description: { type: [String], required: true },
   imagePath: { type: String, required: true },
+  enable: { type: Boolean, default: true },
 });
 
 // Define the Package schema
@@ -75,6 +76,15 @@ const PackageSchema = new Schema<Ipackage>(
       default: [],
     },
     accessAllPartners: { type: Boolean, default: false },
+    subSubscriptionSlots: {
+      type: [
+        {
+          role: { type: String, enum: ["groom", "bridesmaids"], required: true },
+          maxCount: { type: Number, required: true, default: 1 },
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,

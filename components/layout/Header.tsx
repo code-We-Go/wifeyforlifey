@@ -6,6 +6,10 @@ import { useState, useEffect, useContext } from "react";
 import { useCart } from "@/providers/CartProvider";
 import { INotification } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
+import { GiAmpleDress } from "react-icons/gi";
+import { IoIosBowtie } from "react-icons/io";
+
+
 // import { Toolbox } from "lucide-react";
 
 import {
@@ -34,8 +38,11 @@ import {
   ChevronUp,
   CalendarDays,
   Wrench,
-  Boxes
+  Boxes,
+  Shirt,
+  Gem
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -101,6 +108,11 @@ const accountItems = [
 ];
 
 export default function Header() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isGroomTheme = theme === "groom";
+
   const { isAuthenticated, user, loading, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -326,19 +338,51 @@ export default function Header() {
             ))}
             {/* Logo */}
 
-            <Link
-              href="/"
-              className=" border-x-2 lg:flex-shrink-0 border-creamey items-center px-8 lg:px-16 space-x-2"
-            >
-              <Image
-                className="aspect-auto"
-                alt="logo"
-                width={200}
-                height={150}
-                // src={"/cristmas/logo.png"}
-                src={"/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"}
-              />
-            </Link>
+            <div className="flex flex-col items-center justify-center border-x-2 lg:flex-shrink-0 border-creamey px-8 lg:px-16 gap-1">
+              <Link
+                href="/"
+                className="flex items-center justify-center"
+              >
+                <Image
+                  className="aspect-auto"
+                  alt="logo"
+                  width={200}
+                  height={150}
+                  // src={"/cristmas/logo.png"}
+src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
+              </Link>
+              {/* Theme Toggle */}
+              {mounted && (
+                <div className="flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-1" style={{ fontFamily: 'var(--font-inter)' }}>
+                  <button
+                    onClick={() => setTheme("light")}
+                    className={cn(
+                      "flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium transition-all",
+                      !isGroomTheme ? "bg-lovely text-creamey shadow-md" : "text-creamey hover:bg-creamey/20"
+                    )}
+                    title="Bride Theme"
+                  >
+                    <GiAmpleDress className="w-3 h-3" />
+
+                    {/* <Gem className="w-3 h-3" /> */}
+                    <span>Bride</span>
+                  </button>
+                  <button
+                    onClick={() => setTheme("groom")}
+                    className={cn(
+                      "flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium transition-all",
+                      isGroomTheme ? "bg-lovely text-creamey shadow-md" : "text-creamey hover:bg-creamey/20"
+                    )}
+                    title="Groom Theme"
+                  >
+                    <IoIosBowtie className="w-3 h-3" />
+
+                    {/* <Shirt className="w-3 h-3" /> */}
+                    <span>Groom</span>
+                  </button>
+                </div>
+              )}
+            </div>
             {rightNavigation.map((item) => (
               item.items ? (
                 <div key={item.name} className="relative z-50">
@@ -587,6 +631,33 @@ export default function Header() {
                     </Link>
                   </div>
                   <nav className="flex flex-col space-y-6">
+                    {/* Mobile Theme Toggle */}
+                    {mounted && (
+                      <div className="flex items-center w-full max-w-[200px] border border-creamey/30 bg-creamey/10 rounded-full p-1 mb-4" style={{ fontFamily: 'var(--font-inter)' }}>
+                        <button
+                          onClick={() => setTheme("light")}
+                          className={cn(
+                            "flex flex-1 items-center justify-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-all",
+                            !isGroomTheme ? "bg-creamey text-lovely shadow-md" : "text-creamey hover:bg-creamey/20"
+                          )}
+                        >
+                          <GiAmpleDress className="w-4 h-4" />
+                          <span>Bride</span>
+                        </button>
+                        <button
+                          onClick={() => setTheme("groom")}
+                          className={cn(
+                            "flex flex-1 items-center justify-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-all",
+                            isGroomTheme ? "bg-creamey text-lovely shadow-md" : "text-creamey hover:bg-creamey/20"
+                          )}
+                        >
+                          <IoIosBowtie className="w-4 h-4" />
+
+                          <span>Groom</span>
+                        </button>
+                      </div>
+                    )}
+                    
                     {navigation.map((item) => (
                       item.items ? (
                         <div key={item.name} className="flex flex-col space-y-2">
@@ -631,6 +702,7 @@ export default function Header() {
                         </Link>
                       )
                     ))}
+                    
                   </nav>
                   <div className="mt-auto text-lg space-y-4">
                     <Link

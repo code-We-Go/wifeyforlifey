@@ -140,16 +140,41 @@ export default function PlaylistPage() {
 
   // Check if the selected video requires subscription
   const canAccessPremium = hasPlaylistAccess;
-  const videoLocked = !selectedVideo?.isPublic && !canAccessPremium;
+
+  const checkVideoLocked = (video: any) => {
+    if (!video) return true;
+    if (video.isPublic) return false;
+    if (!canAccessPremium) return true;
+    
+    // Sub-subscription specific logic
+    const subRole = session?.user?.subSubscription?.role;
+    console.log("subRole"+subRole);
+    if (subRole) {
+      console.log("video tags: ", video.tags);
+      const hasMatchingTag = Array.isArray(video.tags) ? video.tags.includes(subRole) : false;
+      console.log("hasMatchingTag", hasMatchingTag)
+      if (!hasMatchingTag) return true;
+    }
+    
+    return false;
+  };
+
+  const videoLocked = checkVideoLocked(selectedVideo);
+
+  const fetchedPlaylistIdRef = useRef<string | null>(null);
 
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
+    if (fetchedPlaylistIdRef.current === playlistId && !error) return;
+    
     setIsLoading(true);
     setError(null);
     try {
       const res = await axios.get(`/api/playlists/${playlistId}`);
       console.log("Playlist data:", res.data);
+
       setPlaylist(res.data.data);
+      fetchedPlaylistIdRef.current = playlistId;
 
       // Check if we have a videoId in the URL params
       if (res.data.data.videos && res.data.data.videos.length > 0) {
@@ -212,7 +237,7 @@ export default function PlaylistPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [playlistId]);
+  }, [playlistId, session, status, videoIdParam]);
 
   // Check allowed playlist access when not subscribed
   useEffect(() => {
@@ -233,10 +258,13 @@ export default function PlaylistPage() {
           session?.user?.email &&
           playlistId
         ) {
-          // Fetch all subscriptions for this user
+          // If sub-subscriber, check parent's email instead
+          const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
+          
+          // Fetch all subscriptions for this user or parent user
           const res = await axios.get(
             `/api/subscriptions/track?email=${encodeURIComponent(
-              session.user.email!
+              trackEmail
             )}&all=true`
           );
           console.log("userSubscriptions", res.data)
@@ -247,12 +275,12 @@ export default function PlaylistPage() {
           for (const sub of subs) {
             if (!sub || !sub.subscribed) continue;
 
-            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37";
+            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37" || 
+                           String(sub.packageID?._id || sub.packageID) === "6a2d9aec3def6ce76dc7babc";
             const isExpired = !isMini && sub.expiryDate && new Date(sub.expiryDate).getTime() < now;
             
             if (isExpired) continue;
 
-            // Check subscription's allowedPlaylists (always considered)
             const allowed = Array.isArray(sub?.allowedPlaylists)
               ? sub.allowedPlaylists
               : [];
@@ -698,9 +726,16 @@ export default function PlaylistPage() {
                         a half ✨.
                       </p>
                       <Button
-                        onClick={() =>
-                          router.push("/subscription/687396821b4da119eb1c13fe")
-                        }
+                        onClick={() => {
+                          if (
+                            playlist?.category === "Wedding planning" ||
+                            playlist?.category === "Wedding Planning Experience"
+                          ) {
+                            router.push("/subscription/6965e63c6df4503dda02c12b");
+                          } else {
+                            router.push("/subscription/687396821b4da119eb1c13fe");
+                          }
+                        }}
                         size="sm"
                         className="rounded-2xl text-xs md:text-base hover:bg-creamey hover:text-lovely text-creamey bg-lovely"
                       >
@@ -863,7 +898,7 @@ export default function PlaylistPage() {
                 // Build a unified ordered list: folders get the index of their first video,
                 // ungrouped videos get their own index. Everything is then sorted together.
                 const renderVideoItem = (video: any) => {
-                  const isLocked = !video.isPublic && !canAccessPremium;
+                  const isLocked = checkVideoLocked(video);
                   const isActive = selectedVideo?._id === video._id;
                   return (
                     <div
@@ -1013,9 +1048,16 @@ export default function PlaylistPage() {
                 Subscribe to unlock all premium videos in this playlist.
               </p>
               <Button
-                onClick={() =>
-                  router.push("/subscription/687396821b4da119eb1c13fe")
-                }
+                onClick={() => {
+                  if (
+                    playlist?.category === "Wedding planning" ||
+                    playlist?.category === "Wedding Planning Experience"
+                  ) {
+                    router.push("/subscription/6965e63c6df4503dda02c12b");
+                  } else {
+                    router.push("/subscription/687396821b4da119eb1c13fe");
+                  }
+                }}
                 size="sm"
                 className="rounded-2xl bg-creamey hover:text-lovely text-lovely hover:bg-creamey hover:font-semibold"
               >

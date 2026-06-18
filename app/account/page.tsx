@@ -18,12 +18,14 @@ import {
   Handshake,
   Percent,
   CirclePercent,
+  BookHeart,
   Star,
   Sparkles,
   Bell,
   MessageCircle,
   Reply,
   User,
+  UserPlus,
 } from "lucide-react";
 import { useEffect, useState, useContext, Suspense } from "react";
 import { useSession } from "next-auth/react";
@@ -51,6 +53,8 @@ import PartnersGrid from "./partners/PartnersGrid";
 import FavoritesGrid from "./favorites/FavoritesGrid";
 import InspoTab from "./inspo/InspoTab";
 import ShoppingBestieTab from "./shopping-bestie/ShoppingBestieTab";
+import InvitationsTab from "./invitations/InvitationsTab";
+import WeddingBestieTab from "./wedding-bestie/WeddingBestieTab";
 import { generateDeviceFingerprint } from "@/utils/fingerprint";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -106,6 +110,7 @@ const AccountPage = () => {
   }, []);
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const [editingInfo, setEditingInfo] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
   const { loyaltyPoints, refreshLoyaltyPoints } = useAuth();
@@ -134,6 +139,8 @@ const AccountPage = () => {
   const [subscriptionDoc, setSubscriptionDoc] = useState<any | null>(null);
   const [shouldPromptChoosePlaylist, setShouldPromptChoosePlaylist] =
     useState(false);
+  const [invitationsCount, setInvitationsCount] = useState(0);
+  const [totalSpotsCount, setTotalSpotsCount] = useState(0);
 
   // Continue Watching (latest progress record)
   type ContinueItem = {
@@ -285,7 +292,7 @@ const AccountPage = () => {
     } else if (activeTab === "notifications") {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, session]);
+  }, [activeTab, session?.user?.email]);
 
   const handleMoveToCart = (item: any) => {
     addItem(item);
@@ -304,9 +311,14 @@ const AccountPage = () => {
 
   useEffect(() => {
     if (session?.user) {
-      fetchUserData();
-      fetchUserOrders();
-      fetchNotifications();
+      setIsDataLoading(true);
+      Promise.all([
+        fetchUserData(),
+        fetchUserOrders(),
+        fetchNotifications()
+      ]).finally(() => {
+        setIsDataLoading(false);
+      });
 
       // Check for fingerprint in sessionStorage for Google login tracking
       if (typeof window !== "undefined") {
@@ -334,7 +346,8 @@ const AccountPage = () => {
         }
       }
     }
-  }, [session]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id, session?.user?.email, session?.user?.firstName]);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -345,7 +358,19 @@ const AccountPage = () => {
             session.user.email
           )}`
         );
-        setSubscriptionDoc(res.data || null);
+        const subDoc = res.data || null;
+        setSubscriptionDoc(subDoc);
+        
+        // Compute total spots allowed
+        const slotsConfig = subDoc?.packageID?.subSubscriptionSlots || [];
+        const totalSpots = slotsConfig.reduce((acc: number, curr: any) => acc + (curr.maxCount || 0), 0);
+        setTotalSpotsCount(totalSpots);
+
+        if (totalSpots > 0) {
+          const invRes = await axios.get("/api/sub-subscriptions");
+          const activeInvites = (invRes.data.data || []).filter((i: any) => i.status !== "revoked").length;
+          setInvitationsCount(activeInvites);
+        }
       } catch (e) {
         setSubscriptionDoc(null);
       }
@@ -357,7 +382,7 @@ const AccountPage = () => {
     try {
       if (!session?.user?.isSubscribed && subscriptionDoc) {
         const pkg = String(subscriptionDoc?.packageID || "");
-        const targetPkg = "68bf6ae9c4d5c1af12cdcd37";
+        const isMiniPkg = pkg === "68bf6ae9c4d5c1af12cdcd37" || pkg === "6a2d9aec3def6ce76dc7babc";
         const subscribed = !!subscriptionDoc?.subscribed;
         const createdAt = subscriptionDoc?.createdAt
           ? new Date(subscriptionDoc.createdAt)
@@ -368,7 +393,7 @@ const AccountPage = () => {
           : [];
         const emptyAllowed = allowed.length === 0;
         const cond =
-          pkg === targetPkg &&
+          isMiniPkg &&
           subscribed &&
           createdAt &&
           createdAt > cutoff &&
@@ -391,8 +416,9 @@ const AccountPage = () => {
           subscriptionDoc?.packageID?._id ||
           subscriptionDoc?.packageID ||
           session?.user?.subscription?.packageId;
+        const isMiniPkg = pkgId === "68bf6ae9c4d5c1af12cdcd37" || pkgId === "6a2d9aec3def6ce76dc7babc";
         const url =
-          pkgId === "68bf6ae9c4d5c1af12cdcd37"
+          isMiniPkg
             ? `/api/playlists?all=true&packageId=${pkgId}`
             : "/api/playlists?all=true";
         const res = await fetch(url, {
@@ -686,9 +712,18 @@ const AccountPage = () => {
     }
   };
 
-  // Show loading state while session is loading
-  if (status === "loading") {
-    return <ProfileSkeleton />;
+  // Show loading state while session is loading or data is fetching
+  if (status === "loading" || (status === "authenticated" && isDataLoading)) {
+    return (
+      <div className="fixed min-h-screen w-full inset-0 z-50 bg-[#f9f2de] flex items-center justify-center">
+        <Image
+          src="/weddingPlanningPlanner/loadingAccount.GIF"
+          alt="Loading..."
+     width={500}
+     height={500}
+        />
+      </div>
+    );
   }
 
   // Show loading state while session is loading
@@ -738,9 +773,11 @@ const AccountPage = () => {
     { id: "favorites", label: "Favorites", icon: Star },
     { id: "inspo", label: "Inspo", icon: Sparkles },
     { id: "shopping-bestie", label: "Shopping Bestie", icon: ShoppingCart },
+    { id: "wedding-planning-bestie", label: "Wedding Planning Bestie", icon: BookHeart },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "Loyality", label: "Loyalty", icon: Gift },
     { id: "info", label: "Info", icon: UserCircle },
+    { id: "invitations", label: "Invitations", icon: UserPlus },
     { id: "wishlist", label: "Wishlist", icon: Heart },
     { id: "orders", label: "Recent Orders", icon: ShoppingBag },
   ];
@@ -820,6 +857,14 @@ const AccountPage = () => {
                 </div>
               )}
 
+              {/* Mini Wedding Experience */}
+              {(user.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" || 
+                (subscriptionDoc?.packageID?._id || subscriptionDoc?.packageID) === "6a2d9aec3def6ce76dc7babc") && (
+                <div className="flex items-center gap-2">
+                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Wedding Planning Experience 
+                </div>
+              )}
+
               {/* Wedding Planning Bestie */}
               {user.weddingPlanningBestie && (
                 <div className="flex items-center gap-2">
@@ -841,13 +886,24 @@ const AccountPage = () => {
             <div className="flex md:gap-4 flex-col md:flex-row">
             {session?.user?.subscription?.packageId ===
               "68bf6ae9c4d5c1af12cdcd37" && (
-              // "68bf6ae9c4d5c1af12cdcd37" && (
               <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=true">
                 <Button
                   size="sm"
                   className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                 >
                   Upgrade now to the Full Wifey Experience
+                </Button>
+              </Link>
+            )}
+
+            {(session?.user?.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" || 
+              (subscriptionDoc?.packageID?._id || subscriptionDoc?.packageID) === "6a2d9aec3def6ce76dc7babc") && (
+              <Link href="/subscription/6965e63c6df4503dda02c12b?upgrade=true">
+                <Button
+                  size="sm"
+                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                >
+                  Upgrade now to the Full Wedding Planning Bestie
                 </Button>
               </Link>
             )}
@@ -880,10 +936,14 @@ const AccountPage = () => {
               </Link>
             )}
 
-            {(subscriptionDoc?.packageID?._id ||
+            {((subscriptionDoc?.packageID?._id ||
               subscriptionDoc?.packageID ||
               session?.user?.subscription?.packageId) ===
-              "68bf6ae9c4d5c1af12cdcd37" &&
+              "68bf6ae9c4d5c1af12cdcd37" ||
+              (subscriptionDoc?.packageID?._id ||
+              subscriptionDoc?.packageID ||
+              session?.user?.subscription?.packageId) ===
+              "6a2d9aec3def6ce76dc7babc") &&
               !subscriptionDoc?.miniSubscriptionActivated && (
                 <div className="mt-2">
                   <Button
@@ -895,7 +955,25 @@ const AccountPage = () => {
                   </Button>
                 </div>
               )}
+
+            {totalSpotsCount > 0 && (
+              <div className="">
+                <p
+                  className="bg-creamey font-bold hover:cursor-pointer underline text-sm text-lovely rounded-md  hover:bg-creamey/80 whitespace-normal h-auto py-2 text-center"
+                  onClick={() => {
+                    setActiveTab("invitations");
+                    router.push('/account?tab=invitations', { scroll: false });
+                    setTimeout(() => {
+                      document.getElementById("tabs-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 100);
+                  }}
+                >
+                  Invitations ({invitationsCount}/{totalSpotsCount})
+                </p>
+              </div>
+            )}
             </div>
+
           </div>
         </div>
       </div>
@@ -989,8 +1067,7 @@ const AccountPage = () => {
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="border-b border-pinkey overflow-x-auto">
+      <div id="tabs-section" className="border-b border-pinkey overflow-x-auto scrollbar-hide scroll-mt-20">
         <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
@@ -1467,6 +1544,10 @@ const AccountPage = () => {
           </div>
         )}
 
+        {activeTab === "invitations" && (
+          <InvitationsTab subscriptionDoc={subscriptionDoc} />
+        )}
+
         {activeTab === "info" && (
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -1773,6 +1854,12 @@ const AccountPage = () => {
         {activeTab === "shopping-bestie" && (
           <div>
             <ShoppingBestieTab isSubscribed={user.isSubscribed} />
+          </div>
+        )}
+        
+        {activeTab === "wedding-planning-bestie" && (
+          <div>
+            <WeddingBestieTab />
           </div>
         )}
       </div>

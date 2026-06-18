@@ -30,13 +30,13 @@ export async function GET(request: NextRequest) {
       try {
         if (ObjectId.isValid(subscriptionId)) {
           subscription = await subscriptionsModel.findOne({ _id: new ObjectId(subscriptionId) })
-            .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals");
+            .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals subSubscriptionSlots");
         }
 
         // If not found by ObjectId, try by shipmentID
         if (!subscription) {
           subscription = await subscriptionsModel.findOne({ shipmentID: subscriptionId })
-            .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals");
+            .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals subSubscriptionSlots");
         }
       } catch (error) {
         console.error("Error finding by ID:", error);
@@ -58,13 +58,14 @@ export async function GET(request: NextRequest) {
             {
               $or: [
                 { expiryDate: { $gt: new Date() } },
-                { packageID: PACKAGE_IDS.MINI }
+                { packageID: PACKAGE_IDS.MINI },
+                { packageID: PACKAGE_IDS.MINI_WEDDING }
               ]
             }
           ],
           subscribed: true,
         }).sort({ expiryDate: -1 })
-          .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals");
+          .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals subSubscriptionSlots");
 
         if (!subscriptions || subscriptions.length === 0) {
           return NextResponse.json({ message: "Subscription not found" }, { status: 404 });
@@ -79,7 +80,7 @@ console.log("userSubscriptions",subscriptions)
           { giftRecipientEmail: email }
         ]
       }).sort({ createdAt: -1 }) // Get the most recent subscription for this email
-        .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals");
+        .populate("packageID", "packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners renewals subSubscriptionSlots");
     }
 
     if (!subscription) {

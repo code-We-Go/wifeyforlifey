@@ -348,15 +348,13 @@ export default function PackageDetailPage() {
                 >
                   <div
                     className={`rounded-sm  shadow-xl h-[350px]  ${
-                      packageData?._id === "68bf6ae9c4d5c1af12cdcd37" &&
-                      card.id !== 5 &&
-                      card.id !== 0
+                      card.enable === false
                         ? "bg-gray-500 grayscale-[100%]"
                         : "bg-lovely"
                     }`}
                   >
                     {/* Card Header */}
-                    <div className="p-2 md:p-4 pb-32 md:pb-40 h-full ">
+                    <div className="p-2  pb-32 md:pb-40 h-full ">
                       <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
                         {card.title}
                       </h3>
@@ -374,9 +372,7 @@ export default function PackageDetailPage() {
                   {/* Mobile Screen Mockup - Moving out to avoid grayscale on sibling overlay */}
                   <div
                     className={`absolute -bottom-14 -ml-[6px] xs:-bottom-32 sm:-bottom-20  lg:-bottom-40 xl:-bottom-40 left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px]  h-[450px] xs:h-[550px] ${
-                      packageData?._id === "68bf6ae9c4d5c1af12cdcd37" &&
-                      card.id !== 5 &&
-                      card.id !== 0
+                      card.enable === false
                         ? "grayscale-[100%]"
                         : ""
                     }`}
@@ -388,13 +384,11 @@ export default function PackageDetailPage() {
                       className="object-contain object-bottom"
                     />
                   </div>
-                  {packageData?._id === "68bf6ae9c4d5c1af12cdcd37" &&
-                    card.id !== 5 &&
-                    card.id !== 0 && (
+                  {card.enable === false && (
                       <div className="absolute bg-lovely top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] z-30 flex flex-col items-center justify-center p-3  rounded-sm">
                         <p>🔒</p>
                         <p className={`${thirdFont.className} text-creamey  text-center text-sm md:text-base drop-shadow-lg uppercase tracking-wide`}>
-                          This feature is only available in The Full Wifey Experience
+                          This feature is only available in The Full {packageData?._id === "6a2d9aec3def6ce76dc7babc" ? "Wedding" : "Wifey"} Experience
                         </p>
                       </div>
                     )}

@@ -84,6 +84,10 @@ const SubscriptionSchema = new Schema(
       type: Boolean,
       required: false,
     },
+    miniWeddingSubscriptionActivated:{
+      type: Boolean,
+      required: false,
+    },
     bostaCity: { type: String, required: false },
     bostaCityName: { type: String, required: false },
     bostaZone: { type: String, required: false },

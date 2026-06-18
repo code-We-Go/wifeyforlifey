@@ -286,6 +286,7 @@ export interface SupportCard {
   title: string;
   description: string[];
   imagePath: string;
+  enable?: boolean;
 }
 
 export interface PackageVariant {
@@ -320,6 +321,7 @@ export interface Ipackage {
   accessAllInspos?: boolean; // If true, package grants access to all packageInspos
   packagePartners?: string[]; // Partner IDs included in this package
   accessAllPartners?: boolean; // If true, package grants access to all packagePartners
+  subSubscriptionSlots?: { role: "groom" | "bridesmaids"; maxCount: number }[];
 }
 
 export interface ISubscription {

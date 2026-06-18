@@ -3,7 +3,7 @@ import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import bcrypt from "bcryptjs";
 import { generateToken } from "@/app/utils/jwtUtils";
-
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 export async function POST(req: Request) {
   try {
     await ConnectDB();
@@ -55,11 +55,12 @@ export async function POST(req: Request) {
     const userSubs = await subscriptionsModel.find({ email: newUser.email });
     if (userSubs.length > 0) {
       const subIds = userSubs.map(s => s._id.toString());
-      const existingIds = newUser.subscriptions.map((s: any) => s.toString());
+      const existingIds = newUser.subscriptions?.map((s: any) => s.toString()) || [];
 
       let modified = false;
       for (const id of subIds) {
         if (!existingIds.includes(id)) {
+          if (!newUser.subscriptions) newUser.subscriptions = [];
           newUser.subscriptions.push(id);
           modified = true;
         }
@@ -71,6 +72,12 @@ export async function POST(req: Request) {
     }
 
     // await newUser.populate("subscriptions");
+
+    // Accept any pending sub-subscriptions for this new user
+    await SubSubscriptionModel.updateMany(
+      { inviteeEmail: email, status: "pending" },
+      { $set: { status: "accepted", inviteeUser: newUser._id } }
+    );
 
     // Generate token
     const token = generateToken({

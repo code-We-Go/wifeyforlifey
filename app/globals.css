@@ -72,7 +72,7 @@
   select:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0px 1000px #fbf3e0 inset !important;
     box-shadow: 0 0 0px 1000px #fbf3e0 inset !important;
-    -webkit-text-fill-color: #000 !important;
+    -webkit-text-fill-color: #d32333 !important;
   }
 
   /* .dark {
