@@ -2323,7 +2323,7 @@ We’re beyond excited to share this experience with you… your planner will be
           >
             {/* Wifey Experience Package Details */}
             <div className=" bg-lovely text-creamey rounded-2xl shadow-md p-4 mb-6 flex flex-col items-center border border-lovely">
-              <div className="relative w-[95%] h-[60vh] md:h-[40vh] lg:h-[50vh] xl:h-[60vh]">
+              <div className="relative max-md:aspect-square max-md:h-auto w-[95%] md:w-[80%] h-[60vh] md:h-[60vh] lg:h-[60vh] xl:h-[65vh]">
                 <Image
                   src={packageData.imgUrl}
                   fill
