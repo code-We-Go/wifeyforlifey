@@ -230,6 +230,10 @@ const WeddingBestieTab = () => {
             <ChevronRight className="h-4 w-4" />
             <span className="text-sm font-bold">{selectedCategory.name}</span>
           </div>
+          <div className="bg-pinkey/30 border border-lovely/15 rounded-xl p-4 text-[11px] md:text-xs text-lovely/80 leading-relaxed">
+            <span className="font-bold text-lovely mr-1">Please note:</span>
+            This listed vendor is not a recommendation, it's just to get you started. Prices may not be accurate as vendors have full rights to change their price without notifying anyone, so please take these prices as an estimate and always make your own research for reviews.
+          </div>
 
           <div className="flex flex-wrap gap-3">
             <Button
