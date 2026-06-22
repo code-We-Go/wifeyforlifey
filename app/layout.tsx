@@ -31,15 +31,15 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
 });
 
-export const wifeyFont = localFonts({
+const wifeyFont = localFonts({
   src: "./fonts/AcuminVariableConcept.otf",
 });
 
-export const lifeyFont = localFonts({
+const lifeyFont = localFonts({
   src: "./fonts/Nickainley.otf",
 });
 
-export const Gluten = localFonts({
+const Gluten = localFonts({
   src: "./fonts/Gluten.ttf",
 });
 

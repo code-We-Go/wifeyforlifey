@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         isSubscribed: user.isSubscribed,
         birthDate: user.birthDate,
         weddingDate: user.weddingDate,
+        shippingData: user.shippingData,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       }

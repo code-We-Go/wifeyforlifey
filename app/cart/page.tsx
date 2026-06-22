@@ -9,6 +9,8 @@ import {
   ShoppingBag,
   CreditCard,
   ArrowRight,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -155,7 +157,7 @@ const calculateShippingRate = (
 };
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, totalItems, totalPrice } =
+  const { items, removeItem, updateQuantity, totalItems, totalPrice, subscriptionItems, removeSubscription, updateSubscriptionQuantity } =
     useCart();
   const [couponCode, setCouponCode] = useState("");
   const [isApplying, setIsApplying] = useState(false);
@@ -212,7 +214,9 @@ export default function CartPage() {
     }, 1000);
   };
 
-  if (items.length === 0) {
+  const hasItems = items.length > 0 || subscriptionItems.length > 0;
+
+  if (!hasItems) {
     return (
       <div className="container-custom py-16 max-w-4xl  mx-auto text-center">
         <div className="bg-card rounded-2xl bg-lovely text-creamey border-2 border-lovely  p-8 md:p-12 shadow-sm">
@@ -358,6 +362,99 @@ export default function CartPage() {
             ))}
           </div>
 
+          {/* Subscriptions Section */}
+          {subscriptionItems.length > 0 && (
+            <div className="mt-8 space-y-6">
+              <h2 className={`${thirdFont.className} text-2xl font-bold text-lovely border-b border-lovely pb-2`}>
+                Planners
+              </h2>
+              {subscriptionItems.length > 1 && (
+                <div className="bg-lovely/10 text-lovely p-4 rounded-2xl border border-lovely/20 text-sm font-medium">
+                  🎉 Save on shipping! All planners ship together for a single shipping fee.
+                </div>
+              )}
+              <div className="space-y-4 w-full">
+                {subscriptionItems.map((item) => (
+                  <div key={item.cartItemId} className="bg-card bg-lovely text-creamey rounded-2xl p-4 md:p-6 shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                      {/* Product */}
+                      <div className="md:col-span-5 flex items-center space-x-4">
+                        <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.packageName}
+                            fill
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <h5 className="font-medium line-clamp-1">{item.packageName}</h5>
+                          {item.duration > 0 && (
+                            <p className="text-sm text-creamey/80">
+                              {item.duration} Months Subscription
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {/* Tier */}
+                      <div className="md:col-span-2 text-center capitalize font-semibold">
+                        {item.tier}
+                      </div>
+                      {/* Quantity */}
+                      <div className="md:col-span-2 flex justify-center items-center">
+                        <div className="flex items-center bg-pinkey/10 border border-creamey/20 rounded-full px-2 py-1">
+                          <button
+                            onClick={() =>
+                              updateSubscriptionQuantity(item.cartItemId, item.quantity - 1)
+                            }
+                            className="p-1 text-creamey hover:bg-creamey/10 rounded-full transition-colors"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-8 text-center text-sm font-medium text-creamey">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateSubscriptionQuantity(item.cartItemId, item.quantity + 1)
+                            }
+                            className="p-1 text-creamey hover:bg-creamey/10 rounded-full transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                      {/* Price */}
+                      <div className="md:col-span-1 text-center font-medium">
+                        LE {item.price.toFixed(2)}
+                      </div>
+                      {/* Total */}
+                      <div className="md:col-span-2 flex items-center justify-between md:justify-end">
+                        <span className="md:hidden text-sm text-creamey/80">
+                          Total:
+                        </span>
+                        <div className="flex items-center">
+                          <span className="font-medium">
+                            LE {(item.price * item.quantity).toFixed(2)}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="ml-2 h-8 w-8 text-creamey hover:text-red-300"
+                            onClick={() => removeSubscription(item.cartItemId)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove item</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-4">
             <div className="mt-6 flex justify-between items-center">
               <Button
@@ -366,7 +463,6 @@ export default function CartPage() {
                 className="gap-2 rounded-2xl bg-creamey text-lovely hover:bg-lovely hover:text-creamey border-lovely"
               >
                 <Link href="/shop">
-                  {/* <ArrowLeft className="h-4 w-4" /> */}
                   Continue Shopping
                 </Link>
               </Button>
@@ -377,7 +473,7 @@ export default function CartPage() {
                 variant="outline"
                 className="gap-2 rounded-2xl bg-lovely hover:border hover:border-lovely hover:text-lovely text-creamey"
               >
-                <Link href="/checkout">
+                <Link href={subscriptionItems.length > 0 ? "/subscription/checkout" : "/checkout"}>
                   Checkout
                   <ArrowRight className="h-4 w-4" />
                 </Link>

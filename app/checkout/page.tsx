@@ -845,7 +845,7 @@ const CheckoutClientPage = () => {
       // const paymobIframeURL = `https://accept.paymob.com/api/acceptance/iframes/890332?payment_token=${res.data.token}`;
       const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
 
-      router.push(paymobIframeURL);
+      window.location.href = paymobIframeURL;
     } else if (payment === "instapay") {
       if (res.data.success) {
         clearCart();

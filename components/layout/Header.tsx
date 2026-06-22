@@ -448,9 +448,14 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                       "text-creamey"
                     )}
                   >
-                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center relative">
                       {item.icon}
                       {item.name}
+                      {totalItems > 0 && (
+                        <span className="absolute top-2 right-2 md:right-4 lg:right-6 bg-red-500 text-creamey text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                          {totalItems}
+                        </span>
+                      )}
                     </div>
                   </button>
                 ) : (
@@ -712,6 +717,11 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                     >
                       <ShoppingBag className="h-5 w-5" />
                       <span>Cart</span>
+                      {totalItems > 0 && (
+                        <span className="bg-red-500 text-creamey text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                          {totalItems}
+                        </span>
+                      )}
                     </Link>
 
                     <Link
@@ -784,8 +794,13 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                   <User className="text-creamey" />
                 </div>
               )}
-              <button onClick={openCart} className="bg-transparent border-0 cursor-pointer">
+              <button onClick={openCart} className="bg-transparent border-0 cursor-pointer relative">
                 <ShoppingBag />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-creamey text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
               </button>
             </div>
             {/* <Link href="/cart" className="relative mr-4">

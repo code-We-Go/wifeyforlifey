@@ -221,515 +221,516 @@ async function handleSubscription(
   // Ensure packageModel is registered for populate
   console.log("registering" + packageModel);
 
-  const paymentOp = await subscriptionPaymentModel
-    .findById(referenceId)
+  const paymentOps = await subscriptionPaymentModel
+    .find({ paymentID: paymobOrderId })
     .populate({ path: "to", options: { strictPopulate: false } })
     .populate({ path: "from", options: { strictPopulate: false } });
 
-  if (!paymentOp) {
+  if (!paymentOps || paymentOps.length === 0) {
     console.error(
-      `Subscription payment not found for referenceId: ${referenceId}`
+      `Subscription payments not found for paymentID/paymobOrderId: ${paymobOrderId}`
     );
     return { success: false, redirect: "payment/failed" };
   }
 
   if (!isSuccess) {
-    await subscriptionPaymentModel.findByIdAndUpdate(paymentOp._id, {
-      status: "failed",
-    });
+    await subscriptionPaymentModel.updateMany(
+      { paymentID: paymobOrderId },
+      { status: "failed" }
+    );
     return { success: false, redirect: "payment/failed" };
   }
 
-  console.log("=== SUBSCRIPTION PAYMENT OP ===");
-  console.log("paymentOp.to._id:", (paymentOp as any)?.to?._id?.toString());
-  console.log("paymentOp.isGift:", paymentOp.isGift);
-  console.log("paymentOp.email:", paymentOp.email);
+  console.log("=== PROCESSING MULTI/SINGLE SUBSCRIPTION PAYMENT ===");
+  console.log("Total payments found:", paymentOps.length);
 
-  const isUpgradeProcess = paymentOp?.process === "upgrade";
-  const isRenewProcess = paymentOp?.process === "renew";
+  let finalRedirect = "payment/success";
 
-  // Compute expiry for subscription based on package duration
-  const expiryDate = new Date();
-  const targetPackage = paymentOp.to as any;
-  const pkgId = targetPackage?._id?.toString();
+  for (let idx = 0; idx < paymentOps.length; idx++) {
+    const paymentOp = paymentOps[idx];
+    const isFirstOfMulti = idx === 0;
 
-  const durationToUse = paymentOp.selectedDuration ?? targetPackage?.duration;
+    console.log(`Processing subscription payment index: ${idx}, ID: ${paymentOp._id}`);
+    console.log("paymentOp.to._id:", (paymentOp as any)?.to?._id?.toString());
+    console.log("paymentOp.isGift:", paymentOp.isGift);
+    console.log("paymentOp.email:", paymentOp.email);
 
-  if (typeof durationToUse === "number" && durationToUse > 0) {
-    expiryDate.setMonth(expiryDate.getMonth() + durationToUse);
-  } else if (pkgId === "68bf6ae9c4d5c1af12cdcd37" || pkgId === "6a2d9aec3def6ce76dc7babc") {
-    // Mini subscription: expiry is now
-  } else if (pkgId === "687396821b4da119eb1c13fe") {
-    // Legacy fallback
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-  } else if (pkgId === "6965e63c6df4503dda02c12b") {
-    // Legacy fallback
-    expiryDate.setMonth(expiryDate.getMonth() + 6);
-  }
+    const isUpgradeProcess = paymentOp?.process === "upgrade";
+    const isRenewProcess = paymentOp?.process === "renew";
 
-  // For gifts, use recipient email for account linkage and loyalty
-  const subscriptionEmail =
-    paymentOp.isGift && paymentOp.giftRecipientEmail
-      ? paymentOp.giftRecipientEmail
-      : paymentOp.email;
-  console.log("subscriptionEmail:", subscriptionEmail);
+    // Compute expiry for subscription based on package duration
+    const expiryDate = new Date();
+    const targetPackage = paymentOp.to as any;
+    const pkgId = targetPackage?._id?.toString();
+    const durationToUse = paymentOp.selectedDuration ?? targetPackage?.duration;
 
-  // Build subscription data
-  const subscriptionData: any = {
-    paymentID: paymobOrderId,
-    email: subscriptionEmail,
-    packageID: paymentOp.to,
-    selectedDuration: paymentOp.selectedDuration,
-    subscribed: true,
-    expiryDate,
-    status: "confirmed",
-    process: paymentOp.process,
-    cart: paymentOp.cart || [],
-    redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,
-    appliedDiscount: paymentOp.appliedDiscount,
-    appliedDiscountAmount: paymentOp.appliedDiscountAmount,
-    // User info
-    firstName: paymentOp.firstName,
-    lastName: paymentOp.lastName,
-    phone: paymentOp.phone,
-    whatsAppNumber: paymentOp.whatsAppNumber,
-    // Gift info
-    isGift: paymentOp.isGift,
-    pickupFromBazar: paymentOp.pickupFromBazar,
-    giftSenderEmail: paymentOp.isGift ? paymentOp.email : undefined,
-    giftRecipientEmail: paymentOp.giftRecipientEmail,
-    specialMessage: paymentOp.specialMessage,
-    giftCardName: paymentOp.giftCardName,
-    // Address info
-    country: paymentOp.country,
-    address: paymentOp.address,
-    apartment: paymentOp.apartment,
-    city: paymentOp.city,
-    state: paymentOp.state,
-    postalZip: paymentOp.postalZip,
-    // Billing info
-    billingCountry: paymentOp.billingCountry,
-    billingFirstName: paymentOp.billingFirstName,
-    billingLastName: paymentOp.billingLastName,
-    billingState: paymentOp.billingState,
-    billingAddress: paymentOp.billingAddress,
-    billingApartment: paymentOp.billingApartment,
-    billingPostalZip: paymentOp.billingPostalZip,
-    billingCity: paymentOp.billingCity,
-    billingPhone: paymentOp.billingPhone,
-    // Payment info
-    total: paymentOp.total,
-    subTotal: paymentOp.subTotal,
-    shipping: paymentOp.shipping,
-    currency: paymentOp.currency,
-    paymentMethod: paymentOp.paymentMethod,
-    instapayReciept: paymentOp.instapayReciept,
-    // Bosta fields
-    bostaCity: paymentOp.bostaCity,
-    bostaCityName: paymentOp.bostaCityName,
-    bostaZone: paymentOp.bostaZone,
-    bostaZoneName: paymentOp.bostaZoneName,
-    bostaDistrict: paymentOp.bostaDistrict,
-    bostaDistrictName: paymentOp.bostaDistrictName,
-  };
-
-  // For NEW subscriptions only: pull the package cost and store it on the record
-  if (paymentOp.process === "new" && typeof targetPackage?.cost === "number") {
-    subscriptionData.cost = targetPackage.cost;
-    console.log(`[handleSubscription] Storing package cost on new subscription: ${targetPackage.cost}`);
-  }
-
-  // Always create a new subscription document (preserves history)
-  const created = await subscriptionsModel.create(subscriptionData);
-  let updatedSub: any = created;
-  await UserModel.findOneAndUpdate(
-    { email: subscriptionEmail },
-    {
-      isSubscribed: true,
-      $push: { subscriptions: created._id },
+    if (typeof durationToUse === "number" && durationToUse > 0) {
+      expiryDate.setMonth(expiryDate.getMonth() + durationToUse);
+    } else if (pkgId === "68bf6ae9c4d5c1af12cdcd37" || pkgId === "6a2d9aec3def6ce76dc7babc") {
+      // Mini subscription: expiry is now
+    } else if (pkgId === "687396821b4da119eb1c13fe") {
+      // Legacy fallback
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+    } else if (pkgId === "6965e63c6df4503dda02c12b") {
+      // Legacy fallback
+      expiryDate.setMonth(expiryDate.getMonth() + 6);
     }
-  );
 
-  // Decrease stock for cart items if included in the subscription
-  if (paymentOp.cart && paymentOp.cart.length > 0) {
-    console.log("Decreasing stock for cart items in subscription:", paymentOp.cart.length);
-    await decreaseStock(paymentOp.cart);
-  }
+    // For gifts, use recipient email for account linkage and loyalty
+    const subscriptionEmail =
+      paymentOp.isGift && paymentOp.giftRecipientEmail
+        ? paymentOp.giftRecipientEmail
+        : paymentOp.email;
+    console.log("subscriptionEmail:", subscriptionEmail);
 
-  // Ensure package is populated for downstream logic
-  if (updatedSub?._id) {
-    updatedSub = await subscriptionsModel.findById(updatedSub._id).populate({
-      path: "packageID",
-      options: { strictPopulate: false },
-    });
-  }
-
-  // Loyalty earn for subscription
-  if (
-    updatedSub?.packageID &&
-    typeof (updatedSub.packageID as any).price === "number"
-  ) {
-    await LoyaltyTransactionModel.create({
+    // Build subscription data
+    const subscriptionData: any = {
+      paymentID: paymobOrderId,
       email: subscriptionEmail,
-      type: "earn",
-      reason: "subscription",
-      amount: isUpgradeProcess
-        ? Math.max(
-            0,
-            ((paymentOp.to as any)?.price || 0) -
-              ((paymentOp.from as any)?.price || 0)
-          )
-        : (updatedSub.packageID as any).price,
-      bonusID: isUpgradeProcess
-        ? "69e35eba75941926796f40ce"
-        : (updatedSub.packageID as any)?._id?.toString() ===
-          "68bf6ae9c4d5c1af12cdcd37" || (updatedSub.packageID as any)?._id?.toString() === "6a2d9aec3def6ce76dc7babc"
-        ? "68c176b69c1ff0a2ad779c2d" // TODO: Add a new bonus ID later for MINI_WEDDING
-        : "687d67f459e6ba857a54ed53",
-    });
-  }
+      packageID: paymentOp.to,
+      selectedDuration: paymentOp.selectedDuration,
+      subscribed: true,
+      expiryDate,
+      status: "confirmed",
+      process: paymentOp.process,
+      cart: paymentOp.cart || [],
+      redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,
+      appliedDiscount: paymentOp.appliedDiscount,
+      appliedDiscountAmount: paymentOp.appliedDiscountAmount,
+      // User info
+      firstName: paymentOp.firstName,
+      lastName: paymentOp.lastName,
+      phone: paymentOp.phone,
+      whatsAppNumber: paymentOp.whatsAppNumber,
+      // Gift info
+      isGift: paymentOp.isGift,
+      pickupFromBazar: paymentOp.pickupFromBazar,
+      giftSenderEmail: paymentOp.isGift ? paymentOp.email : undefined,
+      giftRecipientEmail: paymentOp.giftRecipientEmail,
+      specialMessage: paymentOp.specialMessage,
+      giftCardName: paymentOp.giftCardName,
+      // Address info
+      country: paymentOp.country,
+      address: paymentOp.address,
+      apartment: paymentOp.apartment,
+      city: paymentOp.city,
+      state: paymentOp.state,
+      postalZip: paymentOp.postalZip,
+      // Billing info
+      billingCountry: paymentOp.billingCountry,
+      billingFirstName: paymentOp.billingFirstName,
+      billingLastName: paymentOp.billingLastName,
+      billingState: paymentOp.billingState,
+      billingAddress: paymentOp.billingAddress,
+      billingApartment: paymentOp.billingApartment,
+      billingPostalZip: paymentOp.billingPostalZip,
+      billingCity: paymentOp.billingCity,
+      billingPhone: paymentOp.billingPhone,
+      // Payment info
+      total: paymentOp.total,
+      subTotal: paymentOp.subTotal,
+      shipping: paymentOp.shipping,
+      currency: paymentOp.currency,
+      paymentMethod: paymentOp.paymentMethod,
+      instapayReciept: paymentOp.instapayReciept,
+      // Bosta fields
+      bostaCity: paymentOp.bostaCity,
+      bostaCityName: paymentOp.bostaCityName,
+      bostaZone: paymentOp.bostaZone,
+      bostaZoneName: paymentOp.bostaZoneName,
+      bostaDistrict: paymentOp.bostaDistrict,
+      bostaDistrictName: paymentOp.bostaDistrictName,
+    };
 
-  if (paymentOp.redeemedLoyaltyPoints > 0) {
-    await LoyaltyTransactionModel.create({
-      email: subscriptionEmail,
-      type: "spend",
-      reason: "subscription",
-      amount: paymentOp.redeemedLoyaltyPoints,
-    });
-  }
-
-  // Discount usage
-  if (paymentOp.appliedDiscount && paymentOp.appliedDiscountAmount) {
-    await DiscountModel.findByIdAndUpdate(paymentOp.appliedDiscount, {
-      $inc: { usageCount: 1 },
-    });
-  }
-
-  // Bosta integration (skip for upgrade, renew, or pickup from bazar)
-  const isPickup = paymentOp.pickupFromBazar === true;
-  try {
-    if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess && !isRenewProcess && !isPickup) {
-      const bostaService = new BostaService();
-      const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
-      const deliveryPayload = bostaService.createDeliveryPayload(
-        updatedSub,
-        webhookUrl
-      );
-      console.log(
-        "Creating Bosta delivery for subscription:",
-        updatedSub._id
-      );
-      const bostaResult = await bostaService.createDelivery(deliveryPayload);
-      console.log("bostaResult" + JSON.stringify(bostaResult));
-      if (bostaResult.success && bostaResult.data) {
-        await subscriptionsModel.findByIdAndUpdate(updatedSub._id, {
-          shipmentID: bostaResult.data._id,
-          status: "confirmed",
-        });
-        console.log(
-          "Bosta delivery created successfully:",
-          bostaResult.data.trackingNumber
-        );
-      } else {
-        console.error("Failed to create Bosta delivery:", bostaResult.error);
-      }
-    } else if (isUpgradeProcess || isRenewProcess || isPickup) {
-      console.log(
-        `Skipping Bosta delivery for ${isPickup ? 'pickup from bazar' : paymentOp.process} process:`,
-        updatedSub?._id
-      );
+    // For NEW subscriptions only: pull the package cost and store it on the record
+    if (paymentOp.process === "new" && typeof targetPackage?.cost === "number") {
+      subscriptionData.cost = targetPackage.cost;
+      console.log(`[handleSubscription] Storing package cost on new subscription: ${targetPackage.cost}`);
     }
-  } catch (bostaError) {
-    console.error("Bosta integration error:", bostaError);
-  }
 
-  // Send email notifications
-  try {
-    if (updatedSub) {
-      // Admin notification (skip for upgrade or renew)
-      if (!isUpgradeProcess && !isRenewProcess) {
-        await sendMail({
-          to: "orders@shopwifeyforlifey.com",
-          name: "NEW BESTIEEE",
-          subject: "NEW BESTIEEEE",
-          body: `
-          <h2>New Subscription Notification</h2>
-          <p>A new subscription has been successfully created:</p>
-          <ul>
-            <li><strong>Email:</strong> ${paymentOp.email}</li>
-            ${
-              updatedSub.isGift
-                ? `<li><strong>Gift:</strong> Yes</li>
-                <li><strong>Gift Recipient Email:</strong> ${
-                  updatedSub.giftRecipientEmail || "N/A"
-                }</li>
-                <li><strong>Gift Sender Email:</strong> ${
-                  updatedSub.giftSenderEmail || "N/A"
-                }</li>
-                
-            <li><strong>Special Message:</strong> ${
-              updatedSub.specialMessage || "N/A"
-            }</li>
-             <li><strong>Gift Card:</strong> ${
-               updatedSub.giftCardName || "N/A"
-             }</li>`
-                : ""
-            }
-            <li><strong>Package:</strong> ${
-              (updatedSub.packageID as any)?.name || "N/A"
-            }</li>
-            <li><strong>First Name:</strong> ${
-              updatedSub.firstName || "N/A"
-            }</li>
-            <li><strong>Last Name:</strong> ${
-              updatedSub.lastName || "N/A"
-            }</li>
-            <li><strong>Phone:</strong> ${updatedSub.phone || "N/A"}</li>
-            <li><strong>Country:</strong> ${
-              updatedSub.country || "N/A"
-            }</li>
-            ${
-              updatedSub.cart && updatedSub.cart.length > 0
-                ? `<li><strong>Bundled Cart Items:</strong>
-                    <ul>
-                      ${updatedSub.cart
-                        .map(
-                          (item: any) =>
-                            `<li>${item.productName} x ${item.quantity} ${
-                              item.variant
-                                ? `(${item.variant.name}${
-                                    item.attributes?.name
-                                      ? `: ${item.attributes.name}`
-                                      : ""
-                                  })`
-                                : ""
-                            }</li>`
-                        )
-                        .join("")}
-                    </ul>
-                   </li>`
-                : ""
-            }
-          </ul>
-        `,
-        from: "noreply@shopwifeyforlifey.com",
-        });
-        console.log("Subscription notification email sent successfully");
+    // Always create a new subscription document (preserves history)
+    const created = await subscriptionsModel.create(subscriptionData);
+    let updatedSub: any = created;
+    await UserModel.findOneAndUpdate(
+      { email: subscriptionEmail },
+      {
+        isSubscribed: true,
+        $push: { subscriptions: created._id },
       }
-
-      // Gift flow
-      if (updatedSub.isGift) {
-        const { giftMail } = await import("@/utils/giftMail");
-        const firstName = updatedSub.firstName || "Wifey";
-        await sendMail({
-          to: paymentOp.email,
-          name: firstName,
-          subject: "Thank You for Your Gift Purchase! 🎁",
-          body: giftMail(updatedSub._id.toString(), updatedSub.cart),
-          from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-        });
-        console.log("Gift email sent successfully to", updatedSub.email);
-      } else if (paymentOp.process === "new") {
-        // Welcome emails based on package ID
-        if (
-          (updatedSub.packageID as any)?._id &&
-          (updatedSub.packageID as any)._id.toString() ===
-            "687396821b4da119eb1c13fe"
-        ) {
-          const firstName = updatedSub.firstName || "Wifey";
-          const { generateWelcomeEmail } = await import(
-            "@/utils/FullExperienceEmail"
-          );
-          await sendMail({
-            to: updatedSub.email,
-            name: firstName,
-            subject:
-              "You're in, beautiful! Welcome to the Wifeys community 💗",
-            body: generateWelcomeEmail(firstName, updatedSub),
-            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-          });
-          const brevoApiKey = process.env.BREVO_API_KEY;
-          if (brevoApiKey) {
-            await fetch("https://api.brevo.com/v3/contacts", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "api-key": brevoApiKey,
-              },
-              body: JSON.stringify({
-                email: updatedSub.email,
-                listIds: [5],
-                updateEnabled: true,
-              }),
-            });
-          }
-          console.log(
-            "Welcome email sent successfully to",
-            updatedSub.email
-          );
-        } else if (
-          (updatedSub.packageID as any)?._id &&
-          (updatedSub.packageID as any)._id.toString() ===
-            "68bf6ae9c4d5c1af12cdcd37"
-        ) {
-          const firstName = updatedSub.firstName || "Wifey";
-          const { generateMiniExperienceMail } = await import(
-            "@/utils/MiniExperienceEmail"
-          );
-          await sendMail({
-            to: updatedSub.email,
-            name: firstName,
-            subject: "Welcome to the Mini Wifey Experience! 💕",
-            body: generateMiniExperienceMail(firstName, updatedSub),
-            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-          });
-          const brevoApiKey = process.env.BREVO_API_KEY;
-          if (brevoApiKey) {
-            await fetch("https://api.brevo.com/v3/contacts", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "api-key": brevoApiKey,
-              },
-              body: JSON.stringify({
-                email: updatedSub.email,
-                listIds: [4],
-                updateEnabled: true,
-              }),
-            });
-          }
-          console.log(
-            "Mini Experience email sent successfully to",
-            updatedSub.email
-          );
-        } else if (
-          (updatedSub.packageID as any)?._id &&
-          (updatedSub.packageID as any)._id.toString() ===
-            "6a2d9aec3def6ce76dc7babc"
-        ) {
-          const firstName = updatedSub.firstName || "Wifey";
-          const { generateWelcomeEmail } = await import(
-            "@/utils/weddingPlanningExperienceEmail"
-          ); // Using wedding experience mail for now, will change later
-          await sendMail({
-            to: updatedSub.email,
-            name: firstName,
-            subject: "Welcome to the Mini Wedding Planning Experience! 💕",
-            body: generateWelcomeEmail(firstName, updatedSub),
-            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-          });
-          const brevoApiKey = process.env.BREVO_API_KEY;
-          if (brevoApiKey) {
-            await fetch("https://api.brevo.com/v3/contacts", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "api-key": brevoApiKey,
-              },
-              body: JSON.stringify({
-                email: updatedSub.email,
-                listIds: [4], // TODO: Change to a new Brevo list later
-                updateEnabled: true,
-              }),
-            });
-          }
-          console.log(
-            "Mini Wedding Planning Experience email sent successfully to",
-            updatedSub.email
-          );
-        } else if (
-          (updatedSub.packageID as any)?._id &&
-          (updatedSub.packageID as any)._id.toString() ===
-            "6965e63c6df4503dda02c12b"
-        ) {
-          const firstName = updatedSub.firstName || "Wifey";
-          const { generateWelcomeEmail } = await import(
-            "@/utils/weddingPlanningExperienceEmail"
-          );
-          await sendMail({
-            to: updatedSub.email,
-            name: firstName,
-            subject: "Welcome to the Wedding Planning Experience! 💕",
-            body: generateWelcomeEmail(firstName, updatedSub),
-            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-          });
-          const brevoApiKey = process.env.BREVO_API_KEY;
-          if (brevoApiKey) {
-            await fetch("https://api.brevo.com/v3/contacts", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "api-key": brevoApiKey,
-              },
-              body: JSON.stringify({
-                email: updatedSub.email,
-                listIds: [4],
-                updateEnabled: true,
-              }),
-            });
-          }
-          console.log(
-            "Wedding Planning Experience email sent successfully to",
-            updatedSub.email
-          );
-        }
-        
-      }
-    }
-  } catch (emailError) {
-    console.error(
-      "Failed to send subscription notification email:",
-      emailError
     );
+
+    // Decrease stock for cart items if included in the subscription
+    if (paymentOp.cart && paymentOp.cart.length > 0) {
+      console.log("Decreasing stock for cart items in subscription:", paymentOp.cart.length);
+      await decreaseStock(paymentOp.cart);
+    }
+
+    // Ensure package is populated for downstream logic
+    if (updatedSub?._id) {
+      updatedSub = await subscriptionsModel.findById(updatedSub._id).populate({
+        path: "packageID",
+        options: { strictPopulate: false },
+      });
+    }
+
+    // Loyalty earn for subscription
+    if (
+      updatedSub?.packageID &&
+      typeof (updatedSub.packageID as any).price === "number"
+    ) {
+      await LoyaltyTransactionModel.create({
+        email: subscriptionEmail,
+        type: "earn",
+        reason: "subscription",
+        amount: isUpgradeProcess
+          ? Math.max(
+              0,
+              ((paymentOp.to as any)?.price || 0) -
+                ((paymentOp.from as any)?.price || 0)
+            )
+          : (updatedSub.packageID as any).price,
+        bonusID: isUpgradeProcess
+          ? "69e35eba75941926796f40ce"
+          : (updatedSub.packageID as any)?._id?.toString() ===
+            "68bf6ae9c4d5c1af12cdcd37" || (updatedSub.packageID as any)?._id?.toString() === "6a2d9aec3def6ce76dc7babc"
+          ? "68c176b69c1ff0a2ad779c2d"
+          : "687d67f459e6ba857a54ed53",
+      });
+    }
+
+    if (paymentOp.redeemedLoyaltyPoints > 0) {
+      await LoyaltyTransactionModel.create({
+        email: subscriptionEmail,
+        type: "spend",
+        reason: "subscription",
+        amount: paymentOp.redeemedLoyaltyPoints,
+      });
+    }
+
+    // Discount usage (only increment ONCE for the whole transaction)
+    if (isFirstOfMulti && paymentOp.appliedDiscount && paymentOp.appliedDiscountAmount) {
+      await DiscountModel.findByIdAndUpdate(paymentOp.appliedDiscount, {
+        $inc: { usageCount: 1 },
+      });
+    }
+
+    // Bosta integration (skip for upgrade, renew, or pickup from bazar, and only do ONCE per order)
+    const isPickup = paymentOp.pickupFromBazar === true;
+    try {
+      if (updatedSub?._id && process.env.BOSTA_API && !isUpgradeProcess && !isRenewProcess && !isPickup && isFirstOfMulti) {
+        const bostaService = new BostaService();
+        const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
+        const deliveryPayload = bostaService.createDeliveryPayload(
+          updatedSub,
+          webhookUrl
+        );
+        console.log(
+          "Creating Bosta delivery for subscription:",
+          updatedSub._id
+        );
+        const bostaResult = await bostaService.createDelivery(deliveryPayload);
+        console.log("bostaResult" + JSON.stringify(bostaResult));
+        if (bostaResult.success && bostaResult.data) {
+          await subscriptionsModel.findByIdAndUpdate(updatedSub._id, {
+            shipmentID: bostaResult.data._id,
+            status: "confirmed",
+          });
+          console.log(
+            "Bosta delivery created successfully:",
+            bostaResult.data.trackingNumber
+          );
+        } else {
+          console.error("Failed to create Bosta delivery:", bostaResult.error);
+        }
+      }
+    } catch (bostaError) {
+      console.error("Bosta integration error:", bostaError);
+    }
+
+    // Send email notifications
+    try {
+      if (updatedSub) {
+        // Admin notification (skip for upgrade or renew)
+        if (!isUpgradeProcess && !isRenewProcess) {
+          await sendMail({
+            to: "orders@shopwifeyforlifey.com",
+            name: "NEW BESTIEEE",
+            subject: "NEW BESTIEEEE",
+            body: `
+            <h2>New Subscription Notification</h2>
+            <p>A new subscription has been successfully created:</p>
+            <ul>
+              <li><strong>Email:</strong> ${paymentOp.email}</li>
+              ${
+                updatedSub.isGift
+                  ? `<li><strong>Gift:</strong> Yes</li>
+                  <li><strong>Gift Recipient Email:</strong> ${
+                    updatedSub.giftRecipientEmail || "N/A"
+                  }</li>
+                  <li><strong>Gift Sender Email:</strong> ${
+                    updatedSub.giftSenderEmail || "N/A"
+                  }</li>
+              <li><strong>Special Message:</strong> ${
+                updatedSub.specialMessage || "N/A"
+              }</li>
+               <li><strong>Gift Card:</strong> ${
+                 updatedSub.giftCardName || "N/A"
+               }</li>`
+                  : ""
+              }
+              <li><strong>Package:</strong> ${
+                (updatedSub.packageID as any)?.name || "N/A"
+              }</li>
+              <li><strong>First Name:</strong> ${
+                updatedSub.firstName || "N/A"
+              }</li>
+              <li><strong>Last Name:</strong> ${
+                updatedSub.lastName || "N/A"
+              }</li>
+              <li><strong>Phone:</strong> ${updatedSub.phone || "N/A"}</li>
+              <li><strong>Country:</strong> ${
+                updatedSub.country || "N/A"
+              }</li>
+              ${
+                updatedSub.cart && updatedSub.cart.length > 0
+                  ? `<li><strong>Bundled Cart Items:</strong>
+                      <ul>
+                        ${updatedSub.cart
+                          .map(
+                            (item: any) =>
+                              `<li>${item.productName} x ${item.quantity} ${
+                                item.variant
+                                  ? `(${item.variant.name}${
+                                      item.attributes?.name
+                                        ? `: ${item.attributes.name}`
+                                        : ""
+                                    })`
+                                  : ""
+                              }</li>`
+                          )
+                          .join("")}
+                      </ul>
+                     </li>`
+                  : ""
+              }
+            </ul>
+          `,
+          from: "noreply@shopwifeyforlifey.com",
+          });
+          console.log("Subscription notification email sent successfully");
+        }
+
+        // Gift flow
+        if (updatedSub.isGift) {
+          const { giftMail } = await import("@/utils/giftMail");
+          const firstName = updatedSub.firstName || "Wifey";
+          await sendMail({
+            to: paymentOp.email,
+            name: firstName,
+            subject: "Thank You for Your Gift Purchase! 🎁",
+            body: giftMail(updatedSub._id.toString(), updatedSub.cart),
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+          });
+          console.log("Gift email sent successfully to", updatedSub.email);
+        } else if (paymentOp.process === "new") {
+          // Welcome emails based on package ID
+          if (
+            (updatedSub.packageID as any)?._id &&
+            (updatedSub.packageID as any)._id.toString() ===
+              "687396821b4da119eb1c13fe"
+          ) {
+            const firstName = updatedSub.firstName || "Wifey";
+            const { generateWelcomeEmail } = await import(
+              "@/utils/FullExperienceEmail"
+            );
+            await sendMail({
+              to: updatedSub.email,
+              name: firstName,
+              subject:
+                "You're in, beautiful! Welcome to the Wifeys community 💗",
+              body: generateWelcomeEmail(firstName, updatedSub),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            const brevoApiKey = process.env.BREVO_API_KEY;
+            if (brevoApiKey) {
+              await fetch("https://api.brevo.com/v3/contacts", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  "api-key": brevoApiKey,
+                },
+                body: JSON.stringify({
+                  email: updatedSub.email,
+                  listIds: [5],
+                  updateEnabled: true,
+                }),
+              });
+            }
+            console.log(
+              "Welcome email sent successfully to",
+              updatedSub.email
+            );
+          } else if (
+            (updatedSub.packageID as any)?._id &&
+            (updatedSub.packageID as any)._id.toString() ===
+              "68bf6ae9c4d5c1af12cdcd37"
+          ) {
+            const firstName = updatedSub.firstName || "Wifey";
+            const { generateMiniExperienceMail } = await import(
+              "@/utils/MiniExperienceEmail"
+            );
+            await sendMail({
+              to: updatedSub.email,
+              name: firstName,
+              subject: "Welcome to the Mini Wifey Experience! 💕",
+              body: generateMiniExperienceMail(firstName, updatedSub),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            const brevoApiKey = process.env.BREVO_API_KEY;
+            if (brevoApiKey) {
+              await fetch("https://api.brevo.com/v3/contacts", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  "api-key": brevoApiKey,
+                },
+                body: JSON.stringify({
+                  email: updatedSub.email,
+                  listIds: [4],
+                  updateEnabled: true,
+                }),
+              });
+            }
+            console.log(
+              "Mini Experience email sent successfully to",
+              updatedSub.email
+            );
+          } else if (
+            (updatedSub.packageID as any)?._id &&
+            (updatedSub.packageID as any)._id.toString() ===
+              "6a2d9aec3def6ce76dc7babc"
+          ) {
+            const firstName = updatedSub.firstName || "Wifey";
+            const { generateWelcomeEmail } = await import(
+              "@/utils/weddingPlanningExperienceEmail"
+            );
+            await sendMail({
+              to: updatedSub.email,
+              name: firstName,
+              subject: "Welcome to the Mini Wedding Planning Experience! 💕",
+              body: generateWelcomeEmail(firstName, updatedSub),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            const brevoApiKey = process.env.BREVO_API_KEY;
+            if (brevoApiKey) {
+              await fetch("https://api.brevo.com/v3/contacts", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  "api-key": brevoApiKey,
+                },
+                body: JSON.stringify({
+                  email: updatedSub.email,
+                  listIds: [4],
+                  updateEnabled: true,
+                }),
+              });
+            }
+            console.log(
+              "Mini Wedding Planning Experience email sent successfully to",
+              updatedSub.email
+            );
+          } else if (
+            (updatedSub.packageID as any)?._id &&
+            (updatedSub.packageID as any)._id.toString() ===
+              "6965e63c6df4503dda02c12b"
+          ) {
+            const firstName = updatedSub.firstName || "Wifey";
+            const { generateWelcomeEmail } = await import(
+              "@/utils/weddingPlanningExperienceEmail"
+            );
+            await sendMail({
+              to: updatedSub.email,
+              name: firstName,
+              subject: "Welcome to the Wedding Planning Experience! 💕",
+              body: generateWelcomeEmail(firstName, updatedSub),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            const brevoApiKey = process.env.BREVO_API_KEY;
+            if (brevoApiKey) {
+              await fetch("https://api.brevo.com/v3/contacts", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  "api-key": brevoApiKey,
+                },
+                body: JSON.stringify({
+                  email: updatedSub.email,
+                  listIds: [4],
+                  updateEnabled: true,
+                }),
+              });
+            }
+            console.log(
+              "Wedding Planning Experience email sent successfully to",
+              updatedSub.email
+            );
+          }
+        }
+      }
+    } catch (emailError) {
+      console.error(
+        "Failed to send subscription notification email:",
+        emailError
+      );
+    }
+
+    // Link user account (ensure subscription is in the array)
+    const subscribedUser = updatedSub?._id
+      ? await UserModel.findOneAndUpdate(
+          { email: subscriptionEmail },
+          { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
+        )
+      : null;
+
+    // Mark payment operation as confirmed
+    await subscriptionPaymentModel.findByIdAndUpdate(paymentOp._id, {
+      status: "confirmed",
+    });
+
+    // Determine redirect based on the first subscription's package type
+    if (isFirstOfMulti) {
+      if (
+        (updatedSub?.packageID as any)?._id?.toString() ===
+        "68bf6ae9c4d5c1af12cdcd37" || 
+        (updatedSub?.packageID as any)?._id?.toString() ===
+        "6a2d9aec3def6ce76dc7babc"
+      ) {
+        finalRedirect = `payment/success?subscription=mini${
+          subscribedUser ? "&account=true" : ""
+        }&process=${paymentOp.process}`;
+      } else if (
+        (updatedSub?.packageID as any)?._id?.toString() ===
+        "6965e63c6df4503dda02c12b"
+      ) {
+        finalRedirect = `payment/success?subscription=wedding${
+          subscribedUser ? "&account=true" : ""
+        }&process=${paymentOp.process}`;
+      } else {
+        finalRedirect = `payment/success?subscription=true${
+          subscribedUser ? "&account=true" : ""
+        }&process=${paymentOp.process}`;
+      }
+    }
   }
 
-  // Link user account (ensure subscription is in the array)
-  const subscribedUser = updatedSub?._id
-    ? await UserModel.findOneAndUpdate(
-        { email: subscriptionEmail },
-        { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
-      )
-    : null;
-
-  // Mark payment operation as confirmed
-  await subscriptionPaymentModel.findByIdAndUpdate(paymentOp._id, {
-    status: "confirmed",
-  });
-
-  // Determine redirect
-  // TODO: We will change things in the success page later for the new MINI_WEDDING package
-  if (
-    (updatedSub?.packageID as any)?._id?.toString() ===
-    "68bf6ae9c4d5c1af12cdcd37" || 
-    (updatedSub?.packageID as any)?._id?.toString() ===
-    "6a2d9aec3def6ce76dc7babc"
-  ) {
-    return {
-      success: true,
-      redirect: `payment/success?subscription=mini${
-        subscribedUser ? "&account=true" : ""
-      }&process=${paymentOp.process}`,
-    };
-  } else if (
-    (updatedSub?.packageID as any)?._id?.toString() ===
-    "6965e63c6df4503dda02c12b"
-  ) {
-    return {
-      success: true,
-      redirect: `payment/success?subscription=wedding${
-        subscribedUser ? "&account=true" : ""
-      }&process=${paymentOp.process}`,
-    };
-  }
   return {
     success: true,
-    redirect: `payment/success?subscription=true${
-      subscribedUser ? "&account=true" : ""
-    }&process=${paymentOp.process}`,
+    redirect: finalRedirect,
   };
 }
 

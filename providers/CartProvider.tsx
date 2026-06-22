@@ -1,6 +1,6 @@
 "use client";
 
-import { attribute, CartItem, Variant } from "@/app/interfaces/interfaces";
+import { attribute, CartItem, Variant, SubscriptionCartItem } from "@/app/interfaces/interfaces";
 import {
   createContext,
   useContext,
@@ -30,12 +30,20 @@ interface CartContextType {
   setIsCartOpen: (open: boolean) => void;
   openCart: () => void;
   closeCart: () => void;
+  
+  // Subscriptions extension
+  subscriptionItems: SubscriptionCartItem[];
+  addSubscription: (item: Omit<SubscriptionCartItem, "cartItemId">) => void;
+  removeSubscription: (cartItemId: string) => void;
+  updateSubscriptionQuantity: (cartItemId: string, quantity: number) => void;
+  clearSubscriptions: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [subscriptionItems, setSubscriptionItems] = useState<SubscriptionCartItem[]>([]);
 
   // Load cart from localStorage on client side
   useEffect(() => {
@@ -47,12 +55,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.error("Failed to parse cart from localStorage:", error);
       }
     }
+
+    const storedSubCart = localStorage.getItem("subscriptionCart");
+    if (storedSubCart) {
+      try {
+        setSubscriptionItems(JSON.parse(storedSubCart));
+      } catch (error) {
+        console.error("Failed to parse subscriptionCart from localStorage:", error);
+      }
+    }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    localStorage.setItem("subscriptionCart", JSON.stringify(subscriptionItems));
+  }, [subscriptionItems]);
 
   const addItem = (item: CartItem) => {
     setItems((prevItems) => {
@@ -114,14 +135,60 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const clearCart = () => {
-    setItems([]);
-    localStorage.removeItem("cart"); // or localStorage.setItem("cart", "[]");
+  const addSubscription = (item: Omit<SubscriptionCartItem, "cartItemId">) => {
+    setSubscriptionItems((prev) => {
+      const existing = prev.find(
+        (i) => i.packageId === item.packageId && i.duration === item.duration
+      );
+      if (existing) {
+        return prev.map((i) =>
+          i.packageId === item.packageId && i.duration === item.duration
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i
+        );
+      }
+      const newSub: SubscriptionCartItem = {
+        ...item,
+        cartItemId: `${item.packageId}-${item.duration}`
+      };
+      return [...prev, newSub];
+    });
   };
 
-  const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+  const removeSubscription = (cartItemId: string) => {
+    setSubscriptionItems((prev) => prev.filter((i) => i.cartItemId !== cartItemId));
+  };
+
+  const updateSubscriptionQuantity = (cartItemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeSubscription(cartItemId);
+      return;
+    }
+    setSubscriptionItems((prev) =>
+      prev.map((item) =>
+        item.cartItemId === cartItemId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  const clearSubscriptions = () => {
+    setSubscriptionItems([]);
+    localStorage.removeItem("subscriptionCart");
+  };
+
+  const clearCart = () => {
+    setItems([]);
+    setSubscriptionItems([]);
+    localStorage.removeItem("cart");
+    localStorage.removeItem("subscriptionCart");
+  };
+
+  const totalItems = items.reduce((total, item) => total + item.quantity, 0) + subscriptionItems.reduce((total, item) => total + item.quantity, 0);
 
   const totalPrice = items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  ) + subscriptionItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
@@ -145,6 +212,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setIsCartOpen,
         openCart,
         closeCart,
+        subscriptionItems,
+        addSubscription,
+        removeSubscription,
+        updateSubscriptionQuantity,
+        clearSubscriptions,
       }}
     >
       {children}

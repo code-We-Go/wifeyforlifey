@@ -200,6 +200,20 @@ export interface CartItem {
   collections?: string[];
 }
 
+export interface SubscriptionCartItem {
+  cartItemId: string;
+  packageId: string;
+  packageName: string;
+  categoryName: string;
+  tier: "full" | "mini";
+  price: number;
+  duration: number;
+  saving?: string;
+  imageUrl: string;
+  quantity: number;
+}
+
+
 export type FeaturedProduct = Omit<CartItem, "id" | "quantity">;
 
 //   export interface FeaturedProduct

@@ -900,7 +900,7 @@ We’re beyond excited to share this experience with you… your planner will be
 
       // Redirect to Paymob checkout
       const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
-      router.push(paymobIframeURL);
+      window.location.href = paymobIframeURL;
     } catch (error: any) {
       console.error(error);
       alert(error?.response?.data?.error || "Something went wrong");
@@ -1057,7 +1057,7 @@ We’re beyond excited to share this experience with you… your planner will be
       const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
 
       if (includeCartItems) clearCart();
-      router.push(paymobIframeURL);
+      window.location.href = paymobIframeURL;
     } else {
       if (res.data.token === "wiig") {
         if (includeCartItems) clearCart();

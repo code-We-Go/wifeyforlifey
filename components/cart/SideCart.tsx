@@ -25,6 +25,9 @@ export default function SideCart() {
     isCartOpen,
     setIsCartOpen,
     closeCart,
+    subscriptionItems,
+    removeSubscription,
+    updateSubscriptionQuantity,
   } = useCart();
 
   const handleQuantityChange = (
@@ -37,6 +40,9 @@ export default function SideCart() {
       updateQuantity(productId, newQuantity, variant, attribute);
     }
   };
+
+  const hasItems = items.length > 0 || subscriptionItems.length > 0;
+  const checkoutLink = subscriptionItems.length > 0 ? "/subscription/checkout" : "/checkout";
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
@@ -51,7 +57,7 @@ export default function SideCart() {
         </SheetHeader>
 
         <ScrollArea className="flex-grow">
-          {items.length === 0 ? (
+          {!hasItems ? (
             <div className="flex flex-col items-center justify-center h-[60vh] px-6 text-center">
               <div className="w-20 h-20 bg-pinkey rounded-full flex items-center justify-center mb-4">
                 <ShoppingBag className="w-10 h-10 text-lovely opacity-40" />
@@ -71,77 +77,145 @@ export default function SideCart() {
             </div>
           ) : (
             <div className="p-6 space-y-6">
-              {items.map((item, index) => (
-                <div key={`${item.productId}-${index}`} className="flex gap-4">
-                  <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0 border border-lovely/5">
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.productName}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col flex-grow min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-medium text-lovely truncate pr-2">
-                        {item.productName}
-                      </h4>
-                      <button
-                        onClick={() =>
-                          removeItem(item.productId, item.variant, item.attributes)
-                        }
-                        className="text-lovely/40 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p className="text-sm text-lovely/60 mb-2">
-                      {item.variant.name} {item.attributes.name && `• ${item.attributes.name}`}
-                    </p>
-                    <div className="flex justify-between items-center mt-auto">
-                      <div className="flex items-center bg-pinkey rounded-full px-2 py-1">
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(
-                              item.productId,
-                              item.quantity - 1,
-                              item.variant,
-                              item.attributes
-                            )
-                          }
-                          className="p-1 text-lovely hover:bg-lovely/10 rounded-full transition-colors"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="w-8 text-center text-sm font-medium text-lovely">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(
-                              item.productId,
-                              item.quantity + 1,
-                              item.variant,
-                              item.attributes
-                            )
-                          }
-                          className="p-1 text-lovely hover:bg-lovely/10 rounded-full transition-colors"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
+              {/* Products Section */}
+              {items.length > 0 && (
+                <div className="space-y-6">
+                  {items.map((item, index) => (
+                    <div key={`${item.productId}-${index}`} className="flex gap-4">
+                      <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0 border border-lovely/5">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                      <span className="font-medium text-lovely">
-                        LE {(item.price * item.quantity).toFixed(2)}
-                      </span>
+                      <div className="flex flex-col flex-grow min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-medium text-lovely truncate pr-2">
+                            {item.productName}
+                          </h4>
+                          <button
+                            onClick={() =>
+                              removeItem(item.productId, item.variant, item.attributes)
+                            }
+                            className="text-lovely/40 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="text-sm text-lovely/60 mb-2">
+                          {item.variant.name} {item.attributes.name && `• ${item.attributes.name}`}
+                        </p>
+                        <div className="flex justify-between items-center mt-auto">
+                          <div className="flex items-center bg-pinkey rounded-full px-2 py-1">
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.productId,
+                                  item.quantity - 1,
+                                  item.variant,
+                                  item.attributes
+                                )
+                              }
+                              className="p-1 text-lovely hover:bg-lovely/10 rounded-full transition-colors"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium text-lovely">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.productId,
+                                  item.quantity + 1,
+                                  item.variant,
+                                  item.attributes
+                                )
+                              }
+                              className="p-1 text-lovely hover:bg-lovely/10 rounded-full transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <span className="font-medium text-lovely">
+                            LE {(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {/* Subscriptions Section */}
+              {subscriptionItems.length > 0 && (
+                <div className="space-y-6 pt-4 border-t border-lovely/10">
+                  <h4 className="font-medium text-lovely text-sm uppercase tracking-wider mb-2">Subscriptions</h4>
+                  {subscriptionItems.map((item) => (
+                    <div key={item.cartItemId} className="flex gap-4">
+                      <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0 border border-lovely/5">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.packageName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col flex-grow min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-medium text-lovely truncate pr-2">
+                            {item.packageName}
+                          </h4>
+                          <button
+                            onClick={() => removeSubscription(item.cartItemId)}
+                            className="text-lovely/40 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {item.duration > 0 && (
+                          <p className="text-sm text-lovely/60 mb-2">
+                            {item.duration} Months Subscription
+                          </p>
+                        )}
+                        <div className="flex justify-between items-center mt-auto">
+                          <div className="flex items-center bg-pinkey rounded-full px-2 py-1">
+                            <button
+                              onClick={() =>
+                                updateSubscriptionQuantity(item.cartItemId, item.quantity - 1)
+                              }
+                              className="p-1 text-lovely hover:bg-lovely/10 rounded-full transition-colors"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium text-lovely">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateSubscriptionQuantity(item.cartItemId, item.quantity + 1)
+                              }
+                              className="p-1 text-lovely hover:bg-lovely/10 rounded-full transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <span className="font-medium text-lovely">
+                            LE {(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </ScrollArea>
 
-        {items.length > 0 && (
+        {hasItems && (
           <SheetFooter className="p-6 border-t border-lovely/10 bg-white/50 backdrop-blur-sm mt-auto sm:flex-col gap-4">
             <div className="w-full space-y-4">
               <div className="flex justify-between items-center text-lg font-medium text-lovely">
@@ -165,7 +239,7 @@ export default function SideCart() {
                   className="rounded-full bg-lovely hover:bg-everGreen text-creamey transition-all duration-300"
                   onClick={closeCart}
                 >
-                  <Link href="/checkout" className="flex items-center justify-center gap-2">
+                  <Link href={checkoutLink} className="flex items-center justify-center gap-2">
                     Checkout <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>

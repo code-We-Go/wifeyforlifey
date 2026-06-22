@@ -6,6 +6,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronLeft as ChevronLeftIcon,
+  Minus,
+  Plus,
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
@@ -15,14 +17,17 @@ import { thirdFont } from "@/fonts";
 import axios from "axios";
 import PackageDetailSkeleton from "./PackageDetailSkeleton";
 import WifeyCommunity from "@/components/sections/WifeyCommunity";
+import { useCart } from "@/providers/CartProvider";
 
 export default function PackageDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { addSubscription, openCart } = useCart();
   const [packageData, setPackageData] = useState<Ipackage | null>(null);
   const [allPackages, setAllPackages] = useState<Ipackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   const formatDuration = (duration: any) => {
     const months = Number(duration);
@@ -233,6 +238,7 @@ export default function PackageDetailPage() {
                   onClick={() => {
                     setPackageData(pkg);
                     setCurrentImageIndex(0);
+                    setQuantity(1);
                     // Auto-select the last variant if variants exist
                     if (pkg.variants && pkg.variants.length > 0) {
                       setSelectedVariantIndex(pkg.variants.length - 1);
@@ -438,26 +444,118 @@ export default function PackageDetailPage() {
             </div>
           )}
 
-          {/* CTA Button */}
-          <Button
-            className="w-full mt-6 bg-lovely text-creamey hover:bg-lovely/90 rounded-full py-6"
-            onClick={() => {
+          {/* CTA Buttons */}
+          {(() => {
+            const handleAddToCart = () => {
+              if (!packageData) return;
+              let price = packageData.price;
+              let duration = packageData.duration;
+              let saving = packageData.saving;
+
+              if (packageData.variants && packageData.variants.length > 0) {
+                if (selectedVariantIndex === -1) {
+                  alert("Please select a plan before adding to cart.");
+                  return;
+                }
+                const selected = packageData.variants[selectedVariantIndex];
+                price = selected.price;
+                duration = selected.duration;
+                saving = selected.saving;
+              }
+
+              addSubscription({
+                packageId: packageData._id || "",
+                packageName: packageData.name,
+                categoryName: packageData.partOf || packageData.name,
+                tier: (packageData.name.toLowerCase().includes("mini") || (packageData.slug && packageData.slug.toLowerCase().includes("mini"))) ? "mini" : "full",
+                price,
+                duration,
+                saving,
+                imageUrl: packageData.imgUrl,
+                quantity,
+              });
+
+              openCart();
+            };
+
+            const handleSubscribeNow = () => {
+              if (!packageData) return;
+              let price = packageData.price;
+              let duration = packageData.duration;
+              let saving = packageData.saving;
+
               if (packageData.variants && packageData.variants.length > 0) {
                 if (selectedVariantIndex === -1) {
                   alert("Please select a plan before subscribing.");
                   return;
                 }
                 const selected = packageData.variants[selectedVariantIndex];
-                router.push(
-                  `/subscription/${packageData._id}?duration=${selected.duration}&price=${selected.price}`
-                );
-              } else {
-                router.push(`/subscription/${packageData._id}`);
+                price = selected.price;
+                duration = selected.duration;
+                saving = selected.saving;
               }
-            }}
-          >
-            Subscribe to {packageData.name}
-          </Button>
+
+              addSubscription({
+                packageId: packageData._id || "",
+                packageName: packageData.name,
+                categoryName: packageData.partOf || packageData.name,
+                tier: (packageData.name.toLowerCase().includes("mini") || (packageData.slug && packageData.slug.toLowerCase().includes("mini"))) ? "mini" : "full",
+                price,
+                duration,
+                saving,
+                imageUrl: packageData.imgUrl,
+                quantity,
+              });
+
+              router.push("/subscription/checkout");
+            };
+
+            return (
+              <div className="mt-6 space-y-6">
+                <div>
+                  <div className="text-sm text-lovely font-medium mb-2">Quantity</div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      className="text-lovely bg-pinkey border-lovely/20 h-9 w-9 p-0"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))}
+                      disabled={quantity <= 1}
+                    >
+                      <span className="sr-only">Decrease quantity</span>
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <div className="w-12 text-center text-lovely font-medium">{quantity}</div>
+                    <Button
+                      className="text-lovely bg-pinkey border-lovely/20 h-9 w-9 p-0"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity((prev) => prev + 1)}
+                    >
+                      <span className="sr-only">Increase quantity</span>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    className="flex-1 bg-transparent text-lovely border-2 border-lovely hover:bg-lovely/10 rounded-full py-6 text-base font-semibold"
+                    onClick={handleAddToCart}
+                  >
+                    🛒 Add to Cart
+                  </Button>
+                  <Button
+                    className="flex-1 bg-lovely text-creamey hover:bg-lovely/90 rounded-full py-6 text-base font-semibold"
+                    onClick={handleSubscribeNow}
+                  >
+                    ⚡ Subscribe Now
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+
         </div>
       </div>
       <div className="bg-pink-50 -mx-4 mt-8 -mb-8">

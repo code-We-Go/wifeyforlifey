@@ -3,7 +3,6 @@ import React, { useContext } from 'react'
 import { signOut } from "next-auth/react";
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { wifeyFont } from '@/app/layout';
 import { lifeyFont, thirdFont } from '@/fonts';
 
 
