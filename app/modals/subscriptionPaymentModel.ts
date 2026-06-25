@@ -10,7 +10,7 @@ const SubscriptionPaymentSchema = new Schema(
     },
     // Core payment and context
     paymentID: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: false },
     userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",

@@ -37,6 +37,7 @@ interface CartContextType {
   removeSubscription: (cartItemId: string) => void;
   updateSubscriptionQuantity: (cartItemId: string, quantity: number) => void;
   clearSubscriptions: () => void;
+  isCartLoaded: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -44,6 +45,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [subscriptionItems, setSubscriptionItems] = useState<SubscriptionCartItem[]>([]);
+  const [isCartLoaded, setIsCartLoaded] = useState(false);
 
   // Load cart from localStorage on client side
   useEffect(() => {
@@ -64,6 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.error("Failed to parse subscriptionCart from localStorage:", error);
       }
     }
+    setIsCartLoaded(true);
   }, []);
 
   // Save cart to localStorage whenever it changes
@@ -217,6 +220,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeSubscription,
         updateSubscriptionQuantity,
         clearSubscriptions,
+        isCartLoaded,
       }}
     >
       {children}

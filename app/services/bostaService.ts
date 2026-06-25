@@ -112,13 +112,24 @@ class BostaService {
   // Helper method to create delivery payload from order data
   createDeliveryPayload(
     order: any,
-    webhookUrl: string = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`
+    webhookUrl: string = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`,
+    subscriptionCount?: number
   ): BostaDeliveryPayload {
-    const itemsCount =
+    const productCount =
       order.cart?.reduce(
         (total: number, item: any) => total + item.quantity,
         0
-      ) || 2;
+      ) || 0;
+
+    let itemsCount = productCount;
+    if (typeof subscriptionCount === "number" && subscriptionCount > 0) {
+      itemsCount += subscriptionCount;
+    }
+
+    if (itemsCount === 0) {
+      itemsCount = 2;
+    }
+
     const cash = order.cash ? order.cash : "card";
     // const description =
     //   order.cart

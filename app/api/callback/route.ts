@@ -276,10 +276,11 @@ async function handleSubscription(
       expiryDate.setMonth(expiryDate.getMonth() + 6);
     }
 
-    // For gifts, use recipient email for account linkage and loyalty
+    // For gifts, use recipient email for account linkage and loyalty.
+    // If it's a gift and the recipient email is empty, let it be empty (do not fall back to sender's email).
     const subscriptionEmail =
-      paymentOp.isGift && paymentOp.giftRecipientEmail
-        ? paymentOp.giftRecipientEmail
+      paymentOp.isGift
+        ? (paymentOp.giftRecipientEmail || "")
         : paymentOp.email;
     console.log("subscriptionEmail:", subscriptionEmail);
 
@@ -305,7 +306,7 @@ async function handleSubscription(
       // Gift info
       isGift: paymentOp.isGift,
       pickupFromBazar: paymentOp.pickupFromBazar,
-      giftSenderEmail: paymentOp.isGift ? paymentOp.email : undefined,
+      giftSenderEmail: paymentOp.isGift ? paymentOp.giftSenderEmail : undefined,
       giftRecipientEmail: paymentOp.giftRecipientEmail,
       specialMessage: paymentOp.specialMessage,
       giftCardName: paymentOp.giftCardName,
@@ -351,13 +352,15 @@ async function handleSubscription(
     // Always create a new subscription document (preserves history)
     const created = await subscriptionsModel.create(subscriptionData);
     let updatedSub: any = created;
-    await UserModel.findOneAndUpdate(
-      { email: subscriptionEmail },
-      {
-        isSubscribed: true,
-        $push: { subscriptions: created._id },
-      }
-    );
+    if (subscriptionEmail) {
+      await UserModel.findOneAndUpdate(
+        { email: subscriptionEmail },
+        {
+          isSubscribed: true,
+          $push: { subscriptions: created._id },
+        }
+      );
+    }
 
     // Decrease stock for cart items if included in the subscription
     if (paymentOp.cart && paymentOp.cart.length > 0) {
@@ -422,7 +425,8 @@ async function handleSubscription(
         const webhookUrl = `https://www.shopwifeyforlifey.com/api/webhooks/bosta`;
         const deliveryPayload = bostaService.createDeliveryPayload(
           updatedSub,
-          webhookUrl
+          webhookUrl,
+          paymentOps.length
         );
         console.log(
           "Creating Bosta delivery for subscription:",
@@ -523,15 +527,16 @@ async function handleSubscription(
         // Gift flow
         if (updatedSub.isGift) {
           const { giftMail } = await import("@/utils/giftMail");
-          const firstName = updatedSub.firstName || "Wifey";
+          const recipientEmail = updatedSub.giftSenderEmail || paymentOp.giftSenderEmail || paymentOp.email;
+          const senderName = updatedSub.billingFirstName || paymentOp.billingFirstName || "Bestie";
           await sendMail({
-            to: paymentOp.email,
-            name: firstName,
+            to: recipientEmail,
+            name: senderName,
             subject: "Thank You for Your Gift Purchase! 🎁",
             body: giftMail(updatedSub._id.toString(), updatedSub.cart),
             from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
           });
-          console.log("Gift email sent successfully to", updatedSub.email);
+          console.log("Gift email sent successfully to purchaser:", recipientEmail);
         } else if (paymentOp.process === "new") {
           // Welcome emails based on package ID
           if (
@@ -690,7 +695,7 @@ async function handleSubscription(
     }
 
     // Link user account (ensure subscription is in the array)
-    const subscribedUser = updatedSub?._id
+    const subscribedUser = (updatedSub?._id && subscriptionEmail)
       ? await UserModel.findOneAndUpdate(
           { email: subscriptionEmail },
           { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }

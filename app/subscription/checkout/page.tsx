@@ -76,7 +76,7 @@ const calculateShippingRate = (
 
 const UnifiedCheckoutPage = () => {
   const router = useRouter();
-  const { subscriptionItems, items: cartProducts, totalPrice: cartTotalPrice, clearCart } = useCart();
+  const { subscriptionItems, items: cartProducts, totalPrice: cartTotalPrice, clearCart, updateSubscriptionQuantity, updateQuantity, isCartLoaded } = useCart();
   const { isAuthenticated, loyaltyPoints, user } = useAuth();
 
   const [configs, setConfigs] = useState<SubscriptionConfig[]>([]);
@@ -155,7 +155,7 @@ const UnifiedCheckoutPage = () => {
       subscriptionItems.forEach((item) => {
         for (let index = 0; index < item.quantity; index++) {
           const configId = item.quantity > 1 ? `${item.cartItemId}-instance-${index}` : item.cartItemId;
-          const label = item.quantity > 1 ? `${item.packageName} (Copy ${index + 1})` : item.packageName;
+          const label = item.quantity > 1 ? `${item.packageName} (${index + 1})` : item.packageName;
           
           const existing = prev.find((c) => c.cartItemId === configId);
           if (existing) {
@@ -189,10 +189,10 @@ const UnifiedCheckoutPage = () => {
 
   // Redirect if cart is empty
   useEffect(() => {
-    if (subscriptionItems.length === 0) {
+    if (isCartLoaded && subscriptionItems.length === 0) {
       router.replace("/cart");
     }
-  }, [subscriptionItems, router]);
+  }, [isCartLoaded, subscriptionItems, router]);
 
   // Load countries, states, shipping zones, and saved profile data
   useEffect(() => {
@@ -278,7 +278,7 @@ const UnifiedCheckoutPage = () => {
 
   // Recalculate Subtotal, Discounts, Loyalty, and Final Total
   useEffect(() => {
-    const subscriptionsSum = configs.reduce((sum, item) => sum + item.price, 0);
+    const subscriptionsSum = subscriptionItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const productsSum = cartProducts.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const calculatedSubTotal = subscriptionsSum + productsSum;
     setSubTotal(calculatedSubTotal);
@@ -352,25 +352,22 @@ const UnifiedCheckoutPage = () => {
     for (let i = 0; i < configs.length; i++) {
       const config = configs[i];
       const orderNum = i + 1;
-      if (!config.email) {
-        alert(`Please fill in the email for Subscription #${orderNum} (${config.packageName}).`);
-        setLoading(false);
-        return;
-      }
-      if (!config.firstName || !config.lastName) {
-        alert(`Please fill in the name fields for Subscription #${orderNum}.`);
-        setLoading(false);
-        return;
-      }
-      if (!config.phone) {
-        alert(`Please fill in the phone number for Subscription #${orderNum}.`);
-        setLoading(false);
-        return;
-      }
-      if (config.isGift && !config.giftRecipientEmail) {
-        alert(`Please specify the Bride's email for the Gift Subscription #${orderNum}.`);
-        setLoading(false);
-        return;
+      if (!config.isGift) {
+        if (!config.email) {
+          alert(`Please fill in the email for Subscription #${orderNum} (${config.packageName}).`);
+          setLoading(false);
+          return;
+        }
+        if (!config.firstName || !config.lastName) {
+          alert(`Please fill in the name fields for Subscription #${orderNum}.`);
+          setLoading(false);
+          return;
+        }
+        if (!config.phone) {
+          alert(`Please fill in the phone number for Subscription #${orderNum}.`);
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -432,7 +429,7 @@ const UnifiedCheckoutPage = () => {
         phone: c.phone,
         whatsAppNumber: c.whatsAppNumber,
         isGift: c.isGift,
-        giftRecipientEmail: c.giftRecipientEmail,
+        giftRecipientEmail: c.isGift ? c.email : undefined,
         giftCardName: c.giftCardName,
         specialMessage: c.specialMessage,
       })),
@@ -649,14 +646,24 @@ const UnifiedCheckoutPage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's/Owner's Email</label>
+                    <label className="text-lovely text-sm">Bride's Email</label>
                     <input
                       type="email"
                       value={config.email}
                       onChange={(e) => handleConfigChange(index, "email", e.target.value)}
                       className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
-                      required
+                      required={!config.isGift}
                     />
+                    {config.isGift && (
+                      <p className="text-[11px] text-lovely/85 mt-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                        🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!
+                      </p>
+                    )}
+                    {config.isGift && (
+                      <p className="text-[11px] text-lovely/85  font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                        if it's not available just let it empty.
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-lovely text-sm">Bride's Phone Number</label>
@@ -665,7 +672,7 @@ const UnifiedCheckoutPage = () => {
                       value={config.phone}
                       onChange={(e) => handleConfigChange(index, "phone", e.target.value)}
                       className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                      required
+                      required={!config.isGift}
                     />
                   </div>
                 </div>
@@ -678,7 +685,7 @@ const UnifiedCheckoutPage = () => {
                       value={config.firstName}
                       onChange={(e) => handleConfigChange(index, "firstName", e.target.value)}
                       className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                      required
+                      required={!config.isGift}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -688,7 +695,7 @@ const UnifiedCheckoutPage = () => {
                       value={config.lastName}
                       onChange={(e) => handleConfigChange(index, "lastName", e.target.value)}
                       className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                      required
+                      required={!config.isGift}
                     />
                   </div>
                 </div>
@@ -719,17 +726,9 @@ const UnifiedCheckoutPage = () => {
 
                 {config.isGift && (
                   <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Email (Required for Gift Account Linkage)</label>
-                      <input
-                        type="email"
-                        value={config.giftRecipientEmail}
-                        onChange={(e) => handleConfigChange(index, "giftRecipientEmail", e.target.value)}
-                        className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
+                    
                       <label className="text-lovely text-sm">Special Message for the Bride</label>
                       <textarea
                         value={config.specialMessage}
@@ -1005,35 +1004,70 @@ const UnifiedCheckoutPage = () => {
           <div className="lg:border-l border-lovely/30 lg:pl-6 sticky top-4 space-y-6">
             
             {/* Products & Subscriptions summary list */}
-            <div className="bg-lovely/90 text-creamey rounded-2xl p-6 border border-lovely shadow-md">
-              <h3 className={`${thirdFont.className} text-xl tracking-wide font-bold mb-4 border-b border-creamey/20 pb-2`}>
+            <div className="bg-pinkey text-lovely rounded-2xl p-6 border border-lovely shadow-md">
+              <h3 className={`${thirdFont.className} text-xl tracking-wide font-bold mb-4 border-b border-lovely/20 pb-2`}>
                 Order Summary
               </h3>
 
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {configs.map((sub, idx) => (
-                  <div key={sub.cartItemId} className="flex gap-3 text-sm">
-                    <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0">
+                {subscriptionItems.map((sub, idx) => (
+                  <div key={sub.cartItemId} className="flex   gap-3 text-sm">
+                    <div className="relative w-12 h-12 border-lovely/80 border-2 rounded overflow-hidden flex-shrink-0">
                       <Image src={sub.imageUrl} alt={sub.packageName} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold truncate">{sub.packageName}</p>
-                      {sub.duration > 0 && (
-                        <p className="text-xs text-creamey/85">{sub.duration}m Subscription</p>
-                      )}
+                      <div className="flex flex-col gap-0.5">
+                        {sub.duration > 0 && (
+                          <p className="text-xs text-creamey/85">{sub.duration}m Subscription</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <button
+                            type="button"
+                            onClick={() => updateSubscriptionQuantity(sub.cartItemId, sub.quantity - 1)}
+                            className="w-5 h-5 rounded-full border border-lovely/30 flex items-center justify-center text-xs hover:bg-lovely hover:text-creamey transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="text-xs font-semibold">{sub.quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateSubscriptionQuantity(sub.cartItemId, sub.quantity + 1)}
+                            className="w-5 h-5 rounded-full border border-lovely/30 flex items-center justify-center text-xs hover:bg-lovely hover:text-creamey transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <p className="font-semibold text-right">LE {sub.price}</p>
+                    <p className="font-semibold text-right">LE {sub.price * sub.quantity}</p>
                   </div>
                 ))}
 
                 {cartProducts.map((prod, idx) => (
                   <div key={idx} className="flex gap-3 text-sm">
                     <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0">
-                      <Image src={prod.imageUrl} alt={prod.productName} fill className="object-cover" />
+                      <Image src={prod.imageUrl} alt={prod.productName} fill className="object-cover border-lovely/80 border-2" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold truncate">{prod.productName}</p>
-                      <p className="text-xs text-creamey/85">Qty: {prod.quantity}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(prod.productId, prod.quantity - 1, prod.variant, prod.attributes)}
+                          className="w-5 h-5 rounded-full border border-lovely/30 flex items-center justify-center text-xs hover:bg-lovely hover:text-creamey transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="text-xs font-semibold">{prod.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(prod.productId, prod.quantity + 1, prod.variant, prod.attributes)}
+                          className="w-5 h-5 rounded-full border border-lovely/30 flex items-center justify-center text-xs hover:bg-lovely hover:text-creamey transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                     <p className="font-semibold text-right">LE {prod.price * prod.quantity}</p>
                   </div>
@@ -1044,7 +1078,7 @@ const UnifiedCheckoutPage = () => {
             <DiscountSection
               redeemType="Subscription"
               onDiscountApplied={setAppliedDiscount}
-              packagePrice={configs.reduce((sum, item) => sum + item.price, 0)}
+              packagePrice={subscriptionItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
             />
 
             <LoyaltyPointsSection

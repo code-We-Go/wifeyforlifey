@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     const createdPayments = [];
     for (let idx = 0; idx < data.subscriptions.length; idx++) {
       const sub = data.subscriptions[idx];
-      const subEmail = sub.isGift && sub.giftRecipientEmail ? sub.giftRecipientEmail : sub.email;
+      const subEmail = sub.isGift ? (sub.giftRecipientEmail || "") : sub.email;
 
       const userRecord = await UserModel.findOne({ email: subEmail }).populate({
         path: "subscriptions",
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         // Gift settings
         isGift: sub.isGift,
         giftRecipientEmail: sub.giftRecipientEmail,
-        giftSenderEmail: sub.isGift ? sub.email : undefined,
+        giftSenderEmail: sub.isGift ? data.email : undefined,
         giftCardName: sub.giftCardName,
         specialMessage: sub.specialMessage,
 
@@ -143,8 +143,8 @@ export async function POST(request: Request) {
         billingPhone: data.billingPhone,
         billingWhatsAppNumber: data.billingWhatsAppNumber,
 
-        // Totals allocation
-        total: idx === 0 ? data.total : sub.price,
+        // Totals allocation — first sub carries the full order totals; rest show individual price in subTotal only
+        total: idx === 0 ? data.total : 0,
         subTotal: idx === 0 ? data.subTotal : sub.price,
         shipping: idx === 0 ? data.shipping : 0,
         currency: data.currency || "EGP",

@@ -563,7 +563,7 @@ export async function POST(request: Request) {
           const fromPackageID = existingSub?.packageID || null;
           await subscriptionPaymentModel.create({
             paymentID: order.data.payment_keys[0].order_id,
-            email: data.email,
+            email: data.isGift ? (data.giftRecipientEmail || "") : data.email,
             userID: user?._id,
             process: data.process,
             from: fromPackageID,
@@ -649,7 +649,7 @@ export async function POST(request: Request) {
           const fromPackageID = mainSub?.packageID || null;
           await subscriptionPaymentModel.create({
             paymentID: order.data.payment_keys[0].order_id,
-            email: data.email,
+            email: data.isGift ? (data.giftRecipientEmail || "") : data.email,
             userID: user?._id,
             process: "new",
             from: fromPackageID,
