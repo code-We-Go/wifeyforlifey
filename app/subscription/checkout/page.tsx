@@ -6,7 +6,7 @@ import { thirdFont } from "@/fonts";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, useRef, Suspense } from "react";
 import { X, ShoppingBag, Zap, CreditCard, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,6 +85,7 @@ const UnifiedCheckoutPage = () => {
   const [instapayReciept, setInstapayReciept] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [saveShippingData, setSaveShippingData] = useState(false);
+  const paymentCompletedRef = useRef(false);
 
   // Shared shipping/billing states
   const [countryID, setCountryID] = useState(65); // Default to Egypt
@@ -189,7 +190,7 @@ const UnifiedCheckoutPage = () => {
 
   // Redirect if cart is empty
   useEffect(() => {
-    if (isCartLoaded && subscriptionItems.length === 0) {
+    if (isCartLoaded && subscriptionItems.length === 0 && !paymentCompletedRef.current) {
       router.replace("/cart");
     }
   }, [isCartLoaded, subscriptionItems, router]);
@@ -480,6 +481,7 @@ const UnifiedCheckoutPage = () => {
         });
       }
 
+      paymentCompletedRef.current = true;
       clearCart();
       setLoading(false);
 
