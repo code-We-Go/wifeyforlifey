@@ -166,14 +166,17 @@ export async function POST(request: Request) {
 
     // 4. If Instapay, send immediate notification email to the admin
     if (isInstapay) {
+      const isMulti = createdPayments.length > 1;
+      const subLabel = isMulti ? "Multi-Subscription" : "Subscription";
+
       let adminEmailBody = `
-        <h2>New Pending Multi-Subscription Instapay Payment Request</h2>
-        <p>A new multi-subscription has been requested with Instapay payment:</p>
+        <h2>New Pending ${subLabel} Instapay Payment Request</h2>
+        <p>A new ${isMulti ? "multi-subscription" : "subscription"} has been requested with Instapay payment:</p>
         <ul>
           <li><strong>Total Amount:</strong> ${data.total} EGP</li>
           <li><strong>Instapay Screenshot:</strong> <a href="${data.instapayReciept}" target="_blank">View Screenshot</a></li>
         </ul>
-        <h3>Subscriptions list:</h3>
+        <h3>Subscription${isMulti ? "s" : ""} details:</h3>
       `;
 
       for (const sub of createdPayments) {
@@ -197,8 +200,8 @@ export async function POST(request: Request) {
 
       await sendMail({
         to: "orders@shopwifeyforlifey.com",
-        name: "NEW Pending Subscription Request",
-        subject: "NEW Pending Multi-Subscription Request",
+        name: `NEW Pending ${subLabel} Request`,
+        subject: `NEW Pending ${subLabel} Request`,
         body: adminEmailBody,
         from: "noreply@shopwifeyforlifey.com",
       });
