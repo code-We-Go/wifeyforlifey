@@ -1,7 +1,7 @@
 const { MongoClient, ObjectId } = require('mongodb');
 const ExcelJS = require('exceljs');
 
-const MONGODB_URI = 'mongodb+srv://wifeyforlifey:Wifey4Lifey%21@wifeyforlifey.j0pm4vx.mongodb.net/wifeyforlifey?retryWrites=true&w=majority&appName=WifeyForLifey';
+const MONGODB_URI = 'mongodb://wifeyforlifey:Wifey4Lifey%21@ac-kdiurps-shard-00-00.j0pm4vx.mongodb.net:27017,ac-kdiurps-shard-00-01.j0pm4vx.mongodb.net:27017,ac-kdiurps-shard-00-02.j0pm4vx.mongodb.net:27017/wifeyforlifey?ssl=true&replicaSet=atlas-hlglft-shard-0&authSource=admin&retryWrites=true&w=majority';
 
 async function run() {
   const client = new MongoClient(MONGODB_URI);
