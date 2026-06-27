@@ -151,6 +151,7 @@ export async function POST(request: Request) {
 
         status: "pending",
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        instapayReciept: data.instapayReciept,
       });
 
       createdPayments.push(subPayment);
