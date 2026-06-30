@@ -522,6 +522,60 @@ async function handleSubscription(
           from: "noreply@shopwifeyforlifey.com",
           });
           console.log("Subscription notification email sent successfully");
+        } else if (isUpgradeProcess) {
+          const fromPackageName = (paymentOp.from as any)?.name || "N/A";
+          const toPackageName = (paymentOp.to as any)?.name || "N/A";
+          await sendMail({
+            to: "orders@shopwifeyforlifey.com",
+            name: "UPGRADE ALERT",
+            subject: "Subscription Upgrade Notification",
+            body: `
+            <h2>Subscription Upgrade Notification</h2>
+            <p>A user has successfully upgraded their subscription:</p>
+            <ul>
+              <li><strong>Email:</strong> ${paymentOp.email}</li>
+              <li><strong>First Name:</strong> ${updatedSub.firstName || "N/A"}</li>
+              <li><strong>Last Name:</strong> ${updatedSub.lastName || "N/A"}</li>
+              <li><strong>Phone:</strong> ${updatedSub.phone || "N/A"}</li>
+              <li><strong>Upgraded From:</strong> ${fromPackageName}</li>
+              <li><strong>Upgraded To:</strong> ${toPackageName}</li>
+            </ul>
+            `,
+            from: "noreply@shopwifeyforlifey.com",
+          });
+          console.log("Upgrade notification email sent successfully");
+
+          // Send upgrade confirmation email to the subscriber based on target package
+          const firstName = updatedSub.firstName || "Wifey";
+          const toPkgId = (paymentOp.to as any)?._id?.toString();
+
+          if (toPkgId === "6965e63c6df4503dda02c12b") {
+            // Wedding Planning Experience upgrade
+            const { generateWeddingPlanningExperienceUpgradeEmail } = await import(
+              "@/utils/weddingPlanningExperienceUpgradeEmail copy"
+            );
+            await sendMail({
+              to: updatedSub.email,
+              name: firstName,
+              subject: "Your Package Has Been Upgraded! 💖",
+              body: generateWeddingPlanningExperienceUpgradeEmail(firstName),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            console.log("Wedding Planning upgrade email sent to", updatedSub.email);
+          } else if (toPkgId === "687396821b4da119eb1c13fe") {
+            // Gehaz Bestie Experience upgrade
+            const { generateGehazBestieExperienceUpgradeEmail } = await import(
+              "@/utils/gehazBestieExperienceUpgradeEmail"
+            );
+            await sendMail({
+              to: updatedSub.email,
+              name: firstName,
+              subject: "Your Package Has Been Upgraded! 💖",
+              body: generateGehazBestieExperienceUpgradeEmail(firstName),
+              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+            });
+            console.log("Gehaz Bestie upgrade email sent to", updatedSub.email);
+          }
         }
 
         // Gift flow

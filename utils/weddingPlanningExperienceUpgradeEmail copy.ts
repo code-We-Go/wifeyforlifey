@@ -1,8 +1,6 @@
-import { ISubscription } from "@/app/interfaces/interfaces";
 
-export function generateWelcomeEmail(
+export function generateWeddingPlanningExperienceUpgradeEmail(
   first_name: string,
-  subscription: ISubscription
 ) {
   return `
 <!DOCTYPE html>
@@ -103,11 +101,6 @@ export function generateWelcomeEmail(
 				max-height: none !important;
 			}
 
-			.row-3 .column-1 .block-2.paragraph_block td.pad>div {
-				text-align: left !important;
-				font-size: 14px !important;
-			}
-
 			.row-3 .column-1 .block-1.heading_block h3 {
 				text-align: left !important;
 				font-size: 20px !important;
@@ -121,8 +114,10 @@ export function generateWelcomeEmail(
 				display: inline-block !important;
 			}
 
-			.row .side {
-				display: none;
+			.row-3 .column-1 .block-2.paragraph_block td.pad>div,
+			.row-3 .column-1 .block-3.paragraph_block td.pad>div {
+				text-align: left !important;
+				font-size: 14px !important;
 			}
 		}
 	</style><!--[if mso ]><style>sup, sub { font-size: 100% !important; } sup { mso-text-raise:10% } sub { mso-text-raise:-10% }</style> <![endif]-->
@@ -162,7 +157,7 @@ export function generateWelcomeEmail(
 							</tr>
 						</tbody>
 					</table>
-					<table class="row row-2" align="center" width="40%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+					<table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 						<tbody>
 							<tr>
 								<td>
@@ -173,7 +168,7 @@ export function generateWelcomeEmail(
 													<table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
 															<td class="pad" style="width:100%;" align="center">
-																<div class="fullWidth" style="max-width: 680px;"><img src="https://259071beb2.imgdist.com/pub/bfra/ai5ijq1c/3so/l3r/cmz/Wifey%20For%20Lifey%20Character%20Illustrations.png" style="display: block; height: auto; border: 0; width: 40%;" width="680" alt="An open email illustration" title="An open email illustration" height="auto"></div>
+																<div class="fullWidth" style="max-width: 170px;"><img src="https://259071beb2.imgdist.com/pub/bfra/ai5ijq1c/3so/l3r/cmz/Wifey%20For%20Lifey%20Character%20Illustrations.png" style="display: block; height: auto; border: 0; width: 100%;" width="170" alt="An open email illustration" title="An open email illustration" height="auto"></div>
 															</td>
 														</tr>
 													</table>
@@ -207,16 +202,16 @@ export function generateWelcomeEmail(
 																	<tr>
 																		<td class="pad" style="padding-top:10px;padding-bottom:10px;">
 																			<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">Welcome to the Wifeys world — where love is simplified and pressure is left at the door 💗</p>
+																				<p style="margin: 0;">Wonderful news! 💖</p>
 																			</div>
 																		</td>
 																	</tr>
 																</table>
-																<table class="paragraph_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																<table class="paragraph_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
-																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">I’m sooo excited to finally have you here!! 💗 From today, you’re never alone — you’ve got me and your Wifey sisters right by your side.</p>
+																		<td class="pad" style="padding-top:10px;padding-bottom:10px;">
+																			<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
+																				<p style="margin: 0;">Your package has been successfully upgraded.</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -225,31 +220,19 @@ export function generateWelcomeEmail(
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	${
-																		subscription.cart && subscription.cart.length > 0
-																			? `<p style="margin: 0; margin-bottom: 8px;"><strong>📦 Bundled Items included in your order:</strong></p>
-																				 <ul style="margin: 0; margin-bottom: 16px; padding-left: 20px;">
-																					 ${subscription.cart
-																							.map(
-																								(item) =>
-																									`<li>${item.productName} x ${item.quantity} ${
-																										item.variant
-																											? `(${
-																													item.attributes?.name
-																														? ` ${item.attributes.name}`
-																														: ""
-																												})`
-																											: ""
-																									}</li>`
-																							)
-																							.join("")}
-																				 </ul>`
-																			: ""
-																	}																			</div>
+																				<p style="margin: 0;">Thank you for choosing to enhance your experience with us. We're excited to be part of your wedding journey and can't wait to help make your special day even more memorable.</p>
+																			</div>
 																		</td>
 																	</tr>
 																</table>
-																<table class="paragraph_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																<table class="heading_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+																	<tr>
+																		<td class="pad" style="width:100%;" align="center">
+																			<h3 style="margin: 0; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;">✨ Here’s what’s next:<br></h3>
+																		</td>
+																	</tr>
+																</table>
+																																<table class="paragraph_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
@@ -258,25 +241,18 @@ export function generateWelcomeEmail(
 																		</td>
 																	</tr>
 																</table>
-																<table class="heading_block block-6" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-																	<tr>
-																		<td class="pad" style="width:100%;" align="center">
-																			<h3 style="margin: 0; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;">✨ Here’s what’s next:<br></h3>
-																		</td>
-																	</tr>
-																</table>
-																<table class="list_block block-7" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																<table class="list_block block-6" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
 																	<tr>
 																		<td class="pad">
 																			<div style="margin-left:-20px">
-																				<ul style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
+																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
 																					<li style="Margin: 0 0 0 0;">👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/CrkOP8yx2ggLtkOkVUtDco?s=cl&p=i&ilr=4" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
 																				</ul>
 																			</div>
 																		</td>
 																	</tr>
 																</table>
-																<table class="list_block block-8" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																<table class="list_block block-7" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
 																	<tr>
 																		<td class="pad">
 																			<div style="margin-left:-20px">
@@ -287,18 +263,7 @@ export function generateWelcomeEmail(
 																		</td>
 																	</tr>
 																</table>
-																<table class="list_block block-9" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
-																	<tr>
-																		<td class="pad">
-																			<div style="margin-left:-20px">
-																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																					<li style="Margin: 0 0 0 0;">📦 Track your planner delivery → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
-																				</ul>
-																			</div>
-																		</td>
-																	</tr>
-																</table>
-																<table class="paragraph_block block-10" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																<table class="paragraph_block block-8" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
@@ -307,7 +272,7 @@ export function generateWelcomeEmail(
 																		</td>
 																	</tr>
 																</table>
-																<table class="paragraph_block block-11" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																<table class="paragraph_block block-9" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
@@ -316,7 +281,7 @@ export function generateWelcomeEmail(
 																		</td>
 																	</tr>
 																</table>
-																<table class="paragraph_block block-12" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																<table class="paragraph_block block-10" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
@@ -359,8 +324,7 @@ export function generateWelcomeEmail(
 							</tr>
 						</tbody>
 					</table>
-				
-				</td>
+									</td>
 			</tr>
 		</tbody>
 	</table><!-- End -->
