@@ -346,29 +346,29 @@ const WeddingBestieTab = () => {
                 <Table className="bg-creamey relative border-separate border-spacing-0">
                   <TableHeader className="sticky top-0 z-10 bg-creamey shadow-sm">
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="text-lovely font-bold w-16 md:w-20 bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Image</TableHead>
-                      <TableHead className="text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Name</TableHead>
+                      <TableHead className="text-center text-lovely font-bold w-16 md:w-20 bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Image</TableHead>
+                      <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Name</TableHead>
                       <TableHead 
-                        className="text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 cursor-pointer hover:text-lovely/80 transition-colors px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm"
+                        className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 cursor-pointer hover:text-lovely/80 transition-colors px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm"
                         onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
                       >
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center justify-center gap-1">
                           Price Range
                           {sortOrder === "asc" && <ChevronUp className="h-3.5 w-3.5 md:h-4 md:w-4" />}
                           {sortOrder === "desc" && <ChevronDown className="h-3.5 w-3.5 md:h-4 md:w-4" />}
                           {!sortOrder && <ArrowUpDown className="h-2.5 w-2.5 md:h-3 md:w-3 opacity-50" />}
                         </div>
                       </TableHead>
-                      <TableHead className="text-lovely font-bold  bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Link</TableHead>
-                      <TableHead className="text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Notes</TableHead>
+                      <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Link</TableHead>
+                      <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Notes</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {vendors.map((vendor) => (
                       <TableRow key={vendor._id} className="border-lovely/10 hover:bg-lovely/5 transition-colors">
-                        <TableCell className="px-2 py-2 md:px-4 md:py-3">
+                        <TableCell className="text-center align-middle px-2 py-2 md:px-4 md:py-3">
                           {vendor.images && vendor.images.length > 0 ? (
-                            <div className="relative h-8 w-8 md:h-12 md:w-12 rounded-lg overflow-hidden border border-lovely/10 shadow-sm">
+                            <div className="relative h-8 w-8 md:h-12 md:w-12 rounded-lg overflow-hidden border border-lovely/10 shadow-sm mx-auto">
                               <Image
                                 src={vendor.images[0]}
                                 alt={vendor.name}
@@ -377,20 +377,20 @@ const WeddingBestieTab = () => {
                               />
                             </div>
                           ) : (
-                            <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg bg-lovely/10 flex items-center justify-center text-lovely/40 text-[8px] md:text-[10px]">
+                            <div className="mx-auto h-8 w-8 md:h-12 md:w-12 rounded-lg bg-lovely/10 flex items-center justify-center text-lovely/40 text-[8px] md:text-[10px]">
                               No Image
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="font-bold text-lovely px-2 py-2 md:px-4 md:py-3 text-xs md:text-sm">{vendor.name}</TableCell>
-                        <TableCell className="text-lovely/80 font-medium px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-sm">
+                        <TableCell className="text-center align-middle font-bold text-lovely px-2 py-2 md:px-4 md:py-3 text-xs md:text-sm">{vendor.name}</TableCell>
+                        <TableCell className="text-center align-middle text-lovely/80 font-medium px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-sm">
                           {(vendor.fromPrice != null || vendor.toPrice != null) ? (
                             (vendor.fromPrice === vendor.toPrice || vendor.fromPrice === 0 || vendor.fromPrice == null)
                               ? `${vendor.toPrice ?? ""} EGP`
                               : `${vendor.fromPrice ? `From ${vendor.fromPrice} ` : ""}${vendor.toPrice ? `To ${vendor.toPrice}` : ""} EGP`
                           ) : "N/A"}
                         </TableCell>
-                        <TableCell className="text-right px-2 py-2 md:px-4 md:py-3">
+                        <TableCell className="text-center align-middle px-2 py-2 md:px-4 md:py-3">
                           {vendor.link && (
                             <Link 
                               href={vendor.link} 
@@ -401,7 +401,7 @@ const WeddingBestieTab = () => {
                             </Link>
                           )}
                         </TableCell>
-                        <TableCell className="text-lovely/60 text-[10px] md:text-xs italic max-w-[80px] sm:max-w-xs truncate px-2 py-2 md:px-4 md:py-3">
+                        <TableCell className="text-center align-middle text-lovely/60 text-[10px] md:text-xs italic px-2 py-2 md:px-4 md:py-3 whitespace-normal break-words min-w-[120px]">
                           {vendor.notes || "—"}
                         </TableCell>
                       </TableRow>
