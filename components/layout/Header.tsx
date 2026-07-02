@@ -40,7 +40,8 @@ import {
   Wrench,
   Boxes,
   Shirt,
-  Gem
+  Gem,
+  BookHeart
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -63,7 +64,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
   { name: "Home", href: "/" },
-  { name: "Experience", href: "/club" },
+  // { name: "Experience", href: "/club" },
   { name: "Playlists", href: "/playlists" },
   { name: "Shop", href: "/shop" },
   { 
@@ -79,7 +80,7 @@ const navigation = [
 ];
 const leftNavigation = [
   // { name: "Home", href: "/",icon:<ShoppingBag/> },
-  { name: "Experience", href: "/club", icon: <PartyPopper /> },
+  { name: "Planners", href: "/shop?tab=subscriptions", icon: <BookHeart /> },
   { name: "Playlists", href: "/playlists", icon: <ListVideo /> },
   { name: "Shop", href: "/shop", icon: <Store /> },
   { name: "About", href: "/about", icon: <VenetianMask /> },
