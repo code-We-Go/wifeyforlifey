@@ -152,12 +152,12 @@ const UnifiedCheckoutPage = () => {
   useEffect(() => {
     setConfigs((prev) => {
       const newConfigs: SubscriptionConfig[] = [];
-      
+
       subscriptionItems.forEach((item) => {
         for (let index = 0; index < item.quantity; index++) {
           const configId = item.quantity > 1 ? `${item.cartItemId}-instance-${index}` : item.cartItemId;
           const label = item.quantity > 1 ? `${item.packageName} (${index + 1})` : item.packageName;
-          
+
           const existing = prev.find((c) => c.cartItemId === configId);
           if (existing) {
             newConfigs.push(existing);
@@ -183,7 +183,7 @@ const UnifiedCheckoutPage = () => {
           }
         }
       });
-      
+
       return newConfigs;
     });
   }, [subscriptionItems]);
@@ -349,6 +349,25 @@ const UnifiedCheckoutPage = () => {
       return;
     }
 
+    // 1b. Validate Bosta location fields for Egypt
+    if (countryID === 65) {
+      if (!bostaLocation.city) {
+        alert("Please select a Governorate.");
+        setLoading(false);
+        return;
+      }
+      if (!bostaLocation.zone) {
+        alert("Please select a zone.");
+        setLoading(false);
+        return;
+      }
+      if (!bostaLocation.district) {
+        alert("Please select a district.");
+        setLoading(false);
+        return;
+      }
+    }
+
     // 2. Validate individual subscription configs
     for (let i = 0; i < configs.length; i++) {
       const config = configs[i];
@@ -382,29 +401,29 @@ const UnifiedCheckoutPage = () => {
     // 4. Map the payload
     const billingDetails = useSameAsShipping
       ? {
-          billingCountry: formData.country,
-          billingFirstName: formData.firstName,
-          billingLastName: formData.lastName,
-          billingAddress: formData.address,
-          billingApartment: formData.apartment,
-          billingPostalZip: formData.postalZip,
-          billingCity: bostaLocation.city?.name || formData.city,
-          billingState: bostaLocation.zone?.name || formData.state,
-          billingPhone: formData.phone,
-          billingWhatsAppNumber: formData.whatsAppNumber,
-        }
+        billingCountry: formData.country,
+        billingFirstName: formData.firstName,
+        billingLastName: formData.lastName,
+        billingAddress: formData.address,
+        billingApartment: formData.apartment,
+        billingPostalZip: formData.postalZip,
+        billingCity: bostaLocation.city?.name || formData.city,
+        billingState: bostaLocation.zone?.name || formData.state,
+        billingPhone: formData.phone,
+        billingWhatsAppNumber: formData.whatsAppNumber,
+      }
       : {
-          billingCountry: formData.billingCountry,
-          billingFirstName: formData.billingFirstName,
-          billingLastName: formData.billingLastName,
-          billingAddress: formData.billingAddress,
-          billingApartment: formData.billingApartment,
-          billingPostalZip: formData.billingPostalZip,
-          billingCity: formData.billingCity,
-          billingState: formData.billingState,
-          billingPhone: formData.billingPhone,
-          billingWhatsAppNumber: formData.billingWhatsAppNumber,
-        };
+        billingCountry: formData.billingCountry,
+        billingFirstName: formData.billingFirstName,
+        billingLastName: formData.billingLastName,
+        billingAddress: formData.billingAddress,
+        billingApartment: formData.billingApartment,
+        billingPostalZip: formData.billingPostalZip,
+        billingCity: formData.billingCity,
+        billingState: formData.billingState,
+        billingPhone: formData.billingPhone,
+        billingWhatsAppNumber: formData.billingWhatsAppNumber,
+      };
 
     const payload = {
       ...formData,
@@ -417,7 +436,7 @@ const UnifiedCheckoutPage = () => {
       bostaZoneName: bostaLocation.zone?.name || "",
       bostaDistrict: bostaLocation.district?.districtId || "",
       bostaDistrictName: bostaLocation.district?.districtName || "",
-      
+
       subscriptions: configs.map((c) => ({
         packageId: c.packageId,
         packageName: c.packageName,
@@ -458,7 +477,7 @@ const UnifiedCheckoutPage = () => {
 
     try {
       const res = await axios.post("/api/subscription-cart-payment", payload);
-      
+
       // Save shipping profile if requested
       if (saveShippingData && isAuthenticated && user?.email) {
         await axios.put("/api/user/profile", {
@@ -505,14 +524,14 @@ const UnifiedCheckoutPage = () => {
     <div className={`container-custom py-8 md:py-12 justify-between text-lovely min-h-screen bg-creamey flex flex-col`}>
       <h1 className={`${thirdFont.className} tracking-normal text-2xl text-lovely md:text-4xl mb-4 md:mb-8 font-semibold`}>
         Checkout
-      
+
       </h1>
-{/* Subscription Checkout */}
+      {/* Subscription Checkout */}
 
       <div className="w-full flex flex-col-reverse lg:flex-row gap-8">
         {/* Left Side Forms */}
         <form onSubmit={handleSubmit} className="flex flex-col items-start w-full lg:w-5/7 gap-6">
-          
+
           {/* Shipping Section */}
           <div className="w-full">
             <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-4`}>
@@ -730,7 +749,7 @@ const UnifiedCheckoutPage = () => {
                   <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
 
                     <div className="flex flex-col gap-1">
-                    
+
                       <label className="text-lovely text-sm">Special Message for the Bride</label>
                       <textarea
                         value={config.specialMessage}
@@ -757,9 +776,8 @@ const UnifiedCheckoutPage = () => {
                               "giftCardName",
                               config.giftCardName === card.name ? "" : card.name
                             )}
-                            className={`cursor-pointer rounded-lg overflow-hidden border-2 p-1 relative ${
-                              config.giftCardName === card.name ? "border-lovely bg-lovely/5" : "border-transparent"
-                            }`}
+                            className={`cursor-pointer rounded-lg overflow-hidden border-2 p-1 relative ${config.giftCardName === card.name ? "border-lovely bg-lovely/5" : "border-transparent"
+                              }`}
                           >
                             <img src={card.src} alt={card.label} className="w-full h-16 object-cover rounded" />
                             <div className="text-[10px] text-center text-lovely truncate mt-1">{card.label}</div>
@@ -811,27 +829,27 @@ const UnifiedCheckoutPage = () => {
                   </div>
                   <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
                     <p className="flex gap-2">
-                      <span className="font-bold text-lovely">1.</span> 
+                      <span className="font-bold text-lovely">1.</span>
                       <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
                     </p>
                     <p className="flex gap-2">
-                      <span className="font-bold text-lovely">2.</span> 
+                      <span className="font-bold text-lovely">2.</span>
                       <span>Select <b>"Bank Account"</b></span>
                     </p>
                     <p className="flex gap-2">
-                      <span className="font-bold text-lovely">3.</span> 
+                      <span className="font-bold text-lovely">3.</span>
                       <span>Enter Account: <b className="font-mono text-sm select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
                     </p>
                     <p className="flex gap-2">
-                      <span className="font-bold text-lovely">4.</span> 
+                      <span className="font-bold text-lovely">4.</span>
                       <span>Select <b>Credit Agricole</b> as bank</span>
                     </p>
                     <p className="flex gap-2">
-                      <span className="font-bold text-lovely">5.</span> 
+                      <span className="font-bold text-lovely">5.</span>
                       <span>Receiver Name: <b>Wifey</b></span>
                     </p>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
                     <CldUploadWidget
@@ -990,11 +1008,10 @@ const UnifiedCheckoutPage = () => {
             <button
               type="submit"
               disabled={loading || !acceptedTerms}
-              className={`w-full py-4 text-base font-bold tracking-wider rounded-2xl transition duration-300 ${
-                loading || !acceptedTerms
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-lovely text-creamey hover:bg-lovely/90 cursor-pointer shadow-lg shadow-lovely/10"
-              }`}
+              className={`w-full py-4 text-base font-bold tracking-wider rounded-2xl transition duration-300 ${loading || !acceptedTerms
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-lovely text-creamey hover:bg-lovely/90 cursor-pointer shadow-lg shadow-lovely/10"
+                }`}
             >
               {loading ? "PROCESSING..." : "PROCEED TO PAYMENT"}
             </button>
@@ -1004,7 +1021,7 @@ const UnifiedCheckoutPage = () => {
         {/* Right Side Summary */}
         <div className="w-full lg:w-2/7 py-1">
           <div className="lg:border-l border-lovely/30 lg:pl-6 sticky top-4 space-y-6">
-            
+
             {/* Products & Subscriptions summary list */}
             <div className="bg-pinkey text-lovely rounded-2xl p-6 border border-lovely shadow-md">
               <h3 className={`${thirdFont.className} text-xl tracking-wide font-bold mb-4 border-b border-lovely/20 pb-2`}>
