@@ -21,6 +21,7 @@ function SuccessPage() {
   const [subscription, setSubscription] = useState<string | null>(null);
   const [account, setAccount] = useState<string | null>(null);
   const [process, setProcess] = useState<string | null>(null);
+  const [isGift, setIsGift] = useState(false);
   const [sessionOrder, setSessionOrder] = useState<any | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -38,6 +39,7 @@ function SuccessPage() {
     const partnerSession = searchParams.get("session");
     const orderId = searchParams.get("orderId");
     const processParam = searchParams.get("process");
+    const giftParam = searchParams.get("gift");
     if (subscription) {
       setSubscription(subscription);
     }
@@ -46,6 +48,9 @@ function SuccessPage() {
     }
     if (processParam) {
       setProcess(processParam);
+    }
+    if (giftParam === "true") {
+      setIsGift(true);
     }
     if (partnerSession && orderId) {
       fetch(`/api/partner-sessions/order?orderId=${orderId}`)
@@ -104,11 +109,13 @@ function SuccessPage() {
           <div className="text-lovely">
             {" "}
             <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">
-              {process === "upgrade" 
-                ? "🎉 Your Subscription was upgraded successfully. 🎉" 
-                : process === "renew" 
-                  ? "🎉 Your Subscription was renewed successfully. 🎉" 
-                  : "🎉 Your Subscription was created successfully. 🎉"}
+              {isGift
+                ? "🎁 Your Gift Subscription was created successfully! "
+                : process === "upgrade" 
+                  ? "🎉 Your Subscription was upgraded successfully. 🎉" 
+                  : process === "renew" 
+                    ? "🎉 Your Subscription was renewed successfully. 🎉" 
+                    : "🎉 Your Subscription was created successfully. 🎉"}
             </h1>
             <>
               {!account &&
@@ -135,7 +142,12 @@ function SuccessPage() {
                         : "Your subscription was created successfully, now create your account to enjoy our exclusive educational channel and partnerships"}
                   </p>
                 ))}
-              {process === "new" && <p>Look out for an email from your bestie 👯♀️.</p>}
+              {process === "new" && !isGift && <p>Look out for an email from your bestie 👯♀️.</p>}
+              {isGift && subscription !== "mini" && (
+                <p className="px-2 md:px-6 xl:px-12 mt-2">
+                  Please notify us when the planner reaches her so we can add her to the WhatsApp support group 💬
+                </p>
+              )}
             </>
           </div>
         ) : sessionOrder ? (
@@ -167,8 +179,15 @@ function SuccessPage() {
           </div>
         ) : (
           <h1 className="mt-2 text-lg sm:text-xl md:text-2xl font-bold text-lovely">
-            🎉 Your Order was created successfully. 🎉
+            {isGift
+              ? "🎁 Your Gift Order was created successfully! 🎁"
+              : "🎉 Your Order was created successfully. 🎉"}
           </h1>
+        )}
+        {isGift && !subscription && (
+          <p className="text-lovely px-2 md:px-6 xl:px-12">
+            Thank you for your thoughtful gift! 🎁
+          </p>
         )}
         {(account || process === "upgrade" || process === "renew") && subscription && (
           <div className="mt-6 flex gap-4 justify-center">
@@ -209,6 +228,16 @@ function SuccessPage() {
             </Link>
           </div>
         )}
+        {/* Create My Account button for users without an account */}
+        {!account && !subscription && !isGift && (
+          <div className="mt-4 flex justify-center">
+            <Link href="/register" passHref>
+              <button className="px-6 py-2 bg-lovely text-creamey rounded-2xl font-semibold hover:bg-lovely/90 transition">
+                Create My Account
+              </button>
+            </Link>
+          </div>
+        )}
         {!account && process === "new" && subscription && (
           <div className="mt-6 flex gap-4 justify-center">
             {/* <Link href="/register" passHref>
@@ -216,14 +245,21 @@ function SuccessPage() {
               Register Now
             </button>
           </Link> */}
-            {subscription !== "mini" && (
+            {subscription !== "mini" && !isGift && (
               <Link href="/register" passHref>
                 <button className="px-6 py-2 bg-lovely text-creamey rounded-lg font-semibold hover:bg-lovely/90 transition">
                   Register Now
                 </button>
               </Link>
             )}
-            {subscription === "mini" && (
+            {/* {isGift && (
+              <Link href="/register" passHref>
+                <button className="px-6 py-2 bg-lovely text-creamey rounded-2xl font-semibold hover:bg-lovely/90 transition">
+                  Create My Account
+                </button>
+              </Link>
+            )} */}
+            {subscription === "mini" && !isGift && (
               <>
                 {/* <button
                   onClick={() => setIsPlaylistModalOpen(true)}

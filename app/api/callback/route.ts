@@ -763,6 +763,7 @@ async function handleSubscription(
 
     // Determine redirect based on the first subscription's package type
     if (isFirstOfMulti) {
+      const giftParam = updatedSub?.isGift ? "&gift=true" : "";
       if (
         (updatedSub?.packageID as any)?._id?.toString() ===
         "68bf6ae9c4d5c1af12cdcd37" || 
@@ -771,18 +772,18 @@ async function handleSubscription(
       ) {
         finalRedirect = `payment/success?subscription=mini${
           subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}`;
+        }&process=${paymentOp.process}${giftParam}`;
       } else if (
         (updatedSub?.packageID as any)?._id?.toString() ===
         "6965e63c6df4503dda02c12b"
       ) {
         finalRedirect = `payment/success?subscription=wedding${
           subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}`;
+        }&process=${paymentOp.process}${giftParam}`;
       } else {
         finalRedirect = `payment/success?subscription=true${
           subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}`;
+        }&process=${paymentOp.process}${giftParam}`;
       }
     }
   }
@@ -940,7 +941,12 @@ async function handleOrder(
     });
   }
 
-  return { success: true, redirect: "payment/success" };
+  // Check if user has an account
+  const orderUser = await UserModel.findOne({ email: res.email });
+  const giftParam = res.isGift ? "gift=true" : "";
+  const accountParam = orderUser ? "account=true" : "";
+  const queryParams = [giftParam, accountParam].filter(Boolean).join("&");
+  return { success: true, redirect: `payment/success${queryParams ? `?${queryParams}` : ""}` };
 }
 
 // ─── Core Callback Processing ────────────────────────────────────────
@@ -987,9 +993,15 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
         redirect: `payment/success?session=true&orderId=${existing.referenceId}`,
       };
     } else if (existing.productType === "subscription") {
-      return { success: true, redirect: "payment/success?subscription=true" };
+      // Look up subscription to check gift status
+      const existingSub = await subscriptionsModel.findOne({ paymentID: String(paymobOrderId) });
+      const giftParam = existingSub?.isGift ? "&gift=true" : "";
+      return { success: true, redirect: `payment/success?subscription=true${giftParam}` };
     } else {
-      return { success: true, redirect: "payment/success" };
+      // Look up order to check gift status
+      const existingOrder = await ordersModel.findById(existing.referenceId);
+      const giftParam = existingOrder?.isGift ? "?gift=true" : "";
+      return { success: true, redirect: `payment/success${giftParam}` };
     }
   }
 
