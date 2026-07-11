@@ -481,18 +481,29 @@ Let’s verify your experience and choose your playlist! your bridal era officia
                       />
                     </div>
                     <div className="p-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium line-clamp-1">{p.title}</h3>
                         <span className="text-xs">
                           {p.videos?.length || 0}{" "}
                           {(p.videos?.length || 0) === 1 ? "video" : "videos"}
                         </span>
                       </div>
-                      <p className="text-sm text-lovely/80 mt-1 line-clamp-2">
+                      <p className="text-sm text-lovely/80 line-clamp-2 mb-3">
                         {Array.isArray(p.description)
                           ? p.description.join(" ")
                           : (p as any).description}
                       </p>
+                      <div className="flex justify-end">
+                        <a
+                          href={`/playlists/${p._id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1.5 bg-lovely hover:bg-lovely/90 text-creamey text-xs font-semibold rounded-md transition shadow-sm hover:scale-105"
+                        >
+                          View Playlist Details &rarr;
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
