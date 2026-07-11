@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { thirdFont } from "@/fonts";
 import Image from "next/image";
-import BlogsCommentSection from "../components/BlogsCommentsSection";
+import { Smartphone, Sparkles, CalendarDays, ListTodo, Radio, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { FaGooglePlay } from "react-icons/fa";
 
 interface Blog {
   _id: string;
@@ -15,14 +15,6 @@ interface Blog {
   excerpt: string;
   featuredImage?: string;
   tikTokVideoUrl?: string;
-  // author: {
-  //   _id: string;
-  //   username: string;
-  //   firstName?: string;
-  //   lastName?: string;
-  //   email: string;
-  //   imageURL?: string;
-  // };
   status: "draft" | "published" | "archived";
   tags: string[];
   categories: string[];
@@ -36,6 +28,10 @@ interface Blog {
   formattedPublishDate?: string;
 }
 
+/*
+==========================================================
+ORIGINAL BLOG DETAIL COMPONENT - COMMENTED OUT FOR BACKUP
+==========================================================
 const BlogDetailPage = () => {
   const params = useParams();
   const slug = params?.slug as string;
@@ -56,7 +52,6 @@ const BlogDetailPage = () => {
 
   useEffect(() => {
     if (blog?.tikTokVideoUrl) {
-      // Check if it's a photo post that needs oEmbed data
       const photoMatch = blog.tikTokVideoUrl.match(/\/photo\/(\d+)/);
       if (photoMatch) {
         fetchTikTokEmbed(blog.tikTokVideoUrl);
@@ -67,14 +62,9 @@ const BlogDetailPage = () => {
   const fetchBlog = async () => {
     setLoading(true);
     try {
-      // Fetch the blog post
       const response = await axios.get(`/api/blogs/${slug}`);
       setBlog(response.data.data);
-
-      // Increment view count
       await axios.patch(`/api/blogs/${slug}`, { action: "increment_view" });
-
-      // Fetch related blogs (same categories or tags)
       if (
         response.data.data.categories.length > 0 ||
         response.data.data.tags.length > 0
@@ -95,30 +85,19 @@ const BlogDetailPage = () => {
 
   const fetchRelatedBlogs = async (currentBlog: Blog) => {
     try {
-      // Get blogs with similar categories or tags
       const params = new URLSearchParams({
         status: "published",
-        all: "true",
+        limit: "4",
+        exclude: currentBlog._id,
       });
+      currentBlog.categories.forEach((cat) => params.append("categories", cat));
+      currentBlog.tags.forEach((tag) => params.append("tags", tag));
 
       const response = await axios.get(`/api/blogs?${params}`);
-      const allBlogs = response.data.data;
-
-      // Filter related blogs based on categories and tags
-      const related = allBlogs
+      const filtered = response.data.data
         .filter((b: Blog) => b._id !== currentBlog._id)
-        .filter((b: Blog) => {
-          const hasCommonCategory = b.categories.some((cat) =>
-            currentBlog.categories.includes(cat)
-          );
-          const hasCommonTag = b.tags.some((tag) =>
-            currentBlog.tags.includes(tag)
-          );
-          return hasCommonCategory || hasCommonTag;
-        })
         .slice(0, 3);
-
-      setRelatedBlogs(related);
+      setRelatedBlogs(filtered);
     } catch (error) {
       console.error("Error fetching related blogs:", error);
     }
@@ -127,27 +106,17 @@ const BlogDetailPage = () => {
   const fetchTikTokEmbed = async (url: string) => {
     setTikTokLoading(true);
     setTikTokError("");
-    setTikTokEmbedData(null);
-
     try {
       const response = await axios.get(
-        `/api/tiktok-embed?url=${encodeURIComponent(url)}`
+        `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`
       );
       setTikTokEmbedData(response.data);
     } catch (error: any) {
       console.error("Error fetching TikTok embed:", error);
-      setTikTokError("Failed to load TikTok content");
+      setTikTokError("Failed to load TikTok embed");
     } finally {
       setTikTokLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
   };
 
   const stripHtml = (html: string) => {
@@ -157,6 +126,14 @@ const BlogDetailPage = () => {
   const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   if (loading) {
@@ -178,8 +155,7 @@ const BlogDetailPage = () => {
             {error || "Blog not found"}
           </h1>
           <p className="text-lovely/90 mb-8">
-            The blog post you&apos;re looking for doesn&apos;t exist or has been
-            removed.
+            The blog post you're looking for doesn't exist or has been removed.
           </p>
           <Link
             href="/blogs"
@@ -194,7 +170,7 @@ const BlogDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-creamey container-custom">
-      {/* Breadcrumb */}
+      {/* Breadcrumb * /}
       <div className=" border-b">
         <div className="container-custom mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex items-center space-x-2 text-sm text-lovely/90">
@@ -212,9 +188,9 @@ const BlogDetailPage = () => {
       </div>
 
       <article className=" mx-auto   py-8">
-        {/* Article Header */}
+        {/* Article Header * /}
         <header className="mb-8 flex flex-col items-center w-full justify-center">
-          {/* Categories */}
+          {/* Categories * /}
           {blog.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {blog.categories.map((category, index) => (
@@ -228,47 +204,28 @@ const BlogDetailPage = () => {
             </div>
           )}
 
-          {/* Title */}
+          {/* Title * /}
           <h1
             className={`${thirdFont.className} text-4xl md:text-5xl font-bold text-lovely mb-4 leading-tight`}
           >
             {blog.title}
           </h1>
 
-          {/* Excerpt */}
+          {/* Excerpt * /}
           <p className="text-xl text-lovely/90 mb-6 leading-relaxed">
             {blog.excerpt}
           </p>
 
-          {/* Meta Information */}
+          {/* Meta Information * /}
           <div className="flex flex-wrap  items-center gap-6 text-sm text-lovely/80 mb-6">
-            {/* <div className="flex items-center">
-              {blog.author.imageURL && (
-                <img
-                  src={blog.author.imageURL}
-                  alt={blog.author.username}
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-              )}
-              <div>
-                <p className="font-medium text-lovely">
-                  {blog.author.firstName && blog.author.lastName
-                    ? `${blog.author.firstName} ${blog.author.lastName}`
-                    : blog.author.username}
-                </p>
-                <p className="text-lovely/80">Author</p>
-              </div>
-            </div> */}
             <div className="flex items-center space-x-4">
               <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
               <span>•</span>
               <span>{blog.readingTime} min read</span>
-              {/* <span>•</span>
-              <span>{blog.viewCount} views</span> */}
             </div>
           </div>
 
-          {/* Featured Image */}
+          {/* Featured Image * /}
           {blog.featuredImage && (
             <div className="max-w-3xl relative aspect-video w-full mb-8">
               <Image
@@ -281,17 +238,10 @@ const BlogDetailPage = () => {
           )}
         </header>
 
-        {/* Article Content */}
+        {/* Article Content * /}
         <div className="bg-creamey text-lovely rounded-lg  p-8 mb-8">
           <div
             className="prose blog-content overflow-x-scroll prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
-            // dangerouslySetInnerHTML={{ __html: blog.content }}
-            // dangerouslySetInnerHTML={{
-            //   __html: blog.content.replace(
-            //     /<img /g,
-            //     '<img style="float:left;max-width:320px;margin:30px 16px 8px 0;display:inline-block;" '
-            //   ),
-            // }}
             dangerouslySetInnerHTML={{
               __html:
                 blog.content.replace(
@@ -315,7 +265,7 @@ const BlogDetailPage = () => {
           `}</style>
         </div>
 
-        {/* TikTok Video */}
+        {/* TikTok Video * /}
         {blog.tikTokVideoUrl && (
           <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8">
             <h3 className="text-lg font-semibold text-lovely mb-4">
@@ -323,11 +273,8 @@ const BlogDetailPage = () => {
             </h3>
             <div className="flex bg-creamey justify-center">
               {(() => {
-                // Extract video/photo ID from TikTok URL
                 const videoMatch = blog.tikTokVideoUrl.match(/\/video\/(\d+)/);
                 const photoMatch = blog.tikTokVideoUrl.match(/\/photo\/(\d+)/);
-
-                // Handle photo posts with oEmbed data
                 if (photoMatch) {
                   if (tikTokLoading) {
                     return (
@@ -337,7 +284,6 @@ const BlogDetailPage = () => {
                       </div>
                     );
                   }
-
                   if (tikTokError) {
                     return (
                       <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
@@ -368,7 +314,6 @@ const BlogDetailPage = () => {
                       </div>
                     );
                   }
-
                   if (tikTokEmbedData?.html) {
                     return (
                       <div
@@ -379,8 +324,6 @@ const BlogDetailPage = () => {
                       />
                     );
                   }
-
-                  // Fallback for photo posts
                   return (
                     <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
                       <p className="text-lovely mb-3">
@@ -410,19 +353,15 @@ const BlogDetailPage = () => {
                     </div>
                   );
                 }
-
-                // Handle video posts with iframe
                 let embedUrl;
                 if (videoMatch) {
                   embedUrl = `https://www.tiktok.com/embed/v2/${videoMatch[1]}?lang=en-US&autoplay=0&muted=1`;
                 } else {
-                  // Fallback: try to extract any numeric ID
                   const idMatch = blog.tikTokVideoUrl.match(/(\d+)/);
                   embedUrl = idMatch
                     ? `https://www.tiktok.com/embed/v2/${idMatch[0]}?lang=en-US&autoplay=0&muted=1`
                     : blog.tikTokVideoUrl;
                 }
-
                 return (
                   <iframe
                     src={embedUrl}
@@ -445,7 +384,7 @@ const BlogDetailPage = () => {
           </div>
         )}
 
-        {/* Tags */}
+        {/* Tags * /}
         {blog.tags.length > 0 && (
           <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8">
             <h3 className="text-lg font-semibold text-lovely mb-4">Tags</h3>
@@ -464,7 +403,6 @@ const BlogDetailPage = () => {
 
         <BlogsCommentSection slug={blog.slug} blogId={blog._id} />
 
-        {/* Related Posts */}
         {relatedBlogs.length > 0 && (
           <div className="bg-creamey rounded-lg shadow-sm p-6">
             <h3 className="text-2xl font-bold text-lovely mb-6">
@@ -510,7 +448,7 @@ const BlogDetailPage = () => {
           </div>
         )}
 
-        {/* Navigation */}
+        {/* Navigation * /}
         <div className="mt-12 text-center">
           <Link
             href="/blogs"
@@ -520,6 +458,151 @@ const BlogDetailPage = () => {
           </Link>
         </div>
       </article>
+    </div>
+  );
+};
+*/
+
+const AppShowcaseCarousel = () => {
+  const images = [
+    "/blogsImages/1.webp",
+    "/blogsImages/2.webp",
+    "/blogsImages/3.webp",
+    "/blogsImages/4.webp",
+    "/blogsImages/5.webp",
+  ];
+  
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  return (
+    <div className="relative w-[260px] aspect-[9/19.5] mb-12 group">
+      {/* Slides Container */}
+      <div className="relative w-full h-full overflow-hidden rounded-sm border border-lovely/10 shadow-lg bg-black/5">
+        {images.map((src, idx) => (
+          <div
+            key={idx}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+            }`}
+          >
+            <Image
+              src={src}
+              alt={`Mobile App Screen ${idx + 1}`}
+              fill
+              className="object-cover w-full h-full"
+              priority={idx === 0}
+            />
+          </div>
+        ))}
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/60 text-lovely hover:bg-white/90 hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 border border-lovely/10 backdrop-blur-sm shadow-md"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={handleNext}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/60 text-lovely hover:bg-white/90 hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 border border-lovely/10 backdrop-blur-sm shadow-md"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Dot Indicators */}
+      <div className="flex justify-center gap-1.5 mt-4 z-20 relative">
+        {images.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentIndex(idx)}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              idx === currentIndex
+                ? "w-5 bg-lovely"
+                : "w-2 bg-lovely/30 hover:bg-lovely/50"
+            }`}
+            aria-label={`Go to slide ${idx + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const BlogDetailPage = () => {
+  return (
+    <div className="min-h-screen container-custom bg-creamey py-6 md:py-12">
+      <div className="max-w-4xl mx-auto px-4 text-center flex flex-col items-center">
+        {/* Premium Badge */}
+        <span className="inline-flex items-center gap-1.5 bg-lovely/10 text-lovely text-sm font-semibold tracking-wider uppercase px-4 py-1.5 rounded-full mb-6 border border-lovely/20 animate-pulse">
+          <Sparkles className="w-4 h-4 text-lovely" />
+          New Experience
+        </span>
+        
+        {/* Heading */}
+        <h1 className={`${thirdFont.className} text-4xl md:text-6xl font-bold text-lovely mb-6 leading-tight`}>
+          Wifey for Lifey is Now on Mobile!
+        </h1>
+        
+        {/* Description */}
+        <p className="text-lg md:text-xl text-lovely/80 max-w-2xl mx-auto mb-10 leading-relaxed">
+          To provide you with a richer, more interactive bridal era bestie experience, all our wedding blogs have moved exclusively to our mobile app.
+        </p>
+
+        {/* Download Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 w-full max-w-md sm:max-w-none">
+          {/* App Store */}
+          <a
+            href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-lovely text-creamey hover:bg-lovely/90 px-8 py-4 rounded-xl shadow-xl transition-all duration-300 hover:scale-105 group border border-lovely/30 w-full sm:w-auto justify-center"
+          >
+            <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.49-.62.71-1.16 1.85-1.01 2.96 1.12.09 2.27-.58 2.94-1.39z"/>
+            </svg>
+            <div className="text-left">
+              <p className="text-[10px] uppercase tracking-wider opacity-85">Download on the</p>
+              <p className="text-lg font-semibold font-sans">App Store</p>
+            </div>
+          </a>
+
+          {/* Google Play Store */}
+          <a
+            href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&hl=en"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-everGreen text-creamey hover:bg-everGreen/90 px-8 py-4 rounded-xl shadow-xl transition-all duration-300 hover:scale-105 group border border-everGreen/30 w-full sm:w-auto justify-center"
+          >
+            <FaGooglePlay className="text-creamey w-6 h-6" />
+
+            <div className="text-left">
+              <p className="text-[10px] uppercase tracking-wider opacity-85">Get it on</p>
+              <p className="text-lg font-semibold font-sans">Google Play</p>
+            </div>
+          </a>
+        </div>
+
+        {/* Showcase Image Carousel */}
+        <AppShowcaseCarousel />
+      </div>
     </div>
   );
 };
