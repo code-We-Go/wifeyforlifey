@@ -158,7 +158,13 @@ export async function POST(req: Request) {
 
     // Sync subscriptions from subscriptionsModel
     const subscriptionsModel = (await import("@/app/modals/subscriptionsModel")).default;
-    const userSubs = await subscriptionsModel.find({ email: user.email });
+    const userSubs = await subscriptionsModel.find({
+      $or: [
+        { email: user.email },
+        { giftRecipientEmail: user.email }
+      ],
+      subscribed: true,
+    });
     if (userSubs.length > 0) {
       const subIds = userSubs.map(s => s._id.toString());
       const existingIds = user.subscriptions?.map((s: any) => s.toString()) || [];

@@ -9,7 +9,8 @@ export async function POST(req: Request) {
     await ConnectDB();
 
     const body = await req.json();
-    const { username, email, password, firstName, lastName } = body;
+    const { username, email: rawEmail, password, firstName, lastName } = body;
+    const email = rawEmail?.trim().toLowerCase();
 
     // Validate input
     if (!email || !password || !username) {
@@ -52,7 +53,13 @@ export async function POST(req: Request) {
 
     // Sync subscriptions from subscriptionsModel
     const subscriptionsModel = (await import("@/app/modals/subscriptionsModel")).default;
-    const userSubs = await subscriptionsModel.find({ email: newUser.email });
+    const userSubs = await subscriptionsModel.find({
+      $or: [
+        { email: newUser.email },
+        { giftRecipientEmail: newUser.email }
+      ],
+      subscribed: true,
+    });
     if (userSubs.length > 0) {
       const subIds = userSubs.map(s => s._id.toString());
       const existingIds = newUser.subscriptions?.map((s: any) => s.toString()) || [];

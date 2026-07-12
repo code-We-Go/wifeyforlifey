@@ -132,6 +132,32 @@ export const authOptions: NextAuthOptions = {
             imageURL: user.image,
             subscriptions: subscriptionIds
           });
+        } else {
+          // Sync subscriptions for existing user (may have new subs since last login)
+          const subscriptions = await subscriptionsModel.find({
+            $or: [
+              { email: googleEmail },
+              { giftRecipientEmail: googleEmail }
+            ],
+            subscribed: true,
+          });
+
+          if (subscriptions.length > 0) {
+            const subIds = subscriptions.map(sub => sub._id.toString());
+            const existingIds = existingUser.subscriptions?.map((s: any) => s.toString()) || [];
+
+            let modified = false;
+            for (const id of subIds) {
+              if (!existingIds.includes(id)) {
+                existingUser.subscriptions.push(id);
+                modified = true;
+              }
+            }
+            if (modified) {
+              existingUser.isSubscribed = true;
+              await existingUser.save();
+            }
+          }
         }
         userId = (existingUser as any)._id?.toString();
         user.id = userId ?? "";
