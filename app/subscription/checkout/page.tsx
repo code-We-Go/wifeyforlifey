@@ -545,7 +545,7 @@ const UnifiedCheckoutPage = () => {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleInputChange}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value.toLowerCase() }))}
                     className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
                     required
                   />
@@ -671,7 +671,7 @@ const UnifiedCheckoutPage = () => {
                     <input
                       type="email"
                       value={config.email}
-                      onChange={(e) => handleConfigChange(index, "email", e.target.value)}
+                      onChange={(e) => handleConfigChange(index, "email", e.target.value.toLowerCase())}
                       className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
                       required={!config.isGift}
                     />
