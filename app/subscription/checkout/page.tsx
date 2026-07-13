@@ -747,8 +747,13 @@ const UnifiedCheckoutPage = () => {
 
                 {config.isGift && (
                   <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {config.tier !== "mini" && (
+                      <p className="text-sm text-lovely font-medium bg-lovely/10 p-3 rounded-lg border border-lovely/20">
+                        Please notify us when the gift reaches the bride to add her in the whatsapp support group
+                      </p>
+                    )}
 
-                    <div className="flex flex-col gap-1">
+                    {/* <div className="flex flex-col gap-1">
 
                       <label className="text-lovely text-sm">Special Message for the Bride</label>
                       <textarea
@@ -757,7 +762,7 @@ const UnifiedCheckoutPage = () => {
                         className="w-full h-20 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
                         placeholder="Write a lovely note..."
                       />
-                    </div>
+                    </div> */}
 
                     {/* Gift Cards Cards Selector */}
                     <div className="space-y-2">
