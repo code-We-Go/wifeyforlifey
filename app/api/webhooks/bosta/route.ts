@@ -113,11 +113,11 @@ export async function POST(request: Request) {
       isConfirmedDelivery: payload.isConfirmedDelivery,
     });
 
-    // Validate required fields
-    if (!payload.businessReference || payload.state === undefined || payload.state === null) {
-      console.error("Bosta webhook missing required fields:", { businessReference: payload.businessReference, state: payload.state });
+    // Validate required fields — state is always required, businessReference can be empty (fallback to shipmentID)
+    if (payload.state === undefined || payload.state === null) {
+      console.error("Bosta webhook missing required field: state", { state: payload.state });
       return NextResponse.json(
-        { error: "Missing required fields: businessReference or state" },
+        { error: "Missing required field: state" },
         { status: 400 }
       );
     }
@@ -131,26 +131,52 @@ export async function POST(request: Request) {
 
     console.log(`Bosta state mapping: ${stateCode} -> ${orderStatus}`);
 
-    // Validate businessReference is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(payload.businessReference)) {
-      console.error(`Invalid ObjectId for businessReference: ${payload.businessReference}`);
-      return NextResponse.json(
-        { error: `Invalid businessReference format: ${payload.businessReference}` },
-        { status: 400 }
-      );
+    // Try to find by businessReference first (if it's a valid ObjectId)
+    let order = null;
+    const hasValidBusinessRef = payload.businessReference && mongoose.Types.ObjectId.isValid(payload.businessReference);
+    
+    if (hasValidBusinessRef) {
+      // Find order by businessReference (which should be the order ID)
+      order = await ordersModel.findById(payload.businessReference);
     }
-
-    // Find order by businessReference (which should be the order ID)
-    const order = await ordersModel.findById(payload.businessReference);
 
     if (!order) {
       // If order not found, check subscriptions
-      const subscription = await subscriptionsModel.findById(
-        payload.businessReference
-      );
+      let subscription = hasValidBusinessRef
+        ? await subscriptionsModel.findById(payload.businessReference)
+        : null;
+
+      // Fallback: try finding by shipmentID if not found by _id
+      if (!subscription) {
+        subscription = await subscriptionsModel.findOne({ shipmentID: payload._id });
+        if (subscription) {
+          console.log(`Subscription found via shipmentID fallback: ${subscription._id}`);
+        }
+      }
+
+      // Second fallback: try finding orders by shipmentID
+      if (!subscription) {
+        const orderByShipment = await ordersModel.findOne({ shipmentID: payload._id });
+        if (orderByShipment) {
+          console.log(`Order found via shipmentID fallback: ${orderByShipment._id}`);
+          // Update order and return
+          await ordersModel.findByIdAndUpdate(
+            orderByShipment._id,
+            { status: orderStatus, updatedAt: new Date() },
+            { new: true }
+          );
+          console.log(`Order ${orderByShipment._id} updated to status: ${orderStatus} via shipmentID fallback`);
+          return NextResponse.json({
+            success: true,
+            message: "Order status updated successfully (via shipmentID fallback)",
+            orderId: orderByShipment._id,
+            newStatus: orderStatus,
+          });
+        }
+      }
 
       if (!subscription) {
-        console.error(`Neither order nor subscription found for businessReference: ${payload.businessReference}`);
+        console.error(`Neither order nor subscription found for businessReference: ${payload.businessReference} or shipmentID: ${payload._id}`);
         return NextResponse.json(
           {
             error: `Order or subscription not found for businessReference: ${payload.businessReference}`,
@@ -161,7 +187,7 @@ export async function POST(request: Request) {
 
       // Update subscription status, shipmentID, and tracking number
       const updatedSubscription = await subscriptionsModel.findByIdAndUpdate(
-        payload.businessReference,
+        subscription._id,
         {
           status: orderStatus,
           shipmentID: payload._id,
@@ -169,8 +195,24 @@ export async function POST(request: Request) {
         { new: true }
       );
 
+      // Also update sibling subscriptions from the same payment batch
+      if (updatedSubscription?.paymentID) {
+        const siblingResult = await subscriptionsModel.updateMany(
+          {
+            paymentID: updatedSubscription.paymentID,
+            _id: { $ne: updatedSubscription._id },
+          },
+          { status: orderStatus, shipmentID: payload._id }
+        );
+        if (siblingResult.modifiedCount > 0) {
+          console.log(
+            `Also updated ${siblingResult.modifiedCount} sibling subscription(s) with paymentID: ${updatedSubscription.paymentID}`
+          );
+        }
+      }
+
       console.log(
-        `Subscription ${payload.businessReference} updated to status: ${orderStatus}`,
+        `Subscription ${subscription._id} updated to status: ${orderStatus}`,
         {
           trackingNumber: payload.trackingNumber,
           bostaState: stateCode,
@@ -184,7 +226,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         message: "Subscription status updated successfully",
-        subscriptionId: payload.businessReference,
+        subscriptionId: subscription._id,
         newStatus: orderStatus,
       });
     }
