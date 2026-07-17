@@ -180,7 +180,7 @@ class BostaService {
         floor: process.env.BOSTA_RETURN_FLOOR || "1",
         apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
       },
-      businessReference: order._id || "43535252",
+      businessReference: order._id ? String(order._id) : "43535252",
       receiver: {
         firstName: order.billingFirstName || order.firstName || "Sasuke",
         lastName: order.billingLastName || order.lastName || "Uchiha",

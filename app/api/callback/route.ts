@@ -434,17 +434,20 @@ async function handleSubscription(
         );
         const bostaResult = await bostaService.createDelivery(deliveryPayload);
         console.log("bostaResult" + JSON.stringify(bostaResult));
-        if (bostaResult.success && bostaResult.data) {
+        // Handle both wrapped {success, data: {_id}} and direct {_id} response formats
+        const bostaShipmentID = bostaResult?.data?._id || bostaResult?._id;
+        const bostaTrackingNumber = bostaResult?.data?.trackingNumber || bostaResult?.trackingNumber;
+        if (bostaShipmentID) {
           await subscriptionsModel.findByIdAndUpdate(updatedSub._id, {
-            shipmentID: bostaResult.data._id,
+            shipmentID: bostaShipmentID,
             status: "confirmed",
           });
           console.log(
             "Bosta delivery created successfully:",
-            bostaResult.data.trackingNumber
+            bostaTrackingNumber
           );
         } else {
-          console.error("Failed to create Bosta delivery:", bostaResult.error);
+          console.error("Failed to create Bosta delivery — no shipmentID in response:", JSON.stringify(bostaResult));
         }
       }
     } catch (bostaError) {
@@ -828,18 +831,21 @@ async function handleOrder(
       console.log("Creating Bosta delivery for order:", res._id);
       const bostaResult = await bostaService.createDelivery(deliveryPayload);
       console.log("bostaResult" + JSON.stringify(bostaResult));
-      if (bostaResult.success && bostaResult.data) {
-        console.log("shipmentID" + bostaResult.data._id);
+      // Handle both wrapped {success, data: {_id}} and direct {_id} response formats
+      const bostaShipmentID = bostaResult?.data?._id || bostaResult?._id;
+      const bostaTrackingNumber = bostaResult?.data?.trackingNumber || bostaResult?.trackingNumber;
+      if (bostaShipmentID) {
+        console.log("shipmentID" + bostaShipmentID);
         await ordersModel.findByIdAndUpdate(res._id, {
-          shipmentID: bostaResult.data._id,
+          shipmentID: bostaShipmentID,
           status: "confirmed",
         });
         console.log(
           "Bosta delivery created successfully:",
-          bostaResult.data.trackingNumber
+          bostaTrackingNumber
         );
       } else {
-        console.error("Failed to create Bosta delivery:", bostaResult.error);
+        console.error("Failed to create Bosta delivery — no shipmentID in response:", JSON.stringify(bostaResult));
       }
     }
   } catch (bostaError) {
