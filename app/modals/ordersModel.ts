@@ -45,6 +45,7 @@ const OrderSchema = new Schema(
         },
         expiryDate:{type:Date,required:false},
         shipmentID: { type: String, required: false ,default:""}, // Bosta shipment ID
+        billingEmail:{ type: String, required: false },
         billingCountry:{ type: String, required: false },
         billingFirstName: { type: String, required: false },
         billingState:{ type: String, required: false },

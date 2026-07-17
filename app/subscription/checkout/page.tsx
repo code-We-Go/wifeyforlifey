@@ -532,11 +532,12 @@ const UnifiedCheckoutPage = () => {
         {/* Left Side Forms */}
         <form onSubmit={handleSubmit} className="flex flex-col items-start w-full lg:w-5/7 gap-6">
 
-          {/* Shipping Section */}
+          {/* Contact Info Section */}
           <div className="w-full">
-            <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-4`}>
-              Shipping Address
+            <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-1`}>
+              Contact Info
             </h2>
+            <p className="text-lovely/60 text-xs mb-4">Shipping company may contact you</p>
             <div className="space-y-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 flex flex-col gap-1">
@@ -589,6 +590,25 @@ const UnifiedCheckoutPage = () => {
               </div>
 
               <div className="flex flex-col gap-1">
+                <label className="text-lovely text-sm">WhatsApp Number (Optional)</label>
+                <input
+                  type="text"
+                  name="whatsAppNumber"
+                  value={formData.whatsAppNumber}
+                  onChange={handleInputChange}
+                  className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Shipping Address Section */}
+          <div className="w-full">
+            <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-4`}>
+              Shipping Address
+            </h2>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
                 <label className="text-lovely text-sm">Address Details</label>
                 <input
                   type="text"
@@ -600,28 +620,16 @@ const UnifiedCheckoutPage = () => {
                 />
               </div>
 
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 flex flex-col gap-1">
-                  <label className="text-lovely text-sm">Apartment, suite, etc. (Optional)</label>
-                  <input
-                    type="text"
-                    name="apartment"
-                    value={formData.apartment}
-                    onChange={handleInputChange}
-                    className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                  />
-                </div>
-                <div className="flex-1 flex flex-col gap-1">
-                  <label className="text-lovely text-sm">WhatsApp Number (Optional)</label>
-                  <input
-                    type="text"
-                    name="whatsAppNumber"
-                    value={formData.whatsAppNumber}
-                    onChange={handleInputChange}
-                    className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                  />
-                </div>
-              </div>
+              {/* <div className="flex flex-col gap-1">
+                <label className="text-lovely text-sm">Apartment, suite, etc. (Optional)</label>
+                <input
+                  type="text"
+                  name="apartment"
+                  value={formData.apartment}
+                  onChange={handleInputChange}
+                  className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                />
+              </div> */}
 
               {countryID === 65 ? (
                 <BostaLocationSelector
@@ -888,7 +896,7 @@ const UnifiedCheckoutPage = () => {
           </div>
 
           {/* Billing Section */}
-          <div className="w-full">
+          {/* <div className="w-full">
             <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-4`}>
               Billing Address
             </h2>
@@ -979,6 +987,20 @@ const UnifiedCheckoutPage = () => {
 
           {/* Terms & Submit */}
           <div className="w-full space-y-4 mt-4">
+          {isAuthenticated && (
+            <div className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                id="save-profile"
+                checked={saveShippingData}
+                onChange={(e) => setSaveShippingData(e.target.checked)}
+                className="w-4 h-4 accent-lovely cursor-pointer"
+              />
+              <label htmlFor="save-profile" className="text-sm cursor-pointer">
+                Save my shipping data for next time
+              </label>
+            </div>
+          )}
             <div className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -995,20 +1017,6 @@ const UnifiedCheckoutPage = () => {
               </label>
             </div>
 
-            {isAuthenticated && (
-              <div className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  id="save-profile"
-                  checked={saveShippingData}
-                  onChange={(e) => setSaveShippingData(e.target.checked)}
-                  className="w-4 h-4 accent-lovely cursor-pointer"
-                />
-                <label htmlFor="save-profile" className="text-sm cursor-pointer">
-                  Save my shipping data for next time
-                </label>
-              </div>
-            )}
 
             <button
               type="submit"

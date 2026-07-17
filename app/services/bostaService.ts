@@ -148,7 +148,7 @@ class BostaService {
           description: "Desc.",
         },
       },
-      notes: "Welcome Note",
+      notes: "",
       cod: cash === "cash" ? order.total : 0,
       dropOffAddress: {
         city: order.bostaCityName || order.billingCity || order.city || "Cairo",

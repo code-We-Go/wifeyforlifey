@@ -50,6 +50,7 @@ const SubscriptionSchema = new Schema(
     state: { type: String, required: false },
     postalZip: { type: String, required: false },
     // Billing information
+    billingEmail: { type: String, required: false },
     billingCountry: { type: String, required: false },
     billingFirstName: { type: String, required: false },
     billingLastName: { type: String, required: false },
@@ -59,6 +60,7 @@ const SubscriptionSchema = new Schema(
     billingPostalZip: { type: String, required: false },
     billingCity: { type: String, required: false },
     billingPhone: { type: String, required: false },
+    billingWhatsAppNumber: { type: String, required: false },
     // Payment information
     total: { type: Number, required: false },
     subTotal: { type: Number, required: false },

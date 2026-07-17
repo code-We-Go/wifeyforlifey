@@ -67,6 +67,7 @@ const SubscriptionPaymentSchema = new Schema(
     postalZip: { type: String, required: false },
 
     // Billing information
+    billingEmail: { type: String, required: false },
     billingCountry: { type: String, required: false },
     billingFirstName: { type: String, required: false },
     billingLastName: { type: String, required: false },

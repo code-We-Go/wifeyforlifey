@@ -132,6 +132,7 @@ export async function POST(request: Request) {
         bostaDistrictName: data.bostaDistrictName,
 
         // Shared Billing address info
+        billingEmail: data.email,
         billingCountry: data.billingCountry,
         billingFirstName: data.billingFirstName,
         billingLastName: data.billingLastName,

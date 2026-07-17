@@ -318,6 +318,7 @@ async function handleSubscription(
       state: paymentOp.state,
       postalZip: paymentOp.postalZip,
       // Billing info
+      billingEmail: paymentOp.billingEmail,
       billingCountry: paymentOp.billingCountry,
       billingFirstName: paymentOp.billingFirstName,
       billingLastName: paymentOp.billingLastName,
@@ -327,6 +328,7 @@ async function handleSubscription(
       billingPostalZip: paymentOp.billingPostalZip,
       billingCity: paymentOp.billingCity,
       billingPhone: paymentOp.billingPhone,
+      billingWhatsAppNumber: paymentOp.billingWhatsAppNumber,
       // Payment info
       total: paymentOp.total,
       subTotal: paymentOp.subTotal,
@@ -488,13 +490,14 @@ async function handleSubscription(
               <li><strong>Package:</strong> ${
                 (updatedSub.packageID as any)?.name || "N/A"
               }</li>
-              <li><strong>First Name:</strong> ${
-                updatedSub.firstName || "N/A"
+              <li><strong>Contact First Name:</strong> ${
+                updatedSub.billingFirstName || "N/A"
               }</li>
-              <li><strong>Last Name:</strong> ${
-                updatedSub.lastName || "N/A"
+              <li><strong>Contact Last Name:</strong> ${
+                updatedSub.billingLastName || "N/A"
               }</li>
-              <li><strong>Phone:</strong> ${updatedSub.phone || "N/A"}</li>
+              <li><strong>Contact Phone:</strong> ${updatedSub.billingPhone || "N/A"}</li>
+              <li><strong>Contact WhatsApp Number:</strong> ${updatedSub.billingWhatsAppNumber || "N/A"}</li>
               <li><strong>Country:</strong> ${
                 updatedSub.country || "N/A"
               }</li>
