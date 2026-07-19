@@ -369,8 +369,20 @@ const UnifiedCheckoutPage = () => {
     }
 
     // 2. Validate individual subscription configs
-    for (let i = 0; i < configs.length; i++) {
-      const config = configs[i];
+    let finalConfigs = [...configs];
+    if (finalConfigs.length === 1 && !finalConfigs[0].isGift) {
+      finalConfigs[0] = {
+        ...finalConfigs[0],
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        whatsAppNumber: formData.whatsAppNumber,
+      };
+    }
+
+    for (let i = 0; i < finalConfigs.length; i++) {
+      const config = finalConfigs[i];
       const orderNum = i + 1;
       if (!config.isGift) {
         if (!config.email) {
@@ -437,7 +449,7 @@ const UnifiedCheckoutPage = () => {
       bostaDistrict: bostaLocation.district?.districtId || "",
       bostaDistrictName: bostaLocation.district?.districtName || "",
 
-      subscriptions: configs.map((c) => ({
+      subscriptions: finalConfigs.map((c) => ({
         packageId: c.packageId,
         packageName: c.packageName,
         price: c.price,
@@ -673,132 +685,242 @@ const UnifiedCheckoutPage = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's Email</label>
-                    <input
-                      type="email"
-                      value={config.email}
-                      onChange={(e) => handleConfigChange(index, "email", e.target.value.toLowerCase())}
-                      className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
-                      required={!config.isGift}
-                    />
-                    {config.isGift && (
-                      <p className="text-[11px] text-lovely/85 mt-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
-                        🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!
-                      </p>
-                    )}
-                    {config.isGift && (
-                      <p className="text-[11px] text-lovely/85  font-medium animate-in fade-in slide-in-from-top-1 duration-200">
-                        if it's not available just let it empty.
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's Phone Number</label>
-                    <input
-                      type="text"
-                      value={config.phone}
-                      onChange={(e) => handleConfigChange(index, "phone", e.target.value)}
-                      className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                      required={!config.isGift}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's First Name</label>
-                    <input
-                      type="text"
-                      value={config.firstName}
-                      onChange={(e) => handleConfigChange(index, "firstName", e.target.value)}
-                      className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                      required={!config.isGift}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's Last Name</label>
-                    <input
-                      type="text"
-                      value={config.lastName}
-                      onChange={(e) => handleConfigChange(index, "lastName", e.target.value)}
-                      className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                      required={!config.isGift}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-lovely text-sm">Bride's WhatsApp (Optional)</label>
-                  <input
-                    type="text"
-                    value={config.whatsAppNumber}
-                    onChange={(e) => handleConfigChange(index, "whatsAppNumber", e.target.value)}
-                    className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                  />
-                </div>
-
-                {/* Gift Switch */}
-                <div className="flex items-center gap-2 pt-2">
-                  <input
-                    type="checkbox"
-                    id={`gift-${config.cartItemId}`}
-                    checked={config.isGift}
-                    onChange={(e) => handleConfigChange(index, "isGift", e.target.checked)}
-                    className="w-4 h-4 accent-lovely cursor-pointer"
-                  />
-                  <label htmlFor={`gift-${config.cartItemId}`} className="text-lovely text-sm font-semibold cursor-pointer">
-                    Buy this specific subscription as a gift 🎁
-                  </label>
-                </div>
-
-                {config.isGift && (
-                  <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                    {config.tier !== "mini" && (
-                      <p className="text-sm text-lovely font-medium bg-lovely/10 p-3 rounded-lg border border-lovely/20">
-                        Please notify us when the gift reaches the bride to add her in the whatsapp support group
-                      </p>
-                    )}
-
-                    {/* <div className="flex flex-col gap-1">
-
-                      <label className="text-lovely text-sm">Special Message for the Bride</label>
-                      <textarea
-                        value={config.specialMessage}
-                        onChange={(e) => handleConfigChange(index, "specialMessage", e.target.value)}
-                        className="w-full h-20 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                        placeholder="Write a lovely note..."
+                {configs.length === 1 ? (
+                  <>
+                    {/* Gift Switch */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id={`gift-${config.cartItemId}`}
+                        checked={config.isGift}
+                        onChange={(e) => handleConfigChange(index, "isGift", e.target.checked)}
+                        className="w-4 h-4 accent-lovely cursor-pointer"
                       />
-                    </div> */}
+                      <label htmlFor={`gift-${config.cartItemId}`} className="text-lovely text-sm font-semibold cursor-pointer">
+                        Buy this specific subscription as a gift 🎁
+                      </label>
+                    </div>
 
-                    {/* Gift Cards Cards Selector */}
-                    <div className="space-y-2">
-                      <label className="text-lovely text-sm block">Include a Gift Card (+20 LE)</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { name: "Born to shine birthday gift card", label: "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
-                          { name: "The I love you more than words gift card", label: "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
-                          { name: "The Wifey to be card", label: "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
-                          { name: "Merry and Married", label: "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
-                        ].map((card) => (
-                          <div
-                            key={card.name}
-                            onClick={() => handleConfigChange(
-                              index,
-                              "giftCardName",
-                              config.giftCardName === card.name ? "" : card.name
-                            )}
-                            className={`cursor-pointer rounded-lg overflow-hidden border-2 p-1 relative ${config.giftCardName === card.name ? "border-lovely bg-lovely/5" : "border-transparent"
-                              }`}
-                          >
-                            <img src={card.src} alt={card.label} className="w-full h-16 object-cover rounded" />
-                            <div className="text-[10px] text-center text-lovely truncate mt-1">{card.label}</div>
+                    {config.isGift && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-lovely text-sm">Bride's Email</label>
+                            <input
+                              type="email"
+                              value={config.email}
+                              onChange={(e) => handleConfigChange(index, "email", e.target.value.toLowerCase())}
+                              className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
+                              required={!config.isGift}
+                            />
+                            <p className="text-[11px] text-lovely/85 mt-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                              🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!
+                            </p>
+                            <p className="text-[11px] text-lovely/85 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                              if it's not available just let it empty.
+                            </p>
                           </div>
-                        ))}
+                          <div className="flex flex-col gap-1">
+                            <label className="text-lovely text-sm">Bride's Phone Number</label>
+                            <input
+                              type="text"
+                              value={config.phone}
+                              onChange={(e) => handleConfigChange(index, "phone", e.target.value)}
+                              className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                              required={!config.isGift}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-lovely text-sm">Bride's First Name</label>
+                            <input
+                              type="text"
+                              value={config.firstName}
+                              onChange={(e) => handleConfigChange(index, "firstName", e.target.value)}
+                              className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                              required={!config.isGift}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-lovely text-sm">Bride's Last Name</label>
+                            <input
+                              type="text"
+                              value={config.lastName}
+                              onChange={(e) => handleConfigChange(index, "lastName", e.target.value)}
+                              className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                              required={!config.isGift}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-lovely text-sm">Bride's WhatsApp (Optional)</label>
+                          <input
+                            type="text"
+                            value={config.whatsAppNumber}
+                            onChange={(e) => handleConfigChange(index, "whatsAppNumber", e.target.value)}
+                            className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                          />
+                        </div>
+
+                        <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4">
+                          {config.tier !== "mini" && (
+                            <p className="text-sm text-lovely font-medium bg-lovely/10 p-3 rounded-lg border border-lovely/20">
+                              Please notify us when the gift reaches the bride to add her in the whatsapp support group
+                            </p>
+                          )}
+
+                          {/* Gift Cards Selector */}
+                          <div className="space-y-2">
+                            <label className="text-lovely text-sm block">Include a Gift Card (+20 LE)</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { name: "Born to shine birthday gift card", label: "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
+                                { name: "The I love you more than words gift card", label: "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
+                                { name: "The Wifey to be card", label: "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
+                                { name: "Merry and Married", label: "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
+                              ].map((card) => (
+                                <div
+                                  key={card.name}
+                                  onClick={() => handleConfigChange(
+                                    index,
+                                    "giftCardName",
+                                    config.giftCardName === card.name ? "" : card.name
+                                  )}
+                                  className={`cursor-pointer rounded-lg overflow-hidden border-2 p-1 relative ${config.giftCardName === card.name ? "border-lovely bg-lovely/5" : "border-transparent"
+                                    }`}
+                                >
+                                  <img src={card.src} alt={card.label} className="w-full h-16 object-cover rounded" />
+                                  <div className="text-[10px] text-center text-lovely truncate mt-1">{card.label}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-lovely text-sm">Bride's Email</label>
+                        <input
+                          type="email"
+                          value={config.email}
+                          onChange={(e) => handleConfigChange(index, "email", e.target.value.toLowerCase())}
+                          className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
+                          required={!config.isGift}
+                        />
+                        {config.isGift && (
+                          <p className="text-[11px] text-lovely/85 mt-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                            🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!
+                          </p>
+                        )}
+                        {config.isGift && (
+                          <p className="text-[11px] text-lovely/85  font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                            if it's not available just let it empty.
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-lovely text-sm">Bride's Phone Number</label>
+                        <input
+                          type="text"
+                          value={config.phone}
+                          onChange={(e) => handleConfigChange(index, "phone", e.target.value)}
+                          className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                          required={!config.isGift}
+                        />
                       </div>
                     </div>
-                  </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-lovely text-sm">Bride's First Name</label>
+                        <input
+                          type="text"
+                          value={config.firstName}
+                          onChange={(e) => handleConfigChange(index, "firstName", e.target.value)}
+                          className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                          required={!config.isGift}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-lovely text-sm">Bride's Last Name</label>
+                        <input
+                          type="text"
+                          value={config.lastName}
+                          onChange={(e) => handleConfigChange(index, "lastName", e.target.value)}
+                          className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                          required={!config.isGift}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-lovely text-sm">Bride's WhatsApp (Optional)</label>
+                      <input
+                        type="text"
+                        value={config.whatsAppNumber}
+                        onChange={(e) => handleConfigChange(index, "whatsAppNumber", e.target.value)}
+                        className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
+                      />
+                    </div>
+
+                    {/* Gift Switch */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id={`gift-${config.cartItemId}`}
+                        checked={config.isGift}
+                        onChange={(e) => handleConfigChange(index, "isGift", e.target.checked)}
+                        className="w-4 h-4 accent-lovely cursor-pointer"
+                      />
+                      <label htmlFor={`gift-${config.cartItemId}`} className="text-lovely text-sm font-semibold cursor-pointer">
+                        Buy this specific subscription as a gift 🎁
+                      </label>
+                    </div>
+
+                    {config.isGift && (
+                      <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        {config.tier !== "mini" && (
+                          <p className="text-sm text-lovely font-medium bg-lovely/10 p-3 rounded-lg border border-lovely/20">
+                            Please notify us when the gift reaches the bride to add her in the whatsapp support group
+                          </p>
+                        )}
+
+                        {/* Gift Cards Selector */}
+                        <div className="space-y-2">
+                          <label className="text-lovely text-sm block">Include a Gift Card (+20 LE)</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { name: "Born to shine birthday gift card", label: "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
+                              { name: "The I love you more than words gift card", label: "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
+                              { name: "The Wifey to be card", label: "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
+                              { name: "Merry and Married", label: "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
+                            ].map((card) => (
+                              <div
+                                key={card.name}
+                                onClick={() => handleConfigChange(
+                                  index,
+                                  "giftCardName",
+                                  config.giftCardName === card.name ? "" : card.name
+                                )}
+                                className={`cursor-pointer rounded-lg overflow-hidden border-2 p-1 relative ${config.giftCardName === card.name ? "border-lovely bg-lovely/5" : "border-transparent"
+                                  }`}
+                              >
+                                <img src={card.src} alt={card.label} className="w-full h-16 object-cover rounded" />
+                                <div className="text-[10px] text-center text-lovely truncate mt-1">{card.label}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}
