@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -81,6 +82,110 @@ const QUIZ_QUESTIONS: QuizQuestion[] = [
     ],
   },
 ];
+
+function PackageProductCard({
+  prod,
+  addItem,
+  openCart,
+}: {
+  prod: any;
+  addItem: any;
+  openCart: any;
+}) {
+  const [prodQuantity, setProdQuantity] = useState(1);
+
+  const prodImage =
+    prod.variations?.[0]?.images?.[0]?.url ||
+    prod.images?.[0]?.url ||
+    prod.imgUrl ||
+    "/placeholder.png";
+  const prodPrice =
+    prod.variations?.[0]?.attributes?.[0]?.price ??
+    prod.variations?.[0]?.price ??
+    prod.price?.local ??
+    0;
+
+  const handleAddProduct = () => {
+    const variant = prod.variations?.[0] || {
+      name: "Default",
+      attributeName: "Standard",
+      attributes: [],
+      images: [{ url: prodImage, type: "image" }],
+    };
+    const attr = prod.variations?.[0]?.attributes?.[0] || {
+      name: "Standard",
+      stock: 10,
+      price: prodPrice,
+    };
+
+    addItem({
+      productId: prod._id,
+      productName: prod.title,
+      price: prodPrice,
+      attributes: attr,
+      variant: variant,
+      imageUrl: prodImage,
+      quantity: prodQuantity,
+    });
+    openCart();
+  };
+
+  return (
+    <div
+      key={prod._id}
+      className="bg-lovely text-white p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between shadow-md transition-all hover:scale-[1.02] group/card"
+    >
+      <Link href={`/shop/${prod._id}`} className="block group/link">
+        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white mb-3 shadow-inner">
+          <Image
+            src={prodImage}
+            alt={prod.title || "Product"}
+            fill
+            className="object-cover transition-transform duration-300 group-hover/link:scale-105"
+          />
+        </div>
+        <h4 className="font-semibold text-xs sm:text-sm leading-snug line-clamp-2 min-h-[36px] text-white group-hover/link:underline">
+          {prod.title}
+        </h4>
+        <p className={`${thirdFont.className} text-base sm:text-lg font-bold text-white mt-1`}>
+          LE {prodPrice.toLocaleString()}
+        </p>
+      </Link>
+
+      <div className="flex items-center gap-1.5 sm:gap-2 mt-3">
+        <div className="flex items-center bg-white/20 text-white rounded-full p-0.5 border border-white/30 shrink-0">
+          <button
+            type="button"
+            onClick={() => setProdQuantity((q) => Math.max(1, q - 1))}
+            disabled={prodQuantity <= 1}
+            className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:bg-white/30 transition-colors disabled:opacity-40"
+            aria-label="Decrease quantity"
+          >
+            <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+          </button>
+          <span className="w-4 sm:w-5 text-center font-bold text-xs">{prodQuantity}</span>
+          <button
+            type="button"
+            onClick={() => setProdQuantity((q) => q + 1)}
+            className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full hover:bg-white/30 transition-colors"
+            aria-label="Increase quantity"
+          >
+            <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddProduct}
+          className="flex-1 bg-white text-lovely font-bold text-xs sm:text-sm py-1.5 sm:py-2 rounded-full hover:bg-creamey transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1"
+          id={`add-prod-${prod._id}`}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function PackageeDetailPage() {
   const params = useParams();
@@ -335,13 +440,13 @@ export default function PackageeDetailPage() {
   if (!packageData) {
     return (
       <div className="container mx-auto py-16 px-4 text-center">
-        <h2 className="text-2xl font-bold text-[#BE3236]">Package not found</h2>
-        <p className="mt-4 text-[#BE3236]/90">
+        <h2 className="text-2xl font-bold text-lovely">Package not found</h2>
+        <p className="mt-4 text-lovely/90">
           The package you are looking for does not exist or has been removed.
         </p>
         <Button
           onClick={() => router.push("/shop")}
-          className="mt-6 bg-[#BE3236] text-[#F7F0DC] hover:bg-[#9E2529] rounded-full px-8 py-3"
+          className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 rounded-full px-8 py-3"
         >
           Return to Shop
         </Button>
@@ -368,10 +473,10 @@ export default function PackageeDetailPage() {
       : packageData;
 
   return (
-    <div className="bg-[#F7F0DC] text-[#5A1B1D] min-h-screen pb-24 font-sans">
+    <div className="bg-creamey text-foreground min-h-screen pb-24 font-sans">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-[#BE3236] text-white px-5 py-1.5 md:py-3 rounded-xl shadow-2xl border border-white/20 animate-bounce">
+        <div className="fixed top-6 right-6 z-50 bg-lovely text-white px-5 py-1.5 md:py-3 rounded-xl shadow-2xl border border-white/20 animate-bounce">
           <p className="text-sm font-semibold">{toastMessage}</p>
         </div>
       )}
@@ -381,8 +486,8 @@ export default function PackageeDetailPage() {
         <div className="md:mb-6">
           <Button
             variant="ghost"
-            className="text-[#BE3236] hover:text-[#9E2529] hover:bg-transparent p-0 flex items-center font-medium"
-            onClick={() => router.back()}
+            className="text-lovely hover:text-lovely/90 hover:bg-transparent p-0 flex items-center font-medium"
+            onClick={() => router.push('/shop?tab=subscriptions')}
             id="back-btn"
           >
             <ChevronLeft className="mr-1 h-5 w-5" />
@@ -391,22 +496,22 @@ export default function PackageeDetailPage() {
         </div>
 
         {/* Hero Banner Header */}
-        <div className="mb-2 md:mb-8">
+        {/* <div className="mb-2 md:mb-8">
           <h1
-            className={`${thirdFont.className} text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#BE3236] uppercase tracking-tight leading-tight`}
+            className={`${thirdFont.className} text-3xl sm:text-4xl md:text-5xl font-extrabold text-lovely uppercase tracking-tight leading-tight`}
           >
             {fullPackage?.heroTitle || "Everything for your bridal era — in one place"}
           </h1>
-          <p className="mt-1 md:mt-3 text-base sm:text-lg text-[#5A1B1D]/90 max-w-2xl font-normal leading-relaxed">
+          <p className="mt-1 md:mt-3 text-base sm:text-lg text-lovely/90 max-w-2xl font-normal leading-relaxed">
             {fullPackage?.heroSubtitle || "Planners, tools & real support built for Egyptian brides. Wherever you are in your journey, there's a bestie for it. 🎀"}
           </p>
-        </div>
+        </div> */}
 
         {/* Main Package Showcase Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 bg-pinkey/50 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border-2 border-[#BE3236]/30 shadow-xl mb-6 md:mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 bg-pinkey/50 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-xl mb-6 md:mb-12">
           {/* Image Gallery */}
           <div className="space-y-4">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border-3 border-[#BE3236] shadow-md bg-creamey">
+            <div className="relative aspect-square overflow-hidden rounded-2xl border-3 border-lovely shadow-md bg-creamey">
               <Image
                 src={
                   packageData.images && packageData.images.length > 0
@@ -428,7 +533,7 @@ export default function PackageeDetailPage() {
                         prev === 0 ? packageData.images.length - 1 : prev - 1
                       );
                     }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-[#F7F0DC]/90 hover:bg-[#F7F0DC] rounded-full p-2 text-[#BE3236] shadow-md transition-all z-10"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-creamey/90 hover:bg-creamey rounded-full p-2 text-lovely shadow-md transition-all z-10"
                     aria-label="Previous image"
                     id="prev-img-btn"
                   >
@@ -441,7 +546,7 @@ export default function PackageeDetailPage() {
                         prev === packageData.images.length - 1 ? 0 : prev + 1
                       );
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#F7F0DC]/90 hover:bg-[#F7F0DC] rounded-full p-2 text-[#BE3236] shadow-md transition-all z-10"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-creamey/90 hover:bg-creamey rounded-full p-2 text-lovely shadow-md transition-all z-10"
                     aria-label="Next image"
                     id="next-img-btn"
                   >
@@ -459,8 +564,8 @@ export default function PackageeDetailPage() {
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all ${currentImageIndex === index
-                      ? "border-[#BE3236] ring-2 ring-[#BE3236]/30 scale-105"
-                      : "border-[#BE3236]/20 opacity-70 hover:opacity-100"
+                      ? "border-lovely ring-2 ring-lovely/30 scale-105"
+                      : "border-lovely/20 opacity-70 hover:opacity-100"
                       }`}
                     id={`thumb-btn-${index}`}
                   >
@@ -480,18 +585,18 @@ export default function PackageeDetailPage() {
           {/* Package Details & Segmented Controls */}
           <div className="flex flex-col justify-between">
             <div>
-              <span className="inline-block font-semibold text-xs uppercase tracking-widest bg-[#BE3236]/10 text-[#BE3236] px-3 py-1 rounded-full mb-3">
+              <span className="inline-block font-semibold text-xs uppercase tracking-widest bg-lovely/10 text-lovely px-3 py-1 rounded-full mb-3">
                 Wifey Experience
               </span>
               <h2
-                className={`${thirdFont.className} text-3xl sm:text-4xl font-extrabold text-[#BE3236] tracking-wide mb-3`}
+                className={`${thirdFont.className} text-3xl sm:text-4xl font-extrabold text-lovely tracking-wide mb-3`}
               >
                 {packageData.partOf ? packageData.partOf : packageData.name}
               </h2>
 
               {/* All Packages Segmented Switcher (HTML Mockup Design) */}
               {allPackages.length > 1 && (
-                <div className="relative flex bg-[#FBE3E6] border-2 border-[#BE3236] rounded-full p-1.5 mb-6 shadow-inner">
+                <div className="relative flex bg-pinkey/40 border-2 border-lovely rounded-full p-1.5 mb-6 shadow-inner">
                   {allPackages.map((pkg) => {
                     const isSelected = packageData?._id === pkg._id;
                     const isFull =
@@ -513,13 +618,13 @@ export default function PackageeDetailPage() {
                           }
                         }}
                         className={`relative flex-1 py-2.5 px-3 rounded-full text-center transition-all duration-200 cursor-pointer ${isSelected
-                          ? "bg-[#BE3236] text-white shadow-md font-bold"
-                          : "bg-transparent text-[#BE3236] hover:bg-[#BE3236]/10 font-semibold"
+                          ? "bg-lovely text-white shadow-md font-bold"
+                          : "bg-transparent text-lovely hover:bg-lovely/10 font-semibold"
                           }`}
                         id={`pkg-badge-${pkg._id}`}
                       >
                         {isFull && (
-                          <span className="absolute -top-3.5 right-4 bg-[#5A1B1D] text-white text-[9.5px] sm:text-[10.5px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-md z-10 border border-white/20">
+                          <span className="absolute -top-3.5 right-4 bg-lovely text-white text-[9.5px] sm:text-[10.5px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-md z-10 border border-white/20">
                             Most popular
                           </span>
                         )}
@@ -527,7 +632,7 @@ export default function PackageeDetailPage() {
                           {pkg.name}
                         </span>
                         <span
-                          className={`block text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-[#BE3236]/80"
+                          className={`block text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-lovely/80"
                             }`}
                         >
                           LE {pkg.price.toLocaleString()}
@@ -540,15 +645,15 @@ export default function PackageeDetailPage() {
 
               {/* Dashed Helper Callout (Not Sure? Mini vs Full) */}
               {allPackages.length > 1 && (
-                <div className="mb-6 p-3.5 sm:p-4 bg-white border-2 border-dashed border-[#F8D0D6] rounded-2xl text-xs sm:text-sm text-[#5A1B1D]/90 leading-relaxed shadow-sm">
-                  <strong className="text-[#BE3236]">Not sure?</strong> Just want the planner? Choose <strong className="text-[#BE3236]">Mini</strong>. Want the planner <em>plus</em> a year of discounts, videos, community &amp; expert support? Choose <strong className="text-[#BE3236]">Full</strong>.
+                <div className="mb-6 p-3.5 sm:p-4 bg-white border-2 border-dashed border-pinkey rounded-2xl text-xs sm:text-sm text-lovely/90 leading-relaxed shadow-sm">
+                  <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> a year of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
                 </div>
               )}
 
               {/* Variant Segmented Control */}
               {packageData.variants && packageData.variants.length > 0 ? (
-                <div className="mb-6 bg-[#FBE3E6] border-2 border-[#BE3236]/30 p-4 rounded-2xl">
-                  <h3 className={`${thirdFont.className} text-lg font-bold text-[#BE3236] mb-3`}>
+                <div className="mb-6 bg-pinkey/40 border-2 border-lovely/30 p-4 rounded-2xl">
+                  <h3 className={`${thirdFont.className} text-lg font-bold text-lovely mb-3`}>
                     Choose Experience Plan
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -557,21 +662,21 @@ export default function PackageeDetailPage() {
                         key={index}
                         onClick={() => setSelectedVariantIndex(index)}
                         className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedVariantIndex === index
-                          ? "border-[#BE3236] bg-creamey shadow-md ring-2 ring-[#BE3236]/20"
-                          : "border-[#BE3236]/20 bg-white/50 hover:bg-white/80"
+                          ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
+                          : "border-lovely/20 bg-white/50 hover:bg-white/80"
                           }`}
                         id={`variant-card-${index}`}
                       >
                         {formatDuration(variant.duration) && (
-                          <p className="font-bold text-xs uppercase tracking-wider text-[#BE3236]">
+                          <p className="font-bold text-xs uppercase tracking-wider text-lovely">
                             {formatDuration(variant.duration)}
                           </p>
                         )}
-                        <p className={`${thirdFont.className} text-2xl font-bold text-[#BE3236] mt-1`}>
+                        <p className={`${thirdFont.className} text-2xl font-bold text-lovely mt-1`}>
                           LE {variant.price.toFixed(2)}
                         </p>
                         {variant.saving && (
-                          <p className="text-xs text-[#5A1B1D]/80 font-medium mt-1">
+                          <p className="text-xs text-lovely/80 font-medium mt-1">
                             {variant.saving}
                           </p>
                         )}
@@ -580,21 +685,21 @@ export default function PackageeDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div className="mb-6 p-4 bg-[#FBE3E6] border-2 border-[#BE3236]/30 rounded-2xl">
+                <div className="mb-6 p-4 bg-pinkey/40 border-2 border-lovely/30 rounded-2xl">
                   {formatDuration(packageData.duration) && (
-                    <p className="text-sm font-semibold uppercase text-[#BE3236] mb-1">
+                    <p className="text-sm font-semibold uppercase text-lovely mb-1">
                       Duration: {formatDuration(packageData.duration)}
                     </p>
                   )}
-                  <p className={`${thirdFont.className} text-3xl font-extrabold text-[#BE3236]`}>
+                  <p className={`${thirdFont.className} text-3xl font-extrabold text-lovely`}>
                     LE {activePrice.toFixed(2)}
                   </p>
                   {activeSaving && (
-                    <p className="text-sm text-[#5A1B1D]/80 font-medium mt-1">
+                    <p className="text-sm text-lovely/80 font-medium mt-1">
                       {activeSaving}
                     </p>
                   )}
-                  <p className="text-xs sm:text-sm text-[#BE3236] font-bold mt-2.5 flex items-center gap-1.5">
+                  <p className="text-xs sm:text-sm text-lovely font-bold mt-2.5 flex items-center gap-1.5">
                     🎁 Comes with {Math.round(activePrice).toLocaleString()} Wifey Points — like getting your money back.
                   </p>
                 </div>
@@ -602,12 +707,12 @@ export default function PackageeDetailPage() {
 
               {/* Quantity Selector */}
               <div className="mb-6">
-                <label className="block text-xs uppercase tracking-wider text-[#5A1B1D] font-bold mb-2">
+                <label className="block text-xs uppercase tracking-wider text-lovely font-bold mb-2">
                   Quantity
                 </label>
                 <div className="flex items-center space-x-3">
                   <Button
-                    className="bg-[#F8D0D6] text-[#BE3236] hover:bg-[#BE3236] hover:text-white h-10 w-10 p-0 rounded-xl border-2 border-[#BE3236]/20 transition-all"
+                    className="bg-pinkey text-lovely hover:bg-lovely hover:text-white h-10 w-10 p-0 rounded-xl border-2 border-lovely/20 transition-all"
                     variant="outline"
                     size="icon"
                     onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))}
@@ -616,11 +721,11 @@ export default function PackageeDetailPage() {
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-10 text-center font-bold text-lg text-[#BE3236]">
+                  <span className="w-10 text-center font-bold text-lg text-lovely">
                     {quantity}
                   </span>
                   <Button
-                    className="bg-[#F8D0D6] text-[#BE3236] hover:bg-[#BE3236] hover:text-white h-10 w-10 p-0 rounded-xl border-2 border-[#BE3236]/20 transition-all"
+                    className="bg-pinkey text-lovely hover:bg-lovely hover:text-white h-10 w-10 p-0 rounded-xl border-2 border-lovely/20 transition-all"
                     variant="outline"
                     size="icon"
                     onClick={() => setQuantity((prev) => prev + 1)}
@@ -633,16 +738,16 @@ export default function PackageeDetailPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-[#BE3236]/20">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-lovely/20">
               <Button
-                className="flex-1 bg-creamey text-[#BE3236] border-2 border-[#BE3236] hover:bg-[#BE3236]/10 rounded-full py-6 text-base font-bold shadow-sm transition-all flex items-center justify-center gap-2"
+                className="flex-1 bg-creamey text-lovely border-2 border-lovely hover:bg-lovely/10 rounded-full py-6 text-base font-bold shadow-sm transition-all flex items-center justify-center gap-2"
                 onClick={handleAddToCart}
                 id="add-to-cart-btn"
               >
                 <ShoppingBag className="w-5 h-5" /> Add to Cart
               </Button>
               <Button
-                className="flex-1 bg-[#BE3236] text-[#F7F0DC] hover:bg-[#9E2529] rounded-full py-6 text-base font-bold shadow-lg transition-all flex items-center justify-center gap-2"
+                className="flex-1 bg-lovely text-creamey hover:bg-lovely/90 rounded-full py-6 text-base font-bold shadow-lg transition-all flex items-center justify-center gap-2"
                 onClick={handleSubscribeNow}
                 id="subscribe-now-btn"
               >
@@ -653,11 +758,11 @@ export default function PackageeDetailPage() {
         </div>
 
         {/* Feature Comparison Section (Mockup Table Design) */}
-        <div className="bg-pinkey/70 p-6 sm:p-8 rounded-3xl border-2 border-[#F8D0D6] shadow-md mb-12">
-          <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-[#BE3236] uppercase tracking-wide mb-4 text-center`}>
+        <div className="bg-pinkey/70 p-6 sm:p-8 rounded-3xl border-2 border-pinkey shadow-md mb-12">
+          <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-4 text-center`}>
             Choose Your Experience Tier 🎀
           </h2>
-          <p className="text-center text-sm text-[#5A1B1D]/80 mb-6 max-w-xl mx-auto">
+          <p className="text-center text-sm text-lovely/80 mb-6 max-w-xl mx-auto">
             Compare the Full and Mini packages to decide which bestie fits your bridal era needs.
           </p>
 
@@ -665,9 +770,9 @@ export default function PackageeDetailPage() {
             <table className="w-full border-separate border-spacing-y-2">
               <thead>
                 <tr>
-                  <th className="text-left p-3 text-xs uppercase tracking-wider text-[#5A1B1D]/70 font-semibold">Features Included</th>
-                  <th className="p-3 text-center bg-[#BE3236] text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Full</th>
-                  <th className="p-3 text-center bg-white text-[#BE3236] border-2 border-[#F8D0D6] font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Mini</th>
+                  <th className="text-left p-3 text-xs uppercase tracking-wider text-lovely/70 font-semibold">Features Included</th>
+                  <th className="p-3 text-center bg-lovely text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Full</th>
+                  <th className="p-3 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Mini</th>
                 </tr>
               </thead>
               <tbody>
@@ -676,10 +781,10 @@ export default function PackageeDetailPage() {
                   const isDash = (val: string) => val === "—" || val === "-" || val.toLowerCase() === "false";
                   return (
                     <tr key={idx}>
-                      <td className="p-3 bg-[#FBE3E6]/60 rounded-l-xl text-xs sm:text-sm font-medium">
+                      <td className="p-3 bg-pinkey/30 rounded-l-xl text-xs sm:text-sm font-medium">
                         {feat.feature}
                       </td>
-                      <td className="p-3 text-center bg-[#FDECEC] font-bold text-emerald-600">
+                      <td className="p-3 text-center bg-pinkey/20 font-bold text-emerald-600">
                         {isCheck(feat.fullValue) ? (
                           <Check className="inline h-5 w-5" />
                         ) : isDash(feat.fullValue) ? (
@@ -687,11 +792,11 @@ export default function PackageeDetailPage() {
                         ) : (
                           <>
                             <Check className="inline h-5 w-5" />
-                            <span className="block text-[10px] text-[#5A1B1D] font-semibold mt-0.5">{feat.fullValue}</span>
+                            <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.fullValue}</span>
                           </>
                         )}
                       </td>
-                      <td className="p-3 text-center bg-white border border-[#F8D0D6]/50 rounded-r-xl font-bold">
+                      <td className="p-3 text-center bg-white border border-pinkey/50 rounded-r-xl font-bold">
                         {isCheck(feat.miniValue) ? (
                           <Check className="inline h-5 w-5 text-emerald-600" />
                         ) : isDash(feat.miniValue) ? (
@@ -699,7 +804,7 @@ export default function PackageeDetailPage() {
                         ) : (
                           <>
                             <Check className="inline h-5 w-5 text-emerald-600" />
-                            <span className="block text-[10px] text-[#5A1B1D] font-semibold mt-0.5">{feat.miniValue}</span>
+                            <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.miniValue}</span>
                           </>
                         )}
                       </td>
@@ -711,7 +816,7 @@ export default function PackageeDetailPage() {
           </div>
 
           {/* Redbox Callout (HTML Mockup Design) */}
-          <div className="mt-6 bg-[#BE3236] text-white p-6 rounded-2xl shadow-md space-y-2">
+          <div className="mt-6 bg-lovely text-white p-6 rounded-2xl shadow-md space-y-2">
             <h3 className={`${thirdFont.className} text-xl font-bold uppercase tracking-wide`}>
               {fullPackage?.calloutTitle || "Why most brides choose Full 💕"}
             </h3>
@@ -723,7 +828,7 @@ export default function PackageeDetailPage() {
               )}
             </p>
           </div>
-          <div className="mt-4 p-4 border-2 border-dashed border-[#F8D0D6] rounded-xl text-center text-xs sm:text-sm font-medium">
+          <div className="mt-4 p-4 border-2 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
             <strong>The physical planner is yours forever.</strong> Digital benefits stay active for 12 months from purchase.
           </div>
         </div>
@@ -731,82 +836,22 @@ export default function PackageeDetailPage() {
         {/* Make it a full order Section (Suggested Products from MongoDB) */}
         {((packageData.packageProducts && packageData.packageProducts.length > 0) ||
           (fullPackage?.packageProducts && fullPackage.packageProducts.length > 0)) && (
-          <div className="bg-pinkey/50 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border-2 border-[#BE3236]/30 shadow-md mb-12">
-            <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-[#BE3236] uppercase tracking-wide mb-6 text-center`}>
+          <div className="bg-pinkey/50 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-md mb-12">
+            <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-6 text-center`}>
               Make it a full order 🎀
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {(packageData.packageProducts?.length
                 ? packageData.packageProducts
                 : fullPackage?.packageProducts ?? []
-              ).map((prod: any) => {
-                const prodImage =
-                  prod.variations?.[0]?.images?.[0]?.url ||
-                  prod.images?.[0]?.url ||
-                  prod.imgUrl ||
-                  "/placeholder.png";
-                const prodPrice =
-                  prod.variations?.[0]?.attributes?.[0]?.price ??
-                  prod.variations?.[0]?.price ??
-                  prod.price?.local ??
-                  0;
-
-                const handleAddProduct = () => {
-                  const variant = prod.variations?.[0] || {
-                    name: "Default",
-                    attributeName: "Standard",
-                    attributes: [],
-                    images: [{ url: prodImage, type: "image" }],
-                  };
-                  const attr = prod.variations?.[0]?.attributes?.[0] || {
-                    name: "Standard",
-                    stock: 10,
-                    price: prodPrice,
-                  };
-
-                  addItem({
-                    productId: prod._id,
-                    productName: prod.title,
-                    price: prodPrice,
-                    attributes: attr,
-                    variant: variant,
-                    imageUrl: prodImage,
-                    quantity: 1,
-                  });
-                  openCart();
-                };
-
-                return (
-                  <div
-                    key={prod._id}
-                    className="bg-[#BE3236] text-white p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between shadow-md transition-all hover:scale-[1.02]"
-                  >
-                    <div>
-                      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white mb-3 shadow-inner">
-                        <Image
-                          src={prodImage}
-                          alt={prod.title || "Product"}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <h4 className="font-semibold text-xs sm:text-sm leading-snug line-clamp-2 min-h-[36px] text-white">
-                        {prod.title}
-                      </h4>
-                      <p className={`${thirdFont.className} text-base sm:text-lg font-bold text-white mt-1`}>
-                        LE {prodPrice.toLocaleString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleAddProduct}
-                      className="mt-3 w-full bg-white text-[#BE3236] font-bold text-xs sm:text-sm py-2 rounded-full hover:bg-creamey transition-all cursor-pointer shadow-sm"
-                      id={`add-prod-${prod._id}`}
-                    >
-                      Add
-                    </button>
-                  </div>
-                );
-              })}
+              ).map((prod: any) => (
+                <PackageProductCard
+                  key={prod._id}
+                  prod={prod}
+                  addItem={addItem}
+                  openCart={openCart}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -815,7 +860,7 @@ export default function PackageeDetailPage() {
         {/* {(packageData.supportCards ?? []).length > 0 && (
           <div className="mb-14">
             <h2
-              className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-[#BE3236] text-center mb-6 uppercase tracking-wide`}
+              className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely text-center mb-6 uppercase tracking-wide`}
             >
               Included Experience Features 🌟
             </h2>
@@ -826,9 +871,9 @@ export default function PackageeDetailPage() {
                   <button
                     onClick={scrollPrev}
                     disabled={!canScrollPrev}
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 md:-translate-x-6 z-10 bg-[#BE3236] text-white p-2 sm:p-3 rounded-full shadow-xl transition-all ${!canScrollPrev
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 md:-translate-x-6 z-10 bg-lovely text-white p-2 sm:p-3 rounded-full shadow-xl transition-all ${!canScrollPrev
                         ? "opacity-30 cursor-not-allowed"
-                        : "hover:bg-[#9E2529] cursor-pointer"
+                        : "hover:bg-lovely/90 cursor-pointer"
                       }`}
                     aria-label="Previous feature"
                     id="support-prev-btn"
@@ -838,9 +883,9 @@ export default function PackageeDetailPage() {
                   <button
                     onClick={scrollNext}
                     disabled={!canScrollNext}
-                    className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 md:translate-x-6 z-10 bg-[#BE3236] text-white p-2 sm:p-3 rounded-full shadow-xl transition-all ${!canScrollNext
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 md:translate-x-6 z-10 bg-lovely text-white p-2 sm:p-3 rounded-full shadow-xl transition-all ${!canScrollNext
                         ? "opacity-30 cursor-not-allowed"
-                        : "hover:bg-[#9E2529] cursor-pointer"
+                        : "hover:bg-lovely/90 cursor-pointer"
                       }`}
                     aria-label="Next feature"
                     id="support-next-btn"
@@ -860,7 +905,7 @@ export default function PackageeDetailPage() {
                       <div
                         className={`rounded-2xl shadow-lg p-5 h-[340px] flex flex-col justify-between relative overflow-hidden transition-all ${card.enable === false
                             ? "bg-gray-400 text-gray-100 grayscale"
-                            : "bg-[#BE3236] text-[#F7F0DC]"
+                            : "bg-lovely text-creamey"
                           }`}
                       >
                         <div>
@@ -886,9 +931,9 @@ export default function PackageeDetailPage() {
                         )}
 
                         {card.enable === false && (
-                          <div className="absolute inset-0 bg-[#BE3236]/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20">
-                            <Lock className="w-8 h-8 text-[#F7F0DC] mb-2" />
-                            <p className={`${thirdFont.className} text-[#F7F0DC] font-bold text-sm uppercase tracking-wide`}>
+                          <div className="absolute inset-0 bg-lovely/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center z-20">
+                            <Lock className="w-8 h-8 text-creamey mb-2" />
+                            <p className={`${thirdFont.className} text-creamey font-bold text-sm uppercase tracking-wide`}>
                               Available in Full Experience
                             </p>
                           </div>
@@ -904,14 +949,14 @@ export default function PackageeDetailPage() {
 
         {/* Notes Section */}
         {packageData.notes && packageData.notes.length > 0 && (
-          <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-[#BE3236]/20 shadow-md mb-12">
-            <h3 className={`${thirdFont.className} text-xl font-bold text-[#BE3236] mb-3 uppercase tracking-wide`}>
+          <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md mb-12">
+            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
               Important Notes
             </h3>
-            <ul className="space-y-2 text-sm text-[#5A1B1D]/90">
+            <ul className="space-y-2 text-sm text-lovely/90">
               {packageData.notes.map((note, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="text-[#BE3236] mr-2">•</span>
+                  <span className="text-lovely mr-2">•</span>
                   <span>{note}</span>
                 </li>
               ))}
@@ -920,22 +965,22 @@ export default function PackageeDetailPage() {
         )}
 
         {/* Interactive Bridal Quiz Section */}
-        <div className="bg-pinkey/60 border-2 border-[#F8D0D6] rounded-3xl p-6 sm:p-8 shadow-lg mb-12">
+        {/* <div className="bg-pinkey/60 border-2 border-pinkey rounded-3xl p-6 sm:p-8 shadow-lg mb-12">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-[#BE3236]" />
-            <span className="text-xs uppercase tracking-widest font-bold text-[#BE3236]">Bridal Quiz</span>
+            <Sparkles className="w-5 h-5 text-lovely" />
+            <span className="text-xs uppercase tracking-widest font-bold text-lovely">Bridal Quiz</span>
           </div>
-          <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-[#BE3236] uppercase tracking-tight`}>
+          <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-tight`}>
             Which Bestie Do You Need?
           </h2>
-          <p className="text-sm text-[#5A1B1D]/80 mb-6">
+          <p className="text-sm text-lovely/80 mb-6">
             Answer 4 quick questions and we'll match you with your ideal Wifey package. 💕
           </p>
 
           {!showQuizResult ? (
             <div id="quiz-flow" className="space-y-6">
-              <div className="bg-[#FBE3E6]/50 p-5 rounded-2xl border border-[#F8D0D6]">
-                <h3 className={`${thirdFont.className} text-lg font-bold text-[#BE3236] mb-4`}>
+              <div className="bg-pinkey/30 p-5 rounded-2xl border border-pinkey">
+                <h3 className={`${thirdFont.className} text-lg font-bold text-lovely mb-4`}>
                   {QUIZ_QUESTIONS[quizIndex].q}
                 </h3>
                 <div className="grid grid-cols-1 gap-3">
@@ -943,7 +988,7 @@ export default function PackageeDetailPage() {
                     <button
                       key={i}
                       onClick={() => handleQuizAnswer(opt)}
-                      className="text-left bg-white hover:bg-[#BE3236] text-[#5A1B1D] hover:text-white border-2 border-[#F8D0D6] hover:border-[#BE3236] rounded-xl p-4 text-sm font-semibold transition-all shadow-sm"
+                      className="text-left bg-white hover:bg-lovely text-lovely hover:text-white border-2 border-pinkey hover:border-lovely rounded-xl p-4 text-sm font-semibold transition-all shadow-sm"
                       id={`quiz-opt-${quizIndex}-${i}`}
                     >
                       {opt.text}
@@ -951,16 +996,16 @@ export default function PackageeDetailPage() {
                   ))}
                 </div>
               </div>
-              <div className="flex justify-between items-center text-xs font-bold text-[#BE3236]">
+              <div className="flex justify-between items-center text-xs font-bold text-lovely">
                 <span>Question {quizIndex + 1} of {QUIZ_QUESTIONS.length}</span>
-                <span className="bg-[#BE3236]/10 px-3 py-1 rounded-full">
+                <span className="bg-lovely/10 px-3 py-1 rounded-full">
                   {Math.round(((quizIndex) / QUIZ_QUESTIONS.length) * 100)}% Completed
                 </span>
               </div>
             </div>
           ) : (
-            <div id="quiz-result" className="bg-[#BE3236] text-white p-6 sm:p-8 rounded-2xl shadow-xl space-y-4">
-              <span className="inline-block bg-white text-[#BE3236] font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">
+            <div id="quiz-result" className="bg-lovely text-white p-6 sm:p-8 rounded-2xl shadow-xl space-y-4">
+              <span className="inline-block bg-white text-lovely font-bold text-xs uppercase tracking-wider px-3 py-1 rounded-full">
                 {getQuizResultData().persona}
               </span>
               <h3 className={`${thirdFont.className} text-2xl font-extrabold uppercase tracking-wide`}>
@@ -969,12 +1014,12 @@ export default function PackageeDetailPage() {
               <p className="text-sm leading-relaxed text-white/95">
                 {getQuizResultData().why}
               </p>
-              <div className={`${thirdFont.className} text-3xl font-extrabold text-[#F7F0DC] pt-2`}>
+              <div className={`${thirdFont.className} text-3xl font-extrabold text-creamey pt-2`}>
                 {getQuizResultData().price}
               </div>
               <div className="flex flex-col sm:flex-row gap-3 pt-3">
                 <Button
-                  className="bg-white text-[#BE3236] hover:bg-[#F7F0DC] font-bold rounded-full py-5 px-6 text-sm"
+                  className="bg-white text-lovely hover:bg-creamey font-bold rounded-full py-5 px-6 text-sm"
                   onClick={handleAddToCart}
                   id="quiz-result-btn"
                 >
@@ -991,10 +1036,10 @@ export default function PackageeDetailPage() {
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Wifey Community Section */}
-        <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-[#F8D0D6]">
+        <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
           <WifeyCommunity />
         </div>
       </div>

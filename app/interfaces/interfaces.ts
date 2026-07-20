@@ -344,8 +344,8 @@ export interface Ipackage {
   packageProducts?: any[]; // Products associated with this package
   subSubscriptionSlots?: { role: "groom" | "bridesmaids"; maxCount: number }[];
   comparisonFeatures?: ComparisonFeature[];
-  heroTitle?: string;
-  heroSubtitle?: string;
+  // heroTitle?: string;
+  // heroSubtitle?: string;
   badgeLabel?: string;
   calloutBadge?: string;
   calloutTitle?: string;

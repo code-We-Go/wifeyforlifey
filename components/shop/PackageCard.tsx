@@ -32,79 +32,74 @@ export default function PackageCard({
 
   return (
     <div
-      className="relative product-card bg-lovely px-2 pt-4 pb-2 border-lovely border-2 group cursor-pointer"
+      className="relative bg-white/50 border-2 border-lovely text-lovely/90  rounded-[18px] overflow-hidden group cursor-pointer flex flex-col h-full"
       onClick={handlePackageClick}
     >
-      <Image
-        unoptimized
-        width={80}
-        height={50}
-        className="absolute -top-5 -rotate-45 -left-5 z-20"
-        alt="fyonka"
-        src={"/fyonkaCreamey.png"}
-      />
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative aspect-[16/9] w-full overflow-hidden shrink-0 bg-white">
         <Image
           src={packageItem.imgUrl}
           alt={packageItem.name}
           fill
-          className={`object-cover transition-transform duration-300 group-hover:scale-105`}
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div
-          className={`absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10`}
-        ></div>
+        <div className="absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10"></div>
       </div>
-      <div className="pt-2 px-2 md:pt-4 md:px-4">
-        <h4
-          className={`${thirdFont.className} text-sm md:text-base xl:text-lg tracking-wide font-semibold text-creamey line-clamp-1`}
+      
+      <div className="p-[16px_18px_20px] flex flex-col grow">
+        {packageItem.notes && packageItem.notes.length > 0 && (
+          <span className="inline-block self-start text-[11px] font-semibold tracking-[0.06em] uppercase bg-lovely/20  px-2.5 py-1 rounded-full mb-2">
+            {packageItem.notes[0]}
+          </span>
+        )}
+        
+        <h3
+          className={cn(
+            thirdFont.className,
+            "font-bold text-[22px] uppercase tracking-[0.03em] leading-tight"
+          )}
         >
           {packageItem.name}
-        </h4>
-        <div className="flex items-center justify-between mt-2">
-          <div className="space-y-0">
-            <p className="price-tag text-creamey text-xs md:text-sm">
-              LE{packageItem.price.toFixed(2)}
-            </p>
-            {/* {packageItem.saving && (
-              <p className="text-[10px] md:text-xs text-green-300 font-medium">
-                {packageItem.saving}
-              </p>
-            )} */}
-            {
-              packageItem.duration > 0 ? (
-            <p className="text-[10px] md:text-xs text-creamey/80">
-              {(() => {
-                const months = Number(packageItem.duration);
-                if (isNaN(months) || months === 0) return packageItem.duration;
-                if (months < 12) return `${months} Months`;
-                const years = Math.floor(months / 12);
-                const remainingMonths = months % 12;
-                let result = `${years} ${years === 1 ? "Year" : "Years"}`;
-                if (remainingMonths > 0) {
-                  result += ` and ${remainingMonths} ${
-                    remainingMonths === 1 ? "Month" : "Months"
-                  }`;
-                }
-                return result;
-              })()}
-            </p> ):
-            <div className="md:h-5 h-3">
+        </h3>
+        
+        {packageItem.notes && packageItem.notes.length > 1 && (
+          <p className="text-[13.5px] leading-[1.55] mt-1.5 text-lovely/90 line-clamp-3">
+            {packageItem.notes[1]}
+          </p>
+        )}
+        
+        <div className="grow" />
 
-            </div>
-            }
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
-              onClick={handleViewDetails}
-            >
-              <Package className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-              <span className="text-xs">View</span>
-            </Button>
-          </div>
-        </div>
+        <p className={cn(thirdFont.className, "font-semibold text-[19px] mt-3 flex items-center gap-1.5 flex-wrap")}>
+          From LE {packageItem.price.toFixed(2)}
+          <small className="font-sans font-medium text-[12px] opacity-85 normal-case tracking-normal">
+            {packageItem.duration > 0 ? (
+              <>
+                | {(() => {
+                  const months = Number(packageItem.duration);
+                  if (isNaN(months) || months === 0) return packageItem.duration;
+                  if (months < 12) return `${months} Months`;
+                  const years = Math.floor(months / 12);
+                  const remainingMonths = months % 12;
+                  let result = `${years} ${years === 1 ? "Year" : "Years"}`;
+                  if (remainingMonths > 0) {
+                    result += ` and ${remainingMonths} ${
+                      remainingMonths === 1 ? "Month" : "Months"
+                    }`;
+                  }
+                  return result;
+                })()}
+              </>
+            ) : null}
+          </small>
+        </p>
+
+        <Button
+          variant="secondary"
+          className="mt-[14px] self-start w-auto px-6 bg-lovely font-bold text-white hover:bg-lovely/90 rounded-full h-auto py-2.5"
+          onClick={handleViewDetails}
+        >
+          See {packageItem.name}
+        </Button>
       </div>
     </div>
   );

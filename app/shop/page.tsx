@@ -199,7 +199,10 @@ function ShopPage() {
           price: 1500,
           duration: 0,
           items: [],
-          notes: [],
+          notes: [
+            "Buying your gehaz?",
+            "Your home, room by room — 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend."
+          ],
           cards: [],
           active: true,
         };
@@ -207,12 +210,15 @@ function ShopPage() {
           _id: "custom-wedding-bestie-planner",
           slug: "wedding-bestie-planner",
           name: "Wedding Bestie Planner",
-          imgUrl: "/weddingPlanningPlanner/desktop.png",
-          images: ["/weddingPlanningPlanner/desktop.png"],
+          imgUrl: "/weddingPlanningPlanner/mob.jpeg",
+          images: ["/weddingPlanningPlanner/mob.jpeg"],
           price: 1700,
           duration: 0,
           items: [],
-          notes: [],
+          notes: [
+            "Planning your wedding day?",
+            "Your big day, step by step — two checklists included: one for you, one for your groom. Countdown tasks from 2 months out to the night before."
+          ],
           cards: [],
           active: true,
         };
@@ -459,7 +465,7 @@ function ShopPage() {
                 <div className="overflow-x-hidden  py-4 px-2" ref={packagesEmblaRef}>
                   <div className="flex gap-6">
                     {packages.map((packageItem) => (
-                      <div key={packageItem._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
+                      <div key={packageItem._id} className="flex-[0_0_90%] md:flex-[0_0_45%] xl:flex-[0_0_30%] min-w-0">
                         <PackageCard packageItem={packageItem} />
                       </div>
                     ))}

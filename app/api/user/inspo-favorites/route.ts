@@ -124,10 +124,13 @@ export async function POST(req: NextRequest) {
       favorites: updatedFavorites,
       favorited: !exists,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating inspo favorites:", error);
     return NextResponse.json(
-      { error: "Failed to update inspo favorites" },
+      { 
+        error: "Failed to update inspo favorites", 
+        details: error?.message || error?.toString() || "Unknown error" 
+      },
       { status: 500 }
     );
   }
