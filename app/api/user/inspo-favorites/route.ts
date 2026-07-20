@@ -53,7 +53,18 @@ export async function POST(req: NextRequest) {
 
     await ConnectDB();
 
-    const { imagePublicId } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
+
+    const { imagePublicId } = body;
 
     if (!imagePublicId || typeof imagePublicId !== "string") {
       return NextResponse.json(
@@ -62,10 +73,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let user = authUser;
-    if (authType === "session") {
-      user = await UserModel.findOne({ email: authUser.email });
-    }
+    // Always fetch a fresh Mongoose document so .save() works for all auth types.
+    // JWT auth returns a plain JS object (via toObject()) which lacks .save().
+    const user = await UserModel.findOne({ email: authUser.email });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -81,7 +91,16 @@ export async function POST(req: NextRequest) {
       : [...currentFavorites, imagePublicId];
 
     user.inspoFavorites = updatedFavorites;
-    await user.save();
+
+    try {
+      await user.save();
+    } catch (saveError) {
+      console.error("Error saving user favorites:", saveError);
+      return NextResponse.json(
+        { error: "Failed to save favorites" },
+        { status: 500 }
+      );
+    }
 
     try {
       const incValue = exists ? -1 : 1;
@@ -98,6 +117,7 @@ export async function POST(req: NextRequest) {
       );
     } catch (error) {
       console.error("Error updating inspo favoriteCount:", error);
+      // Non-critical — still return success since the user's favorites were saved
     }
 
     return NextResponse.json({
