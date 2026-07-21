@@ -508,7 +508,7 @@ export default function PackageeDetailPage() {
         </div> */}
 
         {/* Main Package Showcase Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 bg-pinkey/50 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-xl mb-6 md:mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 bg-pinkey/60 p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-xl mb-6 md:mb-12">
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-2xl border-3 border-lovely shadow-md bg-creamey">
@@ -586,7 +586,7 @@ export default function PackageeDetailPage() {
           <div className="flex flex-col justify-between">
             <div>
               <span className="inline-block font-semibold text-xs uppercase tracking-widest bg-lovely/10 text-lovely px-3 py-1 rounded-full mb-3">
-                Wifey Experience
+                {packageData.badgeLabel}
               </span>
               <h2
                 className={`${thirdFont.className} text-3xl sm:text-4xl font-extrabold text-lovely tracking-wide mb-3`}
@@ -781,7 +781,7 @@ export default function PackageeDetailPage() {
                   const isDash = (val: string) => val === "—" || val === "-" || val.toLowerCase() === "false";
                   return (
                     <tr key={idx}>
-                      <td className="p-3 bg-pinkey/30 rounded-l-xl text-xs sm:text-sm font-medium">
+                      <td className="p-3 bg-pinkey/30 text-lovely/90 rounded-l-xl text-xs sm:text-sm font-medium">
                         {feat.feature}
                       </td>
                       <td className="p-3 text-center bg-pinkey/20 font-bold text-emerald-600">
@@ -828,7 +828,7 @@ export default function PackageeDetailPage() {
               )}
             </p>
           </div>
-          <div className="mt-4 p-4 border-2 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
+          <div className="mt-4 p-4 border-2 text-lovely/90 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
             <strong>The physical planner is yours forever.</strong> Digital benefits stay active for 12 months from purchase.
           </div>
         </div>
@@ -836,25 +836,25 @@ export default function PackageeDetailPage() {
         {/* Make it a full order Section (Suggested Products from MongoDB) */}
         {((packageData.packageProducts && packageData.packageProducts.length > 0) ||
           (fullPackage?.packageProducts && fullPackage.packageProducts.length > 0)) && (
-          <div className="bg-pinkey/50 backdrop-blur-sm p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-md mb-12">
-            <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-6 text-center`}>
-              Make it a full order 🎀
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {(packageData.packageProducts?.length
-                ? packageData.packageProducts
-                : fullPackage?.packageProducts ?? []
-              ).map((prod: any) => (
-                <PackageProductCard
-                  key={prod._id}
-                  prod={prod}
-                  addItem={addItem}
-                  openCart={openCart}
-                />
-              ))}
+            <div className="bg-pinkey/60 p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-md mb-12">
+              <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-6 text-center`}>
+                Make it a full order 🎀
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {(packageData.packageProducts?.length
+                  ? packageData.packageProducts
+                  : fullPackage?.packageProducts ?? []
+                ).map((prod: any) => (
+                  <PackageProductCard
+                    key={prod._id}
+                    prod={prod}
+                    addItem={addItem}
+                    openCart={openCart}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Support Cards Feature Carousel */}
         {/* {(packageData.supportCards ?? []).length > 0 && (
@@ -947,22 +947,7 @@ export default function PackageeDetailPage() {
           </div>
         )} */}
 
-        {/* Notes Section */}
-        {packageData.notes && packageData.notes.length > 0 && (
-          <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md mb-12">
-            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
-              Important Notes
-            </h3>
-            <ul className="space-y-2 text-sm text-lovely/90">
-              {packageData.notes.map((note, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-lovely mr-2">•</span>
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+
 
         {/* Interactive Bridal Quiz Section */}
         {/* <div className="bg-pinkey/60 border-2 border-pinkey rounded-3xl p-6 sm:p-8 shadow-lg mb-12">
@@ -1042,6 +1027,22 @@ export default function PackageeDetailPage() {
         <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
           <WifeyCommunity />
         </div>
+        {/* Notes Section */}
+        {packageData.notes && packageData.notes.length > 0 && (
+          <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md mt-12">
+            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
+              Important Notes
+            </h3>
+            <ul className="space-y-2 text-sm text-lovely/90">
+              {packageData.notes.map((note, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-lovely mr-2">•</span>
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

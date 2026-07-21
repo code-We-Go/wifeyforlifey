@@ -69,7 +69,7 @@ function ShopPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   // Get category and subcategory from URL params
   const selectedCategoryId = searchParams.get("category") || "";
   const selectedSubcategoryId = searchParams.get("subcategory") || "";
@@ -90,15 +90,6 @@ function ShopPage() {
     sortBy: "newest",
     search: "",
   });
-
-  // Embla Carousel for Packages
-  const [packagesEmblaRef, packagesEmblaApi] = useEmblaCarousel({
-    loop: false,
-    align: "start",
-    slidesToScroll: 1,
-  });
-  const [canScrollPrevPackages, setCanScrollPrevPackages] = useState(false);
-  const [canScrollNextPackages, setCanScrollNextPackages] = useState(false);
 
   // Embla Carousel for Categories (Might be unused now)
   const [categoriesEmblaRef, categoriesEmblaApi] = useEmblaCarousel({
@@ -129,7 +120,7 @@ function ShopPage() {
         // The API returns { data: [...] } or [...] depending on my previous thought.
         // My edit to api/subcategories/route.ts returns { data: ... }
         const rawSubcategories = data.data || [];
-        
+
         // Map subCategoryName to name to match interface
         const mappedSubcategories = rawSubcategories.map((sub: any) => ({
           _id: sub._id,
@@ -138,10 +129,10 @@ function ShopPage() {
           image: sub.image,
           categoryID: sub.categoryID
         }));
-        
+
         setSubcategoriesList(mappedSubcategories);
         // Also set empty categories to avoid errors if referenced
-        setCategories([]); 
+        setCategories([]);
       } catch (error) {
         console.error("Error fetching subcategories:", error);
       }
@@ -188,7 +179,7 @@ function ShopPage() {
         const response = await fetch("/api/packages?all=true&active=true");
         const data = await response.json();
         const fetchedPackages = Array.isArray(data.data) ? data.data : [];
-        
+
         // Custom Gehaz Bestie Planner package to show first
         const gehazBestiePlanner: Ipackage = {
           _id: "custom-gehaz-bestie-planner",
@@ -208,7 +199,7 @@ function ShopPage() {
         };
         const weddingBestiePlanner: Ipackage = {
           _id: "custom-wedding-bestie-planner",
-          slug: "wedding-bestie-planner",
+          slug: "WeddingBestiePlanner",
           name: "Wedding Bestie Planner",
           imgUrl: "/weddingPlanningPlanner/mob.jpeg",
           images: ["/weddingPlanningPlanner/mob.jpeg"],
@@ -222,12 +213,12 @@ function ShopPage() {
           cards: [],
           active: true,
         };
-        
+
         // Filter out any fetched packages with slug "GehazBestiePlanner" to avoid duplicates
         const filteredPackages = fetchedPackages.filter(
           (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner" && pkg.slug !== "wedding-bestie-planner"
         );
-        
+
         // Prepend the custom package to the filtered packages
         setPackages([gehazBestiePlanner, weddingBestiePlanner, ...filteredPackages]);
       } catch (error) {
@@ -239,15 +230,6 @@ function ShopPage() {
 
     fetchPackages();
   }, []);
-
-  // Carousel navigation handlers
-  const scrollPrevPackages = useCallback(() => {
-    if (packagesEmblaApi) packagesEmblaApi.scrollPrev();
-  }, [packagesEmblaApi]);
-
-  const scrollNextPackages = useCallback(() => {
-    if (packagesEmblaApi) packagesEmblaApi.scrollNext();
-  }, [packagesEmblaApi]);
 
   const scrollPrevCategories = useCallback(() => {
     if (categoriesEmblaApi) categoriesEmblaApi.scrollPrev();
@@ -267,13 +249,6 @@ function ShopPage() {
 
 
 
-  // Update scroll button states
-  const onSelectPackages = useCallback(() => {
-    if (!packagesEmblaApi) return;
-    setCanScrollPrevPackages(packagesEmblaApi.canScrollPrev());
-    setCanScrollNextPackages(packagesEmblaApi.canScrollNext());
-  }, [packagesEmblaApi]);
-
   const onSelectCategories = useCallback(() => {
     if (!categoriesEmblaApi) return;
     setCanScrollPrevCategories(categoriesEmblaApi.canScrollPrev());
@@ -287,13 +262,6 @@ function ShopPage() {
   }, [subcategoriesEmblaApi]);
 
 
-
-  useEffect(() => {
-    if (!packagesEmblaApi) return;
-    onSelectPackages();
-    packagesEmblaApi.on("select", onSelectPackages);
-    packagesEmblaApi.on("reInit", onSelectPackages);
-  }, [packagesEmblaApi, onSelectPackages]);
 
   useEffect(() => {
     if (!categoriesEmblaApi) return;
@@ -403,20 +371,18 @@ function ShopPage() {
               className={`flex flex-col items-center min-w-[80px] space-y-2 group transition-colors`}
             >
               <div
-                className={`w-14 h-14 flex items-center justify-center rounded-full transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? "bg-lovely text-creamey shadow-lg "
-                    : "bg-creamey text-lovely border border-lovely/20 hover:border-lovely"
-                }`}
+                className={`w-14 h-14 flex items-center justify-center rounded-full transition-all duration-300 ${activeTab === tab.id
+                  ? "bg-lovely text-creamey shadow-lg "
+                  : "bg-creamey text-lovely border border-lovely/20 hover:border-lovely"
+                  }`}
               >
                 <tab.icon className="w-6 h-6" />
               </div>
               <span
-                className={`text-sm font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "text-lovely font-bold"
-                    : "text-lovely/70"
-                }`}
+                className={`text-sm font-medium transition-colors ${activeTab === tab.id
+                  ? "text-lovely font-bold"
+                  : "text-lovely/70"
+                  }`}
               >
                 {tab.label}
               </span>
@@ -435,51 +401,21 @@ function ShopPage() {
                 <p className="mt-4 text-lovely/90">Loading subscriptions...</p>
               </div>
             ) : packages.length > 0 ? (
-              <div className="relative">
-                {/* Navigation Arrows */}
-                {packages.length > 4 && (
-                  <>
-                    <button
-                      onClick={scrollPrevPackages}
-                      disabled={!canScrollPrevPackages}
-                      className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                        !canScrollPrevPackages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                      }`}
-                      aria-label="Previous slide"
-                    >
-                      <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-                    </button>
-                    <button
-                      onClick={scrollNextPackages}
-                      disabled={!canScrollNextPackages}
-                      className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                        !canScrollNextPackages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                      }`}
-                      aria-label="Next slide"
-                    >
-                      <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-                    </button>
-                  </>
-                )}
-                {/* Embla Carousel */}
-                <div className="overflow-x-hidden  py-4 px-2" ref={packagesEmblaRef}>
-                  <div className="flex gap-6">
-                    {packages.map((packageItem) => (
-                      <div key={packageItem._id} className="flex-[0_0_90%] md:flex-[0_0_45%] xl:flex-[0_0_30%] min-w-0">
-                        <PackageCard packageItem={packageItem} />
-                      </div>
-                    ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 py-4">
+                {packages.map((packageItem) => (
+                  <div key={packageItem._id} className="min-w-0">
+                    <PackageCard packageItem={packageItem} />
                   </div>
+                ))}
+              </div>
+            )
+              : (
+                <div className="text-center py-12">
+                  <p className="text-lovely text-lg">
+                    No subscriptions available at the moment.
+                  </p>
                 </div>
-              </div>
-            ) 
-            : (
-              <div className="text-center py-12">
-                <p className="text-lovely text-lg">
-                  No subscriptions available at the moment.
-                </p>
-              </div>
-            )}
+              )}
           </div>
         )}
 
@@ -498,9 +434,9 @@ function ShopPage() {
                 </button>
                 <ChevronRight className="w-4 h-4" />
                 <span className="text-lovely font-medium">
-                <span className="text-lovely font-medium">
-                  {subcategoriesList.find(s => s._id === selectedSubcategoryId)?.name || "Subcategory"}
-                </span>
+                  <span className="text-lovely font-medium">
+                    {subcategoriesList.find(s => s._id === selectedSubcategoryId)?.name || "Subcategory"}
+                  </span>
                 </span>
               </div>
             )}
@@ -638,7 +574,7 @@ function ShopPage() {
                                 <SelectValue placeholder="Select subcategory" />
                               </SelectTrigger>
                               <SelectContent>
-                              {/* this appears for users */}
+                                {/* this appears for users */}
                                 <SelectItem value="none">All Categories</SelectItem>
                                 {subcategoriesList.map((subcategory) => (
                                   <SelectItem

@@ -54,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="w-full">
+    <html lang="en" suppressHydrationWarning className="w-full bg-creamey">
       <GoogleTagManager gtmId="GTM-KQMB2B2F" />
 
       <body className={`w-full min-h-screen ${wifeyFont.className} bg-creamey`}>

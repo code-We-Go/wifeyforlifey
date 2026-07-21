@@ -97,7 +97,7 @@ export interface Variant {
   attributeName: string;
   attributes: attribute[]; // e.g., [{ name: "Color", value: "Black" }, { name: "Capacity", value: "2L" }]
   images: media[];
-    mobImages?: media[];
+  mobImages?: media[];
 
 }
 
@@ -328,7 +328,7 @@ export interface Ipackage {
   saving?: string;
   cost?: number;
   variants?: PackageVariant[];
-  renewals?: {price:number,duration:number}[];
+  renewals?: { price: number, duration: number }[];
   items: PackageItem[];
   notes: string[];
   cards: PackageCard[]; // Array of cards with image and points
@@ -404,12 +404,12 @@ export interface ISubscription {
   bostaDistrictName?: string;
   shipmentID?: string;
   status?:
-    | "pending"
-    | "confirmed"
-    | "shipped"
-    | "delivered"
-    | "cancelled"
-    | "returned";
+  | "pending"
+  | "confirmed"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "returned";
   cart?: CartItem[];
   createdAt?: Date;
   updatedAt: Date;

@@ -102,7 +102,9 @@
   * {
     @apply border-border;
   }
-  body {
+  html, body {
+    background-color: #fbf3e0;
+    color-scheme: light;
     @apply bg-background text-foreground;
   }
   h1,
