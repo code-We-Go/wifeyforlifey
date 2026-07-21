@@ -700,7 +700,7 @@ export default function PackageeDetailPage() {
                     </p>
                   )}
                   <p className="text-xs sm:text-sm text-lovely font-bold mt-2.5 flex items-center gap-1.5">
-                    🎁 Comes with {Math.round(activePrice).toLocaleString()} Wifey Points — like getting your money back.
+                    🎁 Comes with {Math.round(activePrice).toLocaleString()} Wifey Points — to spend them on our lovely items later.
                   </p>
                 </div>
               )}
