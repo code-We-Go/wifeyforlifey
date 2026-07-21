@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import packageModel from "@/app/modals/packageModel";
 import { ConnectDB } from "@/app/config/db";
 import { NextResponse } from "next/server";
+import productsModel from "@/app/modals/productsModel";
 
 const loadDB = async () => {
   await ConnectDB();
@@ -23,11 +24,11 @@ export async function GET(req: Request) {
   const skip = all ? 0 : (page - 1) * limit;
   const packageID = searchParams.get("packageID");
   const slug = searchParams.get("slug");
-
+  console.log(productsModel + "productsPopulat")
   try {
     if (packageID) {
       // Fetch a single package by ID
-      const singlePackage = await packageModel.findById(packageID);
+      const singlePackage = await packageModel.findById(packageID).populate("packageProducts");
       if (!singlePackage) {
         return NextResponse.json({ error: "Package not found" }, { status: 404 });
       }
@@ -39,7 +40,7 @@ export async function GET(req: Request) {
     if (search) {
       searchQuery.name = { $regex: search, $options: "i" };
     }
-//for testing
+    //for testing
     if (active !== null) {
       searchQuery.active = active === "true";
     }
@@ -54,6 +55,7 @@ export async function GET(req: Request) {
     // Get packages with search filter and proper sorting
     const packages = await packageModel
       .find(searchQuery)
+      .populate("packageProducts")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

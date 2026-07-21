@@ -65,7 +65,11 @@ const PackageSchema = new Schema<Ipackage>(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "partners" }],
       default: [],
     },
-        renewals: {
+    packageProducts: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "products" }],
+      default: [],
+    },
+    renewals: {
       type: [
         {
           price: { type: Number, required: true },
@@ -85,6 +89,23 @@ const PackageSchema = new Schema<Ipackage>(
       ],
       default: [],
     },
+    comparisonFeatures: {
+      type: [
+        {
+          feature: { type: String, required: true },
+          fullValue: { type: String, required: true },
+          miniValue: { type: String, required: true },
+        },
+      ],
+      required: false,
+      default: [],
+    },
+    heroTitle: { type: String, required: false },
+    heroSubtitle: { type: String, required: false },
+    badgeLabel: { type: String, required: false },
+    calloutBadge: { type: String, required: false },
+    calloutTitle: { type: String, required: false },
+    calloutDescription: { type: String, required: false },
   },
   {
     timestamps: true,
