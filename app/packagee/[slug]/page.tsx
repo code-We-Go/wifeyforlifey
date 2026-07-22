@@ -763,7 +763,7 @@ export default function PackageeDetailPage() {
             Choose Your Experience Tier 🎀
           </h2>
           <p className="text-center text-sm text-lovely/80 mb-6 max-w-xl mx-auto">
-            Compare the Full and Mini packages to decide which bestie fits your bridal era needs.
+            Compare the Mini and Full packages to decide which bestie fits your bridal era needs.
           </p>
 
           <div className="overflow-x-auto">
@@ -771,8 +771,8 @@ export default function PackageeDetailPage() {
               <thead>
                 <tr>
                   <th className="text-left p-3 text-xs uppercase tracking-wider text-lovely/70 font-semibold">Features Included</th>
-                  <th className="p-3 text-center bg-lovely text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Full</th>
-                  <th className="p-3 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Mini</th>
+                  <th className="p-3 text-center bg-lovely text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Mini</th>
+                  <th className="p-3 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Full</th>
                 </tr>
               </thead>
               <tbody>
@@ -784,19 +784,7 @@ export default function PackageeDetailPage() {
                       <td className="p-3 bg-pinkey/30 text-lovely/90 rounded-l-xl text-xs sm:text-sm font-medium">
                         {feat.feature}
                       </td>
-                      <td className="p-3 text-center bg-pinkey/20 font-bold text-emerald-600">
-                        {isCheck(feat.fullValue) ? (
-                          <Check className="inline h-5 w-5" />
-                        ) : isDash(feat.fullValue) ? (
-                          <span className="text-gray-400 font-bold">—</span>
-                        ) : (
-                          <>
-                            <Check className="inline h-5 w-5" />
-                            <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.fullValue}</span>
-                          </>
-                        )}
-                      </td>
-                      <td className="p-3 text-center bg-white border border-pinkey/50 rounded-r-xl font-bold">
+                      <td className="p-3 text-center bg-pinkey/20 border border-pinkey/50 font-bold">
                         {isCheck(feat.miniValue) ? (
                           <Check className="inline h-5 w-5 text-emerald-600" />
                         ) : isDash(feat.miniValue) ? (
@@ -805,6 +793,18 @@ export default function PackageeDetailPage() {
                           <>
                             <Check className="inline h-5 w-5 text-emerald-600" />
                             <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.miniValue}</span>
+                          </>
+                        )}
+                      </td>
+                      <td className="p-3 text-center bg-white border border-pinkey/50 rounded-r-xl font-bold">
+                        {isCheck(feat.fullValue) ? (
+                          <Check className="inline h-5 w-5 text-emerald-600" />
+                        ) : isDash(feat.fullValue) ? (
+                          <span className="text-gray-400 font-bold">—</span>
+                        ) : (
+                          <>
+                            <Check className="inline h-5 w-5 text-emerald-600" />
+                            <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.fullValue}</span>
                           </>
                         )}
                       </td>
