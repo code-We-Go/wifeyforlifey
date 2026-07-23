@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import packageModel from "@/app/modals/packageModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
+import UserModel from "@/app/modals/userModel";
 import { authenticateRequest } from "@/app/lib/mobileAuth";
 
 export async function GET(req: Request) {
@@ -19,21 +20,45 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get current subscription
-    const currentSubscription = await subscriptionsModel.findOne({
-      email: user.email,
-      subscribed: true,
+    // Fetch target package first
+    const targetPackage = await packageModel.findById(targetPackageId);
+    if (!targetPackage) {
+      return NextResponse.json({ error: "Target package not found" }, { status: 404 });
+    }
+
+    // Get user subscriptions from UserModel populated with packageID details
+    const userDoc = await UserModel.findOne({ email: user.email }).populate({
+      path: "subscriptions",
+      populate: { path: "packageID" },
     });
 
-    if (!currentSubscription) {
+    const activeSubscriptions =
+      userDoc?.subscriptions?.filter((sub: any) => sub.subscribed) || [];
+
+    if (!activeSubscriptions || activeSubscriptions.length === 0) {
       return NextResponse.json({ error: "No active subscription found to upgrade from" }, { status: 400 });
     }
 
-    const currentPackage = await packageModel.findById(currentSubscription.packageID);
-    const targetPackage = await packageModel.findById(targetPackageId);
+    // Match subscription whose package belongs to the same family via slug or partOf
+    let currentSubscription = activeSubscriptions.find((sub: any) => {
+      const currentPkg = sub.packageID;
+      if (!currentPkg) return false;
 
-    if (!currentPackage || !targetPackage) {
-      return NextResponse.json({ error: "Package not found" }, { status: 404 });
+      if (targetPackage.slug && currentPkg.slug && targetPackage.slug === currentPkg.slug) return true;
+      if (targetPackage.partOf && currentPkg.partOf && targetPackage.partOf === currentPkg.partOf) return true;
+      if (targetPackage.slug && currentPkg.partOf && targetPackage.slug === currentPkg.partOf) return true;
+      if (targetPackage.partOf && currentPkg.slug && targetPackage.partOf === currentPkg.slug) return true;
+      return false;
+    });
+
+    // Fallback if no specific slug/partOf match was found
+    if (!currentSubscription) {
+      currentSubscription = activeSubscriptions[0];
+    }
+
+    const currentPackage = currentSubscription.packageID;
+    if (!currentPackage) {
+      return NextResponse.json({ error: "Current package details not found" }, { status: 404 });
     }
 
     const currentPrice = currentPackage.price || 0;
