@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         {
           amount: data.total * 100,
           currency: "EGP",
-          payment_methods: [5220324, 5220322, 5220323],
+          payment_methods: [5220324, 5220322, 5220323, 5613242],
           billing_data: {
             apartment: data.apartment || "apartment",
             first_name: data.firstName || "firstName",

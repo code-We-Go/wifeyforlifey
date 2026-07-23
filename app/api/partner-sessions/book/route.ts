@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       {
         amount: finalPrice * 100,
         currency: "EGP",
-        payment_methods: [5220324, 5220322, 5220323],
+        payment_methods: [5220324, 5220322, 5220323, 5613242],
         billing_data: {
           apartment: "",
           first_name: firstName,
