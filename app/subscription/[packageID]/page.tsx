@@ -221,6 +221,7 @@ const SubscriptionPage = () => {
   const [instapayReciept, setInstapayReciept] = useState("");
   const [includeCartItems, setIncludeCartItems] = useState(true);
   const [showCartBundleModal, setShowCartBundleModal] = useState(false);
+  const [loadingUpgradePrice, setLoadingUpgradePrice] = useState(false);
 
   // Read upgrade price from query param and set override
   useEffect(() => {
@@ -246,6 +247,7 @@ const SubscriptionPage = () => {
       }));
       
       const fetchUpgradeInfo = async () => {
+        setLoadingUpgradePrice(true);
         try {
           const res = await axios.get(`/api/packages/upgrade?targetPackageId=${packageID}`);
           if (res.data.success) {
@@ -253,6 +255,8 @@ const SubscriptionPage = () => {
           }
         } catch (error) {
           console.error("Failed to fetch upgrade info:", error);
+        } finally {
+          setLoadingUpgradePrice(false);
         }
       };
       fetchUpgradeInfo();
@@ -680,7 +684,7 @@ We’re beyond excited to share this experience with you… your planner will be
     setTotal(calculatedSubTotal + shipping + giftCardCost);
 
     cartItems();
-  }, [items, countryID, billingState, packageData]); // Add packageData to dependencies
+  }, [items, countryID, billingState, packageData, price, overridePrice, isUpgrade]); // Fixed: added price, overridePrice, isUpgrade to dependencies
   useEffect(() => {
     if (countryID !== 65) {
       setPayment("card");
@@ -834,6 +838,10 @@ We’re beyond excited to share this experience with you… your planner will be
     if (isRenew && !selectedDuration) {
       errors.duration = "Please select a renewal option.";
     }
+    // Guard against 0-amount card payments (race condition safety)
+    if (total <= 0 && payment === "card") {
+      errors.total = "Payment amount is not ready yet. Please wait a moment and try again.";
+    }
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       alert(Object.values(errors)[0]);
@@ -845,8 +853,12 @@ We’re beyond excited to share this experience with you… your planner will be
     formData.email = user!.email!;
 
     // Build payload matching the regular submit flow
+    // Use fresh state values for total/subTotal/shipping to avoid stale formData
     const payload = {
       ...formData,
+      total: total,
+      subTotal: subTotal,
+      shipping: shipping,
       appliedDiscount: appliedDiscount?._id,
       appliedDiscountAmount:
         appliedDiscount?.calculationType === "FREE_SHIPPING"
@@ -953,8 +965,12 @@ We’re beyond excited to share this experience with you… your planner will be
       }
       try {
         // Create subscription payment record directly
+        // Use fresh state values for total/subTotal/shipping to avoid stale formData
         const instapayPayload = {
           ...formData,
+          total: total,
+          subTotal: subTotal,
+          shipping: shipping,
           paymentMethod: payment,
           instapayReciept: instapayReciept,
           subscription: packageID,
@@ -999,8 +1015,12 @@ We’re beyond excited to share this experience with you… your planner will be
     }
 
     // Add discount and loyalty info to payload
+    // Use fresh state values for total/subTotal/shipping to avoid stale formData
     const payload = {
       ...formData,
+      total: total,
+      subTotal: subTotal,
+      shipping: shipping,
       paymentMethod: payment,
       appliedDiscount: appliedDiscount?._id,
       appliedDiscountAmount:
@@ -1305,15 +1325,15 @@ We’re beyond excited to share this experience with you… your planner will be
               </div>
               <div className="flex justify-end w-full mt-2">
                 <button
-                  disabled={loading || !acceptedTerms}
+                  disabled={loading || !acceptedTerms || loadingUpgradePrice}
                   type="submit"
                   className={`border text-base transition duration-300 border-lovely p-1 ${
-                    loading || !acceptedTerms
+                    loading || !acceptedTerms || loadingUpgradePrice
                       ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
                       : "hover:cursor-pointer bg-lovely px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
                   }`}
                 >
-                  {loading ? "Processing..." : "PROCEED TO PAYMENT"}
+                  {loadingUpgradePrice ? "Calculating price..." : loading ? "Processing..." : "PROCEED TO PAYMENT"}
                 </button>
               </div>
             </form>

@@ -781,7 +781,7 @@ export default function PackageeDetailPage() {
                   const isDash = (val: string) => val === "—" || val === "-" || val.toLowerCase() === "false";
                   return (
                     <tr key={idx}>
-                      <td className="p-3 bg-pinkey/30 text-lovely/90 rounded-l-xl text-xs sm:text-sm font-medium">
+                      <td className="p-3 bg-lovely/80 text-white rounded-l-xl text-xs sm:text-sm font-medium">
                         {feat.feature}
                       </td>
                       <td className="p-3 text-center bg-pinkey/20 font-bold text-emerald-600">
