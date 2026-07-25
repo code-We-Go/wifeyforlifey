@@ -12,7 +12,7 @@ export interface ILoyaltyTransactionSchema extends Document {
 }
 
 const LoyaltyTransactionSchema = new Schema<ILoyaltyTransactionSchema>({
-  email: { type: String, required: true },
+  email: { type: String, required: true, lowercase: true },
   type: { type: String, enum: ["earn", "spend"], required: true },
   timestamp: { type: Date, default: Date.now },
   amount: { type: Number, required: true },

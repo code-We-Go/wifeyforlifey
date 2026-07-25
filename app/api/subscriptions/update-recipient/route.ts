@@ -6,7 +6,9 @@ export async function POST(request: NextRequest) {
   try {
     await ConnectDB();
     
-    const { oldRecipientEmail, newRecipientEmail } = await request.json();
+    const body = await request.json();
+    const oldRecipientEmail = body.oldRecipientEmail ? body.oldRecipientEmail.toLowerCase() : body.oldRecipientEmail;
+    const newRecipientEmail = body.newRecipientEmail ? body.newRecipientEmail.toLowerCase() : body.newRecipientEmail;
     
     if (!oldRecipientEmail || !newRecipientEmail) {
       return NextResponse.json(

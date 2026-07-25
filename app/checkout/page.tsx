@@ -477,7 +477,11 @@ const CheckoutClientPage = () => {
   ) => {
     const { name, value } = e.target;
     console.log(value);
-    setFormData({ ...formData, [name]: value });
+    // Convert any email field to lowercase
+    const finalValue = name.toLowerCase().includes('email')
+      ? value.toLowerCase()
+      : value;
+    setFormData({ ...formData, [name]: finalValue });
   };
 
   // Separate handler for state changes to ensure shipping calculation triggers

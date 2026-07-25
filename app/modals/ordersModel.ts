@@ -5,7 +5,7 @@ import { CartItemSchema } from "./cartItemSchema";
 // Define the Order schema
 
 const OrderSchema = new Schema(
-    { email:{type: String, required: false},
+    { email:{type: String, required: false, lowercase: true},
     orderID:{type:String , required : false}
         ,country: { type: String, required: false },
         firstName: { type: String, required: false },
@@ -19,7 +19,7 @@ const OrderSchema = new Schema(
         whatsAppNumber: { type: String, required: false },
         // Gift info
         isGift: { type: Boolean, default: false },
-        giftRecipientEmail: { type: String, required: false },
+        giftRecipientEmail: { type: String, required: false, lowercase: true },
         specialMessage: { type: String, required: false },
         giftCardName: { type: String, required: false },
         cash: { type: String, required: false, enum: ["card", "cash", "instapay"] }, // Payment method: card, cash, or instapay
@@ -45,7 +45,7 @@ const OrderSchema = new Schema(
         },
         expiryDate:{type:Date,required:false},
         shipmentID: { type: String, required: false ,default:""}, // Bosta shipment ID
-        billingEmail:{ type: String, required: false },
+        billingEmail:{ type: String, required: false, lowercase: true },
         billingCountry:{ type: String, required: false },
         billingFirstName: { type: String, required: false },
         billingState:{ type: String, required: false },

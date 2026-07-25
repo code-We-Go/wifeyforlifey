@@ -20,7 +20,7 @@ export interface ILogin extends Document {
 
 const LoginSchema = new Schema<ILogin>({
   userId: { type: String, required: false, index: true }, // Make userId optional
-  email: { type: String, required: true, index: true },
+  email: { type: String, required: true, index: true, lowercase: true },
   timestamp: { type: Date, default: Date.now },
   success: { type: Boolean, required: true },
   ipAddress: { type: String },
