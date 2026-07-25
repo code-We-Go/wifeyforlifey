@@ -11,6 +11,7 @@ import { thirdFont } from "@/fonts";
 import { Ipackage, Product } from "@/app/interfaces/interfaces";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 import PackageCard from "../shop/PackageCard";
+import PackageProductCard from "../shop/PackageProductCard";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
@@ -74,18 +75,38 @@ const FeaturedProducts = () => {
             price: 1500,
             duration: 0,
             items: [],
-            notes: [],
+            notes: [
+              "Buying your gehaz?",
+              "Your home, room by room — 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend."
+            ],
             cards: [],
             active: true,
           };
           
-          // Filter out any fetched packages with slug "GehazBestiePlanner" to avoid duplicates
+          const weddingBestiePlanner: Ipackage = {
+            _id: "custom-wedding-bestie-planner",
+            slug: "WeddingBestiePlanner",
+            name: "Wedding Bestie Planner",
+            imgUrl: "/weddingPlanningPlanner/mob.jpeg",
+            images: ["/weddingPlanningPlanner/mob.jpeg"],
+            price: 1700,
+            duration: 0,
+            items: [],
+            notes: [
+              "Planning your wedding day?",
+              "Your big day, step by step — two checklists included: one for you, one for your groom. Countdown tasks from 2 months out to the night before."
+            ],
+            cards: [],
+            active: true,
+          };
+          
+          // Filter out any fetched packages with slug "GehazBestiePlanner" or "WeddingBestiePlanner" to avoid duplicates
           const filteredPackages = fetchedPackages.filter(
-            (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner"
+            (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner" && pkg.slug !== "WeddingBestiePlanner"
           );
           
-          // Prepend the custom package to the filtered packages
-          setPackages([gehazBestiePlanner, ...filteredPackages]);
+          // Prepend the custom packages to the filtered packages
+          setPackages([gehazBestiePlanner, weddingBestiePlanner, ...filteredPackages]);
         } catch (error) {
           console.error("Error fetching packages:", error);
         } finally {
@@ -166,7 +187,11 @@ const FeaturedProducts = () => {
                   className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2 h-full"
                 >
                   <div className="h-full">
-                    <PackageCard packageItem={packageItem} />
+                    {packageItem.slug === "GehazBestiePlanner" || packageItem.slug === "WeddingBestiePlanner" ? (
+                      <PackageProductCard packageItem={packageItem} />
+                    ) : (
+                      <PackageCard packageItem={packageItem} />
+                    )}
                   </div>
                 </div>
               ))}
