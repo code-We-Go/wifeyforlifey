@@ -10,7 +10,7 @@ const SubscriptionPaymentSchema = new Schema(
     },
     // Core payment and context
     paymentID: { type: String, required: true },
-    email: { type: String, required: false },
+    email: { type: String, required: false, lowercase: true },
     userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
@@ -53,8 +53,8 @@ const SubscriptionPaymentSchema = new Schema(
     // Gift information
     isGift: { type: Boolean, default: false },
     pickupFromBazar: { type: Boolean, default: false },
-    giftSenderEmail: { type: String, required: false },
-    giftRecipientEmail: { type: String, required: false },
+    giftSenderEmail: { type: String, required: false, lowercase: true },
+    giftRecipientEmail: { type: String, required: false, lowercase: true },
     specialMessage: { type: String, required: false },
     giftCardName: { type: String, required: false },
 
@@ -67,7 +67,7 @@ const SubscriptionPaymentSchema = new Schema(
     postalZip: { type: String, required: false },
 
     // Billing information
-    billingEmail: { type: String, required: false },
+    billingEmail: { type: String, required: false, lowercase: true },
     billingCountry: { type: String, required: false },
     billingFirstName: { type: String, required: false },
     billingLastName: { type: String, required: false },

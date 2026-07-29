@@ -14,7 +14,7 @@ const SubscriptionSchema = new Schema(
     },
     packageID: { type: mongoose.Schema.Types.ObjectId, ref: "packages" },
     selectedDuration: { type: Number, required: false },
-    email: { type: String },
+    email: { type: String, lowercase: true },
     process: {
       type: String,
       enum: ["upgrade", "renew", "new"],
@@ -38,8 +38,8 @@ const SubscriptionSchema = new Schema(
     // Gift information
     isGift: { type: Boolean, default: false },
     pickupFromBazar: { type: Boolean, default: false },
-    giftSenderEmail: { type: String, required: false },
-    giftRecipientEmail: { type: String, required: false },
+    giftSenderEmail: { type: String, required: false, lowercase: true },
+    giftRecipientEmail: { type: String, required: false, lowercase: true },
     specialMessage: { type: String, required: false },
     giftCardName: { type: String, required: false },
     // Lovely Bride's address information
@@ -50,7 +50,7 @@ const SubscriptionSchema = new Schema(
     state: { type: String, required: false },
     postalZip: { type: String, required: false },
     // Billing information
-    billingEmail: { type: String, required: false },
+    billingEmail: { type: String, required: false, lowercase: true },
     billingCountry: { type: String, required: false },
     billingFirstName: { type: String, required: false },
     billingLastName: { type: String, required: false },

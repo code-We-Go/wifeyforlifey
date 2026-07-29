@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
         // Gift settings
         isGift: sub.isGift,
-        giftRecipientEmail: sub.giftRecipientEmail,
+        giftRecipientEmail: sub.giftRecipientEmail ? sub.giftRecipientEmail.toLowerCase() : sub.giftRecipientEmail,
         giftSenderEmail: sub.isGift ? data.email : undefined,
         giftCardName: sub.giftCardName,
         specialMessage: sub.specialMessage,

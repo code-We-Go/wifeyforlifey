@@ -566,8 +566,8 @@ We’re beyond excited to share this experience with you… your planner will be
   ) => {
     const { name, value } = e.target;
     console.log(value);
-    // Convert email fields to lowercase
-    const finalValue = (name === 'email' || name === 'giftRecipientEmail') 
+    // Convert any email field to lowercase
+    const finalValue = name.toLowerCase().includes('email') 
       ? value.toLowerCase() 
       : value;
     setFormData({ ...formData, [name]: finalValue });

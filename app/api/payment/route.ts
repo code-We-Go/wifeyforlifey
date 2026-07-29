@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         state: data.bostaZoneName,
         phone: data.phone,
         isGift: data.isGift,
-        giftRecipientEmail: data.giftRecipientEmail,
+        giftRecipientEmail: data.giftRecipientEmail ? data.giftRecipientEmail.toLowerCase() : data.giftRecipientEmail,
         specialMessage: data.specialMessage,
         giftCardName: data.giftCardName,
         redeemedLoyaltyPoints: data.loyalty.redeemedPoints,
@@ -298,7 +298,7 @@ export async function POST(request: Request) {
           // Gift information
           isGift: data.isGift,
           pickupFromBazar: data.pickupFromBazar,
-          giftRecipientEmail: data.giftRecipientEmail,
+          giftRecipientEmail: data.giftRecipientEmail ? data.giftRecipientEmail.toLowerCase() : data.giftRecipientEmail,
           specialMessage: data.specialMessage,
           giftCardName: data.giftCardName,
           // Address information

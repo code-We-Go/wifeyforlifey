@@ -327,13 +327,21 @@ const UnifiedCheckoutPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Convert any email field to lowercase
+    const finalValue = name.toLowerCase().includes('email') 
+      ? value.toLowerCase() 
+      : value;
+    setFormData((prev) => ({ ...prev, [name]: finalValue }));
   };
 
   const handleConfigChange = (index: number, name: keyof SubscriptionConfig, value: any) => {
     setConfigs((prev) => {
       const updated = [...prev];
-      updated[index] = { ...updated[index], [name]: value };
+      // Convert any email field to lowercase
+      const finalValue = (typeof name === 'string' && name.toLowerCase().includes('email') && typeof value === 'string')
+        ? value.toLowerCase()
+        : value;
+      updated[index] = { ...updated[index], [name]: finalValue };
       return updated;
     });
   };
@@ -461,7 +469,7 @@ const UnifiedCheckoutPage = () => {
         phone: c.phone,
         whatsAppNumber: c.whatsAppNumber,
         isGift: c.isGift,
-        giftRecipientEmail: c.isGift ? c.email : undefined,
+        giftRecipientEmail: c.isGift ? (c.email || "").toLowerCase() : undefined,
         giftCardName: c.giftCardName,
         specialMessage: c.specialMessage,
       })),

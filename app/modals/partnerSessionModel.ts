@@ -34,7 +34,7 @@ const PartnerSessionSchema = new Schema<IPartnerSession>(
       min: 0,
       max: 100,
     },
-    partnerEmail: { type: String, required: true },
+    partnerEmail: { type: String, required: true, lowercase: true },
     profitPercentage: { type: Number, required: true, min: 0, max: 100 },
     imageUrl: { type: String, required: true },
     isActive: { type: Boolean, default: true },

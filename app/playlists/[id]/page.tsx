@@ -145,17 +145,17 @@ export default function PlaylistPage() {
     if (!video) return true;
     if (video.isPublic) return false;
     if (!canAccessPremium) return true;
-    
+
     // Sub-subscription specific logic
     const subRole = session?.user?.subSubscription?.role;
-    console.log("subRole"+subRole);
+    console.log("subRole" + subRole);
     if (subRole) {
       console.log("video tags: ", video.tags);
       const hasMatchingTag = Array.isArray(video.tags) ? video.tags.includes(subRole) : false;
       console.log("hasMatchingTag", hasMatchingTag)
       if (!hasMatchingTag) return true;
     }
-    
+
     return false;
   };
 
@@ -166,7 +166,7 @@ export default function PlaylistPage() {
   // Fetch the specific playlist
   const fetchPlaylist = useCallback(async () => {
     if (fetchedPlaylistIdRef.current === playlistId && !error) return;
-    
+
     setIsLoading(true);
     setError(null);
     try {
@@ -242,13 +242,13 @@ export default function PlaylistPage() {
   // Check allowed playlist access when not subscribed
   useEffect(() => {
     //User opens a playlist →
-  // 1. Check subscription's `allowedPlaylists` (always checked first)
-  //    → If playlist found with valid expiry → ✅ GRANT ACCESS
-  // 2. If not found, check `sub.packageID.accessAllPlaylists`
-  //    → If true: check if playlist is in `packageID.packagePlaylists`
-  //      → If found → ✅ GRANT ACCESS
-  //    → If false: skip (only allowedPlaylists matter)
-  // 3. No match → ❌ DENY ACCESS
+    // 1. Check subscription's `allowedPlaylists` (always checked first)
+    //    → If playlist found with valid expiry → ✅ GRANT ACCESS
+    // 2. If not found, check `sub.packageID.accessAllPlaylists`
+    //    → If true: check if playlist is in `packageID.packagePlaylists`
+    //      → If found → ✅ GRANT ACCESS
+    //    → If false: skip (only allowedPlaylists matter)
+    // 3. No match → ❌ DENY ACCESS
 
     const checkAccess = async () => {
       try {
@@ -260,7 +260,7 @@ export default function PlaylistPage() {
         ) {
           // If sub-subscriber, check parent's email instead
           const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
-          
+
           // Fetch all subscriptions for this user or parent user
           const res = await axios.get(
             `/api/subscriptions/track?email=${encodeURIComponent(
@@ -275,10 +275,10 @@ export default function PlaylistPage() {
           for (const sub of subs) {
             if (!sub || !sub.subscribed) continue;
 
-            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37" || 
-                           String(sub.packageID?._id || sub.packageID) === "6a2d9aec3def6ce76dc7babc";
+            const isMini = String(sub.packageID?._id || sub.packageID) === "68bf6ae9c4d5c1af12cdcd37" ||
+              String(sub.packageID?._id || sub.packageID) === "6a2d9aec3def6ce76dc7babc";
             const isExpired = !isMini && sub.expiryDate && new Date(sub.expiryDate).getTime() < now;
-            
+
             if (isExpired) continue;
 
             const allowed = Array.isArray(sub?.allowedPlaylists)
@@ -452,9 +452,9 @@ export default function PlaylistPage() {
     if (playlist && selectedVideo) {
       // Find what folder the selected video belongs to
       const targetSlug = selectedVideo.playlistFolder;
-      
+
       const newCollapsedState: Record<string, boolean> = {};
-      
+
       if (playlist.folders && Array.isArray(playlist.folders)) {
         playlist.folders.forEach((folder: any) => {
           // If this is the active folder, close it (false). Otherwise open it (true).
@@ -463,7 +463,7 @@ export default function PlaylistPage() {
           newCollapsedState[folder.slug] = folder.slug !== targetSlug;
         });
       }
-      
+
       setCollapsedFolders(newCollapsedState);
     }
   }, [playlist, selectedVideo]);
@@ -662,9 +662,8 @@ export default function PlaylistPage() {
               {playlist.title}
             </h1>
             <div
-              className={`${
-                seeMore ? "h-auto" : "max-h-[10vh]"
-              }  overflow-hidden transition-all duration-300`}
+              className={`${seeMore ? "h-auto" : "max-h-[10vh]"
+                }  overflow-hidden transition-all duration-300`}
             >
               {Array.isArray(playlist.description) ? (
                 playlist.description.map((desc: string, idx: number) => (
@@ -684,15 +683,15 @@ export default function PlaylistPage() {
             {/* Add the See More / See Less button */}
             {(playlist?.description?.length > 1 ||
               playlist.description[0] !== "") && (
-              <div className="mt-2">
-                <button
-                  className="text-lovely underline cursor-pointer focus:outline-none"
-                  onClick={() => setSeeMore((prev) => !prev)}
-                >
-                  {seeMore ? "See Less" : "See More"}
-                </button>
-              </div>
-            )}
+                <div className="mt-2">
+                  <button
+                    className="text-lovely underline cursor-pointer focus:outline-none"
+                    onClick={() => setSeeMore((prev) => !prev)}
+                  >
+                    {seeMore ? "See Less" : "See More"}
+                  </button>
+                </div>
+              )}
           </div>
 
           {/* Video Player Section */}
@@ -768,9 +767,8 @@ export default function PlaylistPage() {
                     </Suspense>
                     {/* Navigation buttons - positioned to avoid video controls */}
                     <div
-                      className={`absolute top-[45%] left-4 right-4 flex justify-between items-center transition-opacity duration-300 pointer-events-none ${
-                        isVideoHovered ? "opacity-100 " : "opacity-0"
-                      }`}
+                      className={`absolute top-[45%] left-4 right-4 flex justify-between items-center transition-opacity duration-300 pointer-events-none ${isVideoHovered ? "opacity-100 " : "opacity-0"
+                        }`}
                     >
                       <button
                         onClick={prevVideo}
@@ -852,10 +850,10 @@ export default function PlaylistPage() {
                   <span>
                     {playlist.videos?.length
                       ? Math.round(
-                          (watchedVideos.size /
-                            (playlist.videos?.length || 1)) *
-                            100
-                        )
+                        (watchedVideos.size /
+                          (playlist.videos?.length || 1)) *
+                        100
+                      )
                       : 0}
                     %
                   </span>
@@ -864,10 +862,10 @@ export default function PlaylistPage() {
                   value={
                     playlist.videos?.length
                       ? Math.round(
-                          (watchedVideos.size /
-                            (playlist.videos?.length || 1)) *
-                            100
-                        )
+                        (watchedVideos.size /
+                          (playlist.videos?.length || 1)) *
+                        100
+                      )
                       : 0
                   }
                   className="h-3 bg-pinkey/70 text-lovely"
@@ -882,12 +880,15 @@ export default function PlaylistPage() {
                 const videos: any[] = playlist.videos;
                 const folders: any[] = Array.isArray(playlist.folders) ? playlist.folders : [];
 
-                // Separate videos into grouped (have a playlistFolder) and ungrouped
+                // Build a set of valid folder slugs for THIS playlist
+                const validFolderSlugs = new Set(folders.map((f: any) => f.slug));
+
+                // Separate videos into grouped (have a playlistFolder that exists in this playlist) and ungrouped
                 const grouped: Record<string, any[]> = {};
                 const ungrouped: any[] = [];
 
                 videos.forEach((video: any) => {
-                  if (video.playlistFolder) {
+                  if (video.playlistFolder && validFolderSlugs.has(video.playlistFolder)) {
                     if (!grouped[video.playlistFolder]) grouped[video.playlistFolder] = [];
                     grouped[video.playlistFolder].push(video);
                   } else {
@@ -903,13 +904,11 @@ export default function PlaylistPage() {
                   return (
                     <div
                       key={video._id}
-                      className={`${
-                        thirdFont.className
-                      } cursor-pointer relative transition-colors p-4 text-creamey ${
-                        isActive
+                      className={`${thirdFont.className
+                        } cursor-pointer relative transition-colors p-4 text-creamey ${isActive
                           ? "bg-lovely text-creamey"
                           : "bg-pinkey text-lovely hover:bg-lovely hover:text-creamey"
-                      }`}
+                        }`}
                       onClick={() => {
                         const videoIndex = playlist.videos.findIndex(
                           (v: any) => v._id === video._id
@@ -965,7 +964,7 @@ export default function PlaylistPage() {
                 > = [];
 
                 videos.forEach((video: any, idx: number) => {
-                  if (video.playlistFolder) {
+                  if (video.playlistFolder && validFolderSlugs.has(video.playlistFolder)) {
                     const slug = video.playlistFolder;
                     if (!seenFolders.has(slug)) {
                       seenFolders.add(slug);
@@ -1018,9 +1017,8 @@ export default function PlaylistPage() {
                                   </span>
                                 </div>
                                 <ChevronDown
-                                  className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ml-2 ${
-                                    isCollapsed ? "-rotate-90" : ""
-                                  }`}
+                                  className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ml-2 ${isCollapsed ? "-rotate-90" : ""
+                                    }`}
                                 />
                               </div>
                             </div>

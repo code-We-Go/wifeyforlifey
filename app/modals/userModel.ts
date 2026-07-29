@@ -99,7 +99,7 @@ const UserSchema = new Schema<IUser>(
       required: false,
       minlength: 6,
     },
-    email: { type: String, required: true },
+    email: { type: String, required: true, lowercase: true },
     emailVerified: { type: Boolean, default: false },
     isSubscribed: { type: Boolean, default: false },
     isTesting: { type: Boolean, default: false },
@@ -145,7 +145,7 @@ const UserSchema = new Schema<IUser>(
       required: false,
     },
     shippingData: {
-      email: { type: String },
+      email: { type: String, lowercase: true },
       firstName: { type: String },
       lastName: { type: String },
       address: { type: String },
