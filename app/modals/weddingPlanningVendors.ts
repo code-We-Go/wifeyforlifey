@@ -19,6 +19,8 @@ const weddingPlanningVendorsSchema = new mongoose.Schema({
   ],
   active: { type: Boolean, default: false },
   visitedCount: { type: Number, default: 0 },
+  request:{type:Boolean,default:true},
+  requestStatus: {type:String,enum:["Pending","Approved","Rejected","Archived"],default:"Pending"},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }
