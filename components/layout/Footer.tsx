@@ -308,6 +308,9 @@ export default function Footer() {
             >
               Shipping Details
             </Link> */}
+            <Link href="/vendors/join" className="hover:text-foreground font-medium underline-offset-4 hover:underline">
+              Join as Vendor
+            </Link>
             <Link href="/contact" className="hover:text-foreground">
               Contact Us
             </Link>

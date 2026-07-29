@@ -41,7 +41,8 @@ import {
   Boxes,
   Shirt,
   Gem,
-  BookHeart
+  BookHeart,
+  Building2
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ const navigation = [
     items: [
       { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
       { name: "Timeline Bestie", href: "/wedding-timeline", icon: <CalendarDays /> },
+      { name: "Join as Vendor", href: "/vendors/join", icon: <Building2 /> },
     ]
   },
   { name: "About", href: "/about" },
@@ -93,6 +95,7 @@ const rightNavigation = [
     items: [
       { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
       { name: "Timeline Bestie", href: "/wedding-timeline", icon: <CalendarDays /> },
+      { name: "Join as Vendor", href: "/vendors/join", icon: <Building2 /> },
     ]
   },
   { name: "Wishlist", href: "/wishlist", icon: <Heart /> },

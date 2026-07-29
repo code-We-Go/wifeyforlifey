@@ -7,6 +7,20 @@ export async function GET(request: NextRequest) {
   try {
     await ConnectDB();
 
+    // Migration helper: convert single subCategoryID or link to array for legacy DB records
+    try {
+      await weddingPlanningVendorsModel.updateMany(
+        { subCategoryID: { $exists: true, $not: { $type: "array" } } },
+        [{ $set: { subCategoryID: ["$subCategoryID"] } }]
+      );
+      await weddingPlanningVendorsModel.updateMany(
+        { link: { $exists: true, $not: { $type: "array" } } },
+        [{ $set: { link: ["$link"] } }]
+      );
+    } catch (migErr) {
+      console.warn("Legacy migration warning:", migErr);
+    }
+
     const { searchParams } = new URL(request.url);
     const subCategoryID = searchParams.get("subCategoryID");
     // Comma-separated list of subcategory IDs to fetch vendors for all subs in a category
@@ -20,7 +34,6 @@ export async function GET(request: NextRequest) {
 
     if (subCategoryIDs) {
       console.log("subCategoryIDs", subCategoryIDs);
-      // Multiple subcategory IDs — fetch vendors for all of them
       const ids = subCategoryIDs.split(",").filter(Boolean);
       const objectIds = ids.map((id) => {
         try {
@@ -29,11 +42,12 @@ export async function GET(request: NextRequest) {
           return id.trim();
         }
       });
+      // Matches document if ANY of the selected subCategoryIDs match in the array or scalar field
       query.subCategoryID = { $in: objectIds };
     } else if (subCategoryID) {
-      // Single subcategory ID
       try {
-        query.subCategoryID = new mongoose.Types.ObjectId(subCategoryID);
+        const objId = new mongoose.Types.ObjectId(subCategoryID);
+        query.subCategoryID = { $in: [objId, subCategoryID] };
       } catch {
         query.subCategoryID = subCategoryID;
       }
@@ -54,11 +68,7 @@ export async function GET(request: NextRequest) {
     let sortQuery: any = {};
     if (sortBy === "price") {
       sortQuery.toPrice = sortOrder === "desc" ? -1 : 1;
-      // Filter out vendors with no price when sorting by price to avoid "N/A" results at the top
       query.toPrice = { ...query.toPrice, $gt: 0 };
-    } else {
-      // Default or other sort options
-      // sortQuery.visitedCount = -1;
     }
 
     const vendors = await weddingPlanningVendorsModel
@@ -74,3 +84,85 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    await ConnectDB();
+    const body = await request.json();
+
+    const {
+      name,
+      fromPrice,
+      toPrice,
+      link,
+      images,
+      coverImage,
+      package: pkg,
+      notes,
+      subCategoryID,
+    } = body;
+
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return NextResponse.json(
+        { error: "Vendor business name is required" },
+        { status: 400 }
+      );
+    }
+
+    // Process link into array of strings
+    let linksArray: string[] = [];
+    if (Array.isArray(link)) {
+      linksArray = link.map((l) => String(l).trim()).filter(Boolean);
+    } else if (typeof link === "string" && link.trim()) {
+      linksArray = [link.trim()];
+    }
+
+    // Process subCategoryID into array of ObjectIds
+    let subCategoryIDsArray: any[] = [];
+    if (Array.isArray(subCategoryID)) {
+      subCategoryIDsArray = subCategoryID.map((id: any) => {
+        try {
+          return new mongoose.Types.ObjectId(id);
+        } catch {
+          return id;
+        }
+      });
+    } else if (subCategoryID) {
+      try {
+        subCategoryIDsArray = [new mongoose.Types.ObjectId(subCategoryID)];
+      } catch {
+        subCategoryIDsArray = [subCategoryID];
+      }
+    }
+
+    const newVendor = await weddingPlanningVendorsModel.create({
+      name: name.trim(),
+      fromPrice: fromPrice ? Number(fromPrice) : undefined,
+      toPrice: toPrice ? Number(toPrice) : undefined,
+      link: linksArray,
+      images: Array.isArray(images) ? images : [],
+      coverImage: coverImage ? coverImage.trim() : undefined,
+      package: pkg ? pkg.trim() : undefined,
+      notes: notes ? notes.trim() : undefined,
+      subCategoryID: subCategoryIDsArray,
+      active: false, // Inactive by default until approved by admin
+      visitedCount: 0,
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Vendor request submitted successfully and is pending review.",
+        data: newVendor,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Error creating vendor request:", error);
+    return NextResponse.json(
+      { error: "Failed to submit vendor request. Please try again." },
+      { status: 500 }
+    );
+  }
+}
+
