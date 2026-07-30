@@ -25,10 +25,6 @@ export interface Blog {
   formattedPublishDate?: string;
 }
 
-/*
-=========================================================
-ORIGINAL BLOG LIST COMPONENT - COMMENTED OUT FOR BACKUP
-=========================================================
 const BlogListPage = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [featuredBlogs, setFeaturedBlogs] = useState<Blog[]>([]);
@@ -118,7 +114,7 @@ const BlogListPage = () => {
 
   return (
     <div className="min-h-screen container-custom bg-creamey">
-      {/* Header * /}
+      {/* Header */}
       <div className=" border-b border-lovely/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-start">
@@ -132,7 +128,7 @@ const BlogListPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Featured Blogs Section * /}
+        {/* Featured Blogs Section */}
         {featuredBlogs.length > 0 && page === 1 && (
           <div className="mb-12">
             <h2
@@ -175,7 +171,7 @@ const BlogListPage = () => {
           </div>
         )}
 
-        {/* Search and Filters * /}
+        {/* Search and Filters */}
         <div className="bg-lovely/90 rounded-lg shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
@@ -228,7 +224,7 @@ const BlogListPage = () => {
           )}
         </div>
 
-        {/* Blog List * /}
+        {/* Blog List */}
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-lovely"></div>
@@ -282,7 +278,7 @@ const BlogListPage = () => {
           </div>
         )}
 
-        {/* Pagination * /}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-12 flex justify-center">
             <nav className="flex items-center space-x-2">
@@ -300,7 +296,7 @@ const BlogListPage = () => {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg \${
+                    className={`px-4 py-2 text-sm font-medium rounded-lg ${
                       page === pageNum
                         ? "text-white bg-blue-600 border border-blue-600"
                         : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
@@ -327,7 +323,6 @@ const BlogListPage = () => {
     </div>
   );
 };
-*/
 
 const AppShowcaseCarousel = () => {
   const images = [
@@ -412,29 +407,33 @@ const AppShowcaseCarousel = () => {
   );
 };
 
+/*
+=========================================================
+MOBILE APP PROMOTION BLOG LIST COMPONENT - COMMENTED OUT
+=========================================================
 const BlogListPage = () => {
   return (
     <div className="min-h-screen container-custom bg-creamey py-6 md:py-12">
       <div className="max-w-4xl mx-auto px-4 text-center flex flex-col items-center">
-        {/* Premium Badge */}
+        // Premium Badge
         <span className="inline-flex items-center gap-1.5 bg-lovely/10 text-lovely text-sm font-semibold tracking-wider uppercase px-4 py-1.5 rounded-full mb-6 border border-lovely/20 animate-pulse">
           <Sparkles className="w-4 h-4 text-lovely" />
           New Experience
         </span>
         
-        {/* Heading */}
+        // Heading
         <h1 className={`${thirdFont.className} text-4xl md:text-6xl font-bold text-lovely mb-6 leading-tight`}>
           Wifey for Lifey is Now on Mobile!
         </h1>
         
-        {/* Description */}
+        // Description
         <p className="text-lg md:text-xl text-lovely/80 max-w-2xl mx-auto mb-10 leading-relaxed">
           To provide you with a richer, more interactive bridal era bestie experience, all our wedding blogs have moved exclusively to our mobile app.
         </p>
 
-        {/* Download Buttons */}
+        // Download Buttons
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 w-full max-w-md sm:max-w-none">
-          {/* App Store */}
+          // App Store
           <a
             href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337"
             target="_blank"
@@ -450,7 +449,7 @@ const BlogListPage = () => {
             </div>
           </a>
 
-          {/* Google Play Store */}
+          // Google Play Store
           <a
             href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&hl=en"
             target="_blank"
@@ -466,55 +465,13 @@ const BlogListPage = () => {
           </a>
         </div>
 
-        {/* Showcase Image Carousel */}
+        // Showcase Image Carousel
         <AppShowcaseCarousel />
 
-        {/* Feature Cards Grid */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto mb-16">
-          <div className="bg-white/40 p-6 rounded-2xl border border-lovely/10 shadow-sm backdrop-blur-sm">
-            <span className="inline-flex items-center justify-center p-3 bg-lovely/10 rounded-xl text-lovely mb-4">
-              <ListTodo className="w-6 h-6" />
-            </span>
-            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-2`}>Interactive Lists</h3>
-            <p className="text-lovely/85 text-sm leading-relaxed">
-              Track items, set budgets, and organize your bridal prep checklists with dynamic checklists that sync across your devices.
-            </p>
-          </div>
-
-          <div className="bg-white/40 p-6 rounded-2xl border border-lovely/10 shadow-sm backdrop-blur-sm">
-            <span className="inline-flex items-center justify-center p-3 bg-lovely/10 rounded-xl text-lovely mb-4">
-              <CalendarDays className="w-6 h-6" />
-            </span>
-            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-2`}>Timeline Bestie</h3>
-            <p className="text-lovely/85 text-sm leading-relaxed">
-              Plan and customize your perfect wedding day timeline down to the minute. Receive notifications and tips as the big day approaches.
-            </p>
-          </div>
-
-          <div className="bg-white/40 p-6 rounded-2xl border border-lovely/10 shadow-sm backdrop-blur-sm">
-            <span className="inline-flex items-center justify-center p-3 bg-lovely/10 rounded-xl text-lovely mb-4">
-              <Radio className="w-6 h-6" />
-            </span>
-            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-2`}>Bridal Era Playlists</h3>
-            <p className="text-lovely/85 text-sm leading-relaxed">
-              Read all our premium blog guides, listen to curated playlists, and get daily motivational tips to keep you inspired and stress-free.
-            </p>
-          </div>
-        </div> */}
-
-        {/* Back to Home Button */}
-        {/* <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 border border-lovely text-base font-medium rounded-xl text-lovely bg-transparent hover:bg-lovely hover:text-creamey transition-all duration-300 shadow-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Return to Homepage
-          </Link>
-        </div> */}
       </div>
     </div>
   );
 };
+*/
 
 export default BlogListPage;
