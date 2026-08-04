@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
+import subscriptionsModel from "@/app/modals/subscriptionsModel";
 
 async function syncToBrevo(
   contact: { email: string; phone?: string; firstName?: string; lastName?: string },
@@ -80,8 +81,32 @@ export async function GET() {
 
   const expiredPayments = await subscriptionPaymentModel
     .find({ status: "pending", expiresAt: { $lt: now } })
-    .select("email phone firstName lastName");
+    .select("email phone firstName lastName paymentID");
 
+  // Safety check: some subscriptionPayments may still be "pending" because
+  // the callback succeeded in creating a subscription but crashed before
+  // updating the subscriptionPayment status. Don't mark those as "failed".
+  if (expiredPayments.length > 0) {
+    const paymentIDs = expiredPayments.map((p: any) => p.paymentID);
+    const confirmedSubs = await subscriptionsModel.find({
+      paymentID: { $in: paymentIDs },
+      subscribed: true,
+    }).select("paymentID");
+    const confirmedPaymentIDs = new Set(confirmedSubs.map((s: any) => s.paymentID));
+
+    if (confirmedPaymentIDs.size > 0) {
+      // Fix orphaned records — mark as confirmed, not failed
+      await subscriptionPaymentModel.updateMany(
+        { paymentID: { $in: Array.from(confirmedPaymentIDs) }, status: "pending" },
+        { $set: { status: "confirmed" } }
+      );
+      console.log(
+        `[expire-orders] Fixed ${confirmedPaymentIDs.size} orphaned subscriptionPayments (confirmed subscription exists)`
+      );
+    }
+  }
+
+  // Now expire the truly abandoned payments (re-query to exclude the ones we just fixed)
   const result = await subscriptionPaymentModel.updateMany(
     { status: "pending", expiresAt: { $lt: now } },
     { $set: { status: "failed" } }

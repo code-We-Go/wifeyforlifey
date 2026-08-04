@@ -151,7 +151,7 @@ export async function POST(request: Request) {
         currency: data.currency || "EGP",
 
         status: "pending",
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 20 * 60 * 1000),
         instapayReciept: data.instapayReciept,
       });
 

@@ -221,6 +221,24 @@ async function handleSubscription(
   // Ensure packageModel is registered for populate
   console.log("registering" + packageModel);
 
+  // ─── Idempotency guard: prevent duplicate subscription creation ───
+  // If a confirmed subscription already exists for this paymentID, another
+  // callback already handled it. Return success without creating a duplicate.
+  const existingConfirmedSub = await subscriptionsModel.findOne({
+    paymentID: paymobOrderId,
+    subscribed: true,
+  });
+  if (existingConfirmedSub) {
+    console.log(`⏭️ Subscription already exists for paymentID ${paymobOrderId}, skipping duplicate creation`);
+    // Fix any orphaned subscriptionPayment records still in "pending" state
+    await subscriptionPaymentModel.updateMany(
+      { paymentID: paymobOrderId, status: "pending" },
+      { status: "confirmed" }
+    );
+    const giftParam = existingConfirmedSub.isGift ? "&gift=true" : "";
+    return { success: true, redirect: `payment/success?subscription=true${giftParam}` };
+  }
+
   const paymentOps = await subscriptionPaymentModel
     .find({ paymentID: paymobOrderId })
     .populate({ path: "to", options: { strictPopulate: false } })
@@ -354,6 +372,13 @@ async function handleSubscription(
     // Always create a new subscription document (preserves history)
     const created = await subscriptionsModel.create(subscriptionData);
     let updatedSub: any = created;
+
+    // Mark subscriptionPayment as confirmed IMMEDIATELY after subscription creation.
+    // This must happen before any slow downstream work (emails, Bosta, Brevo)
+    // so the expire-orders cron job won't mark it "failed" while we're still processing.
+    await subscriptionPaymentModel.findByIdAndUpdate(paymentOp._id, {
+      status: "confirmed",
+    });
     if (subscriptionEmail) {
       await UserModel.findOneAndUpdate(
         { email: subscriptionEmail },
@@ -762,10 +787,7 @@ async function handleSubscription(
         )
       : null;
 
-    // Mark payment operation as confirmed
-    await subscriptionPaymentModel.findByIdAndUpdate(paymentOp._id, {
-      status: "confirmed",
-    });
+    // (subscriptionPayment is already marked "confirmed" right after creation above)
 
     // Determine redirect based on the first subscription's package type
     if (isFirstOfMulti) {
@@ -990,6 +1012,20 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
         `❌ No PendingPayment found for Paymob order: ${paymobOrderId}`
       );
       return { success: false, redirect: "payment/failed" };
+    }
+
+    // If the record is still "processing", another callback is actively handling it.
+    // Return early — do NOT call the handler again or we'll create duplicates.
+    if (existing.status === "processing") {
+      console.log(
+        `⏳ Payment is being processed by another callback (order: ${paymobOrderId}), skipping`
+      );
+      if (existing.productType === "partner_session") {
+        return { success: true, redirect: `payment/success?session=true&orderId=${existing.referenceId}` };
+      } else if (existing.productType === "subscription") {
+        return { success: true, redirect: `payment/success?subscription=true` };
+      }
+      return { success: true, redirect: `payment/success` };
     }
 
     // Record is "confirmed" — return the appropriate success redirect
