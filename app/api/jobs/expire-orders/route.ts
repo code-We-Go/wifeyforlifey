@@ -10,35 +10,54 @@ async function syncToBrevo(
   brevoApiKey: string,
   tag: string
 ) {
+  const email = contact.email ? contact.email.trim() : "";
+  const hasEmail = email !== "";
+
   // Build attributes — only include SMS if it looks like a phone number
   const attributes: Record<string, string> = {};
   if (contact.firstName) attributes.FIRSTNAME = contact.firstName;
   if (contact.lastName) attributes.LASTNAME = contact.lastName;
+  
   if (contact.phone) {
     const digits = contact.phone.replace(/\D/g, ""); // strip any non-digit chars
-    let normalised: string;
-    if (contact.phone.startsWith("+")) {
-      // Already has country code (e.g. +201114369978)
-      normalised = `+${digits}`;
-    } else if (digits.startsWith("20") && digits.length === 12) {
-      // Already has country code without + (e.g. 201114369978)
-      normalised = `+${digits}`;
-    } else if (digits.startsWith("0")) {
-      // Egyptian local format: 01XXXXXXXXX → +201XXXXXXXXX
-      normalised = `+20${digits.slice(1)}`;
-    } else {
-      // Fallback: assume Egypt
-      normalised = `+20${digits}`;
+    if (digits.length >= 7) {
+      let normalised: string;
+      if (contact.phone.startsWith("+")) {
+        // Already has country code (e.g. +201114369978)
+        normalised = `+${digits}`;
+      } else if (digits.startsWith("20") && digits.length === 12) {
+        // Already has country code without + (e.g. 201114369978)
+        normalised = `+${digits}`;
+      } else if (digits.startsWith("0")) {
+        // Egyptian local format: 01XXXXXXXXX → +201XXXXXXXXX
+        normalised = `+20${digits.slice(1)}`;
+      } else {
+        // Fallback: assume Egypt
+        normalised = `+20${digits}`;
+      }
+      attributes.SMS = normalised;
     }
-    attributes.SMS = normalised;
   }
 
-  const payload = {
-    email: contact.email,
-    ...(Object.keys(attributes).length > 0 && { attributes }),
+  const hasSMS = !!attributes.SMS;
+
+  // We need at least one identifier to update/create a contact in Brevo
+  if (!hasEmail && !hasSMS) {
+    console.warn(`[expire-orders][${tag}] Skipping Brevo sync: no email or SMS identifier for contact:`, contact);
+    return { email: contact.email, status: 400, body: { code: "skipped_no_identifier", message: "Skipped: no identifier" } };
+  }
+
+  const payload: Record<string, any> = {
     listIds: [listId],
     updateEnabled: true,
   };
+
+  if (hasEmail) {
+    payload.email = email;
+  }
+  if (Object.keys(attributes).length > 0) {
+    payload.attributes = attributes;
+  }
 
   console.log(`[expire-orders][${tag}] Brevo payload →`, JSON.stringify(payload));
 
@@ -59,10 +78,12 @@ async function syncToBrevo(
     body = await res.text();
   }
 
+  const identifierLog = hasEmail ? email : attributes.SMS;
+
   if (!res.ok) {
-    console.error(`[expire-orders][${tag}] Brevo error ${res.status} for ${contact.email}:`, body);
+    console.error(`[expire-orders][${tag}] Brevo error ${res.status} for ${identifierLog}:`, body);
   } else {
-    console.log(`[expire-orders][${tag}] Brevo OK for ${contact.email}:`, body);
+    console.log(`[expire-orders][${tag}] Brevo OK for ${identifierLog}:`, body);
   }
 
   return { email: contact.email, status: res.status, body };
