@@ -403,8 +403,9 @@ async function handleSubscription(
       });
     }
 
-    // Loyalty earn for subscription
+    // Loyalty earn for subscription (skip if no email — e.g. gift with no recipient yet)
     if (
+      subscriptionEmail &&
       updatedSub?.packageID &&
       typeof (updatedSub.packageID as any).price === "number"
     ) {
@@ -428,7 +429,7 @@ async function handleSubscription(
       });
     }
 
-    if (paymentOp.redeemedLoyaltyPoints > 0) {
+    if (subscriptionEmail && paymentOp.redeemedLoyaltyPoints > 0) {
       await LoyaltyTransactionModel.create({
         email: subscriptionEmail,
         type: "spend",
