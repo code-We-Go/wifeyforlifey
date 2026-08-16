@@ -456,30 +456,32 @@ const WeddingBestieTab = () => {
                 </h3>
                 
                 {loadingVendors ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="bg-pinkey/20 border border-lovely/10 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <Skeleton className="h-24 w-24 rounded-2xl flex-shrink-0" />
-                        <div className="space-y-2 flex-1 w-full">
-                          <Skeleton className="h-6 w-48" />
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-6 w-24 rounded-full" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="bg-pinkey/20 border border-lovely/10 rounded-2xl p-4 flex flex-col justify-between gap-4">
+                        <div className="flex items-center gap-4 w-full">
+                          <Skeleton className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex-shrink-0" />
+                          <div className="space-y-2 flex-1 w-full min-w-0">
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                            <Skeleton className="h-4 w-2/3" />
+                          </div>
                         </div>
-                        <Skeleton className="h-9 w-24 rounded-full sm:self-center" />
+                        <Skeleton className="h-9 w-full rounded-full" />
                       </div>
                     ))}
                   </div>
                 ) : filteredVendors.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredVendors.map((vendor) => {
                       const coverImg = vendor.coverImage || (vendor.images && vendor.images[0]);
 
                       return (
                         <div
                           key={vendor._id}
-                          className="bg-pinkey/20 border border-lovely/15 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm hover:shadow-md hover:border-lovely/30 transition-all duration-200"
+                          className="bg-pinkey/20 border border-lovely/15 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md hover:border-lovely/30 transition-all duration-200"
                         >
-                          {/* Left Info Section */}
+                          {/* Info Section */}
                           <div className="flex items-center gap-4 flex-1 min-w-0">
                             {/* Cover / Logo Image */}
                             <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-2xl overflow-hidden border border-lovely/20 bg-pinkey/30 flex items-center justify-center">
@@ -499,7 +501,7 @@ const WeddingBestieTab = () => {
 
                             {/* Content */}
                             <div className="space-y-1.5 flex-1 min-w-0">
-                              <h4 className="text-base sm:text-lg md:text-xl font-bold text-lovely truncate">
+                              <h4 className="text-base sm:text-lg font-bold text-lovely truncate" title={vendor.name}>
                                 {vendor.name}
                               </h4>
 
@@ -512,12 +514,12 @@ const WeddingBestieTab = () => {
                             </div>
                           </div>
 
-                          {/* Right Action Section */}
-                          <div className="flex items-center justify-end w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-lovely/10">
+                          {/* Action Section */}
+                          <div className="flex items-center justify-end w-full pt-2 border-t border-lovely/10">
                             <Button
                               type="button"
                               onClick={() => setSelectedVendorDetails(vendor)}
-                              className="bg-lovely text-creamey hover:bg-lovely/80 rounded-full px-5 py-2 text-xs font-bold shadow-sm transition-all"
+                              className="bg-lovely text-creamey hover:bg-lovely/80 rounded-full px-5 py-2 text-xs font-bold shadow-sm transition-all w-full sm:w-auto"
                             >
                               See More
                             </Button>
