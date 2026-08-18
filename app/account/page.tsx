@@ -1860,7 +1860,7 @@ const AccountPage = () => {
 
         {activeTab === "favorites" && (
           <div>
-            {isFavoritesFree || user.isSubscribed || (user.weddingPlanningBestie && !user.weddingPlanningBestie.isSubscribed)? (
+            {isFavoritesFree || user.isSubscribed || (user.weddingPlanningBestie && user.weddingPlanningBestie.isSubscribed)? (
               <FavoritesGrid />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">

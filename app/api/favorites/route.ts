@@ -6,6 +6,7 @@ import UserModel from "@/app/modals/userModel";
 import { ConnectDB } from "@/app/config/db";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
 import accountFeatureModel from "@/app/modals/accountFeatureModel";
+import SubSubscriptionModel from "@/app/modals/subSubscriptionModel";
 
 // GET /api/favorites - Get all favorites for the current user
 export async function GET(req: NextRequest) {
@@ -42,12 +43,41 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      const subscription = await subscriptionsModel.findOne({ email: user.email });
-      const expiryDate = subscription?.expiryDate
-        ? new Date(subscription.expiryDate)
-        : null;
+      // Check session/token flags first
+      let hasActiveSubscription = user.isSubscribed || (user.weddingPlanningBestie && user.weddingPlanningBestie.isSubscribed);
 
-      if (!expiryDate || !(expiryDate > new Date())) {
+      if (!hasActiveSubscription) {
+        // Fallback: check database directly for any active subscription under this user's email
+        const activeSub = await subscriptionsModel.findOne({
+          email: user.email,
+          subscribed: true,
+          $or: [
+            { expiryDate: { $gt: new Date() } },
+            { expiryDate: { $exists: false } },
+            { expiryDate: null }
+          ]
+        });
+
+        if (activeSub) {
+          hasActiveSubscription = true;
+        } else {
+          // Check for sub-subscription
+          const subSub = await SubSubscriptionModel.findOne({
+            inviteeEmail: user.email,
+            status: "accepted",
+          }).populate("parentSubscription");
+
+          if (subSub && subSub.parentSubscription?.subscribed) {
+            const parentExpiry = subSub.parentSubscription.expiryDate;
+            const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
+            if (isParentActive) {
+              hasActiveSubscription = true;
+            }
+          }
+        }
+      }
+
+      if (!hasActiveSubscription) {
         console.warn(`[favorites] Subscription expired or missing for: ${authUser.email}`);
         return NextResponse.json(
           { error: "You need a subscription to access favorites" },
