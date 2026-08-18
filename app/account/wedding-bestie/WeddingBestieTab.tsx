@@ -112,9 +112,17 @@ const WeddingBestieTab = () => {
 
   const checkSubscription = async () => {
     if (!session?.user?.email) return false;
+
+    // Sub-subscription users (groom/bridesmaids) inherit parent access
+    if (session.user.subSubscription && session.user.isSubscribed) {
+      setHasSubscription(true);
+      return true;
+    }
+
     setCheckingSubscription(true);
     try {
-      const res = await axios.get(`/api/subscriptions/track?email=${encodeURIComponent(session.user.email)}&all=true`);
+      const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
+      const res = await axios.get(`/api/subscriptions/track?email=${encodeURIComponent(trackEmail)}&all=true`);
       const subscriptions = Array.isArray(res.data) ? res.data : [res.data];
       
       const isValid = subscriptions.some((sub: any) => {

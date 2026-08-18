@@ -19,6 +19,7 @@ declare module "next-auth" {
       role: "groom" | "bridesmaids";
       parentSubscriptionId: string;
       parentEmail: string;
+      parentExpiryDate?: string | null;
       allowedTags: ("groom" | "bridesmaids")[];
       createdAt?: string | null;
     } | null;
@@ -62,6 +63,7 @@ declare module "next-auth/jwt" {
       role: "groom" | "bridesmaids";
       parentSubscriptionId: string;
       parentEmail: string;
+      parentExpiryDate?: string | null;
       allowedTags: ("groom" | "bridesmaids")[];
       createdAt?: string | null;
     } | null;

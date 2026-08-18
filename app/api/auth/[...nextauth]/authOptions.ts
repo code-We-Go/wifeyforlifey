@@ -228,6 +228,7 @@ export const authOptions: NextAuthOptions = {
                   role: subSub.role,
                   parentSubscriptionId: subSub.parentSubscription._id.toString(),
                   parentEmail: subSub.parentSubscription.email || "",
+                  parentExpiryDate: parentExpiry ? new Date(parentExpiry).toISOString() : null,
                   allowedTags: [subSub.role],
                   createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
                 };
@@ -430,6 +431,7 @@ export const authOptions: NextAuthOptions = {
                     role: subSub.role,
                     parentSubscriptionId: subSub.parentSubscription._id.toString(),
                     parentEmail: subSub.parentSubscription.email || "",
+                    parentExpiryDate: parentExpiry ? new Date(parentExpiry).toISOString() : null,
                     allowedTags: [subSub.role],
                     createdAt: subSub.createdAt ? subSub.createdAt.toISOString() : null,
                   };

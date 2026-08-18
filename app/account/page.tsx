@@ -738,6 +738,7 @@ const AccountPage = () => {
     subscription: session.user.subscription,
     weddingPlanningBestie: session.user.weddingPlanningBestie,
     subscriptionExpiryDate: session.user.subscriptionExpiryDate,
+    subSubscription: session.user.subSubscription,
     imgUrl: session.user.image,
     loyaltyPoints: loyaltyPoints,
     wishlistItems: wishList.length,
@@ -877,6 +878,36 @@ const AccountPage = () => {
                   {user.weddingPlanningBestie.expiryDate && (
                     <span className={`text-xs  ${user.weddingPlanningBestie.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
                       ({new Date(user.weddingPlanningBestie.expiryDate) < new Date() ? "Expired" : "Expires"}: {new Date(user.weddingPlanningBestie.expiryDate).toLocaleDateString()})
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Sub-Subscription (Groom / Bridesmaids via parent invite) */}
+              {user.subSubscription && (
+                <div className="flex items-center gap-2">
+                  {user.isSubscribed ? (
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" />
+                  ) : (
+                    <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
+                  )}
+                  <span className={user.isSubscribed ? "" : "text-red-500"}>
+                    {user.subSubscription.role === "groom" ? "Groom" : "Bridesmaid"} Access
+                  </span>
+                  {user.subSubscription.parentExpiryDate && (
+                    <span className={`text-xs ${user.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
+                      {(() => {
+                        const expiry = new Date(user.subSubscription.parentExpiryDate!);
+                        const now = new Date();
+                        const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
+
+                        if (expiry > tenYearsFromNow) {
+                          return <span className="inline-flex gap-2 items-end">Lifetime <Crown className="h-3 w-3"/></span>;
+                        }
+
+                        const prefix = expiry < new Date() ? "Expired" : "Expires";
+                        return `(${prefix}: ${expiry.toLocaleDateString()})`;
+                      })()}
                     </span>
                   )}
                 </div>
