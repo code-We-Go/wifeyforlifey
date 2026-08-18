@@ -41,12 +41,65 @@ const WeddingBestieTab = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
+  // Vendor Details Modal state
+  const [selectedVendorDetails, setSelectedVendorDetails] = useState<any | null>(null);
+
   // Lightbox Modal state
   const [lightboxData, setLightboxData] = useState<{
     images: string[];
     currentIndex: number;
     vendorName: string;
   } | null>(null);
+
+  const formatPriceRange = (vendor: any) => {
+    if (vendor.fromPrice != null || vendor.toPrice != null) {
+      if (vendor.fromPrice === vendor.toPrice || vendor.fromPrice === 0 || vendor.fromPrice == null) {
+        return vendor.toPrice ? `${vendor.toPrice} EGP` : "N/A";
+      }
+      const fromStr = vendor.fromPrice ? `From ${vendor.fromPrice} ` : "";
+      const toStr = vendor.toPrice ? `To ${vendor.toPrice} ` : "";
+      return `${fromStr}${toStr}EGP`.trim();
+    }
+    return "N/A";
+  };
+
+  const renderVendorLinks = (vendor: any) => {
+    const linkList = Array.isArray(vendor.link)
+      ? vendor.link.filter(Boolean)
+      : vendor.link
+      ? [vendor.link]
+      : [];
+
+    if (linkList.length === 0) return null;
+
+    const getLinkLabel = (url: string, index: number, total: number) => {
+      const lower = url.toLowerCase();
+      if (lower.includes("instagram.com")) return "Instagram";
+      if (lower.includes("facebook.com")) return "Facebook";
+      if (lower.includes("tiktok.com")) return "TikTok";
+      if (lower.includes("youtube.com")) return "YouTube";
+      if (lower.includes("pinterest.com")) return "Pinterest";
+      if (total === 1) return "Portfolio";
+      return `Link ${index + 1}`;
+    };
+
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        {linkList.map((href: string, idx: number) => (
+          <Link
+            key={idx}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-[11px] md:text-xs font-bold text-lovely hover:underline gap-1 bg-lovely/10 px-3 py-1 rounded-full transition-all hover:bg-lovely/20 whitespace-nowrap"
+          >
+            {getLinkLabel(href, idx, linkList.length)}
+            <ExternalLink className="h-3 w-3" />
+          </Link>
+        ))}
+      </div>
+    );
+  };
 
   const openLightbox = (vendor: any, startIdx: number = 0) => {
     const allImgs: string[] = [];
@@ -360,13 +413,25 @@ const WeddingBestieTab = () => {
             >
               Apply Filters
             </Button>
-            {(searchQuery || minPrice > 0 || maxPrice > 0) && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : sortOrder === "desc" ? null : "asc")}
+              className="border-lovely/30 bg-creamey text-lovely hover:bg-pinkey flex items-center gap-1.5 text-xs font-semibold h-10 px-3"
+            >
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              <span>
+                Price: {sortOrder === "asc" ? "Low to High" : sortOrder === "desc" ? "High to Low" : "Default"}
+              </span>
+            </Button>
+            {(searchQuery || minPrice > 0 || maxPrice > 0 || sortOrder !== null) && (
               <Button 
                 variant="ghost" 
                 onClick={() => {
                   setSearchQuery("");
                   setMinPrice(0);
                   setMaxPrice(0);
+                  setSortOrder(null);
                   if (selectedSubcategory) {
                     fetchVendors(selectedSubcategory._id);
                   } else if (selectedCategory) {
@@ -389,7 +454,7 @@ const WeddingBestieTab = () => {
 
             return (
               <div className="mt-8">
-                <h3 className={`text-2xl tracking-wide font-bold text-lovely mb-6 ${thirdFont.className}`}>
+                <h3 className={`text-xl md:text-2xl tracking-wide font-bold text-lovely uppercase mb-6 ${thirdFont.className}`}>
                   {selectedSubcategory ? `${selectedSubcategory.name} Vendors` : `All ${selectedCategory.name} Vendors`}
                   {filteredVendors.length !== vendors.length && (
                     <span className="text-sm font-normal text-lovely/70 ml-2">
@@ -399,188 +464,77 @@ const WeddingBestieTab = () => {
                 </h3>
                 
                 {loadingVendors ? (
-                  <div className="rounded-xl border border-lovely/10 shadow-lg overflow-hidden">
-                    <Table className="bg-creamey">
-                      <TableHeader>
-                        <TableRow className="bg-lovely/5 border-lovely/10">
-                          <TableHead className="w-16 md:w-20 bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Cover Image</TableHead>
-                          <TableHead className="bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Name</TableHead>
-                          <TableHead className="bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Price Range</TableHead>
-                          <TableHead className="bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Package</TableHead>
-                          <TableHead className="text-center bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Images</TableHead>
-                          <TableHead className="text-center bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Link</TableHead>
-                          <TableHead className="bg-creamey px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Notes</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <TableRow key={i} className="border-lovely/10">
-                            <TableCell className="px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-8 w-8 md:h-12 md:w-12 rounded-lg" /></TableCell>
-                            <TableCell className="px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-4 w-16 md:w-32" /></TableCell>
-                            <TableCell className="px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-4 w-12 md:w-24" /></TableCell>
-                            <TableCell className="px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-4 w-20 md:w-32" /></TableCell>
-                            <TableCell className="px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-4 w-16 md:w-24" /></TableCell>
-                            <TableCell className="px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-4 w-full max-w-[60px] md:max-w-xs" /></TableCell>
-                            <TableCell className="text-right px-2 py-2 md:px-4 md:py-3"><Skeleton className="h-6 w-16 md:h-8 md:w-24 rounded-full ml-auto" /></TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="bg-pinkey/20 border border-lovely/10 rounded-2xl p-4 flex flex-col justify-between gap-4">
+                        <div className="flex items-center gap-4 w-full">
+                          <Skeleton className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl flex-shrink-0" />
+                          <div className="space-y-2 flex-1 w-full min-w-0">
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                            <Skeleton className="h-4 w-2/3" />
+                          </div>
+                        </div>
+                        <Skeleton className="h-9 w-full rounded-full" />
+                      </div>
+                    ))}
                   </div>
                 ) : filteredVendors.length > 0 ? (
-                  <div className="overflow-auto rounded-xl border border-lovely/10 shadow-lg max-h-[85vh]">
-                    <Table className="bg-creamey relative border-separate border-spacing-0">
-                      <TableHeader className="sticky top-0 z-10 bg-creamey shadow-sm">
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="text-center text-lovely font-bold w-16 md:w-20 bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Cover Image</TableHead>
-                          <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Name</TableHead>
-                          <TableHead 
-                            className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 cursor-pointer hover:text-lovely/80 transition-colors px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm"
-                            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                          >
-                            <div className="flex items-center justify-center gap-1">
-                              Price Range
-                              {sortOrder === "asc" && <ChevronUp className="h-3.5 w-3.5 md:h-4 md:w-4" />}
-                              {sortOrder === "desc" && <ChevronDown className="h-3.5 w-3.5 md:h-4 md:w-4" />}
-                              {!sortOrder && <ArrowUpDown className="h-2.5 w-2.5 md:h-3 md:w-3 opacity-50" />}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredVendors.map((vendor) => {
+                      const coverImg = vendor.coverImage || (vendor.images && vendor.images[0]);
+
+                      return (
+                        <div
+                          key={vendor._id}
+                          className="bg-pinkey/20 border border-lovely/15 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md hover:border-lovely/30 transition-all duration-200"
+                        >
+                          {/* Info Section */}
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            {/* Cover / Logo Image */}
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-2xl overflow-hidden border border-lovely/20 bg-pinkey/30 flex items-center justify-center">
+                              {coverImg ? (
+                                <Image
+                                  src={coverImg}
+                                  alt={vendor.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <span className="text-lovely/40 text-[10px] sm:text-xs font-medium">
+                                  No Cover
+                                </span>
+                              )}
                             </div>
-                          </TableHead>
-                          <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Package</TableHead>
-                          <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Images</TableHead>
-                          <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Link</TableHead>
-                          <TableHead className="text-center text-lovely font-bold bg-creamey border-b border-lovely/10 sticky top-0 px-2 md:px-4 py-2 md:py-3 text-[11px] md:text-sm">Notes</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredVendors.map((vendor) => {
-                          const coverImg = vendor.coverImage || (vendor.images && vendor.images[0]);
-                          const galleryImgs = Array.isArray(vendor.images) ? vendor.images.filter(Boolean) : [];
 
-                          return (
-                            <TableRow key={vendor._id} className="border-lovely/10 hover:bg-lovely/5 transition-colors">
-                              {/* Column 1: Cover Image */}
-                              <TableCell className="text-center align-middle px-2 py-2 md:px-4 md:py-3">
-                                {coverImg ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => openLightbox(vendor, 0)}
-                                    className="relative group h-8 w-8 md:h-12 md:w-12 rounded-lg overflow-hidden border border-lovely/20 shadow-sm mx-auto block cursor-pointer focus:outline-none focus:ring-2 focus:ring-lovely"
-                                    title="Click to view cover photo"
-                                  >
-                                    <Image
-                                      src={coverImg}
-                                      alt={vendor.name}
-                                      fill
-                                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                                    />
-                                  </button>
-                                ) : (
-                                  <div className="mx-auto h-8 w-8 md:h-12 md:w-12 rounded-lg bg-lovely/10 flex items-center justify-center text-lovely/40 text-[8px] md:text-[10px]">
-                                    No Cover
-                                  </div>
-                                )}
-                              </TableCell>
+                            {/* Content */}
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                              <h4 className="text-base sm:text-lg font-bold text-lovely truncate" title={vendor.name}>
+                                {vendor.name}
+                              </h4>
 
-                              {/* Column 2: Name */}
-                              <TableCell className="text-center align-middle font-bold text-lovely px-2 py-2 md:px-4 md:py-3 text-xs md:text-sm">{vendor.name}</TableCell>
+                              <div className="text-xs sm:text-sm text-lovely/90 font-medium">
+                                <span className="font-bold text-lovely">Price Range: </span>
+                                {formatPriceRange(vendor)}
+                              </div>
 
-                              {/* Column 3: Price Range */}
-                              <TableCell className="text-center align-middle text-lovely/80 font-medium px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-sm">
-                                {(vendor.fromPrice != null || vendor.toPrice != null) ? (
-                                  (vendor.fromPrice === vendor.toPrice || vendor.fromPrice === 0 || vendor.fromPrice == null)
-                                    ? `${vendor.toPrice ?? ""} EGP`
-                                    : `${vendor.fromPrice ? `From ${vendor.fromPrice} ` : ""}${vendor.toPrice ? `To ${vendor.toPrice}` : ""} EGP`
-                                ) : "N/A"}
-                              </TableCell>
+                              {renderVendorLinks(vendor)}
+                            </div>
+                          </div>
 
-                              {/* Column 4: Package */}
-                              <TableCell className="text-center align-middle text-lovely/80 font-medium px-2 py-2 md:px-4 md:py-3 text-[11px] md:text-xs whitespace-normal break-words max-w-[200px] min-w-[120px]">
-                                {vendor.package || "—"}
-                              </TableCell>
-
-                              {/* Column 5: Images (Gallery) */}
-                              <TableCell className="text-center align-middle px-2 py-2 md:px-4 md:py-3">
-                                {galleryImgs.length === 0 ? (
-                                  <span className="text-lovely/50 text-xs">—</span>
-                                ) : (
-                                  <div className="flex items-center justify-center gap-1">
-                                    {galleryImgs.slice(0, 2).map((img: string, idx: number) => (
-                                      <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => {
-                                          const coverOffset = vendor.coverImage ? 1 : 0;
-                                          openLightbox(vendor, coverOffset + idx);
-                                        }}
-                                        className="relative h-7 w-7 md:h-9 md:w-9 rounded-md overflow-hidden border border-pinkey shadow-2xs hover:scale-110 transition-transform cursor-pointer"
-                                        title="Click to view gallery"
-                                      >
-                                        <Image src={img} alt="Gallery" fill className="object-cover" />
-                                      </button>
-                                    ))}
-
-                                    {galleryImgs.length > 2 && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const coverOffset = vendor.coverImage ? 1 : 0;
-                                          openLightbox(vendor, coverOffset);
-                                        }}
-                                        className="text-[10px] md:text-xs font-bold text-lovely bg-lovely/10 hover:bg-lovely/20 px-2 py-1 rounded-full transition"
-                                      >
-                                        +{galleryImgs.length - 2}
-                                      </button>
-                                    )}
-                                  </div>
-                                )}
-                              </TableCell>
-                            <TableCell className="text-center align-middle px-2 py-2 md:px-4 md:py-3">
-                              {(() => {
-                                const linkList = Array.isArray(vendor.link)
-                                  ? vendor.link.filter(Boolean)
-                                  : vendor.link
-                                  ? [vendor.link]
-                                  : [];
-
-                                if (linkList.length === 0) return "—";
-
-                                const getLinkLabel = (url: string, index: number, total: number) => {
-                                  const lower = url.toLowerCase();
-                                  if (lower.includes("instagram.com")) return "Instagram";
-                                  if (lower.includes("facebook.com")) return "Facebook";
-                                  if (lower.includes("tiktok.com")) return "TikTok";
-                                  if (lower.includes("youtube.com")) return "YouTube";
-                                  if (lower.includes("pinterest.com")) return "Pinterest";
-                                  if (total === 1) return "Portfolio";
-                                  return `Link ${index + 1}`;
-                                };
-
-                                return (
-                                  <div className="flex flex-wrap items-center justify-center gap-1.5">
-                                    {linkList.map((href: string, idx: number) => (
-                                      <Link
-                                        key={idx}
-                                        href={href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center text-[10px] md:text-xs font-bold text-lovely hover:underline gap-1 bg-lovely/10 px-2 py-1 md:px-3 md:py-1 rounded-full transition-all hover:bg-lovely/20 whitespace-nowrap"
-                                      >
-                                        {getLinkLabel(href, idx, linkList.length)}{" "}
-                                        <ExternalLink className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                                      </Link>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
-                            </TableCell>
-                            <TableCell className="text-center align-middle text-lovely/60 text-[10px] md:text-xs italic px-2 py-2 md:px-4 md:py-3 whitespace-normal break-words min-w-[120px]">
-                              {vendor.notes || "—"}
-                            </TableCell>
-                          </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                          {/* Action Section */}
+                          <div className="flex items-center justify-end w-full pt-2 border-t border-lovely/10">
+                            <Button
+                              type="button"
+                              onClick={() => setSelectedVendorDetails(vendor)}
+                              className="bg-lovely text-creamey hover:bg-lovely/80 rounded-full px-5 py-2 text-xs font-bold shadow-sm transition-all w-full sm:w-auto"
+                            >
+                              See More
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12 bg-creamey rounded-xl border border-lovely/10">
@@ -590,6 +544,119 @@ const WeddingBestieTab = () => {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* ─── Vendor Details Modal ("See More") ────────────────────────────────────── */}
+      {selectedVendorDetails && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="relative bg-creamey border-2 border-lovely/30 rounded-2xl max-w-2xl w-full p-5 md:p-7 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-lovely/15 pb-4">
+              <div className="space-y-1">
+                <h3 className={`text-2xl font-bold text-lovely ${thirdFont.className}`}>
+                  {selectedVendorDetails.name}
+                </h3>
+                <div className="text-xs md:text-sm text-lovely/80 font-medium">
+                  <span className="font-bold text-lovely">Price Range: </span>
+                  {formatPriceRange(selectedVendorDetails)}
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedVendorDetails(null)}
+                className="text-lovely hover:bg-lovely/10 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* External Links */}
+            {renderVendorLinks(selectedVendorDetails) && (
+              <div className="space-y-1.5">
+                <h4 className="text-xs font-bold text-lovely uppercase tracking-wider">Links</h4>
+                {renderVendorLinks(selectedVendorDetails)}
+              </div>
+            )}
+
+            {/* Images Section */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-lovely uppercase tracking-wider flex items-center gap-1.5">
+                <Images className="w-4 h-4" /> Images
+              </h4>
+              {(() => {
+                const allImgs: string[] = [];
+                if (selectedVendorDetails.coverImage) allImgs.push(selectedVendorDetails.coverImage);
+                if (Array.isArray(selectedVendorDetails.images)) {
+                  selectedVendorDetails.images.forEach((img: string) => {
+                    if (img && !allImgs.includes(img)) allImgs.push(img);
+                  });
+                }
+
+                if (allImgs.length === 0) {
+                  return (
+                    <div className="p-4 bg-pinkey/20 rounded-xl text-center text-xs text-lovely/60">
+                      No images available for this vendor.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                    {allImgs.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => openLightbox(selectedVendorDetails, idx)}
+                        className="relative aspect-square rounded-xl overflow-hidden border border-lovely/20 group hover:ring-2 hover:ring-lovely focus:outline-none transition-all cursor-pointer"
+                        title="Click to expand image"
+                      >
+                        <Image
+                          src={img}
+                          alt={`${selectedVendorDetails.name} ${idx + 1}`}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Package Section */}
+            <div className="space-y-1.5">
+              <h4 className="text-xs font-bold text-lovely uppercase tracking-wider flex items-center gap-1.5">
+                <Package className="w-4 h-4" /> Package Details
+              </h4>
+              <div className="bg-pinkey/30 border border-lovely/15 rounded-xl p-4 text-xs md:text-sm text-lovely/90 whitespace-pre-line leading-relaxed min-h-[60px]">
+                {selectedVendorDetails.package || "No package details provided."}
+              </div>
+            </div>
+
+            {/* Notes Section */}
+            <div className="space-y-1.5">
+              <h4 className="text-xs font-bold text-lovely uppercase tracking-wider">
+                Notes
+              </h4>
+              <div className="bg-pinkey/20 border border-lovely/15 rounded-xl p-4 text-xs md:text-sm text-lovely/80 italic leading-relaxed min-h-[50px]">
+                {selectedVendorDetails.notes || "No notes available."}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-2 flex justify-end">
+              <Button
+                onClick={() => setSelectedVendorDetails(null)}
+                className="bg-lovely text-creamey hover:bg-lovely/80 rounded-full px-6 text-xs font-bold"
+              >
+                Close
+              </Button>
+            </div>
+
+          </div>
         </div>
       )}
 

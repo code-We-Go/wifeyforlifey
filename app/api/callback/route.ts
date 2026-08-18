@@ -485,7 +485,7 @@ async function handleSubscription(
     // Send email notifications
     try {
       if (updatedSub) {
-        // Admin notification (skip for upgrade or renew)
+        // Admin notification
         if (!isUpgradeProcess && !isRenewProcess) {
           await sendMail({
             to: "orders@shopwifeyforlifey.com",
@@ -565,7 +565,7 @@ async function handleSubscription(
             <h2>Subscription Upgrade Notification</h2>
             <p>A user has successfully upgraded their subscription:</p>
             <ul>
-              <li><strong>Email:</strong> ${paymentOp.email}</li>
+              <li><strong>Email:</strong> ${updatedSub.email || paymentOp.email || updatedSub.giftSenderEmail || "N/A"}</li>
               <li><strong>First Name:</strong> ${updatedSub.firstName || "N/A"}</li>
               <li><strong>Last Name:</strong> ${updatedSub.lastName || "N/A"}</li>
               <li><strong>Phone:</strong> ${updatedSub.phone || "N/A"}</li>
@@ -608,10 +608,30 @@ async function handleSubscription(
             });
             console.log("Gehaz Bestie upgrade email sent to", updatedSub.email);
           }
+        } else if (isRenewProcess) {
+          const packageName = (updatedSub.packageID as any)?.name || (paymentOp.to as any)?.name || "N/A";
+          await sendMail({
+            to: "orders@shopwifeyforlifey.com",
+            name: "RENEWAL ALERT",
+            subject: "Subscription Renewal Notification",
+            body: `
+            <h2>Subscription Renewal Notification</h2>
+            <p>A user has successfully renewed their subscription:</p>
+            <ul>
+              <li><strong>Email:</strong> ${updatedSub.email || paymentOp.email || updatedSub.giftSenderEmail || "N/A"}</li>
+              <li><strong>First Name:</strong> ${updatedSub.firstName || updatedSub.billingFirstName || "N/A"}</li>
+              <li><strong>Last Name:</strong> ${updatedSub.lastName || updatedSub.billingLastName || "N/A"}</li>
+              <li><strong>Phone:</strong> ${updatedSub.phone || updatedSub.billingPhone || "N/A"}</li>
+              <li><strong>Package:</strong> ${packageName}</li>
+            </ul>
+            `,
+            from: "noreply@shopwifeyforlifey.com",
+          });
+          console.log("Renewal notification email sent successfully");
         }
 
-        // Gift flow
-        if (updatedSub.isGift) {
+        // Gift flow (only send once per order/transaction)
+        if (updatedSub.isGift && isFirstOfMulti) {
           const { giftMail } = await import("@/utils/giftMail");
           const recipientEmail = updatedSub.giftSenderEmail || paymentOp.giftSenderEmail || paymentOp.email;
           const senderName = updatedSub.billingFirstName || paymentOp.billingFirstName || "Bestie";
