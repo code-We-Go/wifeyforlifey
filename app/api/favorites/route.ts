@@ -27,9 +27,9 @@ export async function GET(req: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     console.log(`[favorites] Auth OK — email: ${authUser.email}, authType: ${authType}`);
-    
+
     console.log("register" + subscriptionsModel);
 
     let user = authUser;

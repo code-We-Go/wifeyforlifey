@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight, ChevronLeft, ExternalLink, Package, ArrowUpDown, ChevronUp, ChevronDown, X, Images } from "lucide-react";
+import { ChevronRight, ChevronLeft, ExternalLink, Package, ArrowUpDown, ChevronUp, ChevronDown, X, Images, Lock } from "lucide-react";
 import { thirdFont } from "@/fonts";
 import {
   Table,
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 
 const WEDDING_EXPERIENCE_PACKAGE_ID = "6965e63c6df4503dda02c12b";
-const WEDDING_BESTIE_SLUG = "wedding-bestie-planner";
+const WEDDING_BESTIE_SLUG = "WeddingBestiePlanner";
 
 const WeddingBestieTab = () => {
   const { data: session } = useSession();
@@ -67,8 +67,8 @@ const WeddingBestieTab = () => {
     const linkList = Array.isArray(vendor.link)
       ? vendor.link.filter(Boolean)
       : vendor.link
-      ? [vendor.link]
-      : [];
+        ? [vendor.link]
+        : [];
 
     if (linkList.length === 0) return null;
 
@@ -85,18 +85,36 @@ const WeddingBestieTab = () => {
 
     return (
       <div className="flex flex-wrap items-center gap-1.5">
-        {linkList.map((href: string, idx: number) => (
-          <Link
-            key={idx}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-[11px] md:text-xs font-bold text-lovely hover:underline gap-1 bg-lovely/10 px-3 py-1 rounded-full transition-all hover:bg-lovely/20 whitespace-nowrap"
-          >
-            {getLinkLabel(href, idx, linkList.length)}
-            <ExternalLink className="h-3 w-3" />
-          </Link>
-        ))}
+        {linkList.map((href: string, idx: number) => {
+          const label = getLinkLabel(href, idx, linkList.length);
+          const isInstagram = label === "Instagram" || href.toLowerCase().includes("instagram.com");
+
+          if (!hasSubscription && isInstagram) {
+            return (
+              <span
+                key={idx}
+                title="Locked for subscribers only"
+                className="inline-flex items-center text-[11px] md:text-xs font-bold text-lovely/50 gap-1 bg-pinkey/40 px-3 py-1 rounded-full whitespace-nowrap border border-lovely/15 cursor-not-allowed select-none"
+              >
+                <Lock className="h-3 w-3 text-lovely/60" />
+                <span>Instagram</span>
+              </span>
+            );
+          }
+
+          return (
+            <Link
+              key={idx}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-[11px] md:text-xs font-bold text-lovely hover:underline gap-1 bg-lovely/10 px-3 py-1 rounded-full transition-all hover:bg-lovely/20 whitespace-nowrap"
+            >
+              {label}
+              <ExternalLink className="h-3 w-3" />
+            </Link>
+          );
+        })}
       </div>
     );
   };
@@ -127,9 +145,9 @@ const WeddingBestieTab = () => {
     setLightboxData((prev) =>
       prev
         ? {
-            ...prev,
-            currentIndex: (prev.currentIndex + 1) % prev.images.length,
-          }
+          ...prev,
+          currentIndex: (prev.currentIndex + 1) % prev.images.length,
+        }
         : null
     );
   };
@@ -139,17 +157,20 @@ const WeddingBestieTab = () => {
     setLightboxData((prev) =>
       prev
         ? {
-            ...prev,
-            currentIndex:
-              (prev.currentIndex - 1 + prev.images.length) % prev.images.length,
-          }
+          ...prev,
+          currentIndex:
+            (prev.currentIndex - 1 + prev.images.length) % prev.images.length,
+        }
         : null
     );
   };
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+    if (session?.user?.email) {
+      checkSubscription();
+    }
+  }, [session?.user?.email]);
 
   const fetchCategories = async () => {
     try {
@@ -177,14 +198,14 @@ const WeddingBestieTab = () => {
       const trackEmail = session.user.subSubscription?.parentEmail || session.user.email;
       const res = await axios.get(`/api/subscriptions/track?email=${encodeURIComponent(trackEmail)}&all=true`);
       const subscriptions = Array.isArray(res.data) ? res.data : [res.data];
-      
+
       const isValid = subscriptions.some((sub: any) => {
         const pkgId = sub.packageID?._id || sub.packageID;
         const isCorrectPackage = pkgId === WEDDING_EXPERIENCE_PACKAGE_ID;
         const isNotExpired = new Date(sub.expiryDate) > new Date();
         return isCorrectPackage && isNotExpired && sub.subscribed;
       });
-      
+
       setHasSubscription(isValid);
       return isValid;
     } catch (error) {
@@ -196,18 +217,13 @@ const WeddingBestieTab = () => {
     }
   };
 
-  const handleCategoryClick = async (category: any) => {
-    const isSubscribed = await checkSubscription();
-    if (isSubscribed) {
-      setSelectedCategory(category);
-      const subs = category.subcategories || [];
-      setSubcategories(subs);
-      setSelectedSubcategory(null);
-      // Fetch all vendors for all subcategories in this category
-      fetchAllVendorsForCategory(subs);
-    } else {
-      // Logic for non-subscribed users is handled in the render phase when hasSubscription is false
-    }
+  const handleCategoryClick = (category: any) => {
+    setSelectedCategory(category);
+    const subs = category.subcategories || [];
+    setSubcategories(subs);
+    setSelectedSubcategory(null);
+    // Fetch all vendors for all subcategories in this category
+    fetchAllVendorsForCategory(subs);
   };
 
   const fetchAllVendorsForCategory = async (subs: any[]) => {
@@ -281,39 +297,36 @@ const WeddingBestieTab = () => {
     );
   }
 
-  if (hasSubscription === false) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-saga/10 rounded-2xl border-2 border-saga/20">
-        <Package className="h-16 w-16 text-lovely mb-4" />
-        <h2 className={`text-2xl font-bold text-lovely mb-2 ${thirdFont.className}`}>
-          Subscription Required
-        </h2>
-        <p className="text-lovely/80 max-w-md mb-6">
-          To access the Wedding Planning Bestie features, you need to subscribe to the Wedding Experience package.
-        </p>
-        <Link href={`/package/${WEDDING_BESTIE_SLUG}`}>
-          <Button className="bg-lovely text-creamey hover:bg-lovely/80">
-            Subscribe Now
-          </Button>
-        </Link>
-        <Button 
-          variant="ghost" 
-          className="mt-4 text-lovely/60 text-xs"
-          onClick={() => setHasSubscription(null)}
-        >
-          Back to categories
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
+      {hasSubscription === false && (
+        <div className="bg-pinkey/50 border-2 border-lovely/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="bg-lovely text-creamey p-3 rounded-2xl hidden sm:flex items-center justify-center">
+              <Package className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className={`text-lg font-bold text-lovely ${thirdFont.className}`}>
+                Unlock Full Wedding Planning Bestie Details
+              </h4>
+              <p className="text-xs text-lovely/80">
+                Subscribe to the Wedding Experience package to unlock vendor prices, complete package details, and notes.
+              </p>
+            </div>
+          </div>
+          <Link href={`/package/${WEDDING_BESTIE_SLUG}`} className="flex-shrink-0 w-full sm:w-auto">
+            <Button className="bg-lovely text-creamey hover:bg-lovely/90 rounded-full font-bold px-6 shadow-md w-full sm:w-auto text-xs uppercase tracking-wider">
+              Subscribe Now
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {!selectedCategory ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
-            <Card 
-              key={category._id} 
+            <Card
+              key={category._id}
               className="cursor-pointer overflow-hidden border-none shadow-lg hover:scale-[1.02] transition-transform duration-300"
               onClick={() => handleCategoryClick(category)}
             >
@@ -336,7 +349,7 @@ const WeddingBestieTab = () => {
       ) : (
         <div className="space-y-6">
           <div className="flex items-center gap-2 text-lovely mb-4">
-            <button 
+            <button
               onClick={() => setSelectedCategory(null)}
               className="text-sm font-medium hover:underline"
             >
@@ -407,7 +420,7 @@ const WeddingBestieTab = () => {
                 className="w-32 placeholder:text-pinkey p-2 rounded-lg border border-lovely/30 bg-creamey text-lovely focus:outline-none focus:ring-2 focus:ring-lovely/50"
               />
             </div>
-            <Button 
+            <Button
               onClick={handleApplyFilters}
               className="bg-lovely text-creamey hover:bg-lovely/80"
             >
@@ -425,8 +438,8 @@ const WeddingBestieTab = () => {
               </span>
             </Button>
             {(searchQuery || minPrice > 0 || maxPrice > 0 || sortOrder !== null) && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => {
                   setSearchQuery("");
                   setMinPrice(0);
@@ -462,7 +475,7 @@ const WeddingBestieTab = () => {
                     </span>
                   )}
                 </h3>
-                
+
                 {loadingVendors ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -515,7 +528,13 @@ const WeddingBestieTab = () => {
 
                               <div className="text-xs sm:text-sm text-lovely/90 font-medium">
                                 <span className="font-bold text-lovely">Price Range: </span>
-                                {formatPriceRange(vendor)}
+                                {hasSubscription ? (
+                                  formatPriceRange(vendor)
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 font-bold text-lovely bg-pinkey/60 px-2 py-0.5 rounded-md text-xs">
+                                    •••••• <Lock className="w-3 h-3 opacity-70" />
+                                  </span>
+                                )}
                               </div>
 
                               {renderVendorLinks(vendor)}
@@ -551,7 +570,7 @@ const WeddingBestieTab = () => {
       {selectedVendorDetails && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="relative bg-creamey border-2 border-lovely/30 rounded-2xl max-w-2xl w-full p-5 md:p-7 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
-            
+
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-lovely/15 pb-4">
               <div className="space-y-1">
@@ -560,7 +579,14 @@ const WeddingBestieTab = () => {
                 </h3>
                 <div className="text-xs md:text-sm text-lovely/80 font-medium">
                   <span className="font-bold text-lovely">Price Range: </span>
-                  {formatPriceRange(selectedVendorDetails)}
+                  {hasSubscription ? (
+                    formatPriceRange(selectedVendorDetails)
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 font-bold text-lovely bg-pinkey/60 px-2.5 py-0.5 rounded-md text-xs">
+                      •••••• <Lock className="w-3.5 h-3.5 opacity-70" />
+                      <span className="text-[10px] text-lovely/70 font-normal ml-1">(Subscribers Only)</span>
+                    </span>
+                  )}
                 </div>
               </div>
               <Button
@@ -631,19 +657,48 @@ const WeddingBestieTab = () => {
               <h4 className="text-xs font-bold text-lovely uppercase tracking-wider flex items-center gap-1.5">
                 <Package className="w-4 h-4" /> Package Details
               </h4>
-              <div className="bg-pinkey/30 border border-lovely/15 rounded-xl p-4 text-xs md:text-sm text-lovely/90 whitespace-pre-line leading-relaxed min-h-[60px]">
-                {selectedVendorDetails.package || "No package details provided."}
-              </div>
+              {hasSubscription ? (
+                <div className="bg-pinkey/30 border border-lovely/15 rounded-xl p-4 text-xs md:text-sm text-lovely/90 whitespace-pre-line leading-relaxed min-h-[60px]">
+                  {selectedVendorDetails.package || "No package details provided."}
+                </div>
+              ) : (
+                <div className="relative bg-pinkey/30 border border-lovely/20 rounded-xl p-5 text-center overflow-hidden flex flex-col items-center justify-center gap-3">
+                  <div className="flex items-center gap-2 text-lovely font-bold text-sm">
+                    <Lock className="w-4 h-4" /> Package Details Locked
+                  </div>
+                  <p className="text-xs text-lovely/80 max-w-md">
+                    Subscribe to the Wedding Planning Bestie to unlock complete vendor package details, pricing, and inclusions.
+                  </p>
+                  <Link href={`/package/${WEDDING_BESTIE_SLUG}`}>
+                    <Button size="sm" className="bg-lovely text-creamey hover:bg-lovely/80 rounded-full font-bold text-xs px-5 shadow-sm">
+                      Subscribe to Unlock
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Notes Section */}
             <div className="space-y-1.5">
-              <h4 className="text-xs font-bold text-lovely uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-lovely uppercase tracking-wider flex items-center gap-1.5">
                 Notes
               </h4>
-              <div className="bg-pinkey/20 border border-lovely/15 rounded-xl p-4 text-xs md:text-sm text-lovely/80 italic leading-relaxed min-h-[50px]">
-                {selectedVendorDetails.notes || "No notes available."}
-              </div>
+              {hasSubscription ? (
+                <div className="bg-pinkey/20 border border-lovely/15 rounded-xl p-4 text-xs md:text-sm text-lovely/80 italic leading-relaxed min-h-[50px]">
+                  {selectedVendorDetails.notes || "No notes available."}
+                </div>
+              ) : (
+                <div className="bg-pinkey/20 border border-lovely/15 rounded-xl p-4 text-xs text-lovely/70 italic flex flex-wrap items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Lock className="w-3.5 h-3.5 text-lovely" /> Notes are exclusive to subscribers
+                  </span>
+                  <Link href={`/package/${WEDDING_BESTIE_SLUG}`}>
+                    <span className="text-lovely underline font-bold cursor-pointer hover:opacity-80">
+                      Unlock Notes
+                    </span>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}
@@ -664,7 +719,7 @@ const WeddingBestieTab = () => {
       {lightboxData && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative bg-creamey border-2 border-lovely/30 rounded-2xl max-w-3xl w-full p-4 md:p-6 shadow-2xl flex flex-col items-center gap-4 overflow-hidden animate-in fade-in zoom-in duration-200">
-            
+
             {/* Header */}
             <div className="w-full flex items-center justify-between border-b border-lovely/10 pb-3">
               <div>
@@ -729,11 +784,10 @@ const WeddingBestieTab = () => {
                     onClick={() =>
                       setLightboxData((prev) => (prev ? { ...prev, currentIndex: idx } : null))
                     }
-                    className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${
-                      idx === lightboxData.currentIndex
+                    className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${idx === lightboxData.currentIndex
                         ? "border-lovely scale-105 shadow-md"
                         : "border-pinkey/50 opacity-60 hover:opacity-100"
-                    }`}
+                      }`}
                   >
                     <Image src={img} alt="Thumb" fill className="object-cover" />
                   </button>

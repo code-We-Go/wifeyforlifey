@@ -170,7 +170,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
         sub.subscribed &&
         (extractId(sub.packageID?._id || sub.packageID) ===
           "68bf6ae9c4d5c1af12cdcd37" ||
-        extractId(sub.packageID?._id || sub.packageID) ===
+          extractId(sub.packageID?._id || sub.packageID) ===
           "6a2d9aec3def6ce76dc7babc")
     );
   }, [userSubs]);
@@ -200,15 +200,15 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
       if (pkg) {
         if (pkg.accessAllInspos) {
           // If accessAllInspos is true, user has access to all inspos in the package
-        const pkgInspos = Array.isArray(pkg.packageInspos)
-          ? pkg.packageInspos
-          : [];
-        if (
-          pkgInspos.some(
-            (id: any) => String(extractId(id)) === String(boardId)
-          )
-        ) {
-          return true;
+          const pkgInspos = Array.isArray(pkg.packageInspos)
+            ? pkg.packageInspos
+            : [];
+          if (
+            pkgInspos.some(
+              (id: any) => String(extractId(id)) === String(boardId)
+            )
+          ) {
+            return true;
           }
         }
       }
@@ -702,14 +702,14 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {boards.map((board) => (
-                  <BoardCard
-                    key={board.id}
-                    title={board.title}
-                    pinCount={board.pinCount}
-                    sectionCount={board.sectionCount}
-                    coverImages={board.coverImages}
+                <BoardCard
+                  key={board.id}
+                  title={board.title}
+                  pinCount={board.pinCount}
+                  sectionCount={board.sectionCount}
+                  coverImages={board.coverImages}
                   onClick={() => navigateToBoard(board.title)}
-                  />
+                />
               ))}
             </div>
           )}
@@ -769,10 +769,10 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
               <p className="text-lovely/70 max-w-md mx-auto mb-8">
                 {pkgs.length > 0
                   ? `This section is exclusive to ${pkgs
-                      .map((p) => p.name)
-                      .join(
-                        " and "
-                      )} packages. Please subscribe to view these inspiration boards.`
+                    .map((p) => p.name)
+                    .join(
+                      " and "
+                    )} packages. Please subscribe to view these inspiration boards.`
                   : "Please subscribe to a package to view these inspiration boards."}
               </p>
 
@@ -786,10 +786,9 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                         const isFullExperience =
                           pkgId === "687396821b4da119eb1c13fe" || pkgId === "6965e63c6df4503dda02c12b";
                         router.push(
-                          `/subscription/${pkgId}${
-                            isFullExperience && hasMiniPackage
-                              ? "?upgrade=true"
-                              : ""
+                          `/subscription/${pkgId}${isFullExperience && hasMiniPackage
+                            ? "?upgrade=true"
+                            : ""
                           }`
                         );
                       }}
@@ -924,7 +923,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                     currentSection.pins.findIndex(
                       (p) => p.id === selectedPin.id
                     ) <
-                      currentSection.pins.length - 1 && (
+                    currentSection.pins.length - 1 && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -988,8 +987,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                     const isFullExperience =
                       pkgId === "687396821b4da119eb1c13fe";
                     router.push(
-                      `/subscription/${pkgId}${
-                        isFullExperience && hasMiniPackage ? "?upgrade=true" : ""
+                      `/subscription/${pkgId}${isFullExperience && hasMiniPackage ? "?upgrade=true" : ""
                       }`
                     );
                     setIsLockModalOpen(false);

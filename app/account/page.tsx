@@ -73,7 +73,7 @@ const AccountPage = () => {
   const { wishList, setWishList } = useContext(wishListContext);
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get("tab") || "partners";
-  
+
   const [isPartnersFree, setIsPartnersFree] = useState(false);
   const [isFavoritesFree, setIsFavoritesFree] = useState(false);
   const [isInspoFree, setIsInspoFree] = useState(false);
@@ -346,7 +346,7 @@ const AccountPage = () => {
         }
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id, session?.user?.email, session?.user?.firstName]);
 
   useEffect(() => {
@@ -360,7 +360,7 @@ const AccountPage = () => {
         );
         const subDoc = res.data || null;
         setSubscriptionDoc(subDoc);
-        
+
         // Compute total spots allowed
         const slotsConfig = subDoc?.packageID?.subSubscriptionSlots || [];
         const totalSpots = slotsConfig.reduce((acc: number, curr: any) => acc + (curr.maxCount || 0), 0);
@@ -719,8 +719,8 @@ const AccountPage = () => {
         <Image
           src="/weddingPlanningPlanner/loadingAccount.GIF"
           alt="Loading..."
-     width={500}
-     height={500}
+          width={500}
+          height={500}
         />
       </div>
     );
@@ -817,7 +817,7 @@ const AccountPage = () => {
             </p>
             <div className="text-sm font-semibold flex flex-col gap-2 text-lovely/80 mb-4 mt-2">
               <span className="font-bold underline">Your Subscriptions:</span>
-              
+
               {/* No Subscriptions at all */}
               {!user.subscription?.packageId && !user.weddingPlanningBestie && (
                 <span className="flex items-center gap-2">None <BadgeAlert className="h-4 w-4" /></span>
@@ -838,11 +838,11 @@ const AccountPage = () => {
                         const expiry = new Date(user.subscriptionExpiryDate);
                         const now = new Date();
                         const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
-                        
+
                         if (expiry > tenYearsFromNow) {
-                          return <span className="inline-flex gap-2 items-end">Lifetime Wifey <Crown className="h-3 w-3"/></span>;
+                          return <span className="inline-flex gap-2 items-end">Lifetime Wifey <Crown className="h-3 w-3" /></span>;
                         }
-                        
+
                         const prefix = expiry < new Date() ? "Expired" : "Expires";
                         return `(${prefix}: ${expiry.toLocaleDateString()})`;
                       })()}
@@ -854,17 +854,17 @@ const AccountPage = () => {
               {/* Mini Experience */}
               {user.subscription?.packageId === "68bf6ae9c4d5c1af12cdcd37" && (
                 <div className="flex items-center gap-2">
-                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Experience 
+                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Experience
                 </div>
               )}
 
               {/* Mini Wedding Experience */}
-              {(user.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" || 
+              {(user.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" ||
                 (subscriptionDoc?.packageID?._id || subscriptionDoc?.packageID) === "6a2d9aec3def6ce76dc7babc") && (
-                <div className="flex items-center gap-2">
-                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Wedding Planning Experience 
-                </div>
-              )}
+                  <div className="flex items-center gap-2">
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Wedding Planning Experience
+                  </div>
+                )}
 
               {/* Wedding Planning Bestie */}
               {user.weddingPlanningBestie && (
@@ -902,7 +902,7 @@ const AccountPage = () => {
                         const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
 
                         if (expiry > tenYearsFromNow) {
-                          return <span className="inline-flex gap-2 items-end">Lifetime <Crown className="h-3 w-3"/></span>;
+                          return <span className="inline-flex gap-2 items-end">Lifetime <Crown className="h-3 w-3" /></span>;
                         }
 
                         const prefix = expiry < new Date() ? "Expired" : "Expires";
@@ -915,94 +915,94 @@ const AccountPage = () => {
             </div>
 
             <div className="flex md:gap-4 flex-col md:flex-row">
-            {session?.user?.subscription?.packageId ===
-              "68bf6ae9c4d5c1af12cdcd37" && (
-              <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=true">
-                <Button
-                  size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
-                >
-                  Upgrade now to the Full Wifey Experience
-                </Button>
-              </Link>
-            )}
+              {session?.user?.subscription?.packageId ===
+                "68bf6ae9c4d5c1af12cdcd37" && (
+                  <Link href="/subscription/687396821b4da119eb1c13fe?upgrade=true">
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                    >
+                      Upgrade now to the Full Wifey Experience
+                    </Button>
+                  </Link>
+                )}
 
-            {(session?.user?.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" || 
-              (subscriptionDoc?.packageID?._id || subscriptionDoc?.packageID) === "6a2d9aec3def6ce76dc7babc") && (
-              <Link href="/subscription/6965e63c6df4503dda02c12b?upgrade=true">
-                <Button
-                  size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
-                >
-                  Upgrade now to the Full Wedding Planning Bestie
-                </Button>
-              </Link>
-            )}
-            
-            {/* Full Experience Renew */}
-            {user.subscription?.packageId === "687396821b4da119eb1c13fe" && !user.isSubscribed && 
-              subscriptionDoc?.packageID?._id === "687396821b4da119eb1c13fe" && 
-              subscriptionDoc?.packageID?.renewals?.length > 0 && (
-              <Link href={`/subscription/687396821b4da119eb1c13fe?renew=true`}>
-                <Button
-                  size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
-                >
-                  Renew your Full Wifey Experience
-                </Button>
-              </Link>
-            )}
+              {(session?.user?.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" ||
+                (subscriptionDoc?.packageID?._id || subscriptionDoc?.packageID) === "6a2d9aec3def6ce76dc7babc") && (
+                  <Link href="/subscription/6965e63c6df4503dda02c12b?upgrade=true">
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                    >
+                      Upgrade now to the Full Wedding Planning Bestie
+                    </Button>
+                  </Link>
+                )}
 
-            {/* Wedding Planning Bestie Renew */}
-            {user.weddingPlanningBestie && !user.weddingPlanningBestie.isSubscribed && 
-              subscriptionDoc?.packageID?._id === "6965e63c6df4503dda02c12b" && 
-              subscriptionDoc?.packageID?.renewals?.length > 0 && (
-              <Link href={`/subscription/6965e63c6df4503dda02c12b?renew=true`}>
-                <Button
-                  size="sm"
-                  className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
-                >
-                  Renew your Wedding Planning Bestie
-                </Button>
-              </Link>
-            )}
+              {/* Full Experience Renew */}
+              {user.subscription?.packageId === "687396821b4da119eb1c13fe" && !user.isSubscribed &&
+                subscriptionDoc?.packageID?._id === "687396821b4da119eb1c13fe" &&
+                subscriptionDoc?.packageID?.renewals?.length > 0 && (
+                  <Link href={`/subscription/687396821b4da119eb1c13fe?renew=true`}>
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                    >
+                      Renew your Full Wifey Experience
+                    </Button>
+                  </Link>
+                )}
 
-            {((subscriptionDoc?.packageID?._id ||
-              subscriptionDoc?.packageID ||
-              session?.user?.subscription?.packageId) ===
-              "68bf6ae9c4d5c1af12cdcd37" ||
-              (subscriptionDoc?.packageID?._id ||
-              subscriptionDoc?.packageID ||
-              session?.user?.subscription?.packageId) ===
-              "6a2d9aec3def6ce76dc7babc") &&
-              !subscriptionDoc?.miniSubscriptionActivated && (
-                <div className="mt-2">
-                  <Button
-                    size="sm"
-                    className="bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
-                    onClick={() => setIsPlaylistModalOpen(true)}
+              {/* Wedding Planning Bestie Renew */}
+              {user.weddingPlanningBestie && !user.weddingPlanningBestie.isSubscribed &&
+                subscriptionDoc?.packageID?._id === "6965e63c6df4503dda02c12b" &&
+                subscriptionDoc?.packageID?.renewals?.length > 0 && (
+                  <Link href={`/subscription/6965e63c6df4503dda02c12b?renew=true`}>
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                    >
+                      Renew your Wedding Planning Bestie
+                    </Button>
+                  </Link>
+                )}
+
+              {((subscriptionDoc?.packageID?._id ||
+                subscriptionDoc?.packageID ||
+                session?.user?.subscription?.packageId) ===
+                "68bf6ae9c4d5c1af12cdcd37" ||
+                (subscriptionDoc?.packageID?._id ||
+                  subscriptionDoc?.packageID ||
+                  session?.user?.subscription?.packageId) ===
+                "6a2d9aec3def6ce76dc7babc") &&
+                !subscriptionDoc?.miniSubscriptionActivated && (
+                  <div className="mt-2">
+                    <Button
+                      size="sm"
+                      className="bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
+                      onClick={() => setIsPlaylistModalOpen(true)}
+                    >
+                      Activate your mini experience
+                    </Button>
+                  </div>
+                )}
+
+              {totalSpotsCount > 0 && (
+                <div className="">
+                  <p
+                    className="bg-creamey font-bold hover:cursor-pointer underline text-sm text-lovely rounded-md  hover:bg-creamey/80 whitespace-normal h-auto py-2 text-center"
+                    onClick={() => {
+                      setActiveTab("invitations");
+                      router.push('/account?tab=invitations', { scroll: false });
+                      setTimeout(() => {
+                        document.getElementById("tabs-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }, 100);
+                    }}
                   >
-                    Activate your mini experience
-                  </Button>
+                    Invitations ({invitationsCount}/{totalSpotsCount})
+                  </p>
                 </div>
               )}
-
-            {totalSpotsCount > 0 && (
-              <div className="">
-                <p
-                  className="bg-creamey font-bold hover:cursor-pointer underline text-sm text-lovely rounded-md  hover:bg-creamey/80 whitespace-normal h-auto py-2 text-center"
-                  onClick={() => {
-                    setActiveTab("invitations");
-                    router.push('/account?tab=invitations', { scroll: false });
-                    setTimeout(() => {
-                      document.getElementById("tabs-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }, 100);
-                  }}
-                >
-                  Invitations ({invitationsCount}/{totalSpotsCount})
-                </p>
-              </div>
-            )}
             </div>
 
           </div>
@@ -1114,11 +1114,10 @@ const AccountPage = () => {
                   markAllNotificationsAsRead();
                 }
               }}
-              className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
-                activeTab === tab.id
+              className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${activeTab === tab.id
                   ? "border-lovely text-lovely font-semibold"
                   : "border-transparent text-lovely/90 hover:text-lovely duration-300 hover:border-lovely"
-              }`}
+                }`}
             >
               <div className="relative">
                 <tab.icon className="h-4 w-4" />
@@ -1233,11 +1232,10 @@ const AccountPage = () => {
                     return (
                       <div
                         key={notification._id}
-                        className={`border rounded-lg overflow-hidden ${
-                          notification.read
+                        className={`border rounded-lg overflow-hidden ${notification.read
                             ? "border-gray-200"
                             : "border-lovely"
-                        }`}
+                          }`}
                       >
                         <NotificationWrapper>
                           <div className="p-4">
@@ -1264,12 +1262,12 @@ const AccountPage = () => {
                                         )}
                                         {notification.actionType ===
                                           "comment" && (
-                                          <MessageCircle className="h-3 w-3 text-white" />
-                                        )}
+                                            <MessageCircle className="h-3 w-3 text-white" />
+                                          )}
                                         {notification.actionType ===
                                           "reply" && (
-                                          <Reply className="h-3 w-3 text-white" />
-                                        )}
+                                            <Reply className="h-3 w-3 text-white" />
+                                          )}
                                       </div>
                                     </div>
                                   ) : (
@@ -1283,12 +1281,12 @@ const AccountPage = () => {
                                         )}
                                         {notification.actionType ===
                                           "comment" && (
-                                          <MessageCircle className="h-3 w-3 text-white" />
-                                        )}
+                                            <MessageCircle className="h-3 w-3 text-white" />
+                                          )}
                                         {notification.actionType ===
                                           "reply" && (
-                                          <Reply className="h-3 w-3 text-white" />
-                                        )}
+                                            <Reply className="h-3 w-3 text-white" />
+                                          )}
                                       </div>
                                     </div>
                                   )}
@@ -1304,9 +1302,9 @@ const AccountPage = () => {
                                       &quot;
                                       {notification.content.length > 100
                                         ? notification.content.substring(
-                                            0,
-                                            100
-                                          ) + "..."
+                                          0,
+                                          100
+                                        ) + "..."
                                         : notification.content}
                                       &quot;
                                     </p>
@@ -1377,7 +1375,7 @@ const AccountPage = () => {
                           >
                             {order.status
                               ? order.status.charAt(0).toUpperCase() +
-                                order.status.slice(1)
+                              order.status.slice(1)
                               : "Pending"}
                           </span>
                           <span className="text-sm text-creamey">
@@ -1860,7 +1858,7 @@ const AccountPage = () => {
 
         {activeTab === "favorites" && (
           <div>
-            {isFavoritesFree || user.isSubscribed || (user.weddingPlanningBestie && user.weddingPlanningBestie.isSubscribed)? (
+            {isFavoritesFree || user.isSubscribed || (user.weddingPlanningBestie && user.weddingPlanningBestie.isSubscribed) ? (
               <FavoritesGrid />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
@@ -1887,7 +1885,7 @@ const AccountPage = () => {
             <ShoppingBestieTab isSubscribed={user.isSubscribed} />
           </div>
         )}
-        
+
         {activeTab === "wedding-planning-bestie" && (
           <div>
             <WeddingBestieTab />
@@ -1940,7 +1938,7 @@ const AccountPage = () => {
                         >
                           {order.status
                             ? order.status.charAt(0).toUpperCase() +
-                              order.status.slice(1)
+                            order.status.slice(1)
                             : "Pending"}
                         </span>
                         <span className="text-sm text-creamey">
@@ -2035,7 +2033,7 @@ const AccountPage = () => {
                 className="border p-2 bg-creamey w-full"
                 value={modalStatus}
                 disabled
-                onChange={() => {}}
+                onChange={() => { }}
               >
                 {[
                   "pending",
@@ -2055,7 +2053,7 @@ const AccountPage = () => {
                 className="border bg-creamey p-2 w-full"
                 value={modalPayment}
                 disabled
-                onChange={() => {}}
+                onChange={() => { }}
               >
                 {["pending", "failed", "confirmed"].map((payment) => (
                   <option key={payment} value={payment}>
@@ -2082,8 +2080,8 @@ const AccountPage = () => {
                 <strong>Created At:</strong>{" "}
                 {selectedOrder.createdAt
                   ? new Date(selectedOrder.createdAt).toLocaleString("en-EG", {
-                      timeZone: "Africa/Cairo",
-                    })
+                    timeZone: "Africa/Cairo",
+                  })
                   : "N/A"}
               </p>
             </div>
@@ -2176,11 +2174,10 @@ const AccountPage = () => {
                 <div
                   key={p._id as string}
                   onClick={() => setSelectedPlaylistId(p._id as string)}
-                  className={`cursor-pointer border rounded-lg overflow-hidden ${
-                    selectedPlaylistId === p._id
+                  className={`cursor-pointer border rounded-lg overflow-hidden ${selectedPlaylistId === p._id
                       ? "border-pinkey border-8"
                       : "border-lovely"
-                  }`}
+                    }`}
                 >
                   <div className="relative aspect-video">
                     <img

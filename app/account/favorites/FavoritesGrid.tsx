@@ -186,11 +186,10 @@ export default function FavoritesGrid() {
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`px-4 py-2 rounded-full text-sm ${
-                  selectedCategory === category
+                className={`px-4 py-2 rounded-full text-sm ${selectedCategory === category
                     ? "bg-lovely text-creamey"
                     : "bg-creamey text-lovely border border-lovely"
-                }`}
+                  }`}
               >
                 {category}
               </button>
@@ -216,11 +215,10 @@ export default function FavoritesGrid() {
                   <button
                     key={subCategory}
                     onClick={() => setSelectedSubCategory(subCategory)}
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      selectedSubCategory === subCategory
+                    className={`px-4 py-2 rounded-full text-sm ${selectedSubCategory === subCategory
                         ? "bg-lovely text-creamey"
                         : "bg-creamey text-lovely border border-lovely"
-                    }`}
+                      }`}
                   >
                     {subCategory}
                   </button>
