@@ -134,6 +134,15 @@ const ExpertSessions = () => {
     setSelectedVariantIndex(0);
   };
 
+  const checkIsActiveSubscriber = () => {
+    if (!authSession?.user?.isSubscribed) return false;
+    const expiry = authSession?.user?.subscriptionExpiryDate;
+    if (expiry) {
+      return new Date(expiry).getTime() > Date.now();
+    }
+    return true;
+  };
+
   const openBookingModal = (s: IPartnerSession, initialVariantIndex = 0) => {
     setSelectedForBooking(s);
     setSelectedVariantIndex(initialVariantIndex);
@@ -151,8 +160,8 @@ const ExpertSessions = () => {
     setCouponFinalPrice(null);
 
     const basePrice = getSessionBasePrice(s, initialVariantIndex);
-    // Auto-apply subscription discount if user has active subscription
-    const isActiveSubscriber = !!authSession?.user?.isSubscribed;
+    // Auto-apply subscription discount if user has active subscription with valid expiry
+    const isActiveSubscriber = checkIsActiveSubscriber();
     const subPercent = Number(s.subscriptionDiscountPercentage || 0);
     if (isActiveSubscriber && subPercent > 0) {
       const subPrice = Math.max(
@@ -171,7 +180,7 @@ const ExpertSessions = () => {
     if (!selectedForBooking) return;
     setSelectedVariantIndex(idx);
     const basePrice = getSessionBasePrice(selectedForBooking, idx);
-    const isActiveSubscriber = !!authSession?.user?.isSubscribed;
+    const isActiveSubscriber = checkIsActiveSubscriber();
     const subPercent = Number(selectedForBooking.subscriptionDiscountPercentage || 0);
 
     let currentSubPrice: number | null = null;

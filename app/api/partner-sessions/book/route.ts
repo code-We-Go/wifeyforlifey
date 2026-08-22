@@ -47,7 +47,15 @@ export async function POST(req: Request) {
 
     // Resolve authenticated user subscription state from NextAuth session
     const { isAuthenticated, user: authUser } = await authenticateRequest(req);
-    const hasActiveSubscription = isAuthenticated && authUser ? !!authUser.isSubscribed : false;
+    let hasActiveSubscription = false;
+    if (isAuthenticated && authUser && authUser.isSubscribed) {
+      const expiry = authUser.subscriptionExpiryDate;
+      if (expiry) {
+        hasActiveSubscription = new Date(expiry).getTime() > Date.now();
+      } else {
+        hasActiveSubscription = true;
+      }
+    }
 
     let finalPrice = basePrice;
     let appliedCode: string | undefined = undefined;

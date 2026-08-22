@@ -89,6 +89,15 @@ export default function PartnerSessionsSection() {
     return Number(s.price) || 0;
   };
 
+  const checkIsActiveSubscriber = () => {
+    if (!authSession?.user?.isSubscribed) return false;
+    const expiry = authSession?.user?.subscriptionExpiryDate;
+    if (expiry) {
+      return new Date(expiry).getTime() > Date.now();
+    }
+    return true;
+  };
+
   const openDetails = (s: PartnerSession) => {
     setSelectedForDetails(s);
     setSelectedVariantIndex(0);
@@ -111,8 +120,8 @@ export default function PartnerSessionsSection() {
     setCouponFinalPrice(null);
 
     const basePrice = getSessionBasePrice(s, initialVariantIndex);
-    // Auto-apply subscription discount if user has active subscription
-    const isActiveSubscriber = !!authSession?.user?.isSubscribed;
+    // Auto-apply subscription discount if user has active subscription with valid expiry
+    const isActiveSubscriber = checkIsActiveSubscriber();
     const subPercent = Number(s.subscriptionDiscountPercentage || 0);
     if (isActiveSubscriber && subPercent > 0) {
       const subPrice = Math.max(
@@ -131,7 +140,7 @@ export default function PartnerSessionsSection() {
     if (!selected) return;
     setSelectedVariantIndex(idx);
     const basePrice = getSessionBasePrice(selected, idx);
-    const isActiveSubscriber = !!authSession?.user?.isSubscribed;
+    const isActiveSubscriber = checkIsActiveSubscriber();
     const subPercent = Number(selected.subscriptionDiscountPercentage || 0);
 
     let currentSubPrice: number | null = null;
