@@ -15,6 +15,14 @@ import useEmblaCarousel from "embla-carousel-react";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
+interface IPartnerSessionVariant {
+  _id?: string;
+  title: string;
+  description: string;
+  price: number;
+  duration: number;
+}
+
 interface IPartnerSession {
   _id: string;
   title: string;
@@ -28,6 +36,9 @@ interface IPartnerSession {
   profitPercentage: number;
   imageUrl: string;
   subscriptionDiscountPercentage?: number;
+  link?: string;
+  meetingLink?: string;
+  variants?: IPartnerSessionVariant[];
 }
 
 const ExpertSessions = () => {
@@ -39,6 +50,7 @@ const ExpertSessions = () => {
   // Modal & Booking State
   const [selectedForDetails, setSelectedForDetails] = useState<IPartnerSession | null>(null);
   const [selectedForBooking, setSelectedForBooking] = useState<IPartnerSession | null>(null);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number>(0);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -103,13 +115,28 @@ const ExpertSessions = () => {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
+  const getSessionBasePrice = (s: IPartnerSession, vIndex: number) => {
+    // Variant price takes absolute priority over session base price
+    if (
+      s.variants &&
+      s.variants[vIndex] &&
+      s.variants[vIndex].price !== undefined &&
+      s.variants[vIndex].price !== null &&
+      !isNaN(Number(s.variants[vIndex].price))
+    ) {
+      return Number(s.variants[vIndex].price);
+    }
+    return Number(s.price) || 0;
+  };
 
   const openDetailsModal = (s: IPartnerSession) => {
     setSelectedForDetails(s);
+    setSelectedVariantIndex(0);
   };
 
-  const openBookingModal = (s: IPartnerSession) => {
+  const openBookingModal = (s: IPartnerSession, initialVariantIndex = 0) => {
     setSelectedForBooking(s);
+    setSelectedVariantIndex(initialVariantIndex);
     setError("");
     setForm({
       firstName: "",
@@ -123,20 +150,47 @@ const ExpertSessions = () => {
     setSubscriptionFinalPrice(null);
     setCouponFinalPrice(null);
 
+    const basePrice = getSessionBasePrice(s, initialVariantIndex);
     // Auto-apply subscription discount if user has active subscription
     const isActiveSubscriber = !!authSession?.user?.isSubscribed;
     const subPercent = Number(s.subscriptionDiscountPercentage || 0);
     if (isActiveSubscriber && subPercent > 0) {
       const subPrice = Math.max(
         0,
-        Math.round(s.price - (s.price * subPercent) / 100)
+        Math.round(basePrice - (basePrice * subPercent) / 100)
       );
       setSubscriptionApplied(true);
       setSubscriptionFinalPrice(subPrice);
       setFinalPrice(subPrice);
     } else {
-      setFinalPrice(s.price);
+      setFinalPrice(basePrice);
     }
+  };
+
+  const handleBookingVariantChange = (idx: number) => {
+    if (!selectedForBooking) return;
+    setSelectedVariantIndex(idx);
+    const basePrice = getSessionBasePrice(selectedForBooking, idx);
+    const isActiveSubscriber = !!authSession?.user?.isSubscribed;
+    const subPercent = Number(selectedForBooking.subscriptionDiscountPercentage || 0);
+
+    let currentSubPrice: number | null = null;
+    if (isActiveSubscriber && subPercent > 0) {
+      currentSubPrice = Math.max(
+        0,
+        Math.round(basePrice - (basePrice * subPercent) / 100)
+      );
+      setSubscriptionApplied(true);
+      setSubscriptionFinalPrice(currentSubPrice);
+      setFinalPrice(currentSubPrice);
+    } else {
+      setSubscriptionApplied(false);
+      setSubscriptionFinalPrice(null);
+      setFinalPrice(basePrice);
+    }
+    setApplied(false);
+    setCouponFinalPrice(null);
+    setForm((prev) => ({ ...prev, discountCode: "" }));
   };
 
   const book = async (e: React.FormEvent) => {
@@ -147,15 +201,39 @@ const ExpertSessions = () => {
     try {
       const res = await axios.post("/api/partner-sessions/book", {
         sessionId: selectedForBooking._id,
+        variantIndex:
+          selectedForBooking.variants && selectedForBooking.variants.length > 0
+            ? selectedVariantIndex
+            : undefined,
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
         phone: form.phone,
         discountCode: form.discountCode || undefined,
       });
+
+      if (res.data?.isFree) {
+        if (res.data.link) {
+          const directUrl =
+            res.data.link.startsWith("http://") || res.data.link.startsWith("https://")
+              ? res.data.link
+              : `https://${res.data.link}`;
+          window.location.href = directUrl;
+        } else if (res.data.orderId) {
+          window.location.href = `/payment/success?session=true&orderId=${res.data.orderId}`;
+        } else {
+          window.location.href = "/payment/success?session=true";
+        }
+        return;
+      }
+
       const clientSecret = res.data.token;
-      const url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${clientSecret}`;
-      window.location.href = url;
+      if (clientSecret) {
+        const url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${clientSecret}`;
+        window.location.href = url;
+      } else if (res.data.link) {
+        window.location.href = res.data.link;
+      }
     } catch (err: any) {
       setError(err?.response?.data?.error || "Failed to start booking");
     } finally {
@@ -165,28 +243,29 @@ const ExpertSessions = () => {
 
   const applyDiscount = async () => {
     if (!selectedForBooking) return;
+    const basePrice = getSessionBasePrice(selectedForBooking, selectedVariantIndex);
     const code = form.discountCode.trim();
     if (!code) {
       setApplied(false);
       if (subscriptionFinalPrice !== null) {
         setFinalPrice(subscriptionFinalPrice);
       } else {
-        setFinalPrice(selectedForBooking.price);
+        setFinalPrice(basePrice);
       }
       setError("");
       return;
     }
     try {
       const res = await axios.post("/api/apply-discount", {
-        cart: [{ price: selectedForBooking.price, quantity: 1 }],
+        cart: [{ price: basePrice, quantity: 1 }],
         discountCode: code,
         redeemType: "Sessions",
       });
       const total = res.data?.finalTotal;
       if (typeof total === "number") {
-        const codePrice = Math.round(total);
+        const codePrice = Math.max(0, Math.round(total));
         setCouponFinalPrice(codePrice);
-        const baseline = subscriptionFinalPrice ?? selectedForBooking.price;
+        const baseline = subscriptionFinalPrice ?? basePrice;
         const best = Math.min(codePrice, baseline);
         setApplied(codePrice < baseline);
         setFinalPrice(best);
@@ -194,13 +273,13 @@ const ExpertSessions = () => {
       } else {
         setApplied(false);
         setCouponFinalPrice(null);
-        setFinalPrice(subscriptionFinalPrice ?? selectedForBooking.price);
+        setFinalPrice(subscriptionFinalPrice ?? basePrice);
         setError("Invalid discount response");
       }
     } catch (e: any) {
       setApplied(false);
       setCouponFinalPrice(null);
-      setFinalPrice(subscriptionFinalPrice ?? selectedForBooking.price);
+      setFinalPrice(subscriptionFinalPrice ?? basePrice);
       const msg = e?.response?.data?.error || "Invalid or expired discount code";
       setError(msg);
     }
@@ -263,6 +342,20 @@ const ExpertSessions = () => {
   if (sessions.length === 0) {
     return null; 
   }
+
+  const activeDetailsVariant =
+    selectedForDetails?.variants && selectedForDetails.variants.length > 0
+      ? selectedForDetails.variants[selectedVariantIndex] || selectedForDetails.variants[0]
+      : null;
+
+  const activeBookingVariant =
+    selectedForBooking?.variants && selectedForBooking.variants.length > 0
+      ? selectedForBooking.variants[selectedVariantIndex] || selectedForBooking.variants[0]
+      : null;
+
+  const bookingBasePrice = selectedForBooking
+    ? getSessionBasePrice(selectedForBooking, selectedVariantIndex)
+    : 0;
 
   return (
     <section 
@@ -373,29 +466,66 @@ const ExpertSessions = () => {
                 <h3 className="text-2xl font-bold text-lovely mb-1">
                   {selectedForDetails.partnerName}
                 </h3>
-                <p className="text-lg text-lovely/70 mb-3">
-                  {selectedForDetails.title}
+                <p className="text-lg text-lovely/70 mb-2">
+                  {activeDetailsVariant?.title || selectedForDetails.title}
                 </p>
-                <p className="text-xl font-semibold text-lovely">
-                  EGP {selectedForDetails.price}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-xl font-semibold text-lovely">
+                    EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
+                  </p>
+                  {activeDetailsVariant?.duration ? (
+                    <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
+                      ⏱ {activeDetailsVariant.duration} mins
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
+
+            {/* Variants Selector if available */}
+            {selectedForDetails.variants && selectedForDetails.variants.length > 1 && (
+              <div className="mb-6">
+                <h4 className="font-bold text-lovely text-sm mb-2 uppercase tracking-wide">
+                  Choose Variant:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedForDetails.variants.map((v, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedVariantIndex(idx)}
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
+                        selectedVariantIndex === idx
+                          ? "bg-lovely text-creamey border-lovely shadow"
+                          : "bg-white/60 text-lovely border-lovely/40 hover:bg-white"
+                      }`}
+                    >
+                      <span>{v.title}</span>
+                      <span className="ml-2 text-xs opacity-80">
+                        (EGP {v.price} • {v.duration}m)
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             <div className="mb-6">
               <h4 className="font-bold text-lovely text-lg mb-2">Helps you with:</h4>
               <div className="text-base font-medium text-lovely/90 whitespace-pre-line">
-                {selectedForDetails.description.split('\n').map((line, i) => (
-                  <div key={i} className="flex items-start gap-2 mb-2">
-                    {line.trim() && (
-                      <>
-                        <span className="mt-1">•</span>
-                        <span>{line}</span>
-                      </>
-                    )}
-                  </div>
-                ))}
+                {(activeDetailsVariant?.description || selectedForDetails.description)
+                  .split('\n')
+                  .map((line, i) => (
+                    <div key={i} className="flex items-start gap-2 mb-2">
+                      {line.trim() && (
+                        <>
+                          <span className="mt-1">•</span>
+                          <span>{line}</span>
+                        </>
+                      )}
+                    </div>
+                  ))}
               </div>
             </div>
 
@@ -413,20 +543,14 @@ const ExpertSessions = () => {
             <div className="flex w-full justify-center gap-3">
               <Button
                 onClick={() => {
+                  const currIdx = selectedVariantIndex;
                   setSelectedForDetails(null);
-                  openBookingModal(selectedForDetails);
+                  openBookingModal(selectedForDetails, currIdx);
                 }}
-                className=" bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
+                className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
               >
                 Book Now
               </Button>
-              {/* <Button
-                variant="outline"
-                className="flex-1 border-lovely text-lovely rounded-xl py-5"
-                onClick={() => setSelectedForDetails(null)}
-              >
-                Close
-              </Button> */}
             </div>
           </div>
         </div>
@@ -437,12 +561,38 @@ const ExpertSessions = () => {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold text-lovely mb-2">
-              Book: {selectedForBooking.title}
+              Book: {activeBookingVariant?.title || selectedForBooking.title}
             </h3>
+            
+            {/* Variant Switcher in Booking Modal */}
+            {selectedForBooking.variants && selectedForBooking.variants.length > 1 && (
+              <div className="mb-4">
+                <label className="block text-xs font-semibold text-lovely uppercase tracking-wide mb-1.5">
+                  Selected Variant
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedForBooking.variants.map((v, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleBookingVariantChange(idx)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
+                        selectedVariantIndex === idx
+                          ? "bg-lovely text-white border-lovely"
+                          : "bg-white/60 text-lovely border-lovely/30 hover:bg-white"
+                      }`}
+                    >
+                      {v.title} (EGP {v.price})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <p className="text-sm text-lovely/90 mb-4">
-              After your payment is successfully completed, you will receive{" "}
-              {selectedForBooking.partnerName}&apos;s WhatsApp contact to arrange your session
-              time.
+              {finalPrice === 0
+                ? "Once confirmed, you will be redirected directly to access your session."
+                : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
             </p>
 
             <form onSubmit={book} className="space-y-3">
@@ -500,10 +650,12 @@ const ExpertSessions = () => {
                   <span className="text-lovely">Price</span>
                   <span
                     className={`text-lovely ${
-                      subscriptionApplied ? "line-through" : ""
+                      subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
+                        ? "line-through"
+                        : ""
                     }`}
                   >
-                    EGP {selectedForBooking.price}
+                    EGP {bookingBasePrice}
                   </span>
                 </div>
                 {subscriptionApplied && subscriptionFinalPrice !== null && (
@@ -513,25 +665,25 @@ const ExpertSessions = () => {
                       {selectedForBooking.subscriptionDiscountPercentage}%){" "}
                     </span>
                     <span className="text-lovely">
-                      EGP {Math.max(0, selectedForBooking.price - subscriptionFinalPrice)}
+                      EGP {Math.max(0, bookingBasePrice - subscriptionFinalPrice)}
                     </span>
                   </div>
                 )}
                 {applied && couponFinalPrice !== null && (
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-lovely">
-                      Coupon discount ({Math.round((((subscriptionFinalPrice ?? selectedForBooking.price) - couponFinalPrice) / (subscriptionFinalPrice ?? selectedForBooking.price)) * 100)}%)
+                      Coupon discount ({Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)
                     </span>
                     <span className="text-lovely">
-                      EGP {Math.max(0, (subscriptionFinalPrice ?? selectedForBooking.price) - couponFinalPrice)}
+                      EGP {Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}
                     </span>
                   </div>
                 )}
-                {finalPrice !== null && finalPrice !== selectedForBooking.price && (
-                  <div className="flex items-center justify-between mt-2">
+                {finalPrice !== null && (
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-lovely/20">
                     <span className="text-lovely font-medium">Final Price</span>
                     <span className="text-lovely font-semibold">
-                      EGP {finalPrice}
+                      {finalPrice === 0 ? "FREE (EGP 0)" : `EGP ${finalPrice}`}
                     </span>
                   </div>
                 )}
@@ -543,7 +695,11 @@ const ExpertSessions = () => {
                   disabled={submitting}
                   className="flex-1 bg-lovely text-creamey rounded-2xl"
                 >
-                  {submitting ? "Processing..." : "Proceed to Pay"}
+                  {submitting
+                    ? "Processing..."
+                    : finalPrice === 0
+                    ? "Book Now"
+                    : "Proceed to Pay"}
                 </Button>
                 <Button
                   type="button"

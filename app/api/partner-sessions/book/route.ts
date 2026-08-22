@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   try {
     await ConnectDB();
     const data = await req.json();
-    const { sessionId, firstName, lastName, email, phone, discountCode } = data;
+    const { sessionId, firstName, lastName, email, phone, discountCode, variantIndex } = data;
     if (!sessionId || !firstName || !lastName || !email || !phone) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -24,11 +24,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
+    // Resolve variant details if variantIndex is provided
+    let sessionTitle = partnerSession.title;
+    let variantTitle: string | undefined = undefined;
+    let variantDuration: number | undefined = undefined;
+    let basePrice = Number(partnerSession.price) || 0;
+
+    if (
+      typeof variantIndex === "number" &&
+      partnerSession.variants &&
+      partnerSession.variants[variantIndex]
+    ) {
+      const variant = partnerSession.variants[variantIndex];
+      variantTitle = variant.title;
+      variantDuration = variant.duration;
+      sessionTitle = variant.title || partnerSession.title;
+      // Variant price takes absolute priority over base session price
+      if (variant.price !== undefined && variant.price !== null && !isNaN(Number(variant.price))) {
+        basePrice = Number(variant.price);
+      }
+    }
+
     // Resolve authenticated user subscription state from NextAuth session
     const { isAuthenticated, user: authUser } = await authenticateRequest(req);
     const hasActiveSubscription = isAuthenticated && authUser ? !!authUser.isSubscribed : false;
 
-    const basePrice = partnerSession.price;
     let finalPrice = basePrice;
     let appliedCode: string | undefined = undefined;
     let subscriptionDiscountAmount = 0;
@@ -54,7 +74,7 @@ export async function POST(req: Request) {
         const found = await DiscountModel.findOne({
           code: new RegExp(`^${discountCode.trim()}$`, "i"),
           isActive: true,
-          redeemType: { $in: ["All"] },
+          redeemType: { $in: ["All", "Sessions"] },
         });
         if (found) {
           let priceAfterCode = basePrice;
@@ -81,16 +101,103 @@ export async function POST(req: Request) {
         }
       } catch {}
     }
-    const profitPercentage = partnerSession.profitPercentage;
+
+    if (finalPrice <= 0) {
+      finalPrice = 0;
+    }
+
+    const profitPercentage = partnerSession.profitPercentage || 0;
     let ourProfitAmount = 0;
     // If subscription discount is applied, it comes from our profit share
-    if (hasActiveSubscription && subPercent > 0 && !appliedCode) {
+    if (finalPrice === 0) {
+      ourProfitAmount = 0;
+    } else if (hasActiveSubscription && subPercent > 0 && !appliedCode) {
       const baseProfit = Math.round((basePrice * profitPercentage) / 100);
       ourProfitAmount = Math.max(0, baseProfit - subscriptionDiscountAmount);
     } else {
       ourProfitAmount = Math.round((finalPrice * profitPercentage) / 100);
     }
 
+    const sessionMeetingLink =
+      (partnerSession.meetingLink && partnerSession.meetingLink.trim()) ||
+      (partnerSession.link && partnerSession.link.trim()) ||
+      "";
+
+    // ─── Free Session Flow (finalPrice === 0) ───────────────────────────
+    if (finalPrice === 0) {
+      const freeOrder = await PartnerSessionOrderModel.create({
+        sessionId: partnerSession._id,
+        sessionTitle,
+        partnerName: partnerSession.partnerName,
+        partnerEmail: partnerSession.partnerEmail,
+        whatsappNumber: partnerSession.whatsappNumber,
+        clientFirstName: firstName,
+        clientLastName: lastName,
+        clientEmail: email,
+        clientPhone: phone,
+        appliedDiscountCode: appliedCode,
+        basePrice,
+        finalPrice: 0,
+        subscriptionDiscountAmount,
+        profitPercentage,
+        ourProfitAmount: 0,
+        paymentID: "FREE",
+        variantTitle,
+        variantDuration,
+        link: sessionMeetingLink,
+        meetingLink: sessionMeetingLink,
+        status: "paid",
+      });
+
+      // Send confirmation emails
+      try {
+        const { sendMail } = await import("@/lib/email");
+        const { SessionBookingPartnerMail } = await import(
+          "@/utils/SessionBookingPartnerMail"
+        );
+        const body = SessionBookingPartnerMail(
+          sessionTitle,
+          firstName,
+          lastName,
+          email,
+          phone
+        );
+        await sendMail({
+          to: partnerSession.partnerEmail,
+          subject: "New Session Confirmed",
+          name: partnerSession.partnerName,
+          body,
+          from: "partners@shopwifeyforlifey.com",
+        });
+        await sendMail({
+          to: "orders@shopwifeyforlifey.com",
+          subject: "New Session Confirmed",
+          name: partnerSession.partnerName,
+          body,
+          from: "partners@shopwifeyforlifey.com",
+        });
+      } catch (e) {
+        console.error("Failed to send partner confirmation email for free booking", e);
+      }
+
+      const redirectTarget = sessionMeetingLink
+        ? sessionMeetingLink
+        : partnerSession.whatsappNumber
+        ? `https://wa.me/${String(partnerSession.whatsappNumber).replace(/[^0-9]/g, "")}`
+        : "";
+
+      return NextResponse.json(
+        {
+          success: true,
+          isFree: true,
+          link: redirectTarget,
+          orderId: freeOrder._id,
+        },
+        { status: 200 }
+      );
+    }
+
+    // ─── Paid Session Flow (Paymob) ─────────────────────────────────────
     const specialReference = `partner-${Date.now()}-${Math.floor(
       Math.random() * 1000
     )}`;
@@ -131,7 +238,7 @@ export async function POST(req: Request) {
 
     await PartnerSessionOrderModel.create({
       sessionId: partnerSession._id,
-      sessionTitle: partnerSession.title,
+      sessionTitle,
       partnerName: partnerSession.partnerName,
       partnerEmail: partnerSession.partnerEmail,
       whatsappNumber: partnerSession.whatsappNumber,
@@ -146,6 +253,10 @@ export async function POST(req: Request) {
       profitPercentage,
       ourProfitAmount,
       paymentID: order.data.payment_keys?.[0]?.order_id || undefined,
+      variantTitle,
+      variantDuration,
+      link: sessionMeetingLink,
+      meetingLink: sessionMeetingLink,
       status: "pending",
     });
 

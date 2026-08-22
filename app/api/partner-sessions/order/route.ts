@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ConnectDB } from "@/app/config/db";
 import PartnerSessionOrderModel from "@/app/modals/partnerSessionOrderModel";
+import mongoose from "mongoose";
 
 export async function GET(req: Request) {
   try {
@@ -10,7 +11,15 @@ export async function GET(req: Request) {
     if (!orderId) {
       return NextResponse.json({ error: "orderId required" }, { status: 400 });
     }
-    const order = await PartnerSessionOrderModel.findById(orderId);
+
+    let order = null;
+    if (mongoose.Types.ObjectId.isValid(orderId)) {
+      order = await PartnerSessionOrderModel.findById(orderId);
+    }
+    if (!order) {
+      order = await PartnerSessionOrderModel.findOne({ paymentID: String(orderId) });
+    }
+
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }

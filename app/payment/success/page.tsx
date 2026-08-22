@@ -159,22 +159,33 @@ function SuccessPage() {
             <p className="mt-1">Session: {sessionOrder.sessionTitle}</p>
             <div className="mt-4 p-4 border border-lovely rounded-2xl bg-creamey">
               <p className="font-semibold">
-                click the link below r appointment:
+                Click the link below for your session appointment:
               </p>
-              <a
-                href={`https://wa.me/${String(
-                  sessionOrder.whatsappNumber
-                ).replace(/[^0-9]/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-lg text-lovely underline"
-              >
-                Whatsapp link
-              </a>
-              {/* <p className=" text-lovely/80">
-                you will be able to arrange the appointment time with{" "}
-                {sessionOrder.partnerName}
-              </p> */}
+              {(() => {
+                const targetLink =
+                  (sessionOrder.meetingLink && sessionOrder.meetingLink.trim()) ||
+                  (sessionOrder.link && sessionOrder.link.trim()) ||
+                  "";
+                const isExternalMeeting = Boolean(targetLink);
+                const href = isExternalMeeting
+                  ? targetLink.startsWith("http://") || targetLink.startsWith("https://")
+                    ? targetLink
+                    : `https://${targetLink}`
+                  : `https://wa.me/${String(
+                      sessionOrder.whatsappNumber
+                    ).replace(/[^0-9]/g, "")}`;
+
+                return (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-lg text-lovely underline font-bold mt-2 inline-block"
+                  >
+                    {isExternalMeeting ? "Join Meeting / Access Link" : "WhatsApp link"}
+                  </a>
+                );
+              })()}
             </div>
           </div>
         ) : (

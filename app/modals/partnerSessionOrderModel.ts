@@ -3,6 +3,8 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export interface IPartnerSessionOrder extends Document {
   sessionId: Types.ObjectId;
   sessionTitle: string;
+  variantTitle?: string;
+  variantDuration?: number;
   partnerName: string;
   partnerEmail: string;
   whatsappNumber: string;
@@ -17,6 +19,8 @@ export interface IPartnerSessionOrder extends Document {
   profitPercentage: number;
   ourProfitAmount: number;
   paymentID?: string;
+  link?: string;
+  meetingLink?: string;
   status: "pending" | "paid" | "failed" | "cancelled";
 }
 
@@ -28,6 +32,8 @@ const PartnerSessionOrderSchema = new Schema<IPartnerSessionOrder>(
       required: true,
     },
     sessionTitle: { type: String, required: true },
+    variantTitle: { type: String },
+    variantDuration: { type: Number },
     partnerName: { type: String, required: true },
     partnerEmail: { type: String, required: true, lowercase: true },
     whatsappNumber: { type: String, required: true },
@@ -42,6 +48,8 @@ const PartnerSessionOrderSchema = new Schema<IPartnerSessionOrder>(
     profitPercentage: { type: Number, required: true, min: 0, max: 100 },
     ourProfitAmount: { type: Number, required: true },
     paymentID: { type: String },
+    link: { type: String },
+    meetingLink: { type: String, required: false, default: "" },
     status: {
       type: String,
       enum: ["pending", "paid", "failed", "cancelled"],
