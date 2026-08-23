@@ -5,6 +5,7 @@ import PartnerSessionOrderModel from "@/app/modals/partnerSessionOrderModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
 import axios from "axios";
+import { PACKAGE_IDS } from "@/app/modals/userModel";
 import { authenticateRequest } from "@/app/lib/mobileAuth";
 
 export async function POST(req: Request) {
@@ -45,15 +46,22 @@ export async function POST(req: Request) {
       }
     }
 
-    // Resolve authenticated user subscription state from NextAuth session
+    // Resolve authenticated user subscription state from NextAuth session or mobile token
     const { isAuthenticated, user: authUser } = await authenticateRequest(req);
     let hasActiveSubscription = false;
     if (isAuthenticated && authUser && authUser.isSubscribed) {
+      const packageId =
+        authUser.subscription?.packageId?.toString() ||
+        authUser.subscriptions?.[0]?.packageID?.toString();
+      const isMini =
+        packageId === PACKAGE_IDS.MINI ||
+        packageId === PACKAGE_IDS.MINI_WEDDING;
+
       const expiry = authUser.subscriptionExpiryDate;
-      if (expiry) {
+      if (!isMini && expiry) {
         hasActiveSubscription = new Date(expiry).getTime() > Date.now();
       } else {
-        hasActiveSubscription = true;
+        hasActiveSubscription = false;
       }
     }
 

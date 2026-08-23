@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { verifyToken, extractTokenFromHeader } from "@/app/utils/jwtUtils";
-import UserModel from "@/app/modals/userModel";
+import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionsModel from "../modals/subscriptionsModel";
+import SubSubscriptionModel from "../modals/subSubscriptionModel";
 import { ConnectDB } from "../config/db";
 
 export interface AuthResult {
@@ -15,7 +16,6 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
   await ConnectDB();
   // 1. Try token-based auth first (for mobile)
   const authHeader = req.headers.get("authorization");
-      console.log("register" + subscriptionsModel);
 
   if (authHeader) {
     const token = extractTokenFromHeader(authHeader);
@@ -31,38 +31,77 @@ export async function authenticateRequest(req: Request): Promise<AuthResult> {
           );
           if (dbUser) {
             let isSubscribed = false;
+            let subscriptionExpiryDate: Date | null = null;
+            let mainSubscription: any = null;
+
             if (dbUser.email) {
               const allSubscriptions = await subscriptionsModel.find({
                 email: dbUser.email,
                 subscribed: true,
               }).sort({ expiryDate: -1 });
 
-              const PACKAGE_IDS = {
-                FULL_EXPERIENCE: "687396821b4da119eb1c13fe",
-                MINI: "68bf6ae9c4d5c1af12cdcd37",
-                MINI_WEDDING: "6a2d9aec3def6ce76dc7babc",
-                WEDDING_PLANNING_BESTIE: "6965e63c6df4503dda02c12b",
-              };
+              // Prioritize active Full Experience over Mini, and Mini over expired Full Experience
+              const activeFullSub = allSubscriptions.find(
+                (sub: any) =>
+                  sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE &&
+                  sub.expiryDate &&
+                  new Date(sub.expiryDate).getTime() > Date.now()
+              );
+              const miniSub = allSubscriptions.find(
+                (sub: any) =>
+                  (sub.packageID?.toString() === PACKAGE_IDS.MINI ||
+                   sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
+                  sub.subscribed
+              );
+              const anyFullSub = allSubscriptions.find(
+                (sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE
+              );
 
-              const mainSubscription = 
-                allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-                allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
-                allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
+              mainSubscription = activeFullSub || miniSub || anyFullSub;
 
               if (mainSubscription) {
-                const isMini = mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
-                               mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
+                const isMini =
+                  mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+                  mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
                 isSubscribed = isMini
                   ? !!mainSubscription.subscribed
                   : !!(
                       mainSubscription.expiryDate &&
                       new Date(mainSubscription.expiryDate).getTime() > Date.now()
                     );
+                subscriptionExpiryDate = mainSubscription.expiryDate
+                  ? new Date(mainSubscription.expiryDate)
+                  : null;
+              } else {
+                // Check for sub-subscriptions (groom/bridesmaid) if no main subscription
+                const subSub = await SubSubscriptionModel.findOne({
+                  inviteeEmail: dbUser.email,
+                  status: "accepted",
+                }).populate("parentSubscription");
+
+                if (subSub && subSub.parentSubscription?.subscribed) {
+                  const parentExpiry = subSub.parentSubscription.expiryDate;
+                  const isParentActive =
+                    !parentExpiry ||
+                    new Date(parentExpiry).getTime() > Date.now();
+
+                  if (isParentActive) {
+                    isSubscribed = true;
+                    subscriptionExpiryDate = parentExpiry
+                      ? new Date(parentExpiry)
+                      : null;
+                  }
+                }
               }
             }
 
             const userObj = dbUser.toObject();
             userObj.isSubscribed = isSubscribed;
+            userObj.subscriptionExpiryDate = subscriptionExpiryDate;
+            userObj.subscription = {
+              packageId: mainSubscription?.packageID?.toString() || undefined,
+              paid: mainSubscription?.subscribed || false,
+            };
 
             return { user: userObj, isAuthenticated: true, authType: "jwt" };
           }

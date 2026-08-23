@@ -240,11 +240,24 @@ export const authOptions: NextAuthOptions = {
             return token;
           }
 
-          // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
-          const mainSubscription = 
-            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
-            allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
+          // Find the MAIN subscription (Prioritize active Full Experience over Mini, and Mini over expired Full Experience)
+          const activeFullSub = allSubscriptions.find(
+            (sub: any) =>
+              sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE &&
+              sub.expiryDate &&
+              sub.expiryDate.getTime() > Date.now()
+          );
+          const miniSub = allSubscriptions.find(
+            (sub: any) =>
+              (sub.packageID?.toString() === PACKAGE_IDS.MINI ||
+               sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
+              sub.subscribed
+          );
+          const anyFullSub = allSubscriptions.find(
+            (sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE
+          );
+
+          const mainSubscription = activeFullSub || miniSub || anyFullSub;
 
           if (mainSubscription) {
             const isMini =
@@ -369,11 +382,24 @@ export const authOptions: NextAuthOptions = {
               }).sort({ expiryDate: -1 });
 
               if (allSubscriptions && allSubscriptions.length > 0) {
-                // Find the MAIN subscription (Prioritize Full Experience over Mini — NOT Bestie)
-                const mainSubscription = 
-                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE) ||
-                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI) ||
-                  allSubscriptions.find((sub: any) => sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING);
+                // Find the MAIN subscription (Prioritize active Full Experience over Mini, and Mini over expired Full Experience)
+                const activeFullSub = allSubscriptions.find(
+                  (sub: any) =>
+                    sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE &&
+                    sub.expiryDate &&
+                    new Date(sub.expiryDate).getTime() > Date.now()
+                );
+                const miniSub = allSubscriptions.find(
+                  (sub: any) =>
+                    (sub.packageID?.toString() === PACKAGE_IDS.MINI ||
+                     sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
+                    sub.subscribed
+                );
+                const anyFullSub = allSubscriptions.find(
+                  (sub: any) => sub.packageID?.toString() === PACKAGE_IDS.FULL_EXPERIENCE
+                );
+
+                const mainSubscription = activeFullSub || miniSub || anyFullSub;
 
                 if (mainSubscription) {
                   const isMini =

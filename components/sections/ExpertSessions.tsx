@@ -136,11 +136,17 @@ const ExpertSessions = () => {
 
   const checkIsActiveSubscriber = () => {
     if (!authSession?.user?.isSubscribed) return false;
+    const packageId = authSession?.user?.subscription?.packageId?.toString();
+    const isMini =
+      packageId === "68bf6ae9c4d5c1af12cdcd37" ||
+      packageId === "6a2d9aec3def6ce76dc7babc";
+    if (isMini) return false;
+
     const expiry = authSession?.user?.subscriptionExpiryDate;
     if (expiry) {
       return new Date(expiry).getTime() > Date.now();
     }
-    return true;
+    return false;
   };
 
   const openBookingModal = (s: IPartnerSession, initialVariantIndex = 0) => {
