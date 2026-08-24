@@ -68,9 +68,9 @@ const navigation = [
   // { name: "Experience", href: "/club" },
   { name: "Playlists", href: "/playlists" },
   { name: "Shop", href: "/shop" },
-  { 
-    name: "Tools kit", 
-    href: "#", 
+  {
+    name: "Tools kit",
+    href: "#",
     icon: <Wrench />,
     items: [
       { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
@@ -88,9 +88,9 @@ const leftNavigation = [
   { name: "About", href: "/about", icon: <VenetianMask /> },
 ];
 const rightNavigation = [
-  { 
-    name: "Tools kit", 
-    href: "#", 
+  {
+    name: "Tools kit",
+    href: "#",
     icon: <Wrench />,
     items: [
       { name: "Blogs", href: "/blogs", icon: <BookOpenText /> },
@@ -124,7 +124,7 @@ export default function Header() {
   const [isMobileAccountOpen, setIsMobileAccountOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  
+
   // Toolkits State
   const [isToolkitsOpen, setIsToolkitsOpen] = useState(false);
   const [isToolkitsHovering, setIsToolkitsHovering] = useState(false);
@@ -314,11 +314,10 @@ export default function Header() {
       {/* <div className="mx-auto"  > */}
       <div
         className={`
-              ${
-                isScrolled
-                  ? "bg-lovely/50 backdrop-blur-md shadow-sm"
-                  : "bg-lovely"
-              }
+              ${isScrolled
+            ? "bg-lovely/50 backdrop-blur-md shadow-sm"
+            : "bg-lovely"
+          }
 
         mx-auto ${thirdFont.className} text-6xl font-semibold relative z-50`}
       >
@@ -353,7 +352,9 @@ export default function Header() {
                   width={200}
                   height={150}
                   // src={"/cristmas/logo.png"}
-src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
+                  // src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
+                  src={"/birthday/birthdayLogo.png"}
+                />
               </Link>
               {/* Theme Toggle */}
               {mounted && (
@@ -606,7 +607,7 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
           </div> */}
 
           {/* Mobile Menu Toggle */}
-          <div className="flex w-full justify-between md:hidden items-center text-creamey">
+          <div className="flex w-full justify-between md:hidden items-center text-creamey px-4">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild className="">
                 <Button variant="ghost" size="icon">
@@ -628,14 +629,15 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                       onClick={handleLinkClick}
                     >
                       <Image
-                        className="aspect-auto"
+                        className="aspect-auto h-14 w-auto object-contain"
                         alt="logo"
                         width={200}
                         height={150}
                         // src={"/cristmas/logo.png"}
-                        src={
-                          "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
-                        }
+                        // src={
+                        //   "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
+                        // }
+                        src={"/birthday/birthdayLogo.png"}
                       />
                     </Link>
                   </div>
@@ -666,7 +668,7 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                         </button>
                       </div>
                     )}
-                    
+
                     {navigation.map((item) => (
                       item.items ? (
                         <div key={item.name} className="flex flex-col space-y-2">
@@ -677,24 +679,24 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                             {item.name}
                             {isMobileToolkitsExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                           </button>
-                          
+
                           {/* Sub-items */}
                           {isMobileToolkitsExpanded && (
-                             <div className="flex flex-col space-y-3 pl-4  ml-2">
-                                {item.items.map(subItem => (
-                                   <Link
-                                      key={subItem.name}
-                                      href={subItem.href}
-                                      className={cn(
-                                        "text-lg hover:underline transition duration-300",
-                                        pathname === subItem.href ? "underline" : "text-creamey"
-                                      )}
-                                      onClick={handleLinkClick}
-                                   >
-                                      {subItem.name}
-                                   </Link>
-                                ))}
-                             </div>
+                            <div className="flex flex-col space-y-3 pl-4  ml-2">
+                              {item.items.map(subItem => (
+                                <Link
+                                  key={subItem.name}
+                                  href={subItem.href}
+                                  className={cn(
+                                    "text-lg hover:underline transition duration-300",
+                                    pathname === subItem.href ? "underline" : "text-creamey"
+                                  )}
+                                  onClick={handleLinkClick}
+                                >
+                                  {subItem.name}
+                                </Link>
+                              ))}
+                            </div>
                           )}
                         </div>
                       ) : (
@@ -711,7 +713,7 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                         </Link>
                       )
                     ))}
-                    
+
                   </nav>
                   <div className="mt-auto text-lg space-y-4">
                     <Link
@@ -760,14 +762,15 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
             </Sheet>
             <Link
               href="/"
-              className="  lg:flex-shrink-0  items-center px-8 lg:px-16 space-x-2"
+              className="flex items-center justify-center py-1 px-2 max-h-full"
             >
               <Image
-                className="aspect-auto"
+                className="aspect-auto h-12 max-h-12 w-auto object-contain"
                 alt="logo"
-                width={200}
-                height={150}
-                src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
+                width={160}
+                height={120}
+                // src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
+                src={"/birthday/birthdayLogo.png"}
               />
             </Link>
             <div className="mr-2 gap-4 flex">
@@ -819,6 +822,27 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
             </Link> */}
           </div>
         </div>
+      </div>
+      {/* Birthday Decoration */}
+      <div className="w-full max-md:hidden absolute top-full left-0 z-40 pointer-events-none">
+        <Image
+          src="/birthday/header.png"
+          alt="Birthday Decoration"
+          width={1925}
+          height={192}
+          className="w-full h-auto object-contain"
+          priority
+        />
+      </div>
+
+      <div className="block md:hidden w-full absolute top-full left-0 -mt-0 z-40 pointer-events-none">
+        <Image
+          src="/birthday/headermob.png"
+          alt="Christmas Decoration"
+          width={1920}
+          height={100}
+          className="w-full h-auto"
+        />
       </div>
       {/* Christmas Decoration - Desktop */}
       {/* <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
@@ -874,9 +898,8 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                 {notifications.map((notification) => (
                   <div
                     key={notification._id}
-                    className={`border rounded-lg overflow-hidden ${
-                      notification.read ? "border-gray-200" : "border-lovely"
-                    } cursor-pointer hover:bg-gray-100 transition-colors`}
+                    className={`border rounded-lg overflow-hidden ${notification.read ? "border-gray-200" : "border-lovely"
+                      } cursor-pointer hover:bg-gray-100 transition-colors`}
                     onClick={async () => {
                       // Mark notification as read if it's not already
                       if (!notification.read) {
@@ -988,7 +1011,7 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
                                 &quot;
                                 {notification.content.length > 100
                                   ? notification.content.substring(0, 100) +
-                                    "..."
+                                  "..."
                                   : notification.content}
                                 &quot;
                               </p>
@@ -1012,7 +1035,7 @@ src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}                />
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Mobile Account Modal */}
       <Dialog open={isMobileAccountOpen} onOpenChange={setIsMobileAccountOpen}>
         <DialogContent className="sm:max-w-md w-[80%] bg-creamey">
