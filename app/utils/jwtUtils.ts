@@ -16,7 +16,7 @@ export function generateToken(user: User): string {
   const payload = {
     id: user.id,
     email: user.email,
-    isSubscribed: user.isSubscribed || false,
+    isSubscribed: user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) > new Date() : false,
     subscriptionExpiryDate: user.subscriptionExpiryDate,
   };
 

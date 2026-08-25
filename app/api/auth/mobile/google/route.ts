@@ -226,7 +226,7 @@ export async function POST(req: Request) {
     const token = generateToken({
       id: user._id.toString(),
       email: user.email,
-      isSubscribed: user.isSubscribed || false,
+      isSubscribed: user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) > new Date() : false,
       subscriptionExpiryDate: user.subscriptionExpiryDate,
     });
 
@@ -242,7 +242,7 @@ export async function POST(req: Request) {
           firstName: user.firstName,
           lastName: user.lastName,
           imageURL: user.imageURL || "",
-          isSubscribed: user.isSubscribed || false,
+          isSubscribed: user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) > new Date() : false,
         },
         isNewUser,
       },

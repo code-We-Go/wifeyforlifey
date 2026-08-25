@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     const token = generateToken({
       id: newUser._id.toString(),
       email: newUser.email,
-      isSubscribed: newUser.isSubscribed || false,
+      isSubscribed: newUser.subscriptionExpiryDate ? new Date(newUser.subscriptionExpiryDate) > new Date() : false,
       subscriptionExpiryDate: newUser.subscriptionExpiryDate,
     });
 

@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       loyaltyPoints: loyaltyPoints,
       weddingDate: user.weddingDate,
       birthDate: user.birthDate,
-      isSubscribed: user.isSubscribed,
+      isSubscribed: user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) > new Date() : false,
       subscriptions: user.subscriptions,
       subSubscription: null,
     };

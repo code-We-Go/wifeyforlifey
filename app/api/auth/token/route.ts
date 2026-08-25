@@ -81,7 +81,7 @@ export async function GET() {
         user: {
           id: user._id.toString(),
           email: user.email,
-          isSubscribed: user.isSubscribed || false,
+          isSubscribed: user.subscriptionExpiryDate ? new Date(user.subscriptionExpiryDate) > new Date() : false,
         },
       },
       { status: 200 }
