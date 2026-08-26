@@ -69,7 +69,8 @@ const OrderSummaryItem = ({ cartItem }: { cartItem: CartItem }) => {
             <p>Total :</p>
             <p>
               {cartItem.quantity * cartItem.price}{" "}
-              <span>{user.userCountry === "EG" ? "LE" : "USD"}</span>
+              {/* <span>{user.userCountry === "EG" ? "LE" : "USD"}</span> */}
+              <span>LE</span>
             </p>
           </div>
         </div>
