@@ -66,16 +66,25 @@ const ExpertSessions = () => {
   const [subscriptionFinalPrice, setSubscriptionFinalPrice] = useState<number | null>(null);
   const [couponFinalPrice, setCouponFinalPrice] = useState<number | null>(null);
 
+  const [autoDiscounts, setAutoDiscounts] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const response = await fetch("/api/partner-sessions");
-        const data = await response.json();
+        const [sessionsRes, discountsRes] = await Promise.all([
+          fetch("/api/partner-sessions"),
+          fetch("/api/active-discounts?redeemType=Sessions"),
+        ]);
+        const data = await sessionsRes.json();
         if (data.success) {
           setSessions(data.data);
         }
+        const discountsData = await discountsRes.json();
+        if (discountsData.success && discountsData.discounts) {
+          setAutoDiscounts(discountsData.discounts);
+        }
       } catch (error) {
-        console.error("Failed to fetch sessions:", error);
+        console.error("Failed to fetch sessions or discounts:", error);
       } finally {
         setLoading(false);
       }
@@ -83,6 +92,35 @@ const ExpertSessions = () => {
 
     fetchSessions();
   }, []);
+
+  const getSessionDiscountBadge = (session: IPartnerSession) => {
+    if (!autoDiscounts || autoDiscounts.length === 0) return null;
+    const sessionPrice = getSessionBasePrice(session, 0);
+    if (!sessionPrice || sessionPrice <= 0) return null;
+
+    const validDiscounts = autoDiscounts.filter((d: any) => {
+      const minAmt = d.conditions?.minimumOrderAmount || 0;
+      return minAmt <= sessionPrice;
+    });
+
+    if (validDiscounts.length === 0) return null;
+
+    validDiscounts.sort((a: any, b: any) => {
+      const minA = a.conditions?.minimumOrderAmount || 0;
+      const minB = b.conditions?.minimumOrderAmount || 0;
+      return minB - minA;
+    });
+
+    const best = validDiscounts[0];
+    if (best.calculationType === "PERCENTAGE" && best.value) {
+      return `${best.value}% OFF`;
+    }
+    if (best.calculationType === "FIXED_AMOUNT" && best.value) {
+      const pct = Math.round((best.value / sessionPrice) * 100);
+      return pct > 0 ? `${pct}% OFF` : `EGP ${best.value} OFF`;
+    }
+    return null;
+  };
 
   // Embla Carousel
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -149,7 +187,59 @@ const ExpertSessions = () => {
     return false;
   };
 
-  const openBookingModal = (s: IPartnerSession, initialVariantIndex = 0) => {
+  const fetchAndApplyBestAutoDiscount = async (
+    basePrice: number,
+    subPrice: number | null
+  ) => {
+    try {
+      const response = await fetch(
+        `/api/active-discounts?cartTotal=${basePrice}&redeemType=Sessions`
+      );
+      const data = await response.json();
+      if (data.success && data.discounts && data.discounts.length > 0) {
+        // Filter valid discounts for this basePrice and sort by highest minimumOrderAmount
+        const validDiscounts = data.discounts.filter((d: any) => {
+          const minOrder = d.conditions?.minimumOrderAmount || 0;
+          return minOrder <= basePrice;
+        });
+
+        validDiscounts.sort((a: any, b: any) => {
+          const minA = a.conditions?.minimumOrderAmount || 0;
+          const minB = b.conditions?.minimumOrderAmount || 0;
+          return minB - minA;
+        });
+
+        if (validDiscounts.length > 0) {
+          const bestDiscount = validDiscounts[0];
+          let codePrice = basePrice;
+          if (bestDiscount.calculationType === "PERCENTAGE" && bestDiscount.value) {
+            codePrice = Math.max(
+              0,
+              Math.round(basePrice - (basePrice * bestDiscount.value) / 100)
+            );
+          } else if (
+            bestDiscount.calculationType === "FIXED_AMOUNT" &&
+            typeof bestDiscount.value === "number"
+          ) {
+            codePrice = Math.max(0, Math.round(basePrice - bestDiscount.value));
+          }
+
+          setCouponFinalPrice(codePrice);
+          const baseline = subPrice ?? basePrice;
+          const best = Math.min(codePrice, baseline);
+          setApplied(codePrice < baseline);
+          setFinalPrice(best);
+          setForm((prev) => ({ ...prev, discountCode: bestDiscount.code }));
+          return bestDiscount;
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching automatic session discount:", e);
+    }
+    return null;
+  };
+
+  const openBookingModal = async (s: IPartnerSession, initialVariantIndex = 0) => {
     setSelectedForBooking(s);
     setSelectedVariantIndex(initialVariantIndex);
     setError("");
@@ -169,8 +259,9 @@ const ExpertSessions = () => {
     // Auto-apply subscription discount if user has active subscription with valid expiry
     const isActiveSubscriber = checkIsActiveSubscriber();
     const subPercent = Number(s.subscriptionDiscountPercentage || 0);
+    let subPrice: number | null = null;
     if (isActiveSubscriber && subPercent > 0) {
-      const subPrice = Math.max(
+      subPrice = Math.max(
         0,
         Math.round(basePrice - (basePrice * subPercent) / 100)
       );
@@ -180,9 +271,12 @@ const ExpertSessions = () => {
     } else {
       setFinalPrice(basePrice);
     }
+
+    // Auto-fetch and apply highest valid automatic discount
+    await fetchAndApplyBestAutoDiscount(basePrice, subPrice);
   };
 
-  const handleBookingVariantChange = (idx: number) => {
+  const handleBookingVariantChange = async (idx: number) => {
     if (!selectedForBooking) return;
     setSelectedVariantIndex(idx);
     const basePrice = getSessionBasePrice(selectedForBooking, idx);
@@ -206,6 +300,9 @@ const ExpertSessions = () => {
     setApplied(false);
     setCouponFinalPrice(null);
     setForm((prev) => ({ ...prev, discountCode: "" }));
+
+    // Re-evaluate automatic discount for new variant price
+    await fetchAndApplyBestAutoDiscount(basePrice, currentSubPrice);
   };
 
   const book = async (e: React.FormEvent) => {
@@ -261,11 +358,15 @@ const ExpertSessions = () => {
     const basePrice = getSessionBasePrice(selectedForBooking, selectedVariantIndex);
     const code = form.discountCode.trim();
     if (!code) {
-      setApplied(false);
-      if (subscriptionFinalPrice !== null) {
-        setFinalPrice(subscriptionFinalPrice);
-      } else {
-        setFinalPrice(basePrice);
+      // Re-apply best automatic discount if available when user clears the code
+      const autoDiscount = await fetchAndApplyBestAutoDiscount(
+        basePrice,
+        subscriptionFinalPrice
+      );
+      if (!autoDiscount) {
+        setApplied(false);
+        setCouponFinalPrice(null);
+        setFinalPrice(subscriptionFinalPrice ?? basePrice);
       }
       setError("");
       return;
@@ -303,13 +404,12 @@ const ExpertSessions = () => {
 
   if (loading) {
     return (
-      <section 
+      <section
         ref={sectionRef}
-        className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${
-          isVisible 
-            ? 'opacity-100 translate-y-0' 
+        className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${isVisible
+            ? 'opacity-100 translate-y-0'
             : 'opacity-0 translate-y-10'
-        }`}
+          }`}
       >
         <div className="container-custom">
           {/* Header */}
@@ -321,7 +421,7 @@ const ExpertSessions = () => {
             </h2>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
-                
+
                 <p className={`${subHeaderStyle}`}>
                   Book consultation sessions with trusted experts and stop relying
                   on confusing or incorrect advice.
@@ -355,7 +455,7 @@ const ExpertSessions = () => {
   }
 
   if (sessions.length === 0) {
-    return null; 
+    return null;
   }
 
   const activeDetailsVariant =
@@ -373,13 +473,12 @@ const ExpertSessions = () => {
     : 0;
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
+      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${isVisible
+          ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-10'
-      }`}
+        }`}
     >
       <div className="container-custom">
         {/* Header */}
@@ -408,9 +507,8 @@ const ExpertSessions = () => {
               <button
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                  }`}
                 aria-label="Previous slide"
               >
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
@@ -418,9 +516,8 @@ const ExpertSessions = () => {
               <button
                 onClick={scrollNext}
                 disabled={!canScrollNext}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                  }`}
                 aria-label="Next slide"
               >
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
@@ -435,6 +532,7 @@ const ExpertSessions = () => {
                 <div key={session._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
                   <SessionCard
                     session={session}
+                    discountBadge={getSessionDiscountBadge(session)}
                     onDetailsClick={() => openDetailsModal(session)}
                     onBookClick={() => openBookingModal(session)}
                   />
@@ -445,21 +543,21 @@ const ExpertSessions = () => {
         </div>
 
         {/* Footer Note */}
-         <div className="mt-16 text-center md:text-left  pt-6">
-            <p className="text-lovely/70 italic text-lg  decoration-lovely/30">
-                Private, judgment-free sessions — from the comfort of your home.
-            </p>
-         </div>
+        <div className="mt-16 text-center md:text-left  pt-6">
+          <p className="text-lovely/70 italic text-lg  decoration-lovely/30">
+            Private, judgment-free sessions — from the comfort of your home.
+          </p>
+        </div>
       </div>
 
 
       {/* Details Modal */}
       {selectedForDetails && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
           onClick={() => setSelectedForDetails(null)}
         >
-          <div 
+          <div
             className="bg-creamey rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -475,7 +573,7 @@ const ExpertSessions = () => {
                   />
                 </div>
               )}
-              
+
               {/* Title & Name */}
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-lovely mb-1">
@@ -488,6 +586,11 @@ const ExpertSessions = () => {
                   <p className="text-xl font-semibold text-lovely">
                     EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
                   </p>
+                  {getSessionDiscountBadge(selectedForDetails) && (
+                    <span className="bg-lovely text-creamey text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                      {getSessionDiscountBadge(selectedForDetails)}
+                    </span>
+                  )}
                   {activeDetailsVariant?.duration ? (
                     <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
                       ⏱ {activeDetailsVariant.duration} mins
@@ -509,15 +612,14 @@ const ExpertSessions = () => {
                       key={idx}
                       type="button"
                       onClick={() => setSelectedVariantIndex(idx)}
-                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
-                        selectedVariantIndex === idx
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${selectedVariantIndex === idx
                           ? "bg-lovely text-creamey border-lovely shadow"
                           : "bg-white/60 text-lovely border-lovely/40 hover:bg-white"
-                      }`}
+                        }`}
                     >
                       <span>{v.title}</span>
                       <span className="ml-2 text-xs opacity-80">
-                        (EGP {v.price} • {v.duration}m)
+                        (EGP {v.price} )
                       </span>
                     </button>
                   ))}
@@ -578,7 +680,7 @@ const ExpertSessions = () => {
             <h3 className="text-xl font-semibold text-lovely mb-2">
               Book: {activeBookingVariant?.title || selectedForBooking.title}
             </h3>
-            
+
             {/* Variant Switcher in Booking Modal */}
             {selectedForBooking.variants && selectedForBooking.variants.length > 1 && (
               <div className="mb-4">
@@ -591,11 +693,10 @@ const ExpertSessions = () => {
                       key={idx}
                       type="button"
                       onClick={() => handleBookingVariantChange(idx)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
-                        selectedVariantIndex === idx
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${selectedVariantIndex === idx
                           ? "bg-lovely text-white border-lovely"
                           : "bg-white/60 text-lovely border-lovely/30 hover:bg-white"
-                      }`}
+                        }`}
                     >
                       {v.title} (EGP {v.price})
                     </button>
@@ -664,11 +765,10 @@ const ExpertSessions = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-lovely">Price</span>
                   <span
-                    className={`text-lovely ${
-                      subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
+                    className={`text-lovely ${subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
                         ? "line-through"
                         : ""
-                    }`}
+                      }`}
                   >
                     EGP {bookingBasePrice}
                   </span>
@@ -713,8 +813,8 @@ const ExpertSessions = () => {
                   {submitting
                     ? "Processing..."
                     : finalPrice === 0
-                    ? "Book Now"
-                    : "Proceed to Pay"}
+                      ? "Book Now"
+                      : "Proceed to Pay"}
                 </Button>
                 <Button
                   type="button"

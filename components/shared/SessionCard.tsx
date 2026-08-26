@@ -8,13 +8,26 @@ interface SessionCardProps {
     partnerName: string;
     title: string;
   };
+  discountBadge?: string | null;
   onDetailsClick: () => void;
   onBookClick: () => void;
 }
 
-export default function SessionCard({ session, onDetailsClick, onBookClick }: SessionCardProps) {
+export default function SessionCard({
+  session,
+  discountBadge,
+  onDetailsClick,
+  onBookClick,
+}: SessionCardProps) {
   return (
-    <div className="flex flex-col gap-1 md:gap-2 w-full max-w-lg h-full bg-creamey border-2 border-lovely rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow">
+    <div className="relative flex flex-col gap-1 md:gap-2 w-full max-w-lg h-full bg-creamey border-2 border-lovely rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow">
+      {/* Discount Badge */}
+      {discountBadge && (
+        <div className="absolute top-3.5 right-3.5 z-20 bg-lovely text-creamey text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
+          {discountBadge}
+        </div>
+      )}
+
       {/* Expert Image */}
       <div className="relative w-full aspect-square max-w-sm overflow-hidden rounded-lg flex-shrink-0">
         <div className="w-full h-full bg-creamey/30 relative">

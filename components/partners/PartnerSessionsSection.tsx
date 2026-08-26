@@ -58,14 +58,22 @@ export default function PartnerSessionsSection() {
     number | null
   >(null);
   const [couponFinalPrice, setCouponFinalPrice] = useState<number | null>(null);
+  const [autoDiscounts, setAutoDiscounts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchSessions = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/partner-sessions");
+        const [res, discountsRes] = await Promise.all([
+          fetch("/api/partner-sessions"),
+          fetch("/api/active-discounts?redeemType=Sessions"),
+        ]);
         const data = await res.json();
         setSessions(data.data || []);
+        const discountsData = await discountsRes.json();
+        if (discountsData.success && discountsData.discounts) {
+          setAutoDiscounts(discountsData.discounts);
+        }
       } catch (e) {
         setSessions([]);
       } finally {
@@ -74,6 +82,35 @@ export default function PartnerSessionsSection() {
     };
     fetchSessions();
   }, []);
+
+  const getSessionDiscountBadge = (session: PartnerSession | null) => {
+    if (!session || !autoDiscounts || autoDiscounts.length === 0) return null;
+    const sessionPrice = getSessionBasePrice(session, 0);
+    if (!sessionPrice || sessionPrice <= 0) return null;
+
+    const validDiscounts = autoDiscounts.filter((d: any) => {
+      const minAmt = d.conditions?.minimumOrderAmount || 0;
+      return minAmt <= sessionPrice;
+    });
+
+    if (validDiscounts.length === 0) return null;
+
+    validDiscounts.sort((a: any, b: any) => {
+      const minA = a.conditions?.minimumOrderAmount || 0;
+      const minB = b.conditions?.minimumOrderAmount || 0;
+      return minB - minA;
+    });
+
+    const best = validDiscounts[0];
+    if (best.calculationType === "PERCENTAGE" && best.value) {
+      return `${best.value}% OFF`;
+    }
+    if (best.calculationType === "FIXED_AMOUNT" && best.value) {
+      const pct = Math.round((best.value / sessionPrice) * 100);
+      return pct > 0 ? `${pct}% OFF` : `EGP ${best.value} OFF`;
+    }
+    return null;
+  };
 
   const getSessionBasePrice = (s: PartnerSession, vIndex: number) => {
     // Variant price takes absolute priority over session base price
@@ -109,7 +146,59 @@ export default function PartnerSessionsSection() {
     setSelectedVariantIndex(0);
   };
 
-  const openModal = (s: PartnerSession, initialVariantIndex = 0) => {
+  const fetchAndApplyBestAutoDiscount = async (
+    basePrice: number,
+    subPrice: number | null
+  ) => {
+    try {
+      const response = await fetch(
+        `/api/active-discounts?cartTotal=${basePrice}&redeemType=Sessions`
+      );
+      const data = await response.json();
+      if (data.success && data.discounts && data.discounts.length > 0) {
+        // Filter valid discounts for this basePrice and sort by highest minimumOrderAmount
+        const validDiscounts = data.discounts.filter((d: any) => {
+          const minOrder = d.conditions?.minimumOrderAmount || 0;
+          return minOrder <= basePrice;
+        });
+
+        validDiscounts.sort((a: any, b: any) => {
+          const minA = a.conditions?.minimumOrderAmount || 0;
+          const minB = b.conditions?.minimumOrderAmount || 0;
+          return minB - minA;
+        });
+
+        if (validDiscounts.length > 0) {
+          const bestDiscount = validDiscounts[0];
+          let codePrice = basePrice;
+          if (bestDiscount.calculationType === "PERCENTAGE" && bestDiscount.value) {
+            codePrice = Math.max(
+              0,
+              Math.round(basePrice - (basePrice * bestDiscount.value) / 100)
+            );
+          } else if (
+            bestDiscount.calculationType === "FIXED_AMOUNT" &&
+            typeof bestDiscount.value === "number"
+          ) {
+            codePrice = Math.max(0, Math.round(basePrice - bestDiscount.value));
+          }
+
+          setCouponFinalPrice(codePrice);
+          const baseline = subPrice ?? basePrice;
+          const best = Math.min(codePrice, baseline);
+          setApplied(codePrice < baseline);
+          setFinalPrice(best);
+          setForm((prev) => ({ ...prev, discountCode: bestDiscount.code }));
+          return bestDiscount;
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching automatic session discount:", e);
+    }
+    return null;
+  };
+
+  const openModal = async (s: PartnerSession, initialVariantIndex = 0) => {
     setSelected(s);
     setSelectedVariantIndex(initialVariantIndex);
     setError("");
@@ -129,8 +218,9 @@ export default function PartnerSessionsSection() {
     // Auto-apply subscription discount if user has active subscription with valid expiry
     const isActiveSubscriber = checkIsActiveSubscriber();
     const subPercent = Number(s.subscriptionDiscountPercentage || 0);
+    let subPrice: number | null = null;
     if (isActiveSubscriber && subPercent > 0) {
-      const subPrice = Math.max(
+      subPrice = Math.max(
         0,
         Math.round(basePrice - (basePrice * subPercent) / 100)
       );
@@ -140,9 +230,12 @@ export default function PartnerSessionsSection() {
     } else {
       setFinalPrice(basePrice);
     }
+
+    // Auto-fetch and apply highest valid automatic discount
+    await fetchAndApplyBestAutoDiscount(basePrice, subPrice);
   };
 
-  const handleBookingVariantChange = (idx: number) => {
+  const handleBookingVariantChange = async (idx: number) => {
     if (!selected) return;
     setSelectedVariantIndex(idx);
     const basePrice = getSessionBasePrice(selected, idx);
@@ -166,6 +259,9 @@ export default function PartnerSessionsSection() {
     setApplied(false);
     setCouponFinalPrice(null);
     setForm((prev) => ({ ...prev, discountCode: "" }));
+
+    // Re-evaluate automatic discount for new variant price
+    await fetchAndApplyBestAutoDiscount(basePrice, currentSubPrice);
   };
 
   const book = async (e: React.FormEvent) => {
@@ -221,12 +317,15 @@ export default function PartnerSessionsSection() {
     const basePrice = getSessionBasePrice(selected, selectedVariantIndex);
     const code = form.discountCode.trim();
     if (!code) {
-      setApplied(false);
-      // If subscription discount is applied, keep that as final price
-      if (subscriptionFinalPrice !== null) {
-        setFinalPrice(subscriptionFinalPrice);
-      } else {
-        setFinalPrice(basePrice);
+      // Re-apply best automatic discount if available when user clears the code
+      const autoDiscount = await fetchAndApplyBestAutoDiscount(
+        basePrice,
+        subscriptionFinalPrice
+      );
+      if (!autoDiscount) {
+        setApplied(false);
+        setCouponFinalPrice(null);
+        setFinalPrice(subscriptionFinalPrice ?? basePrice);
       }
       setError("");
       return;
@@ -257,8 +356,7 @@ export default function PartnerSessionsSection() {
       setApplied(false);
       setCouponFinalPrice(null);
       setFinalPrice(subscriptionFinalPrice ?? basePrice);
-      const msg =
-        e?.response?.data?.error || "Invalid or expired discount code";
+      const msg = e?.response?.data?.error || "Invalid or expired discount code";
       setError(msg);
     }
   };
@@ -290,6 +388,7 @@ export default function PartnerSessionsSection() {
             <div key={session._id} className="min-w-0">
               <SessionCard
                 session={session}
+                discountBadge={getSessionDiscountBadge(session)}
                 onDetailsClick={() => openDetails(session)}
                 onBookClick={() => openModal(session)}
               />
@@ -335,6 +434,11 @@ export default function PartnerSessionsSection() {
                   <p className="text-xl font-semibold text-lovely">
                     EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
                   </p>
+                  {getSessionDiscountBadge(selectedForDetails) && (
+                    <span className="bg-lovely text-creamey text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                      {getSessionDiscountBadge(selectedForDetails)}
+                    </span>
+                  )}
                   {activeDetailsVariant?.duration ? (
                     <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
                       ⏱ {activeDetailsVariant.duration} mins

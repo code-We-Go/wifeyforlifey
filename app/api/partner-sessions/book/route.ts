@@ -91,6 +91,13 @@ export async function POST(req: Request) {
           code: new RegExp(`^${discountCode.trim()}$`, "i"),
           isActive: true,
           redeemType: { $in: ["All", "Sessions"] },
+          "conditions.validFrom": { $lte: new Date() },
+          "conditions.validUntil": { $gte: new Date() },
+          $or: [
+            { "conditions.minimumOrderAmount": { $exists: false } },
+            { "conditions.minimumOrderAmount": null },
+            { "conditions.minimumOrderAmount": { $lte: basePrice } },
+          ],
         });
         if (found) {
           let priceAfterCode = basePrice;
@@ -112,6 +119,50 @@ export async function POST(req: Request) {
             finalPrice = priceAfterCode;
             appliedCode = found.code;
             // Code discount outranks subscription discount; unset subscription discount impact
+            subscriptionDiscountAmount = 0;
+          }
+        }
+      } catch {}
+    } else {
+      // Check for active automatic discounts for sessions
+      try {
+        const autoDiscounts = await DiscountModel.find({
+          isActive: true,
+          applicationType: "AUTOMATIC",
+          redeemType: { $in: ["All", "Sessions"] },
+          "conditions.validFrom": { $lte: new Date() },
+          "conditions.validUntil": { $gte: new Date() },
+          $or: [
+            { "conditions.minimumOrderAmount": { $exists: false } },
+            { "conditions.minimumOrderAmount": null },
+            { "conditions.minimumOrderAmount": { $lte: basePrice } },
+          ],
+        });
+
+        if (autoDiscounts && autoDiscounts.length > 0) {
+          // Sort by highest valid minimumOrderAmount descending
+          autoDiscounts.sort(
+            (a, b) =>
+              (b.conditions?.minimumOrderAmount || 0) -
+              (a.conditions?.minimumOrderAmount || 0)
+          );
+          const bestAuto = autoDiscounts[0];
+          let priceAfterAuto = basePrice;
+          if (bestAuto.calculationType === "PERCENTAGE" && bestAuto.value) {
+            priceAfterAuto = Math.max(
+              0,
+              Math.round(basePrice - (basePrice * bestAuto.value) / 100)
+            );
+          } else if (
+            bestAuto.calculationType === "FIXED_AMOUNT" &&
+            typeof bestAuto.value === "number"
+          ) {
+            priceAfterAuto = Math.max(0, Math.round(basePrice - bestAuto.value));
+          }
+
+          if (priceAfterAuto < finalPrice) {
+            finalPrice = priceAfterAuto;
+            appliedCode = bestAuto.code;
             subscriptionDiscountAmount = 0;
           }
         }

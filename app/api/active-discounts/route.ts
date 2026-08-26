@@ -7,47 +7,68 @@ export async function GET(req: Request) {
     await ConnectDB();
 
     const { searchParams } = new URL(req.url);
-    const cartTotal = parseFloat(searchParams.get("cartTotal") || "0");
-    console.log("cartTotal" + cartTotal);
+    const hasCartTotal =
+      searchParams.has("cartTotal") && searchParams.get("cartTotal") !== "";
+    const cartTotal = hasCartTotal
+      ? parseFloat(searchParams.get("cartTotal") || "0")
+      : null;
     const redeemType = searchParams.get("redeemType");
 
-    if (redeemType === "Purchase") {
-      const activeDiscounts = await DiscountModel.find({
-        isActive: true,
-        applicationType: "AUTOMATIC",
-        redeemType: { $in: [redeemType, "All"] },
-        "conditions.validFrom": { $lte: new Date() },
-        "conditions.validUntil": { $gte: new Date() },
-        $or: [
-          { "conditions.minimumOrderAmount": { $exists: false } },
-          { "conditions.minimumOrderAmount": { $lte: cartTotal } },
-        ],
-      }).select("-__v");
+    const now = new Date();
 
-      return NextResponse.json({
-        success: true,
-        discounts: activeDiscounts,
+    const andConditions: any[] = [
+      { isActive: true },
+      { applicationType: "AUTOMATIC" },
+      {
+        $or: [
+          { "conditions.validFrom": { $exists: false } },
+          { "conditions.validFrom": null },
+          { "conditions.validFrom": { $lte: now } },
+        ],
+      },
+      {
+        $or: [
+          { "conditions.validUntil": { $exists: false } },
+          { "conditions.validUntil": null },
+          { "conditions.validUntil": { $gte: now } },
+        ],
+      },
+    ];
+
+    if (redeemType) {
+      andConditions.push({
+        $or: [
+          { redeemType: { $in: [redeemType, "All"] } },
+          { redeemType: { $exists: false } },
+          { redeemType: null },
+        ],
       });
     }
-    if (redeemType === "Subscription") {
-      const activeDiscounts = await DiscountModel.find({
-        isActive: true,
-        applicationType: "AUTOMATIC",
-        redeemType: { $in: [redeemType, "All"] },
-        "conditions.validFrom": { $lte: new Date() },
-        "conditions.validUntil": { $gte: new Date() },
+
+    if (hasCartTotal && cartTotal !== null) {
+      andConditions.push({
         $or: [
           { "conditions.minimumOrderAmount": { $exists: false } },
+          { "conditions.minimumOrderAmount": null },
           { "conditions.minimumOrderAmount": { $lte: cartTotal } },
         ],
-      }).select("-__v");
-
-      return NextResponse.json({
-        success: true,
-        discounts: activeDiscounts,
       });
     }
-    // Find all active automatic discounts
+
+    const query = { $and: andConditions };
+    const activeDiscounts = await DiscountModel.find(query).select("-__v");
+
+    // Sort discounts to get the highest valid Minimum Order Amount first
+    activeDiscounts.sort((a, b) => {
+      const minA = a.conditions?.minimumOrderAmount || 0;
+      const minB = b.conditions?.minimumOrderAmount || 0;
+      return minB - minA;
+    });
+
+    return NextResponse.json({
+      success: true,
+      discounts: activeDiscounts,
+    });
   } catch (error) {
     console.error("Error fetching active discounts:", error);
     return NextResponse.json(
