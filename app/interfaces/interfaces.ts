@@ -207,6 +207,7 @@ export interface SubscriptionCartItem {
   categoryName: string;
   tier: "full" | "mini";
   price: number;
+  discountedFrom?: number;
   duration: number;
   saving?: string;
   imageUrl: string;
@@ -305,6 +306,7 @@ export interface SupportCard {
 
 export interface PackageVariant {
   price: number;
+  discountedFrom?: number;
   duration: number;
   saving?: string;
 }
@@ -324,6 +326,7 @@ export interface Ipackage {
   mobMainImage?: string;
   mobImages?: string[];
   price: number;
+  discountedFrom?: number;
   duration: number;
   saving?: string;
   cost?: number;

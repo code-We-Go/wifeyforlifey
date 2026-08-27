@@ -36,10 +36,10 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
         redeemType === "Subscription" && packagePrice !== undefined
           ? packagePrice // Use packagePrice prop for subscription
           : cart.reduce(
-              (total: number, item: CartItem) =>
-                total + item.price * item.quantity,
-              0
-            );
+            (total: number, item: CartItem) =>
+              total + item.price * item.quantity,
+            0
+          );
 
       console.log(
         "Discount Section - cartTotal:",
@@ -115,7 +115,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
       </h3>
 
       {/* Active Automatic Discounts */}
-      {activeDiscounts.length > 0 && (
+      {/* {activeDiscounts.length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-600 mb-2">
             Available Discounts:
@@ -128,7 +128,7 @@ const DiscountSection: React.FC<DiscountSectionProps> = ({
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Manual Discount Code Input */}
       <div className="flex gap-2">

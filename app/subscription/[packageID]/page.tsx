@@ -2371,14 +2371,33 @@ We’re beyond excited to share this experience with you… your planner will be
                     )
                   )}
               </ul>
-              <div className="flex justify-start gap-4 tracking-wider mt-2 ">
-                {/* <span className="text-base   text-creamey">
-                  💗 Wifey Experience Membership (subscription 2,500 EGP){" "}
-                </span> */}
-                {/* <span className="text-lg  text-creamey">
-                  {packageData.price} LE (yearly)
-                </span> */}
-                {/* <span className="text-md text-creamey/95">Duration: {wifeyExperience.duration}</span> */}
+              <div className="flex items-center justify-start gap-3 tracking-wider mt-3 w-full px-2 md:px-4">
+                {(() => {
+                  const currentVariant = packageData?.variants?.find(
+                    (v) => v.price === variantPrice || (selectedDuration && v.duration === selectedDuration)
+                  );
+                  const effectiveDiscountedFrom = currentVariant?.discountedFrom ?? packageData?.discountedFrom;
+                  if (effectiveDiscountedFrom && effectiveDiscountedFrom > price) {
+                    return (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-lg md:text-xl font-bold text-creamey">
+                          {price} LE
+                        </span>
+                        <span className="text-sm font-normal text-creamey/60 line-through">
+                          {effectiveDiscountedFrom} LE
+                        </span>
+                        <span className="bg-creamey text-lovely text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+                          Save {Math.round(((effectiveDiscountedFrom - price) / effectiveDiscountedFrom) * 100)}%
+                        </span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <span className="text-lg md:text-xl font-bold text-creamey">
+                      {price} LE
+                    </span>
+                  );
+                })()}
               </div>
               <div className="flex flex-col justify-start items-start w-full font-thin gap-2  mt-2 mb-2">
                 <span className="text-sm text-creamey/80 font-normal">
@@ -2434,10 +2453,44 @@ We’re beyond excited to share this experience with you… your planner will be
               </div>
             )}
             <div className="mt-6 space-y-2 text-lovely">
-              <div className="flex justify-between text-base">
-                <span>Subtotal</span>
-                <span>{subTotal} LE</span>
-              </div>
+              {(() => {
+                const currentVariant = packageData?.variants?.find(
+                  (v) => v.price === variantPrice || (selectedDuration && v.duration === selectedDuration)
+                );
+                const effectiveDiscountedFrom = currentVariant?.discountedFrom ?? packageData?.discountedFrom;
+                const hasPackageDiscount = !!(effectiveDiscountedFrom && effectiveDiscountedFrom > price);
+                const packageDiscountAmount = hasPackageDiscount ? effectiveDiscountedFrom - price : 0;
+                const cartTotal = (includeCartItems && items) ? items.reduce((acc, item) => acc + (item.price * item.quantity), 0) : 0;
+                const originalSubtotal = hasPackageDiscount ? effectiveDiscountedFrom + cartTotal : subTotal;
+
+                if (hasPackageDiscount) {
+                  return (
+                    <>
+                      <div className="flex justify-between text-base">
+                        <span>Subtotal</span>
+                        <span>{originalSubtotal} LE</span>
+                      </div>
+                      <div className="flex justify-between text-base text-green-600">
+                        <span>
+                          Package Discount ({Math.round((packageDiscountAmount / effectiveDiscountedFrom!) * 100)}% OFF)
+                        </span>
+                        <span>-{packageDiscountAmount} LE</span>
+                      </div>
+                      <div className="flex justify-between text-base font-medium">
+                        <span>Now Price</span>
+                        <span>{subTotal} LE</span>
+                      </div>
+                    </>
+                  );
+                }
+
+                return (
+                  <div className="flex justify-between text-base">
+                    <span>Subtotal</span>
+                    <span>{subTotal} LE</span>
+                  </div>
+                );
+              })()}
               {appliedDiscount && appliedDiscount.value !== undefined && (
                 <div className="flex justify-between text-base text-green-600">
                   <span>Discount ({appliedDiscount.code})</span>

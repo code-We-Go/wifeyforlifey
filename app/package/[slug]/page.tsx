@@ -275,7 +275,14 @@ export default function PackageDetailPage() {
                     {formatDuration(variant.duration) && (
                       <p className="font-bold text-lovely">{formatDuration(variant.duration)}</p>
                     )}
-                    <p className="text-xl font-bold text-lovely">LE {variant.price.toFixed(2)}</p>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <p className="text-xl font-bold text-lovely">LE {variant.price.toFixed(2)}</p>
+                      {variant.discountedFrom && variant.discountedFrom > variant.price && (
+                        <span className="text-sm font-normal text-lovely/60 line-through">
+                          LE {variant.discountedFrom.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                     {variant.saving && (
                       <p className="text-sm text-lovely/70 font-medium">{variant.saving}</p>
                     )}
@@ -290,9 +297,16 @@ export default function PackageDetailPage() {
                   Duration: {formatDuration(packageData.duration)}
                 </p>
               )}
-              <p className="text-2xl font-bold text-lovely ">
-                LE {packageData.price.toFixed(2)}
-              </p>
+              <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                <p className="text-2xl font-bold text-lovely ">
+                  LE {packageData.price.toFixed(2)}
+                </p>
+                {packageData.discountedFrom && packageData.discountedFrom > packageData.price && (
+                  <span className="text-lg font-normal text-lovely/60 line-through">
+                    LE {packageData.discountedFrom.toFixed(2)}
+                  </span>
+                )}
+              </div>
               {packageData.saving && (
                 <p className="text-sm text-lovely/70 font-medium ">
                   {packageData.saving}
@@ -449,6 +463,7 @@ export default function PackageDetailPage() {
             const handleAddToCart = () => {
               if (!packageData) return;
               let price = packageData.price;
+              let discountedFrom = packageData.discountedFrom;
               let duration = packageData.duration;
               let saving = packageData.saving;
 
@@ -459,6 +474,7 @@ export default function PackageDetailPage() {
                 }
                 const selected = packageData.variants[selectedVariantIndex];
                 price = selected.price;
+                discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
                 duration = selected.duration;
                 saving = selected.saving;
               }
@@ -469,6 +485,7 @@ export default function PackageDetailPage() {
                 categoryName: packageData.partOf || packageData.name,
                 tier: (packageData.name.toLowerCase().includes("mini") || (packageData.slug && packageData.slug.toLowerCase().includes("mini"))) ? "mini" : "full",
                 price,
+                discountedFrom,
                 duration,
                 saving,
                 imageUrl: packageData.imgUrl,
@@ -481,6 +498,7 @@ export default function PackageDetailPage() {
             const handleSubscribeNow = () => {
               if (!packageData) return;
               let price = packageData.price;
+              let discountedFrom = packageData.discountedFrom;
               let duration = packageData.duration;
               let saving = packageData.saving;
 
@@ -491,6 +509,7 @@ export default function PackageDetailPage() {
                 }
                 const selected = packageData.variants[selectedVariantIndex];
                 price = selected.price;
+                discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
                 duration = selected.duration;
                 saving = selected.saving;
               }
@@ -501,6 +520,7 @@ export default function PackageDetailPage() {
                 categoryName: packageData.partOf || packageData.name,
                 tier: (packageData.name.toLowerCase().includes("mini") || (packageData.slug && packageData.slug.toLowerCase().includes("mini"))) ? "mini" : "full",
                 price,
+                discountedFrom,
                 duration,
                 saving,
                 imageUrl: packageData.imgUrl,

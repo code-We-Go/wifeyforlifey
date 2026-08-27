@@ -292,6 +292,7 @@ export default function PackageeDetailPage() {
   const handleAddToCart = () => {
     if (!packageData) return;
     let price = packageData.price;
+    let discountedFrom = packageData.discountedFrom;
     let duration = packageData.duration;
     let saving = packageData.saving;
 
@@ -302,6 +303,7 @@ export default function PackageeDetailPage() {
       }
       const selected = packageData.variants[selectedVariantIndex];
       price = selected.price;
+      discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
       duration = selected.duration;
       saving = selected.saving;
     }
@@ -316,6 +318,7 @@ export default function PackageeDetailPage() {
           ? "mini"
           : "full",
       price,
+      discountedFrom,
       duration,
       saving,
       imageUrl: packageData.imgUrl,
@@ -328,6 +331,7 @@ export default function PackageeDetailPage() {
   const handleSubscribeNow = () => {
     if (!packageData) return;
     let price = packageData.price;
+    let discountedFrom = packageData.discountedFrom;
     let duration = packageData.duration;
     let saving = packageData.saving;
 
@@ -338,6 +342,7 @@ export default function PackageeDetailPage() {
       }
       const selected = packageData.variants[selectedVariantIndex];
       price = selected.price;
+      discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
       duration = selected.duration;
       saving = selected.saving;
     }
@@ -352,6 +357,7 @@ export default function PackageeDetailPage() {
           ? "mini"
           : "full",
       price,
+      discountedFrom,
       duration,
       saving,
       imageUrl: packageData.imgUrl,

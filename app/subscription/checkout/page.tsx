@@ -328,8 +328,8 @@ const UnifiedCheckoutPage = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     // Convert any email field to lowercase
-    const finalValue = name.toLowerCase().includes('email') 
-      ? value.toLowerCase() 
+    const finalValue = name.toLowerCase().includes('email')
+      ? value.toLowerCase()
       : value;
     setFormData((prev) => ({ ...prev, [name]: finalValue }));
   };
@@ -1120,20 +1120,20 @@ const UnifiedCheckoutPage = () => {
 
           {/* Terms & Submit */}
           <div className="w-full space-y-4 mt-4">
-          {isAuthenticated && (
-            <div className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                id="save-profile"
-                checked={saveShippingData}
-                onChange={(e) => setSaveShippingData(e.target.checked)}
-                className="w-4 h-4 accent-lovely cursor-pointer"
-              />
-              <label htmlFor="save-profile" className="text-sm cursor-pointer">
-                Save my shipping data for next time
-              </label>
-            </div>
-          )}
+            {isAuthenticated && (
+              <div className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="save-profile"
+                  checked={saveShippingData}
+                  onChange={(e) => setSaveShippingData(e.target.checked)}
+                  className="w-4 h-4 accent-lovely cursor-pointer"
+                />
+                <label htmlFor="save-profile" className="text-sm cursor-pointer">
+                  Save my shipping data for next time
+                </label>
+              </div>
+            )}
             <div className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -1205,7 +1205,14 @@ const UnifiedCheckoutPage = () => {
                         </div>
                       </div>
                     </div>
-                    <p className="font-semibold text-right">LE {sub.price * sub.quantity}</p>
+                    <div className="text-right">
+                      {sub.discountedFrom && sub.discountedFrom > sub.price && (
+                        <span className="text-xs text-lovely/60 line-through block">
+                          LE {sub.discountedFrom * sub.quantity}
+                        </span>
+                      )}
+                      <p className="font-semibold">LE {sub.price * sub.quantity}</p>
+                    </div>
                   </div>
                 ))}
 
@@ -1259,10 +1266,51 @@ const UnifiedCheckoutPage = () => {
 
             {/* Calculations Breakdown */}
             <div className="space-y-3 text-lovely pt-4 border-t border-lovely/10">
-              <div className="flex justify-between text-base">
-                <span>Subtotal</span>
-                <span>{subTotal} LE</span>
-              </div>
+              {(() => {
+                const originalSubscriptionsSum = subscriptionItems.reduce(
+                  (sum, item) =>
+                    sum +
+                    (item.discountedFrom && item.discountedFrom > item.price
+                      ? item.discountedFrom
+                      : item.price) *
+                    item.quantity,
+                  0
+                );
+                const productsSum = cartProducts.reduce(
+                  (sum, item) => sum + item.price * item.quantity,
+                  0
+                );
+                const originalSubtotal = originalSubscriptionsSum + productsSum;
+                const totalPackageSavings = originalSubtotal - subTotal;
+
+                if (totalPackageSavings > 0) {
+                  return (
+                    <>
+                      <div className="flex justify-between text-base">
+                        <span>Subtotal</span>
+                        <span>{originalSubtotal} LE</span>
+                      </div>
+                      <div className="flex justify-between text-base text-green-600">
+                        <span>
+                          Package Discount ({Math.round((totalPackageSavings / originalSubtotal) * 100)}% OFF)
+                        </span>
+                        <span>-{totalPackageSavings} LE</span>
+                      </div>
+                      <div className="flex justify-between text-base font-medium">
+                        <span>Price</span>
+                        <span>{subTotal} LE</span>
+                      </div>
+                    </>
+                  );
+                }
+
+                return (
+                  <div className="flex justify-between text-base">
+                    <span>Subtotal</span>
+                    <span>{subTotal} LE</span>
+                  </div>
+                );
+              })()}
 
               {appliedDiscount && (
                 <div className="flex justify-between text-base text-green-600">

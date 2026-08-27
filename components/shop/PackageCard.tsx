@@ -43,6 +43,11 @@ export default function PackageCard({
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10"></div>
+        {packageItem.discountedFrom && packageItem.discountedFrom > packageItem.price && (
+          <div className="absolute top-3 right-3 z-10 bg-lovely text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+            Save {Math.round(((packageItem.discountedFrom - packageItem.price) / packageItem.discountedFrom) * 100)}%
+          </div>
+        )}
       </div>
       
       <div className="p-[16px_18px_20px] flex flex-col grow">
@@ -69,29 +74,36 @@ export default function PackageCard({
         
         <div className="grow" />
 
-        <p className={cn(thirdFont.className, "font-semibold text-[19px] mt-3 flex items-center gap-1.5 flex-wrap")}>
-          From LE {packageItem.price.toFixed(2)}
-          <small className="font-sans font-medium text-[12px] opacity-85 normal-case tracking-normal">
-            {packageItem.duration > 0 ? (
-              <>
-                | {(() => {
-                  const months = Number(packageItem.duration);
-                  if (isNaN(months) || months === 0) return packageItem.duration;
-                  if (months < 12) return `${months} Months`;
-                  const years = Math.floor(months / 12);
-                  const remainingMonths = months % 12;
-                  let result = `${years} ${years === 1 ? "Year" : "Years"}`;
-                  if (remainingMonths > 0) {
-                    result += ` and ${remainingMonths} ${
-                      remainingMonths === 1 ? "Month" : "Months"
-                    }`;
-                  }
-                  return result;
-                })()}
-              </>
-            ) : null}
-          </small>
-        </p>
+        <div className="mt-3 flex items-baseline gap-2 flex-wrap">
+          <p className={cn(thirdFont.className, "font-semibold text-[19px] flex items-center gap-1.5 flex-wrap")}>
+            From LE {packageItem.price.toFixed(2)}
+            {packageItem.discountedFrom && packageItem.discountedFrom > packageItem.price && (
+              <span className="text-[14px] text-lovely/60 line-through font-normal">
+                LE {packageItem.discountedFrom.toFixed(2)}
+              </span>
+            )}
+            <small className="font-sans font-medium text-[12px] opacity-85 normal-case tracking-normal">
+              {packageItem.duration > 0 ? (
+                <>
+                  | {(() => {
+                    const months = Number(packageItem.duration);
+                    if (isNaN(months) || months === 0) return packageItem.duration;
+                    if (months < 12) return `${months} Months`;
+                    const years = Math.floor(months / 12);
+                    const remainingMonths = months % 12;
+                    let result = `${years} ${years === 1 ? "Year" : "Years"}`;
+                    if (remainingMonths > 0) {
+                      result += ` and ${remainingMonths} ${
+                        remainingMonths === 1 ? "Month" : "Months"
+                      }`;
+                    }
+                    return result;
+                  })()}
+                </>
+              ) : null}
+            </small>
+          </p>
+        </div>
 
         <Button
           variant="secondary"
