@@ -1292,7 +1292,7 @@ const UnifiedCheckoutPage = () => {
                       </div>
                       <div className="flex justify-between text-base text-green-600">
                         <span>
-                          Package Discount ({Math.round((totalPackageSavings / originalSubtotal) * 100)}% OFF)
+                          Birthday Discount ({Math.round((totalPackageSavings / originalSubtotal) * 100)}% OFF)
                         </span>
                         <span>-{totalPackageSavings} LE</span>
                       </div>

@@ -60,9 +60,10 @@ export default function DiscountPopup() {
       <div className="relative w-full min-h-[50vh] lg:min-h-[75vh] flex flex-col md:flex-row  max-w-md md:max-w-2xl lg:max-w-3xl  mx-4 bg-creamey rounded-lg shadow-xl">
         <button
           onClick={closePopup}
-          className="absolute top-2 right-2 text-lovely"
+          aria-label="Close popup"
+          className="absolute top-3 right-3 z-20 p-1.5 rounded-full bg-creamey/80 md:bg-transparent text-lovely hover:bg-creamey transition-all shadow-sm md:shadow-none"
         >
-          <X size={24} />
+          <X size={22} />
         </button>
 
         {popup.imageUrl && (
