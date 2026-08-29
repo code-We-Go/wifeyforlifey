@@ -23,6 +23,11 @@ interface IPartnerSessionVariant {
   duration: number;
 }
 
+interface IPartnerSessionLink {
+  url: string;
+  description: string;
+}
+
 interface IPartnerSession {
   _id: string;
   title: string;
@@ -39,6 +44,7 @@ interface IPartnerSession {
   link?: string;
   meetingLink?: string;
   variants?: IPartnerSessionVariant[];
+  links?: IPartnerSessionLink[];
 }
 
 const ExpertSessions = () => {
@@ -710,6 +716,28 @@ const ExpertSessions = () => {
                 ? "Once confirmed, you will be redirected directly to access your session."
                 : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
             </p>
+
+            {/* Links */}
+            {selectedForBooking.links && selectedForBooking.links.length > 0 && (
+              <div className="mb-4">
+                <div className="space-y-2">
+                  {selectedForBooking.links.map((link, i) => (
+                    <a
+                      key={i}
+                      href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-lovely hover:text-lovely/70 underline underline-offset-2 transition-colors text-sm"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <span>{link.description || link.url} (Anonymously)</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <form onSubmit={book} className="space-y-3">
               <Input

@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export interface IPartnerSessionLink {
+  url: string;
+  description: string;
+}
+
 export interface IPartnerSessionVariant {
   title: string;
   description: string;
@@ -23,7 +28,16 @@ export interface IPartnerSession extends Document {
   meetingLink?: string;
   isActive: boolean;
   variants?: IPartnerSessionVariant[];
+  links?: IPartnerSessionLink[];
 }
+
+const PartnerSessionLinkSchema = new Schema<IPartnerSessionLink>(
+  {
+    url: { type: String, required: true },
+    description: { type: String, required: false, default: "" },
+  },
+  { _id: false }
+);
 
 const PartnerSessionVariantSchema = new Schema<IPartnerSessionVariant>(
   {
@@ -61,6 +75,11 @@ const PartnerSessionSchema = new Schema<IPartnerSession>(
     meetingLink: { type: String, required: false, default: "" },
     variants: {
       type: [PartnerSessionVariantSchema],
+      required: false,
+      default: [],
+    },
+    links: {
+      type: [PartnerSessionLinkSchema],
       required: false,
       default: [],
     },
