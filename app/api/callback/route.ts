@@ -202,6 +202,19 @@ async function handlePartnerSession(
       body,
       from: "partners@shopwifeyforlifey.com",
     });
+
+    if (String(partnerOrder.sessionId) === "6a88988e5e832f13002e8653") {
+      const { sexEducationSessionEmailHtml } = await import(
+        "@/utils/SexEducationSessionMail"
+      );
+      await sendMail({
+        to: partnerOrder.clientEmail,
+        subject: "Your Sex Education FAQs Session Booking Confirmation 💕",
+        name: `${partnerOrder.clientFirstName} ${partnerOrder.clientLastName}`.trim(),
+        body: sexEducationSessionEmailHtml,
+        from: "orders@shopwifeyforlifey.com",
+      });
+    }
   } catch (e) {
     console.error("Failed to send partner confirmation email", e);
   }

@@ -243,6 +243,19 @@ export async function POST(req: Request) {
           body,
           from: "partners@shopwifeyforlifey.com",
         });
+
+        if (String(partnerSession._id) === "6a88988e5e832f13002e8653") {
+          const { sexEducationSessionEmailHtml } = await import(
+            "@/utils/SexEducationSessionMail"
+          );
+          await sendMail({
+            to: email,
+            subject: "Your Sex Education FAQs Session Booking Confirmation 💕",
+            name: `${firstName} ${lastName}`.trim(),
+            body: sexEducationSessionEmailHtml,
+            from: "orders@shopwifeyforlifey.com",
+          });
+        }
       } catch (e) {
         console.error("Failed to send partner confirmation email for free booking", e);
       }
