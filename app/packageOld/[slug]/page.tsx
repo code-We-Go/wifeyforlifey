@@ -1,0 +1,677 @@
+"use client";
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronLeft as ChevronLeftIcon,
+  Minus,
+  Plus,
+  X,
+} from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Ipackage } from "@/app/interfaces/interfaces";
+import { thirdFont } from "@/fonts";
+import axios from "axios";
+import PackageDetailSkeleton from "./PackageDetailSkeleton";
+import WifeyCommunity from "@/components/sections/WifeyCommunity";
+import { useCart } from "@/providers/CartProvider";
+
+export default function PackageDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { addSubscription, openCart } = useCart();
+  const [packageData, setPackageData] = useState<Ipackage | null>(null);
+  const [allPackages, setAllPackages] = useState<Ipackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+
+  // Package-specific modal content
+  const getModalContent = (packageId: string) => {
+    const packageContents = {
+      "687396821b4da119eb1c13fe": {
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
+
+  While you wait for your gehaz bestie to arrive, you can already enjoy:
+  ✨ Wifey's curated playlists
+  ✨ Exclusive partner discounts
+  ✨ Access to supportive Wifey circles
+
+  Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
+      },
+      "68bf6ae9c4d5c1af12cdcd37": {
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
+
+After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
+
+Once you receive your planner, you’ll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you’ll find a thank-you card with a QR code that lets you browse and select your favorite playlist.
+
+We’re beyond excited to share this experience with you… your planner will be on its way very soon! ✨`,
+      },
+    };
+
+    return packageContents[packageId as keyof typeof packageContents] || null;
+  };
+
+  const formatDuration = (duration: any) => {
+    const months = Number(duration);
+    if (isNaN(months) || months <= 0) return null;
+    if (months < 12) return `${months} Months`;
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    let result = `${years} ${years === 1 ? "Year" : "Years"}`;
+    if (remainingMonths > 0) {
+      result += ` and ${remainingMonths} ${
+        remainingMonths === 1 ? "Month" : "Months"
+      }`;
+    }
+    return result;
+  };
+
+
+  // Embla Carousel for Package Cards
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: "start",
+    slidesToScroll: 1,
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(-1);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+  }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    const fetchPackageData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `/api/packages?slug=${params.slug}&all=true`
+        );
+        // The API returns { data: [], ... } for search/list queries
+        const packages = response.data.data;
+        
+        if (Array.isArray(packages) && packages.length > 0) {
+          setAllPackages(packages);
+          // Default to the package with the highest price
+          const highestPricePackage = packages.reduce((max, pkg) => 
+            pkg.price > max.price ? pkg : max
+          , packages[0]);
+          setPackageData(highestPricePackage);
+
+          // Auto-select the last variant if variants exist
+          if (highestPricePackage.variants && highestPricePackage.variants.length > 0) {
+            setSelectedVariantIndex(highestPricePackage.variants.length - 1);
+          }
+        } else {
+             setPackageData(null);
+        }
+      } catch (error) {
+        console.error("Error fetching package:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params.slug) {
+      fetchPackageData();
+    }
+  }, [params.slug]);
+
+  // Show modal when package data is loaded for specific packages
+  useEffect(() => {
+    if (packageData && packageData._id) {
+      const modalContent = getModalContent(packageData._id);
+      if (modalContent) {
+        setShowModal(true);
+      }
+    }
+  }, [packageData]);
+
+  if (loading) {
+    return <PackageDetailSkeleton />;
+  }
+
+  if (!packageData) {
+    return (
+      <div className="container mx-auto py-12 px-4 ">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-lovely">Package not found</h2>
+          <p className="mt-4 text-lovely/90">
+            The package you are looking for does not exist or has been removed.
+          </p>
+          <Button
+            onClick={() => router.push("/shop")}
+            className="mt-6 bg-lovely text-creamey hover:bg-lovely/90"
+          >
+            Return to Shop
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    // <div className="py-8 pb-44 md:pb-24 px-4">
+    <div className="py-8   px-4">
+      {/* Back button */}
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          className="text-lovely hover:text-lovely/80 hover:bg-transparent p-0"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Package Image Carousel */}
+        <div className="space-y-4">
+          <div className="relative aspect-square overflow-hidden rounded-lg border-2 border-lovely">
+            <Image
+              src={
+                packageData.images && packageData.images.length > 0
+                  ? packageData.images[currentImageIndex]
+                  : packageData.imgUrl
+              }
+              alt={packageData.name}
+              fill
+              className="object-contain"
+            />
+
+            {/* Navigation arrows */}
+            {packageData.images && packageData.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentImageIndex((prev) =>
+                      prev === 0 ? packageData.images.length - 1 : prev - 1
+                    );
+                  }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-creamey/80 rounded-full p-1 text-lovely hover:bg-creamey transition-colors z-10"
+                >
+                  <ChevronLeftIcon size={20} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentImageIndex((prev) =>
+                      prev === packageData.images.length - 1 ? 0 : prev + 1
+                    );
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-creamey/80 rounded-full p-1 text-lovely hover:bg-creamey transition-colors z-10"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Thumbnail navigation */}
+          {packageData.images && packageData.images.length > 1 && (
+            <div className="flex space-x-2 overflow-x-auto pb-2">
+              {packageData.images.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`relative w-16 h-16 rounded-md overflow-hidden border-2 ${
+                    currentImageIndex === index
+                      ? "border-lovely"
+                      : "border-lovely/30 hover:border-lovely/60"
+                  }`}
+                >
+                  <Image
+                    src={img}
+                    alt={`${packageData.name} thumbnail ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Package Details */}
+        <div>
+                    <h1
+            className={`${thirdFont.className} text-3xl xl:text-4xl tracking-wide font-bold text-lovely mb-2`}
+          >
+                              {packageData.partOf?packageData.partOf:packageData.name}
+
+          </h1>
+           {/* Variants Badges */}
+           {allPackages.length > 1 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {allPackages.map((pkg) => (
+                <div
+                  key={pkg._id}
+                  onClick={() => {
+                    setPackageData(pkg);
+                    setCurrentImageIndex(0);
+                    setQuantity(1);
+                    // Auto-select the last variant if variants exist
+                    if (pkg.variants && pkg.variants.length > 0) {
+                      setSelectedVariantIndex(pkg.variants.length - 1);
+                    } else {
+                      setSelectedVariantIndex(-1);
+                    }
+                  }}
+                  className={`cursor-pointer px-4 py-1 rounded-full border transition-all ${
+                    packageData?._id === pkg._id
+                      ? "bg-lovely text-creamey border-lovely"
+                      : "bg-transparent text-lovely border-lovely hover:bg-lovely/10"
+                  }`}
+                >
+                  {pkg.name}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {packageData.variants && packageData.variants.length > 0 ? (
+            <div className="mb-6">
+              <h2 className={`${thirdFont.className} text-xl font-semibold text-lovely mb-4`}>
+                Choose a plan
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {packageData.variants.map((variant, index) => (
+                  <div 
+                    key={index}
+                    className={`p-4 border-2 rounded-2xl cursor-pointer transition-all ${
+                      selectedVariantIndex === index ? 'border-lovely bg-lovely/5' : 'border-lovely/20 hover:border-lovely/50'
+                    }`}
+                    onClick={() => setSelectedVariantIndex(index)}
+                  >
+                    {formatDuration(variant.duration) && (
+                      <p className="font-bold text-lovely">{formatDuration(variant.duration)}</p>
+                    )}
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <p className="text-xl font-bold text-lovely">LE {variant.price.toFixed(2)}</p>
+                      {variant.discountedFrom && variant.discountedFrom > variant.price && (
+                        <span className="text-sm font-normal text-lovely/60 line-through">
+                          LE {variant.discountedFrom.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    {variant.saving && (
+                      <p className="text-sm text-lovely/70 font-medium">{variant.saving}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              {formatDuration(packageData.duration) && (
+                <p className="text-lg font-medium text-lovely mb-4">
+                  Duration: {formatDuration(packageData.duration)}
+                </p>
+              )}
+              <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                <p className="text-2xl font-bold text-lovely ">
+                  LE {packageData.price.toFixed(2)}
+                </p>
+                {packageData.discountedFrom && packageData.discountedFrom > packageData.price && (
+                  <span className="text-lg font-normal text-lovely/60 line-through">
+                    LE {packageData.discountedFrom.toFixed(2)}
+                  </span>
+                )}
+              </div>
+              {packageData.saving && (
+                <p className="text-sm text-lovely/70 font-medium ">
+                  {packageData.saving}
+                </p>
+              )}
+            </>
+          )}
+          <Separator className="my-6" />
+
+        {/* <h2
+          className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-4`}
+        >
+          Package Features
+        </h2> */}
+        
+        {/* Carousel Container */}
+                <div className="mt-4 container-custom pb-44">
+        <h2
+          className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-4`}
+        >
+          Package Features
+        </h2>
+        
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          {(packageData.supportCards ?? []).length > 2 && (
+            <>
+              <button
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                }`}
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+              </button>
+            </>
+          )}
+
+          {/* Embla Carousel */}
+          <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
+            <div className="flex gap-2 md:gap-4">
+              {(packageData.supportCards ?? []).map((card) => (
+                <div
+                  key={card.id}
+                  className="relative flex-[0_0_80%] sm:flex-[0_0_50%]  min-w-0 pb-6 md:pb-12"
+                >
+                  <div
+                    className={`rounded-sm  shadow-xl h-[350px]  ${
+                      card.enable === false
+                        ? "bg-gray-500 grayscale-[100%]"
+                        : "bg-lovely"
+                    }`}
+                  >
+                    {/* Card Header */}
+                    <div className="p-2  pb-32 md:pb-40 h-full ">
+                      <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
+                        {card.title}
+                      </h3>
+                      <ul className="list-disc list-outside pl-4  text-creamey marker:text-creamey">
+
+                        {card.description.map((point, index) => (
+                          <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Mobile Screen Mockup - Moving out to avoid grayscale on sibling overlay */}
+                  <div
+                    className={`absolute -bottom-14 -ml-[6px] xs:-bottom-32 sm:-bottom-20  lg:-bottom-40 xl:-bottom-40 left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px]  h-[450px] xs:h-[550px] ${
+                      card.enable === false
+                        ? "grayscale-[100%]"
+                        : ""
+                    }`}
+                  >
+                    <Image
+                      src={card.imagePath}
+                      alt={card.title}
+                      fill
+                      className="object-contain object-bottom"
+                    />
+                  </div>
+                  {card.enable === false && (
+                      <div className="absolute bg-lovely top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] z-30 flex flex-col items-center justify-center p-3  rounded-sm">
+                        <p>🔒</p>
+                        <p className={`${thirdFont.className} text-creamey  text-center text-sm md:text-base drop-shadow-lg uppercase tracking-wide`}>
+                          This feature is only available in The Full {packageData?._id === "6a2d9aec3def6ce76dc7babc" ? "Wedding" : "Wifey"} Experience
+                        </p>
+                      </div>
+                    )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+          {/* Package Items */}
+         {/* <div className="mb-6">
+            <h2
+              className={`${thirdFont.className} text-xl font-semibold text-lovely mb-4`}
+            >
+              What&apos;s Included
+            </h2>
+            <ul className="space-y-2">
+              {packageData.items.map(
+                (item, index) =>
+                  item.included && (
+                    <li key={index} className="flex items-start">
+                      <span className="text-lovely">• {item.value}</span>
+                    </li>
+                  )
+              )}
+            </ul>
+          </div> */}
+          
+
+          {/* Notes */}
+          {packageData.notes && packageData.notes.length > 0 && (
+            <div className="mb-6">
+              <h2
+                className={`${thirdFont.className} text-xl font-semibold text-lovely mb-4`}
+              >
+                Notes
+              </h2>
+              <ul className="space-y-2">
+                {packageData.notes.map((note, index) => (
+                  <li key={index} className="text-lovely/90 text-sm">
+                    • {note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* CTA Buttons */}
+          {(() => {
+            const handleAddToCart = () => {
+              if (!packageData) return;
+              let price = packageData.price;
+              let discountedFrom = packageData.discountedFrom;
+              let duration = packageData.duration;
+              let saving = packageData.saving;
+
+              if (packageData.variants && packageData.variants.length > 0) {
+                if (selectedVariantIndex === -1) {
+                  alert("Please select a plan before adding to cart.");
+                  return;
+                }
+                const selected = packageData.variants[selectedVariantIndex];
+                price = selected.price;
+                discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
+                duration = selected.duration;
+                saving = selected.saving;
+              }
+
+              addSubscription({
+                packageId: packageData._id || "",
+                packageName: packageData.name,
+                categoryName: packageData.partOf || packageData.name,
+                tier: (packageData.name.toLowerCase().includes("mini") || (packageData.slug && packageData.slug.toLowerCase().includes("mini"))) ? "mini" : "full",
+                price,
+                discountedFrom,
+                duration,
+                saving,
+                imageUrl: packageData.imgUrl,
+                quantity,
+              });
+
+              openCart();
+            };
+
+            const handleSubscribeNow = () => {
+              if (!packageData) return;
+              let price = packageData.price;
+              let discountedFrom = packageData.discountedFrom;
+              let duration = packageData.duration;
+              let saving = packageData.saving;
+
+              if (packageData.variants && packageData.variants.length > 0) {
+                if (selectedVariantIndex === -1) {
+                  alert("Please select a plan before subscribing.");
+                  return;
+                }
+                const selected = packageData.variants[selectedVariantIndex];
+                price = selected.price;
+                discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
+                duration = selected.duration;
+                saving = selected.saving;
+              }
+
+              addSubscription({
+                packageId: packageData._id || "",
+                packageName: packageData.name,
+                categoryName: packageData.partOf || packageData.name,
+                tier: (packageData.name.toLowerCase().includes("mini") || (packageData.slug && packageData.slug.toLowerCase().includes("mini"))) ? "mini" : "full",
+                price,
+                discountedFrom,
+                duration,
+                saving,
+                imageUrl: packageData.imgUrl,
+                quantity,
+              });
+
+              router.push("/subscription/checkout");
+            };
+
+            return (
+              <div className="mt-6 space-y-6">
+                <div>
+                  <div className="text-sm text-lovely font-medium mb-2">Quantity</div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      className="text-lovely bg-pinkey border-lovely/20 h-9 w-9 p-0"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))}
+                      disabled={quantity <= 1}
+                    >
+                      <span className="sr-only">Decrease quantity</span>
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <div className="w-12 text-center text-lovely font-medium">{quantity}</div>
+                    <Button
+                      className="text-lovely bg-pinkey border-lovely/20 h-9 w-9 p-0"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setQuantity((prev) => prev + 1)}
+                    >
+                      <span className="sr-only">Increase quantity</span>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    className="flex-1 bg-transparent text-lovely border-2 border-lovely hover:bg-lovely/10 rounded-full py-6 text-base font-semibold"
+                    onClick={handleAddToCart}
+                  >
+                    🛒 Add to Cart
+                  </Button>
+                  <Button
+                    className="flex-1 bg-lovely text-creamey hover:bg-lovely/90 rounded-full py-6 text-base font-semibold"
+                    onClick={handleSubscribeNow}
+                  >
+                    ⚡ Subscribe Now
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+
+        </div>
+      </div>
+      <div className="bg-pink-50 -mx-4 mt-8 -mb-8">
+        <WifeyCommunity/>
+      </div>
+      {/* Package Cards Section */}
+      {false && (
+      <div className="mt-16 container-custom">
+        <h2
+          className={`${thirdFont.className} text-2xl font-bold text-lovely text-center mb-8`}
+        >
+          Package Features
+        </h2>
+        
+        {/* Carousel Container */}
+      </div>
+      )}
+
+      {/* Modal for specific packages */}
+      {showModal && packageData?._id && getModalContent(packageData._id) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-creamey rounded-2xl max-w-md w-full mx-4 relative shadow-2xl border-2 border-lovely">
+            {/* Close button */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-lovely hover:text-lovely/70 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Modal content */}
+            <div className="p-6 pt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">💖</div>
+                {getModalContent(packageData._id) && (
+                  <>
+                    <h2 className="text-lovely text-lg font-bold mb-4">
+                      {getModalContent(packageData._id)?.header}
+                    </h2>
+                    <div className="text-lovely leading-relaxed whitespace-pre-line text-sm font-medium">
+                      {getModalContent(packageData._id)?.content}
+                    </div>
+                  </>
+                )}
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
