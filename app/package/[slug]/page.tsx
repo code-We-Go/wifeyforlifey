@@ -8,6 +8,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   Minus,
   Plus,
+  X,
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,36 @@ export default function PackageDetailPage() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+
+  // Package-specific modal content
+  const getModalContent = (packageId: string) => {
+    const packageContents = {
+      "687396821b4da119eb1c13fe": {
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
+
+  While you wait for your gehaz bestie to arrive, you can already enjoy:
+  ✨ Wifey's curated playlists
+  ✨ Exclusive partner discounts
+  ✨ Access to supportive Wifey circles
+
+  Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
+      },
+      "68bf6ae9c4d5c1af12cdcd37": {
+        header: "This is a pre-order",
+        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
+
+After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
+
+Once you receive your planner, you’ll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you’ll find a thank-you card with a QR code that lets you browse and select your favorite playlist.
+
+We’re beyond excited to share this experience with you… your planner will be on its way very soon! ✨`,
+      },
+    };
+
+    return packageContents[packageId as keyof typeof packageContents] || null;
+  };
 
   const formatDuration = (duration: any) => {
     const months = Number(duration);
@@ -112,6 +143,16 @@ export default function PackageDetailPage() {
       fetchPackageData();
     }
   }, [params.slug]);
+
+  // Show modal when package data is loaded for specific packages
+  useEffect(() => {
+    if (packageData && packageData._id) {
+      const modalContent = getModalContent(packageData._id);
+      if (modalContent) {
+        setShowModal(true);
+      }
+    }
+  }, [packageData]);
 
   if (loading) {
     return <PackageDetailSkeleton />;
@@ -592,6 +633,44 @@ export default function PackageDetailPage() {
         
         {/* Carousel Container */}
       </div>
+      )}
+
+      {/* Modal for specific packages */}
+      {showModal && packageData?._id && getModalContent(packageData._id) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-creamey rounded-2xl max-w-md w-full mx-4 relative shadow-2xl border-2 border-lovely">
+            {/* Close button */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-lovely hover:text-lovely/70 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Modal content */}
+            <div className="p-6 pt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">💖</div>
+                {getModalContent(packageData._id) && (
+                  <>
+                    <h2 className="text-lovely text-lg font-bold mb-4">
+                      {getModalContent(packageData._id)?.header}
+                    </h2>
+                    <div className="text-lovely leading-relaxed whitespace-pre-line text-sm font-medium">
+                      {getModalContent(packageData._id)?.content}
+                    </div>
+                  </>
+                )}
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

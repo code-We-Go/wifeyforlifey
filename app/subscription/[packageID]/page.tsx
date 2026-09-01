@@ -245,7 +245,7 @@ const SubscriptionPage = () => {
         ...prevData,
         process: "upgrade",
       }));
-      
+
       const fetchUpgradeInfo = async () => {
         setLoadingUpgradePrice(true);
         try {
@@ -393,9 +393,9 @@ We’re beyond excited to share this experience with you… your planner will be
             : null,
           district: sd.bostaDistrict
             ? ({
-                districtId: sd.bostaDistrict,
-                districtName: sd.bostaDistrictName || "",
-              } as any)
+              districtId: sd.bostaDistrict,
+              districtName: sd.bostaDistrictName || "",
+            } as any)
             : null,
         }));
       }
@@ -567,8 +567,8 @@ We’re beyond excited to share this experience with you… your planner will be
     const { name, value } = e.target;
     console.log(value);
     // Convert any email field to lowercase
-    const finalValue = name.toLowerCase().includes('email') 
-      ? value.toLowerCase() 
+    const finalValue = name.toLowerCase().includes('email')
+      ? value.toLowerCase()
       : value;
     setFormData({ ...formData, [name]: finalValue });
   };
@@ -864,8 +864,8 @@ We’re beyond excited to share this experience with you… your planner will be
         appliedDiscount?.calculationType === "FREE_SHIPPING"
           ? shipping
           : appliedDiscount?.calculationType === "PERCENTAGE"
-          ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
-          : appliedDiscount?.value,
+            ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
+            : appliedDiscount?.value,
       loyalty: {
         redeemedPoints: Math.max(
           0,
@@ -880,7 +880,7 @@ We’re beyond excited to share this experience with you… your planner will be
 
     try {
       const res = await axios.post("/api/payment/", payload);
-      
+
       // Save shipping data if requested
       if (saveShippingData && isAuthenticated && user?.email) {
         try {
@@ -979,8 +979,8 @@ We’re beyond excited to share this experience with you… your planner will be
             appliedDiscount?.calculationType === "FREE_SHIPPING"
               ? shipping
               : appliedDiscount?.calculationType === "PERCENTAGE"
-              ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
-              : appliedDiscount?.value,
+                ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
+                : appliedDiscount?.value,
           loyalty: {
             redeemedPoints: Math.max(
               0,
@@ -999,7 +999,7 @@ We’re beyond excited to share this experience with you… your planner will be
         if (res.data.success) {
           // Clear cart if items were included
           if (includeCartItems) clearCart();
-          
+
           // Redirect to instapay success page with instructions
           const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201007728799";
           router.push(
@@ -1027,8 +1027,8 @@ We’re beyond excited to share this experience with you… your planner will be
         appliedDiscount?.calculationType === "FREE_SHIPPING"
           ? shipping
           : appliedDiscount?.calculationType === "PERCENTAGE"
-          ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
-          : appliedDiscount?.value,
+            ? Math.round((subTotal * (appliedDiscount?.value || 0)) / 100)
+            : appliedDiscount?.value,
       loyalty: {
         redeemedPoints: Math.max(
           0,
@@ -1042,7 +1042,7 @@ We’re beyond excited to share this experience with you… your planner will be
     };
 
     const res = await axios.post("/api/payment/", payload);
-    
+
     // Save shipping data if requested
     if (saveShippingData && isAuthenticated && user?.email) {
       try {
@@ -1118,9 +1118,9 @@ We’re beyond excited to share this experience with you… your planner will be
       const modalContent = getModalContent(packageID as string);
       if (modalContent) {
 
-        setShowModal(false);
-        //not a pre order now
-        // setShowModal(true);
+        // setShowModal(false);
+        // not a pre order now
+        setShowModal(true);
       }
     }
   }, [packageData, packageID]);
@@ -1187,10 +1187,10 @@ We’re beyond excited to share this experience with you… your planner will be
     const finalTotal = Math.max(
       0,
       calculatedSubTotal -
-        newDiscountAmount -
-        loyaltyLE +
-        effectiveShipping +
-        giftCardCost
+      newDiscountAmount -
+      loyaltyLE +
+      effectiveShipping +
+      giftCardCost
     );
     setTotal(finalTotal);
   }, [
@@ -1254,17 +1254,16 @@ We’re beyond excited to share this experience with you… your planner will be
                   <label className="text-lovely text-lg font-semibold">Select Renewal Option:</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                     {packageData.renewals.map((option, idx) => (
-                      <div 
+                      <div
                         key={idx}
                         onClick={() => {
                           setVariantPrice(option.price);
                           setSelectedDuration(option.duration);
                         }}
-                        className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${
-                          selectedDuration === option.duration && variantPrice === option.price
+                        className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${selectedDuration === option.duration && variantPrice === option.price
                             ? "border-lovely bg-lovely/10 shadow-md"
                             : "border-pinkey hover:border-lovely/50 bg-creamey"
-                        }`}
+                          }`}
                       >
                         <span className="text-lovely font-bold text-lg">{option.duration} Months</span>
                         <span className="text-lovely text-base">{option.price} LE</span>
@@ -1287,9 +1286,8 @@ We’re beyond excited to share this experience with you… your planner will be
                     disabled={isRenew || isUpgrade}
                     value={formData.email || user?.email || ""}
                     type="email"
-                    className={`border ${
-                      formErrors.email ? "border-red-500" : ""
-                    } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
+                    className={`border ${formErrors.email ? "border-red-500" : ""
+                      } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
                   />
                   {formErrors.email && (
                     <p className="uppercase text-xs text-red-500">
@@ -1327,103 +1325,100 @@ We’re beyond excited to share this experience with you… your planner will be
                 <button
                   disabled={loading || !acceptedTerms || loadingUpgradePrice}
                   type="submit"
-                  className={`border text-base transition duration-300 border-lovely p-1 ${
-                    loading || !acceptedTerms || loadingUpgradePrice
+                  className={`border text-base transition duration-300 border-lovely p-1 ${loading || !acceptedTerms || loadingUpgradePrice
                       ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
                       : "hover:cursor-pointer bg-lovely px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
-                  }`}
+                    }`}
                 >
                   {loadingUpgradePrice ? "Calculating price..." : loading ? "Processing..." : "PROCEED TO PAYMENT"}
                 </button>
               </div>
             </form>
           ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
-          >
-            <div
-              className={`${thirdFont.className} w-full text-base lg:text-2xl  border-b border-lovely`}
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
             >
-              contact
-            </div>
-            <div className="flex  items-center gap-2 w-full ">
-              <label className="text-lovely text-base">Email</label>
-              <div className="flex w-full gap-1 flex-col">
-                <input
-                  onChange={handleInputChange}
-                  name="email"
-                  value={formData.email}
-                  type="email"
-                  className={`border ${
-                    formErrors.email ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
-                />
-                {formErrors.email ? (
-                  <p className="uppercase text-xs text-red-500">
-                    {formErrors.email}
-                  </p>
-                ) : (
-                  ""
-                )}
+              <div
+                className={`${thirdFont.className} w-full text-base lg:text-2xl  border-b border-lovely`}
+              >
+                contact
               </div>
-            </div>
+              <div className="flex  items-center gap-2 w-full ">
+                <label className="text-lovely text-base">Email</label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    name="email"
+                    value={formData.email}
+                    type="email"
+                    className={`border ${formErrors.email ? "border-red-500" : ""
+                      } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
+                  />
+                  {formErrors.email ? (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.email}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </div>
 
-            <div className="flex items-center gap-2 w-full mt-2">
-              <input
-                type="checkbox"
-                id="giftCheckbox"
-                checked={isGift}
-                onChange={(e) => {
-                  setIsGift(e.target.checked);
-                  setFormData({
-                    ...formData,
-                    isGift: e.target.checked,
-                  });
-                }}
-                className="w-4 h-4 accent-lovely"
-              />
-              <label htmlFor="giftCheckbox" className="text-lovely text-base">
-                I&apos;m buying this as a gift 💖
-              </label>
-            </div>
+              <div className="flex items-center gap-2 w-full mt-2">
+                <input
+                  type="checkbox"
+                  id="giftCheckbox"
+                  checked={isGift}
+                  onChange={(e) => {
+                    setIsGift(e.target.checked);
+                    setFormData({
+                      ...formData,
+                      isGift: e.target.checked,
+                    });
+                  }}
+                  className="w-4 h-4 accent-lovely"
+                />
+                <label htmlFor="giftCheckbox" className="text-lovely text-base">
+                  I&apos;m buying this as a gift 💖
+                </label>
+              </div>
 
 
 
-            {isGift && (
-              <>
-                <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
-                  <p className="text-sm text-lovely mb-2">
-                    Please enter The Bride&apos;s Email (if it&apos;s available
-                    else let it blank).Please let us know once you give this
-                    planner to the bride and We will contact her through her
-                    WhatsApp and activate her account.
-                  </p>
-                  <div className="flex items-center gap-2 w-full">
-                    <label className="text-lovely text-base">
-                      Bride&apos;s Email
-                    </label>
-                    <div className="flex w-full gap-1 flex-col">
-                      <input
-                        onChange={handleInputChange}
-                        name="giftRecipientEmail"
-                        value={formData.giftRecipientEmail}
-                        type="email"
-                        className={`border ${
-                          formErrors.giftRecipientEmail ? "border-red-500" : ""
-                        } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
-                      />
-                      {formErrors.giftRecipientEmail ? (
-                        <p className="uppercase text-xs text-red-500">
-                          {formErrors.giftRecipientEmail}
-                        </p>
-                      ) : (
-                        ""
-                      )}
+              {isGift && (
+                <>
+                  <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
+                    <p className="text-sm text-lovely mb-2">
+                      Please enter The Bride&apos;s Email (if it&apos;s available
+                      else let it blank).Please let us know once you give this
+                      planner to the bride and We will contact her through her
+                      WhatsApp and activate her account.
+                    </p>
+                    <div className="flex items-center gap-2 w-full">
+                      <label className="text-lovely text-base">
+                        Bride&apos;s Email
+                      </label>
+                      <div className="flex w-full gap-1 flex-col">
+                        <input
+                          onChange={handleInputChange}
+                          name="giftRecipientEmail"
+                          value={formData.giftRecipientEmail}
+                          type="email"
+                          className={`border ${formErrors.giftRecipientEmail ? "border-red-500" : ""
+                            } w-full h-10 bg-creamey border-pinkey border rounded-2xl lowercase px-2 text-base`}
+                        />
+                        {formErrors.giftRecipientEmail ? (
+                          <p className="uppercase text-xs text-red-500">
+                            {formErrors.giftRecipientEmail}
+                          </p>
+                        ) : (
+                          ""
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* <div className="flex flex-col w-full mt-2">
+                    {/* <div className="flex flex-col w-full mt-2">
                     <label className="text-lovely text-base mb-1">
                       Special Message
                     </label>
@@ -1444,202 +1439,198 @@ We’re beyond excited to share this experience with you… your planner will be
                       ""
                     )}
                   </div> */}
-                </div>
+                  </div>
 
-                <div className="flex flex-col w-full mt-4">
-                  <label className="text-lovely text-base mb-2">
-                    Optional : Select a Gift Card (+20 EGP)
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div
-                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
-                        formData.giftCardName ===
-                        "Born to shine birthday gift card"
-                          ? "border-lovely"
-                          : "border-transparent"
-                      }`}
-                      onClick={() => {
-                        const newGiftCardName =
-                          formData.giftCardName ===
-                          "Born to shine birthday gift card"
-                            ? ""
-                            : "Born to shine birthday gift card";
-                        setFormData({
-                          ...formData,
-                          giftCardName: newGiftCardName,
-                        });
-                      }}
-                    >
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
-                        Born to shine birthday card
-                      </div>
-                      <img
-                        src="/giftCard/Born to shine birthday gift card.jpeg"
-                        alt="Birthday Gift Card"
-                        className="w-full h-auto"
-                      />
-                      {formData.giftCardName ===
-                        "Born to shine birthday gift card" && (
-                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                  <div className="flex flex-col w-full mt-4">
+                    <label className="text-lovely text-base mb-2">
+                      Optional : Select a Gift Card (+20 EGP)
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div
+                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName ===
+                            "Born to shine birthday gift card"
+                            ? "border-lovely"
+                            : "border-transparent"
+                          }`}
+                        onClick={() => {
+                          const newGiftCardName =
+                            formData.giftCardName ===
+                              "Born to shine birthday gift card"
+                              ? ""
+                              : "Born to shine birthday gift card";
+                          setFormData({
+                            ...formData,
+                            giftCardName: newGiftCardName,
+                          });
+                        }}
+                      >
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                          Born to shine birthday card
                         </div>
-                      )}
-                    </div>
+                        <img
+                          src="/giftCard/Born to shine birthday gift card.jpeg"
+                          alt="Birthday Gift Card"
+                          className="w-full h-auto"
+                        />
+                        {formData.giftCardName ===
+                          "Born to shine birthday gift card" && (
+                            <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                      </div>
 
-                    <div
-                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
-                        formData.giftCardName ===
-                        "The I love you more than words gift card"
-                          ? "border-lovely"
-                          : "border-transparent"
-                      }`}
-                      onClick={() => {
-                        const newGiftCardName =
-                          formData.giftCardName ===
-                          "The I love you more than words gift card"
-                            ? ""
-                            : "The I love you more than words gift card";
-                        setFormData({
-                          ...formData,
-                          giftCardName: newGiftCardName,
-                        });
-                      }}
-                    >
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
-                        I love you more than words card
-                      </div>
-                      <img
-                        src="/giftCard/The I love you more than words gift card.jpeg"
-                        alt="Love Gift Card"
-                        className="w-full h-auto"
-                      />
-                      {formData.giftCardName ===
-                        "The I love you more than words gift card" && (
-                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                      <div
+                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName ===
+                            "The I love you more than words gift card"
+                            ? "border-lovely"
+                            : "border-transparent"
+                          }`}
+                        onClick={() => {
+                          const newGiftCardName =
+                            formData.giftCardName ===
+                              "The I love you more than words gift card"
+                              ? ""
+                              : "The I love you more than words gift card";
+                          setFormData({
+                            ...formData,
+                            giftCardName: newGiftCardName,
+                          });
+                        }}
+                      >
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                          I love you more than words card
                         </div>
-                      )}
-                    </div>
+                        <img
+                          src="/giftCard/The I love you more than words gift card.jpeg"
+                          alt="Love Gift Card"
+                          className="w-full h-auto"
+                        />
+                        {formData.giftCardName ===
+                          "The I love you more than words gift card" && (
+                            <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                      </div>
 
-                    <div
-                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
-                        formData.giftCardName === "The Wifey to be card"
-                          ? "border-lovely"
-                          : "border-transparent"
-                      }`}
-                      onClick={() => {
-                        const newGiftCardName =
-                          formData.giftCardName === "The Wifey to be card"
-                            ? ""
-                            : "The Wifey to be card";
-                        setFormData({
-                          ...formData,
-                          giftCardName: newGiftCardName,
-                        });
-                      }}
-                    >
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
-                        Wifey to be card
-                      </div>
-                      <img
-                        src="/giftCard/The Wifey to be card.jpeg"
-                        alt="Wifey to be Card"
-                        className="w-full object-cover "
-                      />
-                      {formData.giftCardName === "The Wifey to be card" && (
-                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                      <div
+                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName === "The Wifey to be card"
+                            ? "border-lovely"
+                            : "border-transparent"
+                          }`}
+                        onClick={() => {
+                          const newGiftCardName =
+                            formData.giftCardName === "The Wifey to be card"
+                              ? ""
+                              : "The Wifey to be card";
+                          setFormData({
+                            ...formData,
+                            giftCardName: newGiftCardName,
+                          });
+                        }}
+                      >
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                          Wifey to be card
                         </div>
-                      )}
-                    </div>
+                        <img
+                          src="/giftCard/The Wifey to be card.jpeg"
+                          alt="Wifey to be Card"
+                          className="w-full object-cover "
+                        />
+                        {formData.giftCardName === "The Wifey to be card" && (
+                          <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
 
-                    <div
-                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
-                        formData.giftCardName === "Merry and Married"
-                          ? "border-lovely"
-                          : "border-transparent"
-                      }`}
-                      onClick={() => {
-                        const newGiftCardName =
-                          formData.giftCardName === "Merry and Married"
-                            ? ""
-                            : "Merry and Married";
-                        setFormData({
-                          ...formData,
-                          giftCardName: newGiftCardName,
-                        });
-                      }}
-                    >
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
-                        Merry and Married
-                      </div>
-                      <img
-                        src="/cristmas/merryAndMarried.jpeg"
-                        alt="Merry and Married Card"
-                        className="w-full h-auto"
-                      />
-                      {formData.giftCardName === "Merry and Married" && (
-                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                      <div
+                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName === "Merry and Married"
+                            ? "border-lovely"
+                            : "border-transparent"
+                          }`}
+                        onClick={() => {
+                          const newGiftCardName =
+                            formData.giftCardName === "Merry and Married"
+                              ? ""
+                              : "Merry and Married";
+                          setFormData({
+                            ...formData,
+                            giftCardName: newGiftCardName,
+                          });
+                        }}
+                      >
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                          Merry and Married
                         </div>
-                      )}
+                        <img
+                          src="/cristmas/merryAndMarried.jpeg"
+                          alt="Merry and Married Card"
+                          className="w-full h-auto"
+                        />
+                        {formData.giftCardName === "Merry and Married" && (
+                          <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            <div
-              className={`${thirdFont.className} w-full mt-6 text-base lg:text-2xl border-b border-lovely`}
-            >
-              delivery
-            </div>
+              <div
+                className={`${thirdFont.className} w-full mt-6 text-base lg:text-2xl border-b border-lovely`}
+              >
+                delivery
+              </div>
 
-            {/* <div className="flex gap-2 items-center text-base w-full">
+              {/* <div className="flex gap-2 items-center text-base w-full">
               <p>Country</p>
               {countries ? (
                 <select
@@ -1669,96 +1660,93 @@ We’re beyond excited to share this experience with you… your planner will be
                 </select>
               )}
             </div> */}
-            <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
-              <div className="flex flex-col gap-2 w-full ">
-                <div className="flex gap-2 w-full items-center">
-                  <label className="text-lovely whitespace-nowrap text-base">
-                    {isGift ? "First name" : "Beautiful Bride First Name"}
-                  </label>
-                  <div className="flex w-full gap-1 flex-col">
-                    <input
-                      onChange={handleInputChange}
-                      name="firstName"
-                      value={formData.firstName}
-                      type="text"
-                      className={`border ${
-                        formErrors.firstName ? "border-red-500" : ""
-                      } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
-                    />
+              <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
+                <div className="flex flex-col gap-2 w-full ">
+                  <div className="flex gap-2 w-full items-center">
+                    <label className="text-lovely whitespace-nowrap text-base">
+                      {isGift ? "First name" : "Beautiful Bride First Name"}
+                    </label>
+                    <div className="flex w-full gap-1 flex-col">
+                      <input
+                        onChange={handleInputChange}
+                        name="firstName"
+                        value={formData.firstName}
+                        type="text"
+                        className={`border ${formErrors.firstName ? "border-red-500" : ""
+                          } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                      />
 
-                    {formErrors.firstName ? (
-                      <p className="uppercase text-xs text-red-500">
-                        {formErrors.firstName}
-                      </p>
-                    ) : (
-                      ""
-                    )}
+                      {formErrors.firstName ? (
+                        <p className="uppercase text-xs text-red-500">
+                          {formErrors.firstName}
+                        </p>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 w-full ">
+                  <div className="flex gap-2 w-full items-center">
+                    <label className="text-lovely text-base whitespace-nowrap">
+                      {isGift ? "Last name" : "Beautiful Bride Last Name"}
+                    </label>
+                    <div className="flex w-full gap-1 flex-col">
+                      <input
+                        name="lastName"
+                        onChange={handleInputChange}
+                        value={formData.lastName}
+                        type="text"
+                        className={`border ${formErrors.lastName ? "border-red-500" : ""
+                          } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                      />
+                      {formErrors.lastName ? (
+                        <p className="uppercase text-xs text-red-500">
+                          {formErrors.lastName}
+                        </p>
+                      ) : (
+                        ""
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 w-full ">
-                <div className="flex gap-2 w-full items-center">
-                  <label className="text-lovely text-base whitespace-nowrap">
-                    {isGift ? "Last name" : "Beautiful Bride Last Name"}
-                  </label>
-                  <div className="flex w-full gap-1 flex-col">
-                    <input
-                      name="lastName"
-                      onChange={handleInputChange}
-                      value={formData.lastName}
-                      type="text"
-                      className={`border ${
-                        formErrors.lastName ? "border-red-500" : ""
+              <div className="flex gap-2 w-full items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  {isGift ? "address" : "Lovely Bride's address"}
+                </label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    type="text"
+                    onChange={handleInputChange}
+                    name="address"
+                    value={formData.address}
+                    className={`border ${formErrors.address ? "border-red-500" : ""
                       } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
-                    />
-                    {formErrors.lastName ? (
-                      <p className="uppercase text-xs text-red-500">
-                        {formErrors.lastName}
-                      </p>
-                    ) : (
-                      ""
-                    )}
-                  </div>
+                  />
+
+                  {formErrors.address ? (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.address}
+                    </p>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
-            </div>
-            <div className="flex gap-2 w-full items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                {isGift ? "address" : "Lovely Bride's address"}
-              </label>
-              <div className="flex w-full gap-1 flex-col">
+              <div className="flex w-full  gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  Apartment,Suite etc. (Optional)
+                </label>
                 <input
-                  type="text"
                   onChange={handleInputChange}
-                  name="address"
-                  value={formData.address}
-                  className={`border ${
-                    formErrors.address ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                  name="apartment"
+                  value={formData.apartment}
+                  type="text"
+                  className="border w-full h-10 bg-creamey border-pinkey  rounded-2xl py-2 px-2 text-base"
                 />
-
-                {formErrors.address ? (
-                  <p className="uppercase text-xs text-red-500">
-                    {formErrors.address}
-                  </p>
-                ) : (
-                  ""
-                )}
               </div>
-            </div>
-            <div className="flex w-full  gap-2 items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                Apartment,Suite etc. (Optional)
-              </label>
-              <input
-                onChange={handleInputChange}
-                name="apartment"
-                value={formData.apartment}
-                type="text"
-                className="border w-full h-10 bg-creamey border-pinkey  rounded-2xl py-2 px-2 text-base"
-              />
-            </div>
-            {/* <div className="flex flex-col sm:flex-row w-full gap-2"> */}
+              {/* <div className="flex flex-col sm:flex-row w-full gap-2"> */}
               {/* <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
                 <div className="flex w-full gap-2 items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
@@ -1811,107 +1799,105 @@ We’re beyond excited to share this experience with you… your planner will be
                   </div>
                 </div>
               </div> */}
-            {/* </div> */}
+              {/* </div> */}
 
-            {/* Bosta Location Selector for Egyptian customers */}
-            {countryID === 65 ? (
-              <BostaLocationSelector
-                onLocationChange={handleBostaLocationChange}
-                selectedCity={bostaLocation.city?._id}
-                selectedZone={bostaLocation.zone?._id}
-                selectedDistrict={bostaLocation.district?.districtId}
-                orderTotal={price || 0}
-              />
-            ) : (
+              {/* Bosta Location Selector for Egyptian customers */}
+              {countryID === 65 ? (
+                <BostaLocationSelector
+                  onLocationChange={handleBostaLocationChange}
+                  selectedCity={bostaLocation.city?._id}
+                  selectedZone={bostaLocation.zone?._id}
+                  selectedDistrict={bostaLocation.district?.districtId}
+                  orderTotal={price || 0}
+                />
+              ) : (
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-lovely text-base whitespace-nowrap">
+                    State/Province
+                  </label>
+                  <input
+                    onChange={handleInputChange}
+                    value={formData.state}
+                    name="state"
+                    type="text"
+                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
+              )}
               <div className="flex w-full gap-2 items-center">
                 <label className="text-lovely text-base whitespace-nowrap">
-                  State/Province
-                </label>
-                <input
-                  onChange={handleInputChange}
-                  value={formData.state}
-                  name="state"
-                  type="text"
-                  className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                />
-              </div>
-            )}
-            <div className="flex w-full gap-2 items-center">
-              <label className="text-lovely text-base whitespace-nowrap">
-                Phone
-              </label>
-              <div className="flex w-full gap-1 flex-col">
-                <input
-                  onChange={handleInputChange}
-                  type="text"
-                  value={formData.phone}
-                  name="phone"
-                  className={`border ${
-                    formErrors.phone ? "border-red-500" : ""
-                  } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
-                />
-                {formErrors.phone ? (
-                  <p className="uppercase text-xs text-red-500">
-                    {formErrors.phone}
-                  </p>
-                ) : (
-                  ""
-                )}
-              </div>
-            </div>
-            {isGift && (
-              <div className="flex w-full gap-2 items-center">
-                <label className="text-lovely text-base whitespace-nowrap">
-                  Bride&apos;s WhatsApp Number
+                  Phone
                 </label>
                 <div className="flex w-full gap-1 flex-col">
                   <input
                     onChange={handleInputChange}
                     type="text"
-                    value={formData.whatsAppNumber}
-                    name="whatsAppNumber"
-                    className={`border ${
-                      formErrors.whatsAppNumber ? "border-red-500" : ""
-                    } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                    value={formData.phone}
+                    name="phone"
+                    className={`border ${formErrors.phone ? "border-red-500" : ""
+                      } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
                   />
-                  {formErrors.whatsAppNumber ? (
+                  {formErrors.phone ? (
                     <p className="uppercase text-xs text-red-500">
-                      {formErrors.whatsAppNumber}
+                      {formErrors.phone}
                     </p>
                   ) : (
                     ""
                   )}
                 </div>
               </div>
-            )}
-            <div className="flex items-center gap-1 text-xs text-lovely/80">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-lovely/80"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z"
-                />
-              </svg>
-              to send your private community invite
-            </div>
-
-            <div className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 text-nowrap">
-              <div
-                className={`${thirdFont.className} mt-6 w-full text-base lg:text-2xl border-b border-lovely`}
-              >
-                payment
+              {isGift && (
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-lovely text-base whitespace-nowrap">
+                    Bride&apos;s WhatsApp Number
+                  </label>
+                  <div className="flex w-full gap-1 flex-col">
+                    <input
+                      onChange={handleInputChange}
+                      type="text"
+                      value={formData.whatsAppNumber}
+                      name="whatsAppNumber"
+                      className={`border ${formErrors.whatsAppNumber ? "border-red-500" : ""
+                        } w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base`}
+                    />
+                    {formErrors.whatsAppNumber ? (
+                      <p className="uppercase text-xs text-red-500">
+                        {formErrors.whatsAppNumber}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-1 text-xs text-lovely/80">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 text-lovely/80"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                  />
+                </svg>
+                to send your private community invite
               </div>
 
-              {countryID === 65 && (
-                <div className="flex flex-col gap-2">
-                  {/* <div className="flex gap-6">
+              <div className="flex flex-col items-start w-full text-[12px] lg:text-lg gap-2 text-nowrap">
+                <div
+                  className={`${thirdFont.className} mt-6 w-full text-base lg:text-2xl border-b border-lovely`}
+                >
+                  payment
+                </div>
+
+                {countryID === 65 && (
+                  <div className="flex flex-col gap-2">
+                    {/* <div className="flex gap-6">
                     <input
                       type="checkbox"
                       name="cash"
@@ -1924,110 +1910,110 @@ We’re beyond excited to share this experience with you… your planner will be
                     />
                     <label> Cash on delivery </label>
                   </div> */}
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
-                      checked={payment === "card"}
-                      onChange={() => {
-                        setPayment("card");
-                        formData.cash = "card";
-                      }}
-                    />
-                    <label className="text-base"> Pay with card</label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
-                      checked={payment === "instapay"}
-                      onChange={() => {
-                        setPayment("instapay");
-                        formData.cash = "instapay";
-                      }}
-                    />
-                    <label className="text-base"> Pay with instapay</label>
-                  </div>
-                  {payment === "instapay" && (
-                    <div className="mt-4 p-4 border border-lovely/20 rounded-xl bg-lovely/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="flex items-center gap-2 text-lovely font-semibold">
-                        <span className="p-1 bg-lovely/10 rounded-full">💰</span>
-                        <p className="text-sm">Instapay Instructions</p>
-                      </div>
-                      
-                      <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
-                        <p className="flex gap-2">
-                          <span className="font-bold text-lovely">1.</span> 
-                          <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
-                        </p>
-                        <p className="flex gap-2">
-                          <span className="font-bold text-lovely">2.</span> 
-                          <span>Select <b>"Bank Account"</b></span>
-                        </p>
-                        <p className="flex gap-2">
-                          <span className="font-bold text-lovely">3.</span> 
-                          <span>Enter Account Number: <b className="font-mono text-base select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
-                        </p>
-                        <p className="flex gap-2">
-                          <span className="font-bold text-lovely">4.</span> 
-                          <span>Select <b>Credit Agricole</b> as the bank</span>
-                        </p>
-                        <p className="flex gap-2">
-                          <span className="font-bold text-lovely">5.</span> 
-                          <span>Type <b>Wifey</b> in the receiver field</span>
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <label className="block text-[13px] font-medium text-gray-700">
-                          Transaction Screenshot / Receipt
-                        </label>
-                        <CldUploadWidget
-                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
-                          onSuccess={(result: any) => {
-                            if (result.info && typeof result.info !== 'string') {
-                              setInstapayReciept(result.info.secure_url);
-                            }
-                          }}
-                        >
-                          {({ open }) => (
-                            <button
-                              type="button"
-                              onClick={() => open()}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-sm font-medium"
-                            >
-                              {instapayReciept ? (
-                                <>
-                                  <span className="text-green-600 font-bold">✓</span>
-                                  Change Screenshot
-                                </>
-                              ) : (
-                                <>
-                                  <span>📸</span>
-                                  Upload Screenshot
-                                </>
-                              )}
-                            </button>
-                          )}
-                        </CldUploadWidget>
-                        
-                        {instapayReciept && (
-                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 shadow-sm">
-                            <Image 
-                              src={instapayReciept} 
-                              alt="Instapay Receipt" 
-                              fill 
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                        checked={payment === "card"}
+                        onChange={() => {
+                          setPayment("card");
+                          formData.cash = "card";
+                        }}
+                      />
+                      <label className="text-base"> Pay with card</label>
                     </div>
-                  )}
-                </div>
-              )}
-              {/* paymob */}
-              {/* <div className='flex gap-6'>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                        checked={payment === "instapay"}
+                        onChange={() => {
+                          setPayment("instapay");
+                          formData.cash = "instapay";
+                        }}
+                      />
+                      <label className="text-base"> Pay with instapay</label>
+                    </div>
+                    {payment === "instapay" && (
+                      <div className="mt-4 p-4 border border-lovely/20 rounded-xl bg-lovely/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center gap-2 text-lovely font-semibold">
+                          <span className="p-1 bg-lovely/10 rounded-full">💰</span>
+                          <p className="text-sm">Instapay Instructions</p>
+                        </div>
+
+                        <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
+                          <p className="flex gap-2">
+                            <span className="font-bold text-lovely">1.</span>
+                            <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
+                          </p>
+                          <p className="flex gap-2">
+                            <span className="font-bold text-lovely">2.</span>
+                            <span>Select <b>"Bank Account"</b></span>
+                          </p>
+                          <p className="flex gap-2">
+                            <span className="font-bold text-lovely">3.</span>
+                            <span>Enter Account Number: <b className="font-mono text-base select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                          </p>
+                          <p className="flex gap-2">
+                            <span className="font-bold text-lovely">4.</span>
+                            <span>Select <b>Credit Agricole</b> as the bank</span>
+                          </p>
+                          <p className="flex gap-2">
+                            <span className="font-bold text-lovely">5.</span>
+                            <span>Type <b>Wifey</b> in the receiver field</span>
+                          </p>
+                        </div>
+
+                        <div className="space-y-3">
+                          <label className="block text-[13px] font-medium text-gray-700">
+                            Transaction Screenshot / Receipt
+                          </label>
+                          <CldUploadWidget
+                            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
+                            onSuccess={(result: any) => {
+                              if (result.info && typeof result.info !== 'string') {
+                                setInstapayReciept(result.info.secure_url);
+                              }
+                            }}
+                          >
+                            {({ open }) => (
+                              <button
+                                type="button"
+                                onClick={() => open()}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-sm font-medium"
+                              >
+                                {instapayReciept ? (
+                                  <>
+                                    <span className="text-green-600 font-bold">✓</span>
+                                    Change Screenshot
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>📸</span>
+                                    Upload Screenshot
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </CldUploadWidget>
+
+                          {instapayReciept && (
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 shadow-sm">
+                              <Image
+                                src={instapayReciept}
+                                alt="Instapay Receipt"
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* paymob */}
+                {/* <div className='flex gap-6'>
            <input  type='checkbox'
     className="appearance-none h-5 w-5 border-2 text-white   checked:bg-lovely "
     checked={!cash} onChange={()=>setCash((prev)=>!prev)}/>
@@ -2035,48 +2021,48 @@ We’re beyond excited to share this experience with you… your planner will be
             </div> 
               {/* billing */}
 
-              <div
-                className={`${thirdFont.className} mt-6 w-full text-base lg:text-2xl border-b border-lovely`}
-              >
-                billing address
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      name="billingAddress"
-                      checked={useSameAsShipping}
-                      onChange={() => setUseSameAsShipping(true)}
-                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
-                    />
-                    <span className=" text-base">Same as shipping address</span>
-                  </label>
+                <div
+                  className={`${thirdFont.className} mt-6 w-full text-base lg:text-2xl border-b border-lovely`}
+                >
+                  billing address
                 </div>
-                <div>
-                  <label className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      name="billingAddress"
-                      checked={!useSameAsShipping}
-                      onChange={() => setUseSameAsShipping(false)}
-                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
-                    />
-                    <span className="text-base">
-                      Use a different billing address
-                    </span>
-                  </label>
+                <div className="space-y-4">
+                  <div>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="billingAddress"
+                        checked={useSameAsShipping}
+                        onChange={() => setUseSameAsShipping(true)}
+                        className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      />
+                      <span className=" text-base">Same as shipping address</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="billingAddress"
+                        checked={!useSameAsShipping}
+                        onChange={() => setUseSameAsShipping(false)}
+                        className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-everGreen "
+                      />
+                      <span className="text-base">
+                        Use a different billing address
+                      </span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <div
-                className={`flex flex-col gap-2 w-full transition-all duration-500 ease-in-out overflow-hidden
+                <div
+                  className={`flex flex-col gap-2 w-full transition-all duration-500 ease-in-out overflow-hidden
   ${!useSameAsShipping ? "max-h-[70vh]   opacity-100" : "max-h-0  opacity-0"}
   `}
-                style={{
-                  padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
-                }}
-              >
-                {/* <div className="flex gap-2 w-full">
+                  style={{
+                    padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
+                  }}
+                >
+                  {/* <div className="flex gap-2 w-full">
                   <p>Country</p>
                   {countries ? (
                     <select
@@ -2105,73 +2091,73 @@ We’re beyond excited to share this experience with you… your planner will be
                     >
                       {/* <option value='EG'>EGYPT</option>
               <option value='SA'>SAUDI ARABIA</option> */}
-                    {/* </select>
+                  {/* </select>
                   )}
                 </div> */}
-                <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
-                  <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-lovely">First Name</label>
+                  <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
+                    <div className="flex gap-2 w-full md:w-2/4">
+                      <label className="text-lovely">First Name</label>
+                      <input
+                        onChange={handleInputChange}
+                        name="billingFirstName"
+                        value={
+                          useSameAsShipping
+                            ? formData.firstName
+                            : formData.billingFirstName
+                        }
+                        type="text"
+                        className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                      />
+                    </div>
+                    <div className="flex gap-2 w-full md:w-2/4">
+                      <label className="text-lovely">Last Name</label>
+                      <input
+                        name="billingLastName"
+                        onChange={handleInputChange}
+                        value={
+                          useSameAsShipping
+                            ? formData.lastName
+                            : formData.billingLastName
+                        }
+                        type="text"
+                        className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 w-full">
+                    <label className="text-lovely">
+                      Lovely Bride&apos;s address
+                    </label>
                     <input
+                      type="text"
                       onChange={handleInputChange}
-                      name="billingFirstName"
+                      name="billingAddress"
                       value={
                         useSameAsShipping
-                          ? formData.firstName
-                          : formData.billingFirstName
+                          ? formData.address
+                          : formData.billingAddress
+                      }
+                      className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                    />
+                  </div>
+                  <div className="flex w-full  gap-2 items-center">
+                    <label className="text-lovely text-nowrap">
+                      Apartment,Suite ETC. (Optional)
+                    </label>
+                    <input
+                      onChange={handleInputChange}
+                      name="billingApartment"
+                      value={
+                        useSameAsShipping
+                          ? formData.apartment
+                          : formData.billingApartment
                       }
                       type="text"
                       className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
-                  <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-lovely">Last Name</label>
-                    <input
-                      name="billingLastName"
-                      onChange={handleInputChange}
-                      value={
-                        useSameAsShipping
-                          ? formData.lastName
-                          : formData.billingLastName
-                      }
-                      type="text"
-                      className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2 w-full">
-                  <label className="text-lovely">
-                    Lovely Bride&apos;s address
-                  </label>
-                  <input
-                    type="text"
-                    onChange={handleInputChange}
-                    name="billingAddress"
-                    value={
-                      useSameAsShipping
-                        ? formData.address
-                        : formData.billingAddress
-                    }
-                    className=" w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                  />
-                </div>
-                <div className="flex w-full  gap-2 items-center">
-                  <label className="text-lovely text-nowrap">
-                    Apartment,Suite ETC. (Optional)
-                  </label>
-                  <input
-                    onChange={handleInputChange}
-                    name="billingApartment"
-                    value={
-                      useSameAsShipping
-                        ? formData.apartment
-                        : formData.billingApartment
-                    }
-                    type="text"
-                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                  />
-                </div>
-                <div className="flex w-full gap-2">
-                  {/* <div className="flex w-full gap-2 md:w-3/5 items-center">
+                  <div className="flex w-full gap-2">
+                    {/* <div className="flex w-full gap-2 md:w-3/5 items-center">
                     <label className="text-lovely">
                       Postal/Zip code (Optional)
                     </label>
@@ -2188,84 +2174,84 @@ We’re beyond excited to share this experience with you… your planner will be
                     />
                   </div> */}
 
+                    <div className="flex w-full  gap-2 items-center">
+                      <label className="text-lovely">City</label>
+                      <input
+                        onChange={handleInputChange}
+                        name="billingCity"
+                        value={
+                          useSameAsShipping ? formData.city : formData.billingCity
+                        }
+                        type="text"
+                        className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex w-full  gap-2 items-center">
-                    <label className="text-lovely">City</label>
+                    <label className="text-lovely">Governate</label>
+                    {billingCountry === 65 ? (
+                      <select
+                        onChange={handleInputChange}
+                        name="billingState"
+                        value={
+                          useSameAsShipping
+                            ? formData.state
+                            : formData.billingState
+                        }
+                        className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
+                      >
+                        {states.map((state: any, index: number) => {
+                          return (
+                            <option key={index} value={state.name}>
+                              {state.name}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    ) : (
+                      <input
+                        onChange={handleInputChange}
+                        value={
+                          useSameAsShipping
+                            ? formData.state
+                            : formData.billingState
+                        }
+                        name="billingState"
+                        type="text"
+                        className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                      />
+                    )}
+                  </div>
+                  <div className="flex w-full gap-2 items-center">
+                    <label className="text-lovely">Phone</label>
                     <input
                       onChange={handleInputChange}
-                      name="billingCity"
-                      value={
-                        useSameAsShipping ? formData.city : formData.billingCity
-                      }
                       type="text"
+                      value={
+                        useSameAsShipping ? formData.phone : formData.billingPhone
+                      }
+                      name="billingPhone"
+                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
+                    />
+                  </div>
+                  <div className="flex w-full gap-2 items-center">
+                    <label className="text-lovely">WhatsApp Number</label>
+                    <input
+                      onChange={handleInputChange}
+                      type="text"
+                      value={
+                        useSameAsShipping
+                          ? formData.whatsAppNumber
+                          : formData.billingWhatsAppNumber
+                      }
+                      name="billingWhatsAppNumber"
                       className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
                     />
                   </div>
                 </div>
-
-                <div className="flex w-full  gap-2 items-center">
-                  <label className="text-lovely">Governate</label>
-                  {billingCountry === 65 ? (
-                    <select
-                      onChange={handleInputChange}
-                      name="billingState"
-                      value={
-                        useSameAsShipping
-                          ? formData.state
-                          : formData.billingState
-                      }
-                      className="px-2 text-base h-10 w-full bg-creamey border-pinkey border rounded-2xl py-2"
-                    >
-                      {states.map((state: any, index: number) => {
-                        return (
-                          <option key={index} value={state.name}>
-                            {state.name}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  ) : (
-                    <input
-                      onChange={handleInputChange}
-                      value={
-                        useSameAsShipping
-                          ? formData.state
-                          : formData.billingState
-                      }
-                      name="billingState"
-                      type="text"
-                      className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                    />
-                  )}
-                </div>
-                <div className="flex w-full gap-2 items-center">
-                  <label className="text-lovely">Phone</label>
-                  <input
-                    onChange={handleInputChange}
-                    type="text"
-                    value={
-                      useSameAsShipping ? formData.phone : formData.billingPhone
-                    }
-                    name="billingPhone"
-                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                  />
-                </div>
-                <div className="flex w-full gap-2 items-center">
-                  <label className="text-lovely">WhatsApp Number</label>
-                  <input
-                    onChange={handleInputChange}
-                    type="text"
-                    value={
-                      useSameAsShipping
-                        ? formData.whatsAppNumber
-                        : formData.billingWhatsAppNumber
-                    }
-                    name="billingWhatsAppNumber"
-                    className="border w-full h-10 bg-creamey border-pinkey border rounded-2xl py-2 px-2 text-base"
-                  />
-                </div>
               </div>
-            </div>
-            {/* <div className='flex pb-5 justify-between'>
+              {/* <div className='flex pb-5 justify-between'>
            <div className='flex flex-col gap-1'><p>SUBTOTAL</p>
            <p>SHIPPING</p>
            <p className='mt-6'>TOTAL</p>
@@ -2277,62 +2263,61 @@ We’re beyond excited to share this experience with you… your planner will be
              <p className='text-[12px] mt-6 lg:text-lg'>{total} LE</p>
            </div>
          </div> */}
-            <div className="flex items-center gap-2 text-base mt-2">
-              <label className="flex items-center gap-2 cursor-pointer relative">
-                <input
-                  color="#FBF3E0"
-                  type="checkbox"
-                  id="accept-terms"
-                  checked={acceptedTerms}
-                  onChange={() => setAcceptedTerms(!acceptedTerms)}
-                  className="peer appearance-none bg-creamey checked:bg-everGreen border border-pinkey w-4 h-4 rounded transition-colors flex-shrink-0"
-                />
-                <span className="absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs pointer-events-none peer-checked:opacity-100 opacity-0">
-                  ✔
-                </span>
-              </label>
-              <span className="pl-2 text-lovely text-base">
-                By checking, you agree to the{" "}
-                <Link
-                  href="/policies?terms-and-conditions"
-                  className="underline hover:cursor-pointer"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  terms and conditions
-                </Link>
-              </span>
-            </div>
-                        {isAuthenticated && (
-              <div className="flex items-center gap-2 w-full mt-1 mb-1">
-                <input
-                  type="checkbox"
-                  id="saveShippingData"
-                  checked={saveShippingData}
-                  onChange={(e) => setSaveShippingData(e.target.checked)}
-                  className="w-4 h-4 accent-lovely"
-                />
-                <label htmlFor="saveShippingData" className="text-lovely text-base cursor-pointer">
-                  Save my data for next time
+              <div className="flex items-center gap-2 text-base mt-2">
+                <label className="flex items-center gap-2 cursor-pointer relative">
+                  <input
+                    color="#FBF3E0"
+                    type="checkbox"
+                    id="accept-terms"
+                    checked={acceptedTerms}
+                    onChange={() => setAcceptedTerms(!acceptedTerms)}
+                    className="peer appearance-none bg-creamey checked:bg-everGreen border border-pinkey w-4 h-4 rounded transition-colors flex-shrink-0"
+                  />
+                  <span className="absolute left-0 top-0 flex h-4 w-4 items-center justify-center text-white text-xs pointer-events-none peer-checked:opacity-100 opacity-0">
+                    ✔
+                  </span>
                 </label>
+                <span className="pl-2 text-lovely text-base">
+                  By checking, you agree to the{" "}
+                  <Link
+                    href="/policies?terms-and-conditions"
+                    className="underline hover:cursor-pointer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    terms and conditions
+                  </Link>
+                </span>
               </div>
-            )}
-            <div className="flex justify-end">
-              <button
-                disabled={loading || !acceptedTerms}
-                type="submit"
-                className={`border text-base transition duration-300 border-lovely p-1 ${
-                  loading || !acceptedTerms
-                    ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
-                    : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
-                }`}
-              >
-                PROCEED TO PAYMENT
-              </button>
-            </div>
-          </form>
+              {isAuthenticated && (
+                <div className="flex items-center gap-2 w-full mt-1 mb-1">
+                  <input
+                    type="checkbox"
+                    id="saveShippingData"
+                    checked={saveShippingData}
+                    onChange={(e) => setSaveShippingData(e.target.checked)}
+                    className="w-4 h-4 accent-lovely"
+                  />
+                  <label htmlFor="saveShippingData" className="text-lovely text-base cursor-pointer">
+                    Save my data for next time
+                  </label>
+                </div>
+              )}
+              <div className="flex justify-end">
+                <button
+                  disabled={loading || !acceptedTerms}
+                  type="submit"
+                  className={`border text-base transition duration-300 border-lovely p-1 ${loading || !acceptedTerms
+                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
+                      : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
+                    }`}
+                >
+                  PROCEED TO PAYMENT
+                </button>
+              </div>
+            </form>
           )}
-          
+
         </div>
 
         {/* orderSummaryMob */}
@@ -2435,8 +2420,8 @@ We’re beyond excited to share this experience with you… your planner will be
                 <div className="flex items-center justify-between mb-2">
                   <h3 className={`${thirdFont.className} text-lg font-medium text-lovely`}>Include Cart Products?</h3>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="sr-only peer"
                       checked={includeCartItems}
                       onChange={() => setIncludeCartItems(!includeCartItems)}
@@ -2497,19 +2482,18 @@ We’re beyond excited to share this experience with you… your planner will be
                   <span>
                     {appliedDiscount.calculationType === "FREE_SHIPPING"
                       ? `-${shipping} LE (Free Shipping)`
-                      : `-${
-                          appliedDiscount.calculationType === "PERCENTAGE"
-                            ? Math.round(
-                                (subTotal * appliedDiscount.value) / 100
-                              )
-                            : appliedDiscount.value
-                        } LE`}
+                      : `-${appliedDiscount.calculationType === "PERCENTAGE"
+                        ? Math.round(
+                          (subTotal * appliedDiscount.value) / 100
+                        )
+                        : appliedDiscount.value
+                      } LE`}
                   </span>
                 </div>
               )}
               <div className="flex justify-between text-base">
                 {appliedDiscount?.calculationType === "FREE_SHIPPING" ||
-                subTotal > 2000 || packageID === "687396821b4da119eb1c13fe" || packageID === "6965e63c6df4503dda02c12b" ? (
+                  subTotal > 2000 || packageID === "687396821b4da119eb1c13fe" || packageID === "6965e63c6df4503dda02c12b" ? (
                   <>
                     <span className="line-through">Shipping</span>
                     <span className="line-through">
@@ -2603,7 +2587,7 @@ We’re beyond excited to share this experience with you… your planner will be
               <Zap className="w-8 h-8 text-creamey animate-pulse" />
             </div>
           </div> */}
-          
+
           <div className="p-6 text-center">
             <DialogHeader className="mb-4">
               <DialogTitle className={`${thirdFont.className} text-2xl text-lovely text-center`}>
@@ -2636,13 +2620,13 @@ We’re beyond excited to share this experience with you… your planner will be
             </div>
 
             <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-2">
-              <Button 
+              <Button
                 onClick={() => handleBundleResponse(true)}
                 className="w-full rounded-full bg-lovely text-creamey hover:bg-lovely/90 h-12 text-base font-semibold shadow-lg shadow-lovely/20 transition-all active:scale-95"
               >
                 Yes, Bundle & Save!
               </Button>
-              <Button 
+              <Button
                 variant="ghost"
                 onClick={() => handleBundleResponse(false)}
                 className="w-full rounded-full text-lovely/60 hover:text-lovely hover:bg-transparent h-12 text-sm"
