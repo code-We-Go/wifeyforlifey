@@ -416,29 +416,14 @@ async function handleSubscription(
       });
     }
 
-    // Loyalty earn for subscription (skip if no email — e.g. gift with no recipient yet)
-    if (
-      subscriptionEmail &&
-      updatedSub?.packageID &&
-      typeof (updatedSub.packageID as any).price === "number"
-    ) {
+    // Loyalty earn for subscription — use paid amount (subTotal = total minus shipping)
+    // just like purchase transactions, no specific bonusID
+    if (subscriptionEmail && paymentOp.subTotal > 0) {
       await LoyaltyTransactionModel.create({
         email: subscriptionEmail,
         type: "earn",
         reason: "subscription",
-        amount: isUpgradeProcess
-          ? Math.max(
-              0,
-              ((paymentOp.to as any)?.price || 0) -
-                ((paymentOp.from as any)?.price || 0)
-            )
-          : (updatedSub.packageID as any).price,
-        bonusID: isUpgradeProcess
-          ? "69e35eba75941926796f40ce"
-          : (updatedSub.packageID as any)?._id?.toString() ===
-            "68bf6ae9c4d5c1af12cdcd37" || (updatedSub.packageID as any)?._id?.toString() === "6a2d9aec3def6ce76dc7babc"
-          ? "68c176b69c1ff0a2ad779c2d"
-          : "687d67f459e6ba857a54ed53",
+        amount: paymentOp.subTotal,
       });
     }
 
