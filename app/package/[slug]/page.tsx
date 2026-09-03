@@ -879,7 +879,22 @@ We’re beyond excited to share this experience with you… your planner will be
             <strong>The physical planner is yours forever.</strong> Digital benefits stay active for 12 months from purchase.
           </div>
         </div>
-
+        {/* Notes Section */}
+        {packageData.notes && packageData.notes.length > 0 && (
+          <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md my-12 ">
+            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
+              Important Notes
+            </h3>
+            <ul className="space-y-2 text-sm text-lovely/90">
+              {packageData.notes.map((note, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="text-lovely mr-2">•</span>
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {/* Make it a full order Section (Suggested Products from MongoDB) */}
         {((packageData.packageProducts && packageData.packageProducts.length > 0) ||
           (fullPackage?.packageProducts && fullPackage.packageProducts.length > 0)) && (
@@ -1074,22 +1089,7 @@ We’re beyond excited to share this experience with you… your planner will be
         <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
           <WifeyCommunity />
         </div>
-        {/* Notes Section */}
-        {packageData.notes && packageData.notes.length > 0 && (
-          <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md mt-12">
-            <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
-              Important Notes
-            </h3>
-            <ul className="space-y-2 text-sm text-lovely/90">
-              {packageData.notes.map((note, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-lovely mr-2">•</span>
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+
       </div>
 
       {/* Modal for specific packages */}
