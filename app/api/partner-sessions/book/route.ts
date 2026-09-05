@@ -253,7 +253,7 @@ export async function POST(req: Request) {
             subject: "Your Sex Education FAQs Session Booking Confirmation 💕",
             name: `${firstName} ${lastName}`.trim(),
             body: sexEducationSessionEmailHtml,
-            from: "orders@shopwifeyforlifey.com",
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
           });
         } else {
           const { SessionBookingClientMail } = await import(
@@ -274,7 +274,7 @@ export async function POST(req: Request) {
             subject: `Your Booking is Confirmed: ${sessionTitle} 💕`,
             name: `${firstName} ${lastName}`.trim(),
             body: clientBody,
-            from: "orders@shopwifeyforlifey.com",
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
           });
         }
       } catch (e) {

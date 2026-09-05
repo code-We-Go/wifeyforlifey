@@ -216,7 +216,7 @@ async function handlePartnerSession(
         subject: "Your Sex Education FAQs Session Booking Confirmation 💕",
         name: `${partnerOrder.clientFirstName} ${partnerOrder.clientLastName}`.trim(),
         body: sexEducationSessionEmailHtml,
-        from: "orders@shopwifeyforlifey.com",
+        from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
       });
     } else {
       const { SessionBookingClientMail } = await import(
@@ -239,7 +239,7 @@ async function handlePartnerSession(
         subject: `Your Booking is Confirmed: ${partnerOrder.sessionTitle} 💕`,
         name: `${partnerOrder.clientFirstName} ${partnerOrder.clientLastName}`.trim(),
         body: clientBody,
-        from: "orders@shopwifeyforlifey.com",
+        from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
       });
     }
   } catch (e) {
