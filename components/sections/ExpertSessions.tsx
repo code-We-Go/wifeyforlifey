@@ -704,8 +704,17 @@ const ExpertSessions = () => {
 
       {/* Booking Modal */}
       {selectedForBooking && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => {
+            setSelectedForBooking(null);
+            setInstapaySuccess(false);
+          }}
+        >
+          <div
+            className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
 
             {/* InstaPay Success Message */}
             {instapaySuccess ? (
