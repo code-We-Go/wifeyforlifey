@@ -255,9 +255,30 @@ export async function POST(req: Request) {
             body: sexEducationSessionEmailHtml,
             from: "orders@shopwifeyforlifey.com",
           });
+        } else {
+          const { SessionBookingClientMail } = await import(
+            "@/utils/SessionBookingClientMail"
+          );
+          const clientBody = SessionBookingClientMail({
+            clientFirstName: firstName,
+            clientLastName: lastName,
+            sessionTitle: variantTitle ? `${sessionTitle} - ${variantTitle}` : sessionTitle,
+            partnerName: partnerSession.partnerName,
+            partnerWhatsApp: partnerSession.whatsappNumber,
+            meetingLink: sessionMeetingLink,
+            finalPrice: 0,
+            orderId: freeOrder._id?.toString(),
+          });
+          await sendMail({
+            to: email,
+            subject: `Your Booking is Confirmed: ${sessionTitle} 💕`,
+            name: `${firstName} ${lastName}`.trim(),
+            body: clientBody,
+            from: "orders@shopwifeyforlifey.com",
+          });
         }
       } catch (e) {
-        console.error("Failed to send partner confirmation email for free booking", e);
+        console.error("Failed to send partner/client confirmation email for free booking", e);
       }
 
       const redirectTarget = sessionMeetingLink
@@ -310,6 +331,13 @@ export async function POST(req: Request) {
         link: sessionMeetingLink,
         meetingLink: sessionMeetingLink,
         status: "instapay_review",
+      });
+
+      // Register PendingPayment record for callback/approval tracking
+      await PendingPaymentModel.create({
+        paymobOrderId: instapayOrder.paymentID,
+        productType: "partner_session",
+        referenceId: instapayOrder._id,
       });
 
       // Notify admin about the pending instapay review

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import mongoose from "mongoose";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
@@ -158,7 +159,10 @@ async function handlePartnerSession(
     await import("@/app/modals/partnerSessionOrderModel")
   ).default;
 
-  const partnerOrder = await PartnerSessionOrderModel.findById(referenceId);
+  const partnerOrder = (mongoose.Types.ObjectId.isValid(referenceId)
+    ? await PartnerSessionOrderModel.findById(referenceId)
+    : null) || (await PartnerSessionOrderModel.findOne({ paymentID: referenceId }));
+
   if (!partnerOrder) {
     console.error(
       `Partner session order not found for referenceId: ${referenceId}`
@@ -214,9 +218,32 @@ async function handlePartnerSession(
         body: sexEducationSessionEmailHtml,
         from: "orders@shopwifeyforlifey.com",
       });
+    } else {
+      const { SessionBookingClientMail } = await import(
+        "@/utils/SessionBookingClientMail"
+      );
+      const clientBody = SessionBookingClientMail({
+        clientFirstName: partnerOrder.clientFirstName,
+        clientLastName: partnerOrder.clientLastName,
+        sessionTitle: partnerOrder.variantTitle
+          ? `${partnerOrder.sessionTitle} - ${partnerOrder.variantTitle}`
+          : partnerOrder.sessionTitle,
+        partnerName: partnerOrder.partnerName,
+        partnerWhatsApp: partnerOrder.whatsappNumber,
+        meetingLink: partnerOrder.meetingLink || partnerOrder.link,
+        finalPrice: partnerOrder.finalPrice,
+        orderId: partnerOrder._id?.toString(),
+      });
+      await sendMail({
+        to: partnerOrder.clientEmail,
+        subject: `Your Booking is Confirmed: ${partnerOrder.sessionTitle} 💕`,
+        name: `${partnerOrder.clientFirstName} ${partnerOrder.clientLastName}`.trim(),
+        body: clientBody,
+        from: "orders@shopwifeyforlifey.com",
+      });
     }
   } catch (e) {
-    console.error("Failed to send partner confirmation email", e);
+    console.error("Failed to send partner/client confirmation email", e);
   }
 
   return {
@@ -1010,10 +1037,15 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
   // "confirmed" is the only terminal success state — everything else is
   // (re-)claimable so we handle retries, stuck serverless functions, and
   // out-of-order Paymob webhooks in a single pass.
+  const isObjectId = mongoose.Types.ObjectId.isValid(paymobOrderId);
+  const searchFilter = isObjectId
+    ? { $or: [{ paymobOrderId: String(paymobOrderId) }, { referenceId: paymobOrderId }] }
+    : { paymobOrderId: String(paymobOrderId) };
+
   const claimableStatuses = ["pending", "failed"];
   const pendingPayment = await PendingPaymentModel.findOneAndUpdate(
     {
-      paymobOrderId: String(paymobOrderId),
+      ...searchFilter,
       status: { $in: claimableStatuses },
     },
     { status: "processing" },           // atomically mark as in-progress
@@ -1022,11 +1054,26 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
 
   if (!pendingPayment) {
     // Either no record exists, or it's already confirmed.
-    const existing = await PendingPaymentModel.findOne({
-      paymobOrderId: String(paymobOrderId),
-    });
+    const existing = await PendingPaymentModel.findOne(searchFilter);
 
     if (!existing) {
+      // Direct fallback for partner session orders (e.g. from Dashboard InstaPay Approval)
+      const PartnerSessionOrderModel = (
+        await import("@/app/modals/partnerSessionOrderModel")
+      ).default;
+      const partnerOrder = (isObjectId
+        ? await PartnerSessionOrderModel.findById(paymobOrderId)
+        : null) || (await PartnerSessionOrderModel.findOne({ paymentID: paymobOrderId }));
+
+      if (partnerOrder) {
+        console.log(`📦 Found PartnerSessionOrder directly for ID: ${paymobOrderId}`);
+        return await handlePartnerSession(
+          paymobOrderId,
+          partnerOrder._id.toString(),
+          isSuccess
+        );
+      }
+
       console.error(
         `❌ No PendingPayment found for Paymob order: ${paymobOrderId}`
       );
