@@ -5,7 +5,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 // import Link from "next/link"; 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CreditCard, Smartphone, Upload, CheckCircle2 } from "lucide-react";
+import { CldUploadWidget } from "next-cloudinary";
 import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
@@ -73,6 +74,9 @@ const ExpertSessions = () => {
   const [couponFinalPrice, setCouponFinalPrice] = useState<number | null>(null);
 
   const [autoDiscounts, setAutoDiscounts] = useState<any[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "instapay">("card");
+  const [instapayReceipt, setInstapayReceipt] = useState("");
+  const [instapaySuccess, setInstapaySuccess] = useState(false);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -249,6 +253,9 @@ const ExpertSessions = () => {
     setSelectedForBooking(s);
     setSelectedVariantIndex(initialVariantIndex);
     setError("");
+    setPaymentMethod("card");
+    setInstapayReceipt("");
+    setInstapaySuccess(false);
     setForm({
       firstName: "",
       lastName: "",
@@ -317,6 +324,13 @@ const ExpertSessions = () => {
     setSubmitting(true);
     setError("");
     try {
+      // Validate instapay receipt
+      if (paymentMethod === "instapay" && !instapayReceipt) {
+        setError("Please upload your InstaPay receipt screenshot.");
+        setSubmitting(false);
+        return;
+      }
+
       const res = await axios.post("/api/partner-sessions/book", {
         sessionId: selectedForBooking._id,
         variantIndex:
@@ -328,6 +342,8 @@ const ExpertSessions = () => {
         email: form.email,
         phone: form.phone,
         discountCode: form.discountCode || undefined,
+        paymentMethod: finalPrice === 0 ? undefined : paymentMethod,
+        instapayReceipt: paymentMethod === "instapay" ? instapayReceipt : undefined,
       });
 
       if (res.data?.isFree) {
@@ -342,6 +358,13 @@ const ExpertSessions = () => {
         } else {
           window.location.href = "/payment/success?session=true";
         }
+        return;
+      }
+
+      // InstaPay flow — show success message in modal
+      if (res.data?.isInstapay) {
+        setInstapaySuccess(true);
+        setSubmitting(false);
         return;
       }
 
@@ -683,6 +706,52 @@ const ExpertSessions = () => {
       {selectedForBooking && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+
+            {/* InstaPay Success Message */}
+            {instapaySuccess ? (
+              <div className="text-center py-6 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-10 h-10 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-lovely">
+                  Booking Submitted! 🎉
+                </h3>
+                <p className="text-lovely/80 text-sm leading-relaxed">
+                  Your booking for <span className="font-semibold">{activeBookingVariant?.title || selectedForBooking.title}</span> has been received.
+                </p>
+                <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-left space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">⏳</span>
+                    <p className="text-sm text-lovely/90">
+                      Our administration team will review your payment receipt. This may take up to <span className="font-bold">24 hours</span>.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">📧</span>
+                    <p className="text-sm text-lovely/90">
+                      You will receive a confirmation email once your payment is verified.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🕐</span>
+                    <p className="text-sm text-lovely/90">
+                      Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  className="w-full bg-lovely text-creamey rounded-2xl mt-2"
+                  onClick={() => {
+                    setInstapaySuccess(false);
+                    setSelectedForBooking(null);
+                  }}
+                >
+                  Got it!
+                </Button>
+              </div>
+            ) : (
+            <>
             <h3 className="text-xl font-semibold text-lovely mb-2">
               Book: {activeBookingVariant?.title || selectedForBooking.title}
             </h3>
@@ -714,7 +783,9 @@ const ExpertSessions = () => {
             <p className="text-sm text-lovely/90 mb-4">
               {finalPrice === 0
                 ? "Once confirmed, you will be redirected directly to access your session."
-                : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
+                : paymentMethod === "instapay"
+                  ? "Upload your InstaPay receipt and our team will verify your payment within 24 hours."
+                  : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
             </p>
 
             {/* Links */}
@@ -831,18 +902,122 @@ const ExpertSessions = () => {
                   </div>
                 )}
               </div>
+
+              {/* Payment Method Selector */}
+              {finalPrice !== null && finalPrice > 0 && (
+                <div className="space-y-3">
+                  <label className="block text-xs font-semibold text-lovely uppercase tracking-wide">
+                    Payment Method
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("card")}
+                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
+                        paymentMethod === "card"
+                          ? "bg-lovely text-creamey border-lovely shadow-md"
+                          : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
+                      }`}
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      Card / Wallet
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("instapay")}
+                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
+                        paymentMethod === "instapay"
+                          ? "bg-lovely text-creamey border-lovely shadow-md"
+                          : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
+                      }`}
+                    >
+                      <Smartphone className="w-4 h-4" />
+                      InstaPay
+                    </button>
+                  </div>
+
+                  {/* InstaPay Instructions & Upload */}
+                  {paymentMethod === "instapay" && (
+                    <div className="p-3 border border-lovely/20 rounded-xl bg-lovely/5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 text-lovely font-semibold">
+                        <span className="p-1 bg-lovely/10 rounded-full text-sm">💰</span>
+                        <p className="text-xs">InstaPay Instructions</p>
+                      </div>
+                      <div className="text-[12px] text-lovely space-y-1.5 bg-white/50 p-2.5 rounded-lg border border-lovely/10">
+                        <p className="flex gap-1.5">
+                          <span className="font-bold text-lovely">1.</span>
+                          <span>Open <b>InstaPay</b> app → <b>"Send Money"</b></span>
+                        </p>
+                        <p className="flex gap-1.5">
+                          <span className="font-bold text-lovely">2.</span>
+                          <span>Select <b>"Bank Account"</b></span>
+                        </p>
+                        <p className="flex gap-1.5">
+                          <span className="font-bold text-lovely">3.</span>
+                          <span>Account: <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                        </p>
+                        <p className="flex gap-1.5">
+                          <span className="font-bold text-lovely">4.</span>
+                          <span>Bank: <b>Credit Agricole</b></span>
+                        </p>
+                        <p className="flex gap-1.5">
+                          <span className="font-bold text-lovely">5.</span>
+                          <span>Receiver: <b>Wifey</b></span>
+                        </p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
+                        <CldUploadWidget
+                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
+                          onSuccess={(result: any) => {
+                            if (result.info && typeof result.info !== "string") {
+                              setInstapayReceipt(result.info.secure_url);
+                            }
+                          }}
+                        >
+                          {({ open }) => (
+                            <button
+                              type="button"
+                              onClick={() => open()}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-xs font-medium"
+                            >
+                              <Upload className="w-4 h-4" />
+                              {instapayReceipt ? "✓ Receipt Uploaded (Change)" : "📸 Upload Receipt"}
+                            </button>
+                          )}
+                        </CldUploadWidget>
+
+                        {instapayReceipt && (
+                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 mt-1">
+                            <Image src={instapayReceipt} alt="InstaPay Receipt" fill className="object-cover" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-start gap-2 text-[11px] text-lovely/70 bg-pinkey/30 p-2 rounded-lg">
+                        <span className="text-sm">⚠️</span>
+                        <p>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <div className="flex gap-3">
                 <Button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || (paymentMethod === "instapay" && !instapayReceipt && finalPrice !== null && finalPrice > 0)}
                   className="flex-1 bg-lovely text-creamey rounded-2xl"
                 >
                   {submitting
                     ? "Processing..."
                     : finalPrice === 0
                       ? "Book Now"
-                      : "Proceed to Pay"}
+                      : paymentMethod === "instapay"
+                        ? "Submit for Review"
+                        : "Proceed to Pay"}
                 </Button>
                 <Button
                   type="button"
@@ -854,6 +1029,8 @@ const ExpertSessions = () => {
                 </Button>
               </div>
             </form>
+            </>
+            )}
           </div>
         </div>
       )}

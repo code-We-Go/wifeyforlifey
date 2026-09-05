@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   try {
     await ConnectDB();
     const data = await req.json();
-    const { sessionId, firstName, lastName, email, phone, discountCode, variantIndex } = data;
+    const { sessionId, firstName, lastName, email, phone, discountCode, variantIndex, paymentMethod, instapayReceipt } = data;
     if (!sessionId || !firstName || !lastName || !email || !phone) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -272,6 +272,75 @@ export async function POST(req: Request) {
           isFree: true,
           link: redirectTarget,
           orderId: freeOrder._id,
+        },
+        { status: 200 }
+      );
+    }
+
+    // ─── InstaPay Flow (manual receipt review) ──────────────────────────
+    if (paymentMethod === "instapay") {
+      if (!instapayReceipt) {
+        return NextResponse.json(
+          { error: "Please upload your InstaPay receipt screenshot" },
+          { status: 400 }
+        );
+      }
+
+      const instapayOrder = await PartnerSessionOrderModel.create({
+        sessionId: partnerSession._id,
+        sessionTitle,
+        partnerName: partnerSession.partnerName,
+        partnerEmail: partnerSession.partnerEmail,
+        whatsappNumber: partnerSession.whatsappNumber,
+        clientFirstName: firstName,
+        clientLastName: lastName,
+        clientEmail: email,
+        clientPhone: phone,
+        appliedDiscountCode: appliedCode,
+        basePrice,
+        finalPrice,
+        subscriptionDiscountAmount,
+        profitPercentage,
+        ourProfitAmount,
+        paymentID: `instapay-${Date.now()}`,
+        paymentMethod: "instapay",
+        instapayReceipt,
+        variantTitle,
+        variantDuration,
+        link: sessionMeetingLink,
+        meetingLink: sessionMeetingLink,
+        status: "instapay_review",
+      });
+
+      // Notify admin about the pending instapay review
+      try {
+        const { sendMail } = await import("@/lib/email");
+        await sendMail({
+          to: "orders@shopwifeyforlifey.com",
+          subject: `New InstaPay Session Booking - Pending Review`,
+          name: "Admin",
+          body: `
+            <h2>New InstaPay Session Booking</h2>
+            <p><strong>Session:</strong> ${sessionTitle}</p>
+            <p><strong>Client:</strong> ${firstName} ${lastName}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Amount:</strong> EGP ${finalPrice}</p>
+            <p><strong>Receipt:</strong> <a href="${instapayReceipt}">View Receipt</a></p>
+            <p><strong>Order ID:</strong> ${instapayOrder._id}</p>
+          `,
+          from: "partners@shopwifeyforlifey.com",
+        });
+      } catch (e) {
+        console.error("Failed to send instapay review notification email", e);
+      }
+
+      return NextResponse.json(
+        {
+          success: true,
+          isInstapay: true,
+          orderId: instapayOrder._id,
+          message: "Your booking is under review. Our team will verify your payment within 24 hours.",
         },
         { status: 200 }
       );
