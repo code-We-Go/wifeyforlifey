@@ -70,8 +70,8 @@ const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
         // Remove the alert
         // alert(commentsResponse.data.comments[0]._id);
 
-        // Fetch blog details to get likes
-        const blogResponse = await axios.get(`/api/blogs/${slug}`);
+        // Fetch blog details to get likes (without tracking a duplicate view)
+        const blogResponse = await axios.get(`/api/blogs/${slug}?track=false&source=web`);
         // console.log(JSON.stringify(blogResponse.data) + "data");
         if (blogResponse.data.data) {
           // alert(blogResponse.data.data.likes);

@@ -19,6 +19,8 @@ export interface Blog {
   categories: string[];
   publishedAt?: string;
   viewCount: number;
+  mobileViewCount?: number;
+  webViewCount?: number;
   featured: boolean;
   createdAt: string;
   readingTime: number;

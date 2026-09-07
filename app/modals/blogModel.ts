@@ -18,6 +18,8 @@ export interface IBlog extends Document {
   metaDescription?: string;
   publishedAt?: Date;
   viewCount: number;
+  mobileViewCount: number;
+  webViewCount: number;
   featured: boolean;
   likes: CommentUser[];
   createdAt: Date;
@@ -103,6 +105,16 @@ const BlogSchema = new Schema<IBlog>(
       required: false,
     },
     viewCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    mobileViewCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    webViewCount: {
       type: Number,
       default: 0,
       min: 0,

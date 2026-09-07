@@ -22,6 +22,8 @@ interface Blog {
   metaDescription?: string;
   publishedAt?: string;
   viewCount: number;
+  mobileViewCount?: number;
+  webViewCount?: number;
   featured: boolean;
   createdAt: string;
   readingTime: number;
@@ -62,9 +64,8 @@ const BlogDetailPage = () => {
   const fetchBlog = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/blogs/${slug}`);
+      const response = await axios.get(`/api/blogs/${slug}?source=web`);
       setBlog(response.data.data);
-      await axios.patch(`/api/blogs/${slug}`, { action: "increment_view" });
       if (
         response.data.data.categories.length > 0 ||
         response.data.data.tags.length > 0
@@ -547,6 +548,17 @@ const AppShowcaseCarousel = () => {
 };
 
 const BlogDetailPage = () => {
+  const params = useParams();
+  const slug = params?.slug as string;
+
+  useEffect(() => {
+    if (slug) {
+      fetch(`/api/blogs/${slug}?source=web`).catch((err) => {
+        console.error("Failed to track blog view on web:", err);
+      });
+    }
+  }, [slug]);
+
   return (
     <div className="min-h-screen container-custom bg-creamey py-6 md:py-12">
       <div className="max-w-4xl mx-auto px-4 text-center flex flex-col items-center">
