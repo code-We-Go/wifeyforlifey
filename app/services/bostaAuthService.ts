@@ -129,7 +129,7 @@ class BostaAuthService {
     
     try {
       const response = await axios.post<BostaAuthResponse>(
-        'http://app.bosta.co/api/v2/users/login',
+        'https://app.bosta.co/api/v2/users/login',
         {
           email: process.env.BOSTA_EMAIL,
           password: process.env.BOSTA_PASSWORD 
