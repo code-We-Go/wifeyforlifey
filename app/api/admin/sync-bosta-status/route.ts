@@ -11,20 +11,30 @@ import subscriptionsModel from "@/app/modals/subscriptionsModel";
  * Query params:
  *   ?dryRun=true   — (default) Preview what would change without updating
  *   ?dryRun=false  — Actually update the subscriptions
- *   ?status=delivered — The status to set (default: "delivered")
+ *   ?status=shipped — The status to set (default: "shipped", representing "in progress")
  */
 export async function GET(request: NextRequest) {
   await ConnectDB();
 
   const { searchParams } = new URL(request.url);
   const dryRun = searchParams.get("dryRun") !== "false";
-  const targetStatus = searchParams.get("status") || "delivered";
+  const rawStatus = (searchParams.get("status") || "shipped").trim().toLowerCase();
+
+  // Map friendly names like "in progress" to the internal schema enum ("shipped")
+  const statusAliases: Record<string, string> = {
+    "in progress": "shipped",
+    "in-progress": "shipped",
+    "in_progress": "shipped",
+    "inprogress": "shipped",
+  };
+
+  const targetStatus = statusAliases[rawStatus] || rawStatus;
 
   // Validate target status
   const validStatuses = ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"];
   if (!validStatuses.includes(targetStatus)) {
     return NextResponse.json(
-      { error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
+      { error: `Invalid status "${rawStatus}". Must be one of: ${validStatuses.join(", ")} or "in progress"` },
       { status: 400 }
     );
   }

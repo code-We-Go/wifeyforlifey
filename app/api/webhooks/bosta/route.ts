@@ -27,6 +27,7 @@ const BOSTA_STATUS_MAPPING: { [key: string]: string } = {
   "21": "confirmed",
   // Picked up from consignee - Picked up
   "23": "confirmed",
+
   // Picked up - Heading to customer/you
   "41": "shipped",
   // Received at warehouse - In progress
@@ -76,12 +77,12 @@ interface BostaWebhookPayload {
   trackingNumber: string;
   state: string;
   type:
-    | "SEND"
-    | "EXCHANGE"
-    | "CUSTOMER_RETURN_PICKUP"
-    | "RTO"
-    | "SIGN_AND_RETURN"
-    | "FXF_SEND";
+  | "SEND"
+  | "EXCHANGE"
+  | "CUSTOMER_RETURN_PICKUP"
+  | "RTO"
+  | "SIGN_AND_RETURN"
+  | "FXF_SEND";
   cod?: string; // only in Delivered state
   timeStamp: string;
   isConfirmedDelivery: boolean;
@@ -93,7 +94,7 @@ interface BostaWebhookPayload {
 }
 
 export async function POST(request: Request) {
-    await ConnectDB();
+  await ConnectDB();
 
   try {
     const payload: BostaWebhookPayload = await request.json();
@@ -134,7 +135,7 @@ export async function POST(request: Request) {
     // Try to find by businessReference first (if it's a valid ObjectId)
     let order = null;
     const hasValidBusinessRef = payload.businessReference && mongoose.Types.ObjectId.isValid(payload.businessReference);
-    
+
     if (hasValidBusinessRef) {
       // Find order by businessReference (which should be the order ID)
       order = await ordersModel.findById(payload.businessReference);
@@ -160,9 +161,16 @@ export async function POST(request: Request) {
         if (orderByShipment) {
           console.log(`Order found via shipmentID fallback: ${orderByShipment._id}`);
           // Update order and return
+          const orderUpdateData: Record<string, any> = {
+            status: orderStatus,
+            updatedAt: new Date(),
+          };
+          if (orderStatus === "delivered") {
+            orderUpdateData.payment = "confirmed";
+          }
           await ordersModel.findByIdAndUpdate(
             orderByShipment._id,
-            { status: orderStatus, updatedAt: new Date() },
+            orderUpdateData,
             { new: true }
           );
           console.log(`Order ${orderByShipment._id} updated to status: ${orderStatus} via shipmentID fallback`);
@@ -232,13 +240,17 @@ export async function POST(request: Request) {
     }
 
     // Update the order
+    const orderUpdateData: Record<string, any> = {
+      status: orderStatus,
+      shipmentID: payload._id,
+      updatedAt: new Date(),
+    };
+    if (orderStatus === "delivered") {
+      orderUpdateData.payment = "confirmed";
+    }
     const updatedOrder = await ordersModel.findByIdAndUpdate(
       payload.businessReference,
-      {
-        status: orderStatus,
-        shipmentID: payload._id,
-        updatedAt: new Date(),
-      },
+      orderUpdateData,
       { new: true }
     );
 
@@ -277,7 +289,7 @@ export async function POST(request: Request) {
 
 // Handle GET requests (for webhook verification if needed)
 export async function GET(request: NextRequest) {
-    await ConnectDB();
+  await ConnectDB();
 
   return NextResponse.json(
     { message: "Bosta webhook endpoint is active" },
