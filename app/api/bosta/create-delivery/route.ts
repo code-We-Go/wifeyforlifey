@@ -80,8 +80,10 @@ export async function POST(request: Request) {
     // Create delivery with Bosta
     const result = await bostaService.createDelivery(deliveryPayload);
 
-    // Handle both wrapped {success, data: {_id}} and direct {_id} response formats
-    const bostaShipmentID = result?.data?._id || result?._id;
+    // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
+    // Prefer trackingNumber for shipmentID as it's the customer-facing identifier
+    const bostaTrackingNumber = result?.data?.trackingNumber || result?.trackingNumber;
+    const bostaShipmentID = bostaTrackingNumber || result?.data?._id || result?._id;
     if (!bostaShipmentID) {
       console.error("Failed to create Bosta delivery:", result.error || JSON.stringify(result));
       return NextResponse.json({ error: result.error || "No shipmentID in response" }, { status: 400 });
@@ -92,7 +94,7 @@ export async function POST(request: Request) {
       orderId,
       {
         shipmentID: bostaShipmentID,
-        status: "confirmed", // Update status to confirmed when shipment is created
+        status: "order_created", // Update status to order_created when shipment is created
       },
       { new: true }
     );

@@ -350,7 +350,7 @@ async function handleSubscription(
       selectedDuration: paymentOp.selectedDuration,
       subscribed: true,
       expiryDate,
-      status: "confirmed",
+      status: "order_created",
       process: paymentOp.process,
       cart: paymentOp.cart || [],
       redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,
@@ -487,13 +487,14 @@ async function handleSubscription(
         );
         const bostaResult = await bostaService.createDelivery(deliveryPayload);
         console.log("bostaResult" + JSON.stringify(bostaResult));
-        // Handle both wrapped {success, data: {_id}} and direct {_id} response formats
-        const bostaShipmentID = bostaResult?.data?._id || bostaResult?._id;
+        // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
+        // Prefer trackingNumber for shipmentID as it's the customer-facing identifier
         const bostaTrackingNumber = bostaResult?.data?.trackingNumber || bostaResult?.trackingNumber;
+        const bostaShipmentID = bostaTrackingNumber || bostaResult?.data?._id || bostaResult?._id;
         if (bostaShipmentID) {
           await subscriptionsModel.findByIdAndUpdate(updatedSub._id, {
             shipmentID: bostaShipmentID,
-            status: "confirmed",
+            status: "order_created",
           });
           console.log(
             "Bosta delivery created successfully:",
@@ -902,14 +903,15 @@ async function handleOrder(
       console.log("Creating Bosta delivery for order:", res._id);
       const bostaResult = await bostaService.createDelivery(deliveryPayload);
       console.log("bostaResult" + JSON.stringify(bostaResult));
-      // Handle both wrapped {success, data: {_id}} and direct {_id} response formats
-      const bostaShipmentID = bostaResult?.data?._id || bostaResult?._id;
+      // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
+      // Prefer trackingNumber for shipmentID as it's the customer-facing identifier
       const bostaTrackingNumber = bostaResult?.data?.trackingNumber || bostaResult?.trackingNumber;
+      const bostaShipmentID = bostaTrackingNumber || bostaResult?.data?._id || bostaResult?._id;
       if (bostaShipmentID) {
         console.log("shipmentID" + bostaShipmentID);
         await ordersModel.findByIdAndUpdate(res._id, {
           shipmentID: bostaShipmentID,
-          status: "confirmed",
+          status: "order_created",
         });
         console.log(
           "Bosta delivery created successfully:",

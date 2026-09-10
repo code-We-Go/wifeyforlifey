@@ -13,63 +13,52 @@ import mongoose from "mongoose";
 
 // Bosta webhook status mapping based on state codes
 const BOSTA_STATUS_MAPPING: { [key: string]: string } = {
-  // Pickup requested - New
-  "10": "pending",
-  // Waiting for route - In progress
-  "11": "confirmed",
-  // Route Assigned - In progress
-  "20": "confirmed",
-  // Picking up from consignee - Heading to customer
-  "22": "confirmed",
-  // Picking up - Heading to customer
-  "40": "confirmed",
-  // Picked up from business - Picked up
-  "21": "confirmed",
-  // Picked up from consignee - Picked up
-  "23": "confirmed",
-
-  // Picked up - Heading to customer/you
-  "41": "shipped",
-  // Received at warehouse - In progress
-  "24": "shipped",
-  // Fulfilled - Fulfilled
-  "25": "shipped",
-  // In transit between Hubs - In progress
-  "30": "shipped",
-  // Delivered - Successful
+  // Pickup requested — New
+  "10": "order_created",
+  // Waiting for route — In progress (Cash Collection)
+  "11": "order_created",
+  // Route Assigned — In progress
+  "20": "order_created",
+  // Picked up from business — Picked up (Send, Exchange)
+  "21": "picked_up",
+  // Picking up from consignee — Heading to customer (CRP, Exchange)
+  "22": "picked_up",
+  // Picked up from consignee — Picked up (CRP, Exchange)
+  "23": "picked_up",
+  // Received at warehouse — In progress
+  "24": "in_progress",
+  // Fulfilled — Fulfilled (Fulfillment)
+  "25": "in_progress",
+  // In transit between Hubs — In progress
+  "30": "in_progress",
+  // Picking up — Heading to customer (Cash Collection)
+  "40": "picked_up",
+  // Picked up — Heading to customer/you
+  "41": "out_for_delivery",
+  // Delivered — Successful
   "45": "delivered",
-  // Returned to business - Successful
+  // Returned to business — Successful (Exchange, CRP, RTO)
   "46": "delivered",
-  // Exception - In progress
-  "47": "pending",
-  // Canceled - In progress
-  "49": "cancelled",
-  // Terminated - Terminated
+  // Exception — In progress
+  "47": "exception",
+  // Terminated — Terminated
   "48": "cancelled",
-  // Lost - Unsuccessful
-  "100": "cancelled",
-  // Damaged - Unsuccessful
-  "101": "cancelled",
-  // Returned to stock - Returned
+  // Canceled — In progress
+  "49": "cancelled",
+  // Returned to stock — Returned (Fulfillment)
   "60": "returned",
-  // Investigation - In progress
-  "102": "pending",
-  // Awaiting your action - Awaiting your action
-  "103": "pending",
-  // Archived - Archived
+  // Lost — Unsuccessful
+  "100": "cancelled",
+  // Damaged — Unsuccessful
+  "101": "cancelled",
+  // Investigation — In progress
+  "102": "investigation",
+  // Awaiting your action — Awaiting your action (Exchange, CRP, RTO)
+  "103": "awaiting_action",
+  // Archived — Archived
   "104": "cancelled",
-  // On hold - In progress
-  "105": "pending",
-
-  // Legacy string mappings for backward compatibility
-  // PENDING: "pending",
-  // PICKED_UP: "confirmed",
-  // IN_TRANSIT: "shipped",
-  // OUT_FOR_DELIVERY: "shipped",
-  // DELIVERED: "delivered",
-  // CANCELLED: "cancelled",
-  // RETURNED: "cancelled",
-  // EXCEPTION: "pending",
+  // On hold — In progress
+  "105": "on_hold",
 };
 
 interface BostaWebhookPayload {
@@ -128,7 +117,7 @@ export async function POST(request: Request) {
     const orderStatus =
       BOSTA_STATUS_MAPPING[stateCode] ||
       BOSTA_STATUS_MAPPING[stateCode.toUpperCase()] ||
-      "pending";
+      "order_created";
 
     console.log(`Bosta state mapping: ${stateCode} -> ${orderStatus}`);
 

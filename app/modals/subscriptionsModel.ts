@@ -100,14 +100,14 @@ const SubscriptionSchema = new Schema(
     status: {
       type: String,
       enum: [
-        "pending",
-        "confirmed",
-        "shipped",
-        "delivered",
-        "cancelled",
-        "returned",
+        // New Bosta-aligned statuses (used for new records)
+        "order_created", "picked_up", "in_progress", "out_for_delivery",
+        "delivered", "cancelled", "returned",
+        "exception", "investigation", "awaiting_action", "on_hold",
+        // Legacy values (kept for backward compatibility with existing records)
+        "pending", "confirmed", "shipped",
       ],
-      default: "pending",
+      default: "order_created",
     },
         paymentMethod: { type: String, required: false,enum:["instapay","cash","card"] },
 

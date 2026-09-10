@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { IOrder, ISubscription } from "@/app/interfaces/interfaces";
 
@@ -103,7 +103,7 @@ function TrackOrderPage() {
     } catch (err: any) {
       setError(
         err.message ||
-          "An error occurred while fetching the subscription status"
+        "An error occurred while fetching the subscription status"
       );
       setTrackingStatus(null);
     } finally {
@@ -135,7 +135,7 @@ function TrackOrderPage() {
     } catch (err: any) {
       setError(
         err.message ||
-          "An error occurred while fetching the subscription status"
+        "An error occurred while fetching the subscription status"
       );
       setTrackingStatus(null);
     } finally {
@@ -183,21 +183,19 @@ function TrackOrderPage() {
           <div className="flex rounded-md overflow-hidden">
             <button
               onClick={() => setTrackingType("order")}
-              className={`px-4 py-2 ${
-                trackingType === "order"
-                  ? "bg-lovely text-creamey"
-                  : "bg-gray-200 text-gray-700"
-              }`}
+              className={`px-4 py-2 ${trackingType === "order"
+                ? "bg-lovely text-creamey"
+                : "bg-gray-200 text-gray-700"
+                }`}
             >
               Track Order
             </button>
             <button
               onClick={() => setTrackingType("subscription")}
-              className={`px-4 py-2 ${
-                trackingType === "subscription"
-                  ? "bg-lovely text-creamey"
-                  : "bg-gray-200 text-gray-700"
-              }`}
+              className={`px-4 py-2 ${trackingType === "subscription"
+                ? "bg-lovely text-creamey"
+                : "bg-gray-200 text-gray-700"
+                }`}
             >
               Track Planner
             </button>
@@ -290,21 +288,34 @@ function TrackOrderPage() {
 
                   `}
                 >
-                  {trackingStatus.status || "Pending"}
+                  {(trackingStatus.status || "order_created").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
                 </p>
               </div>
               {trackingStatus.shipmentID && (
                 <div>
                   <p className="text-creamey mb-1">Tracking Number:</p>
                   <p className="font-medium">{trackingStatus.shipmentID}</p>
+                  <a
+                    href={`https://bosta.co/en-eg/tracking-shipments?shipment-number=${trackingStatus.shipmentID}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs underline hover:opacity-80 inline-flex items-center gap-1 mt-1 text-creamey font-medium"
+                  >
+                    Check status on Bosta
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
               )}
-              {/* {trackingStatus.status && (
+              {trackingStatus.createdAt && (
                 <div>
                   <p className="text-creamey mb-1">Estimated Delivery:</p>
-                  <p className="font-medium">{trackingStatus.status}</p>
+                  <p className="font-medium">
+                    {new Date(
+                      new Date(trackingStatus.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000
+                    ).toLocaleDateString()}
+                  </p>
                 </div>
-              )} */}
+              )}
               <div className="flex gap-2">
                 <p className="text-creamey mb-1">Total Amount:</p>
                 <p className="font-medium">
@@ -331,9 +342,9 @@ function TrackOrderPage() {
               </h3>
               <ul className="divide-y">
                 {trackingStatus &&
-                isOrder(trackingStatus) &&
-                trackingStatus.cart &&
-                trackingStatus.cart.length > 0 ? (
+                  isOrder(trackingStatus) &&
+                  trackingStatus.cart &&
+                  trackingStatus.cart.length > 0 ? (
                   trackingStatus.cart.map((item, index) => (
                     <li key={index} className="py-2">
                       {item.productName} x {item.quantity} - EGP{" "}
@@ -392,12 +403,23 @@ function TrackOrderPage() {
                     : "N/A"}
                 </p>
               </div>
+
               <div>
                 <p className="text-creamey mb-1">Shipping Status:</p>
                 <p className={`font-medium `}>
-                  {trackingStatus.status || "Pending"}
+                  {(trackingStatus.status || "order_created").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
                 </p>
               </div>
+              {trackingStatus.createdAt && (
+                <div>
+                  <p className="text-creamey mb-1">Estimated Delivery:</p>
+                  <p className="font-medium">
+                    {new Date(
+                      new Date(trackingStatus.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000
+                    ).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
               {trackingStatus.email && (
                 <div>
                   <p className="text-creamey mb-1">Email:</p>
@@ -412,10 +434,20 @@ function TrackOrderPage() {
               </div>
               {trackingStatus.shipmentID && (
                 <div>
-                  <p className="text-creamey mb-1">Shipment ID:</p>
+                  <p className="text-creamey mb-1">Tracking Number:</p>
                   <p className="font-medium">{trackingStatus.shipmentID}</p>
+                  <a
+                    href={`https://bosta.co/en-eg/tracking-shipments?shipment-number=${trackingStatus.shipmentID}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs underline hover:opacity-80 inline-flex items-center gap-1 mt-1 text-creamey font-medium"
+                  >
+                    Check status on Bosta
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
               )}
+
               {/* {trackingStatus.packageID && (
                 <div>
                   <p className="text-creamey mb-1">Package ID:</p>

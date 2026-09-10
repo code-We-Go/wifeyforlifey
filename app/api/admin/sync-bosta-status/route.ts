@@ -18,34 +18,54 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const dryRun = searchParams.get("dryRun") !== "false";
-  const rawStatus = (searchParams.get("status") || "shipped").trim().toLowerCase();
+  const rawStatus = (searchParams.get("status") || "in_progress").trim().toLowerCase();
 
-  // Map friendly names like "in progress" to the internal schema enum ("shipped")
+  // Map friendly names to internal schema enums
   const statusAliases: Record<string, string> = {
-    "in progress": "shipped",
-    "in-progress": "shipped",
-    "in_progress": "shipped",
-    "inprogress": "shipped",
+    "order created": "order_created",
+    "order-created": "order_created",
+    "order_created": "order_created",
+    "picked up": "picked_up",
+    "picked-up": "picked_up",
+    "picked_up": "picked_up",
+    "in progress": "in_progress",
+    "in-progress": "in_progress",
+    "in_progress": "in_progress",
+    "inprogress": "in_progress",
+    "out for delivery": "out_for_delivery",
+    "out-for-delivery": "out_for_delivery",
+    "out_for_delivery": "out_for_delivery",
+    "awaiting action": "awaiting_action",
+    "awaiting-action": "awaiting_action",
+    "awaiting_action": "awaiting_action",
+    "on hold": "on_hold",
+    "on-hold": "on_hold",
+    "on_hold": "on_hold",
   };
 
   const targetStatus = statusAliases[rawStatus] || rawStatus;
 
   // Validate target status
-  const validStatuses = ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"];
+  const validStatuses = [
+    "order_created", "picked_up", "in_progress", "out_for_delivery",
+    "delivered", "cancelled", "returned",
+    "exception", "investigation", "awaiting_action", "on_hold",
+    "pending", "confirmed", "shipped",
+  ];
   if (!validStatuses.includes(targetStatus)) {
     return NextResponse.json(
-      { error: `Invalid status "${rawStatus}". Must be one of: ${validStatuses.join(", ")} or "in progress"` },
+      { error: `Invalid status "${rawStatus}". Must be one of: ${validStatuses.join(", ")}` },
       { status: 400 }
     );
   }
 
   try {
-    // Find subscriptions created since Sept 2 that have a shipmentID but are stuck at "confirmed"
+    // Find subscriptions created since Sept 2 that have a shipmentID but are stuck at "confirmed" or "order_created"
     const sept2 = new Date("2026-09-02T00:00:00Z");
     const stuckSubs = await subscriptionsModel.find({
       createdAt: { $gte: sept2 },
       shipmentID: { $ne: "", $exists: true },
-      status: "confirmed",
+      status: { $in: ["confirmed", "order_created"] },
     });
 
     console.log(`Found ${stuckSubs.length} stuck subscriptions to update to "${targetStatus}"`);

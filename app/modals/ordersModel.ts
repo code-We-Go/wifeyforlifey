@@ -35,8 +35,15 @@ const OrderSchema = new Schema(
         currency: { type: String, required: false}, 
         status: {
             type: String,
-            enum: ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"],
-            default: "pending",
+            enum: [
+              // New Bosta-aligned statuses (used for new records)
+              "order_created", "picked_up", "in_progress", "out_for_delivery",
+              "delivered", "cancelled", "returned",
+              "exception", "investigation", "awaiting_action", "on_hold",
+              // Legacy values (kept for backward compatibility with existing records)
+              "pending", "confirmed", "shipped",
+            ],
+            default: "order_created",
         },
         payment:{
             type: String,

@@ -147,15 +147,16 @@ export async function POST(request: Request) {
           );
           // console.log("bostaResult" + bostaResult);
           console.log("bostaResult" + JSON.stringify(bostaResult));
-          // Handle both wrapped {success, data: {_id}} and direct {_id} response formats
-          const bostaShipmentID = bostaResult?.data?._id || bostaResult?._id;
+          // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
+          // Prefer trackingNumber for shipmentID as it's the customer-facing identifier
           const bostaTrackingNumber = bostaResult?.data?.trackingNumber || bostaResult?.trackingNumber;
+          const bostaShipmentID = bostaTrackingNumber || bostaResult?.data?._id || bostaResult?._id;
           if (bostaShipmentID) {
             // Update order with shipment ID
             console.log("shipmentID" + bostaShipmentID);
             await ordersModel.findByIdAndUpdate(res._id, {
               shipmentID: bostaShipmentID,
-              status: "confirmed",
+              status: "order_created",
             });
             console.log(
               "Bosta delivery created successfully:",

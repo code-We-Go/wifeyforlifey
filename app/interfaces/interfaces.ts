@@ -262,7 +262,7 @@ export interface IOrder {
   subTotal?: number;
   total?: number;
   currency?: string;
-  status?: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  status?: "order_created" | "picked_up" | "in_progress" | "out_for_delivery" | "delivered" | "cancelled" | "returned" | "exception" | "investigation" | "awaiting_action" | "on_hold" | "pending" | "confirmed" | "shipped";
   payment?: "pending" | "failed" | "confirmed";
   shipmentID?: string; // Bosta shipment ID
   billingCountry?: string;
@@ -407,12 +407,20 @@ export interface ISubscription {
   bostaDistrictName?: string;
   shipmentID?: string;
   status?:
-  | "pending"
-  | "confirmed"
-  | "shipped"
+  | "order_created"
+  | "picked_up"
+  | "in_progress"
+  | "out_for_delivery"
   | "delivered"
   | "cancelled"
-  | "returned";
+  | "returned"
+  | "exception"
+  | "investigation"
+  | "awaiting_action"
+  | "on_hold"
+  | "pending"
+  | "confirmed"
+  | "shipped";
   cart?: CartItem[];
   createdAt?: Date;
   updatedAt: Date;

@@ -51,9 +51,15 @@ export default function OrdersPage() {
     switch (status) {
       case 'delivered':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'out_for_delivery':
+      case 'in_progress':
       case 'shipped':
         return <Truck className="h-5 w-5 text-blue-500" />;
+      case 'picked_up':
+      case 'order_created':
       case 'processing':
+      case 'confirmed':
+      case 'pending':
         return <Package className="h-5 w-5 text-yellow-500" />;
       default:
         return <ShoppingBag className="h-5 w-5 text-gray-500" />;
@@ -64,10 +70,24 @@ export default function OrdersPage() {
     switch (status) {
       case 'delivered':
         return 'bg-green-100 text-green-800';
+      case 'out_for_delivery':
+        return 'bg-purple-100 text-purple-800';
+      case 'in_progress':
+      case 'picked_up':
       case 'shipped':
         return 'bg-blue-100 text-blue-800';
+      case 'order_created':
       case 'processing':
+      case 'confirmed':
         return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+      case 'returned':
+        return 'bg-red-100 text-red-800';
+      case 'exception':
+      case 'investigation':
+      case 'awaiting_action':
+      case 'on_hold':
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -100,7 +120,7 @@ export default function OrdersPage() {
                       order.status
                     )}`}
                   >
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    {order.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                   </span>
                   <span className="text-sm text-gray-500">{order.date}</span>
                 </div>
