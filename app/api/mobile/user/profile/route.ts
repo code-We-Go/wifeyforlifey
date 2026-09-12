@@ -11,18 +11,18 @@ import mongoose from "mongoose";
 import playlistModel from "@/app/modals/playlistModel";
 
 export async function GET(request: NextRequest) {
-  
+
   try {
     await ConnectDB();
 
     // 1. Authenticate Request
     const auth = await authenticateRequest(request);
-    
+
     // We can still use userID from query as a fallback or for admin purposes, 
     // but primary source for mobile is the token
     const { searchParams } = new URL(request.url);
     const queryUserID = searchParams.get("userID");
-    
+
     let user = auth.user;
 
     // If not authenticated via token and no query ID, return error
@@ -45,15 +45,18 @@ export async function GET(request: NextRequest) {
 
     // Always (re)fetch the user with specific population selection to ensure 
     // only the 'important features' are returned.
-    console.log("register ",subscriptionsModel,ordersModel,LoyaltyTransactionModel,packageModel,playlistModel)
+    console.log("register ", subscriptionsModel, ordersModel, LoyaltyTransactionModel, packageModel, playlistModel)
     user = await UserModel.findById(targetUserID).populate({
       path: "subscriptions",
       select: "subscribed expiryDate allowedPlaylists miniSubscriptionActivated packageID",
       populate: [
         {
+          // Load-bearing: the mobile app resolves content entitlement from these fields.
+          // packageID MUST stay populated and MUST keep every field in this select -
+          // dropping one silently locks that content for all paying subscribers.
           path: "packageID",
           model: "packages",
-          select: "name packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners",
+          select: "name slug partOf tier price duration packagePlaylists accessAllPlaylists packageInspos accessAllInspos packagePartners accessAllPartners",
         },
         {
           path: "allowedPlaylists.playlistID",

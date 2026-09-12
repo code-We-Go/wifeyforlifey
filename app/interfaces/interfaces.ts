@@ -337,6 +337,7 @@ export interface Ipackage {
   cards: PackageCard[]; // Array of cards with image and points
   active: boolean;
   partOf?: string;
+  tier?: "mini" | "full";
   supportCards?: SupportCard[]; // Support/feature cards shown on the package page
   packagePlaylists?: string[]; // Playlist IDs included in this package
   accessAllPlaylists?: boolean; // If true, package grants access to all packagePlaylists

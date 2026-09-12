@@ -48,6 +48,7 @@ const PackageSchema = new Schema<Ipackage>(
       default: [],
     },
     active: { type: Boolean, default: false },
+    tier: { type: String, enum: ["mini", "full"], required: false },
     notes: { type: [String], required: true, default: [] },
     cards: { type: [PackageCardSchema], required: false, default: [] },
     slug: { type: String, required: false },
