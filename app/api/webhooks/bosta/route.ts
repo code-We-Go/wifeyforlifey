@@ -121,20 +121,33 @@ export async function POST(request: Request) {
 
     console.log(`Bosta state mapping: ${stateCode} -> ${orderStatus}`);
 
-    // Try to find by businessReference first (if it's a valid ObjectId)
+    // Try to find by businessReference first (prioritizing ObjectId, fallback to orderID)
     let order = null;
-    const hasValidBusinessRef = payload.businessReference && mongoose.Types.ObjectId.isValid(payload.businessReference);
-
-    if (hasValidBusinessRef) {
-      // Find order by businessReference (which should be the order ID)
-      order = await ordersModel.findById(payload.businessReference);
+    if (payload.businessReference) {
+      if (mongoose.Types.ObjectId.isValid(payload.businessReference)) {
+        order = await ordersModel.findById(payload.businessReference);
+      }
+      if (!order) {
+        order = await ordersModel.findOne({ orderID: payload.businessReference });
+      }
     }
 
     if (!order) {
-      // If order not found, check subscriptions
-      let subscription = hasValidBusinessRef
-        ? await subscriptionsModel.findById(payload.businessReference)
-        : null;
+      // If order not found, check subscriptions (prioritizing ObjectId, fallback to paymentID/orderID)
+      let subscription = null;
+      if (payload.businessReference) {
+        if (mongoose.Types.ObjectId.isValid(payload.businessReference)) {
+          subscription = await subscriptionsModel.findById(payload.businessReference);
+        }
+        if (!subscription) {
+          subscription = await subscriptionsModel.findOne({
+            $or: [
+              { paymentID: payload.businessReference },
+              { orderID: payload.businessReference },
+            ],
+          });
+        }
+      }
 
       // Fallback: try finding by shipmentID if not found by _id
       if (!subscription) {
@@ -238,13 +251,13 @@ export async function POST(request: Request) {
       orderUpdateData.payment = "confirmed";
     }
     const updatedOrder = await ordersModel.findByIdAndUpdate(
-      payload.businessReference,
+      order._id,
       orderUpdateData,
       { new: true }
     );
 
     console.log(
-      `Order ${payload.businessReference} updated to status: ${orderStatus}`,
+      `Order ${order._id} updated to status: ${orderStatus}`,
       {
         trackingNumber: payload.trackingNumber,
         bostaState: payload.state,

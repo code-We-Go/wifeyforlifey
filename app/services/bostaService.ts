@@ -38,6 +38,7 @@ interface BostaDeliveryPayload {
   pickupAddress: BostaAddress;
   returnAddress: BostaAddress;
   businessReference: string;
+  reference?: string;
   receiver: BostaReceiver;
   webhookUrl: string;
 }
@@ -138,50 +139,55 @@ class BostaService {
 
     // console.log("description", description);
 
-    return {
-      type: 10,
-      specs: {
-        packageType: "Parcel",
-        size: "MEDIUM",
-        packageDetails: {
-          itemsCount,
-          description: "Desc.",
+      const refId = order._id
+        ? String(order._id)
+        : (order.orderID || order.paymentID || order.referenceId || order.orderId || "43535252");
+
+      return {
+        type: 10,
+        specs: {
+          packageType: "Parcel",
+          size: "MEDIUM",
+          packageDetails: {
+            itemsCount,
+            description: "Desc.",
+          },
         },
-      },
-      notes: "",
-      cod: cash === "cash" ? order.total : 0,
-      dropOffAddress: {
-        city: order.bostaCityName || order.billingCity || order.city || "Cairo",
-        zoneId: order.bostaZone || "NQz5sDOeG",
-        districtId: order.bostaDistrict || "aiJudRHeOt",
-        firstLine: order.billingAddress || order.address || "Main Street",
-        secondLine: order.billingApartment || order.apartment || "Apartment details",
-        buildingNumber: "1",
-        floor: "1",
-        apartment: "1",
-      },
-      pickupAddress: {
-        city: process.env.BOSTA_PICKUP_CITY || "Cairo",
-        zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "1",
-        districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "1",
-        firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Main Street",
-        secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "Pickup location",
-        buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "1",
-        floor: process.env.BOSTA_PICKUP_FLOOR || "1",
-        apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
-      },
-      returnAddress: {
-        city: process.env.BOSTA_RETURN_CITY || "Cairo",
-        zoneId: process.env.BOSTA_RETURN_ZONE_ID || "1",
-        districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "1",
-        firstLine: process.env.BOSTA_RETURN_ADDRESS || "Return Address",
-        secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "Return details",
-        buildingNumber: process.env.BOSTA_RETURN_BUILDING || "1",
-        floor: process.env.BOSTA_RETURN_FLOOR || "1",
-        apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
-      },
-      businessReference: order._id ? String(order._id) : "43535252",
-      receiver: {
+        notes: "",
+        cod: cash === "cash" ? order.total : 0,
+        dropOffAddress: {
+          city: order.bostaCityName || order.billingCity || order.city || "Cairo",
+          zoneId: order.bostaZone || "NQz5sDOeG",
+          districtId: order.bostaDistrict || "aiJudRHeOt",
+          firstLine: order.billingAddress || order.address || "Main Street",
+          secondLine: order.billingApartment || order.apartment || "Apartment details",
+          buildingNumber: "1",
+          floor: "1",
+          apartment: "1",
+        },
+        pickupAddress: {
+          city: process.env.BOSTA_PICKUP_CITY || "Cairo",
+          zoneId: process.env.BOSTA_PICKUP_ZONE_ID || "1",
+          districtId: process.env.BOSTA_PICKUP_DISTRICT_ID || "1",
+          firstLine: process.env.BOSTA_PICKUP_ADDRESS || "Main Street",
+          secondLine: process.env.BOSTA_PICKUP_ADDRESS_2 || "Pickup location",
+          buildingNumber: process.env.BOSTA_PICKUP_BUILDING || "1",
+          floor: process.env.BOSTA_PICKUP_FLOOR || "1",
+          apartment: process.env.BOSTA_PICKUP_APARTMENT || "1",
+        },
+        returnAddress: {
+          city: process.env.BOSTA_RETURN_CITY || "Cairo",
+          zoneId: process.env.BOSTA_RETURN_ZONE_ID || "1",
+          districtId: process.env.BOSTA_RETURN_DISTRICT_ID || "1",
+          firstLine: process.env.BOSTA_RETURN_ADDRESS || "Return Address",
+          secondLine: process.env.BOSTA_RETURN_ADDRESS_2 || "Return details",
+          buildingNumber: process.env.BOSTA_RETURN_BUILDING || "1",
+          floor: process.env.BOSTA_RETURN_FLOOR || "1",
+          apartment: process.env.BOSTA_RETURN_APARTMENT || "1",
+        },
+        businessReference: refId,
+        reference: refId,
+        receiver: {
         firstName: order.billingFirstName || order.firstName || "Sasuke",
         lastName: order.billingLastName || order.lastName || "Uchiha",
         phone: order.billingPhone || order.phone || "01065685435",

@@ -10,6 +10,7 @@ import { LoyaltyTransactionModel } from "@/app/modals/loyaltyTransactionModel";
 import packageModel from "@/app/modals/packageModel";
 import { DiscountModel } from "@/app/modals/Discount";
 import { sendMail } from "@/lib/email";
+import { addContactToBrevo } from "@/lib/brevo";
 import BostaService from "@/app/services/bostaService";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
@@ -279,8 +280,15 @@ async function handleSubscription(
     return { success: true, redirect: `payment/success?subscription=true${giftParam}` };
   }
 
+  const isPaymobObjectId = mongoose.Types.ObjectId.isValid(paymobOrderId);
+  const isRefObjectId = referenceId && mongoose.Types.ObjectId.isValid(referenceId);
+
+  const queryConditions: any[] = [{ paymentID: paymobOrderId }];
+  if (isPaymobObjectId) queryConditions.push({ _id: paymobOrderId });
+  if (isRefObjectId) queryConditions.push({ _id: referenceId });
+
   const paymentOps = await subscriptionPaymentModel
-    .find({ paymentID: paymobOrderId })
+    .find({ $or: queryConditions })
     .populate({ path: "to", options: { strictPopulate: false } })
     .populate({ path: "from", options: { strictPopulate: false } });
 
@@ -293,7 +301,7 @@ async function handleSubscription(
 
   if (!isSuccess) {
     await subscriptionPaymentModel.updateMany(
-      { paymentID: paymobOrderId },
+      { $or: queryConditions },
       { status: "failed" }
     );
     return { success: false, redirect: "payment/failed" };
@@ -344,7 +352,7 @@ async function handleSubscription(
 
     // Build subscription data
     const subscriptionData: any = {
-      paymentID: paymobOrderId,
+      paymentID: paymentOp.paymentID || paymobOrderId,
       email: subscriptionEmail,
       packageID: paymentOp.to,
       selectedDuration: paymentOp.selectedDuration,
@@ -620,6 +628,14 @@ async function handleSubscription(
               from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
             console.log("Wedding Planning upgrade email sent to", updatedSub.email);
+
+            await addContactToBrevo({
+              email: updatedSub.email || paymentOp.email,
+              listId: 16,
+              firstName: updatedSub.firstName || paymentOp.firstName,
+              lastName: updatedSub.lastName || paymentOp.lastName,
+              phone: updatedSub.phone || paymentOp.phone,
+            });
           } else if (toPkgId === "687396821b4da119eb1c13fe") {
             // Gehaz Bestie Experience upgrade
             const { generateGehazBestieExperienceUpgradeEmail } = await import(
@@ -633,6 +649,14 @@ async function handleSubscription(
               from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
             console.log("Gehaz Bestie upgrade email sent to", updatedSub.email);
+
+            await addContactToBrevo({
+              email: updatedSub.email || paymentOp.email,
+              listId: 5,
+              firstName: updatedSub.firstName || paymentOp.firstName,
+              lastName: updatedSub.lastName || paymentOp.lastName,
+              phone: updatedSub.phone || paymentOp.phone,
+            });
           }
         } else if (isRenewProcess) {
           const packageName = (updatedSub.packageID as any)?.name || (paymentOp.to as any)?.name || "N/A";
@@ -670,152 +694,134 @@ async function handleSubscription(
           });
           console.log("Gift email sent successfully to purchaser:", recipientEmail);
         } else if (paymentOp.process === "new") {
-          // Welcome emails based on package ID
-          if (
-            (updatedSub.packageID as any)?._id &&
-            (updatedSub.packageID as any)._id.toString() ===
-              "687396821b4da119eb1c13fe"
-          ) {
-            const firstName = updatedSub.firstName || "Wifey";
+          // Welcome emails & Brevo contact sync based on package ID
+          const subPkgId =
+            (updatedSub.packageID as any)?._id?.toString() ||
+            (updatedSub.packageID as any)?.toString() ||
+            (paymentOp.to as any)?._id?.toString() ||
+            (paymentOp.to as any)?.toString();
+          const targetEmail =
+            (updatedSub.email || subscriptionEmail || paymentOp.email || "").trim().toLowerCase();
+          const targetFirstName =
+            updatedSub.firstName || paymentOp.firstName || updatedSub.billingFirstName || paymentOp.billingFirstName || "Wifey";
+          const targetLastName =
+            updatedSub.lastName || paymentOp.lastName || updatedSub.billingLastName || paymentOp.billingLastName || "";
+          const targetPhone =
+            updatedSub.phone || updatedSub.billingPhone || paymentOp.phone || "";
+
+          if (subPkgId === "687396821b4da119eb1c13fe") {
+            // Full Experience (Brevo List 5)
             const { generateWelcomeEmail } = await import(
               "@/utils/FullExperienceEmail"
             );
-            await sendMail({
-              to: updatedSub.email,
-              name: firstName,
-              subject:
-                "You're in, beautiful! Welcome to the Wifeys community 💗",
-              body: generateWelcomeEmail(firstName, updatedSub),
-              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-            });
-            const brevoApiKey = process.env.BREVO_API_KEY;
-            if (brevoApiKey) {
-              await fetch("https://api.brevo.com/v3/contacts", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Accept: "application/json",
-                  "api-key": brevoApiKey,
-                },
-                body: JSON.stringify({
-                  email: updatedSub.email,
-                  listIds: [5],
-                  updateEnabled: true,
-                }),
+            try {
+              await sendMail({
+                to: targetEmail,
+                name: targetFirstName,
+                subject:
+                  "You're in, beautiful! Welcome to the Wifeys community 💗",
+                body: generateWelcomeEmail(targetFirstName, updatedSub),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
+              console.log(
+                "Welcome email sent successfully to",
+                targetEmail
+              );
+            } catch (mailError) {
+              console.error("Failed to send Full Experience welcome email:", mailError);
             }
-            console.log(
-              "Welcome email sent successfully to",
-              updatedSub.email
-            );
-          } else if (
-            (updatedSub.packageID as any)?._id &&
-            (updatedSub.packageID as any)._id.toString() ===
-              "68bf6ae9c4d5c1af12cdcd37"
-          ) {
-            const firstName = updatedSub.firstName || "Wifey";
+
+            await addContactToBrevo({
+              email: targetEmail,
+              listId: 5,
+              firstName: targetFirstName,
+              lastName: targetLastName,
+              phone: targetPhone,
+            });
+          } else if (subPkgId === "68bf6ae9c4d5c1af12cdcd37") {
+            // Mini Experience (Brevo List 4)
             const { generateMiniExperienceMail } = await import(
               "@/utils/MiniExperienceEmail"
             );
-            await sendMail({
-              to: updatedSub.email,
-              name: firstName,
-              subject: "Welcome to the Mini Wifey Experience! 💕",
-              body: generateMiniExperienceMail(firstName, updatedSub),
-              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-            });
-            const brevoApiKey = process.env.BREVO_API_KEY;
-            if (brevoApiKey) {
-              await fetch("https://api.brevo.com/v3/contacts", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Accept: "application/json",
-                  "api-key": brevoApiKey,
-                },
-                body: JSON.stringify({
-                  email: updatedSub.email,
-                  listIds: [4],
-                  updateEnabled: true,
-                }),
+            try {
+              await sendMail({
+                to: targetEmail,
+                name: targetFirstName,
+                subject: "Welcome to the Mini Wifey Experience! 💕",
+                body: generateMiniExperienceMail(targetFirstName, updatedSub),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
+              console.log(
+                "Mini Experience email sent successfully to",
+                targetEmail
+              );
+            } catch (mailError) {
+              console.error("Failed to send Mini Experience email:", mailError);
             }
-            console.log(
-              "Mini Experience email sent successfully to",
-              updatedSub.email
-            );
-          } else if (
-            (updatedSub.packageID as any)?._id &&
-            (updatedSub.packageID as any)._id.toString() ===
-              "6a2d9aec3def6ce76dc7babc"
-          ) {
-            const firstName = updatedSub.firstName || "Wifey";
+
+            await addContactToBrevo({
+              email: targetEmail,
+              listId: 4,
+              firstName: targetFirstName,
+              lastName: targetLastName,
+              phone: targetPhone,
+            });
+          } else if (subPkgId === "6a2d9aec3def6ce76dc7babc") {
+            // Mini Wedding Planning Experience (Brevo List 17)
             const { generateWelcomeEmail } = await import(
               "@/utils/weddingPlanningExperienceEmail"
             );
-            await sendMail({
-              to: updatedSub.email,
-              name: firstName,
-              subject: "Welcome to the Mini Wedding Planning Experience! 💕",
-              body: generateWelcomeEmail(firstName, updatedSub),
-              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-            });
-            const brevoApiKey = process.env.BREVO_API_KEY;
-            if (brevoApiKey) {
-              await fetch("https://api.brevo.com/v3/contacts", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Accept: "application/json",
-                  "api-key": brevoApiKey,
-                },
-                body: JSON.stringify({
-                  email: updatedSub.email,
-                  listIds: [4],
-                  updateEnabled: true,
-                }),
+            try {
+              await sendMail({
+                to: targetEmail,
+                name: targetFirstName,
+                subject: "Welcome to the Mini Wedding Planning Experience! 💕",
+                body: generateWelcomeEmail(targetFirstName, updatedSub),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
+              console.log(
+                "Mini Wedding Planning Experience email sent successfully to",
+                targetEmail
+              );
+            } catch (mailError) {
+              console.error("Failed to send Mini Wedding Planning Experience email:", mailError);
             }
-            console.log(
-              "Mini Wedding Planning Experience email sent successfully to",
-              updatedSub.email
-            );
-          } else if (
-            (updatedSub.packageID as any)?._id &&
-            (updatedSub.packageID as any)._id.toString() ===
-              "6965e63c6df4503dda02c12b"
-          ) {
-            const firstName = updatedSub.firstName || "Wifey";
+
+            await addContactToBrevo({
+              email: targetEmail,
+              listId: 17,
+              firstName: targetFirstName,
+              lastName: targetLastName,
+              phone: targetPhone,
+            });
+          } else if (subPkgId === "6965e63c6df4503dda02c12b") {
+            // Full Wedding Planning Experience (Brevo List 16)
             const { generateWelcomeEmail } = await import(
               "@/utils/weddingPlanningExperienceEmail"
             );
-            await sendMail({
-              to: updatedSub.email,
-              name: firstName,
-              subject: "Welcome to the Wedding Planning Experience! 💕",
-              body: generateWelcomeEmail(firstName, updatedSub),
-              from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-            });
-            const brevoApiKey = process.env.BREVO_API_KEY;
-            if (brevoApiKey) {
-              await fetch("https://api.brevo.com/v3/contacts", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Accept: "application/json",
-                  "api-key": brevoApiKey,
-                },
-                body: JSON.stringify({
-                  email: updatedSub.email,
-                  listIds: [4],
-                  updateEnabled: true,
-                }),
+            try {
+              await sendMail({
+                to: targetEmail,
+                name: targetFirstName,
+                subject: "Welcome to the Wedding Planning Experience! 💕",
+                body: generateWelcomeEmail(targetFirstName, updatedSub),
+                from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
+              console.log(
+                "Wedding Planning Experience email sent successfully to",
+                targetEmail
+              );
+            } catch (mailError) {
+              console.error("Failed to send Wedding Planning Experience email:", mailError);
             }
-            console.log(
-              "Wedding Planning Experience email sent successfully to",
-              updatedSub.email
-            );
+
+            await addContactToBrevo({
+              email: targetEmail,
+              listId: 16,
+              firstName: targetFirstName,
+              lastName: targetLastName,
+              phone: targetPhone,
+            });
           }
         }
       }
@@ -889,6 +895,11 @@ async function handleOrder(
   if (!res) {
     console.error(`Order not found for referenceId: ${referenceId}`);
     return { success: false, redirect: "payment/failed" };
+  }
+
+  if (!res.orderID && paymobOrderId && !mongoose.Types.ObjectId.isValid(paymobOrderId)) {
+    res.orderID = paymobOrderId;
+    await ordersModel.findByIdAndUpdate(res._id, { orderID: paymobOrderId });
   }
 
   // Bosta integration
@@ -1076,6 +1087,34 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
         );
       }
 
+      // Direct fallback for orders (e.g. from Dashboard InstaPay Approval)
+      const directOrder = (isObjectId
+        ? await ordersModel.findById(paymobOrderId)
+        : null) || (await ordersModel.findOne({ orderID: paymobOrderId }));
+
+      if (directOrder) {
+        console.log(`📦 Found Order directly for ID: ${paymobOrderId}`);
+        return await handleOrder(
+          directOrder.orderID || paymobOrderId,
+          directOrder._id.toString(),
+          isSuccess
+        );
+      }
+
+      // Direct fallback for subscriptions (e.g. from Dashboard InstaPay Approval)
+      const directSubPayment = (isObjectId
+        ? await subscriptionPaymentModel.findById(paymobOrderId)
+        : null) || (await subscriptionPaymentModel.findOne({ paymentID: paymobOrderId }));
+
+      if (directSubPayment) {
+        console.log(`📦 Found SubscriptionPayment directly for ID: ${paymobOrderId}`);
+        return await handleSubscription(
+          directSubPayment.paymentID || paymobOrderId,
+          directSubPayment._id.toString(),
+          isSuccess
+        );
+      }
+
       console.error(
         `❌ No PendingPayment found for Paymob order: ${paymobOrderId}`
       );
@@ -1135,14 +1174,14 @@ async function processCallback(paymobOrderId: string, isSuccess: boolean) {
         break;
       case "subscription":
         result = await handleSubscription(
-          paymobOrderId,
+          pendingPayment.paymobOrderId || paymobOrderId,
           pendingPayment.referenceId.toString(),
           isSuccess
         );
         break;
       case "order":
         result = await handleOrder(
-          paymobOrderId,
+          pendingPayment.paymobOrderId || paymobOrderId,
           pendingPayment.referenceId.toString(),
           isSuccess
         );
