@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import SessionCard from "@/components/shared/SessionCard";
 import SessionCardSkeleton from "@/components/shared/SessionCardSkeleton";
+import ConsultantAvailabilityModal, {
+  getAvailabilityNotice,
+} from "@/components/shared/ConsultantAvailabilityModal";
 import useEmblaCarousel from "embla-carousel-react";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -77,6 +80,10 @@ const ExpertSessions = () => {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "instapay">("card");
   const [instapayReceipt, setInstapayReceipt] = useState("");
   const [instapaySuccess, setInstapaySuccess] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<{
+    session: IPartnerSession;
+    variantIndex: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -287,6 +294,15 @@ const ExpertSessions = () => {
 
     // Auto-fetch and apply highest valid automatic discount
     await fetchAndApplyBestAutoDiscount(basePrice, subPrice);
+  };
+
+  // Show availability notice (if any) before opening the booking modal
+  const requestBooking = (s: IPartnerSession, variantIndex = 0) => {
+    if (getAvailabilityNotice(s)) {
+      setPendingBooking({ session: s, variantIndex });
+      return;
+    }
+    openBookingModal(s, variantIndex);
   };
 
   const handleBookingVariantChange = async (idx: number) => {
@@ -563,7 +579,7 @@ const ExpertSessions = () => {
                     session={session}
                     discountBadge={getSessionDiscountBadge(session)}
                     onDetailsClick={() => openDetailsModal(session)}
-                    onBookClick={() => openBookingModal(session)}
+                    onBookClick={() => requestBooking(session)}
                   />
                 </div>
               ))}
@@ -579,6 +595,17 @@ const ExpertSessions = () => {
         </div>
       </div>
 
+
+      <ConsultantAvailabilityModal
+        notice={getAvailabilityNotice(pendingBooking?.session ?? null)}
+        onClose={() => setPendingBooking(null)}
+        onContinue={() => {
+          if (!pendingBooking) return;
+          const { session, variantIndex } = pendingBooking;
+          setPendingBooking(null);
+          openBookingModal(session, variantIndex);
+        }}
+      />
 
       {/* Details Modal */}
       {selectedForDetails && (
@@ -691,7 +718,7 @@ const ExpertSessions = () => {
                 onClick={() => {
                   const currIdx = selectedVariantIndex;
                   setSelectedForDetails(null);
-                  openBookingModal(selectedForDetails, currIdx);
+                  requestBooking(selectedForDetails, currIdx);
                 }}
                 className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
               >

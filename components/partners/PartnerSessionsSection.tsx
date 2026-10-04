@@ -10,6 +10,9 @@ import { CreditCard, Smartphone, Upload, CheckCircle2 } from "lucide-react";
 import { CldUploadWidget } from "next-cloudinary";
 import axios from "axios";
 import SessionCard from "@/components/shared/SessionCard";
+import ConsultantAvailabilityModal, {
+  getAvailabilityNotice,
+} from "@/components/shared/ConsultantAvailabilityModal";
 
 export type PartnerSessionVariant = {
   _id?: string;
@@ -70,6 +73,10 @@ export default function PartnerSessionsSection() {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "instapay">("card");
   const [instapayReceipt, setInstapayReceipt] = useState("");
   const [instapaySuccess, setInstapaySuccess] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<{
+    session: PartnerSession;
+    variantIndex: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -249,6 +256,15 @@ export default function PartnerSessionsSection() {
     await fetchAndApplyBestAutoDiscount(basePrice, subPrice);
   };
 
+  // Show availability notice (if any) before opening the booking modal
+  const requestBooking = (s: PartnerSession, variantIndex = 0) => {
+    if (getAvailabilityNotice(s)) {
+      setPendingBooking({ session: s, variantIndex });
+      return;
+    }
+    openModal(s, variantIndex);
+  };
+
   const handleBookingVariantChange = async (idx: number) => {
     if (!selected) return;
     setSelectedVariantIndex(idx);
@@ -420,7 +436,7 @@ export default function PartnerSessionsSection() {
                 session={session}
                 discountBadge={getSessionDiscountBadge(session)}
                 onDetailsClick={() => openDetails(session)}
-                onBookClick={() => openModal(session)}
+                onBookClick={() => requestBooking(session)}
               />
             </div>
           ))}
@@ -428,6 +444,17 @@ export default function PartnerSessionsSection() {
       ) : (
         <p className="text-lovely/90">No sessions available at the moment.</p>
       )}
+
+      <ConsultantAvailabilityModal
+        notice={getAvailabilityNotice(pendingBooking?.session ?? null)}
+        onClose={() => setPendingBooking(null)}
+        onContinue={() => {
+          if (!pendingBooking) return;
+          const { session, variantIndex } = pendingBooking;
+          setPendingBooking(null);
+          openModal(session, variantIndex);
+        }}
+      />
 
       {/* Details Modal */}
       {selectedForDetails && (
@@ -564,7 +591,7 @@ export default function PartnerSessionsSection() {
                 onClick={() => {
                   const currIdx = selectedVariantIndex;
                   setSelectedForDetails(null);
-                  openModal(selectedForDetails, currIdx);
+                  requestBooking(selectedForDetails, currIdx);
                 }}
                 className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
               >

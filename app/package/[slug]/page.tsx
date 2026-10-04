@@ -324,6 +324,7 @@ We’re beyond excited to share this experience with you… your planner will be
   useEffect(() => {
     if (packageData && packageData._id) {
       const modalContent = getModalContent(packageData._id);
+      // remove false for activating pre-order modal
       if (modalContent && false) {
         setShowModal(true);
       }
