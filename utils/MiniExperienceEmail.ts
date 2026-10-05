@@ -229,6 +229,7 @@ export function generateMiniExperienceMail(
 																	}
 																	<p style="margin: 0; margin-bottom: 16px;">🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!</p>
 																	<p style="margin: 0; margin-bottom: 16px;">👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></p>
+																	<p style="margin: 0; margin-bottom: 16px;">📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a></p>
 																	<p style="margin: 0; margin-bottom: 16px;">So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗</p>
 																	<p style="margin: 0;">With love,</p>
 																	<p style="margin: 0;">Nareiman ✨</p>

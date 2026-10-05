@@ -1,10 +1,10 @@
 import { ISubscription } from "@/app/interfaces/interfaces";
 
 export function generateWelcomeEmail(
-  first_name: string,
-  subscription: ISubscription
+	first_name: string,
+	subscription: ISubscription
 ) {
-  return `
+	return `
 <!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 
@@ -225,27 +225,24 @@ export function generateWelcomeEmail(
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	${
-																		subscription.cart && subscription.cart.length > 0
-																			? `<p style="margin: 0; margin-bottom: 8px;"><strong>📦 Bundled Items included in your order:</strong></p>
+																	${subscription.cart && subscription.cart.length > 0
+			? `<p style="margin: 0; margin-bottom: 8px;"><strong>📦 Bundled Items included in your order:</strong></p>
 																				 <ul style="margin: 0; margin-bottom: 16px; padding-left: 20px;">
 																					 ${subscription.cart
-																							.map(
-																								(item) =>
-																									`<li>${item.productName} x ${item.quantity} ${
-																										item.variant
-																											? `(${
-																													item.attributes?.name
-																														? ` ${item.attributes.name}`
-																														: ""
-																												})`
-																											: ""
-																									}</li>`
-																							)
-																							.join("")}
+				.map(
+					(item) =>
+						`<li>${item.productName} x ${item.quantity} ${item.variant
+							? `(${item.attributes?.name
+								? ` ${item.attributes.name}`
+								: ""
+							})`
+							: ""
+						}</li>`
+				)
+				.join("")}
 																				 </ul>`
-																			: ""
-																	}																			</div>
+			: ""
+		}																			</div>
 																		</td>
 																	</tr>
 																</table>
@@ -270,7 +267,7 @@ export function generateWelcomeEmail(
 																		<td class="pad">
 																			<div style="margin-left:-20px">
 																				<ul style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																					<li style="Margin: 0 0 0 0;">👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/CrkOP8yx2ggLtkOkVUtDco?s=cl&p=i&ilr=4" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
+																					<li style="Margin: 0 0 0 0;">👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
 																				</ul>
 																			</div>
 																		</td>
@@ -293,6 +290,17 @@ export function generateWelcomeEmail(
 																			<div style="margin-left:-20px">
 																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
 																					<li style="Margin: 0 0 0 0;">📦 Track your planner delivery → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
+																				</ul>
+																			</div>
+																		</td>
+																	</tr>
+																</table>
+																<table class="list_block block-app" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																	<tr>
+																		<td class="pad">
+																			<div style="margin-left:-20px">
+																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
+																					<li style="Margin: 0 0 0 0;">📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a></li>
 																				</ul>
 																			</div>
 																		</td>

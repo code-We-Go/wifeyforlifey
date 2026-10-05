@@ -288,6 +288,17 @@ export function generateWelcomeEmail(
 															</td>
 														</tr>
 													</table>
+													<table class="list_block block-app" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+														<tr>
+															<td class="pad">
+																<div style="margin-left:-20px">
+																	<ol start="5" style="margin-top: 0; margin-bottom: 0; list-style-type: decimal;">
+																		<li style="Margin: 0 0 0 0;">📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a></li>
+																	</ol>
+																</div>
+															</td>
+														</tr>
+													</table>
 													${
 														subscription.cart && subscription.cart.length > 0
 															? `<table class="paragraph_block block-10-cart" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
