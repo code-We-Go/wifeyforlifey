@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
 
     // Get token from auth service
     const authService = BostaAuthService.getInstance();
-    const token = await authService.getToken();
+    const authorization = await authService.getAuthHeader();
     
-    if (!token) {
+    if (!authorization) {
       return NextResponse.json(
         { success: false, error: "Failed to get Bosta authentication token" },
         { status: 500 }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: authorization,
           "Content-Type": "application/json",
         },
       }

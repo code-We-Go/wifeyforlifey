@@ -79,16 +79,23 @@ class BostaService {
 
   async createDelivery(payload: BostaDeliveryPayload): Promise<any> {
     try {
-      const token = await this.authService.getToken();
-      
-      const response = await fetch(`${this.baseUrl}/deliveries?apiVersion=1`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const send = (authorization: string) =>
+        fetch(`${this.baseUrl}/deliveries?apiVersion=1`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authorization,
+          },
+          body: JSON.stringify(payload),
+        });
+
+      let response = await send(await this.authService.getAuthHeader());
+
+      // Token expired/revoked -> refresh once and retry
+      if (response.status === 401) {
+        console.warn("Bosta returned 401, refreshing auth and retrying once");
+        response = await send(await this.authService.handleUnauthorized());
+      }
 
       const data = await response.json();
 
