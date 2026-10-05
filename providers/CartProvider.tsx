@@ -31,8 +31,9 @@ interface CartContextType {
   openCart: () => void;
   closeCart: () => void;
   
-  // Subscriptions extension
   subscriptionItems: SubscriptionCartItem[];
+  setCartItems: (items: CartItem[]) => void;
+  setSubscriptionCartItems: (items: SubscriptionCartItem[]) => void;
   addSubscription: (item: Omit<SubscriptionCartItem, "cartItemId">) => void;
   removeSubscription: (cartItemId: string) => void;
   updateSubscriptionQuantity: (cartItemId: string, quantity: number) => void;
@@ -201,10 +202,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
+  const setCartItems = (newItems: CartItem[]) => {
+    setItems(newItems);
+  };
+
+  const setSubscriptionCartItems = (newSubs: SubscriptionCartItem[]) => {
+    setSubscriptionItems(newSubs);
+  };
+
   return (
     <CartContext.Provider
       value={{
         items,
+        setCartItems,
         addItem,
         removeItem,
         updateQuantity,
@@ -216,6 +226,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         openCart,
         closeCart,
         subscriptionItems,
+        setSubscriptionCartItems,
         addSubscription,
         removeSubscription,
         updateSubscriptionQuantity,

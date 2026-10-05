@@ -249,6 +249,7 @@ const CheckoutClientPage = () => {
     totalItems,
     totalPrice,
     clearCart,
+    setCartItems,
   } = useCart();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isValidating, setIsValidating] = useState(true);
@@ -276,6 +277,9 @@ const CheckoutClientPage = () => {
         });
         if (response.data.items) {
           setItems(response.data.items);
+          if (response.data.hasPriceChanges) {
+            setCartItems(response.data.items);
+          }
         }
       } catch (error) {
         console.error("Failed to validate cart", error);
@@ -1885,7 +1889,12 @@ const CheckoutClientPage = () => {
                     <span>-{loyaltyDiscount} LE</span>
                   </div>
                 )}
-                {appliedDiscount && appliedDiscount.value !== undefined && (
+                {appliedDiscount &&
+                  appliedDiscount.value !== undefined &&
+                  (appliedDiscount.calculationType === "FREE_SHIPPING" ||
+                    (appliedDiscount.calculationType === "PERCENTAGE"
+                      ? Math.round((subTotal * appliedDiscount.value) / 100)
+                      : appliedDiscount.value) > 0) && (
                   <div className="flex justify-between text-base text-green-600">
                     <span>Discount ({appliedDiscount.code})</span>
                     <span>

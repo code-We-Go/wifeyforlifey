@@ -76,16 +76,73 @@ const calculateShippingRate = (
 
 const UnifiedCheckoutPage = () => {
   const router = useRouter();
-  const { subscriptionItems, items: cartProducts, totalPrice: cartTotalPrice, clearCart, updateSubscriptionQuantity, updateQuantity, isCartLoaded } = useCart();
+  const {
+    subscriptionItems,
+    items: cartProducts,
+    totalPrice: cartTotalPrice,
+    clearCart,
+    updateSubscriptionQuantity,
+    updateQuantity,
+    isCartLoaded,
+    setCartItems,
+    setSubscriptionCartItems,
+  } = useCart();
   const { isAuthenticated, loyaltyPoints, user } = useAuth();
 
   const [configs, setConfigs] = useState<SubscriptionConfig[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isValidatingCart, setIsValidatingCart] = useState(false);
+  const [priceUpdatedNotice, setPriceUpdatedNotice] = useState(false);
   const [payment, setPayment] = useState<"card" | "instapay">("card");
   const [instapayReciept, setInstapayReciept] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [saveShippingData, setSaveShippingData] = useState(false);
   const paymentCompletedRef = useRef(false);
+  const hasValidatedRef = useRef(false);
+
+  // Validate cart & subscription prices against DB on mount / when cart loads
+  useEffect(() => {
+    if (!isCartLoaded || hasValidatedRef.current) return;
+    if (cartProducts.length === 0 && subscriptionItems.length === 0) return;
+
+    hasValidatedRef.current = true;
+    const validatePrices = async () => {
+      setIsValidatingCart(true);
+      try {
+        const response = await axios.post("/api/cart/validate", {
+          items: cartProducts.map((item) => ({
+            ...item,
+            price:
+              item.attributes?.price && item.attributes.price > 0
+                ? item.attributes.price
+                : item.variant?.price && item.variant.price > 0
+                ? item.variant.price
+                : item.price,
+          })),
+          subscriptionItems,
+        });
+
+        if (response.data) {
+          const { items: newItems, subscriptionItems: newSubs, hasPriceChanges } = response.data;
+          if (hasPriceChanges) {
+            setPriceUpdatedNotice(true);
+          }
+          if (newItems && Array.isArray(newItems)) {
+            setCartItems(newItems);
+          }
+          if (newSubs && Array.isArray(newSubs)) {
+            setSubscriptionCartItems(newSubs);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to validate cart prices:", error);
+      } finally {
+        setIsValidatingCart(false);
+      }
+    };
+
+    validatePrices();
+  }, [isCartLoaded, cartProducts, subscriptionItems, setCartItems, setSubscriptionCartItems]);
 
   // Shared shipping/billing states
   const [countryID, setCountryID] = useState(65); // Default to Egypt
@@ -160,7 +217,12 @@ const UnifiedCheckoutPage = () => {
 
           const existing = prev.find((c) => c.cartItemId === configId);
           if (existing) {
-            newConfigs.push(existing);
+            newConfigs.push({
+              ...existing,
+              price: item.price,
+              packageName: label,
+              imageUrl: item.imageUrl,
+            });
           } else {
             newConfigs.push({
               cartItemId: configId,
@@ -544,8 +606,23 @@ const UnifiedCheckoutPage = () => {
     <div className={`container-custom py-8 md:py-12 justify-between text-lovely min-h-screen bg-creamey flex flex-col`}>
       <h1 className={`${thirdFont.className} tracking-normal text-2xl text-lovely md:text-4xl mb-4 md:mb-8 font-semibold`}>
         Checkout
-
       </h1>
+
+      {priceUpdatedNotice && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center justify-between">
+          <p>
+            ℹ️ Some item prices or details were updated to reflect the latest pricing.
+          </p>
+          <button
+            type="button"
+            onClick={() => setPriceUpdatedNotice(false)}
+            className="text-amber-800 font-bold ml-4 hover:opacity-75"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Subscription Checkout */}
 
       <div className="w-full flex flex-col-reverse lg:flex-row gap-8">
@@ -1206,9 +1283,13 @@ const UnifiedCheckoutPage = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      {sub.discountedFrom && sub.discountedFrom > sub.price && (
+                      {Boolean(
+                        sub.discountedFrom &&
+                        Number(sub.discountedFrom) > 0 &&
+                        Number(sub.discountedFrom) > Number(sub.price)
+                      ) && (
                         <span className="text-xs text-lovely/60 line-through block">
-                          LE {sub.discountedFrom * sub.quantity}
+                          LE {Number(sub.discountedFrom) * sub.quantity}
                         </span>
                       )}
                       <p className="font-semibold">LE {sub.price * sub.quantity}</p>
@@ -1312,7 +1393,7 @@ const UnifiedCheckoutPage = () => {
                 );
               })()}
 
-              {appliedDiscount && (
+              {appliedDiscount && (discountAmount > 0 || (appliedDiscount.calculationType === "FREE_SHIPPING" && shipping > 0)) && (
                 <div className="flex justify-between text-base text-green-600">
                   <span>Discount ({appliedDiscount.code})</span>
                   <span>
