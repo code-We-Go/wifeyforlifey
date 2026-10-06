@@ -146,6 +146,8 @@ export async function POST(request: NextRequest) {
       notes: notes ? notes.trim() : undefined,
       subCategoryID: subCategoryIDsArray,
       active: false, // Inactive by default until approved by admin
+      request: true,
+      requestStatus: "Pending",
       visitedCount: 0,
     });
 
