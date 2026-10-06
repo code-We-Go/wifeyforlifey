@@ -1,0 +1,32 @@
+{
+  "common": {
+    "brand": "وايڤي فور لايڤي",
+    "language": "اللغة",
+    "english": "English",
+    "arabic": "العربية",
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "loading": "جاري التحميل...",
+    "search": "بحث...",
+    "cart": "عربة التسوق",
+    "wishlist": "قائمة الأمنيات",
+    "profile": "الملف الشخصي",
+    "close": "إغلاق"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "planners": "بلانرز وتخطيط",
+    "playlists": "قوائم التشغيل",
+    "about": "من نحن",
+    "toolskit": "أدوات التخطيط",
+    "blogs": "المدونة",
+    "timelineBestie": "جدول الفرح",
+    "joinVendor": "انضمي كـ Vendor"
+  },
+  "theme": {
+    "bride": "العروسة",
+    "groom": "العريس"
+  }
+}

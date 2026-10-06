@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Ipackage } from "@/app/interfaces/interfaces";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { thirdFont } from "@/fonts";
 
 export default function PackageProductCard({
@@ -34,7 +34,7 @@ export default function PackageProductCard({
       <Image
         width={80}
         height={50}
-        className="absolute -top-5 -rotate-45 -left-5 z-20"
+        className="absolute -top-5 -rotate-45 rtl:rotate-45 -start-5 z-20"
         alt="fyonka"
         src={"/fyonkaCreamey.png"}
       />
@@ -62,14 +62,14 @@ export default function PackageProductCard({
               LE{packageItem.price.toFixed(2)}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Button
               size="sm"
               variant="secondary"
               className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+              <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 me-1" />
               <span className="text-xs">View</span>
             </Button>
           </div>

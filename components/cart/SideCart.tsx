@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { X, ShoppingBag, ArrowRight, Trash2, Plus, Minus } from "lucide-react";
 import { useCart } from "@/providers/CartProvider";
 import {
@@ -46,7 +46,7 @@ export default function SideCart() {
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-      <SheetContent className="w-full sm:max-w-md bg-creamey border-l-lovely/10 p-0 flex flex-col h-full">
+      <SheetContent className="w-full sm:max-w-md bg-creamey border-s-lovely/10 p-0 flex flex-col h-full">
         <SheetHeader className="p-6 border-b border-lovely/10">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-2xl font-medium text-lovely flex items-center gap-2">
@@ -240,7 +240,7 @@ export default function SideCart() {
                   onClick={closeCart}
                 >
                   <Link href={checkoutLink} className="flex items-center justify-center gap-2">
-                    Checkout <ArrowRight className="w-4 h-4" />
+                    Checkout <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </Link>
                 </Button>
               </div>

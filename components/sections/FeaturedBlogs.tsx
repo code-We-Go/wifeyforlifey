@@ -1,12 +1,12 @@
 "use client";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import { thirdFont } from "@/fonts";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 import axios from "axios";
-import { Blog } from "@/app/blogs/page";
+import { Blog } from "@/app/interfaces/interfaces";
 import { headerStyle } from "@/app/styles/style";
 
 const FeaturedBlogs = () => {
@@ -59,8 +59,8 @@ const FeaturedBlogs = () => {
             variant="outline"
             className="hidden md:flex items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey  mt-4 md:mt-0"
           >
-            <Link href="/shop">
-              View All <ArrowRight className=" ml-2 h-4 w-4" />
+            <Link href="/blogs">
+              View All <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>
@@ -129,8 +129,8 @@ const FeaturedBlogs = () => {
             variant="outline"
             className="flex md:hidden w-fit items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey  mt-4 md:mt-0"
           >
-            <Link href="/shop">
-              View All <ArrowRight className=" ml-2 h-4 w-4" />
+            <Link href="/blogs">
+              View All <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>

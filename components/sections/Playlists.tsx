@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { VideoPlaylist } from "@/app/interfaces/interfaces";
 import useEmblaCarousel from "embla-carousel-react";
+import { useLocale } from "next-intl";
 
 import VideoCard from "@/components/playlists/VideoCard";
 import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
@@ -14,6 +15,8 @@ import { headerStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const Playlists = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>(
     []
@@ -26,6 +29,7 @@ const Playlists = () => {
     loop: false,
     align: "start",
     slidesToScroll: 1,
+    direction: isRtl ? "rtl" : "ltr",
   });
   
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -138,7 +142,7 @@ const Playlists = () => {
                 {featuredPlaylists.map((playlist) => (
                   <div
                     key={playlist._id}
-                    className="flex-none w-[60vw] sm:w-[45vw] md:w-[33vw] lg:w-[25vw] pl-2 pr-2"
+                    className="flex-none w-[60vw] sm:w-[45vw] md:w-[33vw] lg:w-[25vw] px-2"
                   >
                     <VideoCard playlist={playlist} />
                   </div>
@@ -151,17 +155,17 @@ const Playlists = () => {
               <>
                 <button
                   onClick={scrollPrev}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed z-10"
                   aria-label="Previous slide"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-6 h-6 rtl:rotate-180" />
                 </button>
                 <button
                   onClick={scrollNext}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed z-10"
                   aria-label="Next slide"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-6 h-6 rtl:rotate-180" />
                 </button>
               </>
             )}

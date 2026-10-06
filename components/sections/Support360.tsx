@@ -3,9 +3,10 @@
 import { thirdFont } from "@/fonts";
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
+import { useLocale } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -107,6 +108,8 @@ const supportCards: SupportCard[] = [
 ];
 
 const Support360 = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   
   // Embla Carousel
@@ -114,6 +117,7 @@ const Support360 = () => {
     loop: false,
     align: "start",
     slidesToScroll: 1,
+    direction: isRtl ? "rtl" : "ltr",
   });
 
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -151,7 +155,7 @@ const Support360 = () => {
     >
       <div className="container-custom">
         {/* Header */}
-        <div className="text-left mb-1 md:mb-2 max-w-5xl">
+        <div className="text-start mb-1 md:mb-2 max-w-5xl">
           <h2
             className={`${thirdFont.className} ${headerStyle} mb-2 md:mb-4`}
           >
@@ -170,22 +174,22 @@ const Support360 = () => {
               <button
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                className={`absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 md:-translate-x-12 rtl:md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
                   !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
                 }`}
                 aria-label="Previous slide"
               >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
               </button>
               <button
                 onClick={scrollNext}
                 disabled={!canScrollNext}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
+                className={`absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 md:translate-x-12 rtl:md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
                   !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
                 }`}
                 aria-label="Next slide"
               >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
               </button>
             </>
           )}
@@ -201,7 +205,7 @@ const Support360 = () => {
                       <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
                         {card.title}
                       </h3>
-                      <ul className="list-disc list-outside pl-4  text-creamey marker:text-creamey">
+                      <ul className="list-disc list-outside ps-4  text-creamey marker:text-creamey">
                         {card.description.map((point, index) => (
                           <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
                             {point}

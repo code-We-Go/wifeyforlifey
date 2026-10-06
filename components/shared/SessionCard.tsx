@@ -23,7 +23,7 @@ export default function SessionCard({
     <div className="relative flex flex-col gap-1 md:gap-2 w-full max-w-lg h-full bg-creamey border-2 border-lovely rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow">
       {/* Discount Badge */}
       {discountBadge && (
-        <div className="absolute top-3.5 right-3.5 z-20 bg-lovely text-creamey text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
+        <div className="absolute top-3.5 end-3.5 z-20 bg-lovely text-creamey text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
           {discountBadge}
         </div>
       )}
@@ -43,7 +43,7 @@ export default function SessionCard({
       </div>
 
       {/* Expert Info */}
-      <div className="flex flex-col justify-between flex-grow w-full text-left space-y-1 md:space-y-2">
+      <div className="flex flex-col justify-between flex-grow w-full text-start space-y-1 md:space-y-2">
         <div className="space-y-1">
           <p className="text-base md:text-lg text-lovely font-bold">
             {session.partnerName}

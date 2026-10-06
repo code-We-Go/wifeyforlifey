@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { ShoppingCart, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { Product } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
 import { useContext, useState } from "react";
 import { cartContext } from "@/app/context/cartContext";
-import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/app/context/ModalContext";
@@ -134,7 +133,7 @@ export default function ProductCard({
             heartIsEmpty
               ? "bg-transparent hover:bg-lovely shadow-md text-creamey"
               : "bg-lovely text-creamey hover:bg-transparent shadow-md",
-            "rounded-full h-9 w-9 absolute top-4 right-4 z-10"
+            "rounded-full h-9 w-9 absolute top-4 end-4 z-10"
           )}
         >
           <Heart
@@ -166,7 +165,7 @@ export default function ProductCard({
               LE{product.price.local.toFixed(2)}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {isOutOfStock ? (
               <div className="text-xs text-creamey bg-pinkey/70 py-2 px-2 rounded-full font-medium">
                 Out of Stock
@@ -178,7 +177,7 @@ export default function ProductCard({
                 className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 me-1" />
                 <span className="text-xs">Add</span>
               </Button>
             )}

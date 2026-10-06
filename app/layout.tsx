@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Cairo } from "next/font/google";
 import "./globals.css";
 import "./scrollbar-hide.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -20,6 +20,8 @@ import NewsletterPopup from "@/components/NewsletterPopup";
 import SideCart from "@/components/cart/SideCart";
 import { GoogleTagManager } from "@next/third-parties/google";
 import GlobalThemeWrapper from "./GlobalThemeWrapper";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +31,12 @@ const inter = Inter({
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 const wifeyFont = localFonts({
@@ -43,21 +51,46 @@ const Gluten = localFonts({
   src: "./fonts/Gluten.ttf",
 });
 
-export const metadata: Metadata = {
-  title: "Wifey For Lifey",
-  description: "Shop trendy products and subscribe to exclusive video content",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const isAr = locale === "ar";
+  return {
+    title: isAr ? "وايڤي فور لايڤي | Wifey For Lifey" : "Wifey For Lifey",
+    description: isAr
+      ? "تسوقي منتجات مميزة واشتركي في محتوى الفيديو الحصري لتخطيط وتنظيم الفرح"
+      : "Shop trendy products and subscribe to exclusive video content",
+    alternates: {
+      languages: {
+        en: "/",
+        ar: "/ar",
+      },
+    },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+  const isRtl = locale === "ar";
+
   return (
-    <html lang="en" suppressHydrationWarning className="w-full bg-creamey">
+    <html
+      lang={locale}
+      dir={isRtl ? "rtl" : "ltr"}
+      suppressHydrationWarning
+      className={`w-full bg-creamey ${cairo.variable}`}
+    >
       <GoogleTagManager gtmId="GTM-KQMB2B2F" />
 
-      <body className={`w-full min-h-screen ${wifeyFont.className} bg-creamey`}>
+      <body
+        className={`w-full min-h-screen ${
+          isRtl ? cairo.className : wifeyFont.className
+        } bg-creamey`}
+      >
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-KQMB2B2F"
@@ -66,38 +99,40 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           ></iframe>
         </noscript>
-        <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem={false}
-          >
-            <UserProvider>
-              <CartProvider>
-                <WishListProvider>
-                  <AnnouncementProvider>
-                    <ModalProvider>
-                      <GlobalThemeWrapper>
-                        <div className="relative flex min-h-screen flex-col">
-                          <ConditionalAnnouncmentBar />
-                          <Header />
-                          <main className="flex-1">{children}</main>
-                          <Footer />
-                        </div>
-                        <ProductModal />
-                        <SideCart />
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem={false}
+            >
+              <UserProvider>
+                <CartProvider>
+                  <WishListProvider>
+                    <AnnouncementProvider>
+                      <ModalProvider>
+                        <GlobalThemeWrapper>
+                          <div className="relative flex min-h-screen flex-col">
+                            <ConditionalAnnouncmentBar />
+                            <Header />
+                            <main className="flex-1">{children}</main>
+                            <Footer />
+                          </div>
+                          <ProductModal />
+                          <SideCart />
 
-                        <DiscountPopup />
-                        <NewsletterPopup />
-                        <Toaster />
-                      </GlobalThemeWrapper>
-                    </ModalProvider>
-                  </AnnouncementProvider>
-                </WishListProvider>
-              </CartProvider>
-            </UserProvider>
-          </ThemeProvider>
-        </AuthProvider>
+                          <DiscountPopup />
+                          <NewsletterPopup />
+                          <Toaster />
+                        </GlobalThemeWrapper>
+                      </ModalProvider>
+                    </AnnouncementProvider>
+                  </WishListProvider>
+                </CartProvider>
+              </UserProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

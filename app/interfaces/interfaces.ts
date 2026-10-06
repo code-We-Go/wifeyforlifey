@@ -471,3 +471,24 @@ export interface IAccountFeature extends mongoose.Document {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  featuredImage?: string;
+  status: "draft" | "published" | "archived";
+  tags: string[];
+  categories: string[];
+  publishedAt?: string;
+  viewCount: number;
+  mobileViewCount?: number;
+  webViewCount?: number;
+  featured: boolean;
+  createdAt: string;
+  readingTime: number;
+  formattedPublishDate?: string;
+}
+

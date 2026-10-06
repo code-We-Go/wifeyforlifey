@@ -1,0 +1,32 @@
+{
+  "common": {
+    "brand": "Wifey For Lifey",
+    "language": "Language",
+    "english": "English",
+    "arabic": "العربية",
+    "signIn": "Sign In",
+    "signUp": "Sign up",
+    "logout": "Log Out",
+    "loading": "Loading...",
+    "search": "Search...",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "profile": "Profile",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "planners": "Planners",
+    "playlists": "Playlists",
+    "about": "About",
+    "toolskit": "Tools kit",
+    "blogs": "Blogs",
+    "timelineBestie": "Timeline Bestie",
+    "joinVendor": "Join as Vendor"
+  },
+  "theme": {
+    "bride": "Bride",
+    "groom": "Groom"
+  }
+}

@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Instagram, Facebook, Twitter, Youtube, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,7 +141,7 @@ export default function Footer() {
               </p>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex gap-4">
               {/* Instagram Button */}
               <Button
                 variant="ghost"
@@ -264,12 +264,12 @@ export default function Footer() {
                   value={email}
                   type="email"
                   placeholder="Your email"
-                  className="rounded-r-none lowercase text-lovely placeholder:text-lovely/80 bg-creamey border-r py-5 border-lovely"
+                  className="rounded-e-none lowercase text-lovely placeholder:text-lovely/80 bg-creamey border-e py-5 border-lovely"
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <Button
                   type="submit"
-                  className={`${bgRedButton} rounded-l-none border-l-0`}
+                  className={`${bgRedButton} rounded-s-none border-s-0`}
                 >
                   Join Now
                 </Button>
@@ -283,7 +283,7 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Wifey For Lifey. All rights
             reserved.
           </p>
-          <div className="flex space-x-4 mt-4 md:mt-0">
+          <div className="flex gap-4 mt-4 md:mt-0 flex-wrap">
             <Link
               href="/policies?privacy-policy"
               className="hover:text-foreground"

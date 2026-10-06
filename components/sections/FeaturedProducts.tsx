@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { wishListContext } from "@/app/context/wishListContext";
 import axios from "axios";
 
@@ -14,10 +14,13 @@ import PackageCard from "../shop/PackageCard";
 import PackageProductCard from "../shop/PackageProductCard";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { useLocale } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const FeaturedProducts = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [packages, setPackages] = useState<Ipackage[]>([]);
   const { wishList, setWishList } = useContext(wishListContext);
@@ -31,6 +34,7 @@ const FeaturedProducts = () => {
       align: "start",
       skipSnaps: false,
       dragFree: true,
+      direction: isRtl ? "rtl" : "ltr",
     },
     [
       Autoplay({
@@ -159,7 +163,7 @@ const FeaturedProducts = () => {
             className="hidden md:flex items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey  mt-4 md:mt-0"
           >
             <Link href="/shop">
-              View All <ArrowRight className=" ml-2 h-4 w-4" />
+              View All <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>
@@ -170,7 +174,7 @@ const FeaturedProducts = () => {
               {[...Array(6)].map((_, index) => (
                 <div
                   key={index}
-                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2"
+                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] px-2"
                 >
                   <ProductCardSkeleton />
                 </div>
@@ -184,7 +188,7 @@ const FeaturedProducts = () => {
               {packages.map((packageItem) => (
                 <div
                   key={packageItem._id}
-                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2 h-full"
+                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] px-2 h-full"
                 >
                   <div className="h-full">
                     {packageItem.slug === "GehazBestiePlanner" || packageItem.slug === "WeddingBestiePlanner" ? (
@@ -213,7 +217,7 @@ const FeaturedProducts = () => {
                 return (
                   <div
                     key={product._id}
-                    className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2 h-full"
+                    className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] px-2 h-full"
                   >
                     <div className="h-full">
                       <ProductCard
@@ -236,7 +240,7 @@ const FeaturedProducts = () => {
             className="flex md:hidden w-fit items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey"
           >
             <Link href="/shop">
-              View All <ArrowRight className=" ml-2 h-4 w-4" />
+              View All <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>

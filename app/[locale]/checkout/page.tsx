@@ -1,0 +1,2015 @@
+"use client";
+// import BigCartItem from '@/app/components/BigCartItem';
+import OrderSummaryItem from "./components/OrderSummaryItem";
+import { cartContext } from "@/app/context/cartContext";
+import { CartProvider, useCart } from "@/providers/CartProvider";
+
+import { userContext } from "@/app/context/userContext";
+import { thirdFont } from "@/fonts";
+import orderValidation from "@/lib/validations/orderValidation";
+import axios from "axios";
+import { Link, useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
+import React, { useContext, useEffect, useState, Suspense } from "react";
+import { IoIosArrowDown } from "react-icons/io";
+import { Discount } from "@/app/types/discount";
+import { CartItem } from "@/app/interfaces/interfaces";
+import CartItemSmall from "@/components/cart/CartItemSmall";
+import DiscountSection from "./components/DiscountSection";
+import { CldUploadWidget } from "next-cloudinary";
+import { ShippingZone } from "@/app/interfaces/interfaces";
+import Image from "next/image";
+import { Spinner } from "@material-tailwind/react";
+import { useAuth } from "@/hooks/useAuth";
+import { Info } from "lucide-react";
+import LoyaltyPointsSection from "@/components/LoyaltyPointsSection";
+import BostaLocationSelector from "./components/BostaLocationSelector";
+import {
+  BostaCity,
+  BostaZone,
+  BostaDistrict,
+} from "@/app/services/bostaLocationService";
+
+// Utility function to calculate shipping rate
+const calculateShippingRate = (
+  countryID: number,
+  state: string,
+  states: any[],
+  countries: any[],
+  shippingZones: ShippingZone[]
+): number => {
+  console.log("calculateShippingRate called with:", {
+    countryID,
+    state,
+    statesCount: states.length,
+    countriesCount: countries.length,
+    shippingZonesCount: shippingZones.length,
+  });
+
+  if (countryID === 65 && states.length > 0) {
+    // Local shipping - based on state
+    const selectedState = states.find((s) => s.name === state);
+    console.log("Selected state:", selectedState);
+
+    // Try multiple matching strategies
+    let zone = null;
+
+    // Strategy 1: Match by _id with shipping_zone
+    zone = shippingZones.find((z) => {
+      console.log(
+        "Strategy 1 - Checking zone:",
+        z._id,
+        "against state shipping_zone:",
+        selectedState?.shipping_zone
+      );
+      return (
+        z._id === selectedState?.shipping_zone.toString() &&
+        z.localGlobal === "local"
+      );
+    });
+
+    // Strategy 2: If not found, try matching by state name in states array
+    if (!zone) {
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 2 - Checking zone states array:",
+          z.states,
+          "for state _id:",
+          selectedState?._id
+        );
+        return (
+          z.states &&
+          z.states.includes(selectedState?._id) &&
+          z.localGlobal === "local"
+        );
+      });
+    }
+
+    // Strategy 3: If still not found, try matching by state ID in states array
+    if (!zone) {
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 3 - Checking zone states array:",
+          z.states,
+          "for state ID:",
+          selectedState?.id
+        );
+        return (
+          z.states &&
+          z.states.includes(selectedState?.id.toString()) &&
+          z.localGlobal === "local"
+        );
+      });
+    }
+
+    console.log("Found local zone:", zone);
+    return zone ? zone.zone_rate.local : 70; // Default local rate
+  } else {
+    // Global shipping - based on country
+    const selectedCountry = countries.find((c) => c.id === countryID);
+    console.log("Selected country:", selectedCountry);
+
+    // Try multiple matching strategies
+    let zone = null;
+
+    // Strategy 1: Match by _id with shipping_zone
+    zone = shippingZones.find((z) => {
+      console.log(
+        "Strategy 1 - Checking zone:",
+        z._id,
+        "against country shipping_zone:",
+        selectedCountry?.shipping_zone
+      );
+      return (
+        z._id === selectedCountry?.shipping_zone?.toString() &&
+        z.localGlobal === "global"
+      );
+    });
+
+    // Strategy 2: If not found, try matching by country name in countries array
+    if (!zone) {
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 2 - Checking zone countries array:",
+          z.countries,
+          "for country:",
+          selectedCountry?.name
+        );
+        return (
+          z.countries &&
+          z.countries.includes(selectedCountry?.name) &&
+          z.localGlobal === "global"
+        );
+      });
+    }
+
+    // Strategy 3: If still not found, try matching by country ID in countries array
+    if (!zone) {
+      zone = shippingZones.find((z) => {
+        console.log(
+          "Strategy 3 - Checking zone countries array:",
+          z.countries,
+          "for country ID:",
+          selectedCountry?.id
+        );
+        return (
+          z.countries &&
+          z.countries.includes(selectedCountry?.id.toString()) &&
+          z.localGlobal === "global"
+        );
+      });
+    }
+
+    console.log("Found global zone:", zone);
+    return zone ? zone.zone_rate.global : 65; // Default global rate
+  }
+};
+
+const CheckoutClientPage = () => {
+  // let subTotal=0;
+  // let total = 0;
+  // const []
+  //  const[countries,setCountries]=useState([]);
+  const [isGift, setIsGift] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
+  const calculateTotals = () => {
+    // Calculate subtotal first
+    const calculatedSubTotal = items.reduce(
+      (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+      0
+    );
+
+    // Calculate discount amount
+    let newDiscountAmount = 0;
+    let effectiveShipping = shipping;
+
+    if (appliedDiscount && appliedDiscount.value !== undefined) {
+      if (appliedDiscount.calculationType === "PERCENTAGE") {
+        newDiscountAmount = Math.round(
+          (calculatedSubTotal * appliedDiscount.value) / 100
+        );
+        console.log("Percentage discount:", {
+          subtotal: calculatedSubTotal,
+          percentage: appliedDiscount.value,
+          discountAmount: newDiscountAmount,
+        });
+      } else if (appliedDiscount.calculationType === "FIXED_AMOUNT") {
+        newDiscountAmount = appliedDiscount.value;
+        console.log("Fixed amount discount:", {
+          subtotal: calculatedSubTotal,
+          fixedAmount: appliedDiscount.value,
+          discountAmount: newDiscountAmount,
+        });
+      } else if (appliedDiscount.calculationType === "FREE_SHIPPING") {
+        effectiveShipping = 0;
+        newDiscountAmount = shipping; // Set the discount amount to the original shipping cost
+        console.log("Free shipping discount applied:", {
+          originalShipping: shipping,
+          effectiveShipping: 0,
+          discountAmount: newDiscountAmount,
+        });
+      }
+    }
+
+    // Calculate final total
+    const finalTotal = calculatedSubTotal + effectiveShipping;
+    console.log("Final calculation:", {
+      subtotal: calculatedSubTotal,
+      shipping: effectiveShipping,
+      discountAmount: newDiscountAmount,
+      finalTotal,
+    });
+  };
+  type Payment = "cash" | "card" | "instapay";
+  const { user } = useAuth();
+  const [shipping, setShipping] = useState(90);
+  const [bostaLocation, setBostaLocation] = useState<{
+    city: BostaCity | null;
+    zone: BostaZone | null;
+    district: BostaDistrict | null;
+    shippingCost: {
+      priceBeforeVat: number;
+      priceAfterVat: number;
+      shippingFee: number;
+    };
+  }>({
+    city: null,
+    zone: null,
+    district: null,
+    shippingCost: { priceBeforeVat: 70, priceAfterVat: 70, shippingFee: 70 },
+  });
+  const [payment, setPayment] = useState<Payment>("card");
+  const [instapayReciept, setInstapayReciept] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const {
+    items: initialItems,
+    removeItem,
+    updateQuantity,
+    totalItems,
+    totalPrice,
+    clearCart,
+    setCartItems,
+  } = useCart();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isValidating, setIsValidating] = useState(true);
+
+  useEffect(() => {
+    const validateCart = async () => {
+      if (initialItems.length === 0) {
+        setItems([]);
+        setIsValidating(false);
+        return;
+      }
+
+      setIsValidating(true);
+      try {
+        const response = await axios.post("/api/cart/validate", {
+          items: initialItems.map((item) => ({
+            ...item,
+            price:
+              item.attributes?.price && item.attributes.price > 0
+                ? item.attributes.price
+                : item.variant?.price && item.variant.price > 0
+                ? item.variant.price
+                : item.price,
+          })),
+        });
+        if (response.data.items) {
+          setItems(response.data.items);
+          if (response.data.hasPriceChanges) {
+            setCartItems(response.data.items);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to validate cart", error);
+        setItems(initialItems);
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateCart();
+  }, [initialItems]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
+  const [summary, setSummary] = useState(false);
+  const [subTotal, setSubTotal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [formErrors, setFormErrors] = useState<any>({});
+  const [countryID, setCountryID] = useState(65);
+  const [billingCountry, setBillingCountry] = useState(65);
+  const [states, setStates] = useState<
+    { name: string; shipping_zone: string }[]
+  >([]);
+  const [useSameAsShipping, setUseSameAsShipping] = useState(true);
+
+  // const [state,setState]=useState(states.length>0?states[0].name:'')
+  const [state, setState] = useState("Alexandria"); // Default to the first state's name or an empty string
+  const [billingState, setBillingState] = useState("Alexandria");
+  const { loyaltyPoints, isAuthenticated } = useAuth();
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleDiscountApplied = (discount: Discount | null) => {
+    // alert(discount?.calculationType)
+    setAppliedDiscount(discount);
+    if (discount && discount.calculationType === "FREE_SHIPPING") {
+      setShipping(0);
+    }
+    //     setFormData((prevFormData)=>({...prevFormData,appliedDiscount:discount?._id,}));
+  };
+
+  // Handle Bosta location changes
+  const handleBostaLocationChange = (location: {
+    city: BostaCity | null;
+    zone: BostaZone | null;
+    district: BostaDistrict | null;
+    shippingCost: {
+      priceBeforeVat: number;
+      priceAfterVat: number;
+      shippingFee: number;
+    };
+  }) => {
+    setBostaLocation(location);
+    // Always maintain shipping cost regardless of Bosta Zone selection
+    // Only apply free shipping if discount is specifically for FREE_SHIPPING
+    if (
+      !appliedDiscount ||
+      appliedDiscount.calculationType !== "FREE_SHIPPING" ||
+      // Check if cart total meets minimum order amount required for the discount
+      (appliedDiscount.conditions?.minimumOrderAmount &&
+        subTotal < appliedDiscount.conditions.minimumOrderAmount)
+    ) {
+      // Keep the shipping cost even when Bosta Zone is selected
+      if (location.city && location.zone) {
+        // Maintain shipping cost when zone is selected
+        setShipping(location.shippingCost.priceBeforeVat);
+      } else if (location.city) {
+        // Set shipping when only city is selected
+        setShipping(location.shippingCost.priceBeforeVat);
+      }
+    } else {
+      // Ensure shipping is set to 0 when free shipping discount is applied
+      // and cart total meets minimum order amount
+      setShipping(0);
+    }
+  };
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      total: total,
+      shipping: shipping,
+      subTotal: subTotal,
+      cart: items,
+      bostaCity: bostaLocation.city?._id || "",
+      bostaCityName: bostaLocation.city?.name || "",
+      bostaZone: bostaLocation.zone?._id || "",
+      bostaZoneName: bostaLocation.zone?.name || "",
+      bostaDistrict: bostaLocation.district?.districtId || "",
+      bostaDistrictName: bostaLocation.district?.districtName || "",
+    }));
+  }, [items, bostaLocation, total, shipping, subTotal]);
+  useEffect(() => {
+    const countryName = countries.find((countryy) => countryy.id === countryID);
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      total: total,
+      shipping: shipping,
+      subTotal: subTotal,
+      country: countryName ? countryName.name : "",
+    }));
+  }, [total, countryID, countries]);
+  const [saveShippingData, setSaveShippingData] = useState(false);
+
+  useEffect(() => {
+    if (user?.shippingData && isAuthenticated) {
+      const sd = user.shippingData;
+      setFormData((prev) => ({
+        ...prev,
+        email: sd.email || prev.email,
+        firstName: sd.firstName || prev.firstName,
+        lastName: sd.lastName || prev.lastName,
+        address: sd.address || prev.address,
+        apartment: sd.apartment || prev.apartment,
+        phone: sd.phone || prev.phone,
+        whatsAppNumber: sd.whatsAppNumber || prev.whatsAppNumber,
+        state: sd.bostaCity || prev.state,
+        bostaCity: sd.bostaCity || "",
+        bostaCityName: sd.bostaCityName || "",
+        bostaZone: sd.bostaZone || "",
+        bostaZoneName: sd.bostaZoneName || "",
+        bostaDistrict: sd.bostaDistrict || "",
+        bostaDistrictName: sd.bostaDistrictName || "",
+      }));
+      if (sd.bostaCity) {
+        setState(sd.bostaCity);
+        setBostaLocation((prev) => ({
+          ...prev,
+          city: sd.bostaCity
+            ? ({ _id: sd.bostaCity, name: sd.bostaCityName || "" } as any)
+            : null,
+          zone: sd.bostaZone
+            ? ({ _id: sd.bostaZone, name: sd.bostaZoneName || "" } as any)
+            : null,
+          district: sd.bostaDistrict
+            ? ({
+                districtId: sd.bostaDistrict,
+                districtName: sd.bostaDistrictName || "",
+              } as any)
+            : null,
+        }));
+      }
+    }
+  }, [user, isAuthenticated]);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    country: "",
+    firstName: "",
+    lastName: "",
+    address: "",
+    apartment: "",
+    postalZip: "00000",
+    city: "",
+    appliedDiscount: "",
+    appliedDiscountAmount: 0,
+    cart: items,
+    phone: "",
+    state: state,
+    isGift: false,
+    giftRecipientEmail: "",
+    specialMessage: "",
+    giftCardName: "",
+    cash: payment,
+    paymentMethod: payment,
+    redeemedLoyaltyPoints: Math.max(
+      0,
+      Math.min(
+        redeemPoints - (redeemPoints % 20),
+        loyaltyPoints.realLoyaltyPoints
+      )
+    ),
+    total: total,
+    shipping: shipping,
+    billingCountry: "",
+    billingFirstName: "",
+    billingLastName: "",
+    billingState: useSameAsShipping ? state : billingState,
+    billingAddress: "",
+    billingApartment: "",
+    billingPostalZip: "00000",
+    billingCity: "",
+    billingPhone: "",
+    billingWhatsAppNumber: "",
+    whatsAppNumber: "",
+    bostaCity: "",
+    bostaCityName: "",
+    bostaZone: "",
+    bostaZoneName: "",
+    bostaDistrict: "",
+    bostaDistrictName: "",
+    subTotal: subTotal,
+    // currency:country===65?'LE':'USD'
+    currency: "LE",
+    // currency: user.userCountry === "EG" ? "LE" : "USD",
+  });
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    console.log(value);
+    // Convert any email field to lowercase
+    const finalValue = name.toLowerCase().includes('email')
+      ? value.toLowerCase()
+      : value;
+    setFormData({ ...formData, [name]: finalValue });
+  };
+
+  // Separate handler for state changes to ensure shipping calculation triggers
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    setState(value); // Update local state
+    setFormData({ ...formData, state: value }); // Update formData
+  };
+
+  useEffect(() => {
+    if (useSameAsShipping) {
+      formData.billingState = formData.state;
+      console.log("ya raaaab" + formData.billingState);
+    }
+  }, [formData.state]);
+  useEffect(() => {
+    const countryName = countries.find(
+      (countryy) =>
+        countryy.id === (useSameAsShipping ? countryID : billingCountry)
+    );
+
+    if (useSameAsShipping) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        billingCountry: prevFormData.country,
+        billingFirstName: prevFormData.firstName,
+        billingLastName: prevFormData.lastName,
+        billingAddress: prevFormData.address,
+        billingState: prevFormData.state,
+        billingApartment: prevFormData.apartment,
+        billingPostalZip: prevFormData.postalZip,
+        billingCity: prevFormData.city,
+        billingPhone: prevFormData.phone,
+      }));
+    }
+  }, [useSameAsShipping]);
+  useEffect(() => {
+    const getCountries = async () => {
+      const response = await axios.get("/api/countries");
+      setCountries(response.data);
+    };
+    const getShippingZones = async () => {
+      console.log("testtt");
+      const response = await axios.get("/api/shipping");
+      setShippingZones(response.data);
+    };
+    getShippingZones();
+    const calculateShipping = () => {
+      // Prevent recalculation if FREE_SHIPPING discount is active
+      if (
+        appliedDiscount &&
+        appliedDiscount.calculationType === "FREE_SHIPPING"
+      ) {
+        setShipping(0);
+        return;
+      }
+      if (countryID === 65) {
+        const selectedState = states.find(
+          (state) => state.name === formData.state
+        );
+        const zone = shippingZones.find(
+          (zone: ShippingZone) =>
+            zone._id === selectedState?.shipping_zone &&
+            zone.localGlobal === "local"
+        );
+        if (zone) {
+          setShipping(90);
+        }
+      }
+    };
+    calculateShipping();
+    getCountries();
+    const getStates = async () => {
+      const response = await axios.get(`/api/states?countryID=${65}`);
+      setStates(response.data);
+      // Only set initial state if no state is currently selected
+      if (response.data.length > 0 && !state) {
+        setState(response.data[0].name);
+      }
+    };
+    getStates();
+
+    const calculatedSubTotal = items.reduce(
+      (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+      0
+    );
+    setSubTotal(calculatedSubTotal);
+    setTotal(calculatedSubTotal + shipping);
+
+    cartItems();
+  }, [items, countryID, billingState]); // Removed 'state' from dependencies
+  useEffect(() => {
+    if (countryID !== 65) {
+      setPayment("card");
+    }
+  }, [countryID]);
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      cash: payment,
+      paymentMethod: payment,
+    }));
+  }, [payment]);
+
+  // Sync state changes with formData
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      state: state,
+    }));
+  }, [state]);
+
+  // Handle country changes
+  useEffect(() => {
+    if (countryID === 65 && states.length > 0 && !state) {
+      // Only reset to first state when switching to Egypt AND no state is currently selected
+      setState(states[0].name);
+    }
+  }, [countryID, states, state]);
+
+  useEffect(() => {
+    console.log("Shipping calculation triggered:", {
+      countryID,
+      state,
+      statesLength: states.length,
+      shippingZonesLength: shippingZones.length,
+      countriesLength: countries.length,
+    });
+
+    // Debug: Log all states and their shipping zones
+    if (states.length > 0) {
+      console.log(
+        "All states:",
+        states.map((s) => ({
+          name: s.name,
+          shipping_zone: s.shipping_zone,
+          type: typeof s.shipping_zone,
+        }))
+      );
+    }
+
+    // Debug: Log all shipping zones
+    if (shippingZones.length > 0) {
+      console.log(
+        "All shipping zones:",
+        shippingZones.map((z) => ({
+          _id: z._id,
+          zone_name: z.zone_name,
+          localGlobal: z.localGlobal,
+          zone_rate: z.zone_rate,
+        }))
+      );
+    }
+
+    if (countryID === 65 && states.length > 0 && shippingZones.length > 0) {
+      const shippingRate = calculateShippingRate(
+        countryID,
+        state,
+        states,
+        countries,
+        shippingZones
+      );
+      console.log("Local shipping rate calculated:", shippingRate);
+      if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+        setShipping(0);
+      } else {
+        setShipping(90);
+      }
+      const calculatedSubTotal = items.reduce(
+        (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+        0
+      );
+      setSubTotal(calculatedSubTotal);
+      // setTotal(calculatedSubTotal + shippingRate); // REMOVED: total is now only set in discount/loyalty effect
+    } else if (shippingZones.length > 0) {
+      const shippingRate = calculateShippingRate(
+        countryID,
+        state,
+        states,
+        countries,
+        shippingZones
+      );
+      console.log("Global shipping rate calculated:", shippingRate);
+      if (appliedDiscount?.calculationType === "FREE_SHIPPING") {
+        setShipping(0);
+      } else {
+        setShipping(90);
+      }
+      const calculatedSubTotal = items.reduce(
+        (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+        0
+      );
+      setSubTotal(calculatedSubTotal);
+      // setTotal(calculatedSubTotal + shippingRate); // REMOVED: total is now only set in discount/loyalty effect
+    }
+  }, [countryID, states, shippingZones, state, countries, items]);
+
+  let cartItems = () => {
+    return items.map((cartItem, index) => (
+      <OrderSummaryItem cartItem={cartItem} key={index} />
+    ));
+  };
+  const [discountAmount, setDiscountAmount] = useState(0);
+  // const [total, setTotal] = useState(0);
+
+  // Handler for redeeming points (allow any value, clamp in effect)
+  const handleRedeemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = parseInt(e.target.value) || 0;
+    setRedeemPoints(value);
+  };
+
+  // Recalculate all totals and discounts together
+  useEffect(() => {
+    // Calculate subtotal
+    const calculatedSubTotal = items.reduce(
+      (acc, cartItem) => acc + cartItem.price * cartItem.quantity,
+      0
+    );
+    setSubTotal(calculatedSubTotal);
+
+    // Calculate discount amount and effective shipping
+    let newDiscountAmount = 0;
+    let effectiveShipping = shipping;
+    if (appliedDiscount && appliedDiscount.value !== undefined) {
+      if (appliedDiscount.calculationType === "PERCENTAGE") {
+        newDiscountAmount = Math.round(
+          (calculatedSubTotal * appliedDiscount.value) / 100
+        );
+      } else if (appliedDiscount.calculationType === "FIXED_AMOUNT") {
+        newDiscountAmount = appliedDiscount.value;
+      } else if (appliedDiscount.calculationType === "FREE_SHIPPING") {
+        // Always use the latest shipping value for discount and set shipping to 0
+        newDiscountAmount = shipping;
+        effectiveShipping = 0;
+      }
+    }
+    setDiscountAmount(newDiscountAmount);
+
+    // Loyalty points: clamp to valid multiple of 20 and ≤ loyaltyPoints
+    let validRedeem = Math.max(
+      0,
+      Math.min(
+        redeemPoints - (redeemPoints % 20),
+        loyaltyPoints.realLoyaltyPoints
+      )
+    );
+    const loyaltyLE = Math.floor(validRedeem / 20);
+    setLoyaltyDiscount(loyaltyLE);
+
+    const giftCardCost = formData.giftCardName ? 20 : 0;
+
+    // Calculate final total, always using effectiveShipping
+    // When free shipping is applied, effectiveShipping should be 0
+    const finalTotal = Math.max(
+      0,
+      calculatedSubTotal -
+        newDiscountAmount -
+        loyaltyLE +
+        (appliedDiscount?.calculationType === "FREE_SHIPPING"
+          ? 0
+          : effectiveShipping) +
+        giftCardCost
+    );
+    setTotal(finalTotal);
+  }, [
+    items,
+    shipping,
+    appliedDiscount,
+    loyaltyPoints,
+    redeemPoints,
+    formData.giftCardName,
+  ]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    let errors: any = {};
+    errors = orderValidation(formData);
+
+    // Set errors to state
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      alert(Object.values(errors)[0]);
+      setLoading(false);
+      return;
+    }
+    // Stop submission if there are errors
+
+    console.log("total" + formData.total);
+    console.log(formData);
+    if (useSameAsShipping) {
+      const countryName = countries.find(
+        (countryy) => countryy.id === billingCountry
+      );
+
+      formData.billingCountry = countryName ? countryName.name : "";
+      formData.billingFirstName = formData.firstName;
+      formData.billingLastName = formData.lastName;
+      formData.billingAddress = formData.address;
+      formData.billingState = formData.state;
+      formData.billingApartment = formData.apartment;
+      formData.billingPostalZip = formData.postalZip;
+      formData.billingCity = formData.city;
+      formData.billingPhone = formData.phone;
+    }
+    const orderPayload = {
+      ...formData,
+      instapayReciept: instapayReciept,
+      total, // use the latest state value
+      shipping:
+        appliedDiscount?.calculationType === "FREE_SHIPPING" ? 0 : shipping,
+      subTotal,
+      cart: items,
+      appliedDiscount: appliedDiscount?._id,
+      appliedDiscountAmount: discountAmount,
+      loyalty: {
+        redeemedPoints: Math.max(
+          0,
+          Math.min(
+            redeemPoints - (redeemPoints % 20),
+            loyaltyPoints.realLoyaltyPoints
+          )
+        ),
+        discount: loyaltyDiscount,
+      },
+    };
+
+    if (payment === "instapay" && !instapayReciept) {
+      alert("Please upload your Instapay transaction screenshot to proceed.");
+      setLoading(false);
+      return;
+    }
+
+    const res = await axios.post("/api/payment/", orderPayload);
+    
+    // Save shipping data if requested
+    if (saveShippingData && isAuthenticated && user?.email) {
+      try {
+        await axios.put("/api/user/profile", {
+          email: user.email,
+          shippingData: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            apartment: formData.apartment,
+            phone: formData.phone,
+            whatsAppNumber: formData.whatsAppNumber,
+            bostaCity: formData.bostaCity,
+            bostaCityName: formData.bostaCityName,
+            bostaZone: formData.bostaZone,
+            bostaZoneName: formData.bostaZoneName,
+            bostaDistrict: formData.bostaDistrict,
+            bostaDistrictName: formData.bostaDistrictName,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to save shipping data:", err);
+      }
+    }
+
+    console.log(res.data.token);
+    setLoading(false);
+
+    if (payment === "card") {
+      // const paymobIframeURL = `https://accept.paymob.com/api/acceptance/iframes/890332?payment_token=${res.data.token}`;
+      const paymobIframeURL = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.NEXT_PUBLIC_PaymobPublicKey}&clientSecret=${res.data.token}`;
+
+      window.location.href = paymobIframeURL;
+    } else if (payment === "instapay") {
+      if (res.data.success) {
+        clearCart();
+        const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201007728799";
+        router.push(
+          `/subscription/instapay-success?total=${total}&whatsapp=${whatsappNumber}&orderId=${res.data.orderId}`
+        );
+      }
+    } else {
+      if (res.data.token === "wiig") {
+        clearCart();
+        router.replace("/payment/success");
+      }
+    }
+  };
+
+  // Read subscription param from URL
+  const searchParams = useSearchParams();
+  const isSubscription = searchParams.get("subscription") === "true";
+  // You can use 'isSubscription' below to adjust UI/logic for subscription checkouts
+  // Example: if (isSubscription) { /* custom logic */ }
+
+  return (
+    // cart.length > 0 ?
+    <div
+      className={`relative  container-custom  py-8 md:py-12 justify-between text-lovely min-h-screen  bg-creamey  flex flex-col `}
+    >
+      {loading && (
+        <div className="fixed z-20 inset-0 bg-black/40 flex w-full h-[100vh] justify-center items-center">
+          <div className="w-12 animate-spin border-lovely border-b-2 h-12 rounded-full  "></div>
+        </div>
+      )}
+      <h1
+        className={`${thirdFont.className} tracking-normal text-xl text-lovely md:text-3xl mb-4 md:mb-8  font-semibold`}
+      >
+        Checkout
+      </h1>
+
+      <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">
+        <div className="flex flex-col px-1 md:px-2 bg-backgroundColor items-start w-full md:w-3/7 text-[12px] lg:text-base gap-6 text-nowrap">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col items-start w-full text-[12px] lg:text-base gap-2 py-1 pr-1 md:pr-2  border-lovely text-nowrap"
+          >
+            <div
+              className={`${thirdFont.className} w-full text-lg lg:text-2xl  border-b border-lovely`}
+            >
+              contact
+            </div>
+            <div className="flex  items-center gap-2 w-full ">
+              <label className="text-lovely text-base">Email</label>
+              <div className="flex w-full gap-1 flex-col">
+                <input
+                  onChange={handleInputChange}
+                  name="email"
+                  value={formData.email}
+                  type="email"
+                  className={`border ${
+                    formErrors.email ? "border-red-500" : ""
+                  } w-full h-10 bg-creamey rounded-2xl lowercase px-2 text-base`}
+                />
+                {formErrors.email ? (
+                  <p className="uppercase text-xs text-red-500">
+                    {formErrors.email}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+
+
+
+            <div className="flex items-center gap-2 w-full mt-2">
+              <input
+                type="checkbox"
+                id="giftCheckbox"
+                checked={isGift}
+                onChange={(e) => {
+                  setIsGift(e.target.checked);
+                  setFormData({
+                    ...formData,
+                    isGift: e.target.checked,
+                  });
+                }}
+                className="w-4 h-4 accent-lovely"
+              />
+              <label htmlFor="giftCheckbox" className="text-lovely text-base">
+                I&apos;m buying this as a gift 💖
+              </label>
+            </div>
+
+            {isGift && (
+              <>
+                <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
+                  <p className="text-sm text-lovely mb-2">
+                    Please enter The Bride&apos;s Email (if it&apos;s available
+                    else let it blank).Please let us know once you give this
+                    planner to the bride and We will contact her through her
+                    WhatsApp and activate her account.
+                  </p>
+                  <div className="flex items-center gap-2 w-full">
+                    <label className="text-lovely text-base">
+                      Bride&apos;s Email
+                    </label>
+                    <div className="flex w-full gap-1 flex-col">
+                      <input
+                        onChange={handleInputChange}
+                        name="giftRecipientEmail"
+                        value={formData.giftRecipientEmail}
+                        type="email"
+                        className={`border w-full h-10 bg-creamey border-pinkey lowercase rounded-2xl px-2 text-base`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col w-full mt-4">
+                  <label className="text-lovely text-base mb-2">
+                    Optional : Select a Gift Card (+20 EGP)
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName ===
+                        "Born to shine birthday gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName ===
+                          "Born to shine birthday gift card"
+                            ? ""
+                            : "Born to shine birthday gift card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        Born to shine birthday card
+                      </div>
+                      <img
+                        src="/giftCard/Born to shine birthday gift card.jpeg"
+                        alt="Birthday Gift Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName ===
+                        "Born to shine birthday gift card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                        formData.giftCardName ===
+                        "The I love you more than words gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
+                      }`}
+                      onClick={() => {
+                        const newGiftCardName =
+                          formData.giftCardName ===
+                          "The I love you more than words gift card"
+                            ? ""
+                            : "The I love you more than words gift card";
+                        setFormData({
+                          ...formData,
+                          giftCardName: newGiftCardName,
+                        });
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
+                        I love you more than words card
+                      </div>
+                      <img
+                        src="/giftCard/The I love you more than words gift card.jpeg"
+                        alt="Love Gift Card"
+                        className="w-full h-auto"
+                      />
+                      {formData.giftCardName ===
+                        "The I love you more than words gift card" && (
+                        <div className="absolute top-2 right-2 bg-lovely text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div
+              className={`${thirdFont.className} w-full mt-6 text-lg lg:text-2xl border-b border-lovely`}
+            >
+              delivery
+            </div>
+
+            {/* <div className="flex gap-2 items-center text-base w-full">
+              <p>Country</p>
+              {countries ? (
+                <select
+                  onChange={(e) => setCountryID(Number(e.target.value))}
+                  name="country"
+                  disabled
+                  value={countryID}
+                  className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
+                >
+                  {countries.map((country: any, index: number) => {
+                    return (
+                      <option key={index} value={country.id}>
+                        {country.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              ) : (
+                <select
+                  onChange={handleInputChange}
+                  name="country"
+                  value={formData.country}
+                  className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
+                >
+                  <option value="EG">EGYPT</option>
+                  <option value="SA">SAUDI ARABIA</option>
+                </select>
+              )}
+            </div> */}
+            <div className="flex justify-start  flex-col  w-full gap-2 items-start md:items-center">
+              <div className="flex flex-col gap-2 w-full ">
+                <div className="flex gap-2 w-full items-center">
+                  <label className="text-lovely whitespace-nowrap text-base">
+                    Beautiful Bride First Name
+                  </label>
+                  <div className="flex w-full gap-1 flex-col">
+                    <input
+                      onChange={handleInputChange}
+                      name="firstName"
+                      value={formData.firstName}
+                      type="text"
+                      className={`border ${
+                        formErrors.firstName ? "border-red-500" : ""
+                      } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                    />
+
+                    {formErrors.firstName ? (
+                      <p className="uppercase text-xs text-red-500">
+                        {formErrors.firstName}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 w-full ">
+                <div className="flex gap-2 w-full items-center">
+                  <label className="text-lovely text-base whitespace-nowrap">
+                    Beautiful Bride Last Name
+                  </label>
+                  <div className="flex w-full gap-1 flex-col">
+                    <input
+                      name="lastName"
+                      onChange={handleInputChange}
+                      value={formData.lastName}
+                      type="text"
+                      className={`border ${
+                        formErrors.lastName ? "border-red-500" : ""
+                      } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                    />
+                    {formErrors.lastName ? (
+                      <p className="uppercase text-xs text-red-500">
+                        {formErrors.lastName}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 w-full items-center">
+              <label className="text-lovely text-base whitespace-nowrap">
+                Lovely Bride&apos;s address
+              </label>
+              <div className="flex w-full gap-1 flex-col">
+                <input
+                  type="text"
+                  onChange={handleInputChange}
+                  name="address"
+                  value={formData.address}
+                  className={`border ${
+                    formErrors.address ? "border-red-500" : ""
+                  } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                />
+
+                {formErrors.address ? (
+                  <p className="uppercase text-xs text-red-500">
+                    {formErrors.address}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+            <div className="flex w-full  gap-2 items-center">
+              <label className="text-lovely text-base whitespace-nowrap">
+                Apartment,Suite etc. (Optional)
+              </label>
+              <input
+                onChange={handleInputChange}
+                name="apartment"
+                value={formData.apartment}
+                type="text"
+                className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+              />
+            </div>
+            {/* <div className="flex flex-col sm:flex-row w-full gap-2">
+              <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-lovely text-base whitespace-nowrap">
+                    Postal/Zip code
+                  </label>
+                  <div className="flex w-full gap-1 flex-col">
+                    <input
+                      placeholder={``}
+                      onChange={handleInputChange}
+                      value={formData.postalZip}
+                      name="postalZip"
+                      type="text"
+                      className={`${
+                        formErrors.postalZip ? "border-red-500" : ""
+                      } border w-full h-10 bg-creamey rounded-2xl py-2  px-2 text-base`}
+                    />
+                    {formErrors.postalZip ? (
+                      <p className="uppercase text-xs text-red-500">
+                        {formErrors.postalZip}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
+                <div className="flex gap-2 w-full items-center">
+                  <label className="text-lovely text-base whitespace-nowrap">
+                    City
+                  </label>
+                  <div className="flex w-full gap-1 flex-col">
+                    <input
+                      onChange={handleInputChange}
+                      name="city"
+                      value={formData.city}
+                      type="text"
+                      className={`border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base ${
+                        formErrors.city ? "border-red-500" : ""
+                      }`}
+                    />
+                    {formErrors.city ? (
+                      <p className="uppercase text-xs text-red-500">
+                        {formErrors.city}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div> */}
+
+            {/* Bosta Location Selector for Egyptian customers */}
+            {countryID === 65 ? (
+              <BostaLocationSelector
+                onLocationChange={handleBostaLocationChange}
+                selectedCity={bostaLocation.city?._id}
+                selectedZone={bostaLocation.zone?._id}
+                selectedDistrict={bostaLocation.district?.districtId}
+              />
+            ) : (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  State/Province
+                </label>
+                <input
+                  onChange={handleInputChange}
+                  value={formData.state}
+                  name="state"
+                  type="text"
+                  className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                />
+              </div>
+            )}
+            <div className="flex w-full gap-2 items-center">
+              <label className="text-lovely text-base whitespace-nowrap">
+                Phone
+              </label>
+              <div className="flex w-full gap-1 flex-col">
+                <input
+                  onChange={handleInputChange}
+                  type="text"
+                  value={formData.phone}
+                  name="phone"
+                  className={`border ${
+                    formErrors.phone ? "border-red-500" : ""
+                  } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                />
+                {formErrors.phone ? (
+                  <p className="uppercase text-xs text-red-500">
+                    {formErrors.phone}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+
+            {isGift && (
+              <div className="flex w-full gap-2 items-center">
+                <label className="text-lovely text-base whitespace-nowrap">
+                  WhatsApp Number
+                </label>
+                <div className="flex w-full gap-1 flex-col">
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={formData.whatsAppNumber}
+                    name="whatsAppNumber"
+                    className={`border ${
+                      formErrors.whatsAppNumber ? "border-red-500" : ""
+                    } w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base`}
+                  />
+                  {formErrors.whatsAppNumber ? (
+                    <p className="uppercase text-xs text-red-500">
+                      {formErrors.whatsAppNumber}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col items-start w-full text-[12px] lg:text-base gap-2 text-nowrap">
+              <div
+                className={`${thirdFont.className} mt-6 w-full text-lg lg:text-2xl border-b border-lovely`}
+              >
+                payment
+              </div>
+
+              {countryID === 65 && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-6">
+                    <input
+                      type="checkbox"
+                      name="cash"
+                      className="appearance-none h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely checked:ring-lovely  checked:bg-lovely "
+                      checked={payment === "cash"}
+                      onChange={() => {
+                        setPayment("cash");
+                        formData.cash = "cash";
+                      }}
+                    />
+                    <label> Cash on delivery </label>
+                  </div>
+                  {/* paymob */}
+                  <div className="flex items-center gap-6">
+                    <input
+                      type="checkbox"
+                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
+                      checked={payment === "card"}
+                      onChange={() => {
+                        setPayment("card");
+                        formData.cash = "card";
+                      }}
+                    />
+                    <label> Pay with card</label>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <input
+                      type="checkbox"
+                      className="appearance-none h-3 ring-1 checked:ring-lovely ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
+                      checked={payment === "instapay"}
+                      onChange={() => {
+                        setPayment("instapay");
+                        formData.cash = "instapay";
+                      }}
+                    />
+                    <label className="text-base"> Pay with instapay</label>
+                  </div>
+                  {payment === "instapay" && (
+                    <div className="mt-4 p-4 border border-lovely/20 rounded-xl bg-lovely/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 text-lovely font-semibold">
+                        <span className="p-1 bg-lovely/10 rounded-full">💰</span>
+                        <p className="text-sm">Instapay Instructions</p>
+                      </div>
+                      
+                      <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">1.</span> 
+                          <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">2.</span> 
+                          <span>Select <b>"Bank Account"</b></span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">3.</span> 
+                          <span>Enter Account Number: <b className="font-mono text-base select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">4.</span> 
+                          <span>Select <b>Credit Agricole</b> as the bank</span>
+                        </p>
+                        <p className="flex gap-2">
+                          <span className="font-bold text-lovely">5.</span> 
+                          <span>Type <b>Wifey</b> in the receiver field</span>
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <label className="block text-[13px] font-medium text-gray-700">
+                          Transaction Screenshot / Receipt
+                        </label>
+                        <CldUploadWidget
+                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
+                          onSuccess={(result: any) => {
+                            if (result.info && typeof result.info !== 'string') {
+                              setInstapayReciept(result.info.secure_url);
+                            }
+                          }}
+                        >
+                          {({ open }) => (
+                            <button
+                              type="button"
+                              onClick={() => open()}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-sm font-medium"
+                            >
+                              {instapayReciept ? (
+                                <>
+                                  <span className="text-green-600 font-bold">✓</span>
+                                  Change Screenshot
+                                </>
+                              ) : (
+                                <>
+                                  <span>📸</span>
+                                  Upload Screenshot
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </CldUploadWidget>
+                        
+                        {instapayReciept && (
+                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 shadow-sm">
+                            <Image 
+                              src={instapayReciept} 
+                              alt="Instapay Receipt" 
+                              fill 
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* paymob */}
+              {/* <div className='flex gap-6'>
+           <input  type='checkbox'
+    className="appearance-none h-3 w-3 border-2 text-white   checked:bg-lovely "
+    checked={!cash} onChange={()=>setCash((prev)=>!prev)}/>
+           <label> PAY WITH THE CARD</label>
+            </div> 
+              {/* billing */}
+
+              <div
+                className={`${thirdFont.className} mt-6 w-full text-lg lg:text-2xl border-b border-lovely`}
+              >
+                billing address
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="billingAddress"
+                      checked={useSameAsShipping}
+                      onChange={() => setUseSameAsShipping(true)}
+                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
+                    />
+                    <span className=" ">Same as shipping address</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="billingAddress"
+                      checked={!useSameAsShipping}
+                      onChange={() => setUseSameAsShipping(false)}
+                      className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
+                    />
+                    <span className="">Use a different billing address</span>
+                  </label>
+                </div>
+              </div>
+              <div
+                className={`flex flex-col gap-2 w-full transition-all duration-500 ease-in-out overflow-hidden
+  ${!useSameAsShipping ? "max-h-[70vh]   opacity-100" : "max-h-0  opacity-0"}
+  `}
+                style={{
+                  padding: !useSameAsShipping ? "0.25rem 0.25rem" : "0",
+                }}
+              >
+                <div className="flex gap-2 w-full">
+                  <p>Country</p>
+                  {countries ? (
+                    <select
+                      disabled
+                      onChange={(e) =>
+                        setBillingCountry(Number(e.target.value))
+                      }
+                      name="billingCountry"
+                      value={billingCountry}
+                      className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
+                    >
+                      {countries.map((country: any, index: number) => {
+                        return (
+                          <option key={index} value={country.id}>
+                            {country.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : (
+                    <select
+                      onChange={handleInputChange}
+                      name="billingCountry"
+                      value={formData.billingCountry}
+                      className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
+                    >
+                      {/* <option value='EG'>EGYPT</option>
+              <option value='SA'>SAUDI ARABIA</option> */}
+                    </select>
+                  )}
+                </div>
+                <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
+                  <div className="flex gap-2 w-full md:w-2/4">
+                    <label className="text-lovely">First Name</label>
+                    <input
+                      onChange={handleInputChange}
+                      name="billingFirstName"
+                      value={
+                        useSameAsShipping
+                          ? formData.firstName
+                          : formData.billingFirstName
+                      }
+                      type="text"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                    />
+                  </div>
+                  <div className="flex gap-2 w-full md:w-2/4">
+                    <label className="text-lovely">Last Name</label>
+                    <input
+                      name="billingLastName"
+                      onChange={handleInputChange}
+                      value={
+                        useSameAsShipping
+                          ? formData.lastName
+                          : formData.billingLastName
+                      }
+                      type="text"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2 w-full">
+                  <label className="text-lovely">
+                    Lovely Bride&apos;s address
+                  </label>
+                  <input
+                    type="text"
+                    onChange={handleInputChange}
+                    name="billingAddress"
+                    value={
+                      useSameAsShipping
+                        ? formData.address
+                        : formData.billingAddress
+                    }
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
+                <div className="flex w-full  gap-2 items-center">
+                  <label className="text-lovely text-nowrap">
+                    Apartment,Suite ETC. (Optional)
+                  </label>
+                  <input
+                    onChange={handleInputChange}
+                    name="billingApartment"
+                    value={
+                      useSameAsShipping
+                        ? formData.apartment
+                        : formData.billingApartment
+                    }
+                    type="text"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
+                <div className="flex w-full gap-2">
+                  <div className="flex w-full gap-2 md:w-3/5 items-center">
+                    <label className="text-lovely">
+                      Postal/Zip code (Optional)
+                    </label>
+                    <input
+                      onChange={handleInputChange}
+                      value={
+                        useSameAsShipping
+                          ? formData.postalZip
+                          : formData.billingPostalZip
+                      }
+                      name="billingPostalZip"
+                      type="text"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2  px-2 text-base"
+                    />
+                  </div>
+
+                  <div className="flex w-full  md:w-2/5 gap-2 items-center">
+                    <label className="text-lovely">City</label>
+                    <input
+                      onChange={handleInputChange}
+                      name="billingCity"
+                      value={
+                        useSameAsShipping ? formData.city : formData.billingCity
+                      }
+                      type="text"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex w-full  gap-2 items-center">
+                  <label className="text-lovely">Governate</label>
+                  {billingCountry === 65 ? (
+                    <select
+                      onChange={handleInputChange}
+                      name="billingState"
+                      value={
+                        useSameAsShipping
+                          ? formData.state
+                          : formData.billingState
+                      }
+                      className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
+                    >
+                      {states.map((state: any, index: number) => {
+                        return (
+                          <option key={index} value={state.name}>
+                            {state.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : (
+                    <input
+                      onChange={handleInputChange}
+                      value={
+                        useSameAsShipping
+                          ? formData.state
+                          : formData.billingState
+                      }
+                      name="billingState"
+                      type="text"
+                      className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                    />
+                  )}
+                </div>
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-lovely">Phone</label>
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={
+                      useSameAsShipping ? formData.phone : formData.billingPhone
+                    }
+                    name="billingPhone"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
+                <div className="flex w-full gap-2 items-center">
+                  <label className="text-lovely">WhatsApp Number</label>
+                  <input
+                    onChange={handleInputChange}
+                    type="text"
+                    value={
+                      useSameAsShipping
+                        ? formData.whatsAppNumber
+                        : formData.billingWhatsAppNumber
+                    }
+                    name="billingWhatsAppNumber"
+                    className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
+                  />
+                </div>
+              </div>
+            </div>
+            {/* <div className='flex pb-5 justify-between'>
+           <div className='flex flex-col gap-1'><p>SUBTOTAL</p>
+           <p>SHIPPING</p>
+           <p className='mt-6'>TOTAL</p>
+           </div>
+           
+           <div className='flex flex-col gap-1 items-end'>
+             <p className='text-[12px] lg:text-base'>{subTotal} LE</p>
+             <p className='text-[12px] lg:text-base'>{shipping} LE</p>
+             <p className='text-[12px] mt-6 lg:text-base'>{total} LE</p>
+           </div>
+         </div> */}
+                     {isAuthenticated && (
+              <div className="flex items-center gap-2 w-full mb-2">
+                <input
+                  type="checkbox"
+                  id="saveShippingData"
+                  checked={saveShippingData}
+                  onChange={(e) => setSaveShippingData(e.target.checked)}
+                  className="w-4 h-4 accent-lovely"
+                />
+                <label htmlFor="saveShippingData" className="text-lovely text-sm cursor-pointer">
+                  Save my data for next time
+                </label>
+              </div>
+            )}
+            {payment === "cash" || "instapay" ? (
+              <div className={`flex justify-end`}>
+                <button
+                  className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
+                  onClick={handleSubmit}
+                  disabled={loading || isValidating || items.length === 0}
+                >
+                  {isValidating ? "Validating..." : "Confirm order"}
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-end">
+                <button
+                  disabled={items.length === 0 || loading || isValidating}
+                  type="submit"
+                  className={`border transition duration-300 border-lovely p-1 ${
+                    items.length === 0 || loading || isValidating
+                      ? "cursor-not-allowed bg-gray-300 text-gray-500" // Styles for disabled state
+                      : "hover:cursor-pointer hover:bg-lovely hover:text-white text-lovely"
+                  }`}
+                >
+                  {isValidating ? "Validating..." : "PROCEED TO PAYMENT"}
+                </button>
+              </div>
+            )}
+            <div className="text-base">
+              <p>
+                By clicking &quot;CONFIRM ORDER&quot;, you accept the{" "}
+                <Link
+                  href="/policies?terms-and-conditions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-lovely underline"
+                >
+                  terms and conditions
+                </Link>
+                .
+              </p>
+            </div>
+          </form>
+        </div>
+        {/* orderSummaryMob */}
+        <div className="flex flex-col md:hidden">
+          <div
+            onClick={() => setSummary((prevState) => !prevState)}
+            className="flex  justify-between items-center px-1 hover:cursor-pointer"
+          >
+            <div className="flex gap-1  justify-center items-center">
+              <h6 className={`${thirdFont.className}`}>ORDER SUMMARY</h6>
+              <IoIosArrowDown
+                className={`${
+                  summary ? "rotate-180" : ""
+                } transition duration-500`}
+              />
+            </div>
+            <h6 className={`${thirdFont.className}`}>{total} LE</h6>
+          </div>
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+              summary
+                ? "max-h-[90vh] h-auto  opacity-100"
+                : "max-h-0  opacity-0"
+            } px-1 py-1 flex flex-col gap-2`}
+            style={{
+              padding: summary ? "0.25rem 0.25rem" : "0",
+            }}
+          >
+            {isValidating ? (
+              <div className="flex justify-center p-4">
+                <Spinner />
+              </div>
+            ) : (
+              items.map((cartItem, index) => (
+                <OrderSummaryItem cartItem={cartItem} key={index} />
+              ))
+            )}
+            <DiscountSection
+              onDiscountApplied={handleDiscountApplied}
+              redeemType="Purchase"
+            />
+            {/* Loyalty Points Section for mobile */}
+            <LoyaltyPointsSection
+              loyaltyPoints={loyaltyPoints}
+              redeemPoints={redeemPoints}
+              setRedeemPoints={setRedeemPoints}
+              loyaltyDiscount={loyaltyDiscount}
+              setLoyaltyDiscount={setLoyaltyDiscount}
+              isAuthenticated={isAuthenticated}
+              showTooltip={showTooltip}
+              setShowTooltip={setShowTooltip}
+              mobile={true}
+            />
+            <div className="mt-6 flex justify-between">
+              <div className="flex flex-col gap-1 text-sm">
+                <p>SUBTOTAL</p>
+                {redeemPoints > 0 && (
+                  <p className="text-[12px] lg:text-base text-green-700">
+                    -{loyaltyDiscount} LE (Loyalty Discount)
+                  </p>
+                )}
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                  <p className="line-through">SHIPPING</p>
+                ) : (
+                  <p>SHIPPING</p>
+                )}
+                <p className="mt-6">TOTAL</p>
+              </div>
+              <div className="flex flex-col gap-1 items-end">
+                <p className="text-[12px] lg:text-base">{subTotal} LE</p>
+                {redeemPoints > 0 && (
+                  <p className="text-[12px] lg:text-base text-green-700">
+                    -{loyaltyDiscount} LE
+                  </p>
+                )}
+                {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                  <p className="text-[12px] lg:text-base line-through">
+                    {(() => {
+                      // Calculate the real shipping before discount
+                      const realShipping = calculateShippingRate(
+                        countryID,
+                        state,
+                        states,
+                        countries,
+                        shippingZones
+                      );
+                      return realShipping;
+                    })()}{" "}
+                    LE
+                  </p>
+                ) : (
+                  <p className="text-[12px] lg:text-base">{shipping} LE</p>
+                )}
+                <p className="text-[12px] mt-6 lg:text-base">{total} LE</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {!isSubscription === true ? (
+          <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
+            <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
+              <h2
+                className={`${thirdFont.className} text-lg lg:text-2xl  text-lovely mb-6`}
+              >
+                Order Summary
+              </h2>
+
+              {/* Cart Items */}
+              <div className="flex flex-col gap-4 mb-6">
+                {isValidating ? (
+                  <div className="flex justify-center p-4">
+                    <Spinner />
+                  </div>
+                ) : (
+                  items.map((item, index) => (
+                    <OrderSummaryItem key={index} cartItem={item} />
+                  ))
+                )}
+              </div>
+
+              {/* Discount Section */}
+              <DiscountSection
+                redeemType="Purchase"
+                onDiscountApplied={handleDiscountApplied}
+              />
+
+              {/* Order Totals */}
+              <div className="mt-6 space-y-2 text-lovely">
+                <div className="flex justify-between text-base">
+                  <span>Subtotal</span>
+                  <span>{subTotal} LE</span>
+                </div>
+                {redeemPoints > 0 && (
+                  <div className="flex justify-between text-base text-green-700">
+                    <span>Loyalty Discount</span>
+                    <span>-{loyaltyDiscount} LE</span>
+                  </div>
+                )}
+                {appliedDiscount &&
+                  appliedDiscount.value !== undefined &&
+                  (appliedDiscount.calculationType === "FREE_SHIPPING" ||
+                    (appliedDiscount.calculationType === "PERCENTAGE"
+                      ? Math.round((subTotal * appliedDiscount.value) / 100)
+                      : appliedDiscount.value) > 0) && (
+                  <div className="flex justify-between text-base text-green-600">
+                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>
+                      {appliedDiscount.calculationType === "FREE_SHIPPING"
+                        ? `-${shipping} LE (Free Shipping)`
+                        : `-${
+                            appliedDiscount.calculationType === "PERCENTAGE"
+                              ? Math.round(
+                                  (subTotal * appliedDiscount.value) / 100
+                                )
+                              : appliedDiscount.value
+                          } LE`}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between text-base">
+                  {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
+                    <>
+                      <span className=" line-through">Shipping</span>
+                      <span className="line-through">
+                        {(() => {
+                          // Calculate the real shipping before discount
+                          const realShipping = calculateShippingRate(
+                            countryID,
+                            state,
+                            states,
+                            countries,
+                            shippingZones
+                          );
+                          return realShipping;
+                        })()}{" "}
+                        LE
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Shipping</span>
+                      <span>{shipping} LE</span>
+                    </>
+                  )}
+                </div>
+                <div className="flex justify-between font-bold mt-4 pt-4 border-t">
+                  <span>Total</span>
+                  <span>{total} LE</span>
+                </div>
+              </div>
+              {/* Loyalty Points Section */}
+              <LoyaltyPointsSection
+                loyaltyPoints={loyaltyPoints}
+                redeemPoints={redeemPoints}
+                setRedeemPoints={setRedeemPoints}
+                loyaltyDiscount={loyaltyDiscount}
+                setLoyaltyDiscount={setLoyaltyDiscount}
+                isAuthenticated={isAuthenticated}
+                showTooltip={showTooltip}
+                setShowTooltip={setShowTooltip}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
+            <div
+              className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}
+            >
+              {/* Wifey Experience Package Details */}
+
+              <div className="mt-6 space-y-2 text-lovely">
+                <div className="flex justify-between text-base">
+                  <span>Subtotal</span>
+                  <span>{subTotal} LE</span>
+                </div>
+                {redeemPoints > 0 && (
+                  <div className="flex justify-between text-base text-green-700">
+                    <span>Loyalty Discount</span>
+                    <span>-{loyaltyDiscount} LE</span>
+                  </div>
+                )}
+                {appliedDiscount && appliedDiscount.value !== undefined && (
+                  <div className="flex justify-between text-base text-green-600">
+                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>
+                      -{discountAmount} LE
+                      {appliedDiscount.calculationType === "FREE_SHIPPING"
+                        ? " (Free Shipping)"
+                        : ""}
+                    </span>
+                  </div>
+                )}
+                {/* {redeemPoints > 0 && <div>{redeemPoints}</div>} */}
+                <div className="flex justify-between text-base">
+                  <span>Shipping</span>
+                  <span>
+                    {appliedDiscount?.calculationType === "FREE_SHIPPING"
+                      ? "0"
+                      : shipping}{" "}
+                    LE
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold mt-4 pt-4 border-t">
+                  <span>Total</span>
+                  <span>{total} LE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default function CheckoutPageWithSuspense(props: any) {
+  return (
+    <Suspense fallback={<div>Loading checkout...</div>}>
+      <CheckoutClientPage {...props} />
+    </Suspense>
+  );
+}

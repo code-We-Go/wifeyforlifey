@@ -1,11 +1,10 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Ipackage } from "@/app/interfaces/interfaces";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { thirdFont } from "@/fonts";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +43,7 @@ export default function PackageCard({
         />
         <div className="absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10"></div>
         {packageItem.discountedFrom && packageItem.discountedFrom > packageItem.price && (
-          <div className="absolute top-3 right-3 z-10 bg-lovely text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+          <div className="absolute top-3 end-3 z-10 bg-lovely text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
             Save {Math.round(((packageItem.discountedFrom - packageItem.price) / packageItem.discountedFrom) * 100)}%
           </div>
         )}

@@ -15,7 +15,7 @@ export default function SubcategoryCard({ subcategory, onClick }: SubcategoryCar
   return (
     <button
       onClick={onClick}
-      className="group relative overflow-hidden rounded-xl bg-creamey border-2 flex flex-col justify-start border-lovely/20 hover:border-lovely transition-all duration-300 hover:shadow-lg text-left w-full"
+      className="group relative overflow-hidden rounded-xl bg-creamey border-2 flex flex-col justify-start border-lovely/20 hover:border-lovely transition-all duration-300 hover:shadow-lg text-start w-full"
     >
       {/* Image Section */}
       {subcategory.image && (
@@ -42,7 +42,7 @@ export default function SubcategoryCard({ subcategory, onClick }: SubcategoryCar
               </p>
             )} */}
           </div>
-          <ChevronRight className="w-5 h-5 text-lovely/40 group-hover:text-lovely group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" />
+          <ChevronRight className="w-5 h-5 text-lovely/40 group-hover:text-lovely group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-all flex-shrink-0 ms-2" />
         </div>
       </div>
     </button>

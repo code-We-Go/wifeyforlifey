@@ -16,6 +16,7 @@ import ConsultantAvailabilityModal, {
   getAvailabilityNotice,
 } from "@/components/shared/ConsultantAvailabilityModal";
 import useEmblaCarousel from "embla-carousel-react";
+import { useLocale } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -52,6 +53,8 @@ interface IPartnerSession {
 }
 
 const ExpertSessions = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const { data: authSession } = useSession();
   const [sessions, setSessions] = useState<IPartnerSession[]>([]);
@@ -144,6 +147,7 @@ const ExpertSessions = () => {
     loop: false,
     align: "start",
     slidesToScroll: 1,
+    direction: isRtl ? "rtl" : "ltr",
   });
 
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -552,20 +556,20 @@ const ExpertSessions = () => {
               <button
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                className={`absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 md:-translate-x-12 rtl:md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
                   }`}
                 aria-label="Previous slide"
               >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
               </button>
               <button
                 onClick={scrollNext}
                 disabled={!canScrollNext}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                className={`absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 md:translate-x-12 rtl:md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
                   }`}
                 aria-label="Next slide"
               >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
               </button>
             </>
           )}
