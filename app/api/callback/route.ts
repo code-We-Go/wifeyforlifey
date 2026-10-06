@@ -493,7 +493,7 @@ async function handleSubscription(
           "Creating Bosta delivery for subscription:",
           updatedSub._id
         );
-        const bostaResult = await bostaService.createDelivery(deliveryPayload);
+        const bostaResult = await bostaService.createDelivery(deliveryPayload, updatedSub);
         console.log("bostaResult" + JSON.stringify(bostaResult));
         // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
         // Prefer trackingNumber for shipmentID as it's the customer-facing identifier
@@ -912,7 +912,7 @@ async function handleOrder(
         webhookUrl
       );
       console.log("Creating Bosta delivery for order:", res._id);
-      const bostaResult = await bostaService.createDelivery(deliveryPayload);
+      const bostaResult = await bostaService.createDelivery(deliveryPayload, res);
       console.log("bostaResult" + JSON.stringify(bostaResult));
       // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
       // Prefer trackingNumber for shipmentID as it's the customer-facing identifier
