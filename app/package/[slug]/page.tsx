@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,9 @@ import {
   Zap,
   RotateCcw,
   X,
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
@@ -201,6 +204,143 @@ export default function PackageeDetailPage() {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(-1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  // Touch swipe refs for mobile gesture navigation
+  const touchStartXRef = useRef<number | null>(null);
+  const touchEndXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchEndYRef = useRef<number | null>(null);
+  const hasSwipedRef = useRef<boolean>(false);
+
+  // Zoom & Pan state for Lightbox Magnifier
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const resetZoom = useCallback(() => {
+    setZoomScale(1);
+    setPanPosition({ x: 0, y: 0 });
+    setIsDragging(false);
+  }, []);
+
+  const toggleZoom = useCallback(() => {
+    if (zoomScale > 1) {
+      resetZoom();
+    } else {
+      setZoomScale(2);
+      setPanPosition({ x: 0, y: 0 });
+    }
+  }, [zoomScale, resetZoom]);
+
+  const handleZoomStep = useCallback((delta: number) => {
+    setZoomScale((prev) => {
+      const next = Math.min(3.5, Math.max(1, Math.round((prev + delta) * 10) / 10));
+      if (next === 1) {
+        setPanPosition({ x: 0, y: 0 });
+        setIsDragging(false);
+      }
+      return next;
+    });
+  }, []);
+
+  // Reset zoom when image changes or lightbox closes
+  useEffect(() => {
+    resetZoom();
+  }, [currentImageIndex, isLightboxOpen, resetZoom]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.deltaY < 0) {
+      handleZoomStep(0.25);
+    } else {
+      handleZoomStep(-0.25);
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomScale > 1) {
+      setIsDragging(true);
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      panStartRef.current = { ...panPosition };
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoomScale > 1) {
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      setPanPosition({
+        x: panStartRef.current.x + dx,
+        y: panStartRef.current.y + dy,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.targetTouches[0].clientX;
+    touchStartYRef.current = e.targetTouches[0].clientY;
+    touchEndXRef.current = null;
+    touchEndYRef.current = null;
+    hasSwipedRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndXRef.current = e.targetTouches[0].clientX;
+    touchEndYRef.current = e.targetTouches[0].clientY;
+
+    // When zoomed in, pan image with finger drag
+    if (zoomScale > 1 && touchStartXRef.current !== null && touchStartYRef.current !== null) {
+      const dx = e.targetTouches[0].clientX - touchStartXRef.current;
+      const dy = e.targetTouches[0].clientY - touchStartYRef.current;
+      setPanPosition((prev) => ({
+        x: prev.x + dx,
+        y: prev.y + dy,
+      }));
+      touchStartXRef.current = e.targetTouches[0].clientX;
+      touchStartYRef.current = e.targetTouches[0].clientY;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (zoomScale > 1) {
+      touchStartXRef.current = null;
+      touchEndXRef.current = null;
+      touchStartYRef.current = null;
+      touchEndYRef.current = null;
+      return;
+    }
+
+    if (touchStartXRef.current === null || touchEndXRef.current === null) return;
+    const diffX = touchStartXRef.current - touchEndXRef.current;
+    const diffY = (touchStartYRef.current ?? 0) - (touchEndYRef.current ?? 0);
+
+    // Horizontal swipe threshold: > 40px and dominant over vertical
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      hasSwipedRef.current = true;
+      if (galleryImages.length > 1) {
+        if (diffX > 0) {
+          // Swipe left -> Next image
+          setCurrentImageIndex((prev) =>
+            prev === galleryImages.length - 1 ? 0 : prev + 1
+          );
+        } else {
+          // Swipe right -> Previous image
+          setCurrentImageIndex((prev) =>
+            prev === 0 ? galleryImages.length - 1 : prev - 1
+          );
+        }
+      }
+      setTimeout(() => {
+        hasSwipedRef.current = false;
+      }, 100);
+    }
+  };
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
@@ -330,6 +470,36 @@ We’re beyond excited to share this experience with you… your planner will be
       }
     }
   }, [packageData]);
+
+  // Handle keyboard navigation & body scroll lock for lightbox
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const total =
+      packageData?.images && packageData.images.length > 0
+        ? packageData.images.length
+        : packageData?.imgUrl
+          ? 1
+          : 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsLightboxOpen(false);
+      if (total > 1) {
+        if (e.key === "ArrowLeft") {
+          setCurrentImageIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
+        }
+        if (e.key === "ArrowRight") {
+          setCurrentImageIndex((prev) => (prev === total - 1 ? 0 : prev + 1));
+        }
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLightboxOpen, packageData]);
 
   const handleAddToCart = () => {
     if (!packageData) return;
@@ -520,6 +690,21 @@ We’re beyond excited to share this experience with you… your planner will be
       ? allPackages.reduce((max, pkg) => (pkg.price > max.price ? pkg : max), allPackages[0])
       : packageData;
 
+  const isWeddingPackage = Boolean(
+    (typeof params?.slug === "string" && params.slug.toLowerCase().includes("wedding")) ||
+    (packageData?.slug && packageData.slug.toLowerCase().includes("wedding")) ||
+    (packageData?.name && packageData.name.toLowerCase().includes("wedding")) ||
+    (packageData?.partOf && packageData.partOf.toLowerCase().includes("wedding")) ||
+    packageData?.duration === 6
+  );
+
+  const galleryImages =
+    packageData?.images && packageData.images.length > 0
+      ? packageData.images
+      : packageData?.imgUrl
+        ? [packageData.imgUrl]
+        : [];
+
   return (
     <div className="bg-creamey text-foreground min-h-screen pb-24 font-sans">
       {/* Toast Notification */}
@@ -559,26 +744,41 @@ We’re beyond excited to share this experience with you… your planner will be
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-10 bg-pinkey/60 p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-xl mb-6 md:mb-12">
           {/* Image Gallery */}
           <div className="space-y-4">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border-3 border-lovely shadow-md bg-creamey">
+            <div
+              onClick={() => {
+                if (hasSwipedRef.current) return;
+                setIsLightboxOpen(true);
+              }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="relative aspect-square overflow-hidden rounded-2xl border-3 border-lovely shadow-md bg-creamey cursor-zoom-in group/mainimg touch-pan-y"
+            >
               <Image
                 src={
-                  packageData.images && packageData.images.length > 0
-                    ? packageData.images[currentImageIndex]
-                    : packageData.imgUrl
+                  galleryImages[currentImageIndex] ||
+                  packageData.imgUrl ||
+                  "/placeholder.png"
                 }
                 alt={packageData.name}
                 fill
-                className="object-contain p-2"
+                className="object-contain p-2 transition-transform duration-300 group-hover/mainimg:scale-[1.02]"
                 priority
               />
 
-              {packageData.images && packageData.images.length > 1 && (
+              {/* Zoom hint badge */}
+              <div className="absolute bottom-3 right-3 bg-black/60 text-white rounded-full p-2 opacity-0 group-hover/mainimg:opacity-100 transition-opacity pointer-events-none shadow-md">
+                <Maximize2 size={16} />
+              </div>
+
+              {galleryImages.length > 1 && (
                 <>
                   <button
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       setCurrentImageIndex((prev) =>
-                        prev === 0 ? packageData.images.length - 1 : prev - 1
+                        prev === 0 ? galleryImages.length - 1 : prev - 1
                       );
                     }}
                     className="absolute left-3 top-1/2 -translate-y-1/2 bg-creamey/90 hover:bg-creamey rounded-full p-2 text-lovely shadow-md transition-all z-10"
@@ -590,8 +790,9 @@ We’re beyond excited to share this experience with you… your planner will be
                   <button
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       setCurrentImageIndex((prev) =>
-                        prev === packageData.images.length - 1 ? 0 : prev + 1
+                        prev === galleryImages.length - 1 ? 0 : prev + 1
                       );
                     }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-creamey/90 hover:bg-creamey rounded-full p-2 text-lovely shadow-md transition-all z-10"
@@ -694,7 +895,7 @@ We’re beyond excited to share this experience with you… your planner will be
               {/* Dashed Helper Callout (Not Sure? Mini vs Full) */}
               {allPackages.length > 1 && (
                 <div className="mb-6 p-3.5 sm:p-4 bg-white border-2 border-dashed border-pinkey rounded-2xl text-xs sm:text-sm text-lovely/90 leading-relaxed shadow-sm">
-                  <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> a year of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
+                  <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> {isWeddingPackage ? "6 months" : "a year"} of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
                 </div>
               )}
 
@@ -869,15 +1070,23 @@ We’re beyond excited to share this experience with you… your planner will be
               {fullPackage?.calloutTitle || "Why most brides choose Full 💕"}
             </h3>
             <p className="text-sm leading-relaxed text-white/95">
-              {fullPackage?.calloutDescription || (
+              {fullPackage?.calloutDescription ? (
+                isWeddingPackage ? (
+                  fullPackage.calloutDescription
+                    .replace(/a full year|12 months|a whole year/gi, "6 months")
+                    .replace(/appliance discount/gi, "wedding vendor discount")
+                ) : (
+                  fullPackage.calloutDescription
+                )
+              ) : (
                 <>
-                  For <strong>LE 1,000 more</strong>, you unlock 11 extra playlists plus a full year of community, expert access and partner discounts. One appliance discount alone can cover the difference.
+                  For <strong>LE 1,000 more</strong>, you unlock 11 extra playlists plus {isWeddingPackage ? "6 months" : "a full year"} of community, expert access and partner discounts. {isWeddingPackage ? "One wedding vendor discount alone can cover the difference." : "One appliance discount alone can cover the difference."}
                 </>
               )}
             </p>
           </div>
           <div className="mt-4 p-4 border-2 text-lovely/90 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
-            <strong>The physical planner is yours forever.</strong> Digital benefits stay active for 12 months from purchase.
+            <strong>The physical planner is yours forever.</strong> Digital benefits stay active for {isWeddingPackage ? "6 months" : "12 months"} from purchase.
           </div>
         </div>
         {/* Notes Section */}
@@ -1128,6 +1337,190 @@ We’re beyond excited to share this experience with you… your planner will be
               </div>
             </div>
           </div>
+        </div>
+      )}
+      {/* Lightbox Modal with Dark Background */}
+      {isLightboxOpen && galleryImages.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 transition-all select-none"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Bar: Title, Zoom Controls & Close Button */}
+          <div
+            className="w-full max-w-6xl flex items-center justify-between text-white z-20 pt-2 gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="font-semibold text-sm sm:text-base text-white/90 truncate max-w-xs sm:max-w-md">
+                {packageData.name}
+              </span>
+              {galleryImages.length > 1 && (
+                <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full font-mono flex-shrink-0">
+                  {currentImageIndex + 1} / {galleryImages.length}
+                </span>
+              )}
+            </div>
+
+            {/* Magnifier / Zoom Toolbar */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center bg-white/10 rounded-full p-1 border border-white/10 backdrop-blur-sm">
+                <button
+                  onClick={() => handleZoomStep(-0.5)}
+                  disabled={zoomScale <= 1}
+                  className="p-1.5 sm:p-2 text-white hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-transparent rounded-full transition-colors cursor-pointer"
+                  title="Zoom Out"
+                  aria-label="Zoom Out"
+                >
+                  <ZoomOut size={18} />
+                </button>
+                <button
+                  onClick={toggleZoom}
+                  className="px-2 py-0.5 text-xs font-mono text-white/90 hover:text-white transition-colors cursor-pointer min-w-[42px] text-center"
+                  title="Toggle Zoom"
+                >
+                  {Math.round(zoomScale * 100)}%
+                </button>
+                <button
+                  onClick={() => handleZoomStep(0.5)}
+                  disabled={zoomScale >= 3.5}
+                  className="p-1.5 sm:p-2 text-white hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-transparent rounded-full transition-colors cursor-pointer"
+                  title="Zoom In"
+                  aria-label="Zoom In"
+                >
+                  <ZoomIn size={18} />
+                </button>
+              </div>
+
+              {zoomScale > 1 && (
+                <button
+                  onClick={resetZoom}
+                  className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 sm:p-2.5 transition-colors cursor-pointer border border-white/10"
+                  title="Reset Zoom"
+                  aria-label="Reset Zoom"
+                >
+                  <RotateCcw size={16} />
+                </button>
+              )}
+
+              <button
+                onClick={() => setIsLightboxOpen(false)}
+                className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2.5 transition-colors cursor-pointer ml-1 sm:ml-2 border border-white/10"
+                aria-label="Close image popup"
+              >
+                <X size={22} />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Stage: Prev Button, Large Image, Next Button */}
+          <div
+            className="relative w-full max-w-5xl flex-1 flex items-center justify-center my-2 touch-pan-y"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Prev Button */}
+            {galleryImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndex((prev) =>
+                    prev === 0 ? galleryImages.length - 1 : prev - 1
+                  );
+                }}
+                className="absolute left-2 sm:left-4 z-20 bg-white/10 hover:bg-white/25 active:scale-95 text-white rounded-full p-3 transition-all backdrop-blur-sm shadow-xl cursor-pointer"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={28} />
+              </button>
+            )}
+
+            {/* Displayed Image with Magnifier / Pan */}
+            <div
+              className={`relative w-full h-[65vh] sm:h-[75vh] overflow-hidden flex items-center justify-center ${
+                zoomScale > 1
+                  ? isDragging
+                    ? "cursor-grabbing"
+                    : "cursor-grab"
+                  : "cursor-zoom-in"
+              }`}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onWheel={handleWheel}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                toggleZoom();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDragging) {
+                  toggleZoom();
+                }
+              }}
+            >
+              <div
+                style={{
+                  transform: `scale(${zoomScale}) translate(${panPosition.x / zoomScale}px, ${panPosition.y / zoomScale}px)`,
+                  transition: isDragging ? "none" : "transform 0.2s ease-out",
+                }}
+                className="relative w-full h-full flex items-center justify-center will-change-transform"
+              >
+                <Image
+                  src={galleryImages[currentImageIndex]}
+                  alt={`${packageData.name} image ${currentImageIndex + 1}`}
+                  fill
+                  className="object-contain drop-shadow-2xl pointer-events-none select-none"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Next Button */}
+            {galleryImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndex((prev) =>
+                    prev === galleryImages.length - 1 ? 0 : prev + 1
+                  );
+                }}
+                className="absolute right-2 sm:right-4 z-20 bg-white/10 hover:bg-white/25 active:scale-95 text-white rounded-full p-3 transition-all backdrop-blur-sm shadow-xl cursor-pointer"
+                aria-label="Next image"
+              >
+                <ChevronRight size={28} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails Strip */}
+          {galleryImages.length > 1 && (
+            <div
+              className="flex items-center gap-2 overflow-x-auto max-w-full pb-2 px-2 z-20 scrollbar-hide"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all cursor-pointer ${currentImageIndex === idx
+                      ? "border-pinkey ring-2 ring-pinkey/50 scale-105 opacity-100"
+                      : "border-white/20 opacity-50 hover:opacity-80"
+                    }`}
+                >
+                  <Image
+                    src={img}
+                    alt={`Thumbnail ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -352,8 +352,8 @@ export default function Header() {
                   width={200}
                   height={150}
                   // src={"/cristmas/logo.png"}
-                  // src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
-                  src={"/birthday/birthdayLogo.png"}
+                  src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
+                // src={"/birthday/birthdayLogo.png"}
                 />
               </Link>
               {/* Theme Toggle */}
@@ -634,10 +634,10 @@ export default function Header() {
                         width={200}
                         height={150}
                         // src={"/cristmas/logo.png"}
-                        // src={
-                        //   "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
-                        // }
-                        src={"/birthday/birthdayLogo.png"}
+                        src={
+                          "/logo/WifeyforLifeyPrimaryLogowithSloganCream.png"
+                        }
+                      // src={"/birthday/birthdayLogo.png"}
                       />
                     </Link>
                   </div>
@@ -769,8 +769,8 @@ export default function Header() {
                 alt="logo"
                 width={160}
                 height={120}
-                // src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
-                src={"/birthday/birthdayLogo.png"}
+                src={"/logo/WifeyforLifeyPrimaryLogoCream.png"}
+              // src={"/birthday/birthdayLogo.png"}
               />
             </Link>
             <div className="mr-2 gap-4 flex">
@@ -824,7 +824,7 @@ export default function Header() {
         </div>
       </div>
       {/* Birthday Decoration */}
-      <div className="w-full max-md:hidden absolute top-full left-0 z-40 pointer-events-none">
+      {/* <div className="w-full max-md:hidden absolute top-full left-0 z-40 pointer-events-none">
         <Image
           src="/birthday/header.png"
           alt="Birthday Decoration"
@@ -833,9 +833,9 @@ export default function Header() {
           className="w-full h-auto object-contain"
           priority
         />
-      </div>
+      </div> */}
 
-      <div className="block md:hidden w-full absolute top-full left-0 -mt-0 z-40 pointer-events-none">
+      {/* <div className="block md:hidden w-full absolute top-full left-0 -mt-0 z-40 pointer-events-none">
         <Image
           src="/birthday/headermob.png"
           alt="Christmas Decoration"
@@ -843,7 +843,7 @@ export default function Header() {
           height={100}
           className="w-full h-auto"
         />
-      </div>
+      </div> */}
       {/* Christmas Decoration - Desktop */}
       {/* <div className="hidden bg-transparent md:flex w-full absolute top-full left-0 -mt-14 z-40 pointer-events-none">
 
