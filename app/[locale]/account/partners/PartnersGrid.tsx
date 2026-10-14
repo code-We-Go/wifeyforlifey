@@ -5,7 +5,8 @@ import PartnerCard from "./PartnerCard";
 import PartnerCardSkeleton from "./PartnerCardSkeleton";
 import { thirdFont } from "@/fonts";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Lock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ interface PartnersGridProps {
 }
 
 export default function PartnersGrid({ isFree }: PartnersGridProps) {
+  const t = useTranslations("accountPage");
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
@@ -222,13 +224,13 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
       <h2
         className={`${thirdFont.className} tracking-normal text-4xl font-semibold text-lovely mb-8`}
       >
-        Our Partners
+        {t("ourPartners")}
       </h2>
 
       {/* Filters */}
       <div className="mb-8 flex flex-wrap gap-4">
         <div className="space-y-2">
-          <h3 className="text-lovely font-medium">Categories</h3>
+          <h3 className="text-lovely font-medium">{t("categories")}</h3>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => (
               <button
@@ -240,7 +242,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
                     : "bg-creamey text-lovely border border-lovely"
                 }`}
               >
-                {category}
+                {category === "All" ? t("all") : category}
               </button>
             ))}
           </div>
@@ -248,7 +250,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
 
         {selectedCategory !== "All" && (
           <div className="space-y-2">
-            <h3 className="text-lovely font-medium">Sub-Categories</h3>
+            <h3 className="text-lovely font-medium">{t("subCategories")}</h3>
             <div className="flex flex-wrap gap-2">
               {subCategories
                 .filter(
@@ -270,7 +272,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
                         : "bg-creamey text-lovely border border-lovely"
                     }`}
                   >
-                    {subCategory}
+                    {subCategory === "All" ? t("all") : subCategory}
                   </button>
                 ))}
             </div>
@@ -290,7 +292,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
           {filteredPartners.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-lovely text-lg">
-                No partners found with the selected filters.
+                {t("noPartnersFound")}
               </p>
             </div>
           ) : (
@@ -322,12 +324,10 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
               <Lock size={40} className="text-lovely" />
             </div>
             <DialogTitle className="text-2xl font-bold text-lovely mb-4">
-              Partner Locked
+              {t("partnerLocked")}
             </DialogTitle>
             <p className="text-lovely/70 mb-8">
-              {lockedPartnerPackages.length > 0
-                ? "This partner offer is exclusive to our community members. Subscribe to one of the following packages to gain full access:"
-                : "This partner offer is exclusive to our community members. Please subscribe to a package to gain full access."}
+              {t("partnerLockedDesc")}
             </p>
 
             <div className="w-full space-y-3">
@@ -361,7 +361,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
                       {pkg.name}
                     </span>
                   </div>
-                  <ChevronRight size={20} className="text-lovely/50" />
+                  <ChevronRight size={20} className="text-lovely/50 rtl:rotate-180" />
                 </button>
               ))}
             </div>
@@ -371,7 +371,7 @@ export default function PartnersGrid({ isFree }: PartnersGridProps) {
               onClick={() => setIsLockModalOpen(false)}
               className="mt-6 text-lovely/60 hover:text-lovely"
             >
-              Maybe Later
+              {t("maybeLater")}
             </Button>
           </div>
         </DialogContent>

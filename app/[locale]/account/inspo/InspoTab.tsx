@@ -1,6 +1,8 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
 import BoardCard from "./BoardCard";
@@ -27,6 +29,7 @@ interface InspoTabProps {
 }
 
 const InspoTab = ({ isFree }: InspoTabProps) => {
+  const t = useTranslations("accountPage");
   const searchParams = useSearchParams();
   const router = useRouter();
   const boardTitle = searchParams.get("board");
@@ -532,7 +535,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
   const renderHeader = () => {
     if (!activeBoard)
       return (
-        <h2 className="text-2xl font-bold text-lovely">Inspiration Boards</h2>
+        <h2 className="text-2xl font-bold text-lovely">{t("inspirationBoards")}</h2>
       );
 
     return (
@@ -545,7 +548,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                 className="text-lovely/60 hover:text-lovely"
                 onClick={navigateToRoot}
               >
-                Inspiration Boards
+                {t("inspirationBoards")}
               </button>
               <span className="text-pinkey">/</span>
               {activeSection ? (
@@ -572,12 +575,12 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
             <div className="flex items-center gap-2 text-sm text-lovely/70 mt-1">
               {!activeSection && (
                 <>
-                  <span>{activeBoard.pinCount} Inspos</span>
+                  <span>{t("insposCount", { count: activeBoard.pinCount })}</span>
                   <span>•</span>
-                  <span>{activeBoard.sectionCount} Sections</span>
+                  <span>{t("sectionsCount", { count: activeBoard.sectionCount })}</span>
                 </>
               )}
-              {activeSection && <span>{activeSection.pins.length} Pins</span>}
+              {activeSection && <span>{t("pinsCount", { count: activeSection.pins.length })}</span>}
             </div>
           </div>
           <div className="flex gap-2">
@@ -593,7 +596,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                   showFavorites ? "fill-lovely  text-lovely" : "text-lovely "
                 }
               />
-              Favorites
+              {t("favoritesButton")}
               {favoritePins.length > 0 && ` (${favoritePins.length})`}
             </Button>
             <Button
@@ -970,12 +973,10 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
               <Lock size={40} className="text-lovely" />
             </div>
             <DialogTitle className="text-2xl font-bold text-lovely mb-4">
-              Board Locked
+              {t("boardLocked")}
             </DialogTitle>
             <p className="text-lovely/70 mb-8">
-              {lockedBoardPackages.length > 0
-                ? "This inspiration board is exclusive to our community members. Subscribe to one of the following packages to gain full access:"
-                : "This inspiration board is exclusive to our community members. Please subscribe to a package to gain full access."}
+              {t("boardLockedDesc")}
             </p>
 
             <div className="w-full space-y-3">
@@ -1008,7 +1009,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                       {pkg.name}
                     </span>
                   </div>
-                  <ChevronRight size={20} className="text-lovely/50" />
+                  <ChevronRight size={20} className="text-lovely/50 rtl:rotate-180" />
                 </button>
               ))}
             </div>
@@ -1018,7 +1019,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
               onClick={() => setIsLockModalOpen(false)}
               className="mt-6 text-lovely/60 hover:text-lovely"
             >
-              Maybe Later
+              {t("maybeLater")}
             </Button>
           </div>
         </DialogContent>

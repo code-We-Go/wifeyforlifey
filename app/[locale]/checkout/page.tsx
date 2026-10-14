@@ -11,6 +11,7 @@ import axios from "axios";
 import { Link, useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState, Suspense } from "react";
+import { useTranslations } from "next-intl";
 import { IoIosArrowDown } from "react-icons/io";
 import { Discount } from "@/app/types/discount";
 import { CartItem } from "@/app/interfaces/interfaces";
@@ -166,10 +167,7 @@ const calculateShippingRate = (
 };
 
 const CheckoutClientPage = () => {
-  // let subTotal=0;
-  // let total = 0;
-  // const []
-  //  const[countries,setCountries]=useState([]);
+  const t = useTranslations("checkoutPage");
   const [isGift, setIsGift] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
   const calculateTotals = () => {
@@ -901,10 +899,10 @@ const CheckoutClientPage = () => {
             <div
               className={`${thirdFont.className} w-full text-lg lg:text-2xl  border-b border-lovely`}
             >
-              contact
+              {t("contact")}
             </div>
             <div className="flex  items-center gap-2 w-full ">
-              <label className="text-lovely text-base">Email</label>
+              <label className="text-lovely text-base">{t("email")}</label>
               <div className="flex w-full gap-1 flex-col">
                 <input
                   onChange={handleInputChange}
@@ -925,8 +923,6 @@ const CheckoutClientPage = () => {
               </div>
             </div>
 
-
-
             <div className="flex items-center gap-2 w-full mt-2">
               <input
                 type="checkbox"
@@ -942,7 +938,7 @@ const CheckoutClientPage = () => {
                 className="w-4 h-4 accent-lovely"
               />
               <label htmlFor="giftCheckbox" className="text-lovely text-base">
-                I&apos;m buying this as a gift 💖
+                {t("isGift")}
               </label>
             </div>
 
@@ -950,14 +946,11 @@ const CheckoutClientPage = () => {
               <>
                 <div className="flex flex-col w-full mt-2 p-3 bg-creamey/30 rounded-lg border border-lovely/30">
                   <p className="text-sm text-lovely mb-2">
-                    Please enter The Bride&apos;s Email (if it&apos;s available
-                    else let it blank).Please let us know once you give this
-                    planner to the bride and We will contact her through her
-                    WhatsApp and activate her account.
+                    {t("giftHint")}
                   </p>
                   <div className="flex items-center gap-2 w-full">
                     <label className="text-lovely text-base">
-                      Bride&apos;s Email
+                      {t("brideEmail")}
                     </label>
                     <div className="flex w-full gap-1 flex-col">
                       <input
@@ -973,7 +966,7 @@ const CheckoutClientPage = () => {
 
                 <div className="flex flex-col w-full mt-4">
                   <label className="text-lovely text-base mb-2">
-                    Optional : Select a Gift Card (+20 EGP)
+                    {t("selectGiftCard")}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div
@@ -996,7 +989,7 @@ const CheckoutClientPage = () => {
                       }}
                     >
                       <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
-                        Born to shine birthday card
+                        {t("giftCardBornToShine")}
                       </div>
                       <img
                         src="/giftCard/Born to shine birthday gift card.jpeg"
@@ -1042,7 +1035,7 @@ const CheckoutClientPage = () => {
                       }}
                     >
                       <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-center text-sm">
-                        I love you more than words card
+                        {t("giftCardLove")}
                       </div>
                       <img
                         src="/giftCard/The I love you more than words gift card.jpeg"
@@ -1075,7 +1068,7 @@ const CheckoutClientPage = () => {
             <div
               className={`${thirdFont.className} w-full mt-6 text-lg lg:text-2xl border-b border-lovely`}
             >
-              delivery
+              {t("delivery")}
             </div>
 
             {/* <div className="flex gap-2 items-center text-base w-full">
@@ -1112,7 +1105,7 @@ const CheckoutClientPage = () => {
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely whitespace-nowrap text-base">
-                    Beautiful Bride First Name
+                    {t("brideFirstName")}
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -1138,7 +1131,7 @@ const CheckoutClientPage = () => {
               <div className="flex flex-col gap-2 w-full ">
                 <div className="flex gap-2 w-full items-center">
                   <label className="text-lovely text-base whitespace-nowrap">
-                    Beautiful Bride Last Name
+                    {t("brideLastName")}
                   </label>
                   <div className="flex w-full gap-1 flex-col">
                     <input
@@ -1163,7 +1156,7 @@ const CheckoutClientPage = () => {
             </div>
             <div className="flex gap-2 w-full items-center">
               <label className="text-lovely text-base whitespace-nowrap">
-                Lovely Bride&apos;s address
+                {t("brideAddress")}
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
@@ -1187,7 +1180,7 @@ const CheckoutClientPage = () => {
             </div>
             <div className="flex w-full  gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
-                Apartment,Suite etc. (Optional)
+                {t("apartmentOptional")}
               </label>
               <input
                 onChange={handleInputChange}
@@ -1197,60 +1190,6 @@ const CheckoutClientPage = () => {
                 className="border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base"
               />
             </div>
-            {/* <div className="flex flex-col sm:flex-row w-full gap-2">
-              <div className="flex flex-col w-full gap-2 flex-nowrap sm:w-3/5 ">
-                <div className="flex w-full gap-2 items-center">
-                  <label className="text-lovely text-base whitespace-nowrap">
-                    Postal/Zip code
-                  </label>
-                  <div className="flex w-full gap-1 flex-col">
-                    <input
-                      placeholder={``}
-                      onChange={handleInputChange}
-                      value={formData.postalZip}
-                      name="postalZip"
-                      type="text"
-                      className={`${
-                        formErrors.postalZip ? "border-red-500" : ""
-                      } border w-full h-10 bg-creamey rounded-2xl py-2  px-2 text-base`}
-                    />
-                    {formErrors.postalZip ? (
-                      <p className="uppercase text-xs text-red-500">
-                        {formErrors.postalZip}
-                      </p>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col w-full  md:w-2/5 gap-2 ">
-                <div className="flex gap-2 w-full items-center">
-                  <label className="text-lovely text-base whitespace-nowrap">
-                    City
-                  </label>
-                  <div className="flex w-full gap-1 flex-col">
-                    <input
-                      onChange={handleInputChange}
-                      name="city"
-                      value={formData.city}
-                      type="text"
-                      className={`border w-full h-10 bg-creamey rounded-2xl py-2 px-2 text-base ${
-                        formErrors.city ? "border-red-500" : ""
-                      }`}
-                    />
-                    {formErrors.city ? (
-                      <p className="uppercase text-xs text-red-500">
-                        {formErrors.city}
-                      </p>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div> */}
 
             {/* Bosta Location Selector for Egyptian customers */}
             {countryID === 65 ? (
@@ -1263,7 +1202,7 @@ const CheckoutClientPage = () => {
             ) : (
               <div className="flex w-full gap-2 items-center">
                 <label className="text-lovely text-base whitespace-nowrap">
-                  State/Province
+                  {t("governorate")}
                 </label>
                 <input
                   onChange={handleInputChange}
@@ -1276,7 +1215,7 @@ const CheckoutClientPage = () => {
             )}
             <div className="flex w-full gap-2 items-center">
               <label className="text-lovely text-base whitespace-nowrap">
-                Phone
+                {t("phone")}
               </label>
               <div className="flex w-full gap-1 flex-col">
                 <input
@@ -1301,7 +1240,7 @@ const CheckoutClientPage = () => {
             {isGift && (
               <div className="flex w-full gap-2 items-center">
                 <label className="text-lovely text-base whitespace-nowrap">
-                  WhatsApp Number
+                  {t("whatsAppNumber")}
                 </label>
                 <div className="flex w-full gap-1 flex-col">
                   <input
@@ -1328,7 +1267,7 @@ const CheckoutClientPage = () => {
               <div
                 className={`${thirdFont.className} mt-6 w-full text-lg lg:text-2xl border-b border-lovely`}
               >
-                payment
+                {t("payment")}
               </div>
 
               {countryID === 65 && (
@@ -1344,7 +1283,7 @@ const CheckoutClientPage = () => {
                         formData.cash = "cash";
                       }}
                     />
-                    <label> Cash on delivery </label>
+                    <label> {t("cod")} </label>
                   </div>
                   {/* paymob */}
                   <div className="flex items-center gap-6">
@@ -1357,7 +1296,7 @@ const CheckoutClientPage = () => {
                         formData.cash = "card";
                       }}
                     />
-                    <label> Pay with card</label>
+                    <label> {t("payCard")}</label>
                   </div>
                   <div className="flex items-center gap-6">
                     <input
@@ -1369,41 +1308,41 @@ const CheckoutClientPage = () => {
                         formData.cash = "instapay";
                       }}
                     />
-                    <label className="text-base"> Pay with instapay</label>
+                    <label className="text-base"> {t("payInstapay")}</label>
                   </div>
                   {payment === "instapay" && (
                     <div className="mt-4 p-4 border border-lovely/20 rounded-xl bg-lovely/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="flex items-center gap-2 text-lovely font-semibold">
                         <span className="p-1 bg-lovely/10 rounded-full">💰</span>
-                        <p className="text-sm">Instapay Instructions</p>
+                        <p className="text-sm">{t("instapayTitle")}</p>
                       </div>
                       
                       <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
                         <p className="flex gap-2">
                           <span className="font-bold text-lovely">1.</span> 
-                          <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
+                          <span>{t("instapayStep1")}</span>
                         </p>
                         <p className="flex gap-2">
                           <span className="font-bold text-lovely">2.</span> 
-                          <span>Select <b>"Bank Account"</b></span>
+                          <span>{t("instapayStep2")}</span>
                         </p>
                         <p className="flex gap-2">
                           <span className="font-bold text-lovely">3.</span> 
-                          <span>Enter Account Number: <b className="font-mono text-base select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                          <span>{t("instapayStep3")} <b className="font-mono text-base select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
                         </p>
                         <p className="flex gap-2">
                           <span className="font-bold text-lovely">4.</span> 
-                          <span>Select <b>Credit Agricole</b> as the bank</span>
+                          <span>{t("instapayStep4")}</span>
                         </p>
                         <p className="flex gap-2">
                           <span className="font-bold text-lovely">5.</span> 
-                          <span>Type <b>Wifey</b> in the receiver field</span>
+                          <span>{t("instapayStep5")}</span>
                         </p>
                       </div>
                       
                       <div className="space-y-3">
                         <label className="block text-[13px] font-medium text-gray-700">
-                          Transaction Screenshot / Receipt
+                          {t("transactionReceipt")}
                         </label>
                         <CldUploadWidget
                           uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
@@ -1422,12 +1361,12 @@ const CheckoutClientPage = () => {
                               {instapayReciept ? (
                                 <>
                                   <span className="text-green-600 font-bold">✓</span>
-                                  Change Screenshot
+                                  {t("changeScreenshot")}
                                 </>
                               ) : (
                                 <>
                                   <span>📸</span>
-                                  Upload Screenshot
+                                  {t("uploadScreenshot")}
                                 </>
                               )}
                             </button>
@@ -1461,11 +1400,11 @@ const CheckoutClientPage = () => {
               <div
                 className={`${thirdFont.className} mt-6 w-full text-lg lg:text-2xl border-b border-lovely`}
               >
-                billing address
+                {t("billingAddress")}
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-center space-x-3 rtl:space-x-reverse">
                     <input
                       type="radio"
                       name="billingAddress"
@@ -1473,11 +1412,11 @@ const CheckoutClientPage = () => {
                       onChange={() => setUseSameAsShipping(true)}
                       className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
                     />
-                    <span className=" ">Same as shipping address</span>
+                    <span className=" ">{t("sameAsShipping")}</span>
                   </label>
                 </div>
                 <div>
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-center space-x-3 rtl:space-x-reverse">
                     <input
                       type="radio"
                       name="billingAddress"
@@ -1485,7 +1424,7 @@ const CheckoutClientPage = () => {
                       onChange={() => setUseSameAsShipping(false)}
                       className="appearance-none checked:ring-lovely h-3 ring-1 ring-gray-500 rounded-full w-3 border-2 text-white focus:ring-lovely  checked:bg-lovely "
                     />
-                    <span className="">Use a different billing address</span>
+                    <span className="">{t("differentBilling")}</span>
                   </label>
                 </div>
               </div>
@@ -1498,7 +1437,7 @@ const CheckoutClientPage = () => {
                 }}
               >
                 <div className="flex gap-2 w-full">
-                  <p>Country</p>
+                  <p>{t("governorate")}</p>
                   {countries ? (
                     <select
                       disabled
@@ -1524,14 +1463,12 @@ const CheckoutClientPage = () => {
                       value={formData.billingCountry}
                       className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2"
                     >
-                      {/* <option value='EG'>EGYPT</option>
-              <option value='SA'>SAUDI ARABIA</option> */}
                     </select>
                   )}
                 </div>
                 <div className="flex justify-start  flex-col md:flex-row w-full gap-2 items-start md:items-center">
                   <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-lovely">First Name</label>
+                    <label className="text-lovely">{t("firstName")}</label>
                     <input
                       onChange={handleInputChange}
                       name="billingFirstName"
@@ -1545,7 +1482,7 @@ const CheckoutClientPage = () => {
                     />
                   </div>
                   <div className="flex gap-2 w-full md:w-2/4">
-                    <label className="text-lovely">Last Name</label>
+                    <label className="text-lovely">{t("lastName")}</label>
                     <input
                       name="billingLastName"
                       onChange={handleInputChange}
@@ -1561,7 +1498,7 @@ const CheckoutClientPage = () => {
                 </div>
                 <div className="flex gap-2 w-full">
                   <label className="text-lovely">
-                    Lovely Bride&apos;s address
+                    {t("brideAddress")}
                   </label>
                   <input
                     type="text"
@@ -1577,7 +1514,7 @@ const CheckoutClientPage = () => {
                 </div>
                 <div className="flex w-full  gap-2 items-center">
                   <label className="text-lovely text-nowrap">
-                    Apartment,Suite ETC. (Optional)
+                    {t("apartmentOptional")}
                   </label>
                   <input
                     onChange={handleInputChange}
@@ -1594,7 +1531,7 @@ const CheckoutClientPage = () => {
                 <div className="flex w-full gap-2">
                   <div className="flex w-full gap-2 md:w-3/5 items-center">
                     <label className="text-lovely">
-                      Postal/Zip code (Optional)
+                      {t("postalZip")}
                     </label>
                     <input
                       onChange={handleInputChange}
@@ -1610,7 +1547,7 @@ const CheckoutClientPage = () => {
                   </div>
 
                   <div className="flex w-full  md:w-2/5 gap-2 items-center">
-                    <label className="text-lovely">City</label>
+                    <label className="text-lovely">{t("city")}</label>
                     <input
                       onChange={handleInputChange}
                       name="billingCity"
@@ -1624,7 +1561,7 @@ const CheckoutClientPage = () => {
                 </div>
 
                 <div className="flex w-full  gap-2 items-center">
-                  <label className="text-lovely">Governate</label>
+                  <label className="text-lovely">{t("governorate")}</label>
                   {billingCountry === 65 ? (
                     <select
                       onChange={handleInputChange}
@@ -1659,7 +1596,7 @@ const CheckoutClientPage = () => {
                   )}
                 </div>
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-lovely">Phone</label>
+                  <label className="text-lovely">{t("phone")}</label>
                   <input
                     onChange={handleInputChange}
                     type="text"
@@ -1671,7 +1608,7 @@ const CheckoutClientPage = () => {
                   />
                 </div>
                 <div className="flex w-full gap-2 items-center">
-                  <label className="text-lovely">WhatsApp Number</label>
+                  <label className="text-lovely">{t("whatsAppNumber")}</label>
                   <input
                     onChange={handleInputChange}
                     type="text"
@@ -1686,19 +1623,8 @@ const CheckoutClientPage = () => {
                 </div>
               </div>
             </div>
-            {/* <div className='flex pb-5 justify-between'>
-           <div className='flex flex-col gap-1'><p>SUBTOTAL</p>
-           <p>SHIPPING</p>
-           <p className='mt-6'>TOTAL</p>
-           </div>
-           
-           <div className='flex flex-col gap-1 items-end'>
-             <p className='text-[12px] lg:text-base'>{subTotal} LE</p>
-             <p className='text-[12px] lg:text-base'>{shipping} LE</p>
-             <p className='text-[12px] mt-6 lg:text-base'>{total} LE</p>
-           </div>
-         </div> */}
-                     {isAuthenticated && (
+
+            {isAuthenticated && (
               <div className="flex items-center gap-2 w-full mb-2">
                 <input
                   type="checkbox"
@@ -1708,18 +1634,18 @@ const CheckoutClientPage = () => {
                   className="w-4 h-4 accent-lovely"
                 />
                 <label htmlFor="saveShippingData" className="text-lovely text-sm cursor-pointer">
-                  Save my data for next time
+                  {t("saveDataNextTime")}
                 </label>
               </div>
             )}
-            {payment === "cash" || "instapay" ? (
+            {payment === "cash" || payment === "instapay" ? (
               <div className={`flex justify-end`}>
                 <button
                   className="bg-lovely rounded-2xl text-creamey disabled:bg-lovely/60 hover:bg-lovely/90 px-4 py-2"
                   onClick={handleSubmit}
                   disabled={loading || isValidating || items.length === 0}
                 >
-                  {isValidating ? "Validating..." : "Confirm order"}
+                  {isValidating ? t("validating") : t("confirmOrder")}
                 </button>
               </div>
             ) : (
@@ -1733,20 +1659,20 @@ const CheckoutClientPage = () => {
                       : "hover:cursor-pointer hover:bg-lovely hover:text-white text-lovely"
                   }`}
                 >
-                  {isValidating ? "Validating..." : "PROCEED TO PAYMENT"}
+                  {isValidating ? t("validating") : t("proceedToPayment")}
                 </button>
               </div>
             )}
             <div className="text-base">
               <p>
-                By clicking &quot;CONFIRM ORDER&quot;, you accept the{" "}
+                {t("termsNotice")}{" "}
                 <Link
                   href="/policies?terms-and-conditions"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-lovely underline"
                 >
-                  terms and conditions
+                  {t("termsAndConditions")}
                 </Link>
                 .
               </p>
@@ -1760,7 +1686,7 @@ const CheckoutClientPage = () => {
             className="flex  justify-between items-center px-1 hover:cursor-pointer"
           >
             <div className="flex gap-1  justify-center items-center">
-              <h6 className={`${thirdFont.className}`}>ORDER SUMMARY</h6>
+              <h6 className={`${thirdFont.className}`}>{t("orderSummary")}</h6>
               <IoIosArrowDown
                 className={`${
                   summary ? "rotate-180" : ""
@@ -1806,18 +1732,18 @@ const CheckoutClientPage = () => {
             />
             <div className="mt-6 flex justify-between">
               <div className="flex flex-col gap-1 text-sm">
-                <p>SUBTOTAL</p>
+                <p>{t("subtotal")}</p>
                 {redeemPoints > 0 && (
                   <p className="text-[12px] lg:text-base text-green-700">
-                    -{loyaltyDiscount} LE (Loyalty Discount)
+                    -{loyaltyDiscount} LE ({t("loyaltyDiscount")})
                   </p>
                 )}
                 {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
-                  <p className="line-through">SHIPPING</p>
+                  <p className="line-through">{t("shipping")}</p>
                 ) : (
-                  <p>SHIPPING</p>
+                  <p>{t("shipping")}</p>
                 )}
-                <p className="mt-6">TOTAL</p>
+                <p className="mt-6">{t("total")}</p>
               </div>
               <div className="flex flex-col gap-1 items-end">
                 <p className="text-[12px] lg:text-base">{subTotal} LE</p>
@@ -1851,11 +1777,11 @@ const CheckoutClientPage = () => {
         </div>
         {!isSubscription === true ? (
           <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
-            <div className="border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit">
+            <div className="border-l-2 rtl:border-l-0 rtl:border-r-2 sticky top-4 w-full border-lovely pl-6 rtl:pl-0 rtl:pr-6 shadow-sm h-fit">
               <h2
                 className={`${thirdFont.className} text-lg lg:text-2xl  text-lovely mb-6`}
               >
-                Order Summary
+                {t("orderSummary")}
               </h2>
 
               {/* Cart Items */}
@@ -1880,12 +1806,12 @@ const CheckoutClientPage = () => {
               {/* Order Totals */}
               <div className="mt-6 space-y-2 text-lovely">
                 <div className="flex justify-between text-base">
-                  <span>Subtotal</span>
+                  <span>{t("subtotal")}</span>
                   <span>{subTotal} LE</span>
                 </div>
                 {redeemPoints > 0 && (
                   <div className="flex justify-between text-base text-green-700">
-                    <span>Loyalty Discount</span>
+                    <span>{t("loyaltyDiscount")}</span>
                     <span>-{loyaltyDiscount} LE</span>
                   </div>
                 )}
@@ -1896,10 +1822,10 @@ const CheckoutClientPage = () => {
                       ? Math.round((subTotal * appliedDiscount.value) / 100)
                       : appliedDiscount.value) > 0) && (
                   <div className="flex justify-between text-base text-green-600">
-                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>{t("discount")} ({appliedDiscount.code})</span>
                     <span>
                       {appliedDiscount.calculationType === "FREE_SHIPPING"
-                        ? `-${shipping} LE (Free Shipping)`
+                        ? `-${shipping} LE`
                         : `-${
                             appliedDiscount.calculationType === "PERCENTAGE"
                               ? Math.round(
@@ -1913,7 +1839,7 @@ const CheckoutClientPage = () => {
                 <div className="flex justify-between text-base">
                   {appliedDiscount?.calculationType === "FREE_SHIPPING" ? (
                     <>
-                      <span className=" line-through">Shipping</span>
+                      <span className=" line-through">{t("shipping")}</span>
                       <span className="line-through">
                         {(() => {
                           // Calculate the real shipping before discount
@@ -1931,13 +1857,13 @@ const CheckoutClientPage = () => {
                     </>
                   ) : (
                     <>
-                      <span>Shipping</span>
+                      <span>{t("shipping")}</span>
                       <span>{shipping} LE</span>
                     </>
                   )}
                 </div>
                 <div className="flex justify-between font-bold mt-4 pt-4 border-t">
-                  <span>Total</span>
+                  <span>{t("total")}</span>
                   <span>{total} LE</span>
                 </div>
               </div>
@@ -1957,35 +1883,31 @@ const CheckoutClientPage = () => {
         ) : (
           <div className="hidden md:block lg:col-span-3 relative w-full md:w-2/7 py-1">
             <div
-              className={`${thirdFont.className} border-l-2 sticky top-4 w-full border-lovely pl-6 shadow-sm h-fit`}
+              className={`${thirdFont.className} border-l-2 rtl:border-l-0 rtl:border-r-2 sticky top-4 w-full border-lovely pl-6 rtl:pl-0 rtl:pr-6 shadow-sm h-fit`}
             >
               {/* Wifey Experience Package Details */}
 
               <div className="mt-6 space-y-2 text-lovely">
                 <div className="flex justify-between text-base">
-                  <span>Subtotal</span>
+                  <span>{t("subtotal")}</span>
                   <span>{subTotal} LE</span>
                 </div>
                 {redeemPoints > 0 && (
                   <div className="flex justify-between text-base text-green-700">
-                    <span>Loyalty Discount</span>
+                    <span>{t("loyaltyDiscount")}</span>
                     <span>-{loyaltyDiscount} LE</span>
                   </div>
                 )}
                 {appliedDiscount && appliedDiscount.value !== undefined && (
                   <div className="flex justify-between text-base text-green-600">
-                    <span>Discount ({appliedDiscount.code})</span>
+                    <span>{t("discount")} ({appliedDiscount.code})</span>
                     <span>
                       -{discountAmount} LE
-                      {appliedDiscount.calculationType === "FREE_SHIPPING"
-                        ? " (Free Shipping)"
-                        : ""}
                     </span>
                   </div>
                 )}
-                {/* {redeemPoints > 0 && <div>{redeemPoints}</div>} */}
                 <div className="flex justify-between text-base">
-                  <span>Shipping</span>
+                  <span>{t("shipping")}</span>
                   <span>
                     {appliedDiscount?.calculationType === "FREE_SHIPPING"
                       ? "0"
@@ -1994,7 +1916,7 @@ const CheckoutClientPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between font-bold mt-4 pt-4 border-t">
-                  <span>Total</span>
+                  <span>{t("total")}</span>
                   <span>{total} LE</span>
                 </div>
               </div>
@@ -2008,7 +1930,7 @@ const CheckoutClientPage = () => {
 
 export default function CheckoutPageWithSuspense(props: any) {
   return (
-    <Suspense fallback={<div>Loading checkout...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-lovely">...</div>}>
       <CheckoutClientPage {...props} />
     </Suspense>
   );

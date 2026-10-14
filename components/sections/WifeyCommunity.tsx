@@ -167,8 +167,12 @@ const socialMediaItems = [
   },
  
 ];
+import { useLocale, useTranslations } from "next-intl";
 
 export default function WifeyCommunity() {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const t = useTranslations("home.community");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [selectedVideo, setSelectedVideo] = useState<{ id: string; type: string } | null>(null);
   
@@ -177,7 +181,8 @@ export default function WifeyCommunity() {
       loop: true, 
       dragFree: true,
       align: "center",
-      containScroll: "trimSnaps"
+      containScroll: "trimSnaps",
+      direction: isRtl ? "rtl" : "ltr",
     },
     [
       AutoScroll({ 
@@ -200,15 +205,15 @@ export default function WifeyCommunity() {
     >
       <div className="container mx-auto px-4 mb-12 text-center">
         <h2 className={`${thirdFont.className} normal-case ${headerStyle} text-lovely mb-4`}>
-          #WifeyForLifeyCommunity
+          {t("hashtag")}
         </h2>
         <p className={`${subHeaderStyle} text-lovely/80 text-lg md:text-xl max-w-2xl mx-auto`}>
-          See how our community is celebrating their journey on TikTok.
+          {t("subtitle")}
         </p>
       </div>
 
       <div className="embla w-full" ref={emblaRef}>
-        <div className="embla__container flex gap-6 pl-4">
+        <div className="embla__container flex gap-6 ps-4">
           {socialMediaItems.map((item, index) => (
             <div 
               className="embla__slide flex-[0_0_260px] md:flex-[0_0_300px]" 
@@ -225,8 +230,8 @@ export default function WifeyCommunity() {
       </div>
       
       {/* Decorative gradient edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-creamey via-creamey/80 to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-creamey via-creamey/80 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 start-0 w-24 bg-gradient-to-r rtl:bg-gradient-to-l from-creamey via-creamey/80 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 end-0 w-24 bg-gradient-to-l rtl:bg-gradient-to-r from-creamey via-creamey/80 to-transparent z-10" />
 
       {/* Video Dialog */}
       <Dialog open={!!selectedVideo} onOpenChange={(open) => !open && setSelectedVideo(null)}>

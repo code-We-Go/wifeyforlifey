@@ -2,11 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import { CartItem } from "@/app/interfaces/interfaces";
 import Image from "next/image";
 import { thirdFont } from "@/fonts";
-// import QuickAddButton from './AnchuvaButton'
+import { useTranslations } from "next-intl";
 import { cartContext } from "@/app/context/cartContext";
 import { userContext } from "@/app/context/userContext";
 
 const OrderSummaryItem = ({ cartItem }: { cartItem: CartItem }) => {
+  const t = useTranslations("checkoutPage");
   const { user } = useContext(userContext);
   const { cart, setCart } = useContext(cartContext);
   const [quantity, setQuantity] = useState(cartItem.quantity);
@@ -62,14 +63,13 @@ const OrderSummaryItem = ({ cartItem }: { cartItem: CartItem }) => {
             {cartItem.productName}
           </h2>
           <div className="justify-between flex items-start">
-            <p>Quantity :</p>
+            <p>{t("quantity")} :</p>
             <p>{cartItem.quantity}</p>
           </div>
           <div className="justify-between flex items-start">
-            <p>Total :</p>
+            <p>{t("total")} :</p>
             <p>
               {cartItem.quantity * cartItem.price}{" "}
-              {/* <span>{user.userCountry === "EG" ? "LE" : "USD"}</span> */}
               <span>LE</span>
             </p>
           </div>

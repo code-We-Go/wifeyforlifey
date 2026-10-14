@@ -1,10 +1,11 @@
 "use client";
 import { thirdFont } from "@/fonts";
 import React, { useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { TestimonialCard } from "./testomonials/TestomonialsCard";
 import { headerStyle } from "@/app/styles/style";
+import { useTranslations } from "next-intl";
 const testimonials = [
   {
     name: "sandy_wadea",
@@ -83,6 +84,7 @@ const mobTestimonials = [
 
 const Testimonials = () => {
   const router = useRouter();
+  const t = useTranslations("home.testimonials");
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -117,25 +119,23 @@ const Testimonials = () => {
       <div className="flex flex-col h-full md:justify-center justify-end items-center mb-8">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-lovely/90 text-base font-medium">
-            Loved by 100,000+ bride
+            {t("badge")}
           </span>
         </div>
         <h2
-          className={`${thirdFont.className} text-lovely ${headerStyle} text-center mb-4 `}
+          className={`${thirdFont.className} text-lovely ${headerStyle} text-center mb-4 whitespace-pre-line`}
         >
-          Think Wifey&apos;s Tiktok is helpful?
-          <br />
-          This is 10x the tea
+          {t("title")}
         </h2>
         <p className="text-lg text-lovely/90 text-center max-w-xl">
-          Subscribe now and be a part of your favorite community.
+          {t("subtitle")}
         </p>
       </div>
 
       <div className=" w-full flex justify-center">
         {/* Cards left with parallax */}
         <div
-          className="hidden md:flex flex-col gap-6 absolute left-3 top-8 h-full justify-center items-start"
+          className="hidden md:flex flex-col gap-6 absolute start-3 top-8 h-full justify-center items-start"
           style={{ width: "320px" }}
         >
           <motion.div style={{ x: leftY1, opacity: paragraphOpacities[0] }}>
@@ -150,7 +150,7 @@ const Testimonials = () => {
         </div>
         {/* Cards right with parallax */}
         <div
-          className="hidden md:flex flex-col gap-6 absolute right-3 top-10 h-full justify-center items-end"
+          className="hidden md:flex flex-col gap-6 absolute end-3 top-10 h-full justify-center items-end"
           style={{ width: "320px" }}
         >
           <motion.div style={{ x: rightY1, opacity: paragraphOpacities[0] }}>
@@ -173,7 +173,7 @@ const Testimonials = () => {
             }
             className="mt-8 hover:bg-lovely/90 bg-lovely text-creamey font-bold py-4 px-10 rounded-full text-xl shadow-lg transition"
           >
-            Subscribe Now
+            {t("cta")}
           </button>
           {/* <span className="text-gray-500 text-sm mt-2">
             It’s free and takes less than a minute!

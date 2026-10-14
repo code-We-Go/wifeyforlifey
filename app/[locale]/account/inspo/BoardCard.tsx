@@ -2,6 +2,7 @@
 
 import { CldImage } from "next-cloudinary";
 import { MoreHorizontal, Share, Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface BoardCardProps {
   title: string;
@@ -20,6 +21,7 @@ const BoardCard = ({
   onClick,
   isLocked,
 }: BoardCardProps) => {
+  const t = useTranslations("accountPage");
   return (
     <div className="flex flex-col gap-2 cursor-pointer group" onClick={onClick}>
       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100 flex gap-[1px]">
@@ -78,11 +80,11 @@ const BoardCard = ({
       <div className="px-1">
         <h3 className="font-semibold text-lg text-lovely truncate">{title}</h3>
         <div className="flex items-center gap-2 text-xs text-lovely/70">
-          {pinCount !== undefined && <span>{pinCount} Inspos</span>}
+          {pinCount !== undefined && <span>{t("insposCount", { count: pinCount })}</span>}
           {sectionCount !== undefined && (
             <>
               <span>•</span>
-              <span>{sectionCount} Sections</span>
+              <span>{t("sectionsCount", { count: sectionCount })}</span>
             </>
           )}
         </div>

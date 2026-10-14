@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { thirdFont } from "@/fonts";
+import { useTranslations } from "next-intl";
 
 interface IFavorite {
   _id: string;
@@ -26,6 +27,7 @@ interface FavoriteCardProps {
 }
 
 export default function FavoriteCard({ favorite }: FavoriteCardProps) {
+  const t = useTranslations("accountPage");
   // Function to handle external link click and increment click count
   const handleVisitWebsite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -48,9 +50,9 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
   // Format price display based on maxPrice
   const formatPrice = () => {
     if (favorite.maxPrice && favorite.maxPrice > 0) {
-      return `${favorite.price} - ${favorite.maxPrice} EGP`;
+      return `${favorite.price} - ${favorite.maxPrice} ${t("currency")}`;
     }
-    return `${favorite.price} EGP`;
+    return `${favorite.price} ${t("currency")}`;
   };
 
   return (
@@ -93,7 +95,7 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
               Clicks: {favorite.clickCount}
             </p> */}
           </div>
-          <div className="flex items-center space-x-2 mt-2">
+          <div className="flex items-center space-x-2 rtl:space-x-reverse mt-2">
             {favorite.link && (
               <Button
                 size="sm"
@@ -101,8 +103,8 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
                 className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
                 onClick={handleVisitWebsite}
               >
-                <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                <span className="text-xs">Visit</span>
+                <ExternalLink className="h-3 w-3 md:h-4 md:w-4 me-1" />
+                <span className="text-xs">{t("visit")}</span>
               </Button>
             )}
           </div>

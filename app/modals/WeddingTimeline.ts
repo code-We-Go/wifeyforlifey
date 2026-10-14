@@ -38,12 +38,26 @@ const EventSchema = new Schema({
   groomsmenActivity: { type: String, default: "" },
   duration: { type: Number, required: true },
   timeLabel: { type: String },
+  translations: {
+    ar: {
+      brideActivity: { type: String, required: false },
+      groomActivity: { type: String, required: false },
+      bridesmaidsActivity: { type: String, required: false },
+      groomsmenActivity: { type: String, required: false },
+      timeLabel: { type: String, required: false },
+    },
+  },
 });
 
 const SelectedFeatureSchema = new Schema({
   name: { type: String, required: true },
   duration: { type: Number, required: true },
   enabled: { type: Boolean, default: true },
+  translations: {
+    ar: {
+      name: { type: String, required: false },
+    },
+  },
 });
 
 const WeddingTimelineSchema = new Schema<IWeddingTimeline>(

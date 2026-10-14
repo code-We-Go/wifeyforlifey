@@ -14,13 +14,14 @@ import PackageCard from "../shop/PackageCard";
 import PackageProductCard from "../shop/PackageProductCard";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const FeaturedProducts = () => {
   const locale = useLocale();
   const isRtl = locale === "ar";
+  const t = useTranslations("home.featuredProducts");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [packages, setPackages] = useState<Ipackage[]>([]);
   const { wishList, setWishList } = useContext(wishListContext);
@@ -79,7 +80,10 @@ const FeaturedProducts = () => {
             price: 1500,
             duration: 0,
             items: [],
-            notes: [
+            notes: isRtl ? [
+              "بتجهزي لجهازك؟",
+              "بيتك، ركن بركن — 11 فصل، أساسيات vs حاجات دلع إضافية، ودليل كميات عشان ماتصرفيش فلوسك على الفاضي."
+            ] : [
               "Buying your gehaz?",
               "Your home, room by room — 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend."
             ],
@@ -96,7 +100,10 @@ const FeaturedProducts = () => {
             price: 1700,
             duration: 0,
             items: [],
-            notes: [
+            notes: isRtl ? [
+              "بتخططي ليوم فرحك؟",
+              "يومك الكبير خطوة بخطوة — تشيك ليست ليكي وللعريس، وعد تنازلي بكل تفصيلة من شهرين قبل الفرح لحد ليلة الفرح."
+            ] : [
               "Planning your wedding day?",
               "Your big day, step by step — two checklists included: one for you, one for your groom. Countdown tasks from 2 months out to the night before."
             ],
@@ -119,7 +126,7 @@ const FeaturedProducts = () => {
       };
   
       fetchPackages();
-    }, []);
+    }, [isRtl]);
   
   // const featuredProducts = mockProducts
   //   .filter((product) => product.featured)
@@ -150,9 +157,9 @@ const FeaturedProducts = () => {
             <h2
               className={`${thirdFont.className} ${headerStyle} text-lovely mb-2`}
             >
-              Our Besties' Favorites
+              {t("title")}
             </h2>
-            <span className={`${subHeaderStyle} text-lovely`}>The little things our bride actually use, love, and swear by to make their bridal era feel lighter and more fun.</span>
+            <span className={`${subHeaderStyle} text-lovely`}>{t("subtitle")}</span>
             {/* <p className="text-creamey text">
             Discover our handpicked selection of trending items
           </p> */}
@@ -163,7 +170,7 @@ const FeaturedProducts = () => {
             className="hidden md:flex items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey  mt-4 md:mt-0"
           >
             <Link href="/shop">
-              View All <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
+              {t("viewAll")} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>
@@ -240,7 +247,7 @@ const FeaturedProducts = () => {
             className="flex md:hidden w-fit items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey"
           >
             <Link href="/shop">
-              View All <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
+              {t("viewAll")} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>

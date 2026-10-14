@@ -12,11 +12,13 @@ import {
   Sparkles,
   ShoppingBag,
   Calendar,
+  X,
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -68,6 +70,8 @@ function Fullback() {
 function ShopPage() {
   const locale = useLocale();
   const isRtl = locale === "ar";
+  const t = useTranslations("shopPage");
+  const tCommon = useTranslations("common");
   const { wishList, setWishList } = useContext(wishListContext);
   const router = useRouter();
   const pathname = usePathname();
@@ -347,9 +351,9 @@ function ShopPage() {
       : 100000;
 
   const tabs = [
-    { id: "subscriptions", label: "Planners", icon: Sparkles },
-    { id: "products", label: "Products", icon: ShoppingBag },
-    { id: "sessions", label: "Talk to an expert", icon: Calendar },
+    { id: "subscriptions", label: t("tabPlanners"), icon: Sparkles },
+    { id: "products", label: t("tabProducts"), icon: ShoppingBag },
+    { id: "sessions", label: t("tabSessions"), icon: Calendar },
   ];
 
   return (
@@ -360,7 +364,7 @@ function ShopPage() {
           <h1
             className={`${thirdFont.className}  text-lovely ${headerStyle}`}
           >
-            Shop
+            {t("title")}
           </h1>
           {/* <p className="text-lovely/90">
             Discover our curated collection of products designed just for you.
@@ -403,7 +407,7 @@ function ShopPage() {
             {packagesLoading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
-                <p className="mt-4 text-lovely/90">Loading subscriptions...</p>
+                <p className="mt-4 text-lovely/90">{t("loadingSubscriptions")}</p>
               </div>
             ) : packages.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 py-4">
@@ -417,7 +421,7 @@ function ShopPage() {
               : (
                 <div className="text-center py-12">
                   <p className="text-lovely text-lg">
-                    No subscriptions available at the moment.
+                    {t("noSubscriptions")}
                   </p>
                 </div>
               )}
@@ -434,13 +438,12 @@ function ShopPage() {
                   onClick={handleBackToCategories}
                   className="hover:text-lovely transition-colors"
                 >
-                  {/* this appears for users */}
-                  All Categories
+                  {t("allCategories")}
                 </button>
                 <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 <span className="text-lovely font-medium">
                   <span className="text-lovely font-medium">
-                    {subcategoriesList.find(s => s._id === selectedSubcategoryId)?.name || "Subcategory"}
+                    {subcategoriesList.find(s => s._id === selectedSubcategoryId)?.name || t("subcategory")}
                   </span>
                 </span>
               </div>
@@ -465,7 +468,7 @@ function ShopPage() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-lovely/70">No subcategories available</p>
+                    <p className="text-lovely/70">{t("noSubcategories")}</p>
                   </div>
                 )}
               </div>
@@ -478,7 +481,7 @@ function ShopPage() {
                 <div className="flex flex-col md:flex-row gap-4 justify-between">
                   <div className="relative w-full md:w-96">
                     <Input
-                      placeholder="Search products..."
+                      placeholder={t("searchPlaceholder")}
                       value={filters.search}
                       onChange={(e) => updateFilter("search", e.target.value)}
                       className="ps-10 pe-4 bg-creamey placeholder:text-lovely/90 border-lovely/90"
@@ -505,17 +508,17 @@ function ShopPage() {
                       onValueChange={(value) => updateFilter("sortBy", value)}
                     >
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Sort by" />
+                        <SelectValue placeholder={t("sortBy")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="newest">Newest</SelectItem>
+                        <SelectItem value="newest">{t("newest")}</SelectItem>
                         <SelectItem value="price_asc">
-                          Price: Low to High
+                          {t("priceAsc")}
                         </SelectItem>
                         <SelectItem value="price_desc">
-                          Price: High to Low
+                          {t("priceDesc")}
                         </SelectItem>
-                        <SelectItem value="popular">Most Popular</SelectItem>
+                        <SelectItem value="popular">{t("popular")}</SelectItem>
                       </SelectContent>
                     </Select>
 
@@ -526,61 +529,37 @@ function ShopPage() {
                       >
                         <Button variant="outline">
                           <Filter className="h-4 w-4 me-2" />
-                          Filters
+                          {t("filters")}
                         </Button>
                       </SheetTrigger>
                       <SheetContent className="bg-creamey text-lovely">
                         <SheetHeader className="text-lovely">
                           <SheetTitle className="text-lovely">
-                            Filters
+                            {t("filterTitle")}
                           </SheetTitle>
                           <SheetDescription className="text-lovely">
-                            Refine your product search with these filters.
+                            {t("filterDescription")}
                           </SheetDescription>
                         </SheetHeader>
                         <div className="py-6 space-y-6">
                           {/* Show All Products Option */}
                           <div className="space-y-3">
-                            {/* <h3 className="font-medium">View Options</h3> */}
-                            {/* <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="showAll"
-                                checked={filters.category === "all"}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    updateFilter("category", "all");
-                                    updateFilter("subcategory", "");
-                                  } else {
-                                    updateFilter("category", "");
-                                    updateFilter("subcategory", "");
-                                  }
-                                }}
-                                className="border-lovely data-[state=checked]:bg-lovely data-[state=checked]:text-creamey"
-                              />
-                              <label
-                                htmlFor="showAll"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                              >
-                                Show all products (ignore categories)
-                              </label>
-                            </div> */}
                           </div>
 
                           <Separator />
 
                           {/* Subcategory Filter */}
                           <div className="space-y-3">
-                            <h3 className="font-medium">Subcategory</h3>
+                            <h3 className="font-medium">{t("subcategory")}</h3>
                             <Select
                               value={filters.subcategory || "none"}
                               onValueChange={(value) => updateFilter("subcategory", value === "none" ? "" : value)}
                             >
                               <SelectTrigger className="w-full bg-creamey border-lovely">
-                                <SelectValue placeholder="Select subcategory" />
+                                <SelectValue placeholder={t("subcategory")} />
                               </SelectTrigger>
                               <SelectContent>
-                                {/* this appears for users */}
-                                <SelectItem value="none">All Categories</SelectItem>
+                                <SelectItem value="none">{t("allCategories")}</SelectItem>
                                 {subcategoriesList.map((subcategory) => (
                                   <SelectItem
                                     key={subcategory._id}
@@ -597,7 +576,7 @@ function ShopPage() {
                           {/* Price Range Filter */}
                           <div className="space-y-4">
                             <div className="flex justify-between">
-                              <h3 className="font-medium">Price Range</h3>
+                              <h3 className="font-medium">{t("priceRange")}</h3>
                               <span className="text-sm text-lovely">
                                 {filters.minPrice} - {filters.maxPrice}
                               </span>
@@ -619,7 +598,7 @@ function ShopPage() {
                             variant="outline"
                             className="w-full bg-lovely text-creamey hover:text-creamey hover:bg-lovely/90"
                           >
-                            Reset Filters
+                            {t("resetFilters")}
                           </Button>
                         </div>
                       </SheetContent>
@@ -630,7 +609,7 @@ function ShopPage() {
                 {/* Active Filters */}
                 {(filters.category || filters.subcategory || filters.minPrice > 0 || filters.maxPrice < maxProductPrice) && filters.category !== "all" && (
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-sm text-lovely/90">Active filters:</span>
+                    <span className="text-sm text-lovely/90">{t("activeFilters")}</span>
                     {filters.category && filters.category !== "" && (
                       <Badge
                         onClick={() => {
@@ -639,7 +618,7 @@ function ShopPage() {
                         }}
                         className="cursor-pointer bg-pinkey"
                       >
-                        Category: {categories.find((c) => c._id === filters.category)?.name}
+                        {t("categoryFilter")}: {categories.find((c) => c._id === filters.category)?.name}
                         <X className="ms-1 h-3 w-3" />
                       </Badge>
                     )}
@@ -661,7 +640,7 @@ function ShopPage() {
                         }}
                         className="cursor-pointer bg-pinkey"
                       >
-                        Price: {filters.minPrice} - {filters.maxPrice}
+                        {tCommon("price")}: {filters.minPrice} - {filters.maxPrice}
                         <X className="ms-1 h-3 w-3" />
                       </Badge>
                     )}
@@ -672,7 +651,7 @@ function ShopPage() {
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
-                    <p className="mt-4 text-lovely/90">Loading products...</p>
+                    <p className="mt-4 text-lovely/90">{t("loadingProducts")}</p>
                   </div>
                 ) : products.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 py-4">
@@ -696,17 +675,17 @@ function ShopPage() {
                       <SlidersHorizontal className="w-full h-full" />
                     </div>
                     <h3 className="text-lg text-lovely font-semibold">
-                      No products found
+                      {t("noProductsFound")}
                     </h3>
                     <p className="text-lovely mt-2">
-                      Try adjusting your filters or search term.
+                      {t("adjustFiltersDesc")}
                     </p>
                     <Button
                       onClick={resetFilters}
                       variant="outline"
                       className="mt-4 bg-lovely/90 text-creamey hover:text-creamey hover:bg-lovely"
                     >
-                      Reset Filters
+                      {t("resetFilters")}
                     </Button>
                   </div>
                 )}
@@ -739,44 +718,7 @@ export default function ShopPageWrapper() {
   );
 }
 
-// Badge component for active filters
-function Badge({
-  children,
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-pinkey text-lovely",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
 
-function X(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  );
-}
 
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(" ");

@@ -1,15 +1,17 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import axios from "axios";
 import { thirdFont } from "@/fonts";
 import { FaGoogle } from "react-icons/fa";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { BadgeAlert } from "lucide-react";
 
 function RegisterPage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -37,18 +39,17 @@ function RegisterPage() {
       });
 
       if (response.status === 201) {
-        //
-        //  Use router.push for client-side navigation
         router.push("/verification");
       }
     } catch (error: any) {
       setError(
-        error.response?.data?.error || "Registration failed. Please try again."
+        error.response?.data?.error || t("unexpectedError")
       );
     } finally {
       setLoading(false);
     }
   };
+
   const handleGoogleSignUp = () => {
     const callbackUrl = redirectPath || "/account";
     signIn("google", { callbackUrl });
@@ -56,29 +57,28 @@ function RegisterPage() {
 
   return (
     <div className=" bg-patternPinkey ">
-      <div className="md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)]  flex items-center justify-center bg-black/30 backdrop-blur-[3px] py-12 px-4 sm:px-6 lg:px-8">
-        {/* <div className='md:h-[calc(100vh-128px)] h-[calc(100vh-64px)] bg-black/30 backdrop-blur-[3px] flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8'> */}
-        <div className="max-w-md rounded-2xl bg-creamey shadow-2xl w-full py-3 px-6 space-y-4">
+      <div className="md:min-h-[calc(100vh-128px)] md:h-auto h-[calc(100vh-64px)] flex items-center justify-center bg-black/30 backdrop-blur-[3px] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md rounded-2xl bg-creamey shadow-2xl w-full py-6 px-6 space-y-4">
           <div>
             <h2
               className={`${thirdFont.className} mt-6 text-center text-4xl font-bold tracking-normal text-lovely`}
             >
-              Create an account
+              {t("createAccountTitle")}
             </h2>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm space-y-4 ">
               <div>
                 <label htmlFor="username" className="sr-only">
-                  Username
+                  {t("username")}
                 </label>
                 <input
                   id="username"
                   name="username"
                   type="text"
                   required
-                  className="appearance-none rounded-none placeholder:text-lovely/90 relative block w-full px-3 py-2 border border-pinkey  text-lovely/90 rounded-t-md focus:outline-none focus:ring-primary bg-creamey/90 focus:border-pinkey focus:z-10 sm:text-sm"
-                  placeholder="Username"
+                  className="appearance-none rounded-none placeholder:text-lovely/90 relative block w-full px-3 py-2 border border-pinkey text-lovely/90 rounded-t-md focus:outline-none focus:ring-primary bg-creamey/90 focus:border-pinkey focus:z-10 sm:text-sm"
+                  placeholder={t("usernamePlaceholder")}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
@@ -86,7 +86,7 @@ function RegisterPage() {
               </div>
               <div>
                 <label htmlFor="email" className="sr-only">
-                  Email
+                  {t("email")}
                 </label>
                 <input
                   id="email"
@@ -94,7 +94,7 @@ function RegisterPage() {
                   type="email"
                   required
                   className="appearance-none lowercase placeholder:text-lovely/90 bg-creamey/90 rounded-none relative block w-full px-3 py-2 border border-pinkey placeholder-gray-500 text-lovely/90 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Email"
+                  placeholder={t("emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -102,7 +102,7 @@ function RegisterPage() {
               </div>
               <div>
                 <label htmlFor="password" className="sr-only">
-                  Password
+                  {t("password")}
                 </label>
                 <input
                   id="password"
@@ -110,7 +110,7 @@ function RegisterPage() {
                   type="password"
                   required
                   className="appearance-none rounded-none placeholder:text-lovely/90 relative block w-full px-3 py-2 border border-pinkey bg-creamey text-lovely/90 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Password"
+                  placeholder={t("passwordPlaceholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
@@ -131,9 +131,9 @@ function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border-2 border-creamey text-sm  rounded-md text-creamey bg-lovely font-semibold hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border-2 border-creamey text-sm rounded-md text-creamey bg-lovely font-semibold hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating account..." : "Create account"}
+                {loading ? t("creatingAccount") : t("createAccount")}
               </button>
             </div>
           </form>
@@ -142,7 +142,7 @@ function RegisterPage() {
               <div className="w-full border-t border-pinkey"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-lovely whitespace-nowrap">Or</span>
+              <span className="px-2 text-lovely whitespace-nowrap">{t("or")}</span>
             </div>
             <div className="w-full inset-0 flex items-center">
               <div className="w-full border-t border-pinkey"></div>
@@ -154,12 +154,12 @@ function RegisterPage() {
               type="button"
               onClick={handleGoogleSignUp}
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border-2 border-creamey text-sm  rounded-md text-creamey bg-lovely font-semibold hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border-2 border-creamey text-sm rounded-md text-creamey bg-lovely font-semibold hover:bg-everGreen/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
-                ? "Creating account with Google..."
-                : "Create your account with Google"}
-              <span className="ml-2">
+                ? t("creatingWithGoogle")
+                : t("createWithGoogle")}
+              <span className="ms-2">
                 <FaGoogle />
               </span>
             </button>
@@ -167,12 +167,12 @@ function RegisterPage() {
 
           <div className="text-center">
             <p className="text-sm text-lovely">
-              Already have an account?{" "}
+              {t("alreadyHaveAccount")}{" "}
               <Link
                 href="/login"
-                className="font-medium underline text-lovely/90 hover:text-lovely/90"
+                className="font-medium underline text-lovely/90 hover:text-lovely/90 ms-1"
               >
-                Sign in here
+                {t("signIn")}
               </Link>
             </p>
           </div>
@@ -189,3 +189,4 @@ export default function PlaylistPageWrapper() {
     </Suspense>
   );
 }
+

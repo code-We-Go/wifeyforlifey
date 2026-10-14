@@ -6,7 +6,8 @@ import { ExternalLink, Lock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { thirdFont } from "@/fonts";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 interface Partner {
   _id?: string;
@@ -34,6 +35,7 @@ export default function PartnerCard({
   onLockedClick,
   requiredPackages = []
 }: PartnerCardProps) {
+  const t = useTranslations("accountPage");
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const router = useRouter();
   // Function to handle external link click
@@ -111,7 +113,7 @@ export default function PartnerCard({
                 }}
                 className="text-[10px] text-creamey/50 hover:text-creamey uppercase tracking-widest transition-colors font-bold underline decoration-creamey/30 underline-offset-4"
               >
-                More Details
+                {t("moreDetails")}
               </button>
               {partner.discount && (
                 <p className="text-sm font-bold text-creamey/90 mt-1">
@@ -120,8 +122,8 @@ export default function PartnerCard({
               )}
               {partner.code && (
                 <div className="mt-2 flex items-center">
-                  <span className="text-[10px] font-bold text-lovely bg-creamey px-2 py-0.5 rounded-sm uppercase tracking-tighter mr-2">
-                    Code
+                  <span className="text-[10px] font-bold text-lovely bg-creamey px-2 py-0.5 rounded-sm uppercase tracking-tighter me-2">
+                    {t("code")}
                   </span>
                   {isLocked ? (
                     <div 
@@ -142,7 +144,7 @@ export default function PartnerCard({
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-2 mt-4">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse mt-4">
               {partner.link && (
                 <Button
                   size="sm"
@@ -152,13 +154,13 @@ export default function PartnerCard({
                 >
                   {isLocked ? (
                     <>
-                      <Lock className="h-4 w-4 mr-2" />
-                      <span className="text-xs uppercase tracking-widest">Unlock Code</span>
+                      <Lock className="h-4 w-4 me-2" />
+                      <span className="text-xs uppercase tracking-widest">{t("unlockCode")}</span>
                     </>
                   ) : (
                     <>
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      <span className="text-xs uppercase tracking-widest">Visit Partner</span>
+                      <ExternalLink className="h-4 w-4 me-2" />
+                      <span className="text-xs uppercase tracking-widest">{t("visitPartner")}</span>
                     </>
                   )}
                 </Button>
@@ -200,7 +202,7 @@ export default function PartnerCard({
             <div className="space-y-6">
               <div>
                 <h5 className="text-[10px] uppercase tracking-[0.2em] font-bold text-lovely/40 mb-2">
-                  The Offer
+                  {t("theOffer")}
                 </h5>
                 <p className="text-lovely text-base font-medium leading-normal">
                   {partner.offer}
@@ -210,7 +212,7 @@ export default function PartnerCard({
               {partner.discount && (
                 <div>
                   <h5 className="text-[10px] uppercase tracking-[0.2em] font-bold text-lovely/40 mb-2">
-                    Special Pricing
+                    {t("specialPricing")}
                   </h5>
                   <p className="text-lovely text-xl font-black italic">
                     {partner.discount}
@@ -222,7 +224,7 @@ export default function PartnerCard({
                 {partner.code && (
                   <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-lovely/5">
                     <span className="text-xs font-bold text-lovely/60 uppercase tracking-widest">
-                      Promo Code
+                      {t("promoCode")}
                     </span>
                     {isLocked ? (
                       <div
@@ -249,7 +251,7 @@ export default function PartnerCard({
                   <div className="space-y-4">
                     <div className="p-4 bg-lovely/5 rounded-2xl border border-lovely/10 text-center">
                       <p className="text-lovely text-sm font-semibold mb-4">
-                        To unlock this code you have to subscribe to one of this packages :
+                        {t("unlockPackagesNotice")}
                       </p>
                       <div className="space-y-3">
                         {requiredPackages.map((pkg) => (
@@ -275,7 +277,7 @@ export default function PartnerCard({
                                 {pkg.name}
                               </span>
                             </div>
-                            <ChevronRight size={20} className="text-lovely/50" />
+                            <ChevronRight size={20} className="text-lovely/50 rtl:rotate-180" />
                           </button>
                         ))}
                       </div>
@@ -288,8 +290,8 @@ export default function PartnerCard({
                     }}
                     className="w-full py-6 rounded-2xl bg-lovely text-white hover:bg-lovely/90 font-bold text-sm uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <ExternalLink size={18} className="mr-2" />
-                    Redeem on Website
+                    <ExternalLink size={18} className="me-2" />
+                    {t("redeemOnWebsite")}
                   </Button>
                 )}
               </div>

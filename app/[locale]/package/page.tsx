@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function PackageeIndexPage() {
-  redirect("/packagee/GehazBestiePlanner");
+export default function PackageIndexPage() {
+  redirect("/package/GehazBestiePlanner");
 }

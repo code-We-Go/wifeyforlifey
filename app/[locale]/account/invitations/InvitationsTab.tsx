@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, UserMinus, Clock, CheckCircle, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface SubSubscription {
   _id: string;
@@ -23,6 +24,7 @@ interface SubSubscription {
 }
 
 const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
+  const t = useTranslations("accountPage");
   const { data: session } = useSession();
   const [invitations, setInvitations] = useState<SubSubscription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       console.error("Failed to fetch invitations", error);
       toast({
         title: "Error",
-        description: "Failed to load your invitations.",
+        description: t("inviteLoadError"),
         variant: "destructive",
       });
     } finally {
@@ -75,8 +77,8 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       });
 
       toast({
-        title: "Invitation Sent",
-        description: `Successfully sent invitation to ${newInviteEmail}`,
+        title: t("inviteSentSuccess"),
+        description: t("inviteSentSuccessDesc", { email: newInviteEmail }),
         variant: "added",
       });
       
@@ -88,7 +90,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       console.error("Failed to send invite:", error);
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to send invitation.",
+        description: error.response?.data?.error || t("inviteSendError"),
         variant: "destructive",
       });
     } finally {
@@ -120,7 +122,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
   // };
 
   if (loading) {
-    return <div className="text-center py-8 text-lovely animate-pulse">Loading your invitations details...</div>;
+    return <div className="text-center py-8 text-lovely animate-pulse">{t("loadingInvitations")}</div>;
   }
 
   // Calculate used slots
@@ -139,8 +141,8 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
   if (!slotsConfig.length) {
     return (
       <div className="text-center py-8 text-lovely/80">
-        <h3 className="text-xl font-medium mb-2">No Sub-Subscriptions Available</h3>
-        <p>Your current package does not include invitations.</p>
+        <h3 className="text-xl font-medium mb-2">{t("noSubSubscriptions")}</h3>
+        <p>{t("noSubSubscriptionsDesc")}</p>
       </div>
     );
   }
@@ -148,9 +150,9 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-lovely mb-2">Your Package Invitations</h2>
+        <h2 className="text-2xl font-bold text-lovely mb-2">{t("invitationsTitle")}</h2>
         <p className="text-lovely/80 mb-6">
-          Invite your groom and bridesmaids to get their own accounts and access exclusive content tailored just for them!
+          {t("invitationsDesc")}
         </p>
 
         {/* Slot Summaries */}
@@ -158,9 +160,9 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
           {groomConfig && (
             <div className="bg-creamey p-4 rounded-xl border border-lovely/20 shadow-sm flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-lovely text-lg">Groom Slot</h3>
+                <h3 className="font-semibold text-lovely text-lg">{t("groomSlot")}</h3>
                 <p className="text-sm text-lovely/70">
-                  {groomRemaining > 0 ? `${groomRemaining} invite remaining` : "Slot filled"}
+                  {groomRemaining > 0 ? t("groomRemaining", { count: groomRemaining }) : t("slotFilled")}
                 </p>
               </div>
               <div className="bg-lovely text-creamey h-10 w-10 rounded-full flex items-center justify-center font-bold">
@@ -171,9 +173,9 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
           {bridesmaidsConfig && (
             <div className="bg-creamey p-4 rounded-xl border border-lovely/20 shadow-sm flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-lovely text-lg">Bridesmaids Slots</h3>
+                <h3 className="font-semibold text-lovely text-lg">{t("bridesmaidsSlots")}</h3>
                 <p className="text-sm text-lovely/70">
-                  {bridesmaidsRemaining > 0 ? `${bridesmaidsRemaining} invites remaining` : "All slots filled"}
+                  {bridesmaidsRemaining > 0 ? t("bridesmaidsRemaining", { count: bridesmaidsRemaining }) : t("allSlotsFilled")}
                 </p>
               </div>
               <div className="bg-lovely text-creamey h-10 w-10 rounded-full flex items-center justify-center font-bold">
@@ -187,15 +189,15 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
       {/* Invite Form */}
       {(groomRemaining > 0 || bridesmaidsRemaining > 0) && (
         <div className="bg-creamey p-6 rounded-xl border border-lovely/20 shadow-sm">
-          <h3 className="text-lg font-semibold text-lovely mb-4">Send New Invitation</h3>
+          <h3 className="text-lg font-semibold text-lovely mb-4">{t("sendNewInvitation")}</h3>
           <form onSubmit={handleInvite} className="flex flex-col gap-4">
             <div className="flex flex-col md:flex-row gap-4 w-full">
               <div className="flex-1 space-y-2 w-full placeholder:text-lovely/80">
-                <Label htmlFor="inviteName" className="text-lovely font-medium">Invitee Name</Label>
+                <Label htmlFor="inviteName" className="text-lovely font-medium">{t("inviteeName")}</Label>
                 <Input 
                   id="inviteName"
                   type="text"
-                  placeholder="Invitee Name"
+                  placeholder={t("inviteeNamePlaceholder")}
                   value={newInviteName}
                   onChange={(e) => setNewInviteName(e.target.value)}
                   required
@@ -203,7 +205,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                 />
               </div>
               <div className="flex-1 space-y-2 w-full">
-                <Label htmlFor="inviteEmail" className="text-lovely font-medium">Invitee Email</Label>
+                <Label htmlFor="inviteEmail" className="text-lovely font-medium">{t("inviteeEmail")}</Label>
                 <Input 
                   id="inviteEmail"
                   type="email"
@@ -215,24 +217,24 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                 />
               </div>
               <div className="flex-1 space-y-2 w-full">
-                <Label htmlFor="inviteRole" className="text-lovely font-medium">Role</Label>
+                <Label htmlFor="inviteRole" className="text-lovely font-medium">{t("inviteRole")}</Label>
                 <select 
                   id="inviteRole"
                   value={newInviteRole}
                   onChange={(e) => setNewInviteRole(e.target.value as "groom" | "bridesmaids")}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-lovely/30 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-lovely"
                 >
-                  {groomRemaining > 0 && <option value="groom">Groom</option>}
-                  {bridesmaidsRemaining > 0 && <option value="bridesmaids">Bridesmaid</option>}
+                  {groomRemaining > 0 && <option value="groom">{t("roleGroom")}</option>}
+                  {bridesmaidsRemaining > 0 && <option value="bridesmaids">{t("roleBridesmaid")}</option>}
                 </select>
               </div>
             </div>
             
             <div className="space-y-2 w-full">
-              <Label htmlFor="inviteMessage" className="text-lovely font-medium">Message (Optional)</Label>
+              <Label htmlFor="inviteMessage" className="text-lovely font-medium">{t("inviteMessage")}</Label>
               <textarea 
                 id="inviteMessage"
-                placeholder="Write a personal message to your invitee..."
+                placeholder={t("inviteMessagePlaceholder")}
                 value={newInviteMessage}
                 onChange={(e) => setNewInviteMessage(e.target.value)}
                 className="flex min-h-[80px] w-full placeholder:text-lovely/60 rounded-md border border-lovely/30 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-lovely"
@@ -245,8 +247,8 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                 disabled={isSubmitting || !newInviteEmail || !newInviteName}
                 className="bg-lovely text-white hover:bg-lovely/90 w-full md:w-auto"
               >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Send Invite
+                <UserPlus className="h-4 w-4 me-2" />
+                {isSubmitting ? t("sendingInvite") : t("sendInvite")}
               </Button>
             </div>
           </form>
@@ -255,9 +257,9 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
 
       {/* Sent Invitations List */}
       <div>
-        <h3 className="text-lg font-semibold text-lovely mb-4">Your Invitations List</h3>
+        <h3 className="text-lg font-semibold text-lovely mb-4">{t("invitationsListTitle")}</h3>
         {invitations.length === 0 ? (
-          <p className="text-lovely/70 italic text-sm">No invitations sent yet.</p>
+          <p className="text-lovely/70 italic text-sm">{t("noInvitationsYet")}</p>
         ) : (
           <div className="space-y-3">
             {invitations.map((invite) => (
@@ -271,7 +273,7 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                       {invite.inviteeUser ? `${invite.inviteeUser.firstName} ${invite.inviteeUser.lastName}` : invite.inviteeEmail}
                     </p>
                     <p className="text-xs text-lovely/70 capitalize flex items-center gap-2">
-                      {invite.role} • Sent {new Date(invite.createdAt).toLocaleDateString()}
+                      {invite.role === "groom" ? t("roleGroom") : t("roleBridesmaid")} • {t("sentOn", { date: new Date(invite.createdAt).toLocaleDateString() })}
                     </p>
                   </div>
                 </div>
@@ -279,22 +281,10 @@ const InvitationsTab = ({ subscriptionDoc }: { subscriptionDoc: any }) => {
                 <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
                   {/* Status Badge */}
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white border">
-                    {invite.status === "accepted" && <><CheckCircle className="h-3 w-3 text-green-500" /> <span className="text-green-700">Active</span></>}
-                    {invite.status === "pending" && <><Clock className="h-3 w-3 text-yellow-500" /> <span className="text-yellow-700">Pending</span></>}
-                    {invite.status === "revoked" && <><XCircle className="h-3 w-3 text-red-500" /> <span className="text-red-700">Revoked</span></>}
+                    {invite.status === "accepted" && <><CheckCircle className="h-3 w-3 text-green-500" /> <span className="text-green-700">{t("inviteStatusActive")}</span></>}
+                    {invite.status === "pending" && <><Clock className="h-3 w-3 text-yellow-500" /> <span className="text-yellow-700">{t("inviteStatusPending")}</span></>}
+                    {invite.status === "revoked" && <><XCircle className="h-3 w-3 text-red-500" /> <span className="text-red-700">{t("inviteStatusRevoked")}</span></>}
                   </div>
-
-                  {/* Revoke Button */}
-                  {/* {invite.status !== "revoked" && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleRevoke(invite._id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <UserMinus className="h-4 w-4 mr-1" /> Revoke
-                    </Button>
-                  )} */}
                 </div>
               </div>
             ))}

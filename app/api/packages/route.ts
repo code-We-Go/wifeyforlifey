@@ -38,7 +38,10 @@ export async function GET(req: Request) {
     const searchQuery: any = {};
 
     if (search) {
-      searchQuery.name = { $regex: search, $options: "i" };
+      searchQuery.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { "translations.ar.name": { $regex: search, $options: "i" } },
+      ];
     }
     //for testing
     if (active !== null) {

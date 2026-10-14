@@ -20,6 +20,7 @@ import { thirdFont } from "@/fonts";
 import { ShippingZone } from "@/app/interfaces/interfaces";
 import axios from "axios";
 import CartItemSmall from "./CartItemSmall";
+import { useTranslations } from "next-intl";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -157,6 +158,8 @@ const calculateShippingRate = (
 };
 
 export default function CartPage() {
+  const t = useTranslations("cartPage");
+  const tCommon = useTranslations("common");
   const { items, removeItem, updateQuantity, totalItems, totalPrice, subscriptionItems, removeSubscription, updateSubscriptionQuantity } =
     useCart();
   const [couponCode, setCouponCode] = useState("");
@@ -224,18 +227,17 @@ export default function CartPage() {
             <ShoppingBag className="h-12 w-12 text-lovely" />
           </div>
           <h1 className="text-2xl md:text-3xl text-creamey  font-medium mb-4">
-            Your Cart is Empty
+            {t("emptyTitle")}
           </h1>
           <p className=" mb-8 max-w-md mx-auto">
-            Looks like you haven&apos;t added anything to your cart yet. Explore
-            our products and find something you&apos;ll love!
+            {t("emptySubtitle")}
           </p>
           <Button
             asChild
             size="lg"
             className="rounded-2xl bg-creamey text-lovely hover:bg-creamey hover:font-semibold"
           >
-            <Link href="/shop">Continue Shopping</Link>
+            <Link href="/shop">{t("continueShopping")}</Link>
           </Button>
         </div>
       </div>
@@ -251,10 +253,10 @@ export default function CartPage() {
         <h1
           className={`${thirdFont.className} tracking-normal text-4xl text-lovely md:text-5xl  font-semibold`}
         >
-          Shopping Cart
+          {t("title")}
         </h1>
         <span className="ms-2 text-creamey">
-          ({totalItems} {totalItems === 1 ? "item" : "items"})
+          {t("itemCount", { count: totalItems })}
         </span>
       </div>
 
@@ -262,11 +264,11 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg: space-y-6">
           <div className="hidden md:grid grid-cols-12 gap-4 text-sm text-creamey mb-2">
-            <div className="col-span-5 text-center">Product</div>
-            <div className="col-span-2 text-center">Variants</div>
-            <div className="col-span-2 text-center">Quantity</div>
-            <div className="col-span-1 text-center">Price</div>
-            <div className="col-span-1 text-end">Total</div>
+            <div className="col-span-5 text-center">{t("product")}</div>
+            <div className="col-span-2 text-center">{t("variants")}</div>
+            <div className="col-span-2 text-center">{t("quantity")}</div>
+            <div className="col-span-1 text-center">{t("price")}</div>
+            <div className="col-span-1 text-end">{t("total")}</div>
           </div>
 
           <Separator className="hidden md:block bg-lovely" />
@@ -366,11 +368,11 @@ export default function CartPage() {
           {subscriptionItems.length > 0 && (
             <div className="mt-8 space-y-6">
               <h2 className={`${thirdFont.className} text-2xl font-bold text-lovely border-b border-lovely pb-2`}>
-                Planners
+                {t("planners")}
               </h2>
               {subscriptionItems.length > 1 && (
                 <div className="bg-lovely/10 text-lovely p-4 rounded-2xl border border-lovely/20 text-sm font-medium">
-                  🎉 Save on shipping! All planners ship together for a single shipping fee.
+                  {t("shippingDiscountBanner")}
                 </div>
               )}
               <div className="space-y-4 w-full">
@@ -391,7 +393,7 @@ export default function CartPage() {
                           <h5 className="font-medium line-clamp-1">{item.packageName}</h5>
                           {item.duration > 0 && (
                             <p className="text-sm text-creamey/80">
-                              {item.duration} Months Subscription
+                              {t("monthsSubscription", { months: item.duration })}
                             </p>
                           )}
                         </div>
@@ -426,16 +428,16 @@ export default function CartPage() {
                       </div>
                       {/* Price */}
                       <div className="md:col-span-1 text-center font-medium">
-                        LE {item.price.toFixed(2)}
+                        {item.price.toFixed(2)} {tCommon("le")}
                       </div>
                       {/* Total */}
                       <div className="md:col-span-2 flex items-center justify-between md:justify-end">
                         <span className="md:hidden text-sm text-creamey/80">
-                          Total:
+                          {t("total")}:
                         </span>
                         <div className="flex items-center">
                           <span className="font-medium">
-                            LE {(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} {tCommon("le")}
                           </span>
                           <Button
                             variant="ghost"
@@ -463,7 +465,7 @@ export default function CartPage() {
                 className="gap-2 rounded-2xl bg-creamey text-lovely hover:bg-lovely hover:text-creamey border-lovely"
               >
                 <Link href="/shop">
-                  Continue Shopping
+                  {t("continueShopping")}
                 </Link>
               </Button>
             </div>
@@ -474,7 +476,7 @@ export default function CartPage() {
                 className="gap-2 rounded-2xl bg-lovely hover:border hover:border-lovely hover:text-lovely text-creamey"
               >
                 <Link href={subscriptionItems.length > 0 ? "/subscription/checkout" : "/checkout"}>
-                  Checkout
+                  {t("checkout")}
                   <ArrowRight className="h-4 w-4 rtl:rotate-180" />
                 </Link>
               </Button>

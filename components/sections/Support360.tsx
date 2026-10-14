@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -17,100 +17,89 @@ interface SupportCard {
   imagePath: string;
 }
 
-const supportCards: SupportCard[] = [
-  {
-    id: 1,
-    title: "Discounts & Partnerships",
-    description: [
-      "A trusted partner list that grows over time",
-      "Community-only discounts on things you actually need",
-      "Your membership keeps increasing in value — Wifey-approved = always 💕"
-    ],
-    imagePath: "/360/50.png"
-  },
-  {
-    id: 2,
-    title: "Wifeys favorite products",
-    description: [
-      "Curated, Wifey-approved products we genuinely recommend",
-      "Real reviews — you don't waste time searching",
-      "Clear guidance on what's worth buying — and what's not",
-      "Includes the maximum fair market price, so you don't overpay"
-    ],
-    imagePath: "/360/52.png"
-  },
-  {
-    id: 3,
-    title: "Inspos",
-    description: [
-      "Pinterest, But Make It Bridal 💕",
-      "Curated bridal inspiration — without the overwhelm",
-      "Makeup looks, hairstyles, bridal nails & home moodboards",
-      "Saved, organized, and filtered by the Wifey team",
-      "Inspiration that feels realistic, beautiful, and achievable",
-      "So you can get inspired — not stressed or pressured."
-    ],
-    imagePath: "/360/51.png"
-  },
-  {
-    id: 4,
-    title: "Whatsapp Support circle",
-    description: [
-      "You're not meant to do this alone.",
-      "A private Whatsapp group for Wifey brides only",
-      "Ask questions, share worries, and support each other",
-      // "Live group chat with trusted experts and each other",
-      "Guided by the Wifey for Life team — not just about gehaz, but life, emotions, and everything in between"
-    ],
-    imagePath: "/360/48.png"
-  },
-  {
-    id: 5,
-    title: "Bridal-Era Video Guides",
-    description: [
-      "Designed to support your Gehaz Bestie Planner when it's time to choose",
-      "Helps you understand options and avoid confusion or pressure",
-      "Protects you from fake reviews and biased sales advice",
-      "Includes trusted expert videos in selected playlists ",
-      "(OB-GYN, sex therapists, interior designers, appliance experts & more)",
-      // "Organized support in 1 place"
-    ],
-    imagePath: "/360/49.png"
-  },
-  {
-    id: 6,
-    title: "Expert-Led Webinars",
-    description: [
-      "Live group webinars hosted with trusted experts",
-      "ask questions, learn, and feel reassured",
-      "Guided by the Wifey for Life team",
-      "Examples of webinars hosted!",
-      "Appliances 101 with Zeinab Ahmed",
-      "Feminine Care 101 with Dr. Dalia Ghozlan",
-      "Sex Education 101 with Quareb Therapy"
-    ],
-    imagePath: "/360/53.png"
-  },
-  {
-    id: 7,
-    title: "Discounts on 1:1 Consultations",
-    description: [
-      "Personal Support — At a Better Price 💕",
-      "10%-20% off 1:1 consultations",
-      "Interior designers",
-      "Women's health educators",
-      "Sex therapists",
-      "Appliance experts",
-      "Wedding & bridal consultants"
-    ],
-    imagePath: "/360/47.png"
-  }
-];
-
 const Support360 = () => {
   const locale = useLocale();
   const isRtl = locale === "ar";
+  const t = useTranslations("home.support360");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
+
+  const supportCards: SupportCard[] = [
+    {
+      id: 1,
+      title: t("card1Title"),
+      description: [
+        t("card1Point1"),
+        t("card1Point2"),
+        t("card1Point3"),
+      ],
+      imagePath: "/360/50.png"
+    },
+    {
+      id: 2,
+      title: t("card2Title"),
+      description: [
+        t("card2Point1"),
+        t("card2Point2"),
+        t("card2Point3"),
+        t("card2Point4"),
+      ],
+      imagePath: "/360/52.png"
+    },
+    {
+      id: 3,
+      title: t("card3Title"),
+      description: [
+        t("card3Point1"),
+        t("card3Point2"),
+        t("card3Point3"),
+        t("card3Point4"),
+        t("card3Point5"),
+        t("card3Point6"),
+      ],
+      imagePath: "/360/51.png"
+    },
+    {
+      id: 4,
+      title: t("card4Title"),
+      description: [
+        t("card4Point1"),
+        t("card4Point2"),
+        t("card4Point3"),
+        t("card4Point4"),
+      ],
+      imagePath: "/360/48.png"
+    },
+    {
+      id: 5,
+      title: t("card5Title"),
+      description: [
+        t("card5Point1"),
+        t("card5Point2"),
+        t("card5Point3"),
+        t("card5Point4"),
+      ],
+      imagePath: "/360/49.png"
+    },
+    {
+      id: 6,
+      title: t("card6Title"),
+      description: [
+        t("card6Point1"),
+        t("card6Point2"),
+        t("card6Point3"),
+      ],
+      imagePath: "/360/53.png"
+    },
+    {
+      id: 7,
+      title: t("card7Title"),
+      description: [
+        t("card7Point1"),
+        t("card7Point2"),
+      ],
+      imagePath: "/360/47.png"
+    }
+  ];
   
   // Embla Carousel
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -159,10 +148,10 @@ const Support360 = () => {
           <h2
             className={`${thirdFont.className} ${headerStyle} mb-2 md:mb-4`}
           >
-            The First ever bridal experience to provide 360 support!
+            {t("title")}
           </h2>
           <p className={`${subHeaderStyle} text-lovely/90`}>
-            Because you're never meant to go through your bridal era alone! Everything inside the Full Wifey Experience is designed to save you time, protect your money, and support you emotionally.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -236,7 +225,7 @@ const Support360 = () => {
             href="/package/GehazBestiePlanner"
             className="bg-lovely relative text-creamey px-8 py-4 rounded-sm font-semibold text-base md:text-lg hover:bg-lovely/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            Buy Gehaz Bestie Planner Now
+            {t("cta")}
                 <Image
                   width={60}
                   height={30}

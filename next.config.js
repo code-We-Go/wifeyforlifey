@@ -23,6 +23,20 @@ const nextConfig = {
   images: {
     domains: ["lh3.googleusercontent.com", "utfs.io", "res.cloudinary.com"],
   },
+  async redirects() {
+    return [
+      {
+        source: '/packagee/:slug*',
+        destination: '/package/:slug*',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ar|en)/packagee/:slug*',
+        destination: '/:locale/package/:slug*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

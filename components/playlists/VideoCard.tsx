@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Lock, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +8,14 @@ import { VideoPlaylist } from "@/app/interfaces/interfaces";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 interface VideoCardProps {
   playlist: VideoPlaylist;
 }
 
 export default function VideoCard({ playlist }: VideoCardProps) {
+  const t = useTranslations("videoCard");
   const { data: session, status } = useSession();
   const isSubscribed = (session?.user as any)?.isSubscribed || false;
   const [watchedCount, setWatchedCount] = useState(0);
@@ -71,7 +73,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             )}
             {!playlist.isPublic && (
               <Badge variant="outline" className="font-normal">
-                Premium
+                {t("premium")}
               </Badge>
             )}
           </div>
@@ -86,7 +88,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             <div className="mt-2">
               <div className="flex items-center justify-between text-xs text-lovely/90 mb-1">
                 <span>
-                  Watched {watchedCount} of {totalVideos}
+                  {t("watched", { count: watchedCount, total: totalVideos })}
                 </span>
                 <span>{percent}%</span>
               </div>
@@ -94,8 +96,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             </div>
           )}
           <div className="mt-3 mb-2 text-lovely text-sm">
-            {playlist.videos?.length || 0}{" "}
-            {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
+            {t("videoCount", { count: playlist.videos?.length || 0 })}
           </div>
         </div>
       </div>

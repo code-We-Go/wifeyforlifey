@@ -24,6 +24,13 @@ export interface IBlog extends Document {
   likes: CommentUser[];
   createdAt: Date;
   updatedAt: Date;
+  translations?: {
+    ar?: {
+      title?: string;
+      excerpt?: string;
+      content?: string;
+    };
+  };
 }
 
 // Define the Blog schema
@@ -123,6 +130,13 @@ const BlogSchema = new Schema<IBlog>(
       type: Boolean,
       default: false,
     },
+    translations: {
+      ar: {
+        title: { type: String, required: false },
+        excerpt: { type: String, required: false },
+        content: { type: String, required: false },
+      },
+    },
   },
   {
     timestamps: true,
@@ -139,7 +153,7 @@ BlogSchema.index({ categories: 1 });
 BlogSchema.index({ featured: 1, status: 1 });
 
 // Pre-save middleware to auto-generate slug if not provided
-BlogSchema.pre("save", function (next) {
+BlogSchema.pre("save", function (this: any, next) {
   if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
@@ -169,7 +183,7 @@ BlogSchema.pre("save", function (next) {
 // });
 
 // Virtual for formatted publish date
-BlogSchema.virtual("formattedPublishDate").get(function () {
+BlogSchema.virtual("formattedPublishDate").get(function (this: any) {
   if (this.publishedAt) {
     return this.publishedAt.toLocaleDateString("en-US", {
       year: "numeric",

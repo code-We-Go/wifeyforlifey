@@ -116,6 +116,8 @@ const accountItems = [
 export default function Header() {
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const tTheme = useTranslations("theme");
+  const tHeader = useTranslations("header");
 
   const getNavLabel = (name: string) => {
     switch (name) {
@@ -677,7 +679,7 @@ export default function Header() {
                           )}
                         >
                           <GiAmpleDress className="w-4 h-4" />
-                          <span>Bride</span>
+                          <span>{tTheme("bride")}</span>
                         </button>
                         <button
                           onClick={() => setTheme("groom")}
@@ -688,7 +690,7 @@ export default function Header() {
                         >
                           <IoIosBowtie className="w-4 h-4" />
 
-                          <span>Groom</span>
+                          <span>{tTheme("groom")}</span>
                         </button>
                       </div>
                     )}
@@ -899,7 +901,7 @@ export default function Header() {
       <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
         <DialogContent className="sm:max-w-md bg-creamey">
           <DialogHeader>
-            <DialogTitle className="text-lovely">Notifications</DialogTitle>
+            <DialogTitle className="text-lovely">{tHeader("notifications")}</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto">
             {loadingNotifications ? (
@@ -921,7 +923,7 @@ export default function Header() {
             ) : notifications.length === 0 ? (
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">You have no notifications</p>
+                <p className="text-gray-500">{tHeader("noNotifications")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1030,11 +1032,11 @@ export default function Header() {
                               {notification.userId?.firstName}{" "}
                               {notification.userId?.lastName}{" "}
                               {notification.actionType === "like" &&
-                                "liked your comment"}
+                                tHeader("likedComment")}
                               {notification.actionType === "comment" &&
-                                "commented on your video"}
+                                tHeader("commentedVideo")}
                               {notification.actionType === "reply" &&
-                                "replied to your comment"}
+                                tHeader("repliedComment")}
                             </p>
                             {notification.content && (
                               <p className="text-sm text-lovely/70 mt-1">
@@ -1070,7 +1072,7 @@ export default function Header() {
       <Dialog open={isMobileAccountOpen} onOpenChange={setIsMobileAccountOpen}>
         <DialogContent className="sm:max-w-md w-[80%] bg-creamey">
           <DialogHeader>
-            <DialogTitle className="text-lovely">Account</DialogTitle>
+            <DialogTitle className="text-lovely">{tHeader("account")}</DialogTitle>
           </DialogHeader>
           <div className="p-2">
             <nav className="space-y-1">
@@ -1082,8 +1084,8 @@ export default function Header() {
                     className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                     onClick={() => setIsMobileAccountOpen(false)}
                   >
-                    <item.icon className="mr-3 h-4 w-4 text-lovely" />
-                    {item.label}
+                    <item.icon className="me-3 h-4 w-4 text-lovely" />
+                    {getNavLabel(item.label)}
                   </Link>
                 ))
               ) : (
@@ -1099,8 +1101,8 @@ export default function Header() {
                       setIsMobileAccountOpen(false);
                     }}
                   >
-                    <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
-                    Sign Out
+                    <LogOut className="me-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                    {tCommon("logout")}
                   </button>
                 </div>
               ) : (
@@ -1110,14 +1112,14 @@ export default function Header() {
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                     onClick={() => setIsMobileAccountOpen(false)}
                   >
-                    Sign In
+                    {tCommon("signIn")}
                   </Link>
                   <Link
                     href={"/register"}
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                     onClick={() => setIsMobileAccountOpen(false)}
                   >
-                    Sign up
+                    {tCommon("signUp")}
                   </Link>
                 </div>
               )}

@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
 import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import { bgRedButton } from "@/app/constants";
 
 export default function Footer() {
+  const t = useTranslations("footer");
+  const tCommon = useTranslations("common");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [playlists, setPlaylists] = useState<{ _id: string; title: string }[]>(
@@ -126,18 +129,14 @@ export default function Footer() {
             <h3
               className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl  font-semibold`}
             >
-              Wifey for Lifey – Your Bridal Era Bestie
+              {t("brandSlogan")}
             </h3>
             <div className="justify-start text-start text-sm">
               <p>
-                Wifey for Lifey isn’t just a brand — it’s a full support system
-                designed to guide brides through every step of their wedding and
-                home-prep journey.
+                {t("brandBio1")}
               </p>
-              <p>
-                From engagement to honeymoon, we empower brides with tools,
-                content, and emotional support to help them feel calm,
-                confident, and in control.
+              <p className="mt-2">
+                {t("brandBio2")}
               </p>
             </div>
 
@@ -186,11 +185,11 @@ export default function Footer() {
             <h6
               className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}
             >
-              Shop
+              {t("shop")}
             </h6>
             <ul className="space-y-2">
               {shopCategoriesLoading && (
-                <li className="text-sm text-creamey">Loading...</li>
+                <li className="text-sm text-creamey">{tCommon("loading")}</li>
               )}
               {shopCategoriesError && (
                 <li className="text-sm text-red-500">{shopCategoriesError}</li>
@@ -215,7 +214,7 @@ export default function Footer() {
             <h6
               className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}
             >
-              Playlists
+              {t("playlists")}
             </h6>
             <ul className="space-y-2">
               {playlistsLoading && (
@@ -252,18 +251,17 @@ export default function Footer() {
             <h6
               className={`${thirdFont.className} tracking-normal text-xl lg:text-2xl font-medium mb-4`}
             >
-              Subscribe to our Newsletter
+              {t("newsletterTitle")}
             </h6>
             <p className=" text-sm mb-4">
-              Get the latest updates, sales, and exclusive content straight to
-              your inbox.
+              {t("newsletterSubtitle")}
             </p>
             <form onSubmit={handleSubmit} className="space-y-2">
               <div className="flex items-center">
                 <Input
                   value={email}
                   type="email"
-                  placeholder="Your email"
+                  placeholder={t("newsletterPlaceholder")}
                   className="rounded-e-none lowercase text-lovely placeholder:text-lovely/80 bg-creamey border-e py-5 border-lovely"
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -271,7 +269,7 @@ export default function Footer() {
                   type="submit"
                   className={`${bgRedButton} rounded-s-none border-s-0`}
                 >
-                  Join Now
+                  {t("newsletterButton")}
                 </Button>
               </div>
             </form>
@@ -280,39 +278,32 @@ export default function Footer() {
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm ">
           <p>
-            &copy; {new Date().getFullYear()} Wifey For Lifey. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Wifey For Lifey. {tCommon("allRightsReserved")}
           </p>
           <div className="flex gap-4 mt-4 md:mt-0 flex-wrap">
             <Link
               href="/policies?privacy-policy"
               className="hover:text-foreground"
             >
-              Privacy Policy
+              {t("privacyPolicy")}
             </Link>
             <Link
               href="/policies?terms-and-conditions"
               className="hover:text-foreground"
             >
-              Terms of Service
+              {t("termsOfService")}
             </Link>
             <Link
               href="/policies?return-and-exchange"
               className="hover:text-foreground"
             >
-              Return & Exchange
+              {t("returnExchange")}
             </Link>
-            {/* <Link
-              href="/policies?shipping-policy"
-              className="hover:text-foreground"
-            >
-              Shipping Details
-            </Link> */}
             <Link href="/vendors/join" className="hover:text-foreground font-medium underline-offset-4 hover:underline">
-              Join as Vendor
+              {t("joinAsVendor")}
             </Link>
             <Link href="/contact" className="hover:text-foreground">
-              Contact Us
+              {t("contactUs")}
             </Link>
           </div>
         </div>

@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const isAr = locale === "ar";
   return {
-    title: isAr ? "وايڤي فور لايڤي | Wifey For Lifey" : "Wifey For Lifey",
+    title: isAr ? "وايفي فور لايفي | Wifey For Lifey" : "Wifey For Lifey",
     description: isAr
       ? "تسوقي منتجات مميزة واشتركي في محتوى الفيديو الحصري لتخطيط وتنظيم الفرح"
       : "Shop trendy products and subscribe to exclusive video content",

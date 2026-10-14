@@ -109,6 +109,17 @@ const PackageSchema = new Schema<Ipackage>(
     calloutBadge: { type: String, required: false },
     calloutTitle: { type: String, required: false },
     calloutDescription: { type: String, required: false },
+    translations: {
+      ar: {
+        name: { type: String, required: false },
+        saving: { type: String, required: false },
+        notes: { type: [String], required: false },
+        badgeLabel: { type: String, required: false },
+        calloutBadge: { type: String, required: false },
+        calloutTitle: { type: String, required: false },
+        calloutDescription: { type: String, required: false },
+      },
+    },
   },
   {
     timestamps: true,

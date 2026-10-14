@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { X, ShoppingBag, ArrowRight, Trash2, Plus, Minus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/providers/CartProvider";
 import {
   Sheet,
@@ -17,6 +18,8 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function SideCart() {
+  const t = useTranslations("sideCart");
+  const tCommon = useTranslations("common");
   const {
     items,
     removeItem,
@@ -51,7 +54,7 @@ export default function SideCart() {
           <div className="flex items-center justify-between">
             <SheetTitle className="text-2xl font-medium text-lovely flex items-center gap-2">
               <ShoppingBag className="w-6 h-6" />
-              Your Cart
+              {t("title")}
             </SheetTitle>
           </div>
         </SheetHeader>
@@ -63,16 +66,16 @@ export default function SideCart() {
                 <ShoppingBag className="w-10 h-10 text-lovely opacity-40" />
               </div>
               <h3 className="text-xl font-medium text-lovely mb-2">
-                Your cart is empty
+                {t("emptyTitle")}
               </h3>
               <p className="text-lovely/60 mb-8">
-                Looks like you haven't added anything to your cart yet.
+                {t("emptySubtitle")}
               </p>
               <Button
                 onClick={closeCart}
                 className="rounded-full bg-lovely hover:bg-lovely/90 text-creamey px-8"
               >
-                Continue Shopping
+                {t("continueShopping")}
               </Button>
             </div>
           ) : (
@@ -177,7 +180,7 @@ export default function SideCart() {
                         </div>
                         {item.duration > 0 && (
                           <p className="text-sm text-lovely/60 mb-2">
-                            {item.duration} Months Subscription
+                            {t("monthsSubscription", { months: item.duration })}
                           </p>
                         )}
                         <div className="flex justify-between items-center mt-auto">
@@ -219,11 +222,11 @@ export default function SideCart() {
           <SheetFooter className="p-6 border-t border-lovely/10 bg-white/50 backdrop-blur-sm mt-auto sm:flex-col gap-4">
             <div className="w-full space-y-4">
               <div className="flex justify-between items-center text-lg font-medium text-lovely">
-                <span>Subtotal</span>
+                <span>{t("subtotal")}</span>
                 <span>LE {totalPrice.toFixed(2)}</span>
               </div>
               <p className="text-xs text-lovely/60">
-                Shipping and taxes calculated at checkout.
+                {t("shippingNote")}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <Button
@@ -232,7 +235,7 @@ export default function SideCart() {
                   className="rounded-full border-lovely bg-creamey text-lovely hover:bg-everGreen hover:text-creamey transition-all duration-300"
                   onClick={closeCart}
                 >
-                  <Link href="/cart">View Cart</Link>
+                  <Link href="/cart">{t("viewCart")}</Link>
                 </Button>
                 <Button
                   asChild
@@ -240,7 +243,7 @@ export default function SideCart() {
                   onClick={closeCart}
                 >
                   <Link href={checkoutLink} className="flex items-center justify-center gap-2">
-                    Checkout <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                    {t("checkout")} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </Link>
                 </Button>
               </div>

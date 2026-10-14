@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface SessionCardProps {
   session: {
@@ -19,6 +22,7 @@ export default function SessionCard({
   onDetailsClick,
   onBookClick,
 }: SessionCardProps) {
+  const t = useTranslations("common");
   return (
     <div className="relative flex flex-col gap-1 md:gap-2 w-full max-w-lg h-full bg-creamey border-2 border-lovely rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow">
       {/* Discount Badge */}
@@ -53,26 +57,19 @@ export default function SessionCard({
           </p>
         </div>
         
-        {/* <p 
-          className="text-sm hover:cursor-pointer underline font-medium text-lovely/60"           
-          onClick={onDetailsClick}
-        >
-          More Details
-        </p> */}
-        
         {/* Action Button */}
         <div className="flex text-sm flex-col sm:flex-row gap-3 w-full">
           <Button
             onClick={onDetailsClick}
             className="flex-1 bg-creamey border border-lovely text-lovely hover:bg-creamey/80 font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
           >
-            More Details
+            {t("seeDetails")}
           </Button>
           <Button
             onClick={onBookClick}
             className="flex-[2] bg-lovely hover:bg-lovely/90 text-white font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
           >
-            Book Now
+            {t("bookNow")}
           </Button>
         </div>
       </div>

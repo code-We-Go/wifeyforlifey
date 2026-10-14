@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { VideoPlaylist } from "@/app/interfaces/interfaces";
 import useEmblaCarousel from "embla-carousel-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import VideoCard from "@/components/playlists/VideoCard";
 import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
@@ -17,6 +17,7 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 const Playlists = () => {
   const locale = useLocale();
   const isRtl = locale === "ar";
+  const t = useTranslations("home.playlists");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>(
     []
@@ -95,20 +96,20 @@ const Playlists = () => {
     >
       <div className="container-custom">
         <div className="flex flex-col md:flex-row justify-between items-center mb-3 md:mb-6">
-          <div>
+          <div className="text-start">
             <h2
               className={`max-md:pb-3 ${thirdFont.className} ${headerStyle}`}
             >
-              Your Bridal-Era Video Guides
+              {t("title")}
             </h2>
             <p className="max-md:text-sm max-md:pb-2">
-              These videos are designed to support your Gehaz Bestie Planner when it's time to make real-life choices.
+              {t("desc1")}
             </p>
-            <p className="pb-2 max-md:text-sm md:pb-4">Helps you understand your options and avoid confusion or pressure, Protects you from fake reviews and biased sales advice, Guides you to choose what's right for you — confidently.</p>
+            <p className="pb-2 max-md:text-sm md:pb-4">{t("desc2")}</p>
             {/* <p>Protects you from fake reviews and biased sales advice</p> */}
             {/* <p>Guides you to choose what's right for you — confidently</p> */}
             <p className="font-semibold max-md:text-sm">
-              Includes trusted experts videos in selected playlists to support you along the way [OB-GYNs, sex therapists, interior designers, appliance experts, and more]
+              {t("desc3")}
             </p>
           </div>
           {/* <Button
@@ -132,7 +133,7 @@ const Playlists = () => {
           <div className="text-center text-red-500 py-8">{error}</div>
         ) : featuredPlaylists.length === 0 ? (
           <div className="text-center py-8">
-            No featured playlists found.
+            {t("noPlaylists")}
           </div>
         ) : (
           <div className="relative">
@@ -194,16 +195,16 @@ const Playlists = () => {
         {/* Subscription CTA */}
         <div className="mt-12 text-center flex flex-col items-center md:flex-row md:items-center gap-2 md:gap-4 justify-start">
           <p className="text-creamey/90 text-sm text-start md:text-base max-w-md mb-6">
-            Access included with your subscription<br />
-            Watch all playlists anytime as part of your Wifey Experience 💗
+            {t("accessNote")}<br />
+            {t("watchAnytime")}
           </p>
           <Button
             asChild
             size="lg"
             className="bg-creamey text-lovely hover:bg-creamey/90  text-sm md:text-base md:px-8 py-4 md:py-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Link href="/package/GehazBestiePlanner" className="text-center leading-tight">
-              Subscribe to unlock <br /> premium videos
+            <Link href="/package/GehazBestiePlanner" className="text-center leading-tight whitespace-pre-line">
+              {t("subscribeButton")}
             </Link>
           </Button>
         </div>

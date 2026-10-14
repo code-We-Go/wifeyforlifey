@@ -46,6 +46,12 @@ export interface Video {
   createdAt: Date;
   updatedAt: Date;
   tags?: ("groom" | "bridesmaids")[]; // Array of tags (e.g., ["bride", "groom"])
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string;
+    };
+  };
 }
 
 export interface playlistFolder {
@@ -69,6 +75,12 @@ export interface Playlist {
   createdAt: Date;
   updatedAt: Date;
   order?: number;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string[];
+    };
+  };
 }
 
 // Add VideoPlaylist type alias for compatibility
@@ -98,7 +110,12 @@ export interface Variant {
   attributes: attribute[]; // e.g., [{ name: "Color", value: "Black" }, { name: "Capacity", value: "2L" }]
   images: media[];
   mobImages?: media[];
-
+  translations?: {
+    ar?: {
+      name?: string;
+      attributeName?: string;
+    };
+  };
 }
 
 export interface Category {
@@ -121,6 +138,11 @@ export type attribute = {
   name: string;
   price?: number;
   stock: number;
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
 };
 export type media = {
   url: string;
@@ -170,6 +192,15 @@ export interface Product {
   season: string;
   featured: boolean;
   ratings: number;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string;
+      productDimensions?: string[];
+      productDetails?: string[];
+      productCare?: string[];
+    };
+  };
 }
 
 export type AddProductType = Omit<Product, "_id">;
@@ -354,6 +385,17 @@ export interface Ipackage {
   calloutBadge?: string;
   calloutTitle?: string;
   calloutDescription?: string;
+  translations?: {
+    ar?: {
+      name?: string;
+      saving?: string;
+      notes?: string[];
+      badgeLabel?: string;
+      calloutBadge?: string;
+      calloutTitle?: string;
+      calloutDescription?: string;
+    };
+  };
 }
 
 export interface ISubscription {

@@ -5,6 +5,7 @@ import bostaClientService, {
   BostaZone,
   BostaDistrict,
 } from "@/app/services/bostaClientService";
+import { useLocale, useTranslations } from "next-intl";
 
 interface BostaLocationSelectorProps {
   onLocationChange: (location: {
@@ -30,6 +31,9 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
   selectedDistrict = "",
   orderTotal = 100,
 }) => {
+  const t = useTranslations("checkoutPage");
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const [cities, setCities] = useState<BostaCity[]>([]);
   const [zones, setZones] = useState<BostaZone[]>([]);
   const [districts, setDistricts] = useState<BostaDistrict[]>([]);
@@ -339,7 +343,7 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
       {/* City/Governorate Selection */}
       <div className="flex w-full gap-2 items-center">
         <label className="text-lovely text-base whitespace-nowrap">
-          Governorate
+          {t("governorate")}
         </label>
         <select
           value={selectedCityObj?._id || ""}
@@ -347,15 +351,15 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
           disabled={loading.cities}
           className="px-2 text-base h-10 w-full bg-creamey rounded-2xl border border-gray-200 py-2 disabled:opacity-50"
         >
-          <option value="">Select Governorate</option>
+          <option value="">{t("selectGovernorate")}</option>
           {cities.map((city) => (
             <option key={city._id} value={city._id}>
-              {city.name} ({city.nameAr})
+              {isAr ? (city.nameAr || city.name) : `${city.name} (${city.nameAr})`}
             </option>
           ))}
         </select>
         {loading.cities && (
-          <div className="text-sm text-gray-500">Loading...</div>
+          <div className="text-sm text-gray-500">{t("loading")}</div>
         )}
       </div>
 
@@ -363,7 +367,7 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
       {selectedCityObj && (
         <div className="flex w-full gap-2 items-center">
           <label className="text-lovely text-base whitespace-nowrap">
-            Zone
+            {t("zone")}
           </label>
           <select
             value={selectedZoneObj?._id || ""}
@@ -371,15 +375,15 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
             disabled={loading.zones || zones.length === 0}
             className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2 border border-gray-200 disabled:opacity-50"
           >
-            <option value="">Select Zone</option>
+            <option value="">{t("selectZone")}</option>
             {zones.map((zone) => (
               <option key={zone._id} value={zone._id}>
-                {zone.name} ({zone.nameAr})
+                {isAr ? (zone.nameAr || zone.name) : `${zone.name} (${zone.nameAr})`}
               </option>
             ))}
           </select>
           {loading.zones && (
-            <div className="text-sm text-gray-500">Loading zones...</div>
+            <div className="text-sm text-gray-500">{t("loadingZones")}</div>
           )}
         </div>
       )}
@@ -388,7 +392,7 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
       {selectedZoneObj && (
         <div className="flex w-full gap-2 items-center">
           <label className="text-lovely text-base whitespace-nowrap">
-            District
+            {t("district")}
           </label>
           <select
             value={selectedDistrictObj?.districtId || ""}
@@ -396,15 +400,17 @@ const BostaLocationSelector: React.FC<BostaLocationSelectorProps> = ({
             disabled={loading.districts || districts.length === 0}
             className="px-2 text-base h-10 w-full bg-creamey rounded-2xl py-2 border border-gray-200 disabled:opacity-50"
           >
-            <option value="">Select District</option>
+            <option value="">{t("selectDistrict")}</option>
             {districts.map((district) => (
               <option key={district.districtId} value={district.districtId}>
-                {district.districtName} - {district.districtOtherName}
+                {isAr
+                  ? (district.districtOtherName || district.districtName)
+                  : `${district.districtName} - ${district.districtOtherName}`}
               </option>
             ))}
           </select>
           {loading.districts && (
-            <div className="text-sm text-gray-500">Loading districts...</div>
+            <div className="text-sm text-gray-500">{t("loadingDistricts")}</div>
           )}
         </div>
       )}

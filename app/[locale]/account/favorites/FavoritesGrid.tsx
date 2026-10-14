@@ -5,6 +5,7 @@ import FavoriteCard from "./FavoriteCard";
 import FavoriteCardSkeleton from "./FavoriteCardSkeleton";
 import { thirdFont } from "@/fonts";
 import { Slider } from "@/components/ui/slider";
+import { useTranslations } from "next-intl";
 
 interface IFavorite {
   _id: string;
@@ -22,6 +23,7 @@ interface IFavorite {
 }
 
 export default function FavoritesGrid() {
+  const t = useTranslations("accountPage");
   const [favorites, setFavorites] = useState<IFavorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -174,13 +176,13 @@ export default function FavoritesGrid() {
       <h2
         className={`${thirdFont.className} tracking-normal text-4xl font-semibold text-lovely mb-8`}
       >
-        Wifey&apos;s Favorites
+        {t("wifeyFavorites")}
       </h2>
 
       {/* Filters */}
       <div className="mb-8 flex flex-wrap gap-4">
         <div className="space-y-2">
-          <h3 className="text-lovely font-medium">Categories</h3>
+          <h3 className="text-lovely font-medium">{t("categories")}</h3>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => (
               <button
@@ -191,7 +193,7 @@ export default function FavoritesGrid() {
                     : "bg-creamey text-lovely border border-lovely"
                   }`}
               >
-                {category}
+                {category === "All" ? t("all") : category}
               </button>
             ))}
           </div>
@@ -199,7 +201,7 @@ export default function FavoritesGrid() {
 
         {selectedCategory !== "All" && (
           <div className="space-y-2">
-            <h3 className="text-lovely font-medium">Sub-Categories</h3>
+            <h3 className="text-lovely font-medium">{t("subCategories")}</h3>
             <div className="flex flex-wrap gap-2">
               {subCategories
                 .filter(
@@ -220,7 +222,7 @@ export default function FavoritesGrid() {
                         : "bg-creamey text-lovely border border-lovely"
                       }`}
                   >
-                    {subCategory}
+                    {subCategory === "All" ? t("all") : subCategory}
                   </button>
                 ))}
             </div>
@@ -229,7 +231,7 @@ export default function FavoritesGrid() {
 
         {/* Price Range Filter */}
         <div className="w-full space-y-2">
-          <h3 className="text-lovely font-medium">Price Range</h3>
+          <h3 className="text-lovely font-medium">{t("priceRange")}</h3>
           <div className="px-4">
             <Slider
               defaultValue={[0, maxPriceValue]}
@@ -240,8 +242,8 @@ export default function FavoritesGrid() {
               className="my-6"
             />
             <div className="flex justify-between text-sm text-lovely">
-              <span>{priceRange[0]} EGP</span>
-              <span>{priceRange[1]} EGP</span>
+              <span>{priceRange[0]} {t("currency")}</span>
+              <span>{priceRange[1]} {t("currency")}</span>
             </div>
           </div>
         </div>
@@ -265,13 +267,13 @@ export default function FavoritesGrid() {
               {favorites.length === 0 ? (
                 // Truly no favorites exist in the database at all
                 <p className="text-lovely text-lg">
-                  No favorites have been added yet.
+                  {t("noFavoritesYet")}
                 </p>
               ) : (
                 // Favorites exist but current filters are hiding all of them
                 <>
                   <p className="text-lovely text-lg">
-                    No favorites match the selected filters.
+                    {t("noFavoritesMatch")}
                   </p>
                   <button
                     onClick={() => {
@@ -281,7 +283,7 @@ export default function FavoritesGrid() {
                     }}
                     className="mt-4 px-6 py-2 rounded-full text-sm bg-lovely text-creamey hover:opacity-80 transition-opacity"
                   >
-                    Reset Filters
+                    {t("resetFilters")}
                   </button>
                 </>
               )}

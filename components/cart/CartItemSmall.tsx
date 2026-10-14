@@ -6,6 +6,7 @@ import { useCart } from "@/providers/CartProvider";
 import { wishListContext } from "@/app/context/wishListContext";
 import { Link } from "@/i18n/routing";
 import { thirdFont } from "@/fonts";
+import { useTranslations } from "next-intl";
 
 const CartItemSmall = ({
   item,
@@ -14,6 +15,7 @@ const CartItemSmall = ({
   item: CartItem;
   wishListBool: boolean;
 }) => {
+  const t = useTranslations("common");
   const [quantity, setQuantity] = useState(item.quantity);
   const { updateQuantity, addItem, removeItem } = useCart();
   const { wishList, setWishList } = useContext(wishListContext);
@@ -98,9 +100,9 @@ const CartItemSmall = ({
                 e.preventDefault();
                 removeItem(item.productId, item.variant, item.attributes);
               }}
-              className="text-[12px] pt-2 px-4 text-lovel"
+              className="text-[12px] pt-2 px-4 text-lovely"
             >
-              x
+              ✕
             </span>
           </div>
           <div className="relative min-w-[80px] min-h-[50px]">
@@ -109,7 +111,7 @@ const CartItemSmall = ({
               width={80}
               height={80}
               src={item.imageUrl}
-              alt=""
+              alt={item.productName}
               className="aspect-square rounded object-cover"
             />
           </div>
@@ -134,7 +136,7 @@ const CartItemSmall = ({
                 }}
                 className="flex gap-4 items-center justify-between"
               >
-                QUANTITY :{/* <dt className="inline">Quantity:</dt> */}
+                {t("quantity")}:
                 <span
                   className="px-3 py-2 bg-creamey rounded-lg text-lovely cursor-pointer p-3 text-sm"
                   onClick={(e) => {
@@ -158,22 +160,20 @@ const CartItemSmall = ({
                   +
                 </span>
               </div>
-              <h3 className="text-sm">PRICE : {item.price} LE</h3>
+              <h3 className="text-sm">{t("price")}: {item.price} {t("le")}</h3>
             </div>
             <div className="font-semibold flex justify-between w-full">
               <h2 className="text-xs">
-                {" "}
-                TOTAL : {item.quantity * item.price} LE{" "}
+                {t("total")}: {item.quantity * item.price} {t("le")}
               </h2>
               {wishListBool && (
                 <h1
                   onClick={() => {
-                    transferItemToCart(); // Properly invoke the function
-                    //  deleteItem(item.productId,item.color,item.size);  // Properly invoke with the item ID
+                    transferItemToCart();
                   }}
                   className="text-primary text-sm hover:cursor-pointer"
                 >
-                  ADD TO CART
+                  {t("addToCart")}
                 </h1>
               )}
             </div>

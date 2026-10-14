@@ -4,13 +4,17 @@ import { lifeyFont, thirdFont } from "@/fonts";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { useTranslations, useLocale } from "next-intl";
 import { headerStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const JoinNow = () => {
+  const t = useTranslations("home.joinNow");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
 
@@ -32,14 +36,8 @@ const JoinNow = () => {
       align: "start",
       skipSnaps: false,
       dragFree: true,
+      direction: isRtl ? "rtl" : "ltr",
     },
-    // [
-    //   Autoplay({
-    //     delay: 2000,
-    //     stopOnInteraction: false,
-    //     stopOnMouseEnter: true,
-    //   }),
-    // ]
   );
 
   // Close modal on Escape key
@@ -77,28 +75,28 @@ const JoinNow = () => {
           <h1
             className={`${thirdFont.className } ${headerStyle}  mb-4`}
           >
-            PSSSST... Buying Your Gehaz & Feeling Lost?
+            {t("title")}
             <br />
-            Meet YOUR GEHAZ BESTIE PLANNER!
+            {t("subtitle")}
           </h1>
           
           <p className="text-lg md:text-xl font-bold text-lovely">
-            Built by a bride, for brides!
+            {t("badge")}
           </p>
 
           {/* Feature Points */}
-          <ul className="list-disc list-outside text-left pl-8 md:pl-10 space-y-1 md:space-y-2 mb-4">
+          <ul className="list-disc list-outside text-start ps-8 md:ps-10 space-y-1 md:space-y-2 mb-4">
             <li className="text-sm md:text-base font-normal text-lovely">
-              The first planner ever to include a chapter about your relationship with your fiancé — plus 10 chapters covering every part of your home.
+              {t("point1")}
             </li>
             <li className="text-sm md:text-base font-normal text-lovely">
-              The only planner to split gehaz into Essentials vs Nice-to-Haves so you don&apos;t overspend
+              {t("point2")}
             </li>
             <li className="text-sm md:text-base font-normal text-lovely">
-              Quantity recommendations so you buy just enough
+              {t("point3")}
             </li>
             <li className="text-sm md:text-base font-normal text-lovely">
-              Emotions Journaling to keep you grounded through the chaos
+              {t("point4")}
             </li>
           </ul>
         </div>
@@ -109,7 +107,7 @@ const JoinNow = () => {
             {carouselImages.map((src, index) => (
               <div
                 key={index}
-                className="flex-none w-[66.67vw] h-[66.67vw] sm:w-[45vw] sm:h-[45vw] md:w-[33vw] md:h-[33vw] lg:w-[25vw] lg:h-[25vw] pl-2 pr-2"
+                className="flex-none w-[66.67vw] h-[66.67vw] sm:w-[45vw] sm:h-[45vw] md:w-[33vw] md:h-[33vw] lg:w-[25vw] lg:h-[25vw] px-2"
               >
                 <div 
                   className="w-full h-full overflow-hidden shadow-lg bg-pinkey cursor-pointer transition-transform hover:scale-105"
@@ -131,13 +129,16 @@ const JoinNow = () => {
         {/* Bottom Text and CTA */}
         <div className="text-center space-y-6">
           <p className="text-base md:text-lg font-bold text-lovely">
-This isn’t just a planner — it unlocks a whole support system.          </p>
+            {t("bottomNote")}
+          </p>
           <Button
             asChild
             size="lg"
             className="rounded-md font-bold tracking-wide text-base md:text-lg px-8 py-6 bg-lovely hover:bg-lovely/90 text-creamey shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
-            <Link href="/package/GehazBestiePlanner">See what&apos;s inside <span className="ml-2"><Image src="/illustrations/key.png" alt="arrow-right" className="-rotate-[110deg] animate-pulse" width={50} height={50} /></span></Link>
+            <Link href="/package/GehazBestiePlanner">
+              {t("cta")} <span className="ms-2"><Image src="/illustrations/key.png" alt="arrow-right" className="-rotate-[110deg] animate-pulse" width={50} height={50} /></span>
+            </Link>
           </Button>
         </div>
       </div>

@@ -31,6 +31,7 @@ import { useEffect, useState, useContext, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import axios from "axios";
 import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
@@ -68,6 +69,7 @@ import {
 import { VideoPlaylist } from "@/app/interfaces/interfaces";
 
 const AccountPage = () => {
+  const t = useTranslations("accountPage");
   const { data: session, status } = useSession();
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
@@ -764,21 +766,21 @@ const AccountPage = () => {
 
   const stats = [
     {
-      name: "Loyalty Points",
+      name: t("loyaltyPoints"),
       value: user.loyaltyPoints.lifeTimePoints,
       icon: Gift,
       color: "text-lovely",
       bgColor: "bg-creamey",
     },
     {
-      name: "Wishlist Items",
+      name: t("wishlistItems"),
       value: user.wishlistItems,
       icon: Heart,
       color: "text-lovely",
       bgColor: "bg-creamey",
     },
     {
-      name: "Total Orders",
+      name: t("totalOrders"),
       value: user.orders,
       icon: ShoppingBag,
       color: "text-lovely",
@@ -787,24 +789,24 @@ const AccountPage = () => {
   ];
 
   const tabs = [
-    { id: "partners", label: "Discounts", icon: CirclePercent },
-    { id: "favorites", label: "Favorites", icon: Star },
-    { id: "inspo", label: "Inspo", icon: Sparkles },
-    { id: "shopping-bestie", label: "Shopping Bestie", icon: ShoppingCart },
-    { id: "wedding-planning-bestie", label: "Wedding Planning Bestie", icon: BookHeart },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "Loyality", label: "Loyalty", icon: Gift },
-    { id: "info", label: "Info", icon: UserCircle },
-    { id: "invitations", label: "Invitations", icon: UserPlus },
-    { id: "wishlist", label: "Wishlist", icon: Heart },
-    { id: "orders", label: "Recent Orders", icon: ShoppingBag },
+    { id: "partners", label: t("tabDiscounts"), icon: CirclePercent },
+    { id: "favorites", label: t("tabFavorites"), icon: Star },
+    { id: "inspo", label: t("tabInspo"), icon: Sparkles },
+    { id: "shopping-bestie", label: t("tabShoppingBestie"), icon: ShoppingCart },
+    { id: "wedding-planning-bestie", label: t("tabWeddingPlanningBestie"), icon: BookHeart },
+    { id: "notifications", label: t("tabNotifications"), icon: Bell },
+    { id: "Loyality", label: t("tabLoyalty"), icon: Gift },
+    { id: "info", label: t("tabInfo"), icon: UserCircle },
+    { id: "invitations", label: t("tabInvitations"), icon: UserPlus },
+    { id: "wishlist", label: t("tabWishlist"), icon: Heart },
+    { id: "orders", label: t("tabOrders"), icon: ShoppingBag },
   ];
 
   return (
     <div className="space-y-6 text-creamey">
       {/* Profile Header */}
       <div className="w-full flex flex-col sm:flex-row sm:justify-between gap-4">
-        <div className="flex items-center space-x-4 min-w-0">
+        <div className="flex items-center space-x-4 rtl:space-x-reverse min-w-0">
           {userInfo.imageUrl ? (
             <div className="rounded-full h-24 w-24 border-2 border-lovely relative flex-shrink-0">
               <Image
@@ -833,11 +835,11 @@ const AccountPage = () => {
               {user.email}
             </p>
             <div className="text-sm font-semibold flex flex-col gap-2 text-lovely/80 mb-4 mt-2">
-              <span className="font-bold underline">Your Subscriptions:</span>
+              <span className="font-bold underline">{t("yourSubscriptions")}</span>
 
               {/* No Subscriptions at all */}
               {!user.subscription?.packageId && !user.weddingPlanningBestie && (
-                <span className="flex items-center gap-2">None <BadgeAlert className="h-4 w-4" /></span>
+                <span className="flex items-center gap-2">{t("noSubscriptions")} <BadgeAlert className="h-4 w-4" /></span>
               )}
 
               {/* Full Experience */}
@@ -848,7 +850,7 @@ const AccountPage = () => {
                   ) : (
                     <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
                   )}
-                  <span className={user.isSubscribed ? "" : "text-red-500"}>Full Wifey Experience</span>
+                  <span className={user.isSubscribed ? "" : "text-red-500"}>{t("fullWifeyExperience")}</span>
                   {user.subscriptionExpiryDate && (
                     <span className={`text-xs  ${user.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
                       {(() => {
@@ -857,10 +859,10 @@ const AccountPage = () => {
                         const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
 
                         if (expiry > tenYearsFromNow) {
-                          return <span className="inline-flex gap-2 items-end">Lifetime Wifey <Crown className="h-3 w-3" /></span>;
+                          return <span className="inline-flex gap-2 items-end">{t("lifetimeWifey")} <Crown className="h-3 w-3" /></span>;
                         }
 
-                        const prefix = expiry < new Date() ? "Expired" : "Expires";
+                        const prefix = expiry < new Date() ? t("expired") : t("expires");
                         return `(${prefix}: ${expiry.toLocaleDateString()})`;
                       })()}
                     </span>
@@ -871,7 +873,7 @@ const AccountPage = () => {
               {/* Mini Experience */}
               {user.subscription?.packageId === "68bf6ae9c4d5c1af12cdcd37" && (
                 <div className="flex items-center gap-2">
-                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Experience
+                  <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> {t("miniExperience")}
                 </div>
               )}
 
@@ -879,7 +881,7 @@ const AccountPage = () => {
               {(user.subscription?.packageId === "6a2d9aec3def6ce76dc7babc" ||
                 (subscriptionDoc?.packageID?._id || subscriptionDoc?.packageID) === "6a2d9aec3def6ce76dc7babc") && (
                   <div className="flex items-center gap-2">
-                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> Mini Wedding Planning Experience
+                    <BadgeCheck className="text-lovely/80 h-4 w-4 mb-1" /> {t("miniWeddingExperience")}
                   </div>
                 )}
 
@@ -891,10 +893,10 @@ const AccountPage = () => {
                   ) : (
                     <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
                   )}
-                  <span className={user.weddingPlanningBestie.isSubscribed ? "" : "text-red-500"}>Wedding Planning Bestie</span>
+                  <span className={user.weddingPlanningBestie.isSubscribed ? "" : "text-red-500"}>{t("weddingPlanningBestie")}</span>
                   {user.weddingPlanningBestie.expiryDate && (
                     <span className={`text-xs  ${user.weddingPlanningBestie.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
-                      ({new Date(user.weddingPlanningBestie.expiryDate) < new Date() ? "Expired" : "Expires"}: {new Date(user.weddingPlanningBestie.expiryDate).toLocaleDateString()})
+                      ({new Date(user.weddingPlanningBestie.expiryDate) < new Date() ? t("expired") : t("expires")}: {new Date(user.weddingPlanningBestie.expiryDate).toLocaleDateString()})
                     </span>
                   )}
                 </div>
@@ -909,7 +911,7 @@ const AccountPage = () => {
                     <BadgeAlert className="text-red-500 h-4 w-4 mb-1" />
                   )}
                   <span className={user.isSubscribed ? "" : "text-red-500"}>
-                    {user.subSubscription.role === "groom" ? "Groom" : "Bridesmaid"} Access
+                    {user.subSubscription.role === "groom" ? t("groomAccess") : t("bridesmaidAccess")}
                   </span>
                   {user.subSubscription.parentExpiryDate && (
                     <span className={`text-xs ${user.isSubscribed ? "text-lovely/60" : "text-red-500"}`}>
@@ -919,10 +921,10 @@ const AccountPage = () => {
                         const tenYearsFromNow = new Date(now.getFullYear() + 10, now.getMonth(), now.getDate());
 
                         if (expiry > tenYearsFromNow) {
-                          return <span className="inline-flex gap-2 items-end">Lifetime <Crown className="h-3 w-3" /></span>;
+                          return <span className="inline-flex gap-2 items-end">{t("lifetime")} <Crown className="h-3 w-3" /></span>;
                         }
 
-                        const prefix = expiry < new Date() ? "Expired" : "Expires";
+                        const prefix = expiry < new Date() ? t("expired") : t("expires");
                         return `(${prefix}: ${expiry.toLocaleDateString()})`;
                       })()}
                     </span>
@@ -939,7 +941,7 @@ const AccountPage = () => {
                       size="sm"
                       className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                     >
-                      Upgrade now to the Full Wifey Experience
+                      {t("upgradeFullExperience")}
                     </Button>
                   </Link>
                 )}
@@ -951,7 +953,7 @@ const AccountPage = () => {
                       size="sm"
                       className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                     >
-                      Upgrade now to the Full Wedding Planning Bestie
+                      {t("upgradeWeddingPlanning")}
                     </Button>
                   </Link>
                 )}
@@ -965,7 +967,7 @@ const AccountPage = () => {
                       size="sm"
                       className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                     >
-                      Renew your Full Wifey Experience
+                      {t("renewFullExperience")}
                     </Button>
                   </Link>
                 )}
@@ -979,7 +981,7 @@ const AccountPage = () => {
                       size="sm"
                       className="mt-2 bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                     >
-                      Renew your Wedding Planning Bestie
+                      {t("renewWeddingPlanning")}
                     </Button>
                   </Link>
                 )}
@@ -999,7 +1001,7 @@ const AccountPage = () => {
                       className="bg-lovely text-creamey rounded-md hover:bg-lovely/80 whitespace-normal h-auto py-2 text-center"
                       onClick={() => setIsPlaylistModalOpen(true)}
                     >
-                      Activate your mini experience
+                      {t("activateMiniExperience")}
                     </Button>
                   </div>
                 )}
@@ -1016,7 +1018,7 @@ const AccountPage = () => {
                       }, 100);
                     }}
                   >
-                    Invitations ({invitationsCount}/{totalSpotsCount})
+                    {t("invitationsBadge", { count: invitationsCount, total: totalSpotsCount })}
                   </p>
                 </div>
               )}
@@ -1040,11 +1042,11 @@ const AccountPage = () => {
                   aria-hidden="true"
                 />
               </div>
-              <p className="ml-16 truncate text-sm text-creamey font-semibold">
+              <p className="ms-16 truncate text-sm text-creamey font-semibold">
                 {stat.name}
               </p>
             </dt>
-            <dd className="ml-16 flex items-baseline">
+            <dd className="ms-16 flex items-baseline">
               <p className="text-2xl font-semibold text-creamey">
                 {stat.value}
               </p>
@@ -1054,7 +1056,6 @@ const AccountPage = () => {
       </div>
 
       {/* Continue Watching (subscribed users) */}
-      {/* {session?.user?.isSubscribed && continueLoading && ( */}
       {continueLoading && (
         <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
           <div className="flex items-center gap-4">
@@ -1073,27 +1074,26 @@ const AccountPage = () => {
         </div>
       )}
 
-      {/* {session?.user?.isSubscribed && !continueLoading && continueItem && ( */}
       {!continueLoading && continueItem && (
         <div className="bg-creamey text-lovely rounded-xl p-4 md:p-6 shadow-md">
           <div className="flex items-center gap-4">
             <div className="relative w-40 h-24 rounded overflow-hidden flex-shrink-0">
               <img
                 src={continueItem.thumbnailUrl || "/video/1.png"}
-                alt={continueItem.videoTitle || "Continue watching"}
+                alt={continueItem.videoTitle || t("continueWatching")}
                 className="object-cover w-full h-full"
               />
               <Link
                 href={`/playlists/${continueItem.playlistId}?videoId=${continueItem.videoId}`}
                 className="absolute inset-0 flex items-center justify-center group"
               >
-                <span className="sr-only">Continue</span>
+                <span className="sr-only">{t("continueButton")}</span>
               </Link>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold">Continue Watching</h3>
+              <h3 className="text-lg font-semibold">{t("continueWatching")}</h3>
               <p className="text-sm text-lovely/90 truncate">
-                {continueItem.videoTitle || "Latest watched video"}
+                {continueItem.videoTitle || t("latestWatched")}
                 {continueItem.playlistTitle
                   ? ` • ${continueItem.playlistTitle}`
                   : ""}
@@ -1107,7 +1107,7 @@ const AccountPage = () => {
                   }
                   className="bg-lovely text-creamey hover:bg-lovely"
                 >
-                  Continue
+                  {t("continueButton")}
                 </Button>
               </div>
             </div>
@@ -1116,7 +1116,7 @@ const AccountPage = () => {
       )}
 
       <div id="tabs-section" className="border-b border-pinkey overflow-x-auto scrollbar-hide scroll-mt-20">
-        <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
+        <nav className="-mb-px flex gap-4 sm:gap-8 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -1131,7 +1131,7 @@ const AccountPage = () => {
                   markAllNotificationsAsRead();
                 }
               }}
-              className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${activeTab === tab.id
+              className={`flex items-center gap-1.5 sm:gap-2 py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${activeTab === tab.id
                   ? "border-lovely text-lovely font-semibold"
                   : "border-transparent text-lovely/90 hover:text-lovely duration-300 hover:border-lovely"
                 }`}
@@ -1160,7 +1160,7 @@ const AccountPage = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-lovely">
-                Notifications
+                {t("notificationsTitle")}
               </h2>
             </div>
             {loadingNotifications ? (
@@ -1168,7 +1168,7 @@ const AccountPage = () => {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50 animate-pulse"
+                    className="flex items-start space-x-3 rtl:space-x-reverse p-3 rounded-lg bg-gray-50 animate-pulse"
                   >
                     <div className="h-10 w-10 rounded-full bg-gray-200"></div>
                     <div className="flex-1">
@@ -1182,14 +1182,14 @@ const AccountPage = () => {
             ) : notifications.length === 0 ? (
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">You have no notifications</p>
+                <p className="text-gray-500">{t("noNotifications")}</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {notifications.length === 0 ? (
                   <div className="text-center py-8">
                     <Bell className="h-12 w-12 text-lovely mx-auto mb-4" />
-                    <p className="text-lovely">No notifications yet</p>
+                    <p className="text-lovely">{t("noNotificationsYet")}</p>
                   </div>
                 ) : (
                   notifications.map((notification) => {
@@ -1352,7 +1352,7 @@ const AccountPage = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-lovely">
-                Recent Orders
+                {t("recentOrdersTitle")}
               </h2>
             </div>
 
@@ -1367,24 +1367,24 @@ const AccountPage = () => {
             ) : orders.length === 0 ? (
               <div className="text-center py-8">
                 <ShoppingBag className="h-12 w-12 text-lovely mx-auto mb-4" />
-                <p className="text-lovely">No orders yet</p>
+                <p className="text-lovely">{t("noOrders")}</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {orders.slice(0, 3).map((order) => (
                   <div
                     key={order._id}
-                    className="bg-lovely text-creamey  rounded-lg shadow overflow-hidden"
+                    className="bg-lovely text-creamey rounded-lg shadow overflow-hidden"
                   >
-                    <div className="border-b  px-4 py-5 text-creamey sm:px-6">
+                    <div className="border-b px-4 py-5 text-creamey sm:px-6">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center text-creamey space-x-3 min-w-0">
+                        <div className="flex items-center text-creamey space-x-3 rtl:space-x-reverse min-w-0">
                           {getStatusIcon(order.status || "pending")}
-                          <h3 className="text-lg font-medium leading-6  truncate">
-                            Order : {order._id}
+                          <h3 className="text-lg font-medium leading-6 truncate">
+                            {t("orderNumber", { id: order._id })}
                           </h3>
                         </div>
-                        <div className="flex items-center space-x-4 flex-shrink-0">
+                        <div className="flex items-center space-x-4 rtl:space-x-reverse flex-shrink-0">
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
                               order.status || "pending"
@@ -1406,8 +1406,8 @@ const AccountPage = () => {
                     <div className="px-4 py-5 sm:px-6">
                       <div className="flex justify-between items-center">
                         <div className="text-sm text-creamey">
-                          <span className="font-medium ">Total:</span>{" "}
-                          {order.total} LE
+                          <span className="font-medium">{t("total")}</span>{" "}
+                          {order.total} {t("currency")}
                         </div>
                         <Button
                           className="bg-creamey text-lovely hover:bg-everGreen hover:text-creamey duration-300 transition"
@@ -1420,7 +1420,7 @@ const AccountPage = () => {
                             setDetailsModal(true);
                           }}
                         >
-                          View Details
+                          {t("viewDetails")}
                         </Button>
                       </div>
                     </div>
@@ -1432,7 +1432,7 @@ const AccountPage = () => {
                   size="sm"
                   onClick={() => setShowAllOrders(!showAllOrders)}
                 >
-                  {showAllOrders ? "Hide All" : "See All"}
+                  {showAllOrders ? t("hideAll") : t("seeAll")}
                 </Button>
               </div>
             )}
@@ -1441,14 +1441,14 @@ const AccountPage = () => {
 
         {activeTab === "wishlist" && (
           <div>
-            <h2 className="text-lg  text-lovely mb-4 font-semibold">
-              Wishlist Items
+            <h2 className="text-lg text-lovely mb-4 font-semibold">
+              {t("wishlistTitle")}
             </h2>
             {wishList.length === 0 ? (
               <div className="text-center py-8">
                 <Heart className="h-12 w-12 text-lovely mx-auto mb-4" />
                 <p className="text-lovely font-semibold">
-                  Your wishlist is empty
+                  {t("wishlistEmpty")}
                 </p>
               </div>
             ) : (
@@ -1460,12 +1460,12 @@ const AccountPage = () => {
                   >
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                       {/* Product */}
-                      <div className="md:col-span-5 flex items-center space-x-4">
-                        <div className="relative w-16 h-16 overflow-hidden md:h-20 md:w-20 rounded-md  flex-shrink-0">
+                      <div className="md:col-span-5 flex items-center space-x-4 rtl:space-x-reverse">
+                        <div className="relative w-16 h-16 overflow-hidden md:h-20 md:w-20 rounded-md flex-shrink-0">
                           <img
                             src={item.imageUrl}
                             alt={item.productName}
-                            className="object-cover "
+                            className="object-cover"
                           />
                         </div>
                         <div>
@@ -1484,19 +1484,19 @@ const AccountPage = () => {
 
                       {/* Price */}
                       <div className="md:col-span-1 hidden md:block text-center">
-                        LE{item.price.toFixed(2)}
+                        {item.price.toFixed(2)} {t("currency")}
                       </div>
 
                       {/* Actions */}
-                      <div className="md:col-span-4 flex items-center justify-end space-x-2">
+                      <div className="md:col-span-4 flex items-center justify-end space-x-2 rtl:space-x-reverse">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-creamey  hover:text-creamey hover:border hover:border-creamey bg-lovely hover:bg-saga"
+                          className="text-creamey hover:text-creamey hover:border hover:border-creamey bg-lovely hover:bg-saga"
                           onClick={() => handleMoveToCart(item)}
                         >
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Move to Cart
+                          <ShoppingCart className="h-4 w-4 me-2" />
+                          {t("moveToCart")}
                         </Button>
                         <Button
                           variant="ghost"
@@ -1511,7 +1511,7 @@ const AccountPage = () => {
                           }
                         >
                           <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove item</span>
+                          <span className="sr-only">{t("removeItem")}</span>
                         </Button>
                       </div>
                     </div>
@@ -1525,34 +1525,34 @@ const AccountPage = () => {
         {activeTab === "Loyality" && (
           <div className="">
             <h2 className="text-lg font-semibold text-lovely mb-4">
-              Loyalty Points
+              {t("loyaltyTitle")}
             </h2>
             <div className="w-full justify-center items-center">
               {loadingLoyalty ? (
-                <div className="text-center py-8">Loading transactions...</div>
+                <div className="text-center py-8">{t("loadingTransactions")}</div>
               ) : loyaltyTransactions.length === 0 ? (
                 <div className="text-center py-8 text-lovely">
-                  No loyalty transactions found.
+                  {t("noTransactions")}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-lovely/20">
                     <thead>
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">
-                          Date
+                        <th className="px-4 py-2 text-start text-xs font-medium text-lovely uppercase">
+                          {t("date")}
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">
-                          Type
+                        <th className="px-4 py-2 text-start text-xs font-medium text-lovely uppercase">
+                          {t("type")}
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">
-                          Amount
+                        <th className="px-4 py-2 text-start text-xs font-medium text-lovely uppercase">
+                          {t("amount")}
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">
-                          Reason
+                        <th className="px-4 py-2 text-start text-xs font-medium text-lovely uppercase">
+                          {t("reason")}
                         </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-lovely uppercase">
-                          Bonus
+                        <th className="px-4 py-2 text-start text-xs font-medium text-lovely uppercase">
+                          {t("bonus")}
                         </th>
                       </tr>
                     </thead>
@@ -1598,7 +1598,7 @@ const AccountPage = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium text-lovely">
-                Profile Information
+                {t("profileTitle")}
               </h2>
               <Button
                 className="border border-lovely text-lovely bg-creamey hover:bg-creamey hover:text-lovely hover:cursor-pointer"
@@ -1606,15 +1606,15 @@ const AccountPage = () => {
                 size="sm"
                 onClick={() => setEditingInfo(!editingInfo)}
               >
-                <Edit className="h-4 w-4 mr-2" />
-                {editingInfo ? "Cancel" : "Edit"}
+                <Edit className="h-4 w-4 me-2" />
+                {editingInfo ? t("cancel") : t("edit")}
               </Button>
             </div>
 
-            <div className=" rounded-lg border-2  shadow-xl p-6">
+            <div className=" rounded-lg border-2 shadow-xl p-6">
               <div className="space-y-6">
                 {/* Profile Image */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 rtl:space-x-reverse">
                   <div className="relative">
                     {userInfo.imageUrl ? (
                       <div className="relative h-20 w-20 rounded-full overflow-hidden group">
@@ -1649,11 +1649,11 @@ const AccountPage = () => {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-lovely/80">Profile Picture</p>
+                    <p className="text-sm text-lovely/80">{t("profilePic")}</p>
                     {editingInfo && (
                       <div className="flex items-center gap-2">
                         <p className="text-xs text-lovely/80">
-                          Click the camera icon to change
+                          {t("clickCamera")}
                         </p>
                         <button
                           type="button"
@@ -1674,7 +1674,7 @@ const AccountPage = () => {
                     htmlFor="name"
                     className="text-sm font-medium text-lovely/90 whitespace-nowrap"
                   >
-                    User Name :
+                    {t("usernameLabel")}
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -1694,12 +1694,12 @@ const AccountPage = () => {
                 </div>
 
                 {/* First Name */}
-                <div className="flex  max-md:flex-col items-center gap-2">
+                <div className="flex max-md:flex-col items-center gap-2">
                   <Label
                     htmlFor="firstName"
                     className="text-sm font-medium text-lovely/90 whitespace-nowrap"
                   >
-                    First Name :
+                    {t("firstNameLabel")}
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -1724,7 +1724,7 @@ const AccountPage = () => {
                     htmlFor="lastName"
                     className="text-sm font-medium whitespace-nowrap text-lovely/90"
                   >
-                    Last Name :
+                    {t("lastNameLabel")}
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -1749,7 +1749,7 @@ const AccountPage = () => {
                     htmlFor="email"
                     className="text-sm font-medium text-lovely/90 whitespace-nowrap"
                   >
-                    Email Address :
+                    {t("emailLabel")}
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -1775,7 +1775,7 @@ const AccountPage = () => {
                     htmlFor="birthDate"
                     className="text-sm font-medium text-lovely/90 whitespace-nowrap"
                   >
-                    Birth Date :
+                    {t("birthDateLabel")}
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -1794,7 +1794,7 @@ const AccountPage = () => {
                     <p className="text-sm text-lovely">
                       {userInfo.birthDate
                         ? new Date(userInfo.birthDate).toLocaleDateString()
-                        : "Not set"}
+                        : t("notSet")}
                     </p>
                   )}
                 </div>
@@ -1805,7 +1805,7 @@ const AccountPage = () => {
                     htmlFor="weddingDate"
                     className="text-sm font-medium text-lovely/90 whitespace-nowrap"
                   >
-                    Wedding Date :
+                    {t("weddingDateLabel")}
                   </Label>
                   {editingInfo ? (
                     <Input
@@ -1824,7 +1824,7 @@ const AccountPage = () => {
                     <p className="text-sm text-lovely">
                       {userInfo.weddingDate
                         ? new Date(userInfo.weddingDate).toLocaleDateString()
-                        : "Not set"}
+                        : t("notSet")}
                     </p>
                   )}
                 </div>
@@ -1832,21 +1832,21 @@ const AccountPage = () => {
                 {/* Subscription Status */}
                 <div className="flex max-md:flex-col items-center gap-2">
                   <Label className="text-sm font-medium text-lovely/90">
-                    Subscription Status :
+                    {t("subscriptionStatusLabel")}
                   </Label>
-                  <div className=" flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 rtl:space-x-reverse">
                     {user.isSubscribed ? (
                       <>
                         <BadgeCheck className="h-4 w-4 text-lovely" />
                         <span className="text-sm text-lovely">
-                          Active Subscription
+                          {t("activeSubscription")}
                         </span>
                       </>
                     ) : (
                       <>
                         <BadgeAlert className="h-4 w-4 text-lovely/80" />
                         <span className="text-sm text-lovely/80">
-                          No Active Subscription
+                          {t("noActiveSubscription")}
                         </span>
                       </>
                     )}
@@ -1854,12 +1854,12 @@ const AccountPage = () => {
                 </div>
 
                 {editingInfo && (
-                  <div className="flex space-x-3 pt-4">
+                  <div className="flex space-x-3 rtl:space-x-reverse pt-4">
                     <Button
                       onClick={handleSaveInfo}
                       className="bg-lovely text-creamey hover:bg-lovely/90"
                     >
-                      Save Changes
+                      {t("saveChanges")}
                     </Button>
                   </div>
                 )}
@@ -1879,7 +1879,7 @@ const AccountPage = () => {
               <FavoritesGrid />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
-                Subscribe to access your favorites!
+                {t("subscribeToFavorites")}
               </div>
             )}
           </div>
@@ -1891,7 +1891,7 @@ const AccountPage = () => {
               <InspoTab isFree={isInspoFree} />
             ) : (
               <div className="bg-lovely/10 border border-lovely rounded-lg p-6 text-center text-lovely font-semibold">
-                Subscribe to access your inspiration boards!
+                {t("subscribeToInspo")}
               </div>
             )}
           </div>
@@ -1913,7 +1913,7 @@ const AccountPage = () => {
       {/* Orders Section for "See All" button */}
       {showAllOrders && (
         <div id="orders-section" className="mt-12">
-          <h2 className="text-2xl font-bold text-lovely mb-6">All Orders</h2>
+          <h2 className="text-2xl font-bold text-lovely mb-6">{t("allOrdersTitle")}</h2>
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -1926,10 +1926,10 @@ const AccountPage = () => {
             <div className="text-center py-12">
               <ShoppingBag className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-lovely mb-2">
-                No orders yet
+                {t("noOrders")}
               </h3>
               <p className="text-gray-500">
-                Start shopping to see your order history here
+                {t("startShoppingMsg")}
               </p>
             </div>
           ) : (
@@ -1937,17 +1937,17 @@ const AccountPage = () => {
               {orders.slice(3, orders.length).map((order) => (
                 <div
                   key={order._id}
-                  className="bg-lovely text-creamey  rounded-lg shadow overflow-hidden"
+                  className="bg-lovely text-creamey rounded-lg shadow overflow-hidden"
                 >
-                  <div className="border-b  px-4 py-5 text-creamey sm:px-6">
+                  <div className="border-b px-4 py-5 text-creamey sm:px-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="flex items-center text-creamey space-x-3 min-w-0">
+                      <div className="flex items-center text-creamey space-x-3 rtl:space-x-reverse min-w-0">
                         {getStatusIcon(order.status || "pending")}
-                        <h3 className="text-lg font-medium leading-6  truncate">
-                          Order : {order._id}
+                        <h3 className="text-lg font-medium leading-6 truncate">
+                          {t("orderNumber", { id: order._id })}
                         </h3>
                       </div>
-                      <div className="flex items-center space-x-4 flex-shrink-0">
+                      <div className="flex items-center space-x-4 rtl:space-x-reverse flex-shrink-0">
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(
                             order.status || "pending"
@@ -1967,8 +1967,8 @@ const AccountPage = () => {
                   <div className="px-4 py-5 sm:px-6">
                     <div className="flex justify-between items-center">
                       <div className="text-sm text-creamey">
-                        <span className="font-medium ">Total:</span>{" "}
-                        {order.total} LE
+                        <span className="font-medium">{t("total")}</span>{" "}
+                        {order.total} {t("currency")}
                       </div>
                       <Button
                         className="bg-creamey text-lovely hover:bg-everGreen hover:text-creamey duration-300 transition"
@@ -1981,7 +1981,7 @@ const AccountPage = () => {
                           setDetailsModal(true);
                         }}
                       >
-                        View Details
+                        {t("viewDetails")}
                       </Button>
                     </div>
                   </div>
@@ -1995,7 +1995,7 @@ const AccountPage = () => {
       {isDetailsModalOpen && selectedOrder && (
         <div
           onClick={() => setDetailsModal(false)}
-          className="fixed inset-0 bg-black  bg-opacity-50 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -2010,22 +2010,22 @@ const AccountPage = () => {
               </span>
             </div>
             <h2 className="text-lg font-bold text-everGreen mb-4">
-              ORDER DETAILS
+              {t("orderDetails")}
             </h2>
-            <div className="text-left space-y-2">
+            <div className="text-start space-y-2">
               <p>
-                <strong>Order ID:</strong>{" "}
+                <strong>{t("orderId")}</strong>{" "}
                 {selectedOrder.orderID || selectedOrder._id || "N/A"}
               </p>
               <p>
-                <strong>Email:</strong> {selectedOrder.email || "N/A"}
+                <strong>{t("emailLabel")}</strong> {selectedOrder.email || "N/A"}
               </p>
               <p>
-                <strong>Customer:</strong> {selectedOrder.firstName || ""}{" "}
+                <strong>{t("customer")}</strong> {selectedOrder.firstName || ""}{" "}
                 {selectedOrder.lastName || ""}
               </p>
               <p>
-                <strong>Cart:</strong>
+                <strong>{t("tabWishlist")}</strong>
               </p>
               <div className="flex flex-col gap-2">
                 {selectedOrder.cart?.map((item, index) => (
@@ -2033,19 +2033,19 @@ const AccountPage = () => {
                 ))}
               </div>
               <p>
-                <strong>Phone:</strong> {selectedOrder.phone || "N/A"}
+                <strong>{t("phone")}</strong> {selectedOrder.phone || "N/A"}
               </p>
               <p>
-                <strong>Address:</strong> {selectedOrder.address || ""}
+                <strong>{t("address")}</strong> {selectedOrder.address || ""}
                 {selectedOrder.address ? "," : ""} {selectedOrder.city || ""}
                 {selectedOrder.city ? "," : ""} {selectedOrder.state || ""}
                 {selectedOrder.state ? "," : ""} {selectedOrder.country || ""}
               </p>
               <p>
-                <strong>Postal Code:</strong> {selectedOrder.postalZip || "N/A"}
+                <strong>{t("postalCode")}</strong> {selectedOrder.postalZip || "N/A"}
               </p>
               {/* Status Dropdown */}
-              <label className="block font-semibold mt-4">Status:</label>
+              <label className="block font-semibold mt-4">{t("status")}</label>
               <select
                 className="border p-2 bg-creamey w-full"
                 value={modalStatus}
@@ -2074,7 +2074,7 @@ const AccountPage = () => {
                 ))}
               </select>
               {/* Payment Dropdown */}
-              <label className="block font-semibold mt-4">Payment:</label>
+              <label className="block font-semibold mt-4">{t("payment")}</label>
               <select
                 className="border bg-creamey p-2 w-full"
                 value={modalPayment}
@@ -2088,22 +2088,21 @@ const AccountPage = () => {
                 ))}
               </select>
               <p>
-                <strong>Sub-Total:</strong>{" "}
+                <strong>{t("subtotal")}</strong>{" "}
                 {selectedOrder.subTotal !== undefined
                   ? selectedOrder.subTotal.toFixed(2)
                   : "N/A"}{" "}
-                LE
+                {t("currency")}
               </p>
-              {/* <p><strong>Shipping:</strong> {selectedOrder.shipping !== undefined ? selectedOrder.shipping.toFixed(2) : 'N/A'} LE</p> */}
               <p>
-                <strong>Total:</strong>{" "}
+                <strong>{t("total")}</strong>{" "}
                 {selectedOrder.total !== undefined
                   ? selectedOrder.total.toFixed(2)
                   : "N/A"}{" "}
-                LE
+                {t("currency")}
               </p>
               <p>
-                <strong>Created At:</strong>{" "}
+                <strong>{t("createdAt")}</strong>{" "}
                 {selectedOrder.createdAt
                   ? new Date(selectedOrder.createdAt).toLocaleString("en-EG", {
                     timeZone: "Africa/Cairo",
@@ -2131,18 +2130,11 @@ const AccountPage = () => {
                 <div className="bg-creamey rounded-2xl shadow-xl flex flex-col items-center px-8 py-8 min-w-[280px] animate-fadeIn">
                   <div className="animate-spin rounded-full h-14 w-14 border-t-4 border-lovely border-b-4 mb-4"></div>
                   <span className="text-lg text-lovely font-bold mb-2">
-                    Hang tight!
+                    {t("hangTight")}
                   </span>
                   <span className="text-sm text-lovely/80 text-center mb-4">
-                    We&apos;re compressing your image for a faster upload.
+                    {t("compressingImage")}
                   </span>
-                  {/* Optional: Cancel button */}
-                  {/* <button
-                    className="mt-2 text-lovely underline text-xs hover:text-pinkey"
-                    onClick={() => setIsUploading(false)}
-                  >
-                    Cancel
-                  </button> */}
                 </div>
               </div>
             )}
@@ -2172,7 +2164,7 @@ const AccountPage = () => {
               className="mt-4 text-lovely underline text-sm"
               onClick={() => setShowUploader(false)}
             >
-              Cancel
+              {t("cancel")}
             </button>
           </div>
         </div>
@@ -2180,16 +2172,13 @@ const AccountPage = () => {
       <Dialog open={isPlaylistModalOpen} onOpenChange={setIsPlaylistModalOpen}>
         <DialogContent className="bg-creamey text-lovely max-h-[90vh] overflow-y-auto sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Choose Your Playlist</DialogTitle>
+            <DialogTitle>{t("choosePlaylistTitle")}</DialogTitle>
             <p>
-              Note: you have to choose only one playlist. If you click confirm
-              there&apos;s no way to choose another one.
-              <br />
-              It expires after 6 months from activation.
+              {t("choosePlaylistNote")}
             </p>
           </DialogHeader>
           {loadingPlaylists ? (
-            <div className="py-6 text-center">Loading playlists...</div>
+            <div className="py-6 text-center">{t("loadingPlaylists")}</div>
           ) : playlistsError ? (
             <div className="py-6 text-center text-red-500">
               {playlistsError}
@@ -2230,7 +2219,7 @@ const AccountPage = () => {
               ))}
               {playlists.length === 0 && (
                 <div className="col-span-2 text-center py-8">
-                  No playlists found.
+                  {t("noPlaylists")}
                 </div>
               )}
             </div>
@@ -2240,7 +2229,7 @@ const AccountPage = () => {
               className="px-6 py-2 border-2 border-lovely text-lovely rounded-2xl font-semibold"
               onClick={() => setIsPlaylistModalOpen(false)}
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               disabled={!selectedPlaylistId || savingSelection}
@@ -2266,7 +2255,7 @@ const AccountPage = () => {
                 }
               }}
             >
-              {savingSelection ? "Saving..." : "Confirm"}
+              {savingSelection ? t("saving") : t("confirm")}
             </button>
           </DialogFooter>
         </DialogContent>

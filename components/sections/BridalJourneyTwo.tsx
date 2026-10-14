@@ -2,8 +2,10 @@
 
 import { thirdFont } from "@/fonts";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const BridalJourneyTwo = () => {
+  const t = useTranslations("home.marquee");
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -31,11 +33,11 @@ const BridalJourneyTwo = () => {
   }, []);
 
   const items = [
-    "planners",
-    "expert sessions",
-    "smart tools",
-    "bridal essentials",
-    "everything you need to plan calmly and make right choices",
+    t("planners"),
+    t("expertSessions"),
+    t("smartTools"),
+    t("bridalEssentials"),
+    t("tagline"),
   ];
 
   return (

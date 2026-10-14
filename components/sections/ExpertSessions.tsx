@@ -16,7 +16,7 @@ import ConsultantAvailabilityModal, {
   getAvailabilityNotice,
 } from "@/components/shared/ConsultantAvailabilityModal";
 import useEmblaCarousel from "embla-carousel-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -55,6 +55,7 @@ interface IPartnerSession {
 const ExpertSessions = () => {
   const locale = useLocale();
   const isRtl = locale === "ar";
+  const t = useTranslations("home.expertSessions");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const { data: authSession } = useSession();
   const [sessions, setSessions] = useState<IPartnerSession[]>([]);
@@ -462,18 +463,16 @@ const ExpertSessions = () => {
       >
         <div className="container-custom">
           {/* Header */}
-          <div className="text-left mb-6 max-w-4xl">
+          <div className="text-start mb-6 max-w-4xl">
             <h2
               className={`${thirdFont.className} ${headerStyle} mb-4`}
             >
-              Get real answers from real experts
+              {t("title")}
             </h2>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
-
                 <p className={`${subHeaderStyle}`}>
-                  Book consultation sessions with trusted experts and stop relying
-                  on confusing or incorrect advice.
+                  {t("subtitle")}
                 </p>
               </li>
             </ul>
@@ -493,9 +492,9 @@ const ExpertSessions = () => {
           </div>
 
           {/* Footer Note */}
-          <div className="mt-16 text-center md:text-left  pt-6">
-            <p className="text-lovely/70 italic text-lg   decoration-lovely/30">
-              Private, judgment-free sessions — from the comfort of your home.
+          <div className="mt-16 text-center md:text-start pt-6">
+            <p className="text-lovely/70 italic text-lg decoration-lovely/30">
+              {t("footerNote")}
             </p>
           </div>
         </div>
@@ -531,18 +530,17 @@ const ExpertSessions = () => {
     >
       <div className="container-custom">
         {/* Header */}
-        <div className="text-left mb-6 max-w-4xl">
+        <div className="text-start mb-6 max-w-4xl">
           <h2
             className={`${thirdFont.className} ${headerStyle} mb-4`}
           >
-            Get real answers from real experts!
+            {t("title")}
           </h2>
           <ul className="space-y-2">
             <li className="flex items-start gap-2">
               <span className="text-xl mt-1">•</span>
               <p className={`${subHeaderStyle}`}>
-                Book consultation sessions with trusted experts and stop relying
-                on confusing or incorrect advice.
+                {t("subtitle")}
               </p>
             </li>
           </ul>
@@ -592,9 +590,9 @@ const ExpertSessions = () => {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-16 text-center md:text-left  pt-6">
-          <p className="text-lovely/70 italic text-lg  decoration-lovely/30">
-            Private, judgment-free sessions — from the comfort of your home.
+        <div className="mt-16 text-center md:text-start pt-6">
+          <p className="text-lovely/70 italic text-lg decoration-lovely/30">
+            {t("footerNote")}
           </p>
         </div>
       </div>

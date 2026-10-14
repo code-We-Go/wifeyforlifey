@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { useModal } from "@/app/context/ModalContext";
 import { thirdFont } from "@/fonts";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
+
 export default function ProductCard({
   product,
   favorite,
@@ -20,6 +22,7 @@ export default function ProductCard({
   product: Product;
   favorite: boolean;
 }) {
+  const t = useTranslations("common");
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
   const { cart, setCart } = useContext(cartContext);
@@ -45,22 +48,9 @@ export default function ProductCard({
           imageUrl: product.variations?.[0]?.images?.[0]?.url,
         },
       ]);
-      // Swal.fire({
-      //   background: "#cb808b",
-      //   color: "white",
-      //   toast: false,
-      //   iconColor: "#473728",
-      //   position: "center",
-      //   text: "YOUR PRODUCT HAS BEEN ADDED TO YOUR WISHLIST",
-      //   showConfirmButton: false,
-      //   timer: 2000,
-      //   customClass: {
-      //     popup: "no-rounded-corners small-popup",
-      //   },
-      // });
       toast({
-        title: "Added item to Wishlist",
-        description: "Item has been added to your wishlist.",
+        title: t("addedToWishlist"),
+        description: t("addedToWishlistDesc"),
         variant: "added",
       });
     } else {
@@ -69,8 +59,8 @@ export default function ProductCard({
       );
       setWishList(newWishList);
       toast({
-        title: "Removed item from Wishlist",
-        description: "Item has been removed from your wishlist.",
+        title: t("removedFromWishlist"),
+        description: t("removedFromWishlistDesc"),
         variant: "removed",
       });
     }
@@ -121,7 +111,7 @@ export default function ProductCard({
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-              Out of Stock
+              {t("outOfStock")}
             </div>
           </div>
         )}
@@ -156,19 +146,19 @@ export default function ProductCard({
           <div className="space-y-0">
             {product.comparedPrice > 0 ? (
               <del className="text-creamey text-xs md:text-sm block">
-                LE{product.comparedPrice.toFixed(2)}
+                {product.comparedPrice.toFixed(2)} {t("le")}
               </del>
             ) : (
-              <div className="text-xs md:text-sm block invisible">LE0.00</div>
+              <div className="text-xs md:text-sm block invisible">0.00 {t("le")}</div>
             )}
             <p className="price-tag text-xs md:text-sm text-creamey">
-              LE{product.price.local.toFixed(2)}
+              {product.price.local.toFixed(2)} {t("le")}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {isOutOfStock ? (
               <div className="text-xs text-creamey bg-pinkey/70 py-2 px-2 rounded-full font-medium">
-                Out of Stock
+                {t("outOfStock")}
               </div>
             ) : (
               <Button
@@ -178,7 +168,7 @@ export default function ProductCard({
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 me-1" />
-                <span className="text-xs">Add</span>
+                <span className="text-xs">{t("addToCart")}</span>
               </Button>
             )}
           </div>

@@ -4,8 +4,8 @@ import { useCart } from "@/providers/CartProvider";
 import { useSession } from "next-auth/react";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import React, { useEffect, useState, useRef, Suspense } from "react";
 import { X, ShoppingBag, Zap, CreditCard, ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -76,6 +76,7 @@ const calculateShippingRate = (
 
 const UnifiedCheckoutPage = () => {
   const router = useRouter();
+  const t = useTranslations("checkoutPage");
   const {
     subscriptionItems,
     items: cartProducts,
@@ -764,7 +765,7 @@ const UnifiedCheckoutPage = () => {
                   className="w-4 h-4 accent-lovely cursor-pointer"
                 />
                 <label htmlFor={`gift-${configs[0].cartItemId}`} className="text-lovely text-sm font-semibold cursor-pointer">
-                  Buying this as a gift for someone else? 🎁
+                  {t("isGift")}
                 </label>
               </div>
 
@@ -781,7 +782,7 @@ const UnifiedCheckoutPage = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Email</label>
+                      <label className="text-lovely text-sm">{t("brideEmail")}</label>
                       <input
                         type="email"
                         value={configs[0].email}
@@ -789,14 +790,11 @@ const UnifiedCheckoutPage = () => {
                         className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base lowercase"
                       />
                       <p className="text-[11px] text-lovely/85 mt-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
-                        🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!
-                      </p>
-                      <p className="text-[11px] text-lovely/85 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
-                        if it's not available just let it empty.
+                        {t("giftHint")}
                       </p>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Phone Number</label>
+                      <label className="text-lovely text-sm">{t("phone")}</label>
                       <input
                         type="text"
                         value={configs[0].phone}
@@ -808,7 +806,7 @@ const UnifiedCheckoutPage = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's First Name</label>
+                      <label className="text-lovely text-sm">{t("brideFirstName")}</label>
                       <input
                         type="text"
                         value={configs[0].firstName}
@@ -817,7 +815,7 @@ const UnifiedCheckoutPage = () => {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Last Name</label>
+                      <label className="text-lovely text-sm">{t("brideLastName")}</label>
                       <input
                         type="text"
                         value={configs[0].lastName}
@@ -828,7 +826,7 @@ const UnifiedCheckoutPage = () => {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's WhatsApp (Optional)</label>
+                    <label className="text-lovely text-sm">{t("whatsAppNumber")}</label>
                     <input
                       type="text"
                       value={configs[0].whatsAppNumber}
@@ -1017,7 +1015,7 @@ const UnifiedCheckoutPage = () => {
           {/* Payment Method Selector */}
           <div className="w-full">
             <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-4`}>
-              Payment Method
+              {t("payment")}
             </h2>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -1029,7 +1027,7 @@ const UnifiedCheckoutPage = () => {
                   onChange={() => setPayment("card")}
                   className="w-4 h-4 accent-lovely cursor-pointer"
                 />
-                <label htmlFor="paymob-card" className="text-base cursor-pointer">Pay with card / wallet</label>
+                <label htmlFor="paymob-card" className="text-base cursor-pointer">{t("payCard")}</label>
               </div>
 
               <div className="flex items-center gap-3">
@@ -1041,40 +1039,40 @@ const UnifiedCheckoutPage = () => {
                   onChange={() => setPayment("instapay")}
                   className="w-4 h-4 accent-lovely cursor-pointer"
                 />
-                <label htmlFor="instapay-pay" className="text-base cursor-pointer">Pay with Instapay</label>
+                <label htmlFor="instapay-pay" className="text-base cursor-pointer">{t("payInstapay")}</label>
               </div>
 
               {payment === "instapay" && (
                 <div className="mt-4 p-4 border border-lovely/20 rounded-xl bg-lovely/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center gap-2 text-lovely font-semibold">
                     <span className="p-1 bg-lovely/10 rounded-full">💰</span>
-                    <p className="text-sm">Instapay Instructions</p>
+                    <p className="text-sm">{t("instapayTitle")}</p>
                   </div>
                   <div className="text-[13px] text-lovely space-y-2 bg-white/50 p-3 rounded-lg border border-lovely/10">
                     <p className="flex gap-2">
                       <span className="font-bold text-lovely">1.</span>
-                      <span>Open <b>Instapay</b> app and choose <b>"Send Money"</b></span>
+                      <span>{t("instapayStep1")}</span>
                     </p>
                     <p className="flex gap-2">
                       <span className="font-bold text-lovely">2.</span>
-                      <span>Select <b>"Bank Account"</b></span>
+                      <span>{t("instapayStep2")}</span>
                     </p>
                     <p className="flex gap-2">
                       <span className="font-bold text-lovely">3.</span>
-                      <span>Enter Account: <b className="font-mono text-sm select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                      <span>{t("instapayStep3")} <b className="font-mono text-sm select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
                     </p>
                     <p className="flex gap-2">
                       <span className="font-bold text-lovely">4.</span>
-                      <span>Select <b>Credit Agricole</b> as bank</span>
+                      <span>{t("instapayStep4")}</span>
                     </p>
                     <p className="flex gap-2">
                       <span className="font-bold text-lovely">5.</span>
-                      <span>Receiver Name: <b>Wifey</b></span>
+                      <span>{t("instapayStep5")}</span>
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
+                    <label className="block text-xs font-semibold text-lovely">{t("transactionReceipt")}</label>
                     <CldUploadWidget
                       uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
                       onSuccess={(result: any) => {
@@ -1089,7 +1087,7 @@ const UnifiedCheckoutPage = () => {
                           onClick={() => open()}
                           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-sm font-medium"
                         >
-                          {instapayReciept ? "✓ Receipt Uploaded (Change)" : "📸 Upload Receipt"}
+                          {instapayReciept ? `✓ ${t("changeScreenshot")}` : `📸 ${t("uploadScreenshot")}`}
                         </button>
                       )}
                     </CldUploadWidget>
@@ -1207,7 +1205,7 @@ const UnifiedCheckoutPage = () => {
                   className="w-4 h-4 accent-lovely cursor-pointer"
                 />
                 <label htmlFor="save-profile" className="text-sm cursor-pointer">
-                  Save my shipping data for next time
+                  {t("saveDataNextTime")}
                 </label>
               </div>
             )}
@@ -1220,13 +1218,12 @@ const UnifiedCheckoutPage = () => {
                 className="w-4 h-4 accent-lovely cursor-pointer"
               />
               <label htmlFor="accept-terms" className="text-sm cursor-pointer">
-                By checking, you agree to the{" "}
+                {t("termsNotice")}{" "}
                 <Link href="/policies?terms-and-conditions" className="underline font-bold" target="_blank">
-                  terms and conditions
+                  {t("termsAndConditions")}
                 </Link>
               </label>
             </div>
-
 
             <button
               type="submit"
@@ -1236,7 +1233,7 @@ const UnifiedCheckoutPage = () => {
                 : "bg-lovely text-creamey hover:bg-lovely/90 cursor-pointer shadow-lg shadow-lovely/10"
                 }`}
             >
-              {loading ? "PROCESSING..." : "PROCEED TO PAYMENT"}
+              {loading ? t("validating") : t("proceedToPayment")}
             </button>
           </div>
         </form>
@@ -1248,7 +1245,7 @@ const UnifiedCheckoutPage = () => {
             {/* Products & Subscriptions summary list */}
             <div className="bg-pinkey text-lovely rounded-2xl p-6 border border-lovely shadow-md">
               <h3 className={`${thirdFont.className} text-xl tracking-wide font-bold mb-4 border-b border-lovely/20 pb-2`}>
-                Order Summary
+                {t("orderSummary")}
               </h3>
 
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -1368,17 +1365,17 @@ const UnifiedCheckoutPage = () => {
                   return (
                     <>
                       <div className="flex justify-between text-base">
-                        <span>Subtotal</span>
+                        <span>{t("subtotal")}</span>
                         <span>{originalSubtotal} LE</span>
                       </div>
                       <div className="flex justify-between text-base text-green-600">
                         <span>
-                          Birthday Discount ({Math.round((totalPackageSavings / originalSubtotal) * 100)}% OFF)
+                          {t("discount")} ({Math.round((totalPackageSavings / originalSubtotal) * 100)}% OFF)
                         </span>
                         <span>-{totalPackageSavings} LE</span>
                       </div>
                       <div className="flex justify-between text-base font-medium">
-                        <span>Price</span>
+                        <span>{t("subtotal")}</span>
                         <span>{subTotal} LE</span>
                       </div>
                     </>
@@ -1387,7 +1384,7 @@ const UnifiedCheckoutPage = () => {
 
                 return (
                   <div className="flex justify-between text-base">
-                    <span>Subtotal</span>
+                    <span>{t("subtotal")}</span>
                     <span>{subTotal} LE</span>
                   </div>
                 );
@@ -1395,10 +1392,10 @@ const UnifiedCheckoutPage = () => {
 
               {appliedDiscount && (discountAmount > 0 || (appliedDiscount.calculationType === "FREE_SHIPPING" && shipping > 0)) && (
                 <div className="flex justify-between text-base text-green-600">
-                  <span>Discount ({appliedDiscount.code})</span>
+                  <span>{t("discount")} ({appliedDiscount.code})</span>
                   <span>
                     {appliedDiscount.calculationType === "FREE_SHIPPING"
-                      ? `-${shipping} LE (Free Shipping)`
+                      ? `-${shipping} LE`
                       : `-${discountAmount} LE`}
                   </span>
                 </div>
@@ -1406,7 +1403,7 @@ const UnifiedCheckoutPage = () => {
 
               {loyaltyDiscount > 0 && (
                 <div className="flex justify-between text-base text-green-600">
-                  <span>Loyalty Points Redeem</span>
+                  <span>{t("loyaltyDiscount")}</span>
                   <span>-{loyaltyDiscount} LE</span>
                 </div>
               )}
@@ -1414,12 +1411,12 @@ const UnifiedCheckoutPage = () => {
               <div className="flex justify-between text-base">
                 {appliedDiscount?.calculationType === "FREE_SHIPPING" || subTotal > 2000 || subscriptionItems.some((item) => item.packageId === "687396821b4da119eb1c13fe" || item.packageId === "6965e63c6df4503dda02c12b") ? (
                   <>
-                    <span className="line-through">Shipping</span>
+                    <span className="line-through">{t("shipping")}</span>
                     <span className="line-through">{shipping} LE</span>
                   </>
                 ) : (
                   <>
-                    <span>Shipping</span>
+                    <span>{t("shipping")}</span>
                     <span>{shipping} LE</span>
                   </>
                 )}
@@ -1427,13 +1424,13 @@ const UnifiedCheckoutPage = () => {
 
               {configs.reduce((sum, item) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0) > 0 && (
                 <div className="flex justify-between text-base">
-                  <span>Gift Cards cost</span>
+                  <span>Gift Cards</span>
                   <span>+{configs.reduce((sum, item) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0)} LE</span>
                 </div>
               )}
 
               <div className="flex justify-between font-bold text-lg mt-4 pt-4 border-t border-lovely">
-                <span>Total</span>
+                <span>{t("total")}</span>
                 <span>{total} LE</span>
               </div>
             </div>
