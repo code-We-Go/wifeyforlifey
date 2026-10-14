@@ -180,6 +180,40 @@ async function handlePartnerSession(
   partnerOrder.status = "paid";
   await partnerOrder.save();
 
+  // Record booking in partner session bookings array
+  let session: any = null;
+  try {
+    const PartnerSessionModel = (
+      await import("@/app/modals/partnerSessionModel")
+    ).default;
+    session = await PartnerSessionModel.findById(partnerOrder.sessionId);
+    if (session) {
+      const existingBooking = session.bookings?.find(
+        (b: any) => b.orderId && b.orderId === partnerOrder._id?.toString()
+      );
+      if (!existingBooking) {
+        session.bookings = session.bookings || [];
+        session.bookings.push({
+          orderId: partnerOrder._id?.toString(),
+          clientFirstName: partnerOrder.clientFirstName,
+          clientLastName: partnerOrder.clientLastName,
+          clientEmail: partnerOrder.clientEmail,
+          clientPhone: partnerOrder.clientPhone,
+          variantTitle: partnerOrder.variantTitle,
+          bookedAt: new Date(),
+          status: "paid",
+        });
+        await session.save();
+      } else {
+        // Update existing booking status to paid
+        existingBooking.status = "paid";
+        await session.save();
+      }
+    }
+  } catch (err) {
+    console.error("Failed to append callback booking to session:", err);
+  }
+
   // Send confirmation emails
   try {
     const { sendMail } = await import("@/lib/email");
@@ -230,6 +264,7 @@ async function handlePartnerSession(
           ? `${partnerOrder.sessionTitle} - ${partnerOrder.variantTitle}`
           : partnerOrder.sessionTitle,
         partnerName: partnerOrder.partnerName,
+        sessionType: partnerOrder.sessionType || (session?.sessionType as any) || "one-to-one",
         partnerWhatsApp: partnerOrder.whatsappNumber,
         meetingLink: partnerOrder.meetingLink || partnerOrder.link,
         finalPrice: partnerOrder.finalPrice,

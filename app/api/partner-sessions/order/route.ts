@@ -23,7 +23,21 @@ export async function GET(req: Request) {
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    return NextResponse.json({ order });
+
+    let orderData = order.toObject ? order.toObject() : { ...order };
+    if (!orderData.sessionType && orderData.sessionId) {
+      try {
+        const PartnerSessionModel = (
+          await import("@/app/modals/partnerSessionModel")
+        ).default;
+        const s = await PartnerSessionModel.findById(orderData.sessionId).select("sessionType");
+        if (s && s.sessionType) {
+          orderData.sessionType = s.sessionType;
+        }
+      } catch {}
+    }
+
+    return NextResponse.json({ order: orderData });
   } catch (error) {
     console.error("Failed to fetch partner order", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

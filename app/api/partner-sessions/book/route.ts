@@ -25,6 +25,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
+    // Webinar capacity validation
+    if (
+      partnerSession.sessionType === "webinar" &&
+      typeof partnerSession.maxCapacity === "number" &&
+      partnerSession.maxCapacity > 0
+    ) {
+      const bookingsCount = Array.isArray(partnerSession.bookings)
+        ? partnerSession.bookings.length
+        : 0;
+
+      if (bookingsCount >= partnerSession.maxCapacity) {
+        return NextResponse.json(
+          { error: "This webinar session is fully booked" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Resolve variant details if variantIndex is provided
     let sessionTitle = partnerSession.title;
     let variantTitle: string | undefined = undefined;
@@ -213,8 +231,29 @@ export async function POST(req: Request) {
         variantDuration,
         link: sessionMeetingLink,
         meetingLink: sessionMeetingLink,
+        sessionType: partnerSession.sessionType || "one-to-one",
         status: "paid",
       });
+
+      // Record in partner session bookings array
+      try {
+        await PartnerSessionModel.findByIdAndUpdate(partnerSession._id, {
+          $push: {
+            bookings: {
+              orderId: freeOrder._id?.toString(),
+              clientFirstName: firstName,
+              clientLastName: lastName,
+              clientEmail: email,
+              clientPhone: phone,
+              variantTitle,
+              bookedAt: new Date(),
+              status: "paid",
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Failed to append booking record to session:", err);
+      }
 
       // Send confirmation emails
       try {
@@ -264,6 +303,7 @@ export async function POST(req: Request) {
             clientLastName: lastName,
             sessionTitle: variantTitle ? `${sessionTitle} - ${variantTitle}` : sessionTitle,
             partnerName: partnerSession.partnerName,
+            sessionType: partnerSession.sessionType,
             partnerWhatsApp: partnerSession.whatsappNumber,
             meetingLink: sessionMeetingLink,
             finalPrice: 0,
@@ -281,11 +321,12 @@ export async function POST(req: Request) {
         console.error("Failed to send partner/client confirmation email for free booking", e);
       }
 
+      const isWebinar = partnerSession.sessionType === "webinar";
       const redirectTarget = sessionMeetingLink
         ? sessionMeetingLink
-        : partnerSession.whatsappNumber
+        : !isWebinar && partnerSession.whatsappNumber
         ? `https://wa.me/${String(partnerSession.whatsappNumber).replace(/[^0-9]/g, "")}`
-        : "";
+        : `/payment/success?session=true&orderId=${freeOrder._id}`;
 
       return NextResponse.json(
         {
@@ -330,8 +371,29 @@ export async function POST(req: Request) {
         variantDuration,
         link: sessionMeetingLink,
         meetingLink: sessionMeetingLink,
+        sessionType: partnerSession.sessionType || "one-to-one",
         status: "instapay_review",
       });
+
+      // Record in partner session bookings array
+      try {
+        await PartnerSessionModel.findByIdAndUpdate(partnerSession._id, {
+          $push: {
+            bookings: {
+              orderId: instapayOrder._id?.toString(),
+              clientFirstName: firstName,
+              clientLastName: lastName,
+              clientEmail: email,
+              clientPhone: phone,
+              variantTitle,
+              bookedAt: new Date(),
+              status: "instapay_review",
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Failed to append instapay booking record to session:", err);
+      }
 
       // Register PendingPayment record for callback/approval tracking
       await PendingPaymentModel.create({

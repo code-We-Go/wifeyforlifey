@@ -162,6 +162,7 @@ function SuccessPage() {
                 Click the link below for your session appointment:
               </p>
               {(() => {
+                const isWebinar = sessionOrder.sessionType === "webinar";
                 const targetLink =
                   (sessionOrder.meetingLink && sessionOrder.meetingLink.trim()) ||
                   (sessionOrder.link && sessionOrder.link.trim()) ||
@@ -171,19 +172,66 @@ function SuccessPage() {
                   ? targetLink.startsWith("http://") || targetLink.startsWith("https://")
                     ? targetLink
                     : `https://${targetLink}`
-                  : `https://wa.me/${String(
+                  : !isWebinar
+                  ? `https://wa.me/${String(
                       sessionOrder.whatsappNumber
-                    ).replace(/[^0-9]/g, "")}`;
+                    ).replace(/[^0-9]/g, "")}`
+                  : "";
+
+                const calDetails = `Join online webinar: ${sessionOrder.sessionTitle}\nMeeting Link: ${targetLink || "Online"}`;
+                const calLocation = targetLink || "Online";
+                const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+                  sessionOrder.sessionTitle
+                )}&details=${encodeURIComponent(calDetails)}&location=${encodeURIComponent(calLocation)}`;
+                const outlookCalUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(
+                  sessionOrder.sessionTitle
+                )}&body=${encodeURIComponent(calDetails)}&location=${encodeURIComponent(calLocation)}`;
 
                 return (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg text-lovely underline font-bold mt-2 inline-block"
-                  >
-                    {isExternalMeeting ? "Join Meeting / Access Link" : "WhatsApp link"}
-                  </a>
+                  <div className="mt-2 space-y-3">
+                    {href && (
+                      <div>
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-lg text-lovely underline font-bold inline-block"
+                        >
+                          {isExternalMeeting
+                            ? isWebinar
+                              ? "🔗 Join Webinar Link"
+                              : "🔗 Join Meeting / Access Link"
+                            : "📲 Message on WhatsApp"}
+                        </a>
+                      </div>
+                    )}
+
+                    {isWebinar && (
+                      <div className="pt-3 border-t border-lovely/20 mt-3">
+                        <p className="text-sm font-semibold text-lovely mb-2">
+                          📅 Add this webinar to your calendar:
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                          <a
+                            href={googleCalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4285F4] text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity"
+                          >
+                            📅 Google Calendar
+                          </a>
+                          <a
+                            href={outlookCalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0078D4] text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity"
+                          >
+                            📅 Outlook Calendar
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })()}
             </div>
