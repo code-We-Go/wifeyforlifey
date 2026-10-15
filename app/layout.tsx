@@ -17,6 +17,7 @@ import { AnnouncementProvider } from "../context/announcementContext";
 import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
 import DiscountPopup from "@/components/DiscountPopup";
 import NewsletterPopup from "@/components/NewsletterPopup";
+import AppliancesWebinarGlobalPopup from "@/components/shared/AppliancesWebinarGlobalPopup";
 import SideCart from "@/components/cart/SideCart";
 import { GoogleTagManager } from "@next/third-parties/google";
 import GlobalThemeWrapper from "./GlobalThemeWrapper";
@@ -89,6 +90,7 @@ export default function RootLayout({
 
                         <DiscountPopup />
                         <NewsletterPopup />
+                        <AppliancesWebinarGlobalPopup />
                         <Toaster />
                       </GlobalThemeWrapper>
                     </ModalProvider>

@@ -451,7 +451,7 @@ export default function PartnerSessionsSection() {
     : 0;
 
   return (
-    <div className="">
+    <div id="partner-sessions" className="scroll-mt-24">
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
@@ -783,6 +783,24 @@ export default function PartnerSessionsSection() {
                 <h3 className="text-xl font-semibold text-lovely mb-2">
                   Book: {activeBookingVariant?.title || selected.title}
                 </h3>
+
+                {String(selected._id) === "6acfa82b936fe79b1c127ed6" && (
+                  <div className="mb-4 p-3.5 bg-[#fce2e8] border border-[#efc9cf] rounded-xl text-xs sm:text-sm text-[#592a2f]">
+                    <p className="font-bold text-[#d32333] mb-1">
+                      ورشة جماعية (Online Group Webinar)
+                    </p>
+                    <p className="mb-2 leading-relaxed text-xs">
+                      هذه الجلسة تقدم شرحاً وترشيحات عامة. إذا كنتِ تبحثين عن استشارة فردية 1:1 مخصصة لميزانيتك وبيتك، يمكنكِ حجزها من قسم جلسات الخبراء.
+                    </p>
+                    <a
+                      href="#partner-sessions"
+                      onClick={() => setSelected(null)}
+                      className="inline-flex items-center gap-1 font-bold text-[#d32333] underline hover:text-[#592a2f]"
+                    >
+                      تصفحي الجلسات الفردية 1:1 في قسم الشركاء
+                    </a>
+                  </div>
+                )}
 
                 {/* Variant Switcher in Booking Modal */}
                 {selected.variants && selected.variants.length > 1 && (

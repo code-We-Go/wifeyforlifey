@@ -848,6 +848,23 @@ const ExpertSessions = () => {
                   Book: {activeBookingVariant?.title || selectedForBooking.title}
                 </h3>
 
+                {String(selectedForBooking._id) === "6acfa82b936fe79b1c127ed6" && (
+                  <div className="mb-4 p-3.5 bg-[#fce2e8] border border-[#efc9cf] rounded-xl text-xs sm:text-sm text-[#592a2f]">
+                    <p className="font-bold text-[#d32333] mb-1">
+                      ورشة جماعية (Online Group Webinar)
+                    </p>
+                    <p className="mb-2 leading-relaxed text-xs">
+                      هذه الجلسة تقدم شرحاً وترشيحات عامة. إذا كنتِ تبحثين عن استشارة فردية 1:1 مخصصة لميزانيتك وبيتك، يمكنكِ حجزها من قسم جلسات الخبراء.
+                    </p>
+                    <a
+                      href="/shop?tab=sessions#partner-sessions"
+                      className="font-bold text-[#d32333] underline hover:text-[#592a2f]"
+                    >
+                      تصفحي الجلسات الفردية 1:1 في المتجر
+                    </a>
+                  </div>
+                )}
+
                 {/* Variant Switcher in Booking Modal */}
                 {selectedForBooking.variants && selectedForBooking.variants.length > 1 && (
                   <div className="mb-4">

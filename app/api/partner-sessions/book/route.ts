@@ -283,7 +283,22 @@ export async function POST(req: Request) {
           from: "partners@shopwifeyforlifey.com",
         });
 
-        if (String(partnerSession._id) === "6a88988e5e832f13002e8653") {
+        if (String(partnerSession._id) === "6acfa82b936fe79b1c127ed6") {
+          const { getAppliancesMasterClassEmailHtml } = await import(
+            "@/utils/AppliancesMasterClassSessionMail"
+          );
+          const appliancesBody = getAppliancesMasterClassEmailHtml({
+            clientName: `${firstName} ${lastName}`.trim(),
+            orderId: freeOrder._id?.toString(),
+          });
+          await sendMail({
+            to: email,
+            subject: "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕",
+            name: `${firstName} ${lastName}`.trim(),
+            body: appliancesBody,
+            from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
+          });
+        } else if (String(partnerSession._id) === "6a88988e5e832f13002e8653") {
           const { sexEducationSessionEmailHtml } = await import(
             "@/utils/SexEducationSessionMail"
           );
