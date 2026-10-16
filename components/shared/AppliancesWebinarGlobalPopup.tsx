@@ -78,8 +78,8 @@ export default function AppliancesWebinarGlobalPopup() {
               type="button"
               onClick={() => setLang("ar")}
               className={`px-3 py-1 rounded-full transition-all ${lang === "ar"
-                  ? "bg-[#d32333] text-white shadow-sm font-bold"
-                  : "text-[#592a2f] hover:text-[#d32333]"
+                ? "bg-[#d32333] text-white shadow-sm font-bold"
+                : "text-[#592a2f] hover:text-[#d32333]"
                 }`}
             >
               العربية
@@ -88,8 +88,8 @@ export default function AppliancesWebinarGlobalPopup() {
               type="button"
               onClick={() => setLang("en")}
               className={`px-3 py-1 rounded-full transition-all ${lang === "en"
-                  ? "bg-[#d32333] text-white shadow-sm font-bold"
-                  : "text-[#592a2f] hover:text-[#d32333]"
+                ? "bg-[#d32333] text-white shadow-sm font-bold"
+                : "text-[#592a2f] hover:text-[#d32333]"
                 }`}
             >
               English
@@ -101,7 +101,7 @@ export default function AppliancesWebinarGlobalPopup() {
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-5">
           <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden border-2 border-[#efc9cf] flex-shrink-0 shadow-md">
             <Image
-              src="https://utfs.io/f/33h5308O79UZKSAlEGWyZPew3hMLI0AVku4d27n1vcEFSTBb"
+              src="/experts/zeinab.png"
               alt="Appliances Master Class"
               fill
               className="object-cover"
@@ -116,7 +116,7 @@ export default function AppliancesWebinarGlobalPopup() {
             {lang === "ar" ? (
               <>
                 <h2 className={`${thirdFont.className} text-xl sm:text-2xl font-bold text-[#d32333] mb-1 leading-snug`}>
-                  ورشة أجهزة بيتك (ماستر كلاس)
+                  ورشة أجهزة بيتك
                 </h2>
                 <p className="text-xs sm:text-sm font-semibold text-[#8b3a49]">
                   دليلك لاختيار أجهزة بيتك مع م. زينب أحمد استعداداً للبلاك فرايداي
@@ -148,9 +148,9 @@ export default function AppliancesWebinarGlobalPopup() {
             </div>
 
             {/* Direct to /shop partners sessions callout */}
-            <div className="bg-[#fff5f6] border-2 border-dashed border-[#d32333] rounded-2xl p-4 sm:p-5">
+            {/* <div className="bg-[#fff5f6] border-2 border-dashed border-[#d32333] rounded-2xl p-4 sm:p-5">
               <div className="font-bold text-[#d32333] mb-1.5 text-sm sm:text-base">
-                هل تبحثين عن استشارة فردية خاصة 1:1؟
+                بتدوري عن استشارة فردية خاصة 1:1؟
               </div>
               <p className="text-xs sm:text-sm text-[#592a2f] mb-3">
                 نظراً لأن الورشة جماعية، فالوقت لا يسمح بعمل ترشيحات مخصصة لمقاسات شقتك وميزانيتك بدقة. إذا كنتِ ترغبين في جلسة خاصة 1:1 لمراجعة جهاز بيتك خطوة بخطوة مع م. زينب أحمد، يمكنكِ حجزها مباشرة من قسم جلسات الشركاء!
@@ -162,7 +162,7 @@ export default function AppliancesWebinarGlobalPopup() {
               >
                 احجزي جلسة فردية 1:1 من قسم الشركاء (/shop)
               </Button>
-            </div>
+            </div> */}
           </div>
         ) : (
           <div className="space-y-3.5 text-xs sm:text-sm leading-relaxed text-[#592a2f]">
@@ -176,7 +176,7 @@ export default function AppliancesWebinarGlobalPopup() {
             </div>
 
             {/* Direct to /shop partners sessions callout */}
-            <div className="bg-[#fff5f6] border-2 border-dashed border-[#d32333] rounded-2xl p-4 sm:p-5">
+            {/* <div className="bg-[#fff5f6] border-2 border-dashed border-[#d32333] rounded-2xl p-4 sm:p-5">
               <div className="font-bold text-[#d32333] mb-1.5 text-sm sm:text-base">
                 Looking for a Private 1:1 Consultation?
               </div>
@@ -190,7 +190,7 @@ export default function AppliancesWebinarGlobalPopup() {
               >
                 Book 1:1 Partner Session in /shop
               </Button>
-            </div>
+            </div> */}
           </div>
         )}
 
