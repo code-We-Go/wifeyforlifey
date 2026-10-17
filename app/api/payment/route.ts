@@ -143,7 +143,8 @@ export async function POST(request: Request) {
 
           console.log("Creating Bosta delivery for order:", res._id);
           const bostaResult = await bostaService.createDelivery(
-            deliveryPayload
+            deliveryPayload,
+            res
           );
           // console.log("bostaResult" + bostaResult);
           console.log("bostaResult" + JSON.stringify(bostaResult));

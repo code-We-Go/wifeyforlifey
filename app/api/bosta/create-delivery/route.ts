@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     console.log("Delivery payload:", JSON.stringify(deliveryPayload, null, 2));
 
     // Create delivery with Bosta
-    const result = await bostaService.createDelivery(deliveryPayload);
+    const result = await bostaService.createDelivery(deliveryPayload, order);
 
     // Handle both wrapped {success, data: {_id, trackingNumber}} and direct {_id} response formats
     // Prefer trackingNumber for shipmentID as it's the customer-facing identifier

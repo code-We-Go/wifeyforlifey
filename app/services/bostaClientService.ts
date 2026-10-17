@@ -35,6 +35,11 @@ export interface BostaDistrict {
   dropOffAvailability: boolean;
 }
 
+// Bosta returns locations it doesn't deliver to (e.g. ElWahat ElBaharia); hide them so
+// customers can't pick an address that fails with "Uncovered drop off" (4009)
+const isDeliverable = (loc: { dropOffAvailability?: boolean }) =>
+  loc?.dropOffAvailability !== false;
+
 class BostaClientService {
   private baseUrl = '/api/bosta';
 
@@ -47,7 +52,7 @@ class BostaClientService {
         throw new Error(data.error || 'Failed to fetch cities');
       }
       
-      return data.data || [];
+      return (data.data || []).filter(isDeliverable);
     } catch (error) {
       console.error('Error fetching cities:', error);
       return [];
@@ -63,7 +68,7 @@ class BostaClientService {
         throw new Error(data.error || 'Failed to fetch zones');
       }
       
-      return data.data || [];
+      return (data.data || []).filter(isDeliverable);
     } catch (error) {
       console.error('Error fetching zones:', error);
       return [];
@@ -95,7 +100,7 @@ class BostaClientService {
         throw new Error(data.error || 'Failed to fetch districts');
       }
       
-      return data.data || [];
+      return (data.data || []).filter(isDeliverable);
     } catch (error) {
       console.error('Error fetching districts by zone:', error);
       return [];

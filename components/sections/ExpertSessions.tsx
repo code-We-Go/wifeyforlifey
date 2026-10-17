@@ -1,7 +1,7 @@
 "use client";
 
 import { thirdFont } from "@/fonts";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 // import Link from "next/link"; 
@@ -10,8 +10,10 @@ import { CldUploadWidget } from "next-cloudinary";
 import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import SessionCard from "@/components/shared/SessionCard";
+import SessionCard, { isSessionFullyBooked } from "@/components/shared/SessionCard";
 import SessionCardSkeleton from "@/components/shared/SessionCardSkeleton";
+// import SessionSortSelect from "@/components/shared/SessionSortSelect";
+import { sortSessions, SessionSortKey } from "@/components/shared/sessionSort";
 import ConsultantAvailabilityModal, {
   getAvailabilityNotice,
 } from "@/components/shared/ConsultantAvailabilityModal";
@@ -48,6 +50,12 @@ interface IPartnerSession {
   subscriptionDiscountPercentage?: number;
   link?: string;
   meetingLink?: string;
+  order?: number;
+  featured?: boolean;
+  maxCapacity?: number;
+  bookings?: Array<any>;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   variants?: IPartnerSessionVariant[];
   links?: IPartnerSessionLink[];
 }
@@ -60,6 +68,7 @@ const ExpertSessions = () => {
   const { data: authSession } = useSession();
   const [sessions, setSessions] = useState<IPartnerSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<SessionSortKey>("default");
 
   // Modal & Booking State
   const [selectedForDetails, setSelectedForDetails] = useState<IPartnerSession | null>(null);
@@ -175,6 +184,15 @@ const ExpertSessions = () => {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
+  const sortedSessions = useMemo(() => {
+    return sortSessions(sessions, sortBy);
+  }, [sessions, sortBy]);
+
+  const handleSortChange = (newSort: SessionSortKey) => {
+    setSortBy(newSort);
+    if (emblaApi) emblaApi.scrollTo(0);
+  };
+
   const getSessionBasePrice = (s: IPartnerSession, vIndex: number) => {
     // Variant price takes absolute priority over session base price
     if (
@@ -262,6 +280,7 @@ const ExpertSessions = () => {
   };
 
   const openBookingModal = async (s: IPartnerSession, initialVariantIndex = 0) => {
+    if (isSessionFullyBooked(s)) return;
     setSelectedForBooking(s);
     setSelectedVariantIndex(initialVariantIndex);
     setError("");
@@ -303,6 +322,7 @@ const ExpertSessions = () => {
 
   // Show availability notice (if any) before opening the booking modal
   const requestBooking = (s: IPartnerSession, variantIndex = 0) => {
+    if (isSessionFullyBooked(s)) return;
     if (getAvailabilityNotice(s)) {
       setPendingBooking({ session: s, variantIndex });
       return;
@@ -457,8 +477,8 @@ const ExpertSessions = () => {
       <section
         ref={sectionRef}
         className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${isVisible
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-10'
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-10'
           }`}
       >
         <div className="container-custom">
@@ -524,32 +544,41 @@ const ExpertSessions = () => {
     <section
       ref={sectionRef}
       className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${isVisible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-10'
+        ? 'opacity-100 translate-y-0'
+        : 'opacity-0 translate-y-10'
         }`}
     >
       <div className="container-custom">
         {/* Header */}
-        <div className="text-start mb-6 max-w-4xl">
-          <h2
-            className={`${thirdFont.className} ${headerStyle} mb-4`}
-          >
-            {t("title")}
-          </h2>
-          <ul className="space-y-2">
-            <li className="flex items-start gap-2">
-              <span className="text-xl mt-1">•</span>
-              <p className={`${subHeaderStyle}`}>
-                {t("subtitle")}
-              </p>
-            </li>
-          </ul>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div className="text-start max-w-4xl">
+            <h2
+              className={`${thirdFont.className} ${headerStyle} mb-4`}
+            >
+              {t("title")}
+            </h2>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2">
+                <span className="text-xl mt-1">•</span>
+                <p className={`${subHeaderStyle}`}>
+                  {t("subtitle")}
+                </p>
+              </li>
+            </ul>
+          </div>
+          {/* <div className="self-start md:self-end shrink-0 pb-1">
+            <SessionSortSelect
+              id="expert-sessions-sort"
+              value={sortBy}
+              onChange={handleSortChange}
+            />
+          </div> */}
         </div>
 
         {/* Carousel Container */}
         <div className="relative">
           {/* Navigation Arrows */}
-          {sessions.length > 4 && (
+          {sortedSessions.length > 4 && (
             <>
               <button
                 onClick={scrollPrev}
@@ -575,7 +604,7 @@ const ExpertSessions = () => {
           {/* Embla Carousel */}
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-6 md:gap-12">
-              {sessions.map((session) => (
+              {sortedSessions.map((session) => (
                 <div key={session._id} className="flex-[0_0_45%] md:flex-[0_0_30%] xl:flex-[0_0_22%] min-w-0">
                   <SessionCard
                     session={session}
@@ -598,480 +627,522 @@ const ExpertSessions = () => {
       </div>
 
 
-      <ConsultantAvailabilityModal
-        notice={getAvailabilityNotice(pendingBooking?.session ?? null)}
-        onClose={() => setPendingBooking(null)}
-        onContinue={() => {
-          if (!pendingBooking) return;
-          const { session, variantIndex } = pendingBooking;
-          setPendingBooking(null);
-          openBookingModal(session, variantIndex);
-        }}
-      />
+        <ConsultantAvailabilityModal
+          notice={getAvailabilityNotice(pendingBooking?.session ?? null)}
+          onClose={() => setPendingBooking(null)}
+          onContinue={() => {
+            if (!pendingBooking) return;
+            const { session, variantIndex } = pendingBooking;
+            setPendingBooking(null);
+            openBookingModal(session, variantIndex);
+          }}
+        />
 
-      {/* Details Modal */}
-      {selectedForDetails && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-          onClick={() => setSelectedForDetails(null)}
-        >
+        {/* Details Modal */}
+        {selectedForDetails && (
           <div
-            className="bg-creamey rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setSelectedForDetails(null)}
           >
-            <div className="flex items-start gap-6 mb-6">
-              {/* Image */}
-              {selectedForDetails.imageUrl && (
-                <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
-                  <Image
-                    src={selectedForDetails.imageUrl}
-                    alt={selectedForDetails.partnerName}
-                    fill
-                    className="object-cover"
-                  />
+            <div
+              className="bg-creamey rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start gap-6 mb-6">
+                {/* Image */}
+                {selectedForDetails.imageUrl && (
+                  <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
+                    <Image
+                      src={selectedForDetails.imageUrl}
+                      alt={selectedForDetails.partnerName}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Title & Name */}
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-lovely mb-1">
+                    {selectedForDetails.partnerName}
+                  </h3>
+                  <p className="text-lg text-lovely/70 mb-2">
+                    {activeDetailsVariant?.title || selectedForDetails.title}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xl font-semibold text-lovely">
+                      EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
+                    </p>
+                    {getSessionDiscountBadge(selectedForDetails) && (
+                      <span className="bg-lovely text-creamey text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                        {getSessionDiscountBadge(selectedForDetails)}
+                      </span>
+                    )}
+                    {activeDetailsVariant?.duration ? (
+                      <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
+                        ⏱ {activeDetailsVariant.duration} mins
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              {/* Variants Selector if available */}
+              {selectedForDetails.variants && selectedForDetails.variants.length > 1 && (
+                <div className="mb-6">
+                  <h4 className="font-bold text-lovely text-sm mb-2 uppercase tracking-wide">
+                    Choose Variant:
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedForDetails.variants.map((v, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedVariantIndex(idx)}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${selectedVariantIndex === idx
+                          ? "bg-lovely text-creamey border-lovely shadow"
+                          : "bg-white/60 text-lovely border-lovely/40 hover:bg-white"
+                          }`}
+                      >
+                        <span>{v.title}</span>
+                        <span className="ml-2 text-xs opacity-80">
+                          (EGP {v.price} )
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Title & Name */}
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-lovely mb-1">
-                  {selectedForDetails.partnerName}
-                </h3>
-                <p className="text-lg text-lovely/70 mb-2">
-                  {activeDetailsVariant?.title || selectedForDetails.title}
-                </p>
-                <div className="flex items-center gap-3">
-                  <p className="text-xl font-semibold text-lovely">
-                    EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
+              {/* Description */}
+              <div className="mb-6">
+                <h4 className="font-bold text-lovely text-lg mb-2">Helps you with:</h4>
+                <div className="text-base font-medium text-lovely/90 whitespace-pre-line">
+                  {(activeDetailsVariant?.description || selectedForDetails.description)
+                    .split('\n')
+                    .map((line, i) => (
+                      <div key={i} className="flex items-start gap-2 mb-2">
+                        {line.trim() && (
+                          <>
+                            <span className="mt-1">•</span>
+                            <span>{line}</span>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Session Type & Capacity */}
+              {selectedForDetails.sessionType && (
+                <div className="mb-6 space-y-1">
+                  <p className="text-lovely/80">
+                    <span className="font-semibold">Session Type:</span>{" "}
+                    {selectedForDetails.sessionType === "one-to-one" ? "One-to-One" : "Webinar"}
                   </p>
-                  {getSessionDiscountBadge(selectedForDetails) && (
-                    <span className="bg-lovely text-creamey text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
-                      {getSessionDiscountBadge(selectedForDetails)}
-                    </span>
-                  )}
-                  {activeDetailsVariant?.duration ? (
-                    <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
-                      ⏱ {activeDetailsVariant.duration} mins
-                    </span>
-                  ) : null}
+                  {selectedForDetails.sessionType === "webinar" &&
+                    typeof selectedForDetails.maxCapacity === "number" &&
+                    selectedForDetails.maxCapacity > 0 && (
+                      <div className="text-xs">
+                        {isSessionFullyBooked(selectedForDetails) ? (
+                          <span className="inline-flex items-center font-semibold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
+                            Fully Booked (Max capacity {selectedForDetails.maxCapacity} reached)
+                          </span>
+                        ) : (
+                          <span className="text-lovely/70">
+                            Capacity: {selectedForDetails.maxCapacity} seats
+                            <span className="ml-1 text-emerald-600 font-medium">
+                              ({Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} spots remaining)
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Variants Selector if available */}
-            {selectedForDetails.variants && selectedForDetails.variants.length > 1 && (
-              <div className="mb-6">
-                <h4 className="font-bold text-lovely text-sm mb-2 uppercase tracking-wide">
-                  Choose Variant:
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedForDetails.variants.map((v, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSelectedVariantIndex(idx)}
-                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${selectedVariantIndex === idx
-                          ? "bg-lovely text-creamey border-lovely shadow"
-                          : "bg-white/60 text-lovely border-lovely/40 hover:bg-white"
-                        }`}
-                    >
-                      <span>{v.title}</span>
-                      <span className="ml-2 text-xs opacity-80">
-                        (EGP {v.price} )
-                      </span>
-                    </button>
-                  ))}
-                </div>
+              {/* Action Buttons */}
+              <div className="flex w-full justify-center gap-3">
+                {isSessionFullyBooked(selectedForDetails) ? (
+                  <Button
+                    disabled
+                    className="bg-gray-300 text-gray-500 font-bold rounded-md px-10 md:px-20 py-3 md:py-6 cursor-not-allowed"
+                  >
+                    Fully Booked
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      const currIdx = selectedVariantIndex;
+                      setSelectedForDetails(null);
+                      requestBooking(selectedForDetails, currIdx);
+                    }}
+                    className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
+                  >
+                    Book Now
+                  </Button>
+                )}
               </div>
-            )}
-
-            {/* Description */}
-            <div className="mb-6">
-              <h4 className="font-bold text-lovely text-lg mb-2">Helps you with:</h4>
-              <div className="text-base font-medium text-lovely/90 whitespace-pre-line">
-                {(activeDetailsVariant?.description || selectedForDetails.description)
-                  .split('\n')
-                  .map((line, i) => (
-                    <div key={i} className="flex items-start gap-2 mb-2">
-                      {line.trim() && (
-                        <>
-                          <span className="mt-1">•</span>
-                          <span>{line}</span>
-                        </>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* Session Type */}
-            {selectedForDetails.sessionType && (
-              <div className="mb-6">
-                <p className="text-lovely/80">
-                  <span className="font-semibold">Session Type:</span>{" "}
-                  {selectedForDetails.sessionType === "one-to-one" ? "One-to-One" : "Webinar"}
-                </p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex w-full justify-center gap-3">
-              <Button
-                onClick={() => {
-                  const currIdx = selectedVariantIndex;
-                  setSelectedForDetails(null);
-                  requestBooking(selectedForDetails, currIdx);
-                }}
-                className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
-              >
-                Book Now
-              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Booking Modal */}
-      {selectedForBooking && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-          onClick={() => {
-            setSelectedForBooking(null);
-            setInstapaySuccess(false);
-          }}
-        >
+        {/* Booking Modal */}
+        {selectedForBooking && (
           <div
-            className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => {
+              setSelectedForBooking(null);
+              setInstapaySuccess(false);
+            }}
           >
+            <div
+              className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
 
-            {/* InstaPay Success Message */}
-            {instapaySuccess ? (
-              <div className="text-center py-6 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
-                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-10 h-10 text-green-600" />
-                </div>
-                <h3 className="text-xl font-bold text-lovely">
-                  Booking Submitted! 🎉
-                </h3>
-                <p className="text-lovely/80 text-sm leading-relaxed">
-                  Your booking for <span className="font-semibold">{activeBookingVariant?.title || selectedForBooking.title}</span> has been received.
-                </p>
-                <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-left space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg">⏳</span>
-                    <p className="text-sm text-lovely/90">
-                      Our administration team will review your payment receipt. This may take up to <span className="font-bold">24 hours</span>.
-                    </p>
+              {/* InstaPay Success Message */}
+              {instapaySuccess ? (
+                <div className="text-center py-6 space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-10 h-10 text-green-600" />
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg">📧</span>
-                    <p className="text-sm text-lovely/90">
-                      You will receive a confirmation email once your payment is verified.
-                    </p>
+                  <h3 className="text-xl font-bold text-lovely">
+                    Booking Submitted! 🎉
+                  </h3>
+                  <p className="text-lovely/80 text-sm leading-relaxed">
+                    Your booking for <span className="font-semibold">{activeBookingVariant?.title || selectedForBooking.title}</span> has been received.
+                  </p>
+                  <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-left space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">⏳</span>
+                      <p className="text-sm text-lovely/90">
+                        Our administration team will review your payment receipt. This may take up to <span className="font-bold">24 hours</span>.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">📧</span>
+                      <p className="text-sm text-lovely/90">
+                        You will receive a confirmation email once your payment is verified.
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">🕐</span>
+                      <p className="text-sm text-lovely/90">
+                        Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg">🕐</span>
-                    <p className="text-sm text-lovely/90">
-                      Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  className="w-full bg-lovely text-creamey rounded-2xl mt-2"
-                  onClick={() => {
-                    setInstapaySuccess(false);
-                    setSelectedForBooking(null);
-                  }}
-                >
-                  Got it!
-                </Button>
-              </div>
-            ) : (
-            <>
-            <h3 className="text-xl font-semibold text-lovely mb-2">
-              Book: {activeBookingVariant?.title || selectedForBooking.title}
-            </h3>
-
-            {/* Variant Switcher in Booking Modal */}
-            {selectedForBooking.variants && selectedForBooking.variants.length > 1 && (
-              <div className="mb-4">
-                <label className="block text-xs font-semibold text-lovely uppercase tracking-wide mb-1.5">
-                  Selected Variant
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {selectedForBooking.variants.map((v, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleBookingVariantChange(idx)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${selectedVariantIndex === idx
-                          ? "bg-lovely text-white border-lovely"
-                          : "bg-white/60 text-lovely border-lovely/30 hover:bg-white"
-                        }`}
-                    >
-                      {v.title} (EGP {v.price})
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <p className="text-sm text-lovely/90 mb-4">
-              {finalPrice === 0
-                ? "Once confirmed, you will be redirected directly to access your session."
-                : paymentMethod === "instapay"
-                  ? "Upload your InstaPay receipt and our team will verify your payment within 24 hours."
-                  : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
-            </p>
-
-            {/* Links */}
-            {selectedForBooking.links && selectedForBooking.links.length > 0 && (
-              <div className="mb-4">
-                <div className="space-y-2">
-                  {selectedForBooking.links.map((link, i) => (
-                    <a
-                      key={i}
-                      href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-lovely hover:text-lovely/70 underline underline-offset-2 transition-colors text-sm"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                      <span>{link.description || link.url} (Anonymously)</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={book} className="space-y-3">
-              <Input
-                className="border-pinkey placeholder:text-lovely bg-creamey"
-                placeholder="First name"
-                value={form.firstName}
-                onChange={(e) =>
-                  setForm({ ...form, firstName: e.target.value })
-                }
-                required
-              />
-              <Input
-                className="border-pinkey placeholder:text-lovely bg-creamey"
-                placeholder="Last name"
-                value={form.lastName}
-                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                required
-              />
-              <Input
-                className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
-                placeholder="Email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-              <Input
-                className="border-pinkey placeholder:text-lovely bg-creamey"
-                placeholder="Phone"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                required
-              />
-              <div className="flex gap-2">
-                <Input
-                  className="border-pinkey placeholder:text-lovely bg-creamey"
-                  placeholder="Discount code (optional)"
-                  value={form.discountCode}
-                  onChange={(e) =>
-                    setForm({ ...form, discountCode: e.target.value })
-                  }
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-lovely text-lovely rounded-2xl"
-                  onClick={applyDiscount}
-                >
-                  Apply
-                </Button>
-              </div>
-              <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
-                <div className="flex items-center justify-between">
-                  <span className="text-lovely">Price</span>
-                  <span
-                    className={`text-lovely ${subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
-                        ? "line-through"
-                        : ""
-                      }`}
+                  <Button
+                    type="button"
+                    className="w-full bg-lovely text-creamey rounded-2xl mt-2"
+                    onClick={() => {
+                      setInstapaySuccess(false);
+                      setSelectedForBooking(null);
+                    }}
                   >
-                    EGP {bookingBasePrice}
-                  </span>
+                    Got it!
+                  </Button>
                 </div>
-                {subscriptionApplied && subscriptionFinalPrice !== null && (
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-lovely">
-                      Subscription discount (
-                      {selectedForBooking.subscriptionDiscountPercentage}%){" "}
-                    </span>
-                    <span className="text-lovely">
-                      EGP {Math.max(0, bookingBasePrice - subscriptionFinalPrice)}
-                    </span>
-                  </div>
-                )}
-                {applied && couponFinalPrice !== null && (
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-lovely">
-                      Coupon discount ({Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)
-                    </span>
-                    <span className="text-lovely">
-                      EGP {Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}
-                    </span>
-                  </div>
-                )}
-                {finalPrice !== null && (
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-lovely/20">
-                    <span className="text-lovely font-medium">Final Price</span>
-                    <span className="text-lovely font-semibold">
-                      {finalPrice === 0 ? "FREE (EGP 0)" : `EGP ${finalPrice}`}
-                    </span>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-lovely mb-2">
+                    Book: {activeBookingVariant?.title || selectedForBooking.title}
+                  </h3>
 
-              {/* Payment Method Selector */}
-              {finalPrice !== null && finalPrice > 0 && (
-                <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-lovely uppercase tracking-wide">
-                    Payment Method
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("card")}
-                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
-                        paymentMethod === "card"
-                          ? "bg-lovely text-creamey border-lovely shadow-md"
-                          : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
-                      }`}
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      Card / Wallet
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("instapay")}
-                      className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
-                        paymentMethod === "instapay"
-                          ? "bg-lovely text-creamey border-lovely shadow-md"
-                          : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
-                      }`}
-                    >
-                      <Smartphone className="w-4 h-4" />
-                      InstaPay
-                    </button>
-                  </div>
+                  {String(selectedForBooking._id) === "6acfa82b936fe79b1c127ed6" && (
+                    <div className="mb-4 p-3.5 bg-[#fce2e8] border border-[#efc9cf] rounded-xl text-xs sm:text-sm text-[#592a2f]">
+                      <p className="font-bold text-[#d32333] mb-1">
+                        ورشة جماعية (Online Group Webinar)
+                      </p>
+                      <p className="mb-2 leading-relaxed text-xs">
+                        هذه الجلسة تقدم شرحاً وترشيحات عامة. إذا كنتِ تبحثين عن استشارة فردية 1:1 مخصصة لميزانيتك وبيتك، يمكنكِ حجزها من قسم جلسات الخبراء.
+                      </p>
+                      <a
+                        href="/shop?tab=sessions#partner-sessions"
+                        className="font-bold text-[#d32333] underline hover:text-[#592a2f]"
+                      >
+                        تصفحي الجلسات الفردية 1:1 في المتجر
+                      </a>
+                    </div>
+                  )}
 
-                  {/* InstaPay Instructions & Upload */}
-                  {paymentMethod === "instapay" && (
-                    <div className="p-3 border border-lovely/20 rounded-xl bg-lovely/5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="flex items-center gap-2 text-lovely font-semibold">
-                        <span className="p-1 bg-lovely/10 rounded-full text-sm">💰</span>
-                        <p className="text-xs">InstaPay Instructions</p>
+                  {/* Variant Switcher in Booking Modal */}
+                  {selectedForBooking.variants && selectedForBooking.variants.length > 1 && (
+                    <div className="mb-4">
+                      <label className="block text-xs font-semibold text-lovely uppercase tracking-wide mb-1.5">
+                        Selected Variant
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedForBooking.variants.map((v, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleBookingVariantChange(idx)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${selectedVariantIndex === idx
+                              ? "bg-lovely text-white border-lovely"
+                              : "bg-white/60 text-lovely border-lovely/30 hover:bg-white"
+                              }`}
+                          >
+                            {v.title} (EGP {v.price})
+                          </button>
+                        ))}
                       </div>
-                      <div className="text-[12px] text-lovely space-y-1.5 bg-white/50 p-2.5 rounded-lg border border-lovely/10">
-                        <p className="flex gap-1.5">
-                          <span className="font-bold text-lovely">1.</span>
-                          <span>Open <b>InstaPay</b> app → <b>"Send Money"</b></span>
-                        </p>
-                        <p className="flex gap-1.5">
-                          <span className="font-bold text-lovely">2.</span>
-                          <span>Select <b>"Bank Account"</b></span>
-                        </p>
-                        <p className="flex gap-1.5">
-                          <span className="font-bold text-lovely">3.</span>
-                          <span>Account: <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
-                        </p>
-                        <p className="flex gap-1.5">
-                          <span className="font-bold text-lovely">4.</span>
-                          <span>Bank: <b>Credit Agricole</b></span>
-                        </p>
-                        <p className="flex gap-1.5">
-                          <span className="font-bold text-lovely">5.</span>
-                          <span>Receiver: <b>Wifey</b></span>
-                        </p>
-                      </div>
+                    </div>
+                  )}
 
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
-                        <CldUploadWidget
-                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
-                          onSuccess={(result: any) => {
-                            if (result.info && typeof result.info !== "string") {
-                              setInstapayReceipt(result.info.secure_url);
-                            }
-                          }}
+                  <p className="text-sm text-lovely/90 mb-4">
+                    {finalPrice === 0
+                      ? "Once confirmed, you will be redirected directly to access your session."
+                      : paymentMethod === "instapay"
+                        ? "Upload your InstaPay receipt and our team will verify your payment within 24 hours."
+                        : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
+                  </p>
+
+                  {/* Links */}
+                  {selectedForBooking.links && selectedForBooking.links.length > 0 && (
+                    <div className="mb-4">
+                      <div className="space-y-2">
+                        {selectedForBooking.links.map((link, i) => (
+                          <a
+                            key={i}
+                            href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-lovely hover:text-lovely/70 underline underline-offset-2 transition-colors text-sm"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            <span>{link.description || link.url} (Anonymously)</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <form onSubmit={book} className="space-y-3">
+                    <Input
+                      className="border-pinkey placeholder:text-lovely bg-creamey"
+                      placeholder="First name"
+                      value={form.firstName}
+                      onChange={(e) =>
+                        setForm({ ...form, firstName: e.target.value })
+                      }
+                      required
+                    />
+                    <Input
+                      className="border-pinkey placeholder:text-lovely bg-creamey"
+                      placeholder="Last name"
+                      value={form.lastName}
+                      onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                      required
+                    />
+                    <Input
+                      className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
+                      placeholder="Email"
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      required
+                    />
+                    <Input
+                      className="border-pinkey placeholder:text-lovely bg-creamey"
+                      placeholder="Phone"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      required
+                    />
+                    <div className="flex gap-2">
+                      <Input
+                        className="border-pinkey placeholder:text-lovely bg-creamey"
+                        placeholder="Discount code (optional)"
+                        value={form.discountCode}
+                        onChange={(e) =>
+                          setForm({ ...form, discountCode: e.target.value })
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-lovely text-lovely rounded-2xl"
+                        onClick={applyDiscount}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                    <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lovely">Price</span>
+                        <span
+                          className={`text-lovely ${subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
+                            ? "line-through"
+                            : ""
+                            }`}
                         >
-                          {({ open }) => (
-                            <button
-                              type="button"
-                              onClick={() => open()}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-xs font-medium"
-                            >
-                              <Upload className="w-4 h-4" />
-                              {instapayReceipt ? "✓ Receipt Uploaded (Change)" : "📸 Upload Receipt"}
-                            </button>
-                          )}
-                        </CldUploadWidget>
+                          EGP {bookingBasePrice}
+                        </span>
+                      </div>
+                      {subscriptionApplied && subscriptionFinalPrice !== null && (
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-lovely">
+                            Subscription discount (
+                            {selectedForBooking.subscriptionDiscountPercentage}%){" "}
+                          </span>
+                          <span className="text-lovely">
+                            EGP {Math.max(0, bookingBasePrice - subscriptionFinalPrice)}
+                          </span>
+                        </div>
+                      )}
+                      {applied && couponFinalPrice !== null && (
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-lovely">
+                            Coupon discount ({Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)
+                          </span>
+                          <span className="text-lovely">
+                            EGP {Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}
+                          </span>
+                        </div>
+                      )}
+                      {finalPrice !== null && (
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-lovely/20">
+                          <span className="text-lovely font-medium">Final Price</span>
+                          <span className="text-lovely font-semibold">
+                            {finalPrice === 0 ? "FREE (EGP 0)" : `EGP ${finalPrice}`}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
-                        {instapayReceipt && (
-                          <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 mt-1">
-                            <Image src={instapayReceipt} alt="InstaPay Receipt" fill className="object-cover" />
+                    {/* Payment Method Selector */}
+                    {finalPrice !== null && finalPrice > 0 && (
+                      <div className="space-y-3">
+                        <label className="block text-xs font-semibold text-lovely uppercase tracking-wide">
+                          Payment Method
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("card")}
+                            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${paymentMethod === "card"
+                              ? "bg-lovely text-creamey border-lovely shadow-md"
+                              : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
+                              }`}
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            Card / Wallet
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("instapay")}
+                            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${paymentMethod === "instapay"
+                              ? "bg-lovely text-creamey border-lovely shadow-md"
+                              : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
+                              }`}
+                          >
+                            <Smartphone className="w-4 h-4" />
+                            InstaPay
+                          </button>
+                        </div>
+
+                        {/* InstaPay Instructions & Upload */}
+                        {paymentMethod === "instapay" && (
+                          <div className="p-3 border border-lovely/20 rounded-xl bg-lovely/5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-center gap-2 text-lovely font-semibold">
+                              <span className="p-1 bg-lovely/10 rounded-full text-sm">💰</span>
+                              <p className="text-xs">InstaPay Instructions</p>
+                            </div>
+                            <div className="text-[12px] text-lovely space-y-1.5 bg-white/50 p-2.5 rounded-lg border border-lovely/10">
+                              <p className="flex gap-1.5">
+                                <span className="font-bold text-lovely">1.</span>
+                                <span>Open <b>InstaPay</b> app → <b>"Send Money"</b></span>
+                              </p>
+                              <p className="flex gap-1.5">
+                                <span className="font-bold text-lovely">2.</span>
+                                <span>Select <b>"Bank Account"</b></span>
+                              </p>
+                              <p className="flex gap-1.5">
+                                <span className="font-bold text-lovely">3.</span>
+                                <span>Account: <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                              </p>
+                              <p className="flex gap-1.5">
+                                <span className="font-bold text-lovely">4.</span>
+                                <span>Bank: <b>Credit Agricole</b></span>
+                              </p>
+                              <p className="flex gap-1.5">
+                                <span className="font-bold text-lovely">5.</span>
+                                <span>Receiver: <b>Wifey</b></span>
+                              </p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
+                              <CldUploadWidget
+                                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
+                                onSuccess={(result: any) => {
+                                  if (result.info && typeof result.info !== "string") {
+                                    setInstapayReceipt(result.info.secure_url);
+                                  }
+                                }}
+                              >
+                                {({ open }) => (
+                                  <button
+                                    type="button"
+                                    onClick={() => open()}
+                                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-xs font-medium"
+                                  >
+                                    <Upload className="w-4 h-4" />
+                                    {instapayReceipt ? "✓ Receipt Uploaded (Change)" : "📸 Upload Receipt"}
+                                  </button>
+                                )}
+                              </CldUploadWidget>
+
+                              {instapayReceipt && (
+                                <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-lovely/20 mt-1">
+                                  <Image src={instapayReceipt} alt="InstaPay Receipt" fill className="object-cover" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-start gap-2 text-[11px] text-lovely/70 bg-pinkey/30 p-2 rounded-lg">
+                              <span className="text-sm">⚠️</span>
+                              <p>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</p>
+                            </div>
                           </div>
                         )}
                       </div>
+                    )}
 
-                      <div className="flex items-start gap-2 text-[11px] text-lovely/70 bg-pinkey/30 p-2 rounded-lg">
-                        <span className="text-sm">⚠️</span>
-                        <p>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</p>
-                      </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    <div className="flex gap-3">
+                      <Button
+                        type="submit"
+                        disabled={submitting || (paymentMethod === "instapay" && !instapayReceipt && finalPrice !== null && finalPrice > 0)}
+                        className="flex-1 bg-lovely text-creamey rounded-2xl"
+                      >
+                        {submitting
+                          ? "Processing..."
+                          : finalPrice === 0
+                            ? "Book Now"
+                            : paymentMethod === "instapay"
+                              ? "Submit for Review"
+                              : "Proceed to Pay"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 bg-creamey hover:text-lovely hover:bg-creamey/90 border-lovely text-lovely rounded-2xl"
+                        onClick={() => setSelectedForBooking(null)}
+                      >
+                        Cancel
+                      </Button>
                     </div>
-                  )}
-                </div>
+                  </form>
+                </>
               )}
-
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <div className="flex gap-3">
-                <Button
-                  type="submit"
-                  disabled={submitting || (paymentMethod === "instapay" && !instapayReceipt && finalPrice !== null && finalPrice > 0)}
-                  className="flex-1 bg-lovely text-creamey rounded-2xl"
-                >
-                  {submitting
-                    ? "Processing..."
-                    : finalPrice === 0
-                      ? "Book Now"
-                      : paymentMethod === "instapay"
-                        ? "Submit for Review"
-                        : "Proceed to Pay"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1 bg-creamey hover:text-lovely hover:bg-creamey/90 border-lovely text-lovely rounded-2xl"
-                  onClick={() => setSelectedForBooking(null)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-            </>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </section>
   );
 };

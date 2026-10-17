@@ -3,6 +3,7 @@ export interface SessionBookingClientMailProps {
   clientLastName: string;
   sessionTitle: string;
   partnerName: string;
+  sessionType?: "one-to-one" | "webinar";
   partnerWhatsApp?: string;
   meetingLink?: string;
   finalPrice?: number;
@@ -14,16 +15,27 @@ export function SessionBookingClientMail({
   clientLastName,
   sessionTitle,
   partnerName,
+  sessionType = "one-to-one",
   partnerWhatsApp,
   meetingLink,
   finalPrice,
   orderId,
 }: SessionBookingClientMailProps) {
   const clientName = `${clientFirstName} ${clientLastName}`.trim();
+  const isWebinar = sessionType === "webinar";
   const cleanPhone = partnerWhatsApp
     ? String(partnerWhatsApp).replace(/[^0-9]/g, "")
     : "";
   const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : "";
+
+  const calDetails = `Join online webinar: ${sessionTitle}\nMeeting Link: ${meetingLink || "Online"}`;
+  const calLocation = meetingLink || "Online";
+  const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+    sessionTitle
+  )}&details=${encodeURIComponent(calDetails)}&location=${encodeURIComponent(calLocation)}`;
+  const outlookCalUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(
+    sessionTitle
+  )}&body=${encodeURIComponent(calDetails)}&location=${encodeURIComponent(calLocation)}`;
 
   return `
 <!DOCTYPE html>
@@ -155,6 +167,41 @@ export function SessionBookingClientMail({
 
 									<!-- Next Steps & Action Buttons -->
 									<div style="background-color: #fce2e8; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
+										${
+                      isWebinar
+                        ? `
+										<h4 style="margin: 0 0 8px; color: #d32333; font-size: 18px; font-weight: 700;">
+											Webinar Access & Calendar 💻
+										</h4>
+										<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #592a2f;">
+											This is a group webinar session. You do not need to contact the expert on WhatsApp. Simply join via the session link below at the scheduled time.
+										</p>
+										${
+                      meetingLink
+                        ? `<div style="margin-top: 12px; margin-bottom: 16px;">
+											<a class="button" href="${meetingLink}" target="_blank" style="background-color: #d32333; color: #ffffff; display: inline-block;">
+												🔗 Join Webinar Link
+											</a>
+										</div>`
+                        : ""
+                    }
+										<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed #efc9cf;">
+											<p style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #592a2f;">
+												📅 Don&apos;t miss it — Add to your Calendar:
+											</p>
+											<div style="display: inline-block; margin: 4px;">
+												<a class="button" href="${googleCalUrl}" target="_blank" style="background-color: #4285F4; color: #ffffff; font-size: 13px; padding: 10px 20px; display: inline-block;">
+													📅 Google Calendar
+												</a>
+											</div>
+											<div style="display: inline-block; margin: 4px;">
+												<a class="button" href="${outlookCalUrl}" target="_blank" style="background-color: #0078D4; color: #ffffff; font-size: 13px; padding: 10px 20px; display: inline-block;">
+													📅 Outlook Calendar
+												</a>
+											</div>
+										</div>
+										`
+                        : `
 										<h4 style="margin: 0 0 8px; color: #d32333; font-size: 18px; font-weight: 700;">
 											What Happens Next? 💬
 										</h4>
@@ -164,7 +211,7 @@ export function SessionBookingClientMail({
 										${
                       waUrl
                         ? `<div style="margin-top: 12px;">
-											<a class="wa-button" href="${waUrl}" target="_blank" style="background-color: #25D366; color: #ffffff;">
+											<a class="wa-button" href="${waUrl}" target="_blank" style="background-color: #25D366; color: #ffffff; display: inline-block;">
 												📲 Message ${partnerName} on WhatsApp
 											</a>
 										</div>`
@@ -173,11 +220,13 @@ export function SessionBookingClientMail({
 										${
                       meetingLink
                         ? `<div style="margin-top: 12px;">
-											<a class="button" href="${meetingLink}" target="_blank" style="background-color: #d32333; color: #ffffff;">
+											<a class="button" href="${meetingLink}" target="_blank" style="background-color: #d32333; color: #ffffff; display: inline-block;">
 												🔗 Access Session Link
 											</a>
 										</div>`
                         : ""
+                    }
+										`
                     }
 									</div>
 
