@@ -46,6 +46,7 @@ import { lifeyFont, thirdFont } from "@/fonts";
 import { wishListContext } from "@/app/context/wishListContext";
 import PartnerSessionsSection from "@/components/partners/PartnerSessionsSection";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
+import { localizeProduct, localizePackage } from "@/app/lib/localize";
 
 interface Category {
   _id: string;
@@ -124,23 +125,24 @@ function ShopPage() {
   useEffect(() => {
     const fetchSubcategories = async () => {
       try {
-        const response = await fetch("/api/subcategories?active=true&type=product");
+        const response = await fetch(`/api/subcategories?active=true&type=product&locale=${locale}`);
         const data = await response.json();
-        // The API returns { data: [...] } or [...] depending on my previous thought.
-        // My edit to api/subcategories/route.ts returns { data: ... }
         const rawSubcategories = data.data || [];
 
         // Map subCategoryName to name to match interface
         const mappedSubcategories = rawSubcategories.map((sub: any) => ({
           _id: sub._id,
-          name: sub.subCategoryName,
-          description: sub.description,
+          name: (locale === "ar" && sub.translations?.ar?.subCategoryName)
+            ? sub.translations.ar.subCategoryName
+            : (sub.subCategoryName || sub.name),
+          description: (locale === "ar" && sub.translations?.ar?.description)
+            ? sub.translations.ar.description
+            : sub.description,
           image: sub.image,
           categoryID: sub.categoryID
         }));
 
         setSubcategoriesList(mappedSubcategories);
-        // Also set empty categories to avoid errors if referenced
         setCategories([]);
       } catch (error) {
         console.error("Error fetching subcategories:", error);
@@ -148,7 +150,7 @@ function ShopPage() {
     };
 
     fetchSubcategories();
-  }, []);
+  }, [locale]);
 
   // Fetch products with filters
   useEffect(() => {
@@ -168,8 +170,8 @@ function ShopPage() {
 
         const response = await fetch(`/api/products?${queryParams.toString()}`);
         const data = await response.json();
-        // setProducts(data);
-        setProducts(Array.isArray(data) ? data : []); // Always set an array
+        const rawProducts: Product[] = Array.isArray(data) ? data : [];
+        setProducts(rawProducts.map((p) => localizeProduct(p, locale)));
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -178,7 +180,7 @@ function ShopPage() {
     };
 
     fetchProducts();
-  }, [filters]);
+  }, [filters, locale]);
 
   // Fetch packages
   useEffect(() => {
@@ -193,34 +195,58 @@ function ShopPage() {
         const gehazBestiePlanner: Ipackage = {
           _id: "custom-gehaz-bestie-planner",
           slug: "GehazBestiePlanner",
-          name: "Gehaz Bestie Planner",
+          name: locale === "ar" ? "بلانر رفيقة الجهاز" : "Gehaz Bestie Planner",
           imgUrl: "/experience/gehaz1.png",
           images: ["/experience/gehaz1.png"],
           price: 1500,
           duration: 0,
           items: [],
-          notes: [
+          notes: locale === "ar" ? [
+            "بتجهزي شقتك؟",
+            "دليلك الكامل لبيتك غرفة بغرفة — 11 باب يقسموا جهازك لأساسيات وكماليات عشان متصرفيش في غير محله 💕"
+          ] : [
             "Buying your gehaz?",
             "Your home, room by room — 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend."
           ],
           cards: [],
           active: true,
+          translations: {
+            ar: {
+              name: "بلانر رفيقة الجهاز",
+              notes: [
+                "بتجهزي شقتك؟",
+                "دليلك الكامل لبيتك غرفة بغرفة — 11 باب يقسموا جهازك لأساسيات وكماليات عشان متصرفيش في غير محله 💕"
+              ],
+            },
+          },
         };
         const weddingBestiePlanner: Ipackage = {
           _id: "custom-wedding-bestie-planner",
           slug: "WeddingBestiePlanner",
-          name: "Wedding Bestie Planner",
+          name: locale === "ar" ? "بلانر رفيقة الفرح" : "Wedding Bestie Planner",
           imgUrl: "/weddingPlanningPlanner/mob.jpeg",
           images: ["/weddingPlanningPlanner/mob.jpeg"],
           price: 1700,
           duration: 0,
           items: [],
-          notes: [
+          notes: locale === "ar" ? [
+            "بتنظمي يوم فرحك؟",
+            "يومك الكبير خطوة بخطوة — جدولين مهام: واحد ليكي وواحد لعريسك، مع عد تنازلي من قبلها بشهرين لحد ليلة الفرح 💍"
+          ] : [
             "Planning your wedding day?",
             "Your big day, step by step — two checklists included: one for you, one for your groom. Countdown tasks from 2 months out to the night before."
           ],
           cards: [],
           active: true,
+          translations: {
+            ar: {
+              name: "بلانر رفيقة الفرح",
+              notes: [
+                "بتنظمي يوم فرحك؟",
+                "يومك الكبير خطوة بخطوة — جدولين مهام: واحد ليكي وواحد لعريسك، مع عد تنازلي من قبلها بشهرين لحد ليلة الفرح 💍"
+              ],
+            },
+          },
         };
 
         // Filter out any fetched packages with slug "GehazBestiePlanner" to avoid duplicates
@@ -228,8 +254,12 @@ function ShopPage() {
           (pkg: Ipackage) => pkg.slug !== "GehazBestiePlanner" && pkg.slug !== "wedding-bestie-planner"
         );
 
-        // Prepend the custom package to the filtered packages
-        setPackages([gehazBestiePlanner, weddingBestiePlanner, ...filteredPackages]);
+        // Prepend the custom package to the filtered packages and localize all
+        setPackages([
+          gehazBestiePlanner,
+          weddingBestiePlanner,
+          ...filteredPackages.map((pkg: Ipackage) => localizePackage(pkg, locale)),
+        ]);
       } catch (error) {
         console.error("Error fetching packages:", error);
       } finally {
@@ -238,7 +268,7 @@ function ShopPage() {
     };
 
     fetchPackages();
-  }, []);
+  }, [locale]);
 
   const scrollPrevCategories = useCallback(() => {
     if (categoriesEmblaApi) categoriesEmblaApi.scrollPrev();

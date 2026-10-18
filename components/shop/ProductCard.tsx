@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 import { useModal } from "@/app/context/ModalContext";
 import { thirdFont } from "@/fonts";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { localizeProduct } from "@/app/lib/localize";
 
 export default function ProductCard({
   product,
@@ -23,6 +24,8 @@ export default function ProductCard({
   favorite: boolean;
 }) {
   const t = useTranslations("common");
+  const locale = useLocale();
+  const localizedProduct = localizeProduct(product, locale);
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
   const { cart, setCart } = useContext(cartContext);
@@ -40,7 +43,7 @@ export default function ProductCard({
         {
           id: wishList.length,
           productId: product._id,
-          productName: product.title,
+          productName: localizedProduct.title,
           price: product.price.local,
           variant: product.variations?.[0],
           quantity: 1,
@@ -97,7 +100,7 @@ export default function ProductCard({
       <div className="relative aspect-square overflow-hidden">
         <Image
           src={product.variations[0].images[0].url}
-          alt={product.title}
+          alt={localizedProduct.title}
           fill
           className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
             isOutOfStock ? " opacity-80" : ""
@@ -140,7 +143,7 @@ export default function ProductCard({
         <h4
           className={`${thirdFont.className} text-sm md:text-base xl:text-lg tracking-wide font-semibold text-creamey line-clamp-1`}
         >
-          {product.title}
+          {localizedProduct.title}
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">

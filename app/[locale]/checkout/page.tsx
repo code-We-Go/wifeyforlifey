@@ -887,7 +887,7 @@ const CheckoutClientPage = () => {
       <h1
         className={`${thirdFont.className} tracking-normal text-xl text-lovely md:text-3xl mb-4 md:mb-8  font-semibold`}
       >
-        Checkout
+        {t("checkout")}
       </h1>
 
       <div className="w-full flex flex-col-reverse min-h-screen md:flex-row">

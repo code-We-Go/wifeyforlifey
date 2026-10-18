@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { thirdFont } from "@/fonts";
 import axios from "axios";
 import { Link, useRouter } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import React, { useEffect, useState, useRef, Suspense } from "react";
 import { X, ShoppingBag, Zap, CreditCard, ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -59,7 +59,7 @@ const calculateShippingRate = (
     if (!zone) {
       zone = shippingZones.find((z) => z.states && z.states.includes(selectedState?.id?.toString()) && z.localGlobal === "local");
     }
-    return zone ? zone.zone_rate.local : 70;
+    return zone ? zone.zone_rate.local : 45;
   } else {
     const selectedCountry = countries.find((c) => c.id === countryID);
     let zone = null;
@@ -76,6 +76,8 @@ const calculateShippingRate = (
 
 const UnifiedCheckoutPage = () => {
   const router = useRouter();
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const t = useTranslations("checkoutPage");
   const {
     subscriptionItems,
@@ -606,18 +608,20 @@ const UnifiedCheckoutPage = () => {
   return (
     <div className={`container-custom py-8 md:py-12 justify-between text-lovely min-h-screen bg-creamey flex flex-col`}>
       <h1 className={`${thirdFont.className} tracking-normal text-2xl text-lovely md:text-4xl mb-4 md:mb-8 font-semibold`}>
-        Checkout
+        {isAr ? "إتمام الطلب" : "Checkout"}
       </h1>
 
       {priceUpdatedNotice && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center justify-between">
           <p>
-            ℹ️ Some item prices or details were updated to reflect the latest pricing.
+            {isAr
+              ? "ℹ️ تم تحديث بعض أسعار أو تفاصيل المنتجات لتعكس أحدث الأسعار."
+              : "ℹ️ Some item prices or details were updated to reflect the latest pricing."}
           </p>
           <button
             type="button"
             onClick={() => setPriceUpdatedNotice(false)}
-            className="text-amber-800 font-bold ml-4 hover:opacity-75"
+            className="text-amber-800 font-bold ml-4 rtl:ml-0 rtl:mr-4 hover:opacity-75"
           >
             ✕
           </button>
@@ -633,13 +637,17 @@ const UnifiedCheckoutPage = () => {
           {/* Contact Info Section */}
           <div className="w-full">
             <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-1`}>
-              Contact Info
+              {isAr ? "بيانات التواصل" : "Contact Info"}
             </h2>
-            <p className="text-lovely/60 text-xs mb-4">Shipping company may contact you</p>
+            <p className="text-lovely/60 text-xs mb-4">
+              {isAr ? "شركة الشحن قد تتواصل معكِ" : "Shipping company may contact you"}
+            </p>
             <div className="space-y-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 flex flex-col gap-1">
-                  <label className="text-lovely text-sm">Contact Email</label>
+                  <label className="text-lovely text-sm">
+                    {isAr ? "البريد الإلكتروني للتواصل" : "Contact Email"}
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -650,7 +658,9 @@ const UnifiedCheckoutPage = () => {
                   />
                 </div>
                 <div className="flex-1 flex flex-col gap-1">
-                  <label className="text-lovely text-sm">Receiver Phone</label>
+                  <label className="text-lovely text-sm">
+                    {isAr ? "رقم هاتف المستلم" : "Receiver Phone"}
+                  </label>
                   <input
                     type="text"
                     name="phone"
@@ -664,7 +674,9 @@ const UnifiedCheckoutPage = () => {
 
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 flex flex-col gap-1">
-                  <label className="text-lovely text-sm">First Name</label>
+                  <label className="text-lovely text-sm">
+                    {isAr ? "الاسم الأول" : "First Name"}
+                  </label>
                   <input
                     type="text"
                     name="firstName"
@@ -675,7 +687,9 @@ const UnifiedCheckoutPage = () => {
                   />
                 </div>
                 <div className="flex-1 flex flex-col gap-1">
-                  <label className="text-lovely text-sm">Last Name</label>
+                  <label className="text-lovely text-sm">
+                    {isAr ? "اسم العائلة" : "Last Name"}
+                  </label>
                   <input
                     type="text"
                     name="lastName"
@@ -688,7 +702,9 @@ const UnifiedCheckoutPage = () => {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-lovely text-sm">WhatsApp Number (Optional)</label>
+                <label className="text-lovely text-sm">
+                  {isAr ? "رقم الواتساب (اختياري)" : "WhatsApp Number (Optional)"}
+                </label>
                 <input
                   type="text"
                   name="whatsAppNumber"
@@ -703,11 +719,13 @@ const UnifiedCheckoutPage = () => {
           {/* Shipping Address Section */}
           <div className="w-full">
             <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1 mb-4`}>
-              Shipping Address
+              {isAr ? "عنوان التوصيل" : "Shipping Address"}
             </h2>
             <div className="space-y-4">
               <div className="flex flex-col gap-1">
-                <label className="text-lovely text-sm">Address Details</label>
+                <label className="text-lovely text-sm">
+                  {isAr ? "تفاصيل العنوان" : "Address Details"}
+                </label>
                 <input
                   type="text"
                   name="address"
@@ -717,17 +735,6 @@ const UnifiedCheckoutPage = () => {
                   required
                 />
               </div>
-
-              {/* <div className="flex flex-col gap-1">
-                <label className="text-lovely text-sm">Apartment, suite, etc. (Optional)</label>
-                <input
-                  type="text"
-                  name="apartment"
-                  value={formData.apartment}
-                  onChange={handleInputChange}
-                  className="w-full h-10 bg-creamey border border-pinkey rounded-2xl py-2 px-3 text-base"
-                />
-              </div> */}
 
               {countryID === 65 ? (
                 <BostaLocationSelector
@@ -739,7 +746,9 @@ const UnifiedCheckoutPage = () => {
                 />
               ) : (
                 <div className="flex flex-col gap-1">
-                  <label className="text-lovely text-sm">State/Province</label>
+                  <label className="text-lovely text-sm">
+                    {isAr ? "المحافظة / المدينة" : "State/Province"}
+                  </label>
                   <input
                     type="text"
                     name="state"
@@ -773,7 +782,7 @@ const UnifiedCheckoutPage = () => {
                 <div className="w-full bg-creamey/30 rounded-2xl border-2 border-lovely/20 p-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex justify-between items-center border-b border-lovely/10 pb-2">
                     <h3 className="font-bold text-lovely text-base lg:text-lg">
-                      🎁 Gift Recipient Details
+                      {isAr ? "🎁 بيانات مستلمة الهدية" : "🎁 Gift Recipient Details"}
                     </h3>
                     <span className="text-xs bg-lovely text-creamey px-2 py-0.5 rounded-full capitalize">
                       {configs[0].tier} • {configs[0].duration}m
@@ -838,19 +847,23 @@ const UnifiedCheckoutPage = () => {
                   <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4">
                     {configs[0].tier !== "mini" && (
                       <p className="text-sm text-lovely font-medium bg-lovely/10 p-3 rounded-lg border border-lovely/20">
-                        Please notify us when the gift reaches the bride to add her in the whatsapp support group
+                        {isAr
+                          ? "يرجى إبلاغنا عند وصول الهدية للعروسة لنقوم بإضافتها في جروب الدعم على الواتساب 💕"
+                          : "Please notify us when the gift reaches the bride to add her in the whatsapp support group"}
                       </p>
                     )}
 
                     {/* Gift Cards Selector */}
                     <div className="space-y-2">
-                      <label className="text-lovely text-sm block">Include a Gift Card (+20 LE)</label>
+                      <label className="text-lovely text-sm block">
+                        {isAr ? "إضافة كارت إهداء (+20 ج.م)" : "Include a Gift Card (+20 LE)"}
+                      </label>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { name: "Born to shine birthday gift card", label: "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
-                          { name: "The I love you more than words gift card", label: "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
-                          { name: "The Wifey to be card", label: "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
-                          { name: "Merry and Married", label: "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
+                          { name: "Born to shine birthday gift card", label: isAr ? "كارت عيد ميلاد" : "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
+                          { name: "The I love you more than words gift card", label: isAr ? "كارت حب" : "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
+                          { name: "The Wifey to be card", label: isAr ? "كارت وايفي تو بي" : "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
+                          { name: "Merry and Married", label: isAr ? "كارت ميري آند ماريد" : "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
                         ].map((card) => (
                           <div
                             key={card.name}
@@ -875,7 +888,7 @@ const UnifiedCheckoutPage = () => {
           ) : (
             <div className="w-full space-y-6">
               <h2 className={`${thirdFont.className} w-full text-lg lg:text-2xl border-b border-lovely pb-1`}>
-                Subscriptions Configuration
+                {isAr ? "بيانات المشتركين" : "Subscriptions Configuration"}
               </h2>
               {configs.map((config, index) => (
                 <div
@@ -884,7 +897,7 @@ const UnifiedCheckoutPage = () => {
                 >
                   <div className="flex justify-between items-center border-b border-lovely/10 pb-2">
                     <h3 className="font-bold text-lovely text-base lg:text-lg">
-                      ✨ Subscription #{index + 1}: {config.packageName}
+                      {isAr ? `✨ اشتراك #${index + 1}: ${config.packageName}` : `✨ Subscription #${index + 1}: ${config.packageName}`}
                     </h3>
                     <span className="text-xs bg-lovely text-creamey px-2 py-0.5 rounded-full capitalize">
                       {config.tier} • {config.duration}m
@@ -893,7 +906,9 @@ const UnifiedCheckoutPage = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Email</label>
+                      <label className="text-lovely text-sm">
+                        {isAr ? "إيميل العروسة" : "Bride's Email"}
+                      </label>
                       <input
                         type="email"
                         value={config.email}
@@ -903,17 +918,21 @@ const UnifiedCheckoutPage = () => {
                       />
                       {config.isGift && (
                         <p className="text-[11px] text-lovely/85 mt-1 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
-                          🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!
+                          {isAr
+                            ? "🤫 متقلقيش، مش هنبعت إيميل للعروسة عشان منبوظش المفاجأة!"
+                            : "🤫 Don't worry, we will not send a mail to the bride and spoil the surprise!"}
                         </p>
                       )}
                       {config.isGift && (
-                        <p className="text-[11px] text-lovely/85  font-medium animate-in fade-in slide-in-from-top-1 duration-200">
-                          if it's not available just let it empty.
+                        <p className="text-[11px] text-lovely/85 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                          {isAr ? "لو مش متاح معاكي سيبيها فاضية." : "if it's not available just let it empty."}
                         </p>
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Phone Number</label>
+                      <label className="text-lovely text-sm">
+                        {isAr ? "رقم موبايل العروسة" : "Bride's Phone Number"}
+                      </label>
                       <input
                         type="text"
                         value={config.phone}
@@ -926,7 +945,9 @@ const UnifiedCheckoutPage = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's First Name</label>
+                      <label className="text-lovely text-sm">
+                        {isAr ? "اسم العروسة الأول" : "Bride's First Name"}
+                      </label>
                       <input
                         type="text"
                         value={config.firstName}
@@ -936,7 +957,9 @@ const UnifiedCheckoutPage = () => {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-lovely text-sm">Bride's Last Name</label>
+                      <label className="text-lovely text-sm">
+                        {isAr ? "اسم العائلة" : "Bride's Last Name"}
+                      </label>
                       <input
                         type="text"
                         value={config.lastName}
@@ -948,7 +971,9 @@ const UnifiedCheckoutPage = () => {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-lovely text-sm">Bride's WhatsApp (Optional)</label>
+                    <label className="text-lovely text-sm">
+                      {isAr ? "واتساب العروسة (اختياري)" : "Bride's WhatsApp (Optional)"}
+                    </label>
                     <input
                       type="text"
                       value={config.whatsAppNumber}
@@ -967,7 +992,7 @@ const UnifiedCheckoutPage = () => {
                       className="w-4 h-4 accent-lovely cursor-pointer"
                     />
                     <label htmlFor={`gift-${config.cartItemId}`} className="text-lovely text-sm font-semibold cursor-pointer">
-                      Buy this specific subscription as a gift 🎁
+                      {isAr ? "شراء هذا الاشتراك كهدية 🎁" : "Buy this specific subscription as a gift 🎁"}
                     </label>
                   </div>
 
@@ -975,19 +1000,23 @@ const UnifiedCheckoutPage = () => {
                     <div className="bg-lovely/5 p-4 rounded-xl border border-lovely/10 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       {config.tier !== "mini" && (
                         <p className="text-sm text-lovely font-medium bg-lovely/10 p-3 rounded-lg border border-lovely/20">
-                          Please notify us when the gift reaches the bride to add her in the whatsapp support group
+                          {isAr
+                            ? "يرجى إبلاغنا عند وصول الهدية للعروسة لنقوم بإضافتها في جروب الدعم على الواتساب 💕"
+                            : "Please notify us when the gift reaches the bride to add her in the whatsapp support group"}
                         </p>
                       )}
 
                       {/* Gift Cards Selector */}
                       <div className="space-y-2">
-                        <label className="text-lovely text-sm block">Include a Gift Card (+20 LE)</label>
+                        <label className="text-lovely text-sm block">
+                          {isAr ? "إضافة كارت إهداء (+20 ج.م)" : "Include a Gift Card (+20 LE)"}
+                        </label>
                         <div className="grid grid-cols-2 gap-2">
                           {[
-                            { name: "Born to shine birthday gift card", label: "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
-                            { name: "The I love you more than words gift card", label: "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
-                            { name: "The Wifey to be card", label: "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
-                            { name: "Merry and Married", label: "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
+                            { name: "Born to shine birthday gift card", label: isAr ? "كارت عيد ميلاد" : "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
+                            { name: "The I love you more than words gift card", label: isAr ? "كارت حب" : "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
+                            { name: "The Wifey to be card", label: isAr ? "كارت وايفي تو بي" : "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
+                            { name: "Merry and Married", label: isAr ? "كارت ميري آند ماريد" : "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
                           ].map((card) => (
                             <div
                               key={card.name}
@@ -1240,7 +1269,7 @@ const UnifiedCheckoutPage = () => {
 
         {/* Right Side Summary */}
         <div className="w-full lg:w-2/7 py-1">
-          <div className="lg:border-l border-lovely/30 lg:pl-6 sticky top-4 space-y-6">
+          <div className="lg:border-l rtl:lg:border-l-0 rtl:lg:border-r border-lovely/30 lg:pl-6 rtl:lg:pl-0 rtl:lg:pr-6 sticky top-4 space-y-6">
 
             {/* Products & Subscriptions summary list */}
             <div className="bg-pinkey text-lovely rounded-2xl p-6 border border-lovely shadow-md">
@@ -1250,7 +1279,7 @@ const UnifiedCheckoutPage = () => {
 
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {subscriptionItems.map((sub, idx) => (
-                  <div key={sub.cartItemId} className="flex   gap-3 text-sm">
+                  <div key={sub.cartItemId} className="flex gap-3 text-sm">
                     <div className="relative w-12 h-12 border-lovely/80 border-2 rounded overflow-hidden flex-shrink-0">
                       <Image src={sub.imageUrl} alt={sub.packageName} fill className="object-cover" />
                     </div>
@@ -1258,7 +1287,9 @@ const UnifiedCheckoutPage = () => {
                       <p className="font-bold truncate">{sub.packageName}</p>
                       <div className="flex flex-col gap-0.5">
                         {sub.duration > 0 && (
-                          <p className="text-xs text-creamey/85">{sub.duration}m Subscription</p>
+                          <p className="text-xs text-creamey/85">
+                            {sub.duration} {isAr ? "شهور اشتراك" : "m Subscription"}
+                          </p>
                         )}
                         <div className="flex items-center gap-2 mt-1">
                           <button
@@ -1279,17 +1310,17 @@ const UnifiedCheckoutPage = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right rtl:text-left">
                       {Boolean(
                         sub.discountedFrom &&
                         Number(sub.discountedFrom) > 0 &&
                         Number(sub.discountedFrom) > Number(sub.price)
                       ) && (
                         <span className="text-xs text-lovely/60 line-through block">
-                          LE {Number(sub.discountedFrom) * sub.quantity}
+                          {Number(sub.discountedFrom) * sub.quantity} {isAr ? "ج.م" : "LE"}
                         </span>
                       )}
-                      <p className="font-semibold">LE {sub.price * sub.quantity}</p>
+                      <p className="font-semibold">{sub.price * sub.quantity} {isAr ? "ج.م" : "LE"}</p>
                     </div>
                   </div>
                 ))}
@@ -1319,7 +1350,7 @@ const UnifiedCheckoutPage = () => {
                         </button>
                       </div>
                     </div>
-                    <p className="font-semibold text-right">LE {prod.price * prod.quantity}</p>
+                    <p className="font-semibold text-right rtl:text-left">{prod.price * prod.quantity} {isAr ? "ج.م" : "LE"}</p>
                   </div>
                 ))}
               </div>
@@ -1366,17 +1397,17 @@ const UnifiedCheckoutPage = () => {
                     <>
                       <div className="flex justify-between text-base">
                         <span>{t("subtotal")}</span>
-                        <span>{originalSubtotal} LE</span>
+                        <span>{originalSubtotal} {isAr ? "ج.م" : "LE"}</span>
                       </div>
                       <div className="flex justify-between text-base text-green-600">
                         <span>
                           {t("discount")} ({Math.round((totalPackageSavings / originalSubtotal) * 100)}% OFF)
                         </span>
-                        <span>-{totalPackageSavings} LE</span>
+                        <span>-{totalPackageSavings} {isAr ? "ج.م" : "LE"}</span>
                       </div>
                       <div className="flex justify-between text-base font-medium">
                         <span>{t("subtotal")}</span>
-                        <span>{subTotal} LE</span>
+                        <span>{subTotal} {isAr ? "ج.م" : "LE"}</span>
                       </div>
                     </>
                   );
@@ -1385,7 +1416,7 @@ const UnifiedCheckoutPage = () => {
                 return (
                   <div className="flex justify-between text-base">
                     <span>{t("subtotal")}</span>
-                    <span>{subTotal} LE</span>
+                    <span>{subTotal} {isAr ? "ج.م" : "LE"}</span>
                   </div>
                 );
               })()}
@@ -1395,8 +1426,8 @@ const UnifiedCheckoutPage = () => {
                   <span>{t("discount")} ({appliedDiscount.code})</span>
                   <span>
                     {appliedDiscount.calculationType === "FREE_SHIPPING"
-                      ? `-${shipping} LE`
-                      : `-${discountAmount} LE`}
+                      ? `-${shipping} ${isAr ? "ج.م" : "LE"}`
+                      : `-${discountAmount} ${isAr ? "ج.م" : "LE"}`}
                   </span>
                 </div>
               )}
@@ -1404,7 +1435,7 @@ const UnifiedCheckoutPage = () => {
               {loyaltyDiscount > 0 && (
                 <div className="flex justify-between text-base text-green-600">
                   <span>{t("loyaltyDiscount")}</span>
-                  <span>-{loyaltyDiscount} LE</span>
+                  <span>-{loyaltyDiscount} {isAr ? "ج.م" : "LE"}</span>
                 </div>
               )}
 
@@ -1412,26 +1443,26 @@ const UnifiedCheckoutPage = () => {
                 {appliedDiscount?.calculationType === "FREE_SHIPPING" || subTotal > 2000 || subscriptionItems.some((item) => item.packageId === "687396821b4da119eb1c13fe" || item.packageId === "6965e63c6df4503dda02c12b") ? (
                   <>
                     <span className="line-through">{t("shipping")}</span>
-                    <span className="line-through">{shipping} LE</span>
+                    <span className="line-through">{shipping} {isAr ? "ج.م" : "LE"}</span>
                   </>
                 ) : (
                   <>
                     <span>{t("shipping")}</span>
-                    <span>{shipping} LE</span>
+                    <span>{shipping} {isAr ? "ج.م" : "LE"}</span>
                   </>
                 )}
               </div>
 
               {configs.reduce((sum, item) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0) > 0 && (
                 <div className="flex justify-between text-base">
-                  <span>Gift Cards</span>
-                  <span>+{configs.reduce((sum, item) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0)} LE</span>
+                  <span>{isAr ? "كروت إهداء" : "Gift Cards"}</span>
+                  <span>+{configs.reduce((sum, item) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0)} {isAr ? "ج.م" : "LE"}</span>
                 </div>
               )}
 
               <div className="flex justify-between font-bold text-lg mt-4 pt-4 border-t border-lovely">
                 <span>{t("total")}</span>
-                <span>{total} LE</span>
+                <span>{total} {isAr ? "ج.م" : "LE"}</span>
               </div>
             </div>
 

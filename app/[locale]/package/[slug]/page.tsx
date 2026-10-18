@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,6 +31,8 @@ import axios from "axios";
 import PackageDetailSkeleton from "@/components/skeletons/PackageDetailSkeleton";
 import WifeyCommunity from "@/components/sections/WifeyCommunity";
 import { useCart } from "@/providers/CartProvider";
+import { useLocale } from "next-intl";
+import { localizePackage } from "@/app/lib/localize";
 
 // Quiz Data
 interface QuizOption {
@@ -134,6 +136,8 @@ function PackageProductCard({
     openCart();
   };
 
+  const locale = useLocale();
+
   return (
     <div
       key={prod._id}
@@ -152,7 +156,7 @@ function PackageProductCard({
           {prod.title}
         </h4>
         <p className={`${thirdFont.className} text-base sm:text-lg font-bold text-white mt-1`}>
-          LE {prodPrice.toLocaleString()}
+          {locale === "ar" ? `${prodPrice.toLocaleString()} ج.م` : `LE ${prodPrice.toLocaleString()}`}
         </p>
       </Link>
 
@@ -184,7 +188,7 @@ function PackageProductCard({
           className="flex-1 bg-white text-lovely font-bold text-xs sm:text-sm py-1.5 sm:py-2 rounded-full hover:bg-creamey transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1"
           id={`add-prod-${prod._id}`}
         >
-          Add
+          {locale === "ar" ? "إضافة" : "Add"}
         </button>
       </div>
     </div>
@@ -198,6 +202,15 @@ export default function PackageeDetailPage() {
 
   const [packageData, setPackageData] = useState<Ipackage | null>(null);
   const [allPackages, setAllPackages] = useState<Ipackage[]>([]);
+  const locale = useLocale();
+
+  const currentPackage = useMemo(() => {
+    return packageData ? localizePackage(packageData, locale) : null;
+  }, [packageData, locale]);
+
+  const packagesList = useMemo(() => {
+    return allPackages.map((p) => localizePackage(p, locale));
+  }, [allPackages, locale]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -344,21 +357,39 @@ export default function PackageeDetailPage() {
 
   // Package-specific modal content
   const getModalContent = (packageId: string) => {
+    const isAr = locale === "ar";
     const packageContents = {
       "687396821b4da119eb1c13fe": {
-        header: "This is a pre-order",
-        content: `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
+        header: isAr ? "هذا الطلب حجز مسبق 🎀" : "This is a pre-order",
+        content: isAr
+          ? `يرجى العلم أن هذا الطلب بنظام الحجز المسبق، وهيتم شحن وتوصيل البلانر ليكي خلال 10 أيام عمل.
 
-  While you wait for your gehaz bestie to arrive, you can already enjoy:
-  ✨ Wifey's curated playlists
-  ✨ Exclusive partner discounts
-  ✨ Access to supportive Wifey circles
+وعبال ما رفيقة الجهاز توصلك، تقدري تبدأي تستمتعي بـ:
+✨ قوائم تشغيل وايفي الحصرية
+✨ خصومات الشركاء الموثوقين
+✨ الانضمام لدوائر دعم ومجتمع وايفي
 
-  Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
+شكراً لثقتك وحبك — متحمسين جداً تفرحي بالبلانر أول ما يوصلك! 💗`
+          : `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
+
+While you wait for your gehaz bestie to arrive, you can already enjoy:
+✨ Wifey's curated playlists
+✨ Exclusive partner discounts
+✨ Access to supportive Wifey circles
+
+Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
       "68bf6ae9c4d5c1af12cdcd37": {
-        header: "This is a pre-order",
-        content: `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be beshipped within 10 business days.
+        header: isAr ? "هذا الطلب حجز مسبق 🎀" : "This is a pre-order",
+        content: isAr
+          ? `يرجى العلم أن هذا الطلب بنظام الحجز المسبق، وهيتم شحن بلانر رفيقة الجهاز ليكي خلال 10 أيام عمل.
+
+بعد إتمام الطلب، هيوصلك إيميل تأكيد بمتابعة الشحنة خطوة بخطوة.
+
+أول ما يوصلك البلانر، هتستفيدي بميزة حصرية من وايفي 💗 — وصول لقائمة تشغيل من اختيارك لمدة 6 شهور عبر كود QR مطبوع داخل الباكدج.
+
+متحمسين جداً نخوض الرحلة دي سوا.. البلانر في طريقه ليكي قريب جداً! ✨`
+          : `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days.
 
 After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
 
@@ -386,6 +417,18 @@ We’re beyond excited to share this experience with you… your planner will be
   const formatDuration = (duration: any) => {
     const months = Number(duration);
     if (isNaN(months) || months <= 0) return null;
+    if (locale === "ar") {
+      if (months === 1) return "شهر واحد";
+      if (months === 2) return "شهران";
+      if (months < 12) return `${months} شهور`;
+      const years = Math.floor(months / 12);
+      const remainingMonths = months % 12;
+      let result = years === 1 ? "سنة كاملة" : `${years} سنوات`;
+      if (remainingMonths > 0) {
+        result += ` و ${remainingMonths} ${remainingMonths === 1 ? "شهر" : "شهور"}`;
+      }
+      return result;
+    }
     if (months < 12) return `${months} Months`;
     const years = Math.floor(months / 12);
     const remainingMonths = months % 12;
@@ -526,7 +569,8 @@ We’re beyond excited to share this experience with you… your planner will be
       categoryName: packageData.partOf || packageData.name,
       tier:
         packageData.name.toLowerCase().includes("mini") ||
-          (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
+        packageData.name.includes("المصغرة") ||
+        (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
           ? "mini"
           : "full",
       price,
@@ -565,7 +609,8 @@ We’re beyond excited to share this experience with you… your planner will be
       categoryName: packageData.partOf || packageData.name,
       tier:
         packageData.name.toLowerCase().includes("mini") ||
-          (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
+        packageData.name.includes("المصغرة") ||
+        (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
           ? "mini"
           : "full",
       price,
@@ -672,37 +717,40 @@ We’re beyond excited to share this experience with you… your planner will be
     );
   }
 
+  const displayPackage = currentPackage || packageData;
+  const displayAllPackages = packagesList.length > 0 ? packagesList : allPackages;
+
   const selectedVariant =
-    packageData.variants && selectedVariantIndex >= 0
-      ? packageData.variants[selectedVariantIndex]
+    displayPackage.variants && selectedVariantIndex >= 0
+      ? displayPackage.variants[selectedVariantIndex]
       : null;
 
   const activePrice = selectedVariant
     ? selectedVariant.price
-    : packageData.price;
+    : displayPackage.price;
   const activeSaving = selectedVariant
     ? selectedVariant.saving
-    : packageData.saving;
+    : displayPackage.saving;
 
   // Resolve the full-tier package (highest price) for comparisonFeatures & hero/callout
   const fullPackage =
-    allPackages.length > 0
-      ? allPackages.reduce((max, pkg) => (pkg.price > max.price ? pkg : max), allPackages[0])
-      : packageData;
+    displayAllPackages.length > 0
+      ? displayAllPackages.reduce((max, pkg) => (pkg.price > max.price ? pkg : max), displayAllPackages[0])
+      : displayPackage;
 
   const isWeddingPackage = Boolean(
     (typeof params?.slug === "string" && params.slug.toLowerCase().includes("wedding")) ||
-    (packageData?.slug && packageData.slug.toLowerCase().includes("wedding")) ||
-    (packageData?.name && packageData.name.toLowerCase().includes("wedding")) ||
-    (packageData?.partOf && packageData.partOf.toLowerCase().includes("wedding")) ||
-    packageData?.duration === 6
+    (displayPackage?.slug && displayPackage.slug.toLowerCase().includes("wedding")) ||
+    (displayPackage?.name && displayPackage.name.toLowerCase().includes("wedding")) ||
+    (displayPackage?.partOf && displayPackage.partOf.toLowerCase().includes("wedding")) ||
+    displayPackage?.duration === 6
   );
 
   const galleryImages =
-    packageData?.images && packageData.images.length > 0
-      ? packageData.images
-      : packageData?.imgUrl
-        ? [packageData.imgUrl]
+    displayPackage?.images && displayPackage.images.length > 0
+      ? displayPackage.images
+      : displayPackage?.imgUrl
+        ? [displayPackage.imgUrl]
         : [];
 
   return (
@@ -723,8 +771,8 @@ We’re beyond excited to share this experience with you… your planner will be
             onClick={() => router.push('/shop?tab=subscriptions')}
             id="back-btn"
           >
-            <ChevronLeft className="mr-1 h-5 w-5" />
-            Back to Packages
+            <ChevronLeft className="mr-1 rtl:mr-0 rtl:ml-1 rtl:rotate-180 h-5 w-5" />
+            {locale === "ar" ? "الرجوع للباقات" : "Back to Packages"}
           </Button>
         </div>
 
@@ -807,7 +855,7 @@ We’re beyond excited to share this experience with you… your planner will be
 
             {/* Thumbnail Carousel */}
             {packageData.images && packageData.images.length > 1 && (
-              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex space-x-3 rtl:space-x-reverse overflow-x-auto pb-2 scrollbar-hide">
                 {packageData.images.map((img, index) => (
                   <button
                     key={index}
@@ -835,67 +883,81 @@ We’re beyond excited to share this experience with you… your planner will be
           <div className="flex flex-col justify-between">
             <div>
               <span className="inline-block font-semibold text-xs uppercase tracking-widest bg-lovely/10 text-lovely px-3 py-1 rounded-full mb-3">
-                {packageData.badgeLabel}
+                {displayPackage.badgeLabel}
               </span>
               <h2
                 className={`${thirdFont.className} text-3xl sm:text-4xl font-extrabold text-lovely tracking-wide mb-3`}
               >
-                {packageData.partOf ? packageData.partOf : packageData.name}
+                {displayPackage.partOf ? displayPackage.partOf : displayPackage.name}
               </h2>
 
               {/* All Packages Segmented Switcher (HTML Mockup Design) */}
-              {allPackages.length > 1 && (
+              {displayAllPackages.length > 1 && (
                 <div className="relative flex bg-pinkey/40 border-2 border-lovely rounded-full p-1.5 mb-6 shadow-inner">
-                  {allPackages.map((pkg) => {
-                    const isSelected = packageData?._id === pkg._id;
-                    const isFull =
-                      pkg._id === fullPackage?._id ||
-                      (!pkg.name.toLowerCase().includes("mini") &&
-                        !pkg.slug?.toLowerCase().includes("mini"));
+                  {(() => {
+                    const maxPrice = Math.max(...displayAllPackages.map((p) => p.price || 0));
+                    return displayAllPackages.map((pkg) => {
+                      const isSelected = displayPackage?._id === pkg._id;
+                      const isFull =
+                        displayAllPackages.length > 1
+                          ? (pkg.price || 0) === maxPrice
+                          : pkg._id === fullPackage?._id ||
+                            (!pkg.name.toLowerCase().includes("mini") &&
+                              !pkg.name.includes("المصغرة") &&
+                              !pkg.slug?.toLowerCase().includes("mini"));
 
-                    return (
-                      <button
-                        key={pkg._id}
-                        onClick={() => {
-                          setPackageData(pkg);
-                          setCurrentImageIndex(0);
-                          setQuantity(1);
-                          if (pkg.variants && pkg.variants.length > 0) {
-                            setSelectedVariantIndex(pkg.variants.length - 1);
-                          } else {
-                            setSelectedVariantIndex(-1);
-                          }
-                        }}
-                        className={`relative flex-1 py-2.5 px-3 rounded-full text-center transition-all duration-200 cursor-pointer ${isSelected
-                          ? "bg-lovely text-white shadow-md font-bold"
-                          : "bg-transparent text-lovely hover:bg-lovely/10 font-semibold"
-                          }`}
-                        id={`pkg-badge-${pkg._id}`}
-                      >
-                        {isFull && (
-                          <span className="absolute -top-3.5 right-4 bg-lovely text-white text-[9.5px] sm:text-[10.5px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-md z-10 border border-white/20">
-                            Most popular
-                          </span>
-                        )}
-                        <span className="block text-sm sm:text-base font-extrabold leading-tight">
-                          {pkg.name}
-                        </span>
-                        <span
-                          className={`block text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-lovely/80"
+                      return (
+                        <button
+                          key={pkg._id}
+                          onClick={() => {
+                            setPackageData(pkg);
+                            setCurrentImageIndex(0);
+                            setQuantity(1);
+                            if (pkg.variants && pkg.variants.length > 0) {
+                              setSelectedVariantIndex(pkg.variants.length - 1);
+                            } else {
+                              setSelectedVariantIndex(-1);
+                            }
+                          }}
+                          className={`relative flex-1 py-2.5 px-3 rounded-full text-center transition-all duration-200 cursor-pointer ${isSelected
+                            ? "bg-lovely text-white shadow-md font-bold"
+                            : "bg-transparent text-lovely hover:bg-lovely/10 font-semibold"
                             }`}
+                          id={`pkg-badge-${pkg._id}`}
                         >
-                          LE {pkg.price.toLocaleString()}
-                        </span>
-                      </button>
-                    );
-                  })}
+                          {isFull && (
+                            <span className="absolute -top-3.5 right-4 rtl:right-auto rtl:left-4 bg-lovely text-white text-[9.5px] sm:text-[10.5px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-md z-10 border border-white/20">
+                              {locale === "ar" ? "الأكتر اختياراً 💕" : "Most popular"}
+                            </span>
+                          )}
+                          <span className="block text-sm sm:text-base font-extrabold leading-tight">
+                            {pkg.name}
+                          </span>
+                          <span
+                            className={`block text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-lovely/80"
+                              }`}
+                          >
+                            {locale === "ar" ? `${pkg.price.toLocaleString()} ج.م` : `LE ${pkg.price.toLocaleString()}`}
+                          </span>
+                        </button>
+                      );
+                    });
+                  })()}
                 </div>
               )}
 
               {/* Dashed Helper Callout (Not Sure? Mini vs Full) */}
               {allPackages.length > 1 && (
                 <div className="mb-6 p-3.5 sm:p-4 bg-white border-2 border-dashed border-pinkey rounded-2xl text-xs sm:text-sm text-lovely/90 leading-relaxed shadow-sm">
-                  <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> {isWeddingPackage ? "6 months" : "a year"} of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
+                  {locale === "ar" ? (
+                    <>
+                      <strong className="text-lovely">محتارة؟</strong> محتاجة كتاب البلانر بس؟ اختاري <strong className="text-lovely">التجربة المصغرة (Mini)</strong>. عاوزة البلانر <em>بالإضافة إلى</em> {isWeddingPackage ? "6 شهور" : "سنة كاملة"} من الخصومات، الفيديوهات، مجتمع العرايس ودعم الخبراء؟ اختاري <strong className="text-lovely">التجربة الكاملة (Full)</strong>.
+                    </>
+                  ) : (
+                    <>
+                      <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> {isWeddingPackage ? "6 months" : "a year"} of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
+                    </>
+                  )}
                 </div>
               )}
 
@@ -903,7 +965,7 @@ We’re beyond excited to share this experience with you… your planner will be
               {packageData.variants && packageData.variants.length > 0 ? (
                 <div className="mb-6 bg-pinkey/40 border-2 border-lovely/30 p-4 rounded-2xl">
                   <h3 className={`${thirdFont.className} text-lg font-bold text-lovely mb-3`}>
-                    Choose Experience Plan
+                    {locale === "ar" ? "اختاري خطة التجربة" : "Choose Experience Plan"}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {packageData.variants.map((variant, index) => (
@@ -922,7 +984,7 @@ We’re beyond excited to share this experience with you… your planner will be
                           </p>
                         )}
                         <p className={`${thirdFont.className} text-2xl font-bold text-lovely mt-1`}>
-                          LE {variant.price.toFixed(2)}
+                          {locale === "ar" ? `${variant.price.toFixed(2)} ج.م` : `LE ${variant.price.toFixed(2)}`}
                         </p>
                         {variant.saving && (
                           <p className="text-xs text-lovely/80 font-medium mt-1">
@@ -937,11 +999,11 @@ We’re beyond excited to share this experience with you… your planner will be
                 <div className="mb-6 p-4 bg-pinkey/40 border-2 border-lovely/30 rounded-2xl">
                   {formatDuration(packageData.duration) && (
                     <p className="text-sm font-semibold uppercase text-lovely mb-1">
-                      Duration: {formatDuration(packageData.duration)}
+                      {locale === "ar" ? `المدة: ${formatDuration(packageData.duration)}` : `Duration: ${formatDuration(packageData.duration)}`}
                     </p>
                   )}
                   <p className={`${thirdFont.className} text-3xl font-extrabold text-lovely`}>
-                    LE {activePrice.toFixed(2)}
+                    {locale === "ar" ? `${activePrice.toFixed(2)} ج.م` : `LE ${activePrice.toFixed(2)}`}
                   </p>
                   {activeSaving && (
                     <p className="text-sm text-lovely/80 font-medium mt-1">
@@ -949,7 +1011,9 @@ We’re beyond excited to share this experience with you… your planner will be
                     </p>
                   )}
                   <p className="text-xs sm:text-sm text-lovely font-bold mt-2.5 flex items-center gap-1.5">
-                    🎁 Comes with {Math.round(activePrice).toLocaleString()} Wifey Points — to spend them on our lovely items later.
+                    {locale === "ar"
+                      ? `🎁 بيوصلك مع الباقة ${Math.round(activePrice).toLocaleString()} نقطة وايفي — تقدري تستخدميهم في مشترياتك الجاية 💕`
+                      : `🎁 Comes with ${Math.round(activePrice).toLocaleString()} Wifey Points — to spend them on our lovely items later.`}
                   </p>
                 </div>
               )}
@@ -957,9 +1021,9 @@ We’re beyond excited to share this experience with you… your planner will be
               {/* Quantity Selector */}
               <div className="mb-6">
                 <label className="block text-xs uppercase tracking-wider text-lovely font-bold mb-2">
-                  Quantity
+                  {locale === "ar" ? "الكمية" : "Quantity"}
                 </label>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
                   <Button
                     className="bg-pinkey text-lovely hover:bg-lovely hover:text-white h-10 w-10 p-0 rounded-xl border-2 border-lovely/20 transition-all"
                     variant="outline"
@@ -993,14 +1057,14 @@ We’re beyond excited to share this experience with you… your planner will be
                 onClick={handleAddToCart}
                 id="add-to-cart-btn"
               >
-                <ShoppingBag className="w-5 h-5" /> Add to Cart
+                <ShoppingBag className="w-5 h-5" /> {locale === "ar" ? "أضيفي للشنطة" : "Add to Cart"}
               </Button>
               <Button
                 className="flex-1 bg-lovely text-creamey hover:bg-lovely/90 rounded-full py-6 text-base font-bold shadow-lg transition-all flex items-center justify-center gap-2"
                 onClick={handleSubscribeNow}
                 id="subscribe-now-btn"
               >
-                <Zap className="w-5 h-5 fill-current" /> Subscribe Now
+                <Zap className="w-5 h-5 fill-current" /> {locale === "ar" ? "اشتركي الآن" : "Subscribe Now"}
               </Button>
             </div>
           </div>
@@ -1009,19 +1073,27 @@ We’re beyond excited to share this experience with you… your planner will be
         {/* Feature Comparison Section (Mockup Table Design) */}
         <div className="bg-pinkey/70 p-6 sm:p-8 rounded-3xl border-2 border-pinkey shadow-md mb-12">
           <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-4 text-center`}>
-            Choose Your Experience Tier 🎀
+            {locale === "ar" ? "اختاري باقة التجربة المناسبة ليكي 🎀" : "Choose Your Experience Tier 🎀"}
           </h2>
           <p className="text-center text-sm text-lovely/80 mb-6 max-w-xl mx-auto">
-            Compare the Mini and Full packages to decide which bestie fits your bridal era needs.
+            {locale === "ar"
+              ? "قارني بين الباقة المصغرة والكاملة واختاري الرفيقة الأنسب لاحتياجات مرحلة فرحك."
+              : "Compare the Mini and Full packages to decide which bestie fits your bridal era needs."}
           </p>
 
           <div className="overflow-x-auto">
             <table className="w-full border-separate border-spacing-y-2">
               <thead>
                 <tr>
-                  <th className="text-left p-3 text-xs uppercase tracking-wider text-lovely/70 font-semibold">Features Included</th>
-                  <th className="p-3 text-center bg-lovely text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Mini</th>
-                  <th className="p-3 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">Full</th>
+                  <th className="text-left rtl:text-right p-3 text-xs uppercase tracking-wider text-lovely/70 font-semibold">
+                    {locale === "ar" ? "المميزات والخدمات المشمولة" : "Features Included"}
+                  </th>
+                  <th className="p-3 text-center bg-lovely text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">
+                    {locale === "ar" ? "المصغرة (Mini)" : "Mini"}
+                  </th>
+                  <th className="p-3 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">
+                    {locale === "ar" ? "الكاملة (Full)" : "Full"}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -1030,7 +1102,7 @@ We’re beyond excited to share this experience with you… your planner will be
                   const isDash = (val: string) => val === "—" || val === "-" || val.toLowerCase() === "false";
                   return (
                     <tr key={idx}>
-                      <td className="p-3 bg-lovely/80 text-white rounded-l-xl text-xs sm:text-sm font-medium">
+                      <td className="p-3 bg-lovely/80 text-white rounded-l-xl rtl:rounded-l-none rtl:rounded-r-xl text-xs sm:text-sm font-medium">
                         {feat.feature}
                       </td>
                       <td className="p-3 text-center bg-pinkey/20 border border-pinkey/50 font-bold">
@@ -1045,7 +1117,7 @@ We’re beyond excited to share this experience with you… your planner will be
                           </>
                         )}
                       </td>
-                      <td className="p-3 text-center bg-white border border-pinkey/50 rounded-r-xl font-bold">
+                      <td className="p-3 text-center bg-white border border-pinkey/50 rounded-r-xl rtl:rounded-r-none rtl:rounded-l-xl font-bold">
                         {isCheck(feat.fullValue) ? (
                           <Check className="inline h-5 w-5 text-emerald-600" />
                         ) : isDash(feat.fullValue) ? (
@@ -1067,38 +1139,52 @@ We’re beyond excited to share this experience with you… your planner will be
           {/* Redbox Callout (HTML Mockup Design) */}
           <div className="mt-6 bg-lovely text-white p-6 rounded-2xl shadow-md space-y-2">
             <h3 className={`${thirdFont.className} text-xl font-bold uppercase tracking-wide`}>
-              {fullPackage?.calloutTitle || "Why most brides choose Full 💕"}
+              {fullPackage?.calloutTitle || (locale === "ar" ? "ليه أغلب العرايس بيختاروا التجربة الكاملة 💕" : "Why most brides choose Full 💕")}
             </h3>
             <p className="text-sm leading-relaxed text-white/95">
               {fullPackage?.calloutDescription ? (
                 isWeddingPackage ? (
                   fullPackage.calloutDescription
-                    .replace(/a full year|12 months|a whole year/gi, "6 months")
-                    .replace(/appliance discount/gi, "wedding vendor discount")
+                    .replace(/a full year|12 months|a whole year/gi, locale === "ar" ? "6 شهور" : "6 months")
+                    .replace(/appliance discount/gi, locale === "ar" ? "خصم مورد فرح" : "wedding vendor discount")
                 ) : (
                   fullPackage.calloutDescription
                 )
               ) : (
-                <>
-                  For <strong>LE 1,000 more</strong>, you unlock 11 extra playlists plus {isWeddingPackage ? "6 months" : "a full year"} of community, expert access and partner discounts. {isWeddingPackage ? "One wedding vendor discount alone can cover the difference." : "One appliance discount alone can cover the difference."}
-                </>
+                locale === "ar" ? (
+                  <>
+                    بـ <strong>1000 جنيه زيادة بس</strong>، هتاخدي 11 قائمة تشغيل إضافية، بالإضافة إلى {isWeddingPackage ? "6 شهور" : "سنة كاملة"} في مجتمع وايفي، واستشارات الخبراء، وخصومات الشركاء. {isWeddingPackage ? "خصم مورد فرح واحد كفيل يغطي الفرق وزيادة." : "خصم جهاز واحد كفيل يغطي الفرق وزيادة."}
+                  </>
+                ) : (
+                  <>
+                    For <strong>LE 1,000 more</strong>, you unlock 11 extra playlists plus {isWeddingPackage ? "6 months" : "a full year"} of community, expert access and partner discounts. {isWeddingPackage ? "One wedding vendor discount alone can cover the difference." : "One appliance discount alone can cover the difference."}
+                  </>
+                )
               )}
             </p>
           </div>
           <div className="mt-4 p-4 border-2 text-lovely/90 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
-            <strong>The physical planner is yours forever.</strong> Digital benefits stay active for {isWeddingPackage ? "6 months" : "12 months"} from purchase.
+            {locale === "ar" ? (
+              <>
+                <strong>كتاب البلانر المطبوع ملكك دائماً.</strong> المميزات الرقمية والدعم يستمروا لمدة {isWeddingPackage ? "6 شهور" : "12 شهراً"} من تاريخ الشراء.
+              </>
+            ) : (
+              <>
+                <strong>The physical planner is yours forever.</strong> Digital benefits stay active for {isWeddingPackage ? "6 months" : "12 months"} from purchase.
+              </>
+            )}
           </div>
         </div>
         {/* Notes Section */}
-        {packageData.notes && packageData.notes.length > 0 && (
+        {displayPackage.notes && displayPackage.notes.length > 0 && (
           <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md my-12 ">
             <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
-              Important Notes
+              {locale === "ar" ? "ملاحظات هامة" : "Important Notes"}
             </h3>
             <ul className="space-y-2 text-sm text-lovely/90">
-              {packageData.notes.map((note, index) => (
+              {displayPackage.notes.map((note, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="text-lovely mr-2">•</span>
+                  <span className="text-lovely mr-2 rtl:mr-0 rtl:ml-2">•</span>
                   <span>{note}</span>
                 </li>
               ))}
@@ -1106,15 +1192,15 @@ We’re beyond excited to share this experience with you… your planner will be
           </div>
         )}
         {/* Make it a full order Section (Suggested Products from MongoDB) */}
-        {((packageData.packageProducts && packageData.packageProducts.length > 0) ||
+        {((displayPackage.packageProducts && displayPackage.packageProducts.length > 0) ||
           (fullPackage?.packageProducts && fullPackage.packageProducts.length > 0)) && (
             <div className="bg-pinkey/60 p-6 sm:p-8 rounded-3xl border-2 border-lovely/30 shadow-md mb-12">
               <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-6 text-center`}>
-                Make it a full order 🎀
+                {locale === "ar" ? "كمّلي طلبك بأحلى المنتجات 🎀" : "Make it a full order 🎀"}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                {(packageData.packageProducts?.length
-                  ? packageData.packageProducts
+                {(displayPackage.packageProducts?.length
+                  ? displayPackage.packageProducts
                   : fullPackage?.packageProducts ?? []
                 ).map((prod: any) => (
                   <PackageProductCard

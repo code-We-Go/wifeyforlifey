@@ -199,6 +199,7 @@ export interface Product {
       productDimensions?: string[];
       productDetails?: string[];
       productCare?: string[];
+      season?: string;
     };
   };
 }
@@ -320,11 +321,21 @@ export interface ShippingZone {
 export interface PackageCard {
   image: string;
   points: string[];
+  translations?: {
+    ar?: {
+      points?: string[];
+    };
+  };
 }
 
 export interface PackageItem {
   value: string;
   included: boolean;
+  translations?: {
+    ar?: {
+      value?: string;
+    };
+  };
 }
 
 export interface SupportCard {
@@ -333,6 +344,12 @@ export interface SupportCard {
   description: string[];
   imagePath: string;
   enable?: boolean;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string[];
+    };
+  };
 }
 
 export interface PackageVariant {
@@ -340,12 +357,24 @@ export interface PackageVariant {
   discountedFrom?: number;
   duration: number;
   saving?: string;
+  translations?: {
+    ar?: {
+      saving?: string;
+    };
+  };
 }
 
 export interface ComparisonFeature {
   feature: string;
   fullValue: string;
   miniValue: string;
+  translations?: {
+    ar?: {
+      feature?: string;
+      fullValue?: string;
+      miniValue?: string;
+    };
+  };
 }
 
 export interface Ipackage {
@@ -379,8 +408,8 @@ export interface Ipackage {
   packageProducts?: any[]; // Products associated with this package
   subSubscriptionSlots?: { role: "groom" | "bridesmaids"; maxCount: number }[];
   comparisonFeatures?: ComparisonFeature[];
-  // heroTitle?: string;
-  // heroSubtitle?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   badgeLabel?: string;
   calloutBadge?: string;
   calloutTitle?: string;
@@ -388,12 +417,15 @@ export interface Ipackage {
   translations?: {
     ar?: {
       name?: string;
+      partOf?: string;
       saving?: string;
       notes?: string[];
       badgeLabel?: string;
       calloutBadge?: string;
       calloutTitle?: string;
       calloutDescription?: string;
+      heroTitle?: string;
+      heroSubtitle?: string;
     };
   };
 }

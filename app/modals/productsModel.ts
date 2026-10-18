@@ -116,6 +116,7 @@ const ProductSchema = new Schema({
       productDimensions: { type: [String], required: false },
       productDetails: { type: [String], required: false },
       productCare: { type: [String], required: false },
+      season: { type: String, required: false },
     },
   },
   createdAt: { type: Date, default: Date.now },

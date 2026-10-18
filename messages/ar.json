@@ -20,6 +20,7 @@
     "viewAll": "شوفي كله",
     "viewMore": "شوفي أكتر",
     "seeDetails": "كل التفاصيل",
+    "quickAdd": "إضافة سريعة",
     "bookNow": "احجزي دلوقتي",
     "addToCart": "ضيفي للشنطة",
     "outOfStock": "خلصان حالياً",
@@ -260,12 +261,34 @@
     "adjustFiltersDesc": "جربي تغيّري الفلاتر أو تكتبي كلمة بحث تانية.",
     "categoryFilter": "القسم"
   },
+  "productPage": {
+    "productNotFound": "المنتج غير موجود",
+    "productNotFoundDesc": "المنتج اللي بتدوري عليه مش متوفر حالياً أو تم حذفه.",
+    "backToShop": "الرجوع للمتجر",
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "linkCopied": "تم نسخ الرابط",
+    "linkCopiedDesc": "تم نسخ رابط المنتج إلى الحافظة بنجاح.",
+    "linkCopyError": "فشل نسخ الرابط. يرجى المحاولة مرة أخرى.",
+    "addedToCart": "تمت الإضافة للشنطة",
+    "addedToCartDesc": "تم إضافة {title} ({count} {count, plural, =1 {قطعة} =2 {قطعتين} few {قطع} other {قطعة}}) إلى شنطتك.",
+    "quantity": "الكمية",
+    "addToCart": "أضيفي للشنطة",
+    "outOfStock": "نفدت الكمية",
+    "addToWishlist": "أضيفي للمفضلة",
+    "shareProduct": "شاركي هذا المنتج",
+    "productDetails": "تفاصيل المنتج",
+    "youMayAlsoLike": "منتجات تانية هتعجبك 💕"
+  },
   "videoCard": {
     "premium": "حصري للعروسة 💕",
     "watched": "اتفرجتي على {count} من {total}",
     "videoCount": "{count} {count, plural, =1 {فيديو} =2 {فيديوهين} few {فيديوهات} other {فيديو}}"
   },
   "checkoutPage": {
+    "checkout": "إتمام الطلب",
+    "contactInfo": "بيانات التواصل",
+    "shippingAddress": "عنوان التوصيل",
     "contact": "بيانات التواصل 💌",
     "email": "الإيميل",
     "isGift": "طالباها هدية لعروسة قمر؟ 💖",

@@ -20,6 +20,7 @@
     "viewAll": "View All",
     "viewMore": "View More",
     "seeDetails": "See Details",
+    "quickAdd": "Quick Add",
     "bookNow": "Book Now",
     "addToCart": "Add to Cart",
     "outOfStock": "Out of Stock",
@@ -260,12 +261,34 @@
     "adjustFiltersDesc": "Try adjusting your filters or search term.",
     "categoryFilter": "Category"
   },
+  "productPage": {
+    "productNotFound": "Product not found",
+    "productNotFoundDesc": "The product you are looking for doesn't exist or has been removed.",
+    "backToShop": "Back to Shop",
+    "home": "Home",
+    "shop": "Shop",
+    "linkCopied": "Link Copied",
+    "linkCopiedDesc": "Product link has been copied to your clipboard.",
+    "linkCopyError": "Failed to copy the link. Please try again.",
+    "addedToCart": "Added to cart",
+    "addedToCartDesc": "{title} ({count} {count, plural, =1 {item} other {items}}) has been added to your cart.",
+    "quantity": "Quantity",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "addToWishlist": "Add to Wishlist",
+    "shareProduct": "Share this product",
+    "productDetails": "Product details",
+    "youMayAlsoLike": "You May Also Like"
+  },
   "videoCard": {
     "premium": "Premium",
     "watched": "Watched {count} of {total}",
     "videoCount": "{count} {count, plural, =1 {video} other {videos}}"
   },
   "checkoutPage": {
+    "checkout": "Checkout",
+    "contactInfo": "Contact Info",
+    "shippingAddress": "Shipping Address",
     "contact": "Contact",
     "email": "Email",
     "isGift": "I'm buying this as a gift 💖",
