@@ -566,6 +566,7 @@ We’re beyond excited to share this experience with you… your planner will be
     addSubscription({
       packageId: packageData._id || "",
       packageName: packageData.name,
+      packageNameAr: packageData.translations?.ar?.name || (locale === "ar" ? currentPackage?.name : undefined),
       categoryName: packageData.partOf || packageData.name,
       tier:
         packageData.name.toLowerCase().includes("mini") ||
@@ -606,6 +607,7 @@ We’re beyond excited to share this experience with you… your planner will be
     addSubscription({
       packageId: packageData._id || "",
       packageName: packageData.name,
+      packageNameAr: packageData.translations?.ar?.name || (locale === "ar" ? currentPackage?.name : undefined),
       categoryName: packageData.partOf || packageData.name,
       tier:
         packageData.name.toLowerCase().includes("mini") ||

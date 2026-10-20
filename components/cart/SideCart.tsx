@@ -4,8 +4,9 @@ import React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { X, ShoppingBag, ArrowRight, Trash2, Plus, Minus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/providers/CartProvider";
+import { getLocalizedPackageName } from "@/utils/subscriptionLocalization";
 import {
   Sheet,
   SheetContent,
@@ -20,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function SideCart() {
   const t = useTranslations("sideCart");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const {
     items,
     removeItem,
@@ -143,7 +145,7 @@ export default function SideCart() {
                             </button>
                           </div>
                           <span className="font-medium text-lovely">
-                            LE {(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} {tCommon("le")}
                           </span>
                         </div>
                       </div>
@@ -155,13 +157,15 @@ export default function SideCart() {
               {/* Subscriptions Section */}
               {subscriptionItems.length > 0 && (
                 <div className="space-y-6 pt-4 border-t border-lovely/10">
-                  <h4 className="font-medium text-lovely text-sm uppercase tracking-wider mb-2">Subscriptions</h4>
+                  <h4 className="font-medium text-lovely text-sm uppercase tracking-wider mb-2">
+                    {t("subscriptions")}
+                  </h4>
                   {subscriptionItems.map((item) => (
                     <div key={item.cartItemId} className="flex gap-4">
                       <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0 border border-lovely/5">
                         <Image
                           src={item.imageUrl}
-                          alt={item.packageName}
+                          alt={getLocalizedPackageName(item, locale)}
                           fill
                           className="object-cover"
                         />
@@ -169,7 +173,7 @@ export default function SideCart() {
                       <div className="flex flex-col flex-grow min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <h4 className="font-medium text-lovely truncate pr-2">
-                            {item.packageName}
+                            {getLocalizedPackageName(item, locale)}
                           </h4>
                           <button
                             onClick={() => removeSubscription(item.cartItemId)}
@@ -206,7 +210,7 @@ export default function SideCart() {
                             </button>
                           </div>
                           <span className="font-medium text-lovely">
-                            LE {(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} {tCommon("le")}
                           </span>
                         </div>
                       </div>
@@ -223,7 +227,7 @@ export default function SideCart() {
             <div className="w-full space-y-4">
               <div className="flex justify-between items-center text-lg font-medium text-lovely">
                 <span>{t("subtotal")}</span>
-                <span>LE {totalPrice.toFixed(2)}</span>
+                <span>{totalPrice.toFixed(2)} {tCommon("le")}</span>
               </div>
               <p className="text-xs text-lovely/60">
                 {t("shippingNote")}

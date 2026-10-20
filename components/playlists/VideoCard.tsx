@@ -8,7 +8,7 @@ import { VideoPlaylist } from "@/app/interfaces/interfaces";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface VideoCardProps {
   playlist: VideoPlaylist;
@@ -16,6 +16,7 @@ interface VideoCardProps {
 
 export default function VideoCard({ playlist }: VideoCardProps) {
   const t = useTranslations("videoCard");
+  const locale = useLocale();
   const { data: session, status } = useSession();
   const isSubscribed = (session?.user as any)?.isSubscribed || false;
   const [watchedCount, setWatchedCount] = useState(0);
@@ -67,8 +68,18 @@ export default function VideoCard({ playlist }: VideoCardProps) {
           <div className="flex items-center h-full justify-between mb-2">
             {playlist.category && (
               <Badge variant="destructive" className="font-normal">
-                {playlist.category.charAt(0).toUpperCase() +
-                  playlist.category.slice(1)}
+                {playlist.category === "Gehaz Bestie Experience"
+                  ? locale === "ar"
+                    ? "تجربة جهاز البيستي"
+                    : playlist.category
+                  : playlist.category === "Wedding Planning Experience"
+                  ? locale === "ar"
+                    ? "تجربة تخطيط الفرح"
+                    : playlist.category
+                  : locale === "ar" && playlist.translations?.ar?.category
+                  ? playlist.translations.ar.category
+                  : playlist.category.charAt(0).toUpperCase() +
+                    playlist.category.slice(1)}
               </Badge>
             )}
             {!playlist.isPublic && (
@@ -78,10 +89,23 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             )}
           </div>
           <h3 className="font-medium text-lovely line-clamp-1">
-            {playlist.title}
+            {(locale === "ar" && playlist.translations?.ar?.title) ||
+              playlist.title}
           </h3>
           <div className="text-sm min-h-[4vh] md:min-h-[10vh] text-lovely/90 mt-1 line-clamp-2">
-            <p>{playlist.description}</p>
+            <p>
+              {(() => {
+                if (
+                  locale === "ar" &&
+                  playlist.translations?.ar?.description?.length
+                ) {
+                  return playlist.translations.ar.description.join(" ");
+                }
+                return Array.isArray(playlist.description)
+                  ? playlist.description.join(" ")
+                  : playlist.description;
+              })()}
+            </p>
           </div>
           {/* Progress section (shown for authenticated users) */}
           {status === "authenticated" && isSubscribed && (

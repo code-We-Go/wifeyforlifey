@@ -35,6 +35,9 @@ export async function GET(req: Request) {
             { title: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
             { category: { $regex: search, $options: "i" } },
+            { "translations.ar.title": { $regex: search, $options: "i" } },
+            { "translations.ar.description": { $regex: search, $options: "i" } },
+            { "translations.ar.category": { $regex: search, $options: "i" } },
           ],
         }
       : {};
@@ -72,7 +75,7 @@ export async function GET(req: Request) {
       .populate({
         path: "videos",
         model: "videos",
-        select: "title description thumbnailUrl duration isPublished playlistFolder",
+        select: "title description thumbnailUrl duration isPublished isPublic playlistFolder translations tags",
       })
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)

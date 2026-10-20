@@ -17,8 +17,11 @@ import { thirdFont } from "@/fonts";
 import VdoPlayer from "./components/VdoPlayer";
 import CommentSection from "@/components/video/CommentSection";
 import LoadingSpinner from "@/components/checkout/LoadingSpinner";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function PlaylistPage() {
+  const t = useTranslations("playlistsPage");
+  const locale = useLocale();
   const params = useParams();
   const searchParams = useSearchParams();
   const videoIdParam = searchParams?.get("videoId") || null;
@@ -563,7 +566,7 @@ export default function PlaylistPage() {
 
   // Format date
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -583,7 +586,7 @@ export default function PlaylistPage() {
     return (
       <div className="container-custom flex-col flex w-full justify-center items-center bg-lovely h-auto min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-128px)] py-16 text-center">
         <div className="animate-spin text-creamey rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-creamey">Loading playlist...</p>
+        <p className="mt-4 text-creamey">{t("loading")}</p>
       </div>
     );
   }
@@ -591,13 +594,12 @@ export default function PlaylistPage() {
   if (error || !playlist) {
     return (
       <div className="container-custom py-16 text-center">
-        <h1 className="text-2xl font-medium mb-4">Playlist not found</h1>
+        <h1 className="text-2xl font-medium mb-4">{t("playlistNotFound")}</h1>
         <p className="text-lovely/90 mb-6">
-          {error ||
-            "The playlist you are looking for doesn't exist or has been removed."}
+          {error || t("playlistNotFoundDesc")}
         </p>
         <Button asChild>
-          <Link href="/playlists">Back to Playlists</Link>
+          <Link href="/playlists">{t("backToPlaylists")}</Link>
         </Button>
       </div>
     );
@@ -659,36 +661,43 @@ export default function PlaylistPage() {
             <h1
               className={`${thirdFont.className} text-lovely text-4xl md:text-5xl font-semibold tracking-normal   `}
             >
-              {playlist.title}
+              {(locale === "ar" && playlist.translations?.ar?.title) || playlist.title}
             </h1>
             <div
               className={`${seeMore ? "h-auto" : "max-h-[10vh]"
                 }  overflow-hidden transition-all duration-300`}
             >
-              {Array.isArray(playlist.description) ? (
-                playlist.description.map((desc: string, idx: number) => (
-                  <p
-                    key={idx}
-                    className="text-lovely/90 mt-2 whitespace-pre-line"
-                  >
-                    {desc}
+              {(() => {
+                const descs =
+                  locale === "ar" && playlist.translations?.ar?.description?.length
+                    ? playlist.translations.ar.description
+                    : playlist.description;
+                return Array.isArray(descs) ? (
+                  descs.map((desc: string, idx: number) => (
+                    <p
+                      key={idx}
+                      className="text-lovely/90 mt-2 whitespace-pre-line"
+                    >
+                      {desc}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-lovely/90 mt-2 whitespace-pre-line">
+                    {descs}
                   </p>
-                ))
-              ) : (
-                <p className="text-lovely/90 mt-2 whitespace-pre-line">
-                  {playlist.description}
-                </p>
-              )}
+                );
+              })()}
             </div>
             {/* Add the See More / See Less button */}
-            {(playlist?.description?.length > 1 ||
-              playlist.description[0] !== "") && (
+            {((Array.isArray(playlist?.description) && playlist.description.length > 1) ||
+              (typeof playlist.description === "string" && playlist.description !== "") ||
+              (locale === "ar" && playlist.translations?.ar?.description?.length)) && (
                 <div className="mt-2">
                   <button
                     className="text-lovely underline cursor-pointer focus:outline-none"
                     onClick={() => setSeeMore((prev) => !prev)}
                   >
-                    {seeMore ? "See Less" : "See More"}
+                    {seeMore ? t("seeLess") : t("seeMore")}
                   </button>
                 </div>
               )}
@@ -716,13 +725,10 @@ export default function PlaylistPage() {
                     <div className="relative w-full z-20 justify-center flex flex-col items-center">
                       <Lock className="h-10 w-10 md:h-16 md:w-16 mb-1 md:mb-4 text-creamey" />
                       <h3 className="text-base md:text-xl font-medium mb-1 md:mb-4">
-                        This video is exclusive to the Wifeys community!
+                        {t("videoExclusiveTitle")}
                       </h3>
                       <p className="mb-1 text-xs md:text-base md:mb-4 max-w-md">
-                        Subscribe now for planning hacks, vendor tips, expert
-                        advices, emotional support, and bridal tea 10x juicier
-                        than anything I’ve shared on TikTok in the last year and
-                        a half ✨.
+                        {t("videoExclusiveDesc")}
                       </p>
                       <Button
                         onClick={() => {
@@ -730,22 +736,22 @@ export default function PlaylistPage() {
                             playlist?.category === "Wedding planning" ||
                             playlist?.category === "Wedding Planning Experience"
                           ) {
-                            router.push("/subscription/6965e63c6df4503dda02c12b");
+                            router.push("/package/WeddingBestiePlanner");
                           } else {
-                            router.push("/subscription/687396821b4da119eb1c13fe");
+                            router.push("/package/GehazBestiePlanner");
                           }
                         }}
                         size="sm"
                         className="rounded-2xl text-xs md:text-base hover:bg-creamey hover:text-lovely text-creamey bg-lovely"
                       >
-                        Subscribe Now
+                        {t("subscribeNow")}
                       </Button>
                     </div>
                   </div>
                 ) : videoLoading ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p>Loading video...</p>
+                    <p>{t("loadingVideo")}</p>
                   </div>
                 ) : otp && playbackInfo ? (
                   <div
@@ -786,14 +792,14 @@ export default function PlaylistPage() {
                   </div>
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white p-8 text-center">
-                    <p>Unable to load video.</p>
+                    <p>{t("unableToLoadVideo")}</p>
                   </div>
                 )}
               </div>
             ) : (
               <div className="relative aspect-video overflow-hidden rounded-lg bg-muted flex items-center justify-center">
                 <p className="text-lovely/90">
-                  No videos available in this playlist.
+                  {t("noVideosInPlaylist")}
                 </p>
               </div>
             )}
@@ -803,16 +809,18 @@ export default function PlaylistPage() {
                 <h2
                   className={`${thirdFont.className} text-3xl text-lovely font-medium`}
                 >
-                  {selectedVideo.title}
+                  {(locale === "ar" && selectedVideo.translations?.ar?.title) ||
+                    selectedVideo.title}
                 </h2>
                 <div className="flex items-center gap-4 text-sm text-lovely/90 mt-2">
                   <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
+                    <Calendar className="h-4 w-4 mr-1 rtl:mr-0 rtl:ml-1" />
                     {formatDate(new Date())}
                   </div>
                 </div>
                 <p className="text-lovely/90 mt-2 whitespace-pre-line">
-                  {selectedVideo.description}
+                  {(locale === "ar" && selectedVideo.translations?.ar?.description) ||
+                    selectedVideo.description}
                 </p>
 
                 {/* Comment Section */}
@@ -825,16 +833,15 @@ export default function PlaylistPage() {
         </div>
 
         {/* Playlist Videos */}
-        <div className="space-y-4 md:pl-6 sticky top-8 h-fit">
+        <div className="space-y-4 md:pl-6 rtl:md:pl-0 rtl:md:pr-6 sticky top-8 h-fit">
           <div className="flex items-center justify-between">
             <h2
               className={`${thirdFont.className} text-3xl tracking-normal text-lovely font-medium`}
             >
-              Videos in this Playlist
+              {t("videosInPlaylist")}
             </h2>
             <span className="text-sm text-lovely/90">
-              {playlist.videos?.length || 0}{" "}
-              {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
+              {t("videoCount", { count: playlist.videos?.length || 0 })}
             </span>
           </div>
 
@@ -844,8 +851,10 @@ export default function PlaylistPage() {
               <div className="p-4  bg-creamey/90">
                 <div className="flex items-center justify-between text-sm text-lovely  mb-2">
                   <span>
-                    Watched {watchedVideos.size} of{" "}
-                    {playlist.videos?.length || 0}
+                    {t("watchedProgress", {
+                      watched: watchedVideos.size,
+                      total: playlist.videos?.length || 0,
+                    })}
                   </span>
                   <span>
                     {playlist.videos?.length
@@ -943,11 +952,13 @@ export default function PlaylistPage() {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h5 className="font-medium line-clamp-2">{video.title}</h5>
+                          <h5 className="font-medium line-clamp-2">
+                            {(locale === "ar" && video.translations?.ar?.title) || video.title}
+                          </h5>
                           <div className="flex items-center mt-1">
                             {!video.isPublic && (
                               <span className="text-xs bg-muted text-everGreen px-1.5 py-0.5 rounded-full">
-                                Premium
+                                {t("premiumContent")}
                               </span>
                             )}
                           </div>
@@ -990,7 +1001,10 @@ export default function PlaylistPage() {
                       // Folder block
                       const { slug } = item;
                       const folderDef = folders.find((f: any) => f.slug === slug);
-                      const folderName = folderDef?.name || slug;
+                      const folderName =
+                        (locale === "ar" && folderDef?.translations?.ar?.name) ||
+                        folderDef?.name ||
+                        slug;
                       const folderVideos = grouped[slug] || [];
                       const isCollapsed = !!collapsedFolders[slug];
 
@@ -1013,7 +1027,7 @@ export default function PlaylistPage() {
                                 <div className="flex flex-col">
                                   <span className="line-clamp-1 tracking-wide text-lg md:text-xl font-semibold">{folderName}</span>
                                   <span className="text-sm font-normal opacity-90 tracking-wide mt-1">
-                                    {folderVideos.length} {folderVideos.length === 1 ? "video" : "videos"}
+                                    {t("videoCount", { count: folderVideos.length })}
                                   </span>
                                 </div>
                                 <ChevronDown
@@ -1043,7 +1057,7 @@ export default function PlaylistPage() {
           {playlist.isPublic && !isSubscribed && (
             <div className="bg-lovely text-creamey rounded-lg p-4 text-center">
               <p className="text-sm mb-3">
-                Subscribe to unlock all premium videos in this playlist.
+                {t("subscribeToUnlockAll")}
               </p>
               <Button
                 onClick={() => {
@@ -1051,15 +1065,15 @@ export default function PlaylistPage() {
                     playlist?.category === "Wedding planning" ||
                     playlist?.category === "Wedding Planning Experience"
                   ) {
-                    router.push("/subscription/6965e63c6df4503dda02c12b");
+                    router.push("/package/WeddingBestiePlanner");
                   } else {
-                    router.push("/subscription/687396821b4da119eb1c13fe");
+                    router.push("/package/GehazBestiePlanner");
                   }
                 }}
                 size="sm"
                 className="rounded-2xl bg-creamey hover:text-lovely text-lovely hover:bg-creamey hover:font-semibold"
               >
-                Subscribe Now
+                {t("subscribeNow")}
               </Button>
             </div>
           )}
@@ -1072,7 +1086,7 @@ export default function PlaylistPage() {
           <h2
             className={`${thirdFont.className} text-3xl tracking-normal font-meduim text-lovely mb-6`}
           >
-            You May Also Like
+            {t("youMayAlsoLike")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedPlaylists.map((relatedPlaylist) => (
@@ -1102,20 +1116,23 @@ export default function PlaylistPage() {
                   </div>
                   <div className="p-4 min-h-[15vh] md:min-h-[25vh] bg-lovely text-creamey">
                     <div className="flex items-center justify-between mb-2">
-                      {/* <Badge variant="secondary" className="font-normal">
-                        {relatedPlaylist.category ? (relatedPlaylist.category.charAt(0).toUpperCase() + relatedPlaylist.category.slice(1)) : "Uncategorized"}
-                      </Badge> */}
-                      {/* {relatedPlaylist.isPublic && (
-                        <Badge variant="outline" className="font-normal">
-                          Premium
-                        </Badge>
-                      )} */}
                     </div>
                     <h3 className="font-medium line-clamp-1">
-                      {relatedPlaylist.title}
+                      {(locale === "ar" && relatedPlaylist.translations?.ar?.title) ||
+                        relatedPlaylist.title}
                     </h3>
                     <p className="text-sm text-creamey/70 mt-1 line-clamp-2">
-                      {relatedPlaylist.description}
+                      {(() => {
+                        if (
+                          locale === "ar" &&
+                          relatedPlaylist.translations?.ar?.description?.length
+                        ) {
+                          return relatedPlaylist.translations.ar.description.join(" ");
+                        }
+                        return Array.isArray(relatedPlaylist.description)
+                          ? relatedPlaylist.description.join(" ")
+                          : relatedPlaylist.description;
+                      })()}
                     </p>
                   </div>
                 </div>

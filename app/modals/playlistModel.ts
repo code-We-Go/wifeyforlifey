@@ -19,6 +19,11 @@ const PlaylistSchema = new Schema<Playlist>({
     {
       name: { type: String, required: true },   // display label, e.g. "Behind the Scenes"
       slug: { type: String, required: true },   // URL-safe key, e.g. "behind-the-scenes"
+      translations: {
+        ar: {
+          name: { type: String, required: false },
+        },
+      },
     }
   ],
 
@@ -29,6 +34,7 @@ const PlaylistSchema = new Schema<Playlist>({
     ar: {
       title: { type: String, required: false },
       description: { type: [String], required: false },
+      category: { type: String, required: false },
     },
   },
 }, {

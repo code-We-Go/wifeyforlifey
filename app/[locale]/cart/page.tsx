@@ -20,7 +20,8 @@ import { thirdFont } from "@/fonts";
 import { ShippingZone } from "@/app/interfaces/interfaces";
 import axios from "axios";
 import CartItemSmall from "./CartItemSmall";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { getLocalizedPackageName, getLocalizedTier } from "@/utils/subscriptionLocalization";
 
 // Utility function to calculate shipping rate
 const calculateShippingRate = (
@@ -160,6 +161,7 @@ const calculateShippingRate = (
 export default function CartPage() {
   const t = useTranslations("cartPage");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { items, removeItem, updateQuantity, totalItems, totalPrice, subscriptionItems, removeSubscription, updateSubscriptionQuantity } =
     useCart();
   const [couponCode, setCouponCode] = useState("");
@@ -384,13 +386,15 @@ export default function CartPage() {
                         <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
                           <Image
                             src={item.imageUrl}
-                            alt={item.packageName}
+                            alt={getLocalizedPackageName(item, locale)}
                             fill
                             className="object-cover rounded-md"
                           />
                         </div>
                         <div>
-                          <h5 className="font-medium line-clamp-1">{item.packageName}</h5>
+                          <h5 className="font-medium line-clamp-1">
+                            {getLocalizedPackageName(item, locale)}
+                          </h5>
                           {item.duration > 0 && (
                             <p className="text-sm text-creamey/80">
                               {t("monthsSubscription", { months: item.duration })}
@@ -400,7 +404,7 @@ export default function CartPage() {
                       </div>
                       {/* Tier */}
                       <div className="md:col-span-2 text-center capitalize font-semibold">
-                        {item.tier}
+                        {getLocalizedTier(item.tier, locale)}
                       </div>
                       {/* Quantity */}
                       <div className="md:col-span-2 flex justify-center items-center">

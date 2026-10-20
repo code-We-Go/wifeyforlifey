@@ -34,6 +34,7 @@ import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
 import { thirdFont } from "@/fonts";
 import { useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations, useLocale } from "next-intl";
 
 // interface PlaylistFilters {
 //   category?: string;
@@ -47,6 +48,8 @@ function PlaylistsPageFallback() {
 }
 
 function PlaylistsPage() {
+  const t = useTranslations("playlistsPage");
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
@@ -79,18 +82,43 @@ function PlaylistsPage() {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    setSelectedCategoryFolder(categoryParam || null);
+  }, [searchParams]);
+
   const categoryFolders = [
     {
       id: "Gehaz Bestie Experience",
-      name: "Gehaz Bestie Experience",
+      name: t("gehazBestieCategory"),
       image: "/experience/gehaz1.png"
     },
     {
       id: "Wedding Planning Experience",
-      name: "Wedding Planning Experience",
+      name: t("weddingPlanningCategory"),
       image: "/weddingPlanningPlanner/desktop.png"
     }
   ];
+
+  const isWeddingCategory =
+    selectedCategoryFolder === "Wedding Planning Experience" ||
+    selectedCategoryFolder === "Wedding planning" ||
+    filters.category === "Wedding Planning Experience" ||
+    filters.category === "Wedding planning" ||
+    searchParams.get("category") === "Wedding Planning Experience" ||
+    searchParams.get("category") === "Wedding planning";
+
+  const isGehazCategory =
+    selectedCategoryFolder === "Gehaz Bestie Experience" ||
+    filters.category === "Gehaz Bestie Experience" ||
+    searchParams.get("category") === "Gehaz Bestie Experience";
+
+  const shouldShowCta = isWeddingCategory
+    ? !session?.user?.weddingPlanningBestie?.isSubscribed
+    : isGehazCategory
+    ? !session?.user?.isSubscribed
+    : !session?.user?.isSubscribed &&
+      !session?.user?.weddingPlanningBestie?.isSubscribed;
 
   // Continue Watching (latest progress record)
   type ContinueItem = {
@@ -111,6 +139,7 @@ function PlaylistsPage() {
         const queryParams = new URLSearchParams();
         if (filters.search) queryParams.append("search", filters.search);
         queryParams.append("all", "true"); // Get all playlists for client-side filtering
+        queryParams.append("locale", locale);
 
         const response = await fetch(
           `/api/playlists?${queryParams.toString()}`
@@ -235,12 +264,10 @@ function PlaylistsPage() {
           <h1
             className={`${thirdFont.className} text-4xl md:text-5xl font-semibold tracking-normal text-creamey`}
           >
-            {" "}
-            Playlists
+            {t("title")}
           </h1>
           <p className="text-creamey/80">
-            Explore our collection of curated video playlists for tutorials,
-            inspiration, and more.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -248,7 +275,7 @@ function PlaylistsPage() {
         <div className="flex flex-col md:flex-row gap-4 justify-between">
           <div className="relative w-full md:w-96">
             <Input
-              placeholder="Search playlists..."
+              placeholder={t("searchPlaceholder")}
               value={filters.search}
               onChange={(e) => updateFilter("search", e.target.value)}
               className="pl-10 bg-creamey placeholder:text-lovely/90"
@@ -376,13 +403,13 @@ function PlaylistsPage() {
         {/* Active Filters */}
         {(filters.category || filters.isPublic !== undefined) && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-lovely/90">Active filters:</span>
+            <span className="text-sm text-lovely/90">{t("activeFilters")}</span>
             {filters.category && (
               <Badge
                 onClick={() => updateFilter("category", "")}
                 className="cursor-pointer"
               >
-                {videoCategories.find((c) => c.id === filters.category)?.name}
+                {categoryFolders.find((c) => c.id === filters.category)?.name || filters.category}
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
@@ -391,7 +418,7 @@ function PlaylistsPage() {
                 onClick={() => updateFilter("isPublic", undefined)}
                 className="cursor-pointer"
               >
-                {filters.isPublic ? "Premium Content" : "Free Content"}
+                {filters.isPublic ? t("premiumContent") : t("freeContent")}
                 <X className="ml-1 h-3 w-3" />
               </Badge>
             )}
@@ -399,38 +426,40 @@ function PlaylistsPage() {
         )}
 
         {/* Subscription CTA */}
-        {!session?.user?.isSubscribed && 
-          !session?.user?.weddingPlanningBestie?.isSubscribed && (
+        {shouldShowCta && (
           <div className="bg-creamey text-lovely rounded-xl p-6 md:p-8 shadow-md">
             <div className="grid md:grid-cols-3 gap-6 items-center">
               <div className="md:col-span-2 space-y-4">
                 <h2 className="text-2xl  font-medium">
-                  Unlock Premium Content
+                  {t("unlockPremiumTitle")}
                 </h2>
                 <p className="text-lovely/90">
-                  Subscribe today to access our exclusive premium video
-                  playlists and tutorials.
+                  {t("unlockPremiumDesc")}
                 </p>
                 <div className="flex space-x-2">
                   <div className="flex items-center text-sm">
                     <Play className="h-4 w-4 mr-1 text-lovely/90" />
-                    <span>Unlimited access</span>
+                    <span>{t("unlimitedAccess")}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <Lock className="h-4 w-4 mr-1 text-lovely/90" />
-                    <span>Exclusive content</span>
+                    <span>{t("exclusiveContent")}</span>
                   </div>
                 </div>
               </div>
               <div className="flex   justify-center md:justify-end">
                 <Button
                   onClick={() =>
-                    router.push("/subscription/687396821b4da119eb1c13fe")
+                    router.push(
+                      isWeddingCategory
+                        ? "/package/WeddingBestiePlanner"
+                        : "/package/GehazBestiePlanner"
+                    )
                   }
                   size="lg"
                   className="rounded-full  hover:font-semibold bg-lovely hover:bg-lovely text-creamey border border-creamey"
                 >
-                  Subscribe Now
+                  {t("subscribeNow")}
                 </Button>
               </div>
             </div>
@@ -476,7 +505,7 @@ function PlaylistsPage() {
                 </Link>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold">Continue Watching</h3>
+                <h3 className="text-lg font-semibold">{t("continueWatching")}</h3>
                 <p className="text-sm text-lovely/90 truncate">
                   {continueItem.videoTitle || "Latest watched video"}
                   {continueItem.playlistTitle
@@ -492,7 +521,7 @@ function PlaylistsPage() {
                     }
                     className="bg-lovely text-creamey hover:bg-lovely"
                   >
-                    Continue
+                    {t("continue")}
                   </Button>
                 </div>
               </div>
@@ -538,10 +567,12 @@ function PlaylistsPage() {
                 onClick={() => handleCategorySelect(null)}
                 className="text-sm font-medium hover:underline"
               >
-                Categories
+                {t("categories")}
               </button>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-sm font-bold">{selectedCategoryFolder}</span>
+              <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+              <span className="text-sm font-bold">
+                {categoryFolders.find((f) => f.id === selectedCategoryFolder)?.name || selectedCategoryFolder}
+              </span>
             </div>
 
             {(() => {
@@ -557,16 +588,16 @@ function PlaylistsPage() {
                   <div className="mx-auto w-24 h-24 mb-4 text-creamey/50">
                     <Filter className="w-full h-full" />
                   </div>
-                  <h3 className="text-lg font-medium">No playlists found</h3>
+                  <h3 className="text-lg font-medium">{t("noPlaylistsFound")}</h3>
                   <p className="text-creamey/80 mt-2">
-                    Try adjusting your filters or search term.
+                    {t("adjustFiltersDesc")}
                   </p>
                   <Button
                     onClick={resetFilters}
                     variant="outline"
                     className="mt-4 bg-creamey text-lovely hover:bg-lovely hover:text-creamey"
                   >
-                    Reset Filters
+                    {t("resetFilters")}
                   </Button>
                 </div>
               );

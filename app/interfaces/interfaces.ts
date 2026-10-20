@@ -58,6 +58,11 @@ export interface playlistFolder {
   _id?: string;
   name: string;   // e.g. "Behind the Scenes"
   slug: string;   // e.g. "behind-the-scenes"
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
 }
 // types/Playlist.ts
 export interface Playlist {
@@ -79,6 +84,7 @@ export interface Playlist {
     ar?: {
       title?: string;
       description?: string[];
+      category?: string;
     };
   };
 }
@@ -236,6 +242,7 @@ export interface SubscriptionCartItem {
   cartItemId: string;
   packageId: string;
   packageName: string;
+  packageNameAr?: string;
   categoryName: string;
   tier: "full" | "mini";
   price: number;

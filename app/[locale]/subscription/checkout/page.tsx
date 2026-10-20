@@ -21,6 +21,7 @@ import DiscountSection from "@/components/subscription/DiscountSection";
 import { CldUploadWidget } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { getLocalizedPackageName, getLocalizedTier } from "@/utils/subscriptionLocalization";
 
 interface SubscriptionConfig {
   cartItemId: string;
@@ -897,10 +898,12 @@ const UnifiedCheckoutPage = () => {
                 >
                   <div className="flex justify-between items-center border-b border-lovely/10 pb-2">
                     <h3 className="font-bold text-lovely text-base lg:text-lg">
-                      {isAr ? `✨ اشتراك #${index + 1}: ${config.packageName}` : `✨ Subscription #${index + 1}: ${config.packageName}`}
+                      {isAr
+                        ? `✨ اشتراك #${index + 1}: ${getLocalizedPackageName(config, "ar")}`
+                        : `✨ Subscription #${index + 1}: ${config.packageName}`}
                     </h3>
                     <span className="text-xs bg-lovely text-creamey px-2 py-0.5 rounded-full capitalize">
-                      {config.tier} • {config.duration}m
+                      {getLocalizedTier(config.tier, isAr ? "ar" : "en")} • {config.duration}{isAr ? " شهور" : "m"}
                     </span>
                   </div>
 
@@ -1281,10 +1284,10 @@ const UnifiedCheckoutPage = () => {
                 {subscriptionItems.map((sub, idx) => (
                   <div key={sub.cartItemId} className="flex gap-3 text-sm">
                     <div className="relative w-12 h-12 border-lovely/80 border-2 rounded overflow-hidden flex-shrink-0">
-                      <Image src={sub.imageUrl} alt={sub.packageName} fill className="object-cover" />
+                      <Image src={sub.imageUrl} alt={getLocalizedPackageName(sub, isAr ? "ar" : "en")} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold truncate">{sub.packageName}</p>
+                      <p className="font-bold truncate">{getLocalizedPackageName(sub, isAr ? "ar" : "en")}</p>
                       <div className="flex flex-col gap-0.5">
                         {sub.duration > 0 && (
                           <p className="text-xs text-creamey/85">

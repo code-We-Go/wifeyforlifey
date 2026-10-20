@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { thirdFont } from "@/fonts";
 import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import { bgRedButton } from "@/app/constants";
 
 export default function Footer() {
   const t = useTranslations("footer");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [playlists, setPlaylists] = useState<{ _id: string; title: string }[]>(
@@ -31,12 +32,18 @@ export default function Footer() {
   useEffect(() => {
     setPlaylistsLoading(true);
     setPlaylistsError(null);
-    fetch("/api/playlists?all=true")
+    fetch(`/api/playlists?all=true&locale=${locale}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.data)) {
           setPlaylists(
-            data.data.map((p: any) => ({ _id: p._id, title: p.title }))
+            data.data.map((p: any) => ({
+              _id: p._id,
+              title:
+                locale === "ar" && p.translations?.ar?.title
+                  ? p.translations.ar.title
+                  : p.title,
+            }))
           );
         } else {
           setPlaylists([]);
@@ -44,19 +51,19 @@ export default function Footer() {
       })
       .catch(() => setPlaylistsError("Failed to load playlists."))
       .finally(() => setPlaylistsLoading(false));
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     setShopCategoriesLoading(true);
     setShopCategoriesError(null);
-    fetch("/api/categories?type=product")
+    fetch(`/api/categories?type=product&locale=${locale}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setShopCategories(
             data
               .slice(0, 5)
-              .map((cat: any) => ({ _id: cat._id, name: cat.name }))
+              .map((cat: any) => ({ _id: cat._id, name: cat.name || cat.categoryName }))
           );
         } else {
           setShopCategories([]);
@@ -64,7 +71,7 @@ export default function Footer() {
       })
       .catch(() => setShopCategoriesError("Failed to load categories."))
       .finally(() => setShopCategoriesLoading(false));
-  }, []);
+  }, [locale]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,18 +115,18 @@ export default function Footer() {
     }
   };
   const PLAYLISTS_PLACEHOLDER = [
-    { _id: "686007d8bacf36b32ede9531", title: "Fashion" },
-    { _id: "68600bc2dfe9d20434366bf8", title: "Decor" },
-    { _id: "6860103c49b3ce972cede653", title: "Self care" },
-    { _id: "6860137de6f2df88e5805d69", title: "Groceries" },
-    { _id: "68601688c9d854f63af8a403", title: "Toilet Essentials " },
-    { _id: "686617235a1506075be76c41", title: "Makeup" },
-    { _id: "686617935a1506075be76c45", title: "Bedding" },
-    { _id: "686617c05a1506075be76c4a", title: "Dinning & Kitchen" },
-    { _id: "686617ef5a1506075be76c4e", title: "Appliances" },
-    { _id: "6866181ed57c8789806a6914", title: "Furniture" },
-    { _id: "68661a16d57c8789806a691a", title: "Meet your bridal era bestie!" },
-    { _id: "68661ac05a1506075be76c73", title: "Experience graduation! " },
+    { _id: "686007d8bacf36b32ede9531", title: locale === "ar" ? "أزياء وملابس" : "Fashion" },
+    { _id: "68600bc2dfe9d20434366bf8", title: locale === "ar" ? "ديكور" : "Decor" },
+    { _id: "6860103c49b3ce972cede653", title: locale === "ar" ? "العناية الشخصية" : "Self care" },
+    { _id: "6860137de6f2df88e5805d69", title: locale === "ar" ? "المشتريات الغذائية" : "Groceries" },
+    { _id: "68601688c9d854f63af8a403", title: locale === "ar" ? "مستلزمات الحمام" : "Toilet Essentials " },
+    { _id: "686617235a1506075be76c41", title: locale === "ar" ? "ميك آب" : "Makeup" },
+    { _id: "686617935a1506075be76c45", title: locale === "ar" ? "المفروشات" : "Bedding" },
+    { _id: "686617c05a1506075be76c4a", title: locale === "ar" ? "المطبخ والسفرة" : "Dinning & Kitchen" },
+    { _id: "686617ef5a1506075be76c4e", title: locale === "ar" ? "الأجهزة الكهربائية" : "Appliances" },
+    { _id: "6866181ed57c8789806a6914", title: locale === "ar" ? "الأثاث" : "Furniture" },
+    { _id: "68661a16d57c8789806a691a", title: locale === "ar" ? "قابلي بيستي العرايس!" : "Meet your bridal era bestie!" },
+    { _id: "68661ac05a1506075be76c73", title: locale === "ar" ? "تخرجي من التجربة!" : "Experience graduation! " },
   ];
   return (
     <footer className="bg-card border-t bg-lovely text-creamey">
