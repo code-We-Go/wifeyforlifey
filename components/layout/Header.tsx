@@ -336,7 +336,11 @@ export default function Header() {
         // isVisible ? "translate-y-0" : "-translate-y-16 md:-translate-y-32"
       )}
     >
-      {/* <div className="mx-auto"  > */}
+      {/* Upper small line above the header */}
+      {/* <div className="w-full bg-lovely border-b border-creamey/20 text-creamey relative z-50">
+
+      </div> */}
+
       <div
         className={`
               ${isScrolled
@@ -346,9 +350,50 @@ export default function Header() {
 
         mx-auto ${thirdFont.className} text-6xl font-semibold relative z-50`}
       >
-        <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
+        <div className="container-custom hidden  mx-auto border-b border-white/40 md:flex items-center justify-end gap-3 py-1.5 px-4 md:px-8">
+          {/* Theme Toggle */}
+          {mounted && (
+            <div
+              className="flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-0.5"
+              style={{ fontFamily: 'var(--font-inter)' }}
+            >
+              <button
+                type="button"
+                onClick={() => setTheme("light")}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer",
+                  !isGroomTheme
+                    ? "bg-creamey text-lovely shadow-sm font-semibold"
+                    : "text-creamey hover:bg-creamey/20"
+                )}
+                title="Bride Theme"
+              >
+                <GiAmpleDress className="w-3.5 h-3.5" />
+                <span>{tTheme("bride")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme("groom")}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer",
+                  isGroomTheme
+                    ? "bg-creamey text-lovely shadow-sm font-semibold"
+                    : "text-creamey hover:bg-creamey/20"
+                )}
+                title="Groom Theme"
+              >
+                <IoIosBowtie className="w-3.5 h-3.5" />
+                <span>{tTheme("groom")}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Language Switcher */}
+          {mounted && <LanguageSwitcher />}
+        </div>
+        <div className="flex h-16 md:h-20 py-4 items-center justify-center gap-8 xl:gap-16">
           {/* Desktop Navigation */}
-          <nav className="hidden  text-lovely justify-center items-center md:flex px-2 py-8">
+          <nav className="hidden  text-lovely justify-center items-center md:flex px-2 ">
             {leftNavigation.map((item) => (
               <Link
                 key={item.name}
@@ -381,38 +426,6 @@ export default function Header() {
                 // src={"/birthday/birthdayLogo.png"}
                 />
               </Link>
-              {/* Theme Toggle */}
-              {mounted && (
-                <div className="flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-1" style={{ fontFamily: 'var(--font-inter)' }}>
-                  <button
-                    onClick={() => setTheme("light")}
-                    className={cn(
-                      "flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all",
-                      !isGroomTheme ? "bg-lovely text-creamey shadow-md" : "text-creamey hover:bg-creamey/20"
-                    )}
-                    title="Bride Theme"
-                  >
-                    <GiAmpleDress className="w-3 h-3" />
-
-                    {/* <Gem className="w-3 h-3" /> */}
-                    <span>Bride</span>
-                  </button>
-                  <button
-                    onClick={() => setTheme("groom")}
-                    className={cn(
-                      "flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all",
-                      isGroomTheme ? "bg-lovely text-creamey shadow-md" : "text-creamey hover:bg-creamey/20"
-                    )}
-                    title="Groom Theme"
-                  >
-                    <IoIosBowtie className="w-3 h-3" />
-
-                    {/* <Shirt className="w-3 h-3" /> */}
-                    <span>Groom</span>
-                  </button>
-                </div>
-              )}
-              {mounted && <LanguageSwitcher />}
             </div>
             {rightNavigation.map((item) => (
               item.items ? (
@@ -670,7 +683,7 @@ export default function Header() {
                   <nav className="flex flex-col space-y-6">
                     {/* Mobile Theme Toggle */}
                     {mounted && (
-                      <div className="flex items-center w-full max-w-[200px] border border-creamey/30 bg-creamey/10 rounded-full p-1 mb-4" style={{ fontFamily: 'var(--font-inter)' }}>
+                      <div className="flex items-center w-full max-w-[200px] border border-creamey/30 bg-creamey/10 rounded-full p-1 " style={{ fontFamily: 'var(--font-inter)' }}>
                         <button
                           onClick={() => setTheme("light")}
                           className={cn(
@@ -696,7 +709,7 @@ export default function Header() {
                     )}
                     {/* Mobile Language Switcher */}
                     {mounted && (
-                      <div className="mb-4">
+                      <div className="pt-0">
                         <LanguageSwitcher variant="mobile" />
                       </div>
                     )}

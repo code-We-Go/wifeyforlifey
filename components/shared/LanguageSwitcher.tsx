@@ -44,8 +44,8 @@ export default function LanguageSwitcher({
           className={cn(
             "flex flex-1 items-center justify-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-all cursor-pointer",
             locale === "en"
-              ? "bg-white text-[#581c24] shadow-sm font-semibold"
-              : "text-creamey hover:text-white"
+              ? "bg-creamey text-lovely shadow-sm font-semibold"
+              : "text-creamey hover:bg-creamey/20"
           )}
         >
           <span>EN</span>
@@ -57,8 +57,8 @@ export default function LanguageSwitcher({
           className={cn(
             "flex flex-1 items-center justify-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-all cursor-pointer",
             locale === "ar"
-              ? "bg-white text-[#581c24] shadow-sm font-semibold"
-              : "text-creamey hover:text-white"
+              ? "bg-creamey text-lovely shadow-sm font-semibold"
+              : "text-creamey hover:bg-creamey/20"
           )}
         >
           <span>عربي</span>
@@ -70,7 +70,7 @@ export default function LanguageSwitcher({
   return (
     <div
       className={cn(
-        "flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-1",
+        "flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-0.5",
         className
       )}
       style={{ fontFamily: "var(--font-inter)" }}
@@ -82,8 +82,8 @@ export default function LanguageSwitcher({
         className={cn(
           "flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer",
           locale === "en"
-            ? "bg-white text-[#581c24] shadow-sm font-semibold"
-            : "text-creamey hover:text-white"
+            ? "bg-creamey text-lovely shadow-sm font-semibold"
+            : "text-creamey hover:bg-creamey/20"
         )}
         title="English"
       >
@@ -96,8 +96,8 @@ export default function LanguageSwitcher({
         className={cn(
           "flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer",
           locale === "ar"
-            ? "bg-white text-[#581c24] shadow-sm font-semibold"
-            : "text-creamey hover:text-white"
+            ? "bg-creamey text-lovely shadow-sm font-semibold"
+            : "text-creamey hover:bg-creamey/20"
         )}
         title="العربية"
       >

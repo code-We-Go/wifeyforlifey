@@ -1,92 +1,105 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 
-const ReturnAndExchange = ({
-  selectedTab,
-  setSelectedTab,
-}: {
+interface PolicyProps {
   selectedTab: string;
-  setSelectedTab: React.Dispatch<React.SetStateAction<string>>;
-}) => {
+  setSelectedTab?: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const ReturnAndExchange: React.FC<PolicyProps> = ({ selectedTab }) => {
+  const t = useTranslations("policiesPage.returnExchange");
+
   return (
     <div
       className={`${
-        selectedTab === "return-and-exchange" ? "flex flex-col gap-4" : "hidden"
-      } h-auto w-full`}
+        selectedTab === "return-and-exchange"
+          ? "flex flex-col gap-6"
+          : "hidden"
+      } h-auto w-full text-lovely`}
     >
-      <div className="flex flex-col gap-4">
-        <h1 className="font-bold text-xl mb-2">Return & Exchange Policy</h1>
+      <h1 className="font-bold text-2xl md:text-3xl text-lovely mb-2">
+        {t("title")}
+      </h1>
 
-        <p>
-          At Wifey for Lifey, we care about your satisfaction and promise to
-          handle any issues with fairness and clarity. Please read our return
-          and exchange policy below.
-        </p>
+      <p className="text-base md:text-lg leading-relaxed">{t("intro")}</p>
 
-        <div>
-          <h2 className="font-bold text-lg mt-4">1. Returns</h2>
-          <ul>
-            <li>Returns are only accepted if the item is faulty or damaged.</li>
-            <li>
-              You must report the issue within 24 hours of receiving your item.
-            </li>
-            <li>
-              The item must be unused and returned in its original packaging.
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="font-bold text-lg mt-4">2. What You Can’t Return</h2>
-          <ul>
-            <li>Opened or used planners.</li>
-            <li>Products damaged due to misuse.</li>
-            <li>Digital content (e.g., videos or downloadable materials).</li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="font-bold text-lg mt-4">3. Refund Process</h2>
-          <ul>
-            <li>
-              Approved refunds will be issued to your original payment method
-              within 7 business days.
-            </li>
-            <li>
-              Shipping costs are non-refundable unless the error was on our
-              side.
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="font-bold text-lg mt-4">4. Exchanges</h2>
-          <p>
-            We do not offer product exchanges unless the wrong item was
-            delivered to you.
-          </p>
-        </div>
-
-        <div>
-          <h2 className="font-bold text-lg mt-4">5. How to Start a Return</h2>
-          <p>To start a return or report an issue, please contact us:</p>
-          <ul>
-            <li>
-              📧 Email:{" "}
-              <a href="mailto:support@wifeyforlifey.com">
-                support@wifeyforlifey.com
-              </a>
-            </li>
-            <li>📞 WhatsApp: +20 10 55691340</li>
-          </ul>
-        </div>
-
-        <p className="mt-4">
-          We appreciate your trust in Wifey for Lifey and are here to support
-          you through any concerns.
-        </p>
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t("section1Title")}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t("returnsItem1")}</li>
+          <li>{t("returnsItem2")}</li>
+          <li>{t("returnsItem3")}</li>
+        </ul>
       </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t("section2Title")}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t("cantReturnItem1")}</li>
+          <li>{t("cantReturnItem2")}</li>
+          <li>{t("cantReturnItem3")}</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t("section3Title")}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t("refundItem1")}</li>
+          <li>{t("refundItem2")}</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t("section4Title")}
+        </h2>
+        <p className="text-lovely/90 leading-relaxed">{t("exchangesDesc")}</p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t("section5Title")}
+        </h2>
+        <p className="text-lovely/90">{t("startDesc")}</p>
+        <ul className="space-y-2 ms-2 text-lovely/90">
+          <li className="flex items-center gap-2">
+            <span>📧</span>
+            <span className="font-medium">{t("emailLabel")}:</span>
+            <a
+              href="mailto:support@wifeyforlifey.com"
+              className="underline font-semibold hover:text-lovely/80"
+            >
+              support@wifeyforlifey.com
+            </a>
+          </li>
+          <li className="flex items-center gap-2">
+            <span>📞</span>
+            <span className="font-medium">{t("whatsappLabel")}:</span>
+            <a
+              href="https://wa.me/201055691340"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline font-semibold hover:text-lovely/80"
+              dir="ltr"
+            >
+              +20 10 55691340
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <p className="text-lovely font-medium text-lg pt-4 border-t border-lovely/20 leading-relaxed">
+        {t("closing")}
+      </p>
     </div>
   );
 };
 
 export default ReturnAndExchange;
+

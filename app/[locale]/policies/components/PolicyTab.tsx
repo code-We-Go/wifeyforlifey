@@ -1,25 +1,44 @@
-'use client'
-import React, { useContext } from 'react'
-import { signOut } from "next-auth/react";
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
-import { lifeyFont, thirdFont } from '@/fonts';
+'use client';
+import React from 'react';
+import { useRouter } from '@/i18n/routing';
+import { useLocale } from 'next-intl';
+import { thirdFont } from '@/fonts';
 
+interface PolicyTabProps {
+  title: string;
+  value: string;
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+}
 
+const PolicyTab: React.FC<PolicyTabProps> = ({
+  title,
+  value,
+  activeTab,
+  setActiveTab,
+}) => {
+  const router = useRouter();
+  const locale = useLocale();
+  const isAr = locale === 'ar';
 
-const PolicyTab = ({title,value,activeTab,setActiveTab}:{title:string,value:string,activeTab:string,setActiveTab:React.Dispatch<React.SetStateAction<string>>}) => {
- const router = useRouter();
-
-  const handleClick = async () => {
+  const handleClick = () => {
     setActiveTab(value);
     router.push(`/policies?${value}`);
   };
 
   return (
-    <div 
-    onClick={handleClick}
-    className={`${value === activeTab ?'text-lovely  underline':'text-lovely/90'} hover:cursor-pointer text-xl text-nowrap ${thirdFont.className}`}>{title}</div>
-  )
-}
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`text-start transition-all duration-200 cursor-pointer text-xl text-nowrap ${
+        value === activeTab
+          ? 'text-lovely underline underline-offset-8 font-extrabold'
+          : 'text-lovely/70 hover:text-lovely font-medium'
+      } ${isAr ? 'font-bold' : thirdFont.className}`}
+    >
+      {title}
+    </button>
+  );
+};
 
-export default PolicyTab
+export default PolicyTab;

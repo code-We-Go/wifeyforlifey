@@ -1,76 +1,109 @@
-import React from 'react'
+import React from 'react';
+import { useTranslations } from 'next-intl';
 
-const LoyaltyPolicy = ({selectedTab ,setSelectedTab}:{selectedTab:string,setSelectedTab:React.Dispatch<React.SetStateAction<string>> }) => {
-    return (
-      <div className={`${selectedTab === "loyalty" ? 'flex flex-col gap-4' : 'hidden'} h-auto w-full`}>
-        <div className='flex flex-col gap-4'>
+interface PolicyProps {
+  selectedTab: string;
+  setSelectedTab?: React.Dispatch<React.SetStateAction<string>>;
+}
 
-          <h1 className='font-bold text-xl mb-2'>🎁 Wifey for Lifey – Loyalty Program</h1>
-          
-          <p className='text-lg font-medium mb-4'>
-            Earn points. Unlock rewards. Join the sisterhood.
-          </p>
+const LoyaltyPolicy: React.FC<PolicyProps> = ({ selectedTab }) => {
+  const t = useTranslations('policiesPage.loyalty');
 
-          <div>
-            <h2 className='font-bold text-lg mt-6 mb-3'>👀 How to Earn Points</h2>
-            <ul className='space-y-2'>
-              <li className='flex items-start gap-2'>
-                <span>📲</span>
-                <span><strong>Follow us on Instagram</strong> = 25 points</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span>💬</span>
-                <span><strong>Tag Wifey on your IG Stories</strong> = 30 points</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span>📦</span>
-                <span><strong>Place another order within 30 days</strong> = 50 points</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <span>💕</span>
-                <span><strong>Refer a bride</strong> = 2500 points</span>
-              </li>
+  return (
+    <div
+      className={`${
+        selectedTab === 'loyalty' ? 'flex flex-col gap-6' : 'hidden'
+      } h-auto w-full text-lovely`}
+    >
+      <h1 className="font-bold text-2xl md:text-3xl text-lovely mb-1">
+        {t('title')}
+      </h1>
+
+      <p className="text-lg font-medium text-lovely/90 mb-2">
+        {t('subtitle')}
+      </p>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('howToEarnTitle')}
+        </h2>
+        <ul className="space-y-2.5 ms-2 text-lovely/90">
+          <li className="flex items-start gap-3">
+            <span className="text-xl">📲</span>
+            <span>
+              <strong>{t('earnIgFollow')}</strong> = {t('earnIgFollowPts')}
+            </span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-xl">💬</span>
+            <span>
+              <strong>{t('earnIgStory')}</strong> = {t('earnIgStoryPts')}
+            </span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-xl">📦</span>
+            <span>
+              <strong>{t('earnReorder')}</strong> = {t('earnReorderPts')}
+            </span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-xl">💕</span>
+            <span>
+              <strong>{t('earnRefer')}</strong> = {t('earnReferPts')}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('tiersTitle')}
+        </h2>
+
+        <div className="space-y-4">
+          <div className="border border-lovely/30 rounded-xl p-5 bg-pinkey/30 backdrop-blur-sm">
+            <h3 className="font-bold text-lg mb-2 text-lovely">
+              {t('bestieTierTitle')}
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-sm md:text-base text-lovely/90 ms-2">
+              <li>{t('bestiePerk1')}</li>
+              <li>{t('bestiePerk2')}</li>
             </ul>
           </div>
 
-          <div>
-            <h2 className='font-bold text-lg mt-6 mb-3'>👑 Loyalty Tiers</h2>
-            
-            <div className='space-y-6'>
-              <div className='border border-gray-200 rounded-lg p-4'>
-                <h6 className='font-bold text-md mb-2'>1. 💌 Bestie – up to 5,000 points</h6>
-                <ul className='space-y-1 text-sm'>
-                  <li>🎂 Birthday bonus points</li>
-                  <li>🔓 Early access to pre-orders of new products</li>
-                </ul>
-              </div>
-
-              <div className='border border-gray-200 rounded-lg p-4'>
-                <h6 className='font-bold text-md mb-2'>2. 💍 Wifey – up to 10,000 points</h6>
-                <p className='text-sm mb-2'>Everything in Bestie, plus:</p>
-                <ul className='space-y-1 text-sm'>
-                  <li>🎁 Discounts on new product launches</li>
-                  <li>⏰ Early access to new collections</li>
-                  <li>💖 Bonus points on birthday and wedding day</li>
-                </ul>
-              </div>
-
-              <div className='border border-gray-200 rounded-lg p-4'>
-                <h6 className='font-bold text-md mb-2'>3. 👑 Boss Wifey – 15,000+ points</h6>
-                <p className='text-sm mb-2'>Everything in Wifey, plus:</p>
-                <ul className='space-y-1 text-sm'>
-                  <li>🎉️ Exclusive invites to Wifey for Lifey events</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p> each 20 points is equal to 1 EGP.</p>
+          <div className="border border-lovely/30 rounded-xl p-5 bg-pinkey/30 backdrop-blur-sm">
+            <h3 className="font-bold text-lg mb-1 text-lovely">
+              {t('wifeyTierTitle')}
+            </h3>
+            <p className="text-sm md:text-base text-lovely/80 mb-2">
+              {t('wifeyTierSubtitle')}
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm md:text-base text-lovely/90 ms-2">
+              <li>{t('wifeyPerk1')}</li>
+              <li>{t('wifeyPerk2')}</li>
+              <li>{t('wifeyPerk3')}</li>
+            </ul>
           </div>
 
+          <div className="border border-lovely/30 rounded-xl p-5 bg-pinkey/30 backdrop-blur-sm">
+            <h3 className="font-bold text-lg mb-1 text-lovely">
+              {t('bossTierTitle')}
+            </h3>
+            <p className="text-sm md:text-base text-lovely/80 mb-2">
+              {t('bossTierSubtitle')}
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm md:text-base text-lovely/90 ms-2">
+              <li>{t('bossPerk1')}</li>
+            </ul>
+          </div>
         </div>
       </div>
-    )
-}
 
-export default LoyaltyPolicy
+      <p className="text-lovely font-semibold text-lg pt-4 border-t border-lovely/20">
+        💰 {t('conversion')}
+      </p>
+    </div>
+  );
+};
+
+export default LoyaltyPolicy;

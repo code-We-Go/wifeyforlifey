@@ -1,91 +1,106 @@
-import React from 'react'
+import React from 'react';
+import { useTranslations } from 'next-intl';
 
-const TermsAndConditions = ({selectedTab ,setSelectedTab}:{selectedTab:string,setSelectedTab:React.Dispatch<React.SetStateAction<string>> }) => {
-    return (
-      <div className={`${selectedTab === "terms-and-conditions" ? 'flex flex-col gap-4' : 'hidden'} h-auto w-full`}>
- <div className='flex flex-col gap-4'>
-
-<h1 className='font-bold text-xl mb-2'>Terms & Conditions</h1>
-
-<p>
-  Welcome to Wifey for Lifey! By accessing our website or making a purchase, you agree to the terms
-  outlined below. Please read them carefully.
-</p>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>1. General Use</h2>
-  <ul>
-    <li>You must be 18 years or older to place an order.</li>
-    <li>You agree to use our website legally and responsibly.</li>
-    <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
-  </ul>
-</div>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>2. Products</h2>
-  <p>
-    We aim to ensure our product descriptions, images, and pricing are accurate. However, please note
-    that designs, features, and availability may change without prior notice.
-  </p>
-</div>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>3. Orders & Payments</h2>
-  <ul>
-    <li>Orders are only confirmed once payment has been successfully processed.</li>
-    <li>We reserve the right to cancel or delay orders due to stock limitations or payment issues.</li>
-  </ul>
-</div>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>4. Shipping</h2>
-  <ul>
-    <li>We currently deliver across Egypt.</li>
-    <li>Delivery timelines vary based on your location and courier service performance.</li>
-    <li>We are not liable for courier delays once the order has been dispatched.</li>
-  </ul>
-</div>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>5. Exclusive Video Access</h2>
-  <ul>
-    <li>Every planner purchase includes access to our exclusive video platform.</li>
-    <li>Content is protected — it cannot be shared, downloaded, or screen-recorded.</li>
-    <li>Sharing login details is strictly prohibited and may lead to revoked access or legal action.</li>
-  </ul>
-</div>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>6. Intellectual Property</h2>
-  <p>
-    All content — including videos, planner designs, and website material — is the intellectual
-    property of Wifey for Lifey. Use or reproduction of this material without written permission is
-    prohibited.
-  </p>
-</div>
-
-<div>
-  <h2 className='font-bold text-lg mt-4'>7. Community Code</h2>
-  <p>
-    Access to our private WhatsApp support group is reserved for verified planner buyers. We expect
-    respectful communication at all times. Any form of harassment or inappropriate behavior may result
-    in removal from the group.
-  </p>
-</div>
-
-<p className='mt-4'>
-  By continuing to use our services, you agree to these terms. If you have questions, please contact
-  us at <a href="mailto:support@wifeyforlifey.com">support@wifeyforlifey.com</a>.
-</p>
-
-</div>
-
-</div>
-
-
-
-
-  )
+interface PolicyProps {
+  selectedTab: string;
+  setSelectedTab?: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default TermsAndConditions
+const TermsAndConditions: React.FC<PolicyProps> = ({ selectedTab }) => {
+  const t = useTranslations('policiesPage.terms');
+
+  return (
+    <div
+      className={`${
+        selectedTab === 'terms-and-conditions'
+          ? 'flex flex-col gap-6'
+          : 'hidden'
+      } h-auto w-full text-lovely`}
+    >
+      <h1 className="font-bold text-2xl md:text-3xl text-lovely mb-2">
+        {t('title')}
+      </h1>
+
+      <p className="text-base md:text-lg leading-relaxed">{t('intro')}</p>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section1Title')}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t('generalItem1')}</li>
+          <li>{t('generalItem2')}</li>
+          <li>{t('generalItem3')}</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section2Title')}
+        </h2>
+        <p className="text-lovely/90 leading-relaxed">{t('productsDesc')}</p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section3Title')}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t('ordersItem1')}</li>
+          <li>{t('ordersItem2')}</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section4Title')}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t('shippingItem1')}</li>
+          <li>{t('shippingItem2')}</li>
+          <li>{t('shippingItem3')}</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section5Title')}
+        </h2>
+        <ul className="list-disc list-inside space-y-1.5 ms-2 text-lovely/90">
+          <li>{t('videoItem1')}</li>
+          <li>{t('videoItem2')}</li>
+          <li>{t('videoItem3')}</li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section6Title')}
+        </h2>
+        <p className="text-lovely/90 leading-relaxed">{t('ipDesc')}</p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="font-bold text-xl md:text-2xl text-lovely">
+          {t('section7Title')}
+        </h2>
+        <p className="text-lovely/90 leading-relaxed">{t('communityDesc')}</p>
+      </div>
+
+      <p className="text-lovely font-medium text-lg pt-4 border-t border-lovely/20 leading-relaxed">
+        {t.rich('closing', {
+          emailLink: (chunks) => (
+            <a
+              href="mailto:support@wifeyforlifey.com"
+              className="underline font-semibold hover:text-lovely/80"
+            >
+              {chunks}
+            </a>
+          ),
+        })}
+      </p>
+    </div>
+  );
+};
+
+export default TermsAndConditions;
