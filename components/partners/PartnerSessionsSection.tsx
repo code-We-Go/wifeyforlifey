@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { useLocale } from "next-intl";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,8 @@ export type PartnerSession = {
 };
 
 export default function PartnerSessionsSection() {
+  const locale = useLocale();
+  const isArabic = locale === "ar";
   const { data: authSession } = useSession();
   const [sessions, setSessions] = useState<PartnerSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -476,14 +479,16 @@ export default function PartnerSessionsSection() {
                       <h3
                         className={`${thirdFont.className} text-xl md:text-2xl font-bold text-lovely`}
                       >
-                        Featured Sessions
+                        {isArabic ? "ورش عمل جماعية" : "Featured Sessions"}
                       </h3>
                       {/* <span className="rounded-full bg-lovely/15 px-2.5 py-0.5 text-xs font-bold text-lovely uppercase tracking-wide">
                         Featured
                       </span> */}
                     </div>
                     <p className="text-xs md:text-sm text-lovely/80 mt-0.5">
-                      Handpicked top consultation sessions recommended for your wedding journey
+                      {isArabic
+                        ? "لقاءات واستشارات بنعرّفك بيها، مع خبيرات في مجالات مختلفة، عشان يساعدوكي تاخدي قراراتك بثقة!"
+                        : "Handpicked top consultation sessions recommended for your wedding journey"}
                     </p>
                   </div>
                 </div>
@@ -828,10 +833,16 @@ export default function PartnerSessionsSection() {
 
                 <p className="text-sm text-lovely/90 mb-4">
                   {finalPrice === 0
-                    ? "Once confirmed, you will be redirected directly to access your session."
+                    ? (isArabic
+                        ? "بمجرد التأكيد، هيتم تحويلك مباشرة للوصول إلى الجلسة."
+                        : "Once confirmed, you will be redirected directly to access your session.")
                     : paymentMethod === "instapay"
-                      ? "Upload your InstaPay receipt and our team will verify your payment within 24 hours."
-                      : `After your payment is successfully completed, you will receive ${selected.partnerName}'s WhatsApp contact / access link to arrange your session.`}
+                      ? (isArabic
+                          ? "ارفعي إيصال إنستاباي وسيقوم فريقنا بمراجعة الدفع خلال 24 ساعة."
+                          : "Upload your InstaPay receipt and our team will verify your payment within 24 hours.")
+                      : (isArabic
+                          ? `بعد إتمام الدفع بنجاح، هيوصلك رقم واتساب ${selected.partnerName} أو لينك التواصل معها، عشان تقدروا تنسّقوا مع بعض وتحددوا معاد الاستشارة المناسب ليكم.`
+                          : `After your payment is successfully completed, you will receive ${selected.partnerName}'s WhatsApp contact / access link to arrange your session.`)}
                 </p>
 
                 {/* Links */}
@@ -859,7 +870,7 @@ export default function PartnerSessionsSection() {
                 <form onSubmit={book} className="space-y-3">
                   <Input
                     className="border-pinkey placeholder:text-lovely bg-creamey"
-                    placeholder="First name"
+                    placeholder={isArabic ? "الاسم الأول" : "First name"}
                     value={form.firstName}
                     onChange={(e) =>
                       setForm({ ...form, firstName: e.target.value })
@@ -868,14 +879,14 @@ export default function PartnerSessionsSection() {
                   />
                   <Input
                     className="border-pinkey placeholder:text-lovely bg-creamey"
-                    placeholder="Last name"
+                    placeholder={isArabic ? "اسم العائلة" : "Last name"}
                     value={form.lastName}
                     onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                     required
                   />
                   <Input
                     className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
-                    placeholder="Email"
+                    placeholder={isArabic ? "البريد الإلكتروني" : "Email"}
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -883,7 +894,7 @@ export default function PartnerSessionsSection() {
                   />
                   <Input
                     className="border-pinkey placeholder:text-lovely bg-creamey"
-                    placeholder="Phone"
+                    placeholder={isArabic ? "رقم الموبايل" : "Phone"}
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     required
@@ -891,7 +902,7 @@ export default function PartnerSessionsSection() {
                   <div className="flex gap-2">
                     <Input
                       className="border-pinkey placeholder:text-lovely bg-creamey"
-                      placeholder="Discount code (optional)"
+                      placeholder={isArabic ? "كود الخصم (اختياري)" : "Discount code (optional)"}
                       value={form.discountCode}
                       onChange={(e) =>
                         setForm({ ...form, discountCode: e.target.value })
@@ -903,12 +914,12 @@ export default function PartnerSessionsSection() {
                       className="border-lovely text-lovely rounded-2xl"
                       onClick={applyDiscount}
                     >
-                      Apply
+                      {isArabic ? "تفعيل" : "Apply"}
                     </Button>
                   </div>
                   <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
                     <div className="flex items-center justify-between">
-                      <span className="text-lovely">Price</span>
+                      <span className="text-lovely">{isArabic ? "السعر" : "Price"}</span>
                       <span
                         className={`text-lovely ${subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
                           ? "line-through"
@@ -953,7 +964,7 @@ export default function PartnerSessionsSection() {
                   {finalPrice !== null && finalPrice > 0 && (
                     <div className="space-y-3">
                       <label className="block text-xs font-semibold text-lovely uppercase tracking-wide">
-                        Payment Method
+                        {isArabic ? "طريقة الدفع" : "Payment Method"}
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         <button
@@ -965,7 +976,7 @@ export default function PartnerSessionsSection() {
                             }`}
                         >
                           <CreditCard className="w-4 h-4" />
-                          Card / Wallet
+                          {isArabic ? "بطاقة بنكية / محفظة إلكترونية" : "Card / Wallet"}
                         </button>
                         <button
                           type="button"
@@ -976,7 +987,7 @@ export default function PartnerSessionsSection() {
                             }`}
                         >
                           <Smartphone className="w-4 h-4" />
-                          InstaPay
+                          {isArabic ? "إنستا باي" : "InstaPay"}
                         </button>
                       </div>
 
@@ -1056,12 +1067,12 @@ export default function PartnerSessionsSection() {
                       className="flex-1 bg-lovely text-creamey rounded-2xl"
                     >
                       {submitting
-                        ? "Processing..."
+                        ? (isArabic ? "جاري المعالجة..." : "Processing...")
                         : finalPrice === 0
-                          ? "Book Now"
+                          ? (isArabic ? "احجزي الآن" : "Book Now")
                           : paymentMethod === "instapay"
-                            ? "Submit for Review"
-                            : "Proceed to Pay"}
+                            ? (isArabic ? "إرسال للمراجعة" : "Submit for Review")
+                            : (isArabic ? "إتمام الدفع" : "Proceed to Pay")}
                     </Button>
                     <Button
                       type="button"
@@ -1069,7 +1080,7 @@ export default function PartnerSessionsSection() {
                       className="flex-1 bg-creamey hover:text-lovely hover:bg-creamey/90 border-lovely text-lovely rounded-2xl"
                       onClick={() => setSelected(null)}
                     >
-                      Cancel
+                      {isArabic ? "إلغاء" : "Cancel"}
                     </Button>
                   </div>
                 </form>

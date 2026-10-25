@@ -15,11 +15,15 @@ import { Separator } from "@radix-ui/react-separator";
 import Image from "next/image";
 import { useCart } from "@/providers/CartProvider";
 import { useToast } from "@/hooks/use-toast";
+import { useLocale, useTranslations } from "next-intl";
 
 const WishlistPage = () => {
   const { addItem } = useCart();
   const { toast } = useToast();
   const { wishList, setWishList } = useContext(wishListContext);
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+  const t = useTranslations("common");
 
   const handleRemoveFromWishlist = (
     productId: string,
@@ -35,8 +39,10 @@ const WishlistPage = () => {
       )
     );
     toast({
-      title: "Removed from wishlist",
-      description: "Item has been removed from your wishlist.",
+      title: isArabic ? "اتشال من المفضلة" : "Removed from wishlist",
+      description: isArabic
+        ? "المنتج اتحذف من قائمة المفضلة."
+        : "Item has been removed from your wishlist.",
     });
   };
 
@@ -44,8 +50,10 @@ const WishlistPage = () => {
     addItem(item);
     handleRemoveFromWishlist(item.productId, item.variant, item.attributes);
     toast({
-      title: "Added to cart",
-      description: `${item.productName} has been moved to your cart.`,
+      title: isArabic ? "انضاف للشنطة 💕" : "Added to cart",
+      description: isArabic
+        ? `تم نقل ${item.productName} لشنطة مشترياتك.`
+        : `${item.productName} has been moved to your cart.`,
     });
   };
 
@@ -57,18 +65,19 @@ const WishlistPage = () => {
             <Heart className="h-12 w-12 text-lovely" />
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-medium mb-4">
-            Your Wishlist is Empty
+            {isArabic ? "لسه مفيش حاجة في قائمة امنياتك!" : "Your Wishlist is Empty"}
           </h1>
-          <p className=" mb-8 max-w-md mx-auto">
-            Looks like you haven&apos;t added anything to your wishlist yet.
-            Explore our products and find something you&apos;ll love!
+          <p className="mb-8 max-w-md mx-auto" dir={isArabic ? "rtl" : "ltr"}>
+            {isArabic
+              ? "لسه مضفتيش حاجة لقائمة أمنياتك! خدي لفة في المتجر، وأكيد هتلاقي حاجات تعجبك💗\u200F"
+              : "Looks like you haven't added anything to your wishlist yet. Explore our products and find something you'll love!"}
           </p>
           <Button
             asChild
             size="lg"
             className="rounded-2xl bg-creamey text-lovely hover:bg-creamey hover:font-semibold"
           >
-            <Link href="/shop">Continue Shopping</Link>
+            <Link href="/shop">{isArabic ? "كمّلي شوبنج" : "Continue Shopping"}</Link>
           </Button>
         </div>
       </div>
@@ -79,12 +88,12 @@ const WishlistPage = () => {
     <div className="container-custom py-8 md:py-12 min-h-[calc(100vh-128px)]">
       <div className="flex items-center mb-8">
         <h1
-          className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl  font-semibold`}
+          className={`${thirdFont.className} tracking-normal text-4xl text-lovely/90 md:text-5xl font-semibold`}
         >
-          Wishlist
+          {isArabic ? "المفضلة" : "Wishlist"}
         </h1>
-        <span className="ml-2 text-lovely/90">
-          ({wishList.length} {wishList.length === 1 ? "item" : "items"})
+        <span className="mx-2 text-lovely/90">
+          ({wishList.length} {isArabic ? (wishList.length === 1 ? "منتج" : "منتجات") : (wishList.length === 1 ? "item" : "items")})
         </span>
       </div>
 
@@ -96,11 +105,11 @@ const WishlistPage = () => {
           {wishList.map((item, index) => (
             <div
               key={index}
-              className="bg-card bg-lovely border-lovely border-2  text-creamey rounded-lg p-4 md:p-6 shadow-sm"
+              className="bg-card bg-lovely border-lovely border-2 text-creamey rounded-lg p-4 md:p-6 shadow-sm"
             >
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 {/* Product */}
-                <div className="md:col-span-5 flex items-center space-x-4">
+                <div className="md:col-span-5 flex items-center space-x-4 rtl:space-x-reverse">
                   <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
                     <Image
                       unoptimized
@@ -126,19 +135,19 @@ const WishlistPage = () => {
 
                 {/* Price */}
                 <div className="md:col-span-1 hidden md:block text-center">
-                  LE{item.price.toFixed(2)}
+                  {isArabic ? `${item.price.toFixed(2)} ج.م` : `LE${item.price.toFixed(2)}`}
                 </div>
 
                 {/* Actions */}
-                <div className="md:col-span-4 flex items-center justify-end space-x-2">
+                <div className="md:col-span-4 flex items-center justify-end space-x-2 rtl:space-x-reverse">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-lovely  hover:text-lovely hover:border hover:border-creamey bg-creamey hover:font-semibold hover:bg-creamey"
+                    className="text-lovely hover:text-lovely hover:border hover:border-creamey bg-creamey hover:font-semibold hover:bg-creamey"
                     onClick={() => handleMoveToCart(item)}
                   >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Move to Cart
+                    <ShoppingCart className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                    {isArabic ? "إضافة لشنطة التسوق" : "Move to Cart"}
                   </Button>
                   <Button
                     variant="ghost"
@@ -152,7 +161,7 @@ const WishlistPage = () => {
                       )
                     }
                   >
-                    <Trash2 className="h-4  w-4" />
+                    <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Remove item</span>
                   </Button>
                 </div>
@@ -167,8 +176,8 @@ const WishlistPage = () => {
               className="gap-2 bg-lovely text-creamey hover:text-creamey hover:bg-lovely hover:font-semibold"
             >
               <Link href="/shop">
-                <ArrowLeft className="h-4 w-4" />
-                Continue Shopping
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+                {isArabic ? "العودة للمتجر" : "Continue Shopping"}
               </Link>
             </Button>
           </div>

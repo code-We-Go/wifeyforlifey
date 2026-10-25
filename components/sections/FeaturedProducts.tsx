@@ -81,8 +81,8 @@ const FeaturedProducts = () => {
             duration: 0,
             items: [],
             notes: isRtl ? [
-              "بتجهزي لجهازك؟",
-              "بيتك، ركن بركن — 11 فصل، أساسيات vs حاجات دلع إضافية، ودليل كميات عشان ماتصرفيش فلوسك على الفاضي."
+              "بتجهزي شقتك؟",
+              "جهزي بيتك أوضة بأوضة مع ١١ فصل فيهم كل اللي ممكن تحتاجيه، من الأساسيات للكماليات، وكمان الكميات المناسبة ليكي عشان تشتري كل اللي محتاجاه من غير مصاريف زيادة!"
             ] : [
               "Buying your gehaz?",
               "Your home, room by room — 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend."
@@ -101,8 +101,8 @@ const FeaturedProducts = () => {
             duration: 0,
             items: [],
             notes: isRtl ? [
-              "بتخططي ليوم فرحك؟",
-              "يومك الكبير خطوة بخطوة — تشيك ليست ليكي وللعريس، وعد تنازلي بكل تفصيلة من شهرين قبل الفرح لحد ليلة الفرح."
+              "بتنظمي يوم فرحك؟",
+              "خططي ليوم فرحك خطوة بخطوة، مع 2 بلانر للتجهيزات: واحدة ليكي وواحدة لعريسك! هتعرفوا تعملوا إيه وإمتى، من يوم ما تبدأوا تنظيم لحد الليلة اللي قبل الفرح، عشان متنسيش أي تفصيلة."
             ] : [
               "Planning your wedding day?",
               "Your big day, step by step — two checklists included: one for you, one for your groom. Countdown tasks from 2 months out to the night before."

@@ -30,6 +30,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)'],
         display: ['var(--font-playfair)'],
+        arabic: ['var(--font-arabic)', 'sans-serif'],
       },
 
 

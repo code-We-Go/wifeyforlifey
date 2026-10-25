@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Inter, Playfair_Display, Cairo } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./scrollbar-hide.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -34,10 +34,9 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
 });
 
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  variable: "--font-cairo",
-  weight: ["300", "400", "500", "600", "700", "800"],
+const skolarFont = localFonts({
+  src: "./fonts/SkolarSansArabicTEST-Rg.otf",
+  variable: "--font-arabic",
 });
 
 const wifeyFont = localFonts({
@@ -83,13 +82,13 @@ export default async function RootLayout({
       lang={locale}
       dir={isRtl ? "rtl" : "ltr"}
       suppressHydrationWarning
-      className={`w-full bg-creamey ${cairo.variable}`}
+      className={`w-full bg-creamey ${skolarFont.variable}`}
     >
       <GoogleTagManager gtmId="GTM-KQMB2B2F" />
 
       <body
         className={`w-full min-h-screen ${
-          isRtl ? cairo.className : wifeyFont.className
+          isRtl ? skolarFont.className : wifeyFont.className
         } bg-creamey`}
       >
         <noscript>

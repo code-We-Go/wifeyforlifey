@@ -659,7 +659,7 @@ We’re beyond excited to share this experience with you… your planner will be
         title: "The Whole Bridal Era Bundle",
         why: "You're living gehaz and wedding planning at the same time — so you get both planners (3 books!) plus one full year of the complete Wifey Experience, in one box.",
         price: "LE 3,900 (save LE 1,300)",
-        btnTxt: "Explore Full Bundle",
+        btnTxt: locale === "ar" ? "عرض التفاصيل" : "Explore Full Bundle",
       };
     } else if (quizAnswers.stage === "gehaz") {
       if (quizAnswers.support === "full") {
@@ -668,7 +668,7 @@ We’re beyond excited to share this experience with you… your planner will be
           title: "Gehaz Bestie — Full Experience",
           why: "You're building your home and you want backup every step: 12 video playlists, the WhatsApp circle, partner discounts and expert access for a whole year.",
           price: "LE 2,500",
-          btnTxt: "Explore Gehaz Bestie",
+          btnTxt: locale === "ar" ? "عرض التفاصيل" : "Explore Gehaz Bestie",
         };
       }
       return {
@@ -676,7 +676,7 @@ We’re beyond excited to share this experience with you… your planner will be
         title: "Gehaz Bestie — Mini Experience",
         why: "You've got this — you just need the book. 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend.",
         price: "LE 1,500",
-        btnTxt: "Explore Gehaz Mini",
+        btnTxt: locale === "ar" ? "عرض التفاصيل" : "Explore Gehaz Mini",
       };
     } else {
       if (quizAnswers.support === "full") {
@@ -685,7 +685,7 @@ We’re beyond excited to share this experience with you… your planner will be
           title: "Wedding Bestie — Full Experience",
           why: "Your big day, fully backed up: both checklists (yours + his), 10 playlists, the community, expert discounts and curated inspos for every decision.",
           price: "LE 2,700",
-          btnTxt: "Explore Wedding Bestie",
+          btnTxt: locale === "ar" ? "عرض التفاصيل" : "Explore Wedding Bestie",
         };
       }
       return {
@@ -693,7 +693,7 @@ We’re beyond excited to share this experience with you… your planner will be
         title: "Wedding Bestie — Mini Experience",
         why: "Two checklists — one for you, one for your groom — with countdown tasks from 2 months out to the night before.",
         price: "LE 1,700",
-        btnTxt: "Explore Wedding Mini",
+        btnTxt: locale === "ar" ? "عرض التفاصيل" : "Explore Wedding Mini",
       };
     }
   };
@@ -774,7 +774,7 @@ We’re beyond excited to share this experience with you… your planner will be
             id="back-btn"
           >
             <ChevronLeft className="mr-1 rtl:mr-0 rtl:ml-1 rtl:rotate-180 h-5 w-5" />
-            {locale === "ar" ? "الرجوع للباقات" : "Back to Packages"}
+            {locale === "ar" ? "العودة للمتجر" : "Back to Packages"}
           </Button>
         </div>
 

@@ -893,10 +893,16 @@ const ExpertSessions = () => {
 
                   <p className="text-sm text-lovely/90 mb-4">
                     {finalPrice === 0
-                      ? "Once confirmed, you will be redirected directly to access your session."
+                      ? (isRtl
+                          ? "بمجرد التأكيد، هيتم تحويلك مباشرة للوصول إلى الجلسة."
+                          : "Once confirmed, you will be redirected directly to access your session.")
                       : paymentMethod === "instapay"
-                        ? "Upload your InstaPay receipt and our team will verify your payment within 24 hours."
-                        : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
+                        ? (isRtl
+                            ? "ارفعي إيصال إنستاباي وسيقوم فريقنا بمراجعة الدفع خلال 24 ساعة."
+                            : "Upload your InstaPay receipt and our team will verify your payment within 24 hours.")
+                        : (isRtl
+                            ? `بعد إتمام الدفع بنجاح، هيوصلك رقم واتساب ${selectedForBooking.partnerName} أو لينك التواصل معها، عشان تقدروا تنسّقوا مع بعض وتحددوا معاد الاستشارة المناسب ليكم.`
+                            : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`)}
                   </p>
 
                   {/* Links */}
@@ -924,7 +930,7 @@ const ExpertSessions = () => {
                   <form onSubmit={book} className="space-y-3">
                     <Input
                       className="border-pinkey placeholder:text-lovely bg-creamey"
-                      placeholder="First name"
+                      placeholder={isRtl ? "الاسم الأول" : "First name"}
                       value={form.firstName}
                       onChange={(e) =>
                         setForm({ ...form, firstName: e.target.value })
@@ -933,14 +939,14 @@ const ExpertSessions = () => {
                     />
                     <Input
                       className="border-pinkey placeholder:text-lovely bg-creamey"
-                      placeholder="Last name"
+                      placeholder={isRtl ? "اسم العائلة" : "Last name"}
                       value={form.lastName}
                       onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                       required
                     />
                     <Input
                       className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
-                      placeholder="Email"
+                      placeholder={isRtl ? "البريد الإلكتروني" : "Email"}
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -948,7 +954,7 @@ const ExpertSessions = () => {
                     />
                     <Input
                       className="border-pinkey placeholder:text-lovely bg-creamey"
-                      placeholder="Phone"
+                      placeholder={isRtl ? "رقم الموبايل" : "Phone"}
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       required
@@ -956,7 +962,7 @@ const ExpertSessions = () => {
                     <div className="flex gap-2">
                       <Input
                         className="border-pinkey placeholder:text-lovely bg-creamey"
-                        placeholder="Discount code (optional)"
+                        placeholder={isRtl ? "كود الخصم (اختياري)" : "Discount code (optional)"}
                         value={form.discountCode}
                         onChange={(e) =>
                           setForm({ ...form, discountCode: e.target.value })
@@ -968,12 +974,12 @@ const ExpertSessions = () => {
                         className="border-lovely text-lovely rounded-2xl"
                         onClick={applyDiscount}
                       >
-                        Apply
+                        {isRtl ? "تفعيل" : "Apply"}
                       </Button>
                     </div>
                     <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
                       <div className="flex items-center justify-between">
-                        <span className="text-lovely">Price</span>
+                        <span className="text-lovely">{isRtl ? "السعر" : "Price"}</span>
                         <span
                           className={`text-lovely ${subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
                             ? "line-through"
@@ -1018,7 +1024,7 @@ const ExpertSessions = () => {
                     {finalPrice !== null && finalPrice > 0 && (
                       <div className="space-y-3">
                         <label className="block text-xs font-semibold text-lovely uppercase tracking-wide">
-                          Payment Method
+                          {isRtl ? "طريقة الدفع" : "Payment Method"}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           <button
@@ -1030,7 +1036,7 @@ const ExpertSessions = () => {
                               }`}
                           >
                             <CreditCard className="w-4 h-4" />
-                            Card / Wallet
+                            {isRtl ? "بطاقة بنكية / محفظة إلكترونية" : "Card / Wallet"}
                           </button>
                           <button
                             type="button"
@@ -1041,7 +1047,7 @@ const ExpertSessions = () => {
                               }`}
                           >
                             <Smartphone className="w-4 h-4" />
-                            InstaPay
+                            {isRtl ? "إنستا باي" : "InstaPay"}
                           </button>
                         </div>
 
@@ -1121,12 +1127,12 @@ const ExpertSessions = () => {
                         className="flex-1 bg-lovely text-creamey rounded-2xl"
                       >
                         {submitting
-                          ? "Processing..."
+                          ? (isRtl ? "جاري المعالجة..." : "Processing...")
                           : finalPrice === 0
-                            ? "Book Now"
+                            ? (isRtl ? "احجزي الآن" : "Book Now")
                             : paymentMethod === "instapay"
-                              ? "Submit for Review"
-                              : "Proceed to Pay"}
+                              ? (isRtl ? "إرسال للمراجعة" : "Submit for Review")
+                              : (isRtl ? "إتمام الدفع" : "Proceed to Pay")}
                       </Button>
                       <Button
                         type="button"
@@ -1134,7 +1140,7 @@ const ExpertSessions = () => {
                         className="flex-1 bg-creamey hover:text-lovely hover:bg-creamey/90 border-lovely text-lovely rounded-2xl"
                         onClick={() => setSelectedForBooking(null)}
                       >
-                        Cancel
+                        {isRtl ? "إلغاء" : "Cancel"}
                       </Button>
                     </div>
                   </form>

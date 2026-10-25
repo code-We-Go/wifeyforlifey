@@ -8,13 +8,13 @@ export interface LocalizedSubItem {
 
 const PACKAGE_ID_TO_AR_NAME: Record<string, string> = {
   // Gehaz Full Experience
-  "687396821b4da119eb1c13fe": "تجربة وايفي الكاملة",
+  "687396821b4da119eb1c13fe": "رحلة جهازك الكاملة مع وايفي",
   // Gehaz Mini Experience
-  "68bf6ae9c4d5c1af12cdcd37": "تجربة وايفي المصغرة",
+  "68bf6ae9c4d5c1af12cdcd37": "رحلة جهازك المصغّرة",
   // Wedding Full Experience
-  "6965e63c6df4503dda02c12b": "تجربة تنظيم الفرح الكاملة",
+  "6965e63c6df4503dda02c12b": "فرحك مع وايفى",
   // Wedding Mini Experience
-  "6a2d9aec3def6ce76dc7babc": "تجربة تنظيم الفرح المصغرة",
+  "6a2d9aec3def6ce76dc7babc": "فرحك مع وايفى (المصغرة)",
 };
 
 export function getLocalizedPackageName(
@@ -59,19 +59,19 @@ export function getLocalizedPackageName(
   const isFull = lower.includes("full") || item.tier === "full";
 
   if (isWedding) {
-    if (isFull) return "تجربة تنظيم الفرح الكاملة";
-    if (isMini) return "تجربة تنظيم الفرح المصغرة";
-    return "بلانر رفيقة الفرح";
+    if (isFull) return "فرحك مع وايفى";
+    if (isMini) return "فرحك مع وايفى (المصغرة)";
+    return "فرحك مع وايفى";
   }
 
   if (isGehaz) {
-    if (isFull) return "تجربة وايفي الكاملة";
-    if (isMini) return "تجربة وايفي المصغرة";
-    return "بلانر رفيقة الجهاز";
+    if (isFull) return "رحلة جهازك الكاملة مع وايفي";
+    if (isMini) return "رحلة جهازك المصغّرة";
+    return "رحلة جهازك مع وايفى";
   }
 
-  if (isFull) return "التجربة الكاملة";
-  if (isMini) return "التجربة المصغرة";
+  if (isFull) return "رحلة جهازك الكاملة مع وايفي";
+  if (isMini) return "رحلة جهازك المصغّرة";
 
   return name;
 }

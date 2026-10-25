@@ -861,9 +861,9 @@ const UnifiedCheckoutPage = () => {
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          { name: "Born to shine birthday gift card", label: isAr ? "كارت عيد ميلاد" : "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
-                          { name: "The I love you more than words gift card", label: isAr ? "كارت حب" : "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
-                          { name: "The Wifey to be card", label: isAr ? "كارت وايفي تو بي" : "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
+                          { name: "Born to shine birthday gift card", label: isAr ? "Born to shine" : "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
+                          { name: "The I love you more than words gift card", label: isAr ? "بحبك أكتر ما الكلام يوصف" : "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
+                          { name: "The Wifey to be card", label: isAr ? "حياتك الجديدة (Wifey to be)" : "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
                           { name: "Merry and Married", label: isAr ? "كارت ميري آند ماريد" : "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
                         ].map((card) => (
                           <div
@@ -1016,9 +1016,9 @@ const UnifiedCheckoutPage = () => {
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           {[
-                            { name: "Born to shine birthday gift card", label: isAr ? "كارت عيد ميلاد" : "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
-                            { name: "The I love you more than words gift card", label: isAr ? "كارت حب" : "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
-                            { name: "The Wifey to be card", label: isAr ? "كارت وايفي تو بي" : "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
+                            { name: "Born to shine birthday gift card", label: isAr ? "Born to shine" : "Birthday Card", src: "/giftCard/Born to shine birthday gift card.jpeg" },
+                            { name: "The I love you more than words gift card", label: isAr ? "بحبك أكتر ما الكلام يوصف" : "Love Card", src: "/giftCard/The I love you more than words gift card.jpeg" },
+                            { name: "The Wifey to be card", label: isAr ? "حياتك الجديدة (Wifey to be)" : "Wifey to be", src: "/giftCard/The Wifey to be card.jpeg" },
                             { name: "Merry and Married", label: isAr ? "كارت ميري آند ماريد" : "Merry & Married", src: "/cristmas/merryAndMarried.jpeg" },
                           ].map((card) => (
                             <div
