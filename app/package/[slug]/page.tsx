@@ -464,8 +464,8 @@ We’re beyond excited to share this experience with you… your planner will be
   useEffect(() => {
     if (packageData && packageData._id) {
       const modalContent = getModalContent(packageData._id);
-      // remove false for activating pre-order modal
-      if (modalContent && false) {
+      // add false for stop pre-order modal
+      if (modalContent) {
         setShowModal(true);
       }
     }
@@ -1438,13 +1438,12 @@ We’re beyond excited to share this experience with you… your planner will be
 
             {/* Displayed Image with Magnifier / Pan */}
             <div
-              className={`relative w-full h-[65vh] sm:h-[75vh] overflow-hidden flex items-center justify-center ${
-                zoomScale > 1
-                  ? isDragging
-                    ? "cursor-grabbing"
-                    : "cursor-grab"
-                  : "cursor-zoom-in"
-              }`}
+              className={`relative w-full h-[65vh] sm:h-[75vh] overflow-hidden flex items-center justify-center ${zoomScale > 1
+                ? isDragging
+                  ? "cursor-grabbing"
+                  : "cursor-grab"
+                : "cursor-zoom-in"
+                }`}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -1506,8 +1505,8 @@ We’re beyond excited to share this experience with you… your planner will be
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
                   className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all cursor-pointer ${currentImageIndex === idx
-                      ? "border-pinkey ring-2 ring-pinkey/50 scale-105 opacity-100"
-                      : "border-white/20 opacity-50 hover:opacity-80"
+                    ? "border-pinkey ring-2 ring-pinkey/50 scale-105 opacity-100"
+                    : "border-white/20 opacity-50 hover:opacity-80"
                     }`}
                 >
                   <Image
