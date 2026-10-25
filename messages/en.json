@@ -577,6 +577,8 @@
     "wifeyFavorites": "Wifey's Favorites",
     "noFavoritesYet": "No favorites have been added yet.",
     "noFavoritesMatch": "No favorites match the selected filters.",
+    "priceRange": "Price Range",
+    "resetFilters": "Reset Filters",
     "visit": "Visit",
     "inspirationBoards": "Inspiration Boards",
     "insposCount": "{count} Inspos",

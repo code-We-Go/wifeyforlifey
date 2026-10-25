@@ -31,7 +31,7 @@ import { useEffect, useState, useContext, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import axios from "axios";
 import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
@@ -70,6 +70,7 @@ import { VideoPlaylist } from "@/app/interfaces/interfaces";
 
 const AccountPage = () => {
   const t = useTranslations("accountPage");
+  const locale = useLocale();
   const { data: session, status } = useSession();
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
@@ -445,10 +446,6 @@ const AccountPage = () => {
   useEffect(() => {
     const loadContinueWatching = async () => {
       try {
-        // if (!session?.user?.isSubscribed) {
-        //   setContinueItem(null);
-        //   return;
-        // }
         setContinueLoading(true);
         const res = await fetch(`/api/playlist-progress`, {
           cache: "no-store",
@@ -458,19 +455,95 @@ const AccountPage = () => {
         }
         const data = await res.json();
         const list = (data?.progressList || []) as any[];
-        // Find the most recent entry that has a lastWatchedVideoID
-        const latest = list.find((p) => p?.lastWatchedVideoID && p?.playlistID);
+        // Find the most recent entry that has a lastWatchedVideoID or any watched video
+        const latest = list.find(
+          (p) =>
+            (p?.lastWatchedVideoID ||
+              (Array.isArray(p?.videosWatched) && p.videosWatched.length > 0)) &&
+            p?.playlistID
+        );
         if (latest) {
+          let videoObj = latest.lastWatchedVideoID;
+          const vId = String(videoObj?._id || videoObj || "");
+
+          // If videoObj has no title, look inside playlistID.videos
+          if (!videoObj?.title && Array.isArray(latest.playlistID?.videos)) {
+            const foundInPlaylist = latest.playlistID.videos.find(
+              (v: any) => String(v?._id || v) === vId
+            );
+            if (foundInPlaylist?.title) {
+              videoObj = foundInPlaylist;
+            }
+          }
+
+          // If still no title, fallback to the latest video from videosWatched
+          if (
+            !videoObj?.title &&
+            Array.isArray(latest.videosWatched) &&
+            latest.videosWatched.length > 0
+          ) {
+            const lastWatched = latest.videosWatched[latest.videosWatched.length - 1];
+            if (lastWatched?.title) {
+              videoObj = lastWatched;
+            }
+          }
+
+          let videoTitle =
+            (locale === "ar"
+              ? videoObj?.translations?.ar?.title || videoObj?.title
+              : videoObj?.title ||
+                videoObj?.translations?.en?.title ||
+                videoObj?.translations?.ar?.title) ||
+            videoObj?.title ||
+            "";
+
+          const playlistTitle =
+            (locale === "ar"
+              ? latest.playlistID?.translations?.ar?.title ||
+                latest.playlistID?.title
+              : latest.playlistID?.title ||
+                latest.playlistID?.translations?.en?.title ||
+                latest.playlistID?.translations?.ar?.title) ||
+            latest.playlistID?.title ||
+            "";
+
+          const finalVideoId = String(videoObj?._id || vId || "");
+          const finalPlaylistId = String(
+            latest.playlistID?._id || latest.playlistID
+          );
+
+          // If videoTitle is still missing, attempt fetching video details
+          if (!videoTitle && finalVideoId && finalVideoId !== "undefined") {
+            try {
+              const vRes = await fetch(`/api/videos/${finalVideoId}`);
+              if (vRes.ok) {
+                const vData = await vRes.json();
+                const fetchedVid = vData?.data || vData;
+                if (fetchedVid) {
+                  videoTitle =
+                    (locale === "ar"
+                      ? fetchedVid?.translations?.ar?.title || fetchedVid?.title
+                      : fetchedVid?.title ||
+                        fetchedVid?.translations?.en?.title ||
+                        fetchedVid?.translations?.ar?.title) ||
+                    fetchedVid?.title ||
+                    "";
+                }
+              }
+            } catch (err) {
+              console.warn("Could not fetch video fallback", err);
+            }
+          }
+
           setContinueItem({
-            playlistId: String(latest.playlistID?._id || latest.playlistID),
-            videoId: String(
-              latest.lastWatchedVideoID?._id || latest.lastWatchedVideoID
-            ),
+            playlistId: finalPlaylistId,
+            videoId: finalVideoId,
             thumbnailUrl:
+              videoObj?.thumbnailUrl ||
               latest.lastWatchedVideoID?.thumbnailUrl ||
               latest.playlistID?.thumbnailUrl,
-            playlistTitle: latest.playlistID?.title,
-            videoTitle: latest.lastWatchedVideoID?.title,
+            playlistTitle,
+            videoTitle: videoTitle || playlistTitle,
           });
         } else {
           setContinueItem(null);
@@ -487,7 +560,7 @@ const AccountPage = () => {
     if (status !== "loading") {
       loadContinueWatching();
     }
-  }, [status, session?.user?.isSubscribed]);
+  }, [status, session?.user?.isSubscribed, locale]);
 
   // Function to record login attempt with device fingerprint
   const recordLoginAttempt = async (
@@ -1091,13 +1164,19 @@ const AccountPage = () => {
               </Link>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold">{t("continueWatching")}</h3>
-              <p className="text-sm text-lovely/90 truncate">
-                {continueItem.videoTitle || t("latestWatched")}
-                {continueItem.playlistTitle
-                  ? ` • ${continueItem.playlistTitle}`
-                  : ""}
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-lovely/80 bg-pinkey/40 px-2.5 py-0.5 rounded-full">
+                  {t("continueWatching")}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-lovely mt-1 truncate">
+                {continueItem.videoTitle || continueItem.playlistTitle || t("latestWatched")}
+              </h3>
+              {continueItem.playlistTitle && continueItem.videoTitle && continueItem.playlistTitle !== continueItem.videoTitle && (
+                <p className="text-xs text-lovely/70 truncate mt-0.5">
+                  {continueItem.playlistTitle}
+                </p>
+              )}
               <div className="mt-2">
                 <Button
                   onClick={() =>
@@ -1105,7 +1184,7 @@ const AccountPage = () => {
                       `/playlists/${continueItem.playlistId}?videoId=${continueItem.videoId}`
                     )
                   }
-                  className="bg-lovely text-creamey hover:bg-lovely"
+                  className="bg-lovely text-creamey hover:bg-lovely text-xs sm:text-sm h-8 sm:h-9"
                 >
                   {t("continueButton")}
                 </Button>
