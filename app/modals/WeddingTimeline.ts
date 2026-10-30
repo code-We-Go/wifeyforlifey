@@ -1,22 +1,40 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export interface IWeddingTimelineEvent {
+  id: string;
+  brideActivity: string;
+  groomActivity: string;
+  bridesmaidsActivity: string;
+  groomsmenActivity: string;
+  duration: number;
+  timeLabel?: string;
+  translations?: {
+    ar?: {
+      brideActivity?: string;
+      groomActivity?: string;
+      bridesmaidsActivity?: string;
+      groomsmenActivity?: string;
+      timeLabel?: string;
+    };
+  };
+}
+
+export interface IWeddingTimelineSelectedFeature {
+  name: string;
+  duration: number;
+  enabled: boolean;
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
+}
+
 export interface IWeddingTimeline extends Document {
   userId?: mongoose.Types.ObjectId;
   zaffaTime: string; // The anchor time
-  selectedFeatures: {
-    name: string;
-    duration: number;
-    enabled: boolean;
-  }[];
-  events: {
-    id: string;
-    brideActivity: string;
-    groomActivity: string;
-    bridesmaidsActivity: string;
-    groomsmenActivity: string;
-    duration: number;
-    timeLabel?: string;
-  }[];
+  selectedFeatures: IWeddingTimelineSelectedFeature[];
+  events: IWeddingTimelineEvent[];
   shareToken?: string; // Unique token for sharing read-only timeline
   feedback?: {
     easeOfUse: number; // 1-5 star rating
@@ -26,7 +44,7 @@ export interface IWeddingTimeline extends Document {
     recommend: string; // "definitely_not" | "maybe" | "definitely_yes"
     comment?: string;
   }; 
-  exported:{type:Number,default:0};
+  exported: { type: Number, default: 0 };
   createdAt: Date;
 }
 

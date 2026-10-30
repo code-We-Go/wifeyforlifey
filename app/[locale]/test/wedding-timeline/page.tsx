@@ -92,12 +92,14 @@ type TimelineEvent = {
 
 // --- Helper Functions ---
 
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+const formatTime = (date: Date, locale?: string) => {
+  const isAr = locale === "ar";
+  const hours24 = date.getHours();
+  const minutes = date.getMinutes();
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+  const paddedMinutes = String(minutes).padStart(2, "0");
+  const period = hours24 >= 12 ? (isAr ? "م" : "PM") : (isAr ? "ص" : "AM");
+  return `${hours12}:${paddedMinutes} ${period}`;
 };
 
 const shiftZaffaTime = (currentZaffa: string, minutes: number) => {
@@ -112,7 +114,7 @@ const addMinutes = (date: Date, minutes: number) => {
   return new Date(date.getTime() + minutes * 60000);
 };
 
-const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa") => {
+const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa", locale: string = "en") => {
   if (events.length === 0) return [];
 // on Nareiman's Demandss the part starts => entrance
   let zaffaIndex = events.findIndex((e) => e.id === anchorId);
@@ -165,7 +167,7 @@ const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchor
 
   return result.map((e, i) => ({
     ...e,
-    timeLabel: `${formatTime(times[i].start)} - ${formatTime(times[i].end)}`,
+    timeLabel: `${formatTime(times[i].start, locale)} - ${formatTime(times[i].end, locale)}`,
   }));
 };
 

@@ -3,7 +3,7 @@
 import { Link } from "@/i18n/routing";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useContext } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/providers/CartProvider";
 import { INotification } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
@@ -118,6 +118,8 @@ export default function Header() {
   const tCommon = useTranslations("common");
   const tTheme = useTranslations("theme");
   const tHeader = useTranslations("header");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
 
   const getNavLabel = (name: string) => {
     switch (name) {
@@ -655,7 +657,7 @@ export default function Header() {
               </SheetTrigger>
               <SheetTitle className="hidden">test</SheetTitle>
               <SheetContent
-                side="left"
+                side={isArabic ? "right" : "left"}
                 className="w-[300px] bg-lovely text-creamey sm:w-[400px]"
               >
                 <div

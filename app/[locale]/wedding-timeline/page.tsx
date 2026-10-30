@@ -71,13 +71,21 @@ import {
   ALL_FEATURES,
   MUSLIM_KATB_KETAB_ONLY_FEATURES,
 } from "@/lib/wedding-timeline-config";
+import { useTranslations, useLocale } from "next-intl";
+import {
+  localizeFeature,
+  localizeEvent,
+  getLocalizedFeatureLabel,
+  getLocalizedActivity,
+  getLocalizedVariationLabel,
+  formatTimelineTimeLabel,
+} from "@/lib/wedding-timeline-localization";
+import { exportTimelinePDF } from "@/lib/timelinePdfExport";
 
 // --- Types & Constants ---
 
 // CEREMONY_OPTIONS and FEATURES are imported from @/lib/wedding-timeline-config
 // They are also served via GET /api/wedding-timeline/config for mobile app consumption.
-
-
 
 type TimelineEvent = {
   id: string;
@@ -88,16 +96,19 @@ type TimelineEvent = {
   duration: number; // minutes
   timeLabel?: string;
   isBreak?: boolean;
+  translations?: any;
 };
 
 // --- Helper Functions ---
 
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+const formatTime = (date: Date, locale?: string) => {
+  const isAr = locale === "ar";
+  const hours24 = date.getHours();
+  const minutes = date.getMinutes();
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+  const paddedMinutes = String(minutes).padStart(2, "0");
+  const period = hours24 >= 12 ? (isAr ? "م" : "PM") : (isAr ? "ص" : "AM");
+  return `${hours12}:${paddedMinutes} ${period}`;
 };
 
 const shiftZaffaTime = (currentZaffa: string, minutes: number) => {
@@ -112,7 +123,7 @@ const addMinutes = (date: Date, minutes: number) => {
   return new Date(date.getTime() + minutes * 60000);
 };
 
-const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa") => {
+const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa", locale: string = "en") => {
   if (events.length === 0) return [];
 // on Nareiman's Demandss the part starts => entrance
   let zaffaIndex = events.findIndex((e) => e.id === anchorId);
@@ -165,7 +176,7 @@ const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchor
 
   return result.map((e, i) => ({
     ...e,
-    timeLabel: `${formatTime(times[i].start)} - ${formatTime(times[i].end)}`,
+    timeLabel: `${formatTime(times[i].start, locale)} - ${formatTime(times[i].end, locale)}`,
   }));
 };
 
@@ -194,6 +205,7 @@ function SortableRow({
   mobileActiveColumn: string;
   setOriginalDuration: (val: number) => void;
 }) {
+  const locale = useLocale();
   const {
     attributes,
     listeners,
@@ -250,7 +262,7 @@ function SortableRow({
       </TableCell>
       <TableCell className="font-medium text-sm md:text-base p-1 md:p-4 align-middle">
         <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm break-words">
-          {event.timeLabel}
+          {formatTimelineTimeLabel(event.timeLabel, locale)}
         </span>
       </TableCell>
       <TableCell className="p-1 md:p-4 align-middle">
@@ -397,6 +409,8 @@ function SortableRow({
 // --- Main Page Component ---
 
 function WeddingTimelinePageContent() {
+  const t = useTranslations("weddingTimeline");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, loading } = useAuth();
@@ -497,14 +511,12 @@ function WeddingTimelinePageContent() {
     // For these variations, use the user's selected anchor if available
     if ((variation === "christian_church_venue" || variation === "muslim_katb_ketab_wedding") && anchorOverride) return anchorOverride;
 
-    // Christian variations usually anchor to Church, unless it's venue only
-    // if (variation.startsWith("christian") && variation !== "christian_venue_only") return "church";
     if (variation === "christian_venue_only"  || variation === "christian_church_venue") return "Grand_Entrance";
     if (variation === "christian_church_only") return "church";
     
     // Muslim variations
     if (variation === "muslim_katb_ketab_only") return "katb_ketab";
-    if (variation === "muslim_katb_ketab_wedding") return anchorOverride || "Grand_Entrance"; // Or katb_ketab depending on override, but default if not set
+    if (variation === "muslim_katb_ketab_wedding") return anchorOverride || "Grand_Entrance";
     if (variation === "muslim_wedding_only") return "Grand_Entrance"; 
     
     return "zaffa"; 
@@ -513,36 +525,37 @@ function WeddingTimelinePageContent() {
   const getAnchorLabel = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
     const anchorId = getAnchorEventId(variation, anchorOverride);
     const feature = ALL_FEATURES.find(f => f.id === anchorId);
-    return feature ? feature.label : "Wedding";
+    if (!feature) return locale === "ar" ? "الفرح" : "Wedding";
+    return getLocalizedFeatureLabel(feature.label, locale);
   };
 
   // Tutorial Steps
   const tutorialSteps = [
     {
       image: "/weddingPlanningToutorial/step1.gif",
-      title: "Set Your Wedding Start Time",
-      description: "Start by selecting when your wedding begins. This will be the anchor point for your entire timeline."
+      title: t("tutorialStep1Title"),
+      description: t("tutorialStep1Desc"),
     },
     {
       image: "/weddingPlanningToutorial/2.gif",
-      title: "Choose Your Features",
-      description: "Select the activities you want to include in your wedding day and customize their duration to fit your schedule. (Note: this is our recommended timing but you still can change it later)"
+      title: t("tutorialStep2Title"),
+      description: t("tutorialStep2Desc"),
     },
     {
       image: "/weddingPlanningToutorial/3.gif",
-      title: "Drag and Drop Events",
-      description: "Easily reorder your timeline by dragging and dropping events. Arrange your day exactly how you want it!"
+      title: t("tutorialStep3Title"),
+      description: t("tutorialStep3Desc"),
     },
     {
       image: "/weddingPlanningToutorial/4.gif",
-      title: "Mobile View Selector",
-      description: "On mobile devices, use the dropdown selector to switch between viewing different personas (Bride, Groom, Bridesmaids, Groomsmen)."
+      title: t("tutorialStep4Title"),
+      description: t("tutorialStep4Desc"),
     },
     {
       image: "/weddingPlanningToutorial/step5.gif",
-      title: "Save, Share & Export",
-      description: "Use these options to save your timeline, share it with your loved ones, or export it as a PDF for printing."
-    }
+      title: t("tutorialStep5Title"),
+      description: t("tutorialStep5Desc"),
+    },
   ];
 
   // -- Dnd Sensors --
@@ -571,7 +584,7 @@ function WeddingTimelinePageContent() {
                 if (savedBride) setBrideFirstName(savedBride);
                 if (savedGroom) setGroomFirstName(savedGroom);
                 if (savedEvents && savedEvents.length > 0) {
-                  setEvents(savedEvents);
+                  setEvents(savedEvents.map((e: any) => localizeEvent(e, locale)));
                   setStep(6);
                 }
               // Check if user has already provided feedback
@@ -660,7 +673,7 @@ function WeddingTimelinePageContent() {
   };
 
   // 5. Calculated Events (Time Calculation)
-  const calculatedEvents = calculateTimeline(events, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor));
+  const calculatedEvents = calculateTimeline(events, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor), locale);
 
   // 6. Auto-Save Logic (Only if newly generated and not yet saved)
   //   useEffect(() => {
@@ -738,15 +751,19 @@ function WeddingTimelinePageContent() {
               duration: e.duration,
               enabled: true,
             })),
-          events: computedEvents.map((e) => ({
-            id: e.id,
-            brideActivity: e.brideActivity,
-            groomActivity: e.groomActivity,
-            bridesmaidsActivity: e.bridesmaidsActivity,
-            groomsmenActivity: e.groomsmenActivity,
-            duration: e.duration,
-            timeLabel: e.timeLabel,
-          })),
+          events: computedEvents.map((e) => {
+            const loc = localizeEvent(e, locale);
+            return {
+              id: e.id,
+              brideActivity: e.brideActivity,
+              groomActivity: e.groomActivity,
+              bridesmaidsActivity: e.bridesmaidsActivity,
+              groomsmenActivity: e.groomsmenActivity,
+              duration: e.duration,
+              timeLabel: e.timeLabel,
+              translations: loc.translations,
+            };
+          }),
         }),
       });
 
@@ -755,8 +772,11 @@ function WeddingTimelinePageContent() {
 
       if (!silent) {
         toast({
-          title: "Success",
-          description: "Your timeline has been saved!",
+          title: locale === "ar" ? "تم بنجاح" : "Success",
+          description:
+            locale === "ar"
+              ? "تم حفظ تايم لاين فرحك بنجاح!"
+              : "Your timeline has been saved!",
           className: "bg-pinkey text-lovely border-lovely",
         });
 
@@ -768,8 +788,11 @@ function WeddingTimelinePageContent() {
     } catch (error) {
       if (!silent) {
         toast({
-          title: "Error",
-          description: "Failed to save timeline. Please try again.",
+          title: locale === "ar" ? "خطأ في الحفظ" : "Error",
+          description:
+            locale === "ar"
+              ? "تعذر حفظ التايم لاين. يرجى المحاولة مرة أخرى."
+              : "Failed to save timeline. Please try again.",
           className: "bg-pinkey text-lovely border-lovely",
         });
       }
@@ -833,14 +856,14 @@ function WeddingTimelinePageContent() {
         }
       }
 
-      generatedEvents.push({
+      generatedEvents.push(localizeEvent({
         id: feature.id,
         duration: feature.duration,
         brideActivity: acts.bride || "",
         groomActivity: acts.groom || "",
         bridesmaidsActivity: acts.bridesmaids || "",
         groomsmenActivity: acts.groomsmen || "",
-      });
+      }, locale));
 
       // Add break if not the last event AND not after zaffa, arrival, or any 'after' category events
       const nextFeature = featureList[index + 1];
@@ -851,15 +874,16 @@ function WeddingTimelinePageContent() {
         nextFeature &&
         !nextFeature.noBreakBefore
       ) {
-        generatedEvents.push({
+        const breakText = locale === "ar" ? "استراحة / انتقال" : "Break / Transition";
+        generatedEvents.push(localizeEvent({
           id: `break_${index}`,
           duration: 15,
-          brideActivity: (acts.bride?.trim() === "_" || !acts.bride?.trim()) ? "_" : "Break / Transition",
-          groomActivity: (acts.groom?.trim() === "_" || !acts.groom?.trim()) ? "_" : "Break / Transition",
-          bridesmaidsActivity: (acts.bridesmaids?.trim() === "_" || !acts.bridesmaids?.trim()) ? "_" : "Break / Transition",
-          groomsmenActivity: (acts.groomsmen?.trim() === "_" || !acts.groomsmen?.trim()) ? "_" : "Break / Transition",
+          brideActivity: (acts.bride?.trim() === "_" || !acts.bride?.trim()) ? "_" : breakText,
+          groomActivity: (acts.groom?.trim() === "_" || !acts.groom?.trim()) ? "_" : breakText,
+          bridesmaidsActivity: (acts.bridesmaids?.trim() === "_" || !acts.bridesmaids?.trim()) ? "_" : breakText,
+          groomsmenActivity: (acts.groomsmen?.trim() === "_" || !acts.groomsmen?.trim()) ? "_" : breakText,
           isBreak: true,
-        });
+        }, locale));
       }
     });
 
@@ -867,7 +891,7 @@ function WeddingTimelinePageContent() {
 
     // 2. Save to DB
     if (isAuthenticated) {
-      const computedEvents = calculateTimeline(generatedEvents, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor));
+      const computedEvents = calculateTimeline(generatedEvents, zaffaTime, getAnchorEventId(selectedCeremonyVariation, selectedAnchor), locale);
       await saveToDb(generatedEvents, computedEvents, zaffaTime, true);
     }
 
@@ -975,8 +999,11 @@ function WeddingTimelinePageContent() {
     setShowAddEventModal(false);
     
     toast({
-      title: "Event Added",
-      description: `"${newEventName || "New Activity"}" has been added to your timeline.`,
+      title: locale === "ar" ? "تمت إضافة الفقرة" : "Event Added",
+      description:
+        locale === "ar"
+          ? `تمت إضافة "${newEventName || "فقرة جديدة"}" إلى جدول يومك.`
+          : `"${newEventName || "New Activity"}" has been added to your timeline.`,
       className: "bg-pinkey text-lovely border-lovely",
     });
   };
@@ -995,8 +1022,11 @@ function WeddingTimelinePageContent() {
   const handleShare = async () => {
     if (!isAuthenticated) {
       toast({
-        title: "Login Required",
-        description: "Please login to share your timeline.",
+        title: locale === "ar" ? "تسجيل الدخول مطلوب" : "Login Required",
+        description:
+          locale === "ar"
+            ? "يرجى تسجيل الدخول لمشاركة التايم لاين."
+            : "Please login to share your timeline.",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
@@ -1020,8 +1050,11 @@ function WeddingTimelinePageContent() {
         await navigator.clipboard.writeText(data.shareUrl);
         
         toast({
-          title: "Share Link Created!",
-          description: "Link copied to clipboard. Share it with your loved ones!",
+          title: locale === "ar" ? "تم تجهيز رابط المشاركة!" : "Share Link Created!",
+          description:
+            locale === "ar"
+              ? "تم نسخ الرابط للحافظة. شاركيه مع عريسك وحبايبك!"
+              : "Link copied to clipboard. Share it with your loved ones!",
           className: "bg-pinkey text-lovely border-lovely",
         });
 
@@ -1033,8 +1066,11 @@ function WeddingTimelinePageContent() {
     } catch (error) {
       console.error("Share failed:", error);
       toast({
-        title: "Share Failed",
-        description: "Could not get share link. Please try again.",
+        title: locale === "ar" ? "فشل المشاركة" : "Share Failed",
+        description:
+          locale === "ar"
+            ? "تعذر الحصول على رابط المشاركة. يرجى المحاولة مرة أخرى."
+            : "Could not get share link. Please try again.",
         className: "bg-pinkey text-lovely border-lovely",
       });
     } finally {
@@ -1046,48 +1082,66 @@ function WeddingTimelinePageContent() {
     // Validate ALL fields are filled in
     if (feedbackRatings.easeOfUse === 0) {
       toast({
-        title: "Rating Required",
-        description: "Please rate how easy it was to create your timeline (Question 1).",
+        title: locale === "ar" ? "التقييم مطلوب" : "Rating Required",
+        description:
+          locale === "ar"
+            ? "يرجى تحديد مدى سهولة الأداة (السؤال 1)."
+            : "Please rate how easy it was to create your timeline (Question 1).",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
     if (feedbackRatings.satisfaction === 0) {
       toast({
-        title: "Rating Required",
-        description: "Please rate how satisfied you are with how the day looks (Question 2).",
+        title: locale === "ar" ? "التقييم مطلوب" : "Rating Required",
+        description:
+          locale === "ar"
+            ? "يرجى تحديد مدى رضاكِ عن النتيجة (السؤال 2)."
+            : "Please rate how satisfied you are with how the day looks (Question 2).",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
     if (!feedbackTimeSaved) {
       toast({
-        title: "Selection Required",
-        description: "Please select how much time you feel this tool saved you (Question 3).",
+        title: locale === "ar" ? "الاختيار مطلوب" : "Selection Required",
+        description:
+          locale === "ar"
+            ? "يرجى اختيار مقدار الوقت الذي وفرته الأداة (السؤال 3)."
+            : "Please select how much time you feel this tool saved you (Question 3).",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
     if (feedbackFeelings.length === 0) {
       toast({
-        title: "Selection Required",
-        description: "Please select at least one feeling about how this tool made you feel (Question 4).",
+        title: locale === "ar" ? "الاختيار مطلوب" : "Selection Required",
+        description:
+          locale === "ar"
+            ? "يرجى اختيار شعور واحد على الأقل (السؤال 4)."
+            : "Please select at least one feeling about how this tool made you feel (Question 4).",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
     if (!feedbackRecommend) {
       toast({
-        title: "Selection Required",
-        description: "Please let us know if you would recommend this tool to another bride (Question 5).",
+        title: locale === "ar" ? "الاختيار مطلوب" : "Selection Required",
+        description:
+          locale === "ar"
+            ? "يرجى تحديد ما إذا كنتِ ترشحي الأداة لعروسة تانية (السؤال 5)."
+            : "Please let us know if you would recommend this tool to another bride (Question 5).",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
     }
     if (!feedbackText.trim()) {
       toast({
-        title: "Comments Required",
-        description: "Please share any additional comments before submitting.",
+        title: locale === "ar" ? "التعليق مطلوب" : "Comments Required",
+        description:
+          locale === "ar"
+            ? "يرجى مشاركتنا أي تعليق إضافي قبل الإرسال."
+            : "Please share any additional comments before submitting.",
         className: "bg-pinkey text-lovely border-lovely",
       });
       return;
@@ -1133,16 +1187,22 @@ function WeddingTimelinePageContent() {
         setFeedbackRecommend("");
 
         toast({
-          title: "Thank You! 💕",
-          description: "Your feedback helps us make this feature even better!",
+          title: locale === "ar" ? "شكراً ليكي يا سكرة! 💕" : "Thank You! 💕",
+          description:
+            locale === "ar"
+              ? "رأيك بيساعدنا نطور الأداة دي وتكون أفضل دائماً!"
+              : "Your feedback helps us make this feature even better!",
           className: "bg-pinkey text-lovely border-lovely",
         });
       }
     } catch (error) {
       console.error("Feedback submission failed:", error);
       toast({
-        title: "Submission Failed",
-        description: "Could not submit feedback. Please try again.",
+        title: locale === "ar" ? "فشل الإرسال" : "Submission Failed",
+        description:
+          locale === "ar"
+            ? "تعذر إرسال التقييم. يرجى المحاولة مرة أخرى."
+            : "Could not submit feedback. Please try again.",
         className: "bg-pinkey text-lovely border-lovely",
       });
     } finally {
@@ -1154,307 +1214,12 @@ function WeddingTimelinePageContent() {
     setIsExporting(true);
 
     try {
-      const { default: jsPDF, GState } = (await import("jspdf")) as any;
-
-      const doc = new jsPDF();
-
-      // Helper function to draw rounded rectangle
-      const drawRoundedRect = (x: number, y: number, width: number, height: number, radius: number, fillColor: string, borderColor: string) => {
-        doc.setFillColor(fillColor);
-        doc.setDrawColor(borderColor);
-        doc.setLineWidth(0.5);
-        
-        // Draw rounded rectangle
-        doc.roundedRect(x, y, width, height, radius, radius, 'FD');
-      };
-
-      // Helper function to calculate how many lines text will need
-      const calculateTextLines = (text: string, width: number, fontSize: number = 8) => {
-        doc.setFontSize(fontSize);
-        const maxWidth = width - 2; // Leave 1 unit padding on each side
-        const lines = doc.splitTextToSize(text, maxWidth);
-        return lines;
-      };
-
-      // Helper function to add text centered in a cell with wrapping
-      const addCenteredText = (text: string, x: number, y: number, width: number, height: number, fontSize: number = 8) => {
-        doc.setFontSize(fontSize);
-        const maxWidth = width - 2; // Leave 1 unit padding on each side
-        const lines = doc.splitTextToSize(text, maxWidth);
-        const lineHeight = fontSize * 0.5; // Line spacing
-        const totalTextHeight = lines.length * lineHeight;
-        
-        // Start Y position to center the text block vertically
-        let textY = y + (height - totalTextHeight) / 2 + (fontSize / 2.5);
-        
-        lines.forEach((line: string) => {
-          const lineWidth = doc.getTextWidth(line);
-          const textX = x + (width - lineWidth) / 2;
-          doc.text(line, textX, textY);
-          textY += lineHeight;
-        });
-      };
-
-      // Set Page Background (Creamey)
-      doc.setFillColor("#FBF3E0");
-      doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
-
-      // Add Logo at the top (full opacity)
-      const logoUrl = "/logo/Wifey for Lifey Primary Logo with Slogan Red.png";
-      const logoImg = new Image();
-      logoImg.src = logoUrl;
-
-      await new Promise((resolve, reject) => {
-        logoImg.onload = resolve;
-        logoImg.onerror = reject;
+      await exportTimelinePDF({
+        events: calculatedEvents,
+        locale,
+        brideFirstName,
+        groomFirstName,
       });
-
-      // Add logo centered at top
-      const logoWidth = 60;
-      const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
-      const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
-      doc.addImage(logoImg, "PNG", logoX, 10, logoWidth, logoHeight);
-
-
-      // Add timeline subheader image
-      const subHeaderUrl = "/timeline/timelineSubHeader.jpg";
-      const subHeaderImg = new Image();
-      subHeaderImg.src = subHeaderUrl;
-
-      await new Promise((resolve, reject) => {
-        subHeaderImg.onload = resolve;
-        subHeaderImg.onerror = reject;
-      });
-
-      // Add subheader image centered below logo
-      const subHeaderWidth = 100;
-      const subHeaderHeight = (subHeaderImg.height * subHeaderWidth) / subHeaderImg.width;
-      const subHeaderX = (doc.internal.pageSize.getWidth() - subHeaderWidth) / 2;
-      const titleY = 10 + logoHeight ;
-      doc.addImage(subHeaderImg, "JPEG", subHeaderX, titleY, subHeaderWidth, subHeaderHeight);
-
-
-      // Table configuration
-      const startY = titleY + subHeaderHeight ;
-      const gap = 2; // Gap between cells
-      const radius = 1; // Rounded corner radius
-      const minRowHeight = 8; // Minimum row height
-      const baseLineHeight = 4; // Height per line of text
-      const timeColWidth = 30;
-      const activityColWidth = 35;
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const tableWidth = timeColWidth + (activityColWidth * 4) + (gap * 5);
-      const startX = (pageWidth - tableWidth) / 2;
-
-      let currentY = startY;
-
-      // Draw header row (text only, no boxes)
-      const headers = ["TIME", "BRIDE", "GROOM", "BRIDESMAIDS", "GROOMSMEN"];
-      const headerWidths = [timeColWidth, activityColWidth, activityColWidth, activityColWidth, activityColWidth];
-      
-      doc.setTextColor("#D32333");
-      doc.setFont("BebasNeue-Regular", "bold");
-      doc.setFontSize(10);
-      
-      let headerX = startX;
-      headers.forEach((header, index) => {
-        const textWidth = doc.getTextWidth(header);
-        const textX = headerX + (headerWidths[index] - textWidth) / 2;
-        doc.text(header, textX, currentY + 5); // Simple text without cell
-        headerX += headerWidths[index] + gap;
-      });
-
-      // Draw horizontal line under headers
-      const lineY = currentY + 7;
-      doc.setDrawColor("#D32333");
-      doc.setLineWidth(0.5);
-      doc.line(startX, lineY, startX + tableWidth, lineY);
-
-      currentY += 10; // Space after headers and line
-
-      // Draw data rows
-      doc.setFont("helvetica", "normal");
-      
-      calculatedEvents.forEach((event) => {
-        // Calculate the required height for this row based on content
-        let maxLines = 1;
-        const fontSize = 8;
-        
-        // Check if all activities are the same (merged cell)
-        const allSame = 
-          event.brideActivity === event.groomActivity &&
-          event.brideActivity === event.bridesmaidsActivity &&
-          event.brideActivity === event.groomsmenActivity;
-
-        if (allSame) {
-          // For merged cell, use the merged width
-          const mergedWidth = (activityColWidth * 4) + (gap * 3);
-          const lines = calculateTextLines(event.brideActivity, mergedWidth, fontSize);
-          maxLines = Math.max(maxLines, lines.length);
-        } else {
-          // Check each activity column
-          const activities = [
-            event.brideActivity,
-            event.groomActivity,
-            event.bridesmaidsActivity,
-            event.groomsmenActivity
-          ];
-          
-          activities.forEach((activity) => {
-            const lines = calculateTextLines(activity, activityColWidth, fontSize);
-            maxLines = Math.max(maxLines, lines.length);
-          });
-        }
-
-        // Also check time label
-        const timeLines = calculateTextLines(event.timeLabel || "", timeColWidth, fontSize);
-        maxLines = Math.max(maxLines, timeLines.length);
-
-        // Calculate row height based on number of lines
-        const rowHeight = Math.max(minRowHeight, maxLines * baseLineHeight + 2);
-
-        // Check if we need a new page
-        if (currentY + rowHeight > doc.internal.pageSize.getHeight() - 20) {
-          doc.addPage();
-          doc.setFillColor("#FBF3E0");
-          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
-          currentY = 20;
-        }
-
-        // Draw time cell (always pink)
-        drawRoundedRect(startX, currentY, timeColWidth, rowHeight, radius, "#FFB6C7", "#D32333");
-        doc.setTextColor("#D32333");
-        doc.setFont("helvetica", "bold");
-        addCenteredText(event.timeLabel || "", startX, currentY, timeColWidth, rowHeight, fontSize);
-
-        if (allSame) {
-          // Draw merged cell for all activities
-          const mergedWidth = (activityColWidth * 4) + (gap * 3);
-          const mergedX = startX + timeColWidth + gap;
-          // Use pink background for entrance event, creamy for others
-          const bgColor = event.id === "entrance" || event.id === "church" || event.id === "Grand_Entrance" ? "#FFB6C7" : "#FBF3E0";
-          drawRoundedRect(mergedX, currentY, mergedWidth, rowHeight, radius, bgColor, "#D32333");
-          doc.setTextColor("#D32333");
-          doc.setFont("helvetica", "normal");
-          addCenteredText(event.brideActivity, mergedX, currentY, mergedWidth, rowHeight, fontSize);
-        } else {
-          // Draw separate cells for each activity
-          const activities = [
-            event.brideActivity,
-            event.groomActivity,
-            event.bridesmaidsActivity,
-            event.groomsmenActivity
-          ];
-          
-          let cellX = startX + timeColWidth + gap;
-          activities.forEach((activity) => {
-            drawRoundedRect(cellX, currentY, activityColWidth, rowHeight, radius, "#FBF3E0", "#D32333");
-            doc.setTextColor("#D32333");
-            doc.setFont("helvetica", "normal");
-            addCenteredText(activity, cellX, currentY, activityColWidth, rowHeight, fontSize);
-            cellX += activityColWidth + gap;
-          });
-        }
-
-        currentY += rowHeight + gap;
-      });
-
-      // Add Tips section
-      currentY += 10; // Add some space after the table
-
-      // Check if we need a new page for tips
-      if (currentY + 50 > doc.internal.pageSize.getHeight() - 20) {
-        doc.addPage();
-        doc.setFillColor("#FBF3E0");
-        doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
-        currentY = 20;
-      }
-
-      // Tips title
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.setTextColor("#D32333");
-      doc.text("Tips:", startX, currentY);
-      currentY += 7;
-
-      // Tips content
-      const tips = [
-        "The photographer and videographer should arrive during the last 30-40 minutes of the makeup session.",
-        "If a photo booth, audio booth, or live painter is hired, it's recommended that they arrive and complete setup 1-2 hours before the wedding begins.",
-        "Zaffa is recommended to start after Katb El Ketab.",
-        "If additional entertainers are hired (tabla show, violinist, etc.), we recommend that they begin after dinner.",
-        `for bridesmaids coming to photoshoot but getting ready at home : 
-- Consider 90 mins for hair styling at the salon. 
-- 60 mins for makeup and dress. 
-- Please leave early to arrive on time for photoshoot.`
-      ];
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor("#D32333");
-
-      tips.forEach((tip) => {
-        // Check if we need a new page
-        if (currentY + 10 > doc.internal.pageSize.getHeight() - 20) {
-          doc.addPage();
-          doc.setFillColor("#FBF3E0");
-          doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
-          currentY = 20;
-        }
-
-        // Add bullet point and text with wrapping
-        const bulletX = startX + 2;
-        const textX = startX + 7;
-        const maxWidth = tableWidth - 7;
-
-        doc.text("•", bulletX, currentY);
-        
-        // Split text if it's too long
-        const lines = doc.splitTextToSize(tip, maxWidth);
-        doc.text(lines, textX, currentY);
-        
-        currentY += (lines.length * 5) + 2; // Adjust spacing based on number of lines
-      });
-
-      // Add Watermark to all pages (with low opacity)
-      const totalPages = doc.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        doc.setPage(i);
-        const wmWidth = 120;
-        const wmHeight = (logoImg.height * wmWidth) / logoImg.width;
-        const x = (doc.internal.pageSize.getWidth() - wmWidth) / 2;
-        const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
-
-        (doc as any).saveGraphicsState();
-        doc.setGState(new GState({ opacity: 0.12 }));
-        doc.addImage(logoImg, "PNG", x, y, wmWidth, wmHeight);
-        (doc as any).restoreGraphicsState();
-        
-        // Add footer text with link
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor("#D32333");
-        const footerText = "This timeline was created by ";
-        const linkText = "shopwifeyforlifey.com";
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const footerY = pageHeight - 10;
-        
-        const footerTextWidth = doc.getTextWidth(footerText);
-        const totalWidth = footerTextWidth + doc.getTextWidth(linkText);
-        const footerStartX = (pageWidth - totalWidth) / 2;
-        
-        doc.text(footerText, footerStartX, footerY);
-        doc.textWithLink(linkText, footerStartX + footerTextWidth, footerY, {
-          url: "https://shopwifeyforlifey.com"
-        });
-      }
-
-      const pdfFileName =
-        brideFirstName.trim() && groomFirstName.trim()
-          ? `${brideFirstName.trim()} & ${groomFirstName.trim()} wedding day timeline.pdf`
-          : "wedding-timeline.pdf";
-      doc.save(pdfFileName);
 
       // Increment export counter in database
       if (isAuthenticated) {
@@ -1464,13 +1229,15 @@ function WeddingTimelinePageContent() {
           });
         } catch (error) {
           console.error("Failed to track export:", error);
-          // Don't show error to user, this is just analytics
         }
       }
 
       toast({
-        title: "Success",
-        description: "Timeline exported as PDF!",
+        title: locale === "ar" ? "تم بنجاح" : "Success",
+        description:
+          locale === "ar"
+            ? "تم تحميل ملف الـ PDF بنجاح!"
+            : "Timeline exported as PDF!",
         className: "bg-pinkey text-lovely border-lovely",
       });
 
@@ -1480,8 +1247,11 @@ function WeddingTimelinePageContent() {
     } catch (error) {
       console.error("Export failed", error);
       toast({
-        title: "Export Failed",
-        description: "Could not generate PDF. Please try again.",
+        title: locale === "ar" ? "فشل التحميل" : "Export Failed",
+        description:
+          locale === "ar"
+            ? "تعذر إنشاء ملف الـ PDF. يرجى المحاولة مرة أخرى."
+            : "Could not generate PDF. Please try again.",
         className: "bg-pinkey text-lovely border-lovely",
       });
     } finally {
@@ -1551,15 +1321,21 @@ function WeddingTimelinePageContent() {
       localStorage.removeItem("weddingTimelineTutorialSeen");
 
       toast({
-        title: "Timeline Reset",
-        description: "Your timeline has been deleted. Start fresh!",
+        title: locale === "ar" ? "تمت إعادة الضبط" : "Timeline Reset",
+        description:
+          locale === "ar"
+            ? "تم مسح جدول التايم لاين. تقدري تبدأي من جديد!"
+            : "Your timeline has been deleted. Start fresh!",
         className: "bg-pinkey text-lovely border-lovely",
       });
     } catch (error) {
       console.error("Reset failed:", error);
       toast({
-        title: "Error",
-        description: "Failed to reset timeline. Please try again.",
+        title: locale === "ar" ? "خطأ" : "Error",
+        description:
+          locale === "ar"
+            ? "فشل في إعادة ضبط التايم لاين. يرجى المحاولة مرة أخرى."
+            : "Failed to reset timeline. Please try again.",
         className: "bg-pinkey text-lovely border-lovely",
       });
     }
@@ -1589,7 +1365,7 @@ function WeddingTimelinePageContent() {
           <h1
             className={`${thirdFont.className} text-4xl text-center mb-2 text-lovely `}
           >
-            Your Timeline Bestie
+            {t("title")}
           </h1>
 
           {loading || checkingTimeline ? (
@@ -1597,8 +1373,8 @@ function WeddingTimelinePageContent() {
               <Loader2 className="h-8 w-8 animate-spin text-lovely/70 mb-4" />
               <p className="text-muted-foreground">
                 {checkingTimeline
-                  ? "Checking for existing plan..."
-                  : "Loading..."}
+                  ? t("checkingPlan")
+                  : t("loading")}
               </p>
             </div>
           ) : (
@@ -1612,7 +1388,7 @@ function WeddingTimelinePageContent() {
                       router.push("/login?callbackUrl=/wedding-timeline")
                     }
                   >
-                    Already have a plan? Login to check
+                    {t("alreadyHavePlan")}
                   </Button>
                 </div>
               )}
@@ -1621,7 +1397,7 @@ function WeddingTimelinePageContent() {
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl text-lovely text-center block">
-                      What kind of ceremony are you planning?
+                      {t("ceremonyQuestion")}
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                       {CEREMONY_OPTIONS.map((option) => (
@@ -1638,7 +1414,7 @@ function WeddingTimelinePageContent() {
                           onClick={() => setActiveCeremonyType(option.id)}
                         >
                           <h3 className="text-lg font-bold text-lovely text-center">
-                            {option.label}
+                            {getLocalizedFeatureLabel(option.label, locale)}
                           </h3>
                           
                           {activeCeremonyType === option.id && (
@@ -1667,7 +1443,9 @@ function WeddingTimelinePageContent() {
                                       <div className="w-2 h-2 rounded-full bg-white" />
                                     )}
                                   </div>
-                                  <span className="text-sm font-medium">{variation.label}</span>
+                                  <span className="text-sm font-medium">
+                                    {getLocalizedVariationLabel(variation.id, variation.label, locale)}
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -1695,7 +1473,7 @@ function WeddingTimelinePageContent() {
                     }}
                     className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                    {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               )}
@@ -1706,7 +1484,7 @@ function WeddingTimelinePageContent() {
                 {selectedCeremonyVariation !== "christian_church_only" && (
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
-                      Where are you getting ready?
+                      {t("whereGettingReady")}
                     </Label>
                     <div className="grid grid-cols-2 gap-3">
                       {(["home", "venue"] as const).map((option) => (
@@ -1720,10 +1498,10 @@ function WeddingTimelinePageContent() {
                           }`}
                         >
                           <div className="flex flex-col items-center gap-1">
-                            <span>{option === "home" ? "🏠 Somewhere else" : (selectedCeremonyVariation === "muslim_katb_ketab_only" ? "🏛️ Katb ketab Venue" : "🏛️ Wedding Venue")}</span>
+                            <span>{option === "home" ? t("somewhereElse") : (selectedCeremonyVariation === "muslim_katb_ketab_only" ? t("katbKetabVenue") : t("weddingVenue"))}</span>
                             {option === "home" && (
                               <span className="text-[10px] normal-case font-normal opacity-70">
-                                (Home, other venue)
+                                {t("somewhereElseSub")}
                               </span>
                             )}
                           </div>
@@ -1732,7 +1510,7 @@ function WeddingTimelinePageContent() {
                     </div>
                     {gettingReadyLocation === "home" && (
                       <p className="text-xs text-lovely/60 text-center">
-                        A 30-minute transportation to the photoshoot location will be added after preparations.
+                        {t("prepTransportationNotice")}
                       </p>
                     )}
                   </div>
@@ -1740,7 +1518,7 @@ function WeddingTimelinePageContent() {
                   {/* Q2: Will bridesmaids come to preparations? */}
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
-                      Will the bridesmaids come to preparations?
+                      {t("bridesmaidsAtPrep")}
                     </Label>
                     <div className="grid grid-cols-2 gap-3">
                       {(["yes", "no"] as const).map((option) => (
@@ -1753,13 +1531,10 @@ function WeddingTimelinePageContent() {
                               : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                           }`}
                         >
-                          {option === "yes" ? "✅ Yes" : "❌ No"}
+                          {option === "yes" ? t("yes") : t("no")}
                         </button>
                       ))}
                     </div>
-                      {/* <p className="text-xs text-lovely/60 text-center">
-                        The &quot;Getting Ready Pictures&quot; event will be removed.
-                      </p> */}
                   </div>
                 
 
@@ -1769,7 +1544,7 @@ function WeddingTimelinePageContent() {
                     {activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") ? (
                       <>
                         <Label className="text-xl text-lovely text-center block">
-                          When do you want to have the photo session?
+                          {t("photoshootTiming")}
                         </Label>
                         <div className="grid grid-cols-2 gap-3">
                           {(["before", "after"] as const).map((option) => (
@@ -1782,7 +1557,7 @@ function WeddingTimelinePageContent() {
                                   : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                               }`}
                             >
-                              {option === "before" ? "🕒 Before Church" : "🕓 After Church"}
+                              {option === "before" ? t("beforeChurch") : t("afterChurch")}
                             </button>
                           ))}
                         </div>
@@ -1791,11 +1566,13 @@ function WeddingTimelinePageContent() {
                       // Muslim or variations where we ask location relative to anchor
                       <>
                         <Label className="text-xl text-lovely text-center block">
-                          Is the photo session at the same location as the {
-                            selectedCeremonyVariation?.includes("church") ? "church" : 
-                            selectedCeremonyVariation?.includes("katb_ketab") ? "Katb ketab location" : 
-                            "venue"
-                          }?
+                          {t("photoshootSameLocation", {
+                            location: selectedCeremonyVariation?.includes("church")
+                              ? t("church")
+                              : selectedCeremonyVariation?.includes("katb_ketab")
+                              ? t("katbKetabLocation")
+                              : t("venue")
+                          })}
                         </Label>
                         <div className="grid grid-cols-2 gap-3">
                           {(["yes", "no"] as const).map((option) => (
@@ -1814,14 +1591,13 @@ function WeddingTimelinePageContent() {
                                   : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                               }`}
                             >
-                              {option === "yes" ? "✅ Yes, same place" : "📍 No, different"}
+                              {option === "yes" ? t("yesSamePlace") : t("noDifferentPlace")}
                             </button>
                           ))}
                         </div>
                         {(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? photoshootLocation === "another_place" : photoAtKatbLocation === "no") && (
                           <p className="text-xs text-lovely/60 text-center">
-                            A 30-minute transportation to the will be added after the photoshoot.
-                            {/* A 30-minute transportation to the {getAnchorLabel(selectedCeremonyVariation)} will be added after the photoshoot. */}
+                            {t("photoshootTransportationNotice")}
                           </p>
                         )}
                       </>
@@ -1829,13 +1605,13 @@ function WeddingTimelinePageContent() {
                   </div>
                   )}
 
-                        <div className="flex gap-4 pt-2">
+                  <div className="flex gap-4 pt-2">
                     <Button
                       variant="outline"
                       onClick={() => setStep(1)}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
-                      Back
+                      {t("back")}
                     </Button>
                     <Button
                       disabled={
@@ -1848,7 +1624,7 @@ function WeddingTimelinePageContent() {
                       onClick={() => setStep(3)}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -1859,7 +1635,7 @@ function WeddingTimelinePageContent() {
                   {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && !selectedAnchor ? (
                     <div className="space-y-4">
                       <h2 className="text-xl text-lovely text-center block font-semibold">
-                        Which event should we build your timeline around?
+                        {t("anchorQuestion")}
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {selectedCeremonyVariation === "christian_church_venue" ? (
@@ -1868,13 +1644,13 @@ function WeddingTimelinePageContent() {
                               onClick={() => setSelectedAnchor("church")}
                               className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                             >
-                              ⛪ Church Ceremony
+                              {t("churchCeremony")}
                             </button>
                             <button
                               onClick={() => setSelectedAnchor("Grand_Entrance")}
                               className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                             >
-                              🚪 Venue Entrance
+                              {t("venueEntrance")}
                             </button>
                           </>
                         ) : (
@@ -1883,25 +1659,25 @@ function WeddingTimelinePageContent() {
                               onClick={() => setSelectedAnchor("katb_ketab")}
                               className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                             >
-                              📜 Katb Ketab Ceremony
+                              {t("katbKetabCeremony")}
                             </button>
                             <button
                               onClick={() => setSelectedAnchor("Grand_Entrance")}
                               className="p-4 rounded-lg border-2 font-semibold transition-all bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
                             >
-                              🥁 Grand Entrance
+                              {t("grandEntrance")}
                             </button>
                           </>
                         )}
                       </div>
                       <p className="text-sm text-lovely/60 text-center">
-                        This event will be the anchor that everything else is calculated from.
+                        {t("anchorNotice")}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <Label className="text-xl text-lovely text-center block">
-                        When does the {getAnchorLabel(selectedCeremonyVariation, selectedAnchor)} start?
+                        {t("whenAnchorStarts", { event: getAnchorLabel(selectedCeremonyVariation, selectedAnchor) })}
                       </Label>
                       <div className="flex w-full justify-center px-2">
                         <input
@@ -1921,7 +1697,7 @@ function WeddingTimelinePageContent() {
                             onClick={() => setSelectedAnchor(null)}
                             className="text-lovely/60 text-xs underline"
                           >
-                            Change reference event
+                            {t("changeReferenceEvent")}
                           </Button>
                         </div>
                       )}
@@ -1949,14 +1725,14 @@ function WeddingTimelinePageContent() {
                       }}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
-                      Back
+                      {t("back")}
                     </Button>
                     <Button
                       disabled={selectedCeremonyVariation === "christian_church_venue" && !selectedAnchor}
                       onClick={() => setStep(4)}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -1966,11 +1742,10 @@ function WeddingTimelinePageContent() {
                 <div className="space-y-6 animate-in  text-lovely fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl  block mb-4">
-                      Select your activities
+                      {t("selectActivitiesTitle")}
                     </Label>
                     <p className="text-sm text-lovely/60 mb-4">
-                      Select the activities you want to include and adjust their
-                      duration (in minutes).
+                      {t("selectActivitiesDesc")}
                     </p>
 
                     <div className="grid gap-4 max-h-[50vh] overflow-y-auto pr-2">
@@ -2016,10 +1791,10 @@ function WeddingTimelinePageContent() {
                               htmlFor={feature.id}
                               className="text-base font-medium cursor-pointer"
                             >
-                              {feature.label}
+                              {getLocalizedFeatureLabel(feature.label, locale)}
                               {(feature.id === "hair" && activeCeremonyType !== "christian") && (
                                 <span className="block text-xs font-normal text-lovely/70 mt-1">
-                                  (for hijabis we recommend make up to be first, you can swap them later.)
+                                  {t("hijabiTip")}
                                 </span>
                               )}
                             </Label>
@@ -2044,7 +1819,7 @@ function WeddingTimelinePageContent() {
                                 }
                                 className="w-20 text-center h-8 bg-creamey border-pinkey"
                               />
-                              <span className="text-xs  w-8">min</span>
+                              <span className="text-xs  w-8">{t("min")}</span>
                             </div>
                           )}
                         </div>
@@ -2058,14 +1833,14 @@ function WeddingTimelinePageContent() {
                       onClick={() => setStep(3)}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
-                      Prev step
+                      {t("prevStep")}
                     </Button>
                     <Button
                       onClick={() => setStep(5)}
                       disabled={loading}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90  font-bold  text-lovely"
                     >
-                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -2075,10 +1850,10 @@ function WeddingTimelinePageContent() {
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="mb-6 text-center">
                     <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
-                      Login Required
+                      {t("loginRequired")}
                     </h2>
                     <p className="text-lovely/90 text-base">
-                      To be able to view your wedding day timeline later, you’ll need to sign up or login if you already have an account 💗
+                      {t("loginRequiredDesc")}
                     </p>
                   </div>
                   <div className="flex gap-4 flex-col sm:flex-row">
@@ -2102,7 +1877,7 @@ function WeddingTimelinePageContent() {
                         router.push("/login?callbackUrl=/wedding-timeline?step=5");
                       }}
                     >
-                      Login
+                      {t("login")}
                     </Button>
                     <Button
                       variant="outline"
@@ -2125,7 +1900,7 @@ function WeddingTimelinePageContent() {
                         router.push("/register?callbackUrl=/wedding-timeline?step=5");
                       }}
                     >
-                      Sign Up
+                      {t("signUp")}
                     </Button>
                   </div>
                   <div className="flex gap-4 pt-2 mt-4">
@@ -2134,7 +1909,7 @@ function WeddingTimelinePageContent() {
                       onClick={() => setStep(4)}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
-                      Back
+                      {t("back")}
                     </Button>
                   </div>
                 </div>
@@ -2142,20 +1917,20 @@ function WeddingTimelinePageContent() {
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-4">
                     <Label className="text-xl text-lovely text-center block">
-                      One last thing! 💕
+                      {t("oneLastThing")}
                     </Label>
                     <p className="text-sm text-lovely/60 text-center">
-                      Optionally, enter the bride&apos;s and groom&apos;s first names to personalise your PDF file name.
+                      {t("namesOptionalDesc")}
                     </p>
 
                     <div className="space-y-3">
                       <div>
                         <Label className="text-sm font-semibold text-lovely mb-1 block">
-                          Bride&apos;s First Name
+                          {t("brideFirstName")}
                         </Label>
                         <Input
                           type="text"
-                          placeholder="e.g. Nour"
+                          placeholder={t("brideFirstNamePlaceholder")}
                           value={brideFirstName}
                           onChange={(e) => setBrideFirstName(e.target.value)}
                           className="bg-creamey border-pinkey border-2 text-lovely placeholder:text-lovely/40 focus-visible:ring-pinkey"
@@ -2163,11 +1938,11 @@ function WeddingTimelinePageContent() {
                       </div>
                       <div>
                         <Label className="text-sm font-semibold text-lovely mb-1 block">
-                          Groom&apos;s First Name
+                          {t("groomFirstName")}
                         </Label>
                         <Input
                           type="text"
-                          placeholder="e.g. Ahmed"
+                          placeholder={t("groomFirstNamePlaceholder")}
                           value={groomFirstName}
                           onChange={(e) => setGroomFirstName(e.target.value)}
                           className="bg-creamey border-pinkey border-2 text-lovely placeholder:text-lovely/40 focus-visible:ring-pinkey"
@@ -2177,7 +1952,7 @@ function WeddingTimelinePageContent() {
 
                     {brideFirstName.trim() && groomFirstName.trim() && (
                       <p className="text-xs text-lovely/60 text-center">
-                        Your PDF will be saved as: <span className="font-semibold text-lovely">&ldquo;{brideFirstName.trim()} &amp; {groomFirstName.trim()} wedding.pdf&rdquo;</span>
+                        {t("pdfNamePreview", { bride: brideFirstName.trim(), groom: groomFirstName.trim() })}
                       </p>
                     )}
                   </div>
@@ -2188,7 +1963,7 @@ function WeddingTimelinePageContent() {
                       onClick={() => setStep(4)}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
-                      Back
+                      {t("back")}
                     </Button>
                     <Button
                       onClick={handlePlan}
@@ -2196,7 +1971,7 @@ function WeddingTimelinePageContent() {
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 font-bold text-lovely"
                     >
                       {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      Plan My Day 💍
+                      {t("planMyDay")}
                     </Button>
                   </div>
                 </div>
@@ -2218,7 +1993,7 @@ function WeddingTimelinePageContent() {
               <h1
                 className={`${thirdFont.className} text-4xl font-display text-white`}
               >
-                Your Timeline Bestie
+                {t("title")}
               </h1>
             </div>
             {/* Desktop: Show all buttons */}
@@ -2234,7 +2009,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Download className="h-4 w-4 mr-2" />
                 )}
-                PDF
+                {t("exportPdf")}
               </Button>
               <Button
                 onClick={handleShare}
@@ -2247,7 +2022,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Share2 className="h-4 w-4 mr-2" />
                 )}
-                Share
+                {t("share")}
               </Button>
               <Button
                 onClick={() => handleSave(false)}
@@ -2259,7 +2034,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                Save
+                {t("save")}
               </Button>
               <Button
                 onClick={() => setShowTutorial(true)}
@@ -2267,7 +2042,7 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 <HelpCircle className="h-4 w-4 mr-2" />
-                How to Use
+                {t("howToUse")}
               </Button>
               <Button
                 onClick={() => setShowResetDialog(true)}
@@ -2275,7 +2050,7 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Reset
+                {t("reset")}
               </Button>
             </div>
 
@@ -2287,7 +2062,7 @@ function WeddingTimelinePageContent() {
                 className="bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely"
               >
                 <MoreVertical className="h-4 w-4 mr-2" />
-                Options
+                {t("options")}
               </Button>
             </div>
           </div>
@@ -2362,10 +2137,10 @@ function WeddingTimelinePageContent() {
                     {/* Drag Handle Header */}
                     <TableHead className="w-8 p-1 md:p-2"></TableHead>
                     <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-32 md:w-auto text-center">
-                      TIME
+                      {t("time")}
                     </TableHead>
                     <TableHead className="text-center text-white text-xs md:text-sm p-1 md:p-4 w-16 md:w-auto">
-                      Duration (min)
+                      {t("duration")}
                     </TableHead>
                     <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 text-center">
                       <div className="md:hidden flex justify-center w-full">
@@ -2377,27 +2152,27 @@ function WeddingTimelinePageContent() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="brideActivity">Bride</SelectItem>
-                            <SelectItem value="groomActivity">Groom</SelectItem>
+                            <SelectItem value="brideActivity">{t("bride")}</SelectItem>
+                            <SelectItem value="groomActivity">{t("groom")}</SelectItem>
                             <SelectItem value="bridesmaidsActivity">
-                              Bridesmaids
+                              {t("bridesmaids")}
                             </SelectItem>
                             <SelectItem value="groomsmenActivity">
-                              Groomsmen
+                              {t("groomsmen")}
                             </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <span className="hidden md:inline">BRIDE</span>
+                      <span className="hidden md:inline">{t("bride")}</span>
                     </TableHead>
                     <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
-                      GROOM
+                      {t("groom")}
                     </TableHead>
                     <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
-                      BRIDESMAIDS
+                      {t("bridesmaids")}
                     </TableHead>
                     <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
-                      GROOMSMEN
+                      {t("groomsmen")}
                     </TableHead>
                     <TableHead className="w-8 md:w-auto p-1 md:p-4 text-center"></TableHead>
                   </TableRow>
@@ -2435,7 +2210,7 @@ function WeddingTimelinePageContent() {
               variant="secondary"
               className="w-full bg-lovely text-white border-dashed border-2 border-pinkey/40  hover:bg-pinkey/10 hover:text-lovely hover:border-pinkey"
             >
-              <Plus className="mr-2 h-4 w-4" /> Add New Event
+              <Plus className="mr-2 h-4 w-4" /> {t("addNewEvent")}
             </Button>
           </div>
         </div>
@@ -2453,11 +2228,10 @@ function WeddingTimelinePageContent() {
             </button>
 
             <h2 className={`${thirdFont.className} text-2xl text-lovely text-center mb-3`}>
-              Quick Tip Before You Go!
+              {t("quickTipTitle")}
             </h2>
             <p className="text-lovely/80 text-sm text-center mb-5 leading-relaxed">
-              We noticed your ratings were a bit low. Our blog post on{" "}
-              <strong>creating the perfect wedding day timeline</strong> might have the answers you're looking for — from ordering events to timing tips! 🌸
+              {t("quickTipDesc")}
             </p>
 
             {/* Blog image */}
@@ -2479,7 +2253,7 @@ function WeddingTimelinePageContent() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full bg-lovely hover:bg-lovely/90 text-white font-semibold py-3 px-4 rounded-lg transition-all hover:scale-[1.02]"
               >
-                <span>📖</span> Read the Blog Post
+                {t("readBlogPost")}
               </a>
             </div>
           </div>
@@ -2499,11 +2273,10 @@ function WeddingTimelinePageContent() {
 
             <div className="mb-6">
               <h2 className={`${thirdFont.className} text-3xl text-lovely mb-3 text-center`}>
-                Hi bestie! We'd love to know your feedback! 💗
+                {t("feedbackHi")}
               </h2>
               <p className="text-lovely/90 text-base font-semibold text-center ">
-                You just created your wedding day timeline in less than 5 minutes! ✨<br />
-                Help us make this tool even better for brides like you.
+                {t("feedbackSub")}
               </p>
             </div>
 
@@ -2511,7 +2284,7 @@ function WeddingTimelinePageContent() {
               {/* Q1 - Star Rating */}
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
-                  1. How easy was it to create your wedding day timeline using this tool?
+                  {t("feedbackQ1")}
                 </label>
                 <div className="flex gap-1 justify-center">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -2541,7 +2314,7 @@ function WeddingTimelinePageContent() {
               {/* Q2 - Star Rating */}
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
-                  2. Are you satisfied about how the day looks?
+                  {t("feedbackQ2")}
                 </label>
                 <div className="flex gap-1 justify-center">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -2571,13 +2344,13 @@ function WeddingTimelinePageContent() {
               {/* Q3 - Time Saved */}
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
-                  3. Compared to creating a timeline on your own, how much time do you feel this tool saved you?
+                  {t("feedbackQ3")}
                 </label>
                 <div className="space-y-2">
                   {[
-                    { value: "2-7days", label: "Between 2 days to 7 days" },
-                    { value: "7-14days", label: "Between 7 days to 2 weeks" },
-                    { value: "era", label: "A whole era of overthinking" },
+                    { value: "2-7days", label: t("feedbackTimeOption1") },
+                    { value: "7-14days", label: t("feedbackTimeOption2") },
+                    { value: "era", label: t("feedbackTimeOption3") },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -2598,16 +2371,16 @@ function WeddingTimelinePageContent() {
               {/* Q4 - Feelings (Multi-select) */}
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
-                  4. How did this tool make you feel while planning your wedding day?
+                  {t("feedbackQ4")}
                 </label>
-                <p className="text-xs text-lovely/60 mb-2">(Select all that apply)</p>
+                <p className="text-xs text-lovely/60 mb-2">{t("feedbackQ4Sub")}</p>
                 <div className="space-y-2">
                   {[
-                    { value: "less_stressed", label: "Less stressed" },
-                    { value: "more_organized", label: "More organized" },
-                    { value: "more_confident", label: "More confident" },
-                    { value: "calm_reassured", label: "Calm & reassured" },
-                    { value: "no_difference", label: "No difference" },
+                    { value: "less_stressed", label: t("feelingLessStressed") },
+                    { value: "more_organized", label: t("feelingMoreOrganized") },
+                    { value: "more_confident", label: t("feelingMoreConfident") },
+                    { value: "calm_reassured", label: t("feelingCalmReassured") },
+                    { value: "no_difference", label: t("feelingNoDifference") },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -2634,13 +2407,13 @@ function WeddingTimelinePageContent() {
               {/* Q5 - Recommendation */}
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
-                  5. Would you recommend this timeline creator to another bride?
+                  {t("feedbackQ5")}
                 </label>
                 <div className="space-y-2">
                   {[
-                    { value: "definitely_not", label: "Definitely not" },
-                    { value: "maybe", label: "Maybe" },
-                    { value: "definitely_yes", label: "Definitely yes" },
+                    { value: "definitely_not", label: t("recommendDefNo") },
+                    { value: "maybe", label: t("recommendMaybe") },
+                    { value: "definitely_yes", label: t("recommendDefYes") },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -2661,13 +2434,13 @@ function WeddingTimelinePageContent() {
               {/* Additional Comments */}
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
-                  Any additional comments?
+                  {t("feedbackComments")}
                   <span className="text-lovely ml-1">*</span>
                 </label>
                 <Textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
-                  placeholder="Share your thoughts..."
+                  placeholder={t("feedbackCommentsPlaceholder")}
                   className="min-h-[80px] placeholder:text-lovely/60 border-2 bg-creamey resize-none focus:border-lovely border-pinkey"
                 />
               </div>
@@ -2679,7 +2452,7 @@ function WeddingTimelinePageContent() {
                 variant="outline"
                 className="flex-1 border-2 border-pinkey bg-creamey hover:text-lovely text-lovely hover:bg-pinkey/20"
               >
-                Maybe Later
+                {t("maybeLater")}
               </Button>
               <Button
                 onClick={handleSubmitFeedback}
@@ -2689,7 +2462,7 @@ function WeddingTimelinePageContent() {
                 {isSubmittingFeedback ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Submit Feedback
+                {t("submitFeedback")}
               </Button>
             </div>
           </div>
@@ -2706,7 +2479,7 @@ function WeddingTimelinePageContent() {
         >
           <MessageSquare className="h-5 w-5" />
           <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap">
-            Write Feedback
+            {t("writeFeedback")}
           </span>
         </button>
       )}
@@ -2724,27 +2497,27 @@ function WeddingTimelinePageContent() {
 
             <div className="mb-6 text-center">
               <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2`}>
-                Add New Event
+                {t("addNewEvent")}
               </h2>
               <p className="text-lovely/70 text-sm">
-                Customize your event details below ✨
+                {t("addEventDesc")}
               </p>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-lovely font-bold">Activity Name</Label>
+                <Label className="text-lovely font-bold">{t("eventName")}</Label>
                 <Input
                   value={newEventName}
                   onChange={(e) => setNewEventName(e.target.value)}
-                  placeholder="e.g., Quick Snack, Coffee Break..."
+                  placeholder={t("eventNamePlaceholder")}
                   className="border-2 border-pinkey focus:border-lovely bg-creamey placeholder:text-lovely/40"
                 />
-                <p className="text-[10px] text-lovely/60">This will be the default activity for everyone.</p>
+                <p className="text-[10px] text-lovely/60">{t("defaultActivityNote")}</p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-lovely font-bold">Duration (minutes)</Label>
+                <Label className="text-lovely font-bold">{t("eventDuration")}</Label>
                 <Input
                   type="number"
                   value={newEventDuration}
@@ -2754,7 +2527,7 @@ function WeddingTimelinePageContent() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-lovely font-bold">Fixing the Beginning or the end of the day? <span className="text-pinkey/60 text-sm">()</span></Label>
+                <Label className="text-lovely font-bold">{t("positionQuestion")}</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setNewEventPosition("start")}
@@ -2764,7 +2537,7 @@ function WeddingTimelinePageContent() {
                         : "bg-creamey text-lovely border-pinkey hover:border-lovely"
                     }`}
                   >
-                    Beginning of day
+                    {t("beginningOfDay")}
                   </button>
                   <button
                     onClick={() => setNewEventPosition("end")}
@@ -2774,7 +2547,7 @@ function WeddingTimelinePageContent() {
                         : "bg-creamey text-lovely border-pinkey hover:border-lovely"
                     }`}
                   >
-                    End of day
+                    {t("endOfDay")}
                   </button>
                 </div>
               </div>
@@ -2786,13 +2559,13 @@ function WeddingTimelinePageContent() {
                 variant="outline"
                 className="flex-1 border-2 border-pinkey bg-creamey hover:bg-pinkey/20 text-lovely font-bold"
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 onClick={confirmAddNewEvent}
                 className="flex-1 bg-lovely hover:bg-lovely/90 text-white font-bold"
               >
-                Add Event
+                {t("add")}
               </Button>
             </div>
           </div>
@@ -2805,10 +2578,10 @@ function WeddingTimelinePageContent() {
           <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="mb-6 text-center">
               <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2`}>
-                Adjust Timeline
+                {t("adjustTimelineTitle")}
               </h2>
               <p className="text-lovely/70 text-sm">
-                How should this time change affect your day?
+                {t("adjustTimelineDesc")}
               </p>
             </div>
 
@@ -2818,11 +2591,11 @@ function WeddingTimelinePageContent() {
                 className="w-full p-4 rounded-lg border-2 border-pinkey bg-white hover:border-lovely hover:bg-pinkey/10 transition-all text-left group"
               >
                 <div className="font-bold text-lovely group-hover:text-lovely flex items-center justify-between">
-                  Start the day earlier
+                  {t("shiftStartEarlier")}
                   <Clock className="w-5 h-5 opacity-40 group-hover:opacity-100" />
                 </div>
                 <p className="text-xs text-lovely/60 mt-1">
-                  The beginning of your day will shift to accommodate the extra time.
+                  {t("shiftStartEarlierDesc")}
                 </p>
               </button>
 
@@ -2831,11 +2604,11 @@ function WeddingTimelinePageContent() {
                 className="w-full p-4 rounded-lg border-2 border-pinkey bg-white hover:border-lovely hover:bg-pinkey/10 transition-all text-left group"
               >
                 <div className="font-bold text-lovely group-hover:text-lovely flex items-center justify-between">
-                  End the day later
+                  {t("shiftEndLater")}
                   <Clock className="w-5 h-5 opacity-40 group-hover:opacity-100" />
                 </div>
                 <p className="text-xs text-lovely/60 mt-1">
-                  The end of your day will be pushed back for the extra time.
+                  {t("shiftEndLaterDesc")}
                 </p>
               </button>
             </div>
@@ -2849,7 +2622,7 @@ function WeddingTimelinePageContent() {
                 variant="ghost"
                 className="w-full text-lovely/60 hover:text-lovely"
               >
-                Cancel Change
+                {t("cancelChange")}
               </Button>
             </div>
           </div>
@@ -2868,10 +2641,10 @@ function WeddingTimelinePageContent() {
 
             <div className="p-4">
               <h2 className={`${thirdFont.className} text-3xl text-lovely mb-2 max-md:mt-8 text-center`}>
-                How to Use Timeline Bestie
+                {t("howToUseTitle")}
               </h2>
               <p className="text-lovely/70 text-center mb-2">
-                Step {currentTutorialStep + 1} of {tutorialSteps.length}
+                {t("stepOf", { current: currentTutorialStep + 1, total: tutorialSteps.length })}
               </p>
 
               <div className="bg-creamey rounded-lg p-2 mb-2 border-2 border-pinkey/20">
@@ -2917,17 +2690,17 @@ function WeddingTimelinePageContent() {
                   className="flex-1 border-2 border-pinkey bg-creamey text-lovely hover:text-lovely hover:bg-pinkey/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
-                  Previous
+                  {t("previous")}
                 </Button>
                 <Button
                   onClick={handleNextTutorialStep}
                   className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
                 >
                   {currentTutorialStep === tutorialSteps.length - 1 ? (
-                    "Get Started"
+                    t("getStarted")
                   ) : (
                     <>
-                      Next
+                      {t("next")}
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </>
                   )}
@@ -2954,10 +2727,10 @@ function WeddingTimelinePageContent() {
                 <Trash2 className="h-6 w-6 text-lovely" />
               </div>
               <h2 className={`${thirdFont.className} text-2xl text-lovely mb-2`}>
-                Reset Timeline?
+                {t("resetModalTitle")}
               </h2>
               <p className="text-lovely/90 text-base">
-                Are you sure you want to delete your current timeline and start over? This action cannot be undone.
+                {t("resetModalDesc")}
               </p>
             </div>
 
@@ -2967,14 +2740,14 @@ function WeddingTimelinePageContent() {
                 className="flex-1 border-2 border-pinkey bg-creamey text-lovely hover:bg-pinkey/20"
                 onClick={() => setShowResetDialog(false)}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
                 onClick={handleResetTimeline}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Yes, Reset
+                {t("yesReset")}
               </Button>
             </div>
           </div>
@@ -2998,7 +2771,7 @@ function WeddingTimelinePageContent() {
 
             <div className="mb-6">
               <h2 className={`${thirdFont.className} text-2xl text-lovely text-center`}>
-                Timeline Options
+                {t("timelineOptions")}
               </h2>
             </div>
 
@@ -3017,7 +2790,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Download className="h-5 w-5 mr-3" />
                 )}
-                Export as PDF
+                {t("exportPdf")}
               </Button>
 
               <Button
@@ -3034,7 +2807,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Share2 className="h-5 w-5 mr-3" />
                 )}
-                Share Timeline
+                {t("share")}
               </Button>
 
               <Button
@@ -3050,7 +2823,7 @@ function WeddingTimelinePageContent() {
                 ) : (
                   <Save className="h-5 w-5 mr-3" />
                 )}
-                Save Timeline
+                {t("save")}
               </Button>
 
               <Button
@@ -3062,7 +2835,7 @@ function WeddingTimelinePageContent() {
                 className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
               >
                 <HelpCircle className="h-5 w-5 mr-3" />
-                How to Use
+                {t("howToUse")}
               </Button>
 
               <Button
@@ -3074,7 +2847,7 @@ function WeddingTimelinePageContent() {
                 className="w-full bg-creamey hover:border-creamey border-2 border-lovely text-lovely hover:bg-pinkey hover:text-lovely justify-start"
               >
                 <Trash2 className="h-5 w-5 mr-3" />
-                Reset Timeline
+                {t("reset")}
               </Button>
             </div>
 
@@ -3084,7 +2857,7 @@ function WeddingTimelinePageContent() {
                 variant="outline"
                 className="w-full border-2 border-pinkey bg-creamey text-lovely hover:bg-pinkey/20"
               >
-                Close
+                {t("close")}
               </Button>
             </div>
           </div>

@@ -33,6 +33,8 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
+import { useLocale } from "next-intl";
+import { formatTimelineTimeLabel } from "@/lib/wedding-timeline-localization";
 import {
   DndContext,
   closestCenter,
@@ -81,6 +83,7 @@ function SortableRow({
   ) => void;
   handleDeleteEvent: (index: number) => void;
 }) {
+  const locale = useLocale();
   const {
     attributes,
     listeners,
@@ -116,7 +119,7 @@ function SortableRow({
           </div>
         </div> */}
         <span className="bg-pinkey/20 px-2 py-1 rounded text-lovely font-semibold block text-center mt-1">
-          {event.timeLabel}
+          {formatTimelineTimeLabel(event.timeLabel, locale)}
         </span>
       </TableCell>
       <TableCell>
@@ -291,12 +294,14 @@ const FEATURE_META: Record<
 };
 
 // Helper to format time
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+const formatTime = (date: Date, locale?: string) => {
+  const isAr = locale === "ar";
+  const hours24 = date.getHours();
+  const minutes = date.getMinutes();
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+  const paddedMinutes = String(minutes).padStart(2, "0");
+  const period = hours24 >= 12 ? (isAr ? "م" : "PM") : (isAr ? "ص" : "AM");
+  return `${hours12}:${paddedMinutes} ${period}`;
 };
 
 const addMinutes = (date: Date, minutes: number) => {
@@ -304,6 +309,7 @@ const addMinutes = (date: Date, minutes: number) => {
 };
 
 function TimelineEditor() {
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -474,7 +480,7 @@ function TimelineEditor() {
     // Attach time labels
     return result.map((e, i) => ({
       ...e,
-      timeLabel: `${formatTime(times[i].start)} - ${formatTime(times[i].end)}`,
+      timeLabel: `${formatTime(times[i].start, locale)} - ${formatTime(times[i].end, locale)}`,
     }));
   })();
 

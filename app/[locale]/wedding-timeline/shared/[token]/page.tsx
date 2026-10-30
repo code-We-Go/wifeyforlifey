@@ -22,6 +22,9 @@ import {
 import { Loader2, Download, Heart } from "lucide-react";
 import { thirdFont } from "@/fonts";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations, useLocale } from "next-intl";
+import { localizeEvent, formatTimelineTimeLabel } from "@/lib/wedding-timeline-localization";
+import { exportTimelinePDF } from "@/lib/timelinePdfExport";
 
 type TimelineEvent = {
   id: string;
@@ -31,9 +34,12 @@ type TimelineEvent = {
   groomsmenActivity: string;
   duration: number;
   timeLabel?: string;
+  translations?: any;
 };
 
 export default function SharedTimelinePage() {
+  const t = useTranslations("weddingTimeline");
+  const locale = useLocale();
   const params = useParams();
   const token = params?.token as string;
   const { toast } = useToast();
@@ -47,7 +53,7 @@ export default function SharedTimelinePage() {
   useEffect(() => {
     const fetchSharedTimeline = async () => {
       if (!token) {
-        setError("Invalid share link");
+        setError(locale === "ar" ? "رابط المشاركة غير صالح" : "Invalid share link");
         setLoading(false);
         return;
       }
@@ -63,7 +69,8 @@ export default function SharedTimelinePage() {
 
         const data = await res.json();
         if (data.success && data.data) {
-          setEvents(data.data.events || []);
+          const rawEvents = (data.data.events || []) as TimelineEvent[];
+          setEvents(rawEvents.map((e) => localizeEvent(e, locale)));
         } else {
           throw new Error("Invalid timeline data");
         }
@@ -82,110 +89,26 @@ export default function SharedTimelinePage() {
     setIsExporting(true);
 
     try {
-      const { default: jsPDF, GState } = (await import("jspdf")) as any;
-      const autoTable = (await import("jspdf-autotable")).default;
-
-      const doc = new jsPDF();
-
-      // Set Page Background (Creamey)
-      doc.setFillColor("#FBF3E0");
-      doc.rect(
-        0,
-        0,
-        doc.internal.pageSize.width,
-        doc.internal.pageSize.height,
-        "F"
-      );
-
-      // Add Title
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(22);
-      doc.setTextColor("#D32333"); // Lovely
-      doc.text("Wedding Day Timeline", 14, 20);
-
-      // Define columns
-      const tableColumn = [
-        "Time",
-        "Duration",
-        "Bride",
-        "Groom",
-        "Bridesmaids",
-        "Groomsmen",
-      ];
-
-      // Define rows
-      const tableRows = events.map((event) => [
-        event.timeLabel || "",
-        event.duration + " min",
-        event.brideActivity,
-        event.groomActivity,
-        event.bridesmaidsActivity,
-        event.groomsmenActivity,
-      ]);
-
-      // Add Table
-      autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 30,
-        theme: "grid",
-        styles: {
-          font: "helvetica",
-          fontSize: 10,
-          textColor: "#D32333", // Lovely
-          fillColor: "#FFB6C7", // Pinkey
-          lineColor: "#D32333", // Lovely
-          lineWidth: 0.1,
-        },
-        headStyles: {
-          fillColor: "#D32333", // Lovely
-          textColor: "#FFFFFF", // White
-          fontStyle: "bold",
-        },
-        alternateRowStyles: {
-          fillColor: "#FFC2D1",
-        },
-        columnStyles: {
-          0: { cellWidth: 35, fontStyle: "bold" }, // Time
-          1: { cellWidth: 20, halign: "center" }, // Duration
-        },
+      await exportTimelinePDF({
+        events,
+        locale,
       });
-
-      // Add Watermark to all pages
-      const logoUrl = "/logo/Wifey for Lifey Primary Logo with Slogan Red.png";
-      const watermarkImg = new Image();
-      watermarkImg.src = logoUrl;
-
-      await new Promise((resolve, reject) => {
-        watermarkImg.onload = resolve;
-        watermarkImg.onerror = reject;
-      });
-
-      const totalPages = doc.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        doc.setPage(i);
-        const wmWidth = 120;
-        const wmHeight = (watermarkImg.height * wmWidth) / watermarkImg.width;
-        const x = (doc.internal.pageSize.getWidth() - wmWidth) / 2;
-        const y = (doc.internal.pageSize.getHeight() - wmHeight) / 2;
-
-        (doc as any).saveGraphicsState();
-        doc.setGState(new GState({ opacity: 0.1 }));
-        doc.addImage(watermarkImg, "PNG", x, y, wmWidth, wmHeight);
-        (doc as any).restoreGraphicsState();
-      }
-
-      doc.save("wedding-timeline.pdf");
 
       toast({
-        title: "Success",
-        description: "Timeline exported as PDF!",
+        title: locale === "ar" ? "تم بنجاح" : "Success",
+        description:
+          locale === "ar"
+            ? "تم تحميل ملف الـ PDF بنجاح!"
+            : "Timeline exported as PDF!",
       });
     } catch (error) {
       console.error("Export failed", error);
       toast({
-        title: "Export Failed",
-        description: "Could not generate PDF. Please try again.",
+        title: locale === "ar" ? "فشل التحميل" : "Export Failed",
+        description:
+          locale === "ar"
+            ? "تعذر إنشاء ملف الـ PDF. يرجى المحاولة مرة أخرى."
+            : "Could not generate PDF. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -232,10 +155,10 @@ export default function SharedTimelinePage() {
             <h1
               className={`${thirdFont.className} text-3xl md:text-4xl font-display text-white`}
             >
-              Wedding Day Timeline
+              {t("sharedTimelineTitle")}
             </h1>
             <p className="text-white/80 text-sm mt-2">
-              Shared with love <Heart className="inline h-4 w-4 fill-white" />
+              {locale === "ar" ? "مشارك بكل حب" : "Shared with love"} <Heart className="inline h-4 w-4 fill-white" />
             </p>
           </div>
           <div className="flex gap-2">
@@ -250,7 +173,7 @@ export default function SharedTimelinePage() {
               ) : (
                 <Download className="mr-2 h-4 w-4" />
               )}
-              Export PDF
+              {t("exportPdf")}
             </Button>
           </div>
         </div>
@@ -259,43 +182,43 @@ export default function SharedTimelinePage() {
           <Table className="w-full relative">
             <TableHeader className="bg-lovely sticky top-0 z-10 shadow-sm">
               <TableRow className="hover:bg-lovely">
-                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-24 md:w-auto">
-                  TIME
+                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 w-24 md:w-auto text-center">
+                  {t("time")}
                 </TableHead>
                 <TableHead className="text-center text-white text-xs md:text-sm p-1 md:p-4 w-16 md:w-auto">
-                  Duration (min)
+                  {t("duration")}
                 </TableHead>
-                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4">
+                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 text-center">
                   <div className="md:hidden">
                     <Select
                       value={mobileActiveColumn}
                       onValueChange={setMobileActiveColumn}
                     >
-                      <SelectTrigger className="h-6 text-xs bg-transparent border-none text-white p-0 focus:ring-0 focus:ring-offset-0 font-bold uppercase">
+                      <SelectTrigger className="h-6 text-xs bg-transparent border-none text-white p-0 focus:ring-0 focus:ring-offset-0 font-bold uppercase text-center justify-center">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="brideActivity">Bride</SelectItem>
-                        <SelectItem value="groomActivity">Groom</SelectItem>
+                        <SelectItem value="brideActivity">{t("bride")}</SelectItem>
+                        <SelectItem value="groomActivity">{t("groom")}</SelectItem>
                         <SelectItem value="bridesmaidsActivity">
-                          Bridesmaids
+                          {t("bridesmaids")}
                         </SelectItem>
                         <SelectItem value="groomsmenActivity">
-                          Groomsmen
+                          {t("groomsmen")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <span className="hidden md:inline">BRIDE</span>
+                  <span className="hidden md:inline">{t("bride")}</span>
                 </TableHead>
-                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
-                  GROOM
+                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
+                  {t("groom")}
                 </TableHead>
-                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
-                  BRIDESMAIDS
+                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
+                  {t("bridesmaids")}
                 </TableHead>
-                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell">
-                  GROOMSMEN
+                <TableHead className="font-bold text-white text-xs md:text-sm p-1 md:p-4 hidden md:table-cell text-center">
+                  {t("groomsmen")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -307,7 +230,7 @@ export default function SharedTimelinePage() {
                 >
                   <TableCell className="font-medium whitespace-nowrap text-sm md:text-base p-1 md:p-4">
                     <span className="bg-pinkey/20 px-1 md:px-2 py-1 rounded text-lovely font-semibold block text-center mt-1 text-xs md:text-sm">
-                      {event.timeLabel}
+                      {formatTimelineTimeLabel(event.timeLabel, locale)}
                     </span>
                   </TableCell>
                   <TableCell className="p-1 md:p-4 text-center font-semibold">
