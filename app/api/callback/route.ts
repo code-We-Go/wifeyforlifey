@@ -452,6 +452,8 @@ async function handleSubscription(
       currency: paymentOp.currency,
       paymentMethod: paymentOp.paymentMethod,
       instapayReciept: paymentOp.instapayReciept,
+      edition: paymentOp.edition,
+      editionName: paymentOp.editionName,
       // Bosta fields
       bostaCity: paymentOp.bostaCity,
       bostaCityName: paymentOp.bostaCityName,
@@ -600,6 +602,16 @@ async function handleSubscription(
               <li><strong>Package:</strong> ${
                 (updatedSub.packageID as any)?.name || "N/A"
               }</li>
+              ${
+                updatedSub.edition || updatedSub.editionName
+                  ? `<li><strong>Planner Edition / لغة البلانر:</strong> <span style="color:#d63384;font-weight:bold;">${
+                      updatedSub.editionName ||
+                      (updatedSub.edition === "ar"
+                        ? "النسخة العربية (Arabic Edition)"
+                        : "English Edition")
+                    }</span></li>`
+                  : ""
+              }
               <li><strong>Contact First Name:</strong> ${
                 updatedSub.billingFirstName || "N/A"
               }</li>

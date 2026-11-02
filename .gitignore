@@ -37,3 +37,6 @@ next-env.d.ts
 
 # ignored readme
 /README.md
+
+# agents documentation
+agents.md

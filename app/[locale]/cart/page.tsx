@@ -395,6 +395,13 @@ export default function CartPage() {
                           <h5 className="font-medium line-clamp-1">
                             {getLocalizedPackageName(item, locale)}
                           </h5>
+                          {item.edition && (
+                            <div className="mt-1">
+                              <span className="inline-block text-[11px] font-bold bg-pinkey text-lovely px-2 py-0.5 rounded-full">
+                                {item.edition === "ar" ? "النسخة العربية" : "English Edition"}
+                              </span>
+                            </div>
+                          )}
                           {item.duration > 0 && (
                             <p className="text-sm text-creamey/80">
                               {t("monthsSubscription", { months: item.duration })}

@@ -182,6 +182,13 @@ export default function SideCart() {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
+                        {item.edition && (
+                          <div className="mb-1">
+                            <span className="inline-block text-[11px] font-bold bg-pinkey/80 text-lovely border border-lovely/20 px-2 py-0.5 rounded-full">
+                              {item.edition === "ar" ? "النسخة العربية" : "English Edition"}
+                            </span>
+                          </div>
+                        )}
                         {item.duration > 0 && (
                           <p className="text-sm text-lovely/60 mb-2">
                             {t("monthsSubscription", { months: item.duration })}

@@ -218,6 +218,7 @@ export default function PackageeDetailPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [selectedEdition, setSelectedEdition] = useState<"ar" | "en">("ar");
 
   // Touch swipe refs for mobile gesture navigation
   const touchStartXRef = useRef<number | null>(null);
@@ -263,6 +264,11 @@ export default function PackageeDetailPage() {
   useEffect(() => {
     resetZoom();
   }, [currentImageIndex, isLightboxOpen, resetZoom]);
+
+  // Reset image index when switching edition
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [selectedEdition]);
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.deltaY < 0) {
@@ -563,6 +569,14 @@ We’re beyond excited to share this experience with you… your planner will be
       saving = selected.saving;
     }
 
+    const activeEdition = hasEditionSelection ? selectedEdition : undefined;
+    const activeEditionName = hasEditionSelection
+      ? (selectedEdition === "ar" ? "النسخة العربية (Arabic Edition)" : "English Edition")
+      : undefined;
+    const activeImg = (hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0)
+      ? arabicImages[0]
+      : (packageData.imgUrl || "");
+
     addSubscription({
       packageId: packageData._id || "",
       packageName: packageData.name,
@@ -570,16 +584,18 @@ We’re beyond excited to share this experience with you… your planner will be
       categoryName: packageData.partOf || packageData.name,
       tier:
         packageData.name.toLowerCase().includes("mini") ||
-        packageData.name.includes("المصغرة") ||
-        (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
+          packageData.name.includes("المصغرة") ||
+          (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
           ? "mini"
           : "full",
       price,
       discountedFrom,
       duration,
       saving,
-      imageUrl: packageData.imgUrl,
+      imageUrl: activeImg,
       quantity,
+      edition: activeEdition,
+      editionName: activeEditionName,
     });
 
     openCart();
@@ -604,6 +620,14 @@ We’re beyond excited to share this experience with you… your planner will be
       saving = selected.saving;
     }
 
+    const activeEdition = hasEditionSelection ? selectedEdition : undefined;
+    const activeEditionName = hasEditionSelection
+      ? (selectedEdition === "ar" ? "النسخة العربية (Arabic Edition)" : "English Edition")
+      : undefined;
+    const activeImg = (hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0)
+      ? arabicImages[0]
+      : (packageData.imgUrl || "");
+
     addSubscription({
       packageId: packageData._id || "",
       packageName: packageData.name,
@@ -611,16 +635,18 @@ We’re beyond excited to share this experience with you… your planner will be
       categoryName: packageData.partOf || packageData.name,
       tier:
         packageData.name.toLowerCase().includes("mini") ||
-        packageData.name.includes("المصغرة") ||
-        (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
+          packageData.name.includes("المصغرة") ||
+          (packageData.slug && packageData.slug.toLowerCase().includes("mini"))
           ? "mini"
           : "full",
       price,
       discountedFrom,
       duration,
       saving,
-      imageUrl: packageData.imgUrl,
+      imageUrl: activeImg,
       quantity,
+      edition: activeEdition,
+      editionName: activeEditionName,
     });
 
     router.push("/subscription/checkout");
@@ -748,12 +774,36 @@ We’re beyond excited to share this experience with you… your planner will be
     displayPackage?.duration === 6
   );
 
+  const isGehazPackage = Boolean(
+    (typeof params?.slug === "string" && params.slug.toLowerCase().includes("gehaz")) ||
+    (displayPackage?.slug && displayPackage.slug.toLowerCase().includes("gehaz")) ||
+    (displayPackage?.name && (displayPackage.name.toLowerCase().includes("gehaz") || displayPackage.name.includes("جهاز")))
+  );
+
+  const hasEditionSelection =
+    displayPackage?.enableArabicEdition === true ||
+    (displayPackage?.enableArabicEdition !== false && isGehazPackage && !isWeddingPackage);
+
+  const arabicCover = displayPackage?.arabicImgUrl || displayPackage?.translations?.ar?.imgUrl;
+  const arabicGallery = displayPackage?.arabicImages || displayPackage?.translations?.ar?.images || [];
+
+  const arabicImages = [
+    ...(arabicCover ? [arabicCover] : []),
+    ...arabicGallery,
+  ].filter((url, index, arr) => Boolean(url) && arr.indexOf(url) === index);
+
+  const englishCover = displayPackage?.imgUrl;
+  const englishGallery = displayPackage?.images || [];
+
+  const englishImages = [
+    ...(englishCover ? [englishCover] : []),
+    ...englishGallery,
+  ].filter((url, index, arr) => Boolean(url) && arr.indexOf(url) === index);
+
   const galleryImages =
-    displayPackage?.images && displayPackage.images.length > 0
-      ? displayPackage.images
-      : displayPackage?.imgUrl
-        ? [displayPackage.imgUrl]
-        : [];
+    hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0
+      ? arabicImages
+      : englishImages;
 
   return (
     <div className="bg-creamey text-foreground min-h-screen pb-24 font-sans">
@@ -856,9 +906,9 @@ We’re beyond excited to share this experience with you… your planner will be
             </div>
 
             {/* Thumbnail Carousel */}
-            {packageData.images && packageData.images.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="flex space-x-3 rtl:space-x-reverse overflow-x-auto pb-2 scrollbar-hide">
-                {packageData.images.map((img, index) => (
+                {galleryImages.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -904,9 +954,9 @@ We’re beyond excited to share this experience with you… your planner will be
                         displayAllPackages.length > 1
                           ? (pkg.price || 0) === maxPrice
                           : pkg._id === fullPackage?._id ||
-                            (!pkg.name.toLowerCase().includes("mini") &&
-                              !pkg.name.includes("المصغرة") &&
-                              !pkg.slug?.toLowerCase().includes("mini"));
+                          (!pkg.name.toLowerCase().includes("mini") &&
+                            !pkg.name.includes("المصغرة") &&
+                            !pkg.slug?.toLowerCase().includes("mini"));
 
                       return (
                         <button
@@ -960,6 +1010,69 @@ We’re beyond excited to share this experience with you… your planner will be
                       <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> {isWeddingPackage ? "6 months" : "a year"} of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
                     </>
                   )}
+                </div>
+              )}
+
+              {/* Planner Edition Selector (Arabic vs English) */}
+              {hasEditionSelection && (
+                <div className="mb-6 bg-pinkey/50 border-2 border-lovely/30 p-4 rounded-2xl shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className={`${thirdFont.className} text-lg font-bold text-lovely flex items-center gap-2`}>
+                      <span>{locale === "ar" ? "لغة البلانر (النسخة)" : "Planner Edition"}</span>
+                    </h3>
+                    <span className="text-xs bg-lovely text-white font-semibold px-2.5 py-0.5 rounded-full">
+                      {selectedEdition === "ar" ? (locale === "ar" ? "النسخة العربية" : "Arabic Edition") : "English Edition"}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEdition("ar")}
+                      className={`p-3.5 rounded-xl border-2 text-start transition-all cursor-pointer flex flex-col justify-between ${selectedEdition === "ar"
+                        ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
+                        : "border-lovely/20 bg-white/60 hover:bg-white/90"
+                        }`}
+                      id="edition-btn-ar"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-sm sm:text-base text-lovely">
+                          النسخة العربية
+                        </span>
+                        {selectedEdition === "ar" && (
+                          <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
+                        )}
+                      </div>
+                      <p className="text-xs text-lovely/70 leading-snug">
+                        {locale === "ar"
+                          ? "محتوى وغلاف البلانر باللغة العربية"
+                          : "Arabic planner pages, prompts & cover"}
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEdition("en")}
+                      className={`p-3.5 rounded-xl border-2 text-start transition-all cursor-pointer flex flex-col justify-between ${selectedEdition === "en"
+                        ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
+                        : "border-lovely/20 bg-white/60 hover:bg-white/90"
+                        }`}
+                      id="edition-btn-en"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-sm sm:text-base text-lovely">
+                          English Edition
+                        </span>
+                        {selectedEdition === "en" && (
+                          <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
+                        )}
+                      </div>
+                      <p className="text-xs text-lovely/70 leading-snug">
+                        {locale === "ar"
+                          ? "محتوى وغلاف البلانر باللغة الإنجليزية"
+                          : "English planner pages, prompts & cover"}
+                      </p>
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1526,13 +1639,12 @@ We’re beyond excited to share this experience with you… your planner will be
 
             {/* Displayed Image with Magnifier / Pan */}
             <div
-              className={`relative w-full h-[65vh] sm:h-[75vh] overflow-hidden flex items-center justify-center ${
-                zoomScale > 1
-                  ? isDragging
-                    ? "cursor-grabbing"
-                    : "cursor-grab"
-                  : "cursor-zoom-in"
-              }`}
+              className={`relative w-full h-[65vh] sm:h-[75vh] overflow-hidden flex items-center justify-center ${zoomScale > 1
+                ? isDragging
+                  ? "cursor-grabbing"
+                  : "cursor-grab"
+                : "cursor-zoom-in"
+                }`}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -1594,8 +1706,8 @@ We’re beyond excited to share this experience with you… your planner will be
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
                   className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all cursor-pointer ${currentImageIndex === idx
-                      ? "border-pinkey ring-2 ring-pinkey/50 scale-105 opacity-100"
-                      : "border-white/20 opacity-50 hover:opacity-80"
+                    ? "border-pinkey ring-2 ring-pinkey/50 scale-105 opacity-100"
+                    : "border-white/20 opacity-50 hover:opacity-80"
                     }`}
                 >
                   <Image

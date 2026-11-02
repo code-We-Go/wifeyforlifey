@@ -243,12 +243,16 @@ class BostaService {
     }
 
     const cash = order.cash ? order.cash : "card";
-    // const description =
-    //   order.cart
-    //     ?.map((item: any) => `${item.productName} (${item.quantity})`)
-    //     .join(", ") || "Desc.";
+    const editionText = order.editionName
+      ? order.editionName
+      : order.edition === "ar"
+      ? "Arabic Edition"
+      : order.edition === "en"
+      ? "English Edition"
+      : "";
 
-    // console.log("description", description);
+    const parcelDescription = editionText ? `Planner (${editionText})` : "Bestie Planner";
+    const parcelNotes = editionText ? `Edition: ${editionText}` : "";
 
       const refId = order._id
         ? String(order._id)
@@ -261,10 +265,10 @@ class BostaService {
           size: "MEDIUM",
           packageDetails: {
             itemsCount,
-            description: "Desc.",
+            description: parcelDescription,
           },
         },
-        notes: "",
+        notes: parcelNotes,
         cod: cash === "cash" ? order.total : 0,
         dropOffAddress: {
           city: order.bostaCityName || order.billingCity || order.city || "Cairo",

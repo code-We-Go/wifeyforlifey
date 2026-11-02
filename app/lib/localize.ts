@@ -194,9 +194,14 @@ export function localizePackage<T = any>(pkg: T, locale: string = "en"): T {
     ? p.packageProducts.map((prod: any) => (prod && typeof prod === "object" ? localizeProduct(prod, locale) : prod))
     : p.packageProducts;
 
+  const localizedImgUrl = (arTrans?.imgUrl && arTrans.imgUrl.trim() !== "")
+    ? arTrans.imgUrl
+    : (p.arabicImgUrl && p.arabicImgUrl.trim() !== "" ? p.arabicImgUrl : p.imgUrl);
+
   return {
     ...p,
     name: localizedName,
+    imgUrl: localizedImgUrl,
     partOf: localizedPartOf,
     saving: localizedSaving,
     badgeLabel: localizedBadgeLabel,
@@ -212,6 +217,8 @@ export function localizePackage<T = any>(pkg: T, locale: string = "en"): T {
     cards: localizedCards,
     variants: localizedVariants,
     packageProducts: localizedPackageProducts,
+    arabicImages: (arTrans?.images && arTrans.images.length > 0) ? arTrans.images : p.arabicImages,
+    arabicImgUrl: (arTrans?.imgUrl && arTrans.imgUrl.trim() !== "") ? arTrans.imgUrl : p.arabicImgUrl,
   };
 }
 
@@ -248,4 +255,3 @@ export function localizeSubcategory<T = any>(subcategory: T, locale: string = "e
     description: arTrans?.description !== undefined && arTrans.description !== "" ? arTrans.description : s.description,
   };
 }
-

@@ -33,6 +33,9 @@ const PackageSchema = new Schema<Ipackage>(
     name: { type: String, required: true },
     imgUrl: { type: String, required: true },
     images: { type: [String], required: false, default: [] },
+    arabicImgUrl: { type: String, required: false },
+    arabicImages: { type: [String], required: false, default: [] },
+    enableArabicEdition: { type: Boolean, required: false },
     mobMainImage: { type: String, required: false },
     mobImages: { type: [String], required: false, default: [] },
 
@@ -154,6 +157,8 @@ const PackageSchema = new Schema<Ipackage>(
         calloutDescription: { type: String, required: false },
         heroTitle: { type: String, required: false },
         heroSubtitle: { type: String, required: false },
+        imgUrl: { type: String, required: false },
+        images: { type: [String], required: false, default: [] },
       },
     },
   },

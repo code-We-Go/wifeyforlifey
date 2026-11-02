@@ -31,6 +31,8 @@ interface SubscriptionConfig {
   duration: number;
   price: number;
   imageUrl: string;
+  edition?: "ar" | "en";
+  editionName?: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -226,6 +228,8 @@ const UnifiedCheckoutPage = () => {
               price: item.price,
               packageName: label,
               imageUrl: item.imageUrl,
+              edition: item.edition,
+              editionName: item.editionName,
             });
           } else {
             newConfigs.push({
@@ -236,6 +240,8 @@ const UnifiedCheckoutPage = () => {
               duration: item.duration,
               price: item.price,
               imageUrl: item.imageUrl,
+              edition: item.edition,
+              editionName: item.editionName,
               email: "",
               firstName: "",
               lastName: "",
@@ -538,6 +544,8 @@ const UnifiedCheckoutPage = () => {
         giftRecipientEmail: c.isGift ? (c.email || "").toLowerCase() : undefined,
         giftCardName: c.giftCardName,
         specialMessage: c.specialMessage,
+        edition: c.edition,
+        editionName: c.editionName,
       })),
       cart: cartProducts,
       paymentMethod: payment,
@@ -902,9 +910,16 @@ const UnifiedCheckoutPage = () => {
                         ? `✨ اشتراك #${index + 1}: ${getLocalizedPackageName(config, "ar")}`
                         : `✨ Subscription #${index + 1}: ${config.packageName}`}
                     </h3>
-                    <span className="text-xs bg-lovely text-creamey px-2 py-0.5 rounded-full capitalize">
-                      {getLocalizedTier(config.tier, isAr ? "ar" : "en")} • {config.duration}{isAr ? " شهور" : "m"}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {config.edition && (
+                        <span className="text-xs bg-pinkey text-lovely border border-lovely/20 font-bold px-2 py-0.5 rounded-full">
+                          {config.edition === "ar" ? "النسخة العربية" : "English Edition"}
+                        </span>
+                      )}
+                      <span className="text-xs bg-lovely text-creamey px-2 py-0.5 rounded-full capitalize">
+                        {getLocalizedTier(config.tier, isAr ? "ar" : "en")} • {config.duration}{isAr ? " شهور" : "m"}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1288,6 +1303,11 @@ const UnifiedCheckoutPage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold truncate">{getLocalizedPackageName(sub, isAr ? "ar" : "en")}</p>
+                      {sub.edition && (
+                        <span className="inline-block text-[11px] font-bold bg-white/70 text-lovely border border-lovely/20 px-2 py-0.5 rounded-full my-0.5 w-fit">
+                          {sub.edition === "ar" ? "النسخة العربية" : "English Edition"}
+                        </span>
+                      )}
                       <div className="flex flex-col gap-0.5">
                         {sub.duration > 0 && (
                           <p className="text-xs text-creamey/85">

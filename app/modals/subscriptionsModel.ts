@@ -109,7 +109,9 @@ const SubscriptionSchema = new Schema(
       ],
       default: "order_created",
     },
-        paymentMethod: { type: String, required: false,enum:["instapay","cash","card"] },
+    edition: { type: String, enum: ["ar", "en"], required: false },
+    editionName: { type: String, required: false },
+    paymentMethod: { type: String, required: false,enum:["instapay","cash","card"] },
 
     // process: {
     //   type: String,

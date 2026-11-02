@@ -251,6 +251,8 @@ export interface SubscriptionCartItem {
   saving?: string;
   imageUrl: string;
   quantity: number;
+  edition?: "ar" | "en";
+  editionName?: string;
 }
 
 
@@ -390,6 +392,9 @@ export interface Ipackage {
   name: string;
   imgUrl: string; // Main image (keeping for backward compatibility)
   images: string[]; // Array of image URLs
+  arabicImgUrl?: string;
+  arabicImages?: string[];
+  enableArabicEdition?: boolean;
   mobMainImage?: string;
   mobImages?: string[];
   price: number;
@@ -433,6 +438,8 @@ export interface Ipackage {
       calloutDescription?: string;
       heroTitle?: string;
       heroSubtitle?: string;
+      imgUrl?: string;
+      images?: string[];
     };
   };
 }
@@ -572,4 +579,3 @@ export interface Blog {
   readingTime: number;
   formattedPublishDate?: string;
 }
-
