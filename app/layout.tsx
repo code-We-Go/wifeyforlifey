@@ -87,9 +87,8 @@ export default async function RootLayout({
       <GoogleTagManager gtmId="GTM-KQMB2B2F" />
 
       <body
-        className={`w-full min-h-screen ${
-          isRtl ? skolarFont.className : wifeyFont.className
-        } bg-creamey`}
+        className={`w-full min-h-screen ${isRtl ? skolarFont.className : wifeyFont.className
+          } bg-creamey`}
       >
         <noscript>
           <iframe
@@ -123,7 +122,7 @@ export default async function RootLayout({
 
                           <DiscountPopup />
                           <NewsletterPopup />
-                          <AppliancesWebinarGlobalPopup />
+                          {/* <AppliancesWebinarGlobalPopup /> */}
                           <Toaster />
                         </GlobalThemeWrapper>
                       </ModalProvider>
