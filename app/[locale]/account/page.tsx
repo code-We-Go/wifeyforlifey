@@ -201,6 +201,28 @@ const AccountPage = () => {
     return date.toLocaleDateString();
   };
 
+  const formatLoyaltyType = (type?: string) => {
+    if (!type) return "-";
+    const lower = type.toLowerCase();
+    if (lower === "earn") {
+      return t("loyaltyEarn");
+    }
+    if (lower === "spend") {
+      return t("loyaltySpend");
+    }
+    return type;
+  };
+
+  const formatLoyaltyReason = (reason?: string) => {
+    if (!reason) return "-";
+    const r = reason.toLowerCase().trim();
+    if (r === "first name" || r === "firstname") return t("loyaltyReasonFirstName");
+    if (r === "purchase") return t("loyaltyReasonPurchase");
+    if (r === "last name" || r === "lastname") return t("loyaltyReasonLastName");
+    if (r === "spend") return t("loyaltySpend");
+    return reason;
+  };
+
   const getNotificationText = (notification: INotification): string => {
     switch (notification.actionType) {
       case "like":
@@ -1643,8 +1665,8 @@ const AccountPage = () => {
                               ? new Date(tx.timestamp).toLocaleDateString()
                               : "-"}
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap capitalize">
-                            {tx.type}
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            {formatLoyaltyType(tx.type)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
                             {tx.type === "earn"
@@ -1652,7 +1674,7 @@ const AccountPage = () => {
                               : `-${tx.amount}`}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
-                            {tx.reason || "-"}
+                            {formatLoyaltyReason(tx.reason)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
                             {tx.bonusID && tx.bonusID?.bonusPoints

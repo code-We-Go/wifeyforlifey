@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
 import BoardCard from "./BoardCard";
@@ -24,12 +24,25 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Pin, Board, Section } from "./types";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const INSPO_BOARD_TRANSLATIONS: Record<string, string> = {
+  "photoshoot": "أفكار لصور فرحك",
+  "wedding color palettes": "ألوان فرحك",
+  "wedding decorations": "ديكورات فرحك",
+  "bridal veil": "طرحة فرحك",
+  "bridal makeup": "مكياج فرحك",
+  "bridal nails": "ضوافر فرحك 💅🏻",
+  "bridal nails💅🏻": "ضوافر فرحك 💅🏻",
+  "bridal hair styles": "تسريحات فرحك",
+  "wedding dresses": "فساتين فرحك",
+};
+
 interface InspoTabProps {
   isFree?: boolean;
 }
 
 const InspoTab = ({ isFree }: InspoTabProps) => {
   const t = useTranslations("accountPage");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
   const boardTitle = searchParams.get("board");
@@ -109,9 +122,21 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
             const shuffledPins = [...allPins].sort(() => 0.5 - Math.random());
             const coverImages = shuffledPins.slice(0, 3).map((p) => p.publicId);
 
+            const rawTitle = (dbInspo.title || "").toLowerCase().trim();
+            const cleanTitle = rawTitle.replace(/[^\w\s]/gi, "").trim();
+            const arTitle =
+              dbInspo.translations?.ar?.title ||
+              INSPO_BOARD_TRANSLATIONS[rawTitle] ||
+              INSPO_BOARD_TRANSLATIONS[cleanTitle] ||
+              dbInspo.title;
+
+            const displayTitle = locale === "ar" ? arTitle : dbInspo.title;
+
             return {
               id: extractId(dbInspo._id),
-              title: dbInspo.title,
+              title: displayTitle,
+              originalTitle: dbInspo.title,
+              translations: dbInspo.translations,
               pinCount: allPins.length,
               sectionCount: sections.length,
               coverImages,
@@ -128,7 +153,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
     };
 
     fetchBoards();
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     const fetchSubsAndPackages = async () => {
@@ -259,7 +284,13 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
   }, []);
 
   const activeBoard = useMemo(
-    () => boards.find((b) => b.title === boardTitle),
+    () =>
+      boards.find(
+        (b) =>
+          b.title === boardTitle ||
+          (b as any).originalTitle === boardTitle ||
+          (b as any).translations?.ar?.title === boardTitle
+      ),
     [boards, boardTitle]
   );
   const activeSection = useMemo(
@@ -634,7 +665,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-lovely">
-              Inspiration Boards
+              {t("inspirationBoards")}
             </h2>
             <Button
               onClick={handleFavoritesClick}
@@ -648,7 +679,7 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
                   showFavorites ? "fill-lovely  text-lovely" : "text-lovely "
                 }
               />
-              Favorites
+              {t("favoritesButton")}
               {favoritePins.length > 0 && ` (${favoritePins.length})`}
             </Button>
           </div>
@@ -656,7 +687,9 @@ const InspoTab = ({ isFree }: InspoTabProps) => {
           {showFavorites ? (
             favoritePins.length === 0 ? (
               <div className="text-lovely/70">
-                You do not have any inspo favorites yet.
+                {locale === "ar"
+                  ? "لسه معندكيش أفكار مفضلة متسجلة هنا 💕"
+                  : "You do not have any inspo favorites yet."}
               </div>
             ) : (
               <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -23,9 +24,38 @@ import {
 const WEDDING_EXPERIENCE_PACKAGE_ID = "6965e63c6df4503dda02c12b";
 const WEDDING_BESTIE_SLUG = "WeddingBestiePlanner";
 
+const WEDDING_CATEGORY_TRANSLATIONS: Record<string, string> = {
+  "decorations": "ديكورات الفرح",
+  "catering": "الاكل",
+  "bride crew": "فريق العروسة",
+  "groom crew": "فريق العريس",
+  "food": "الأكل",
+  "entertainment": "فقرات الفرح",
+  "wedding memories": "ذكريات الفرح",
+  "venues": "أماكن الفرح",
+  "transportation": "عربيات التنقل",
+  "wedding dress": "فستان فرحك",
+};
+
 const WeddingBestieTab = () => {
   const { data: session } = useSession();
   const router = useRouter();
+  const locale = useLocale();
+
+  const getCategoryName = (cat: any) => {
+    if (!cat) return "";
+    if (locale === "ar") {
+      const lower = (cat.originalName || cat.categoryName || cat.name || "").toLowerCase().trim();
+      return (
+        cat.translations?.ar?.categoryName ||
+        cat.name ||
+        WEDDING_CATEGORY_TRANSLATIONS[lower] ||
+        cat.categoryName ||
+        cat.name
+      );
+    }
+    return cat.originalName || cat.categoryName || cat.name;
+  };
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
@@ -170,12 +200,12 @@ const WeddingBestieTab = () => {
     if (session?.user?.email) {
       checkSubscription();
     }
-  }, [session?.user?.email]);
+  }, [session?.user?.email, locale]);
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/api/categories?type=wedding-planning");
+      const res = await axios.get(`/api/categories?type=wedding-planning&locale=${locale}`);
       setCategories(res.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -333,13 +363,13 @@ const WeddingBestieTab = () => {
               <div className="relative h-40 w-full">
                 <Image
                   src="/patterns/patternPinkey.png"
-                  alt={category.name}
+                  alt={getCategoryName(category)}
                   fill
                   className="object-cover blur-[2px]"
                 />
                 <div className="absolute inset-0 bg-black/10 flex items-center justify-center p-4 text-center">
                   <h3 className={`text-3xl leading-relaxed lg:text-4xl tracking-wide font-bold text-creamey drop-shadow-md ${thirdFont.className}`}>
-                    {category.name}
+                    {getCategoryName(category)}
                   </h3>
                 </div>
               </div>
@@ -356,7 +386,7 @@ const WeddingBestieTab = () => {
               Wedding Planning Bestie
             </button>
             <ChevronRight className="h-4 w-4" />
-            <span className="text-sm font-bold">{selectedCategory.name}</span>
+            <span className="text-sm font-bold">{getCategoryName(selectedCategory)}</span>
           </div>
           <div className="bg-pinkey/30 border border-lovely/15 rounded-xl p-4 text-[11px] md:text-xs text-lovely/80 leading-relaxed">
             <span className="font-bold text-lovely mr-1">Please note:</span>
@@ -468,7 +498,7 @@ const WeddingBestieTab = () => {
             return (
               <div className="mt-8">
                 <h3 className={`text-xl md:text-2xl tracking-wide font-bold text-lovely uppercase mb-6 ${thirdFont.className}`}>
-                  {selectedSubcategory ? `${selectedSubcategory.name} Vendors` : `All ${selectedCategory.name} Vendors`}
+                  {selectedSubcategory ? `${selectedSubcategory.name} Vendors` : (locale === "ar" ? `كل مزودي خدمة ${getCategoryName(selectedCategory)}` : `All ${getCategoryName(selectedCategory)} Vendors`)}
                   {filteredVendors.length !== vendors.length && (
                     <span className="text-sm font-normal text-lovely/70 ml-2">
                       ({filteredVendors.length} of {vendors.length} shown)

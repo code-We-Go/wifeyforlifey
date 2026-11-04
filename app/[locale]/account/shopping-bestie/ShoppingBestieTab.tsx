@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useLocale } from "next-intl";
 import {
   ExternalLink,
   Star,
@@ -41,6 +42,65 @@ import axios from "axios";
 import { compressImage } from "@/utils/imageCompression";
 import { UploadDropzone } from "@/utils/uploadthing";
 import { CldImage, CldUploadWidget } from "next-cloudinary";
+
+// ─── Translations Dictionary ───────────────────────────────────────────────────
+
+export const SHOPPING_BESTIE_TRANSLATIONS: Record<string, string> = {
+  // Categories
+  "All": "الكل",
+  "Appliances": "أجهزة كهربائية",
+  "Bedding": "مفروشات",
+  "Decorations": "ديكورات",
+  "Dining & Kitchen": "المطبخ والسفرة",
+  "Dinning & Kitchen": "المطبخ والسفرة",
+  "Fashion": "أزياء",
+  "Furniture": "أثاث",
+  "Groceries": "بقالة",
+  "Makeup": "مكياج",
+  "Self Care": "العناية بنفسك",
+  "Toilet Essentials": "أساسيات الحمّام",
+
+  // Subcategories
+  "Mattresses & Pillows": "مراتب ومخدات",
+  "Bed Sheets": "ملايات",
+  "Towels & Bathrobes": "فوط وبرانس",
+  "Duvets & Blankets": "ألحفة وبطاطين",
+  "Kitchen Tools – Rafay3": "أدوات ورفايع المطبخ",
+  "Kitchen Tools - Rafay3": "أدوات ورفايع المطبخ",
+  "Kitchen Organizers": "منظّمات المطبخ",
+  "Toilet Organizers": "منظّمات الحمّام",
+  "Dining Sets": "أطقم السفرة",
+  "Dinning Sets": "أطقم السفرة",
+  "Imported Appliances": "أجهزة مستوردة",
+  "Large Appliances": "أجهزة كبيرة",
+  "Small Appliances": "أجهزة صغيرة",
+  "Home Accessories": "إكسسوارات البيت",
+  "Home acccessories": "إكسسوارات البيت",
+  "Rugs": "سجاد",
+  "Shoes": "أحذية",
+  "Body Care": "عناية بالجسم",
+  "Pijamas": "بيجامات",
+  "Lingerie": "لانجري",
+  "Skin Care": "عناية بالبشرة",
+  "Hair Care": "عناية بالشعر",
+  "Make up Tools": "أدوات مكياج",
+  "Nail Care": "عناية بالأظافر",
+  "Oral Care": "عناية بالأسنان",
+  "Dresses": "فساتين",
+  "Bags": "شنط",
+  "Kitchen Design & Execution": "تصميم وتنفيذ المطابخ",
+  "Interior Design": "تصميم داخلي وديكور",
+  "Makeup Products": "منتجات مكياج",
+  "Placemats": "مفارش سفرة",
+  "Laundry products": "مستلزمات الغسيل",
+};
+
+export const translateShoppingBestieTerm = (term?: string, locale?: string) => {
+  if (!term) return "";
+  if (locale !== "ar") return term;
+  const key = term.trim();
+  return SHOPPING_BESTIE_TRANSLATIONS[key] || SHOPPING_BESTIE_TRANSLATIONS[key.toLowerCase()] || term;
+};
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -257,6 +317,7 @@ function BrandCard({
   onSubmitFeedback,
   onBrandUpdate,
 }: BrandCardProps) {
+  const locale = useLocale();
   const [showFeedback, setShowFeedback] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
   const [reviews, setReviews] = useState<BrandReview[]>([]);
@@ -487,12 +548,12 @@ function BrandCard({
                   key={cat}
                   className="text-xs bg-lovely/10 text-lovely px-2 py-0.5 rounded-full font-medium"
                 >
-                  {cat}
+                  {translateShoppingBestieTerm(cat, locale)}
                 </span>
               ))}
               {(brand.subCategoryNames ?? []).map((sub) => (
                 <span key={sub} className="text-xs text-lovely/60">
-                  {sub}
+                  {translateShoppingBestieTerm(sub, locale)}
                 </span>
               ))}
             </div>
@@ -502,7 +563,11 @@ function BrandCard({
                 {brand.averageRating > 0 ? brand.averageRating.toFixed(1) : "–"}
               </span>
               <span className="text-xs text-lovely/40">
-                ({brand.reviews?.length ?? brand.reviewCount} ratings)
+                ({locale === "ar"
+                  ? (brand.reviews?.length ?? brand.reviewCount) === 1
+                    ? "تقييم واحد"
+                    : `${brand.reviews?.length ?? brand.reviewCount} تقييم`
+                  : `${brand.reviews?.length ?? brand.reviewCount} ratings`})
               </span>
             </div>
           </div>
@@ -536,7 +601,13 @@ function BrandCard({
           </div> */}
           <div className="flex items-center gap-1">
             <MessageSquare className="h-3.5 w-3.5 text-lovely/40" />
-            <span>{brand.reviews?.length ?? brand.reviewCount} reviews</span>
+            <span>
+              {locale === "ar"
+                ? (brand.reviews?.length ?? brand.reviewCount) === 1
+                  ? "تجربة واحدة"
+                  : `${brand.reviews?.length ?? brand.reviewCount} تجارب`
+                : `${brand.reviews?.length ?? brand.reviewCount} reviews`}
+            </span>
           </div>
         </div>
                 {/* Reviews Toggle */}
@@ -547,7 +618,13 @@ function BrandCard({
               className="flex items-center gap-1.5 text-xs text-lovely/60 hover:text-lovely mb-2 transition-colors"
             >
               <MessageSquare className="h-3.5 w-3.5" />
-              {showReviews ? "Hide" : "Show"} reviews
+              {locale === "ar"
+                ? showReviews
+                  ? "إخفاء تجارب البنات"
+                  : "شوفي تجارب البنات"
+                : showReviews
+                ? "Hide reviews"
+                : "Show reviews"}
               {showReviews ? (
                 <ChevronUp className="h-3.5 w-3.5" />
               ) : (
@@ -669,7 +746,7 @@ function BrandCard({
             className="flex-1 min-w-0 flex items-center justify-center gap-2 py-2.5 px-4 bg-lovely text-creamey rounded-xl text-sm font-semibold hover:bg-lovely/90 transition-all duration-200 group-hover:shadow-md"
           >
             <ShoppingBag className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">Visit Store</span>
+            <span className="truncate">{locale === "ar" ? "روحي للمتجر" : "Visit Store"}</span>
             <ExternalLink className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
           </a>
 
@@ -685,7 +762,13 @@ function BrandCard({
             }`}
           >
             <Star className="h-4 w-4" />
-            {submitted ? "✓ Rated" : "Rate"}
+            {submitted
+              ? locale === "ar"
+                ? "✓ تم التقييم"
+                : "✓ Rated"
+              : locale === "ar"
+              ? "قيّمي البراند"
+              : "Rate"}
           </button>
         </div>
 
@@ -861,6 +944,7 @@ interface CategoryData {
 }
 
 function BrandSubmissionDialog() {
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -940,27 +1024,29 @@ function BrandSubmissionDialog() {
       <DialogTrigger asChild>
         <Button className="bg-lovely text-creamey hover:bg-lovely/90 rounded-xl px-4 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95 flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Suggest a Brand
+          {locale === "ar" ? "رشّحيلنا براند" : "Suggest a Brand"}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-creamey border-lovely/20 max-w-lg w-[95vw] rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-lovely flex items-center gap-2">
             <Store className="h-6 w-6" />
-            Suggest a New Brand
+            {locale === "ar" ? "رشّحيلنا براند جديد" : "Suggest a New Brand"}
           </DialogTitle>
           <p className="text-lovely/60 text-sm">
-            Know a brand that every wifey should love? Tell us about it!
+            {locale === "ar"
+              ? "تعرفي براند يستاهل كل وايفي تعرفه؟ احكيلنا عنه 🤍"
+              : "Know a brand that every wifey should love? Tell us about it!"}
           </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="brand-name" className="text-lovely font-semibold">Brand Name *</Label>
+            <Label htmlFor="brand-name" className="text-lovely font-semibold">{locale === "ar" ? "اسم البراند *" : "Brand Name *"}</Label>
             <Input
               id="brand-name"
               required
-              placeholder="e.g., Wifey Essentials"
+              placeholder={locale === "ar" ? "اكتبي اسم البراند هنا" : "e.g., Wifey Essentials"}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="bg-white/50 border-lovely/20 focus:border-lovely"
@@ -968,7 +1054,7 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand-link" className="text-lovely font-semibold">Website/Link *</Label>
+            <Label htmlFor="brand-link" className="text-lovely font-semibold">{locale === "ar" ? "موقع البراند أو لينك صفحته *" : "Website/Link *"}</Label>
             <Input
               id="brand-link"
               required
@@ -981,10 +1067,10 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand-desc" className="text-lovely font-semibold">Description (Optional)</Label>
+            <Label htmlFor="brand-desc" className="text-lovely font-semibold">{locale === "ar" ? "نبذة عن البراند (اختياري)" : "Description (Optional)"}</Label>
             <Textarea
               id="brand-desc"
-              placeholder="What makes this brand special?"
+              placeholder={locale === "ar" ? "إيه اللي عجبك في البراند وبيميّزه؟" : "What makes this brand special?"}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="bg-white/50 border-lovely/20 focus:border-lovely min-h-[100px]"
@@ -992,11 +1078,11 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-lovely font-semibold">Categories *</Label>
+            <Label className="text-lovely font-semibold">{locale === "ar" ? "الأقسام *" : "Categories *"}</Label>
             <div className="space-y-3 max-h-[200px] overflow-y-auto p-3 rounded-lg border border-lovely/10 bg-white/30">
               {categories.map((cat) => (
                 <div key={cat._id} className="space-y-1.5">
-                  <p className="text-xs font-bold text-lovely/40 uppercase tracking-widest">{cat.name}</p>
+                  <p className="text-xs font-bold text-lovely/40 uppercase tracking-widest">{translateShoppingBestieTerm(cat.name, locale)}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {cat.subcategories.map((sub) => (
                       <button
@@ -1009,7 +1095,7 @@ function BrandSubmissionDialog() {
                             : "bg-white/50 text-lovely/70 border-lovely/10 hover:border-lovely/30"
                         }`}
                       >
-                        {sub.name}
+                        {translateShoppingBestieTerm(sub.name, locale)}
                       </button>
                     ))}
                   </div>
@@ -1019,10 +1105,10 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="brand-tags" className="text-lovely font-semibold">Tags (Optional)</Label>
+            <Label htmlFor="brand-tags" className="text-lovely font-semibold">{locale === "ar" ? "كلمات تساعدنا نلاقيه (اختياري)" : "Tags (Optional)"}</Label>
             <Input
               id="brand-tags"
-              placeholder="fashion, jewelry, local (comma separated)"
+              placeholder={locale === "ar" ? "زي: أزياء، إكسسوارات، صناعة مصرية (افصلي بينهم بفاصلة)" : "fashion, jewelry, local (comma separated)"}
               value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
               className="bg-white/50 border-lovely/20 focus:border-lovely"
@@ -1030,7 +1116,7 @@ function BrandSubmissionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-lovely font-semibold">Logo (Optional)</Label>
+            <Label className="text-lovely font-semibold">{locale === "ar" ? "لوجو البراند (اختياري)" : "Logo (Optional)"}</Label>
             {formData.logo ? (
               <div className="relative inline-block mt-2">
                 <img src={formData.logo} alt="Brand logo" className="h-24 w-24 object-cover rounded-xl shadow-sm border border-lovely/20" />
@@ -1048,6 +1134,14 @@ function BrandSubmissionDialog() {
                 <UploadDropzone
                   endpoint="mediaUploader"
                   config={{ mode: "auto" }}
+                  content={{
+                    label: locale === "ar" ? "اختاري صورة أو اسحبيها هنا" : "Choose a file or drag and drop",
+                    allowedContent: locale === "ar" ? "صورة بحد أقصى 16 ميجابايت" : "Image (16MB)",
+                    button({ ready }) {
+                      if (ready) return locale === "ar" ? "اختاري صورة" : "Choose File";
+                      return locale === "ar" ? "جاري التحميل..." : "Loading...";
+                    },
+                  }}
                   onBeforeUploadBegin={async (files) => {
                     try {
                       return await Promise.all(
@@ -1097,7 +1191,7 @@ function BrandSubmissionDialog() {
               ) : (
                 <Send className="h-5 w-5 mr-2" />
               )}
-              Submit Brand for Approval
+              {locale === "ar" ? "ابعتي ترشيحك 🤍" : "Submit Brand for Approval"}
             </Button>
           </DialogFooter>
         </form>
@@ -1115,6 +1209,7 @@ interface ShoppingBestieTabProps {
 export default function ShoppingBestieTab({
   isSubscribed,
 }: ShoppingBestieTabProps) {
+  const locale = useLocale();
   const [brands, setBrands] = useState<ShoppingBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1242,17 +1337,33 @@ export default function ShoppingBestieTab({
             Shopping Bestie 🛍️
           </h2>
           <div className="mt-4 space-y-4 text-lovely/80 text-sm max-w-3xl leading-relaxed">
-            <p>
-              These brands aren’t officially recommended or endorsed by Wifey for Lifey 💗✨<br />
-              They’re simply a curated list of our community’s go-to favorites!
-            </p>
-            <p>
-              Always do your own research, read reviews, and choose what feels right for you before purchasing 🛍️💭<br />
-              Wifey for Lifey isn’t responsible for any issues related to products or services.
-            </p>
-            <p>
-              We just put this list together to make your shopping journey a little easier and way less overwhelming 💕
-            </p>
+            {locale === "ar" ? (
+              <>
+                <p>
+                  جمعنالك هنا براندات من مفضّلات بنات مجتمع وايفي، عشان نسهّل عليكي اللف والدوران ونقلّل حيرة الشوبينج 🤍
+                </p>
+                <p>
+                  وجود أي براند في الليست مش معناه إن وايفي جرّبته أو بتوصي بيه بشكل رسمي.
+                </p>
+                <p>
+                  قبل ما تشتري، خدي وقتك في البحث، واقري تجارب غيرك، واختاري الأنسب ليكي. وايفي فور لايفي مش مسؤولة عن أي مشكلات تخص المنتجات أو الخدمات.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  These brands aren’t officially recommended or endorsed by Wifey for Lifey 💗✨<br />
+                  They’re simply a curated list of our community’s go-to favorites!
+                </p>
+                <p>
+                  Always do your own research, read reviews, and choose what feels right for you before purchasing 🛍️💭<br />
+                  Wifey for Lifey isn’t responsible for any issues related to products or services.
+                </p>
+                <p>
+                  We just put this list together to make your shopping journey a little easier and way less overwhelming 💕
+                </p>
+              </>
+            )}
           </div>
         </div>
         <BrandSubmissionDialog />
@@ -1267,7 +1378,7 @@ export default function ShoppingBestieTab({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search brands, categories, or tags..."
+            placeholder={locale === "ar" ? "بتدوّري على إيه؟ اكتبي براند، قسم أو كلمة…" : "Search brands, categories, or tags..."}
             className="w-full bg-transparent border border-lovely/20 rounded-xl pl-9 pr-4 py-2.5 text-sm text-lovely placeholder-lovely/40 focus:outline-none focus:border-lovely/50 transition-colors"
           />
         </div>
@@ -1284,7 +1395,7 @@ export default function ShoppingBestieTab({
                   : "bg-lovely/10 text-lovely hover:bg-lovely/20 border border-lovely/20"
               }`}
             >
-              {cat}
+              {translateShoppingBestieTerm(cat, locale)}
             </button>
           ))}
         </div>
@@ -1302,7 +1413,7 @@ export default function ShoppingBestieTab({
                     : "bg-white/50 text-lovely/80 hover:bg-lovely/10 border border-lovely/20"
                 }`}
               >
-                {subcat}
+                {translateShoppingBestieTerm(subcat, locale)}
               </button>
             ))}
           </div>
@@ -1310,7 +1421,7 @@ export default function ShoppingBestieTab({
 
         {/* Sort */}
         <div className="flex items-center gap-2 text-xs text-lovely/60">
-          <span className="font-medium">Sort by:</span>
+          <span className="font-medium">{locale === "ar" ? "رتّبي حسب:" : "Sort by:"}</span>
           {(["default", "rating", "visits"] as const).map((opt) => (
             <button
               key={opt}
@@ -1322,8 +1433,16 @@ export default function ShoppingBestieTab({
               }`}
             >
               {opt === "default"
-                ? "Featured"
-                : opt.charAt(0).toUpperCase() + opt.slice(1)}
+                ? locale === "ar"
+                  ? "المحلات المميّزة"
+                  : "Featured"
+                : opt === "rating"
+                ? locale === "ar"
+                  ? "التقييم"
+                  : "Rating"
+                : locale === "ar"
+                ? "الزيارات"
+                : "Visits"}
             </button>
           ))}
         </div>
@@ -1373,9 +1492,9 @@ export default function ShoppingBestieTab({
       ) : (
         <>
           <p className="text-xs text-lovely/40 font-medium">
-            Showing {filteredBrands.length} brand
-            {filteredBrands.length !== 1 ? "s" : ""}
-            {selectedCategory !== "All" ? ` in ${selectedCategory}` : ""}
+            {locale === "ar"
+              ? `عندك ${filteredBrands.length} براند تكتشفيهم${selectedCategory !== "All" ? ` في قسم ${translateShoppingBestieTerm(selectedCategory, locale)}` : ""}`
+              : `Showing ${filteredBrands.length} brand${filteredBrands.length !== 1 ? "s" : ""}${selectedCategory !== "All" ? ` in ${selectedCategory}` : ""}`}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {filteredBrands.map((brand) => (
