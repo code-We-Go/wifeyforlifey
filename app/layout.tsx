@@ -90,7 +90,7 @@ export default function RootLayout({
 
                         <DiscountPopup />
                         <NewsletterPopup />
-                        <AppliancesWebinarGlobalPopup />
+                        {/* <AppliancesWebinarGlobalPopup /> */}
                         <Toaster />
                       </GlobalThemeWrapper>
                     </ModalProvider>
