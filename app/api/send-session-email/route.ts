@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { sendMail } from "@/lib/email";
-import { sexEducationSessionEmailHtml } from "@/utils/SexEducationSessionMail";
+import { getSexEducationSessionEmailHtml } from "@/utils/SexEducationSessionMail";
 import { getAppliancesMasterClassEmailHtml } from "@/utils/AppliancesMasterClassSessionMail";
 import { ConnectDB } from "@/app/config/db";
 import PartnerSessionModel from "@/app/modals/partnerSessionModel";
+import { getUserPreferredLanguage } from "@/utils/getUserPreferredLanguage";
 
 const APPLIANCES_SESSION_ID = "6acfa82b936fe79b1c127ed6";
 
@@ -19,10 +20,6 @@ export async function GET(request: Request) {
       session === "appliances" ||
       session === APPLIANCES_SESSION_ID ||
       session === "webinar";
-
-    const subject = isAppliances
-      ? "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕"
-      : "Your Sex Education FAQs Session Booking Confirmation 💕";
 
     if (sendToAll) {
       await ConnectDB();
@@ -45,12 +42,23 @@ export async function GET(request: Request) {
         seen.add(clientEmail);
 
         const clientFullName = `${b.clientFirstName || ""} ${b.clientLastName || ""}`.trim() || "Wifey";
+        const clientLang = await getUserPreferredLanguage({
+          email: clientEmail,
+          fallbackLang: "ar",
+        });
+
+        const subject = isAppliances
+          ? "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕"
+          : clientLang === "ar"
+          ? "تأكيد حجز جلسة الثقافة الجنسية 💕"
+          : "Your Sex Education FAQs Session Booking Confirmation 💕";
+
         const emailHtml = isAppliances
           ? getAppliancesMasterClassEmailHtml({
               clientName: clientFullName,
               orderId: b.orderId?.toString() || b._id?.toString(),
             })
-          : sexEducationSessionEmailHtml;
+          : getSexEducationSessionEmailHtml(clientLang);
 
         try {
           await sendMail({
@@ -74,9 +82,20 @@ export async function GET(request: Request) {
       });
     }
 
+    const clientLang = await getUserPreferredLanguage({
+      email: recipientEmail,
+      fallbackLang: "ar",
+    });
+
+    const subject = isAppliances
+      ? "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕"
+      : clientLang === "ar"
+      ? "تأكيد حجز جلسة الثقافة الجنسية 💕"
+      : "Your Sex Education FAQs Session Booking Confirmation 💕";
+
     const emailHtml = isAppliances
       ? getAppliancesMasterClassEmailHtml({ clientName: name })
-      : sexEducationSessionEmailHtml;
+      : getSexEducationSessionEmailHtml(clientLang);
 
     await sendMail({
       to: recipientEmail,
@@ -116,10 +135,6 @@ export async function POST(request: Request) {
       session === APPLIANCES_SESSION_ID ||
       session === "webinar";
 
-    const subject = isAppliances
-      ? "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕"
-      : "Your Sex Education FAQs Session Booking Confirmation 💕";
-
     if (sendToAll) {
       await ConnectDB();
       const targetSessionId = isAppliances ? APPLIANCES_SESSION_ID : session;
@@ -140,12 +155,23 @@ export async function POST(request: Request) {
         seen.add(clientEmail);
 
         const clientFullName = `${b.clientFirstName || ""} ${b.clientLastName || ""}`.trim() || "Wifey";
+        const clientLang = await getUserPreferredLanguage({
+          email: clientEmail,
+          fallbackLang: "ar",
+        });
+
+        const subject = isAppliances
+          ? "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕"
+          : clientLang === "ar"
+          ? "تأكيد حجز جلسة الثقافة الجنسية 💕"
+          : "Your Sex Education FAQs Session Booking Confirmation 💕";
+
         const emailHtml = isAppliances
           ? getAppliancesMasterClassEmailHtml({
               clientName: clientFullName,
               orderId: b.orderId?.toString() || b._id?.toString(),
             })
-          : sexEducationSessionEmailHtml;
+          : getSexEducationSessionEmailHtml(clientLang);
 
         try {
           await sendMail({
@@ -169,9 +195,20 @@ export async function POST(request: Request) {
       });
     }
 
+    const clientLang = await getUserPreferredLanguage({
+      email: recipientEmail,
+      fallbackLang: "ar",
+    });
+
+    const subject = isAppliances
+      ? "تأكيد حجز ورشة أجهزة بيتك - Appliances Master Class 💕"
+      : clientLang === "ar"
+      ? "تأكيد حجز جلسة الثقافة الجنسية 💕"
+      : "Your Sex Education FAQs Session Booking Confirmation 💕";
+
     const emailHtml = isAppliances
       ? getAppliancesMasterClassEmailHtml({ clientName: name })
-      : sexEducationSessionEmailHtml;
+      : getSexEducationSessionEmailHtml(clientLang);
 
     await sendMail({
       to: recipientEmail,

@@ -59,6 +59,8 @@ export const SHOPPING_BESTIE_TRANSLATIONS: Record<string, string> = {
   "Makeup": "مكياج",
   "Self Care": "العناية بنفسك",
   "Toilet Essentials": "أساسيات الحمّام",
+  "Shopping Bestie": "تسوّقى مع وايفى",
+  "Shopping Bestie 🛍️": "تسوّقى مع وايفى 🛍️",
 
   // Subcategories
   "Mattresses & Pillows": "مراتب ومخدات",
@@ -1334,7 +1336,7 @@ export default function ShoppingBestieTab({
           <h2
             className={`${thirdFont.className} text-3xl font-bold text-lovely tracking-normal`}
           >
-            Shopping Bestie 🛍️
+            {locale === "ar" ? "تسوّقى مع وايفى 🛍️" : "Shopping Bestie 🛍️"}
           </h2>
           <div className="mt-4 space-y-4 text-lovely/80 text-sm max-w-3xl leading-relaxed">
             {locale === "ar" ? (

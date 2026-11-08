@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -26,7 +26,7 @@ const WEDDING_BESTIE_SLUG = "WeddingBestiePlanner";
 
 const WEDDING_CATEGORY_TRANSLATIONS: Record<string, string> = {
   "decorations": "ديكورات الفرح",
-  "catering": "الاكل",
+  "catering": "الكاترينج والضيافة",
   "bride crew": "فريق العروسة",
   "groom crew": "فريق العريس",
   "food": "الأكل",
@@ -37,7 +37,38 @@ const WEDDING_CATEGORY_TRANSLATIONS: Record<string, string> = {
   "wedding dress": "فستان فرحك",
 };
 
+const WEDDING_SUBCATEGORY_TRANSLATIONS: Record<string, string> = {
+  "photographer": "مصور فوتوغرافي",
+  "photographers": "مصورين فوتوغرافي",
+  "photography": "تصوير فوتوغرافي",
+  "videographer": "مصور فيديو",
+  "videographers": "مصوري فيديو",
+  "videography": "تصوير فيديو",
+  "makeup artist": "ميك أب آرتيست",
+  "makeup artists": "ميك أب آرتيست",
+  "hair stylist": "مصفف شعر",
+  "hair stylists": "مصففي شعر",
+  "wedding planner": "منظم أفراح",
+  "wedding planners": "منظمي أفراح",
+  "dj": "دي جي",
+  "zaffa": "زفة",
+  "band": "فرقة موسيقية",
+  "open air": "أماكن مفتوحة (أوبن إير)",
+  "open air venues": "أماكن مفتوحة (أوبن إير)",
+  "indoor venues": "قاعات مغلقة",
+  "ballrooms": "قاعات أفراح",
+  "invitations": "كروت دعوة",
+  "bouquets": "بوكيهات ورد",
+  "flowers": "زهور وتنسيق",
+  "wedding cake": "تورتة الفرح",
+  "catering": "بوفيه وكاترينج",
+  "limousine": "ليموزين وتوصيل",
+  "rings": "دبل ومجوهرات",
+  "suits": "بدل عريس",
+};
+
 const WeddingBestieTab = () => {
+  const t = useTranslations("accountPage");
   const { data: session } = useSession();
   const router = useRouter();
   const locale = useLocale();
@@ -47,14 +78,30 @@ const WeddingBestieTab = () => {
     if (locale === "ar") {
       const lower = (cat.originalName || cat.categoryName || cat.name || "").toLowerCase().trim();
       return (
+        WEDDING_CATEGORY_TRANSLATIONS[lower] ||
         cat.translations?.ar?.categoryName ||
         cat.name ||
-        WEDDING_CATEGORY_TRANSLATIONS[lower] ||
         cat.categoryName ||
-        cat.name
+        ""
       );
     }
     return cat.originalName || cat.categoryName || cat.name;
+  };
+
+  const getSubcategoryName = (sub: any) => {
+    if (!sub) return "";
+    if (locale === "ar") {
+      const lower = (sub.originalName || sub.subCategoryName || sub.name || "").toLowerCase().trim();
+      return (
+        sub.translations?.ar?.subCategoryName ||
+        sub.translations?.ar?.name ||
+        WEDDING_SUBCATEGORY_TRANSLATIONS[lower] ||
+        sub.name ||
+        sub.subCategoryName ||
+        ""
+      );
+    }
+    return sub.originalName || sub.subCategoryName || sub.name || "";
   };
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,15 +129,36 @@ const WeddingBestieTab = () => {
   } | null>(null);
 
   const formatPriceRange = (vendor: any) => {
-    if (vendor.fromPrice != null || vendor.toPrice != null) {
-      if (vendor.fromPrice === vendor.toPrice || vendor.fromPrice === 0 || vendor.fromPrice == null) {
-        return vendor.toPrice ? `${vendor.toPrice} EGP` : "N/A";
+    if (!vendor) return t("notAvailable");
+    const egp = locale === "ar" ? "جنيه" : "EGP";
+    const notAvailable = t("notAvailable");
+
+    const fromNum = vendor.fromPrice != null && vendor.fromPrice !== "" ? Number(vendor.fromPrice) : null;
+    const toNum = vendor.toPrice != null && vendor.toPrice !== "" ? Number(vendor.toPrice) : null;
+
+    const hasFrom = fromNum != null && !isNaN(fromNum) && fromNum > 0;
+    const hasTo = toNum != null && !isNaN(toNum) && toNum > 0;
+
+    if (hasFrom && hasTo) {
+      if (fromNum === toNum) {
+        return `${fromNum} ${egp}`;
       }
-      const fromStr = vendor.fromPrice ? `From ${vendor.fromPrice} ` : "";
-      const toStr = vendor.toPrice ? `To ${vendor.toPrice} ` : "";
-      return `${fromStr}${toStr}EGP`.trim();
+      return locale === "ar"
+        ? `من ${fromNum} إلى ${toNum} ${egp}`
+        : `From ${fromNum} To ${toNum} ${egp}`;
     }
-    return "N/A";
+
+    if (hasFrom) {
+      return locale === "ar"
+        ? `من ${fromNum} ${egp}`
+        : `From ${fromNum} ${egp}`;
+    }
+
+    if (hasTo) {
+      return `${toNum} ${egp}`;
+    }
+
+    return notAvailable;
   };
 
   const renderVendorLinks = (vendor: any) => {
@@ -151,13 +219,18 @@ const WeddingBestieTab = () => {
 
   const openLightbox = (vendor: any, startIdx: number = 0) => {
     const allImgs: string[] = [];
-    if (vendor.coverImage) allImgs.push(vendor.coverImage);
+    if (typeof vendor.coverImage === "string" && vendor.coverImage.trim()) {
+      allImgs.push(vendor.coverImage.trim());
+    }
     if (Array.isArray(vendor.images)) {
       vendor.images.forEach((img: string) => {
-        if (img && !allImgs.includes(img)) {
-          allImgs.push(img);
+        if (typeof img === "string" && img.trim() && !allImgs.includes(img.trim())) {
+          allImgs.push(img.trim());
         }
       });
+    }
+    if (typeof vendor.image === "string" && vendor.image.trim() && !allImgs.includes(vendor.image.trim())) {
+      allImgs.push(vendor.image.trim());
     }
 
     if (allImgs.length > 0) {
@@ -383,14 +456,14 @@ const WeddingBestieTab = () => {
               onClick={() => setSelectedCategory(null)}
               className="text-sm font-medium hover:underline"
             >
-              Wedding Planning Bestie
+              {t("weddingPlanningBestie")}
             </button>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rtl:rotate-180" />
             <span className="text-sm font-bold">{getCategoryName(selectedCategory)}</span>
           </div>
           <div className="bg-pinkey/30 border border-lovely/15 rounded-xl p-4 text-[11px] md:text-xs text-lovely/80 leading-relaxed">
-            <span className="font-bold text-lovely mr-1">Please note:</span>
-            This listed vendor is not a recommendation, it's just to get you started. Prices may not be accurate as vendors have full rights to change their price without notifying anyone, so please take these prices as an estimate and always make your own research for reviews.
+            <span className="font-bold text-lovely mr-1 rtl:mr-0 rtl:ml-1">{t("vendorDisclaimerNote")}</span>
+            {t("vendorDisclaimerText")}
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -399,7 +472,7 @@ const WeddingBestieTab = () => {
               className={!selectedSubcategory ? "bg-lovely text-creamey" : "border-lovely hover:bg-pinkey hover:text-lovely text-lovely"}
               onClick={handleShowAll}
             >
-              All
+              {t("all")}
             </Button>
             {subcategories.map((sub) => (
               <Button
@@ -408,24 +481,24 @@ const WeddingBestieTab = () => {
                 className={selectedSubcategory?._id === sub._id ? "bg-lovely text-creamey" : "border-lovely bg-creamey hover:bg-pinkey hover:text-lovely text-lovely"}
                 onClick={() => handleSubcategoryClick(sub)}
               >
-                {sub.name}
+                {getSubcategoryName(sub)}
               </Button>
             ))}
           </div>
 
           <div className="bg-pinkey/50 p-4 rounded-xl border border-lovely/20 flex flex-wrap items-end gap-4">
             <div className="space-y-1 flex-1 min-w-[200px]">
-              <label className="text-xs font-bold text-lovely">Search Vendor Name</label>
+              <label className="text-xs font-bold text-lovely">{t("searchVendorName")}</label>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search vendor by name..."
+                placeholder={t("searchVendorPlaceholder")}
                 className="w-full placeholder:text-pinkey p-2 rounded-lg border border-lovely/30 bg-creamey text-lovely focus:outline-none focus:ring-2 focus:ring-lovely/50"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-lovely">Min Price (EGP)</label>
+              <label className="text-xs font-bold text-lovely">{t("minPrice")}</label>
               <input
                 type="number"
                 value={minPrice || ""}
@@ -433,12 +506,12 @@ const WeddingBestieTab = () => {
                   const val = Number(e.target.value);
                   setMinPrice(val);
                 }}
-                placeholder="From"
+                placeholder={t("priceFrom")}
                 className="w-32 placeholder:text-pinkey p-2 rounded-lg border border-lovely/30 bg-creamey text-lovely focus:outline-none focus:ring-2 focus:ring-lovely/50"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-lovely">Max Price (EGP)</label>
+              <label className="text-xs font-bold text-lovely">{t("maxPrice")}</label>
               <input
                 type="number"
                 value={maxPrice || ""}
@@ -446,7 +519,7 @@ const WeddingBestieTab = () => {
                   const val = Number(e.target.value);
                   setMaxPrice(val);
                 }}
-                placeholder="To"
+                placeholder={t("priceTo")}
                 className="w-32 placeholder:text-pinkey p-2 rounded-lg border border-lovely/30 bg-creamey text-lovely focus:outline-none focus:ring-2 focus:ring-lovely/50"
               />
             </div>
@@ -454,7 +527,7 @@ const WeddingBestieTab = () => {
               onClick={handleApplyFilters}
               className="bg-lovely text-creamey hover:bg-lovely/80"
             >
-              Apply Filters
+              {t("applyFilters")}
             </Button>
             <Button
               type="button"
@@ -464,7 +537,11 @@ const WeddingBestieTab = () => {
             >
               <ArrowUpDown className="h-3.5 w-3.5" />
               <span>
-                Price: {sortOrder === "asc" ? "Low to High" : sortOrder === "desc" ? "High to Low" : "Default"}
+                {sortOrder === "asc"
+                  ? t("priceSortLowToHigh")
+                  : sortOrder === "desc"
+                    ? t("priceSortHighToLow")
+                    : t("priceSortDefault")}
               </span>
             </Button>
             {(searchQuery || minPrice > 0 || maxPrice > 0 || sortOrder !== null) && (
@@ -483,7 +560,7 @@ const WeddingBestieTab = () => {
                 }}
                 className="text-lovely/70 hover:text-lovely"
               >
-                Clear
+                {t("clear")}
               </Button>
             )}
           </div>
@@ -498,10 +575,12 @@ const WeddingBestieTab = () => {
             return (
               <div className="mt-8">
                 <h3 className={`text-xl md:text-2xl tracking-wide font-bold text-lovely uppercase mb-6 ${thirdFont.className}`}>
-                  {selectedSubcategory ? `${selectedSubcategory.name} Vendors` : (locale === "ar" ? `كل مزودي خدمة ${getCategoryName(selectedCategory)}` : `All ${getCategoryName(selectedCategory)} Vendors`)}
+                  {selectedSubcategory
+                    ? (locale === "ar" ? `مزودي خدمة ${getSubcategoryName(selectedSubcategory)}` : `${getSubcategoryName(selectedSubcategory)} Vendors`)
+                    : (locale === "ar" ? `كل مزودي خدمة ${getCategoryName(selectedCategory)}` : `All ${getCategoryName(selectedCategory)} Vendors`)}
                   {filteredVendors.length !== vendors.length && (
-                    <span className="text-sm font-normal text-lovely/70 ml-2">
-                      ({filteredVendors.length} of {vendors.length} shown)
+                    <span className="text-sm font-normal text-lovely/70 ml-2 rtl:ml-0 rtl:mr-2">
+                      {locale === "ar" ? `(تم عرض ${filteredVendors.length} من ${vendors.length})` : `(${filteredVendors.length} of ${vendors.length} shown)`}
                     </span>
                   )}
                 </h3>
@@ -525,7 +604,11 @@ const WeddingBestieTab = () => {
                 ) : filteredVendors.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredVendors.map((vendor) => {
-                      const coverImg = vendor.coverImage || (vendor.images && vendor.images[0]);
+                      const coverImg =
+                        (typeof vendor.coverImage === "string" && vendor.coverImage.trim()) ||
+                        (Array.isArray(vendor.images) && vendor.images.find((img: any) => typeof img === "string" && img.trim())) ||
+                        (typeof vendor.image === "string" && vendor.image.trim()) ||
+                        null;
 
                       return (
                         <div
@@ -539,13 +622,13 @@ const WeddingBestieTab = () => {
                               {coverImg ? (
                                 <Image
                                   src={coverImg}
-                                  alt={vendor.name}
+                                  alt={vendor.name || "Vendor"}
                                   fill
                                   className="object-cover"
                                 />
                               ) : (
-                                <span className="text-lovely/40 text-[10px] sm:text-xs font-medium">
-                                  No Cover
+                                <span className="text-lovely/40 text-[10px] sm:text-xs font-medium text-center px-1">
+                                  {t("noCover")}
                                 </span>
                               )}
                             </div>
@@ -557,7 +640,7 @@ const WeddingBestieTab = () => {
                               </h4>
 
                               <div className="text-xs sm:text-sm text-lovely/90 font-medium">
-                                <span className="font-bold text-lovely">Price Range: </span>
+                                <span className="font-bold text-lovely">{t("priceRange")}: </span>
                                 {hasSubscription ? (
                                   formatPriceRange(vendor)
                                 ) : (
@@ -578,7 +661,7 @@ const WeddingBestieTab = () => {
                               onClick={() => setSelectedVendorDetails(vendor)}
                               className="bg-lovely text-creamey hover:bg-lovely/80 rounded-full px-5 py-2 text-xs font-bold shadow-sm transition-all w-full sm:w-auto"
                             >
-                              See More
+                              {t("seeMore")}
                             </Button>
                           </div>
                         </div>
@@ -587,7 +670,7 @@ const WeddingBestieTab = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12 bg-creamey rounded-xl border border-lovely/10">
-                    <p className="text-lovely/60">No vendors found matching your criteria.</p>
+                    <p className="text-lovely/60">{t("noVendorsFound")}</p>
                   </div>
                 )}
               </div>
@@ -608,13 +691,13 @@ const WeddingBestieTab = () => {
                   {selectedVendorDetails.name}
                 </h3>
                 <div className="text-xs md:text-sm text-lovely/80 font-medium">
-                  <span className="font-bold text-lovely">Price Range: </span>
+                  <span className="font-bold text-lovely">{t("priceRange")}: </span>
                   {hasSubscription ? (
                     formatPriceRange(selectedVendorDetails)
                   ) : (
                     <span className="inline-flex items-center gap-1.5 font-bold text-lovely bg-pinkey/60 px-2.5 py-0.5 rounded-md text-xs">
                       •••••• <Lock className="w-3.5 h-3.5 opacity-70" />
-                      <span className="text-[10px] text-lovely/70 font-normal ml-1">(Subscribers Only)</span>
+                      <span className="text-[10px] text-lovely/70 font-normal ml-1 rtl:ml-0 rtl:mr-1">{t("subscribersOnly")}</span>
                     </span>
                   )}
                 </div>
@@ -644,11 +727,18 @@ const WeddingBestieTab = () => {
               </h4>
               {(() => {
                 const allImgs: string[] = [];
-                if (selectedVendorDetails.coverImage) allImgs.push(selectedVendorDetails.coverImage);
+                if (typeof selectedVendorDetails.coverImage === "string" && selectedVendorDetails.coverImage.trim()) {
+                  allImgs.push(selectedVendorDetails.coverImage.trim());
+                }
                 if (Array.isArray(selectedVendorDetails.images)) {
                   selectedVendorDetails.images.forEach((img: string) => {
-                    if (img && !allImgs.includes(img)) allImgs.push(img);
+                    if (typeof img === "string" && img.trim() && !allImgs.includes(img.trim())) {
+                      allImgs.push(img.trim());
+                    }
                   });
+                }
+                if (typeof selectedVendorDetails.image === "string" && selectedVendorDetails.image.trim() && !allImgs.includes(selectedVendorDetails.image.trim())) {
+                  allImgs.push(selectedVendorDetails.image.trim());
                 }
 
                 if (allImgs.length === 0) {
@@ -815,8 +905,8 @@ const WeddingBestieTab = () => {
                       setLightboxData((prev) => (prev ? { ...prev, currentIndex: idx } : null))
                     }
                     className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${idx === lightboxData.currentIndex
-                        ? "border-lovely scale-105 shadow-md"
-                        : "border-pinkey/50 opacity-60 hover:opacity-100"
+                      ? "border-lovely scale-105 shadow-md"
+                      : "border-pinkey/50 opacity-60 hover:opacity-100"
                       }`}
                   >
                     <Image src={img} alt="Thumb" fill className="object-cover" />

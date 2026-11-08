@@ -417,7 +417,24 @@
     "creatingWithGoogle": "Creating account with Google...",
     "alreadyHaveAccount": "Already have an account?",
     "unexpectedError": "An unexpected error occurred. Please try again.",
-    "googleError": "An error occurred during Google sign-in. Please try again."
+    "googleError": "An error occurred during Google sign-in. Please try again.",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "First name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Last name",
+    "whatsAppNumber": "WhatsApp Number",
+    "whatsAppPlaceholder": "e.g. 01012345678",
+    "whatsAppRequired": "WhatsApp number is required",
+    "preferredLanguage": "Preferred Language",
+    "preferredLanguageDesc": "Which language do you prefer for emails & notifications?",
+    "arabic": "العربية",
+    "english": "English",
+    "weddingDay": "Wedding Date (Optional)",
+    "weddingDayHelp": "Help us tailor your planning timeline 💕",
+    "onboardingTitle": "Complete Your Profile 💖",
+    "onboardingSubtitle": "Help us stay in touch and customize your experience with Wifey.",
+    "saveAndContinue": "Save & Continue",
+    "saving": "Saving..."
   },
   "accountPage": {
     "yourSubscriptions": "Your Subscriptions:",
@@ -591,7 +608,26 @@
     "pinsCount": "{count} Pins",
     "favoritesButton": "Favorites",
     "boardLocked": "Board Locked",
-    "boardLockedDesc": "This inspiration board is exclusive to our community members. Subscribe to one of the following packages to gain full access:"
+    "boardLockedDesc": "This inspiration board is exclusive to our community members. Subscribe to one of the following packages to gain full access:",
+    "searchVendorName": "Search Vendor Name",
+    "searchVendorPlaceholder": "Search vendor by name...",
+    "minPrice": "Min Price (EGP)",
+    "maxPrice": "Max Price (EGP)",
+    "priceFrom": "From",
+    "priceTo": "To",
+    "applyFilters": "Apply Filters",
+    "priceSortLowToHigh": "Price: Low to High",
+    "priceSortHighToLow": "Price: High to Low",
+    "priceSortDefault": "Price: Default",
+    "clear": "Clear",
+    "vendorDisclaimerNote": "Please note:",
+    "vendorDisclaimerText": "This listed vendor is not a recommendation, it's just to get you started. Prices may not be accurate as vendors have full rights to change their price without notifying anyone, so please take these prices as an estimate and always make your own research for reviews.",
+    "subscribersOnly": "(Subscribers Only)",
+    "seeMore": "See More",
+    "noVendorsFound": "No vendors found matching your criteria.",
+    "notAvailable": "N/A",
+    "noCover": "No Cover",
+    "shoppingBestieHeading": "Shopping Bestie 🛍️"
   },
   "aboutPage": {
     "title": "❤️ About Wifey for Lifey",
@@ -1028,4 +1064,3 @@
     "adjustTimelineDesc": "How should this time change affect your day?"
   }
 }
-

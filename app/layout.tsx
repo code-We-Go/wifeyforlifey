@@ -18,6 +18,7 @@ import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
 import DiscountPopup from "@/components/DiscountPopup";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import AppliancesWebinarGlobalPopup from "@/components/shared/AppliancesWebinarGlobalPopup";
+import OnboardingModal from "@/components/auth/OnboardingModal";
 import SideCart from "@/components/cart/SideCart";
 import { GoogleTagManager } from "@next/third-parties/google";
 import GlobalThemeWrapper from "./GlobalThemeWrapper";
@@ -122,6 +123,7 @@ export default async function RootLayout({
 
                           <DiscountPopup />
                           <NewsletterPopup />
+                          <OnboardingModal />
                           {/* <AppliancesWebinarGlobalPopup /> */}
                           <Toaster />
                         </GlobalThemeWrapper>
