@@ -29,6 +29,7 @@ yarn-error.log*
 .env*.local
 /api/admin
 app/api/admin/send-test-arabic-emails/
+#testVercelSync
 # vercel
 .vercel
 
