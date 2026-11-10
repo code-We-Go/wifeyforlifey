@@ -1,50 +1,328 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { thirdFont } from "@/fonts";
 import Image from "next/image";
-import { Smartphone, Sparkles, CalendarDays, ListTodo, Radio, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { FaGooglePlay } from "react-icons/fa";
+import {
+  Calendar,
+  Clock,
+  Eye,
+  Languages,
+} from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
+import TikTokEmbed from "@/components/TikTokEmbed";
+import BlogsCommentSection from "../components/BlogsCommentsSection";
+import type { Blog, ContentBlock } from "../page";
 
-interface Blog {
-  _id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  featuredImage?: string;
-  tikTokVideoUrl?: string;
-  status: "draft" | "published" | "archived";
-  tags: string[];
-  categories: string[];
-  metaTitle?: string;
-  metaDescription?: string;
-  publishedAt?: string;
-  viewCount: number;
-  mobileViewCount?: number;
-  webViewCount?: number;
-  featured: boolean;
-  createdAt: string;
-  readingTime: number;
-  formattedPublishDate?: string;
+function renderContentBlocks(
+  blocks: ContentBlock[] | undefined,
+  locale: "en" | "ar"
+) {
+  if (!blocks || blocks.length === 0) return null;
+
+  const normalizeHtmlSpacing = (html: string) => {
+    return html
+      .replace(/<p>\s*(?:<br\s*\/?\s*)+<\/p>/gi, "<br/>")
+      .replace(/(?:<br\s*\/?\s*){2,}/gi, "<br/>");
+  };
+
+  return blocks.map((block, index) => {
+    const rawContent =
+      locale === "ar" && block.arabicContent
+        ? block.arabicContent
+        : block.textHtml || "";
+    const content = normalizeHtmlSpacing(rawContent);
+
+    switch (block.type) {
+      case "text":
+        return (
+          <div
+            key={index}
+            className="prose blog-content prose-lg max-w-none text-lovely leading-relaxed prose-headings:text-lovely prose-p:text-lovely prose-strong:text-lovely"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        );
+      case "image":
+        return (
+          <div key={index} className="my-8 flex flex-col items-center">
+            {block.imageUrl && (
+              <img
+                src={block.imageUrl}
+                alt={block.alt || "Blog image"}
+                className="w-auto max-w-full h-auto max-h-[85vh] rounded-xl shadow-md object-contain"
+                loading="lazy"
+              />
+            )}
+            {block.caption && (
+              <p className="text-sm text-lovely/75 text-center mt-2">
+                {block.caption}
+              </p>
+            )}
+          </div>
+        );
+      case "imageText": {
+        const isRtl = locale === "ar";
+        const layout = block.layout === "img-left" ? "img-left" : "img-block";
+
+        if (layout === "img-left" && block.imageUrl) {
+          return (
+            <div
+              dir={isRtl ? "rtl" : "ltr"}
+              key={index}
+              className="flex flex-col-reverse md:flex-row gap-6 my-8 items-start"
+            >
+              <div
+                className="md:w-1/2 prose blog-content prose-lg text-lovely leading-relaxed prose-headings:text-lovely prose-p:text-lovely prose-strong:text-lovely"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+              <div className="w-full md:w-1/2 flex flex-col items-center">
+                <img
+                  src={block.imageUrl}
+                  alt={block.alt || "Blog image"}
+                  className="w-auto max-w-full h-auto max-h-[75vh] rounded-xl shadow-md object-contain"
+                  loading="lazy"
+                />
+                {block.caption && (
+                  <p
+                    className={`text-sm w-full ${
+                      isRtl ? "text-right" : "text-left"
+                    } text-lovely/75 mt-2`}
+                  >
+                    {block.caption}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // img-block layout
+        return (
+          <div key={index} className="my-8" dir={isRtl ? "rtl" : "ltr"}>
+            {block.imageUrl && (
+              <div className="flex flex-col items-center mb-4">
+                <img
+                  src={block.imageUrl}
+                  alt={block.alt || "Blog image"}
+                  className="w-auto max-w-full h-auto max-h-[85vh] rounded-xl shadow-md object-contain"
+                  loading="lazy"
+                />
+                {block.caption && (
+                  <p className="text-sm text-lovely/75 text-center mt-2">
+                    {block.caption}
+                  </p>
+                )}
+              </div>
+            )}
+            <div
+              className="prose blog-content prose-lg max-w-none text-lovely leading-relaxed prose-headings:text-lovely prose-p:text-lovely prose-strong:text-lovely"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          </div>
+        );
+      }
+      case "carousel": {
+        const rtl = locale === "ar";
+        const imgs = (block.images || []).filter((i) => !!i?.imageUrl);
+        if (imgs.length === 0 && block.imageUrl) {
+          imgs.push({
+            imageUrl: block.imageUrl,
+            alt: block.alt,
+            caption: block.caption,
+          });
+        }
+
+        return (
+          <div key={index} className="my-8 px-8" dir={rtl ? "rtl" : "ltr"}>
+            {imgs.length > 0 ? (
+              <Carousel
+                className="w-full"
+                opts={{ direction: rtl ? "rtl" : "ltr" }}
+              >
+                <CarouselContent>
+                  {imgs.map((img, i) => (
+                    <CarouselItem key={i}>
+                      <div className="relative w-full h-80 md:h-[550px] rounded-xl overflow-hidden bg-black/5 flex items-center justify-center">
+                        <Image
+                          src={img.imageUrl}
+                          alt={img.alt || "Blog image"}
+                          fill
+                          sizes="100vw"
+                          className="object-contain"
+                        />
+                      </div>
+                      {img.caption && (
+                        <p className="text-sm text-lovely/75 text-center mt-2">
+                          {img.caption}
+                        </p>
+                      )}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            ) : (
+              <div className="w-full h-32 rounded-md bg-lovely/10 flex items-center justify-center text-lovely/70">
+                {rtl
+                  ? "لا توجد صور في هذا المعرض"
+                  : "No images available in this carousel"}
+              </div>
+            )}
+
+            {content && (
+              <div
+                className="prose blog-content prose-lg max-w-none text-lovely leading-relaxed mt-4"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+            )}
+          </div>
+        );
+      }
+      case "embed": {
+        if (!block.url) return null;
+
+        if (block.url.includes("tiktok.com")) {
+          return (
+            <TikTokEmbed
+              key={index}
+              url={block.url}
+              caption={block.caption}
+              locale={locale}
+            />
+          );
+        }
+
+        const instagram = block.url.match(
+          /instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/
+        );
+        const youtube = block.url.match(
+          /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]+)/
+        );
+
+        let embedSrc: string | null = null;
+        let platform = "Media";
+        let maxWidth = "360px";
+        let height = "520";
+        let aspectRatio = "4/5";
+
+        if (instagram) {
+          embedSrc = `https://www.instagram.com/p/${instagram[1]}/embed`;
+          platform = "Instagram";
+          maxWidth = "360px";
+          height = "520";
+          aspectRatio = "4/5";
+        } else if (youtube) {
+          embedSrc = `https://www.youtube.com/embed/${youtube[1]}`;
+          platform = "YouTube";
+          maxWidth = "720px";
+          height = "400";
+          aspectRatio = "16/9";
+        }
+
+        return (
+          <div
+            key={index}
+            className="my-8 flex flex-col items-center justify-center"
+          >
+            {embedSrc ? (
+              <div
+                className="w-full flex flex-col items-center justify-center bg-creamey"
+                style={{
+                  maxWidth,
+                }}
+              >
+                <iframe
+                  src={embedSrc}
+                  width={platform === "YouTube" ? "100%" : "325"}
+                  height={height}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  loading="lazy"
+                  className="rounded-lg bg-creamey border-none shadow-md"
+                  style={{
+                    backgroundColor: "#fbf3e0",
+                    maxWidth: "100%",
+                    height: "auto",
+                    aspectRatio,
+                  }}
+                />
+                {block.url && (
+                  <a
+                    href={block.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2.5 inline-flex items-center gap-1.5 text-xs text-lovely/70 hover:text-lovely hover:underline"
+                  >
+                    <span>
+                      {locale === "ar"
+                        ? `مشاهدة على ${platform}`
+                        : `Watch on ${platform}`}
+                    </span>
+                    <span>↗</span>
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-lovely/20 bg-creamey/80">
+                <p className="text-lovely text-sm font-medium">
+                  {locale === "ar"
+                    ? "منشور تفاعلي من منصة"
+                    : "Interactive post on"}{" "}
+                  {platform}
+                </p>
+                <a
+                  href={block.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-lovely px-6 py-3 text-sm font-semibold text-creamey shadow-md hover:bg-lovely/90 transition"
+                >
+                  <span>
+                    {locale === "ar" ? "مشاهدة على" : "Watch on"} {platform}
+                  </span>
+                  <span className="text-xs">↗</span>
+                </a>
+              </div>
+            )}
+            {block.caption && (
+              <p className="mt-2 text-center text-sm text-lovely/75 font-medium">
+                {block.caption}
+              </p>
+            )}
+          </div>
+        );
+      }
+      default:
+        return null;
+    }
+  });
 }
 
-/*
-==========================================================
-ORIGINAL BLOG DETAIL COMPONENT - COMMENTED OUT FOR BACKUP
-==========================================================
 const BlogDetailPage = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params?.slug as string;
+  const routeLocale = (params?.locale as string) || "en";
+  const initialLang =
+    searchParams.get("lang") === "ar" || routeLocale === "ar" ? "ar" : "en";
 
+  const [previewLang, setPreviewLang] = useState<"en" | "ar">(initialLang);
   const [blog, setBlog] = useState<Blog | null>(null);
   const [relatedBlogs, setRelatedBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [tikTokEmbedData, setTikTokEmbedData] = useState<any>(null);
-  const [tikTokLoading, setTikTokLoading] = useState(false);
-  const [tikTokError, setTikTokError] = useState("");
+
+  const isArabic = previewLang === "ar";
 
   useEffect(() => {
     if (slug) {
@@ -52,29 +330,21 @@ const BlogDetailPage = () => {
     }
   }, [slug]);
 
-  useEffect(() => {
-    if (blog?.tikTokVideoUrl) {
-      const photoMatch = blog.tikTokVideoUrl.match(/\/photo\/(\d+)/);
-      if (photoMatch) {
-        fetchTikTokEmbed(blog.tikTokVideoUrl);
-      }
-    }
-  }, [blog]);
-
   const fetchBlog = async () => {
     setLoading(true);
     try {
       const response = await axios.get(`/api/blogs/${slug}?source=web`);
-      setBlog(response.data.data);
+      const fetchedBlog: Blog = response.data.data;
+      setBlog(fetchedBlog);
       if (
-        response.data.data.categories.length > 0 ||
-        response.data.data.tags.length > 0
+        (fetchedBlog.categories && fetchedBlog.categories.length > 0) ||
+        (fetchedBlog.tags && fetchedBlog.tags.length > 0)
       ) {
-        fetchRelatedBlogs(response.data.data);
+        fetchRelatedBlogs(fetchedBlog);
       }
-    } catch (error: any) {
-      console.error("Error fetching blog:", error);
-      if (error.response?.status === 404) {
+    } catch (err: any) {
+      console.error("Error fetching blog:", err);
+      if (err.response?.status === 404) {
         setError("Blog post not found");
       } else {
         setError("Failed to load blog post");
@@ -86,55 +356,39 @@ const BlogDetailPage = () => {
 
   const fetchRelatedBlogs = async (currentBlog: Blog) => {
     try {
-      const params = new URLSearchParams({
+      const queryParams = new URLSearchParams({
         status: "published",
-        limit: "4",
-        exclude: currentBlog._id,
       });
-      currentBlog.categories.forEach((cat) => params.append("categories", cat));
-      currentBlog.tags.forEach((tag) => params.append("tags", tag));
-
-      const response = await axios.get(`/api/blogs?${params}`);
-      const filtered = response.data.data
+      const response = await axios.get(`/api/blogs?${queryParams}`);
+      const filtered = (response.data.data || [])
         .filter((b: Blog) => b._id !== currentBlog._id)
         .slice(0, 3);
       setRelatedBlogs(filtered);
-    } catch (error) {
-      console.error("Error fetching related blogs:", error);
-    }
-  };
-
-  const fetchTikTokEmbed = async (url: string) => {
-    setTikTokLoading(true);
-    setTikTokError("");
-    try {
-      const response = await axios.get(
-        `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`
-      );
-      setTikTokEmbedData(response.data);
-    } catch (error: any) {
-      console.error("Error fetching TikTok embed:", error);
-      setTikTokError("Failed to load TikTok embed");
-    } finally {
-      setTikTokLoading(false);
+    } catch (err) {
+      console.error("Error fetching related blogs:", err);
     }
   };
 
   const stripHtml = (html: string) => {
+    if (!html) return "";
     return html.replace(/<[^>]*>/g, "");
   };
 
   const truncateText = (text: string, maxLength: number) => {
+    if (!text) return "";
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return new Date(dateString).toLocaleDateString(
+      isArabic ? "ar-EG" : "en-US",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }
+    );
   };
 
   if (loading) {
@@ -155,44 +409,99 @@ const BlogDetailPage = () => {
           <h1 className="text-4xl font-bold text-lovely mb-4">
             {error || "Blog not found"}
           </h1>
-          <p className="text-lovely/90 mb-8">
-            The blog post you're looking for doesn't exist or has been removed.
-          </p>
           <Link
-            href="/blogs"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            href={`/${routeLocale}/blogs`}
+            className="inline-flex items-center px-6 py-3 rounded-md text-creamey bg-lovely hover:bg-lovely/90"
           >
-            Back to Blogs
+            {isArabic ? "العودة إلى المدونة" : "Back to Blogs"}
           </Link>
         </div>
       </div>
     );
   }
 
+  const displayTitle = isArabic
+    ? blog.v2?.titleAR ||
+      blog.titleAR ||
+      blog.translations?.ar?.title ||
+      blog.title
+    : blog.title;
+  const displayExcerpt = isArabic
+    ? blog.v2?.excerptAR ||
+      blog.excerptAR ||
+      blog.translations?.ar?.excerpt ||
+      blog.excerpt
+    : blog.excerpt;
+  const effectiveBlocks = blog.v2?.blocks || blog.blocks;
+  const hasBlocks = Array.isArray(effectiveBlocks) && effectiveBlocks.length > 0;
+  const hasEmbedBlock =
+    hasBlocks &&
+    effectiveBlocks!.some(
+      (b) => b.type === "embed" && Boolean(b.url && b.url.trim())
+    );
+
   return (
-    <div className="min-h-screen bg-creamey container-custom">
-      {/* Breadcrumb * /}
-      <div className=" border-b">
-        <div className="container-custom mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <nav className="flex items-center space-x-2 text-sm text-lovely/90">
-            <Link href="/" className="hover:text-lovely hover:underline">
-              Home
+    <div
+      className="min-h-screen bg-creamey container-custom"
+      dir={isArabic ? "rtl" : "ltr"}
+    >
+      {/* Breadcrumb & Language Switcher */}
+      <div className="border-b border-lovely/20 mt-4">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+          <nav className="flex items-center gap-2 text-sm text-lovely/90 truncate">
+            <Link
+              href={`/${routeLocale}`}
+              className="hover:text-lovely hover:underline"
+            >
+              {isArabic ? "الرئيسية" : "Home"}
             </Link>
             <span>/</span>
-            <Link href="/blogs" className="hover:text-lovely hover:underline">
-              Blogs
+            <Link
+              href={`/${routeLocale}/blogs?lang=${previewLang}`}
+              className="hover:text-lovely hover:underline"
+            >
+              {isArabic ? "المدونة" : "Blogs"}
             </Link>
             <span>/</span>
-            <span className="text-lovely">{blog.title}</span>
+            <span className="text-lovely font-medium truncate">
+              {displayTitle}
+            </span>
           </nav>
+
+          {/* Bilingual Switcher */}
+          <div className="inline-flex items-center gap-1 rounded-lg border border-lovely/30 bg-white/80 p-0.5 shrink-0">
+            <Languages className="h-3.5 w-3.5 text-lovely mx-1" />
+            <button
+              type="button"
+              onClick={() => setPreviewLang("en")}
+              className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${
+                previewLang === "en"
+                  ? "bg-lovely text-creamey"
+                  : "text-lovely hover:bg-lovely/10"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewLang("ar")}
+              className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${
+                previewLang === "ar"
+                  ? "bg-lovely text-creamey"
+                  : "text-lovely hover:bg-lovely/10"
+              }`}
+            >
+              AR
+            </button>
+          </div>
         </div>
       </div>
 
-      <article className=" mx-auto   py-8">
-        {/* Article Header * /}
-        <header className="mb-8 flex flex-col items-center w-full justify-center">
-          {/* Categories * /}
-          {blog.categories.length > 0 && (
+      <article className="max-w-4xl mx-auto px-4 py-8">
+        {/* Article Header */}
+        <header className="mb-8 flex flex-col items-start w-full">
+          {/* Categories */}
+          {blog.categories && blog.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {blog.categories.map((category, index) => (
                 <span
@@ -205,56 +514,81 @@ const BlogDetailPage = () => {
             </div>
           )}
 
-          {/* Title * /}
+          {/* Title */}
           <h1
             className={`${thirdFont.className} text-4xl md:text-5xl font-bold text-lovely mb-4 leading-tight`}
           >
-            {blog.title}
+            {displayTitle}
           </h1>
 
-          {/* Excerpt * /}
-          <p className="text-xl text-lovely/90 mb-6 leading-relaxed">
-            {blog.excerpt}
-          </p>
+          {/* Excerpt */}
+          {displayExcerpt && (
+            <p className="text-xl text-lovely/90 mb-6 leading-relaxed">
+              {displayExcerpt}
+            </p>
+          )}
 
-          {/* Meta Information * /}
-          <div className="flex flex-wrap  items-center gap-6 text-sm text-lovely/80 mb-6">
-            <div className="flex items-center space-x-4">
+          {/* Meta Information */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-lovely/80 mb-6">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4" />
               <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-              <span>•</span>
-              <span>{blog.readingTime} min read</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-4 w-4" />
+              <span>
+                {blog.readingTime || 1}{" "}
+                {isArabic ? "دقائق قراءة" : "min read"}
+              </span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center gap-1.5">
+              <Eye className="h-4 w-4" />
+              <span>
+                {blog.viewCount ?? 0} {isArabic ? "مشاهدة" : "views"}
+              </span>
             </div>
           </div>
 
-          {/* Featured Image * /}
+          {/* Featured Image */}
           {blog.featuredImage && (
-            <div className="max-w-3xl relative aspect-video w-full mb-8">
+            <div className="relative aspect-video w-full mb-8 rounded-2xl overflow-hidden shadow-lg">
               <Image
                 fill
                 src={blog.featuredImage}
-                alt={blog.title}
-                className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+                alt={displayTitle}
+                className="object-cover"
+                priority
               />
             </div>
           )}
         </header>
 
-        {/* Article Content * /}
-        <div className="bg-creamey text-lovely rounded-lg  p-8 mb-8">
-          <div
-            className="prose blog-content overflow-x-scroll prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
-            dangerouslySetInnerHTML={{
-              __html:
-                blog.content.replace(
-                  /<img /g,
-                  '<div style="clear:both;"></div><img style="float:left;max-width:320px;margin:30px 16px 8px 0;" '
-                ) + '<div style="clear:both;"></div>',
-            }}
-          />
+        {/* Article Content: Render Blocks if available, otherwise fallback to legacy HTML */}
+        <div className="bg-creamey text-lovely rounded-lg p-2 md:p-6 mb-8">
+          {hasBlocks ? (
+            <div className="space-y-6">
+              {renderContentBlocks(effectiveBlocks, previewLang)}
+            </div>
+          ) : (
+            <div
+              className="prose blog-content overflow-x-auto prose-lg max-w-none prose-headings:text-lovely prose-p:text-lovely prose-a:text-blue-600 prose-strong:text-lovely"
+              dangerouslySetInnerHTML={{
+                __html:
+                  (isArabic && blog.translations?.ar?.content
+                    ? blog.translations.ar.content
+                    : blog.content || ""
+                  ).replace(
+                    /<img /g,
+                    '<div style="clear:both;"></div><img style="float:left;max-width:320px;margin:30px 16px 8px 0;" '
+                  ) + '<div style="clear:both;"></div>',
+              }}
+            />
+          )}
           <style jsx global>{`
             .blog-content ol {
               list-style-type: decimal;
-              padding-top: 3em;
               margin-left: 1.5em;
               padding-left: 1em;
             }
@@ -266,134 +600,27 @@ const BlogDetailPage = () => {
           `}</style>
         </div>
 
-        {/* TikTok Video * /}
-        {blog.tikTokVideoUrl && (
-          <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8">
+        {/* TikTok Video: Only render legacy bottom section if there is no embed block in the article */}
+        {!hasEmbedBlock && blog.tikTokVideoUrl && (
+          <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8 border border-lovely/15">
             <h3 className="text-lg font-semibold text-lovely mb-4">
-              Watch on TikTok
+              {isArabic ? "شاهدي على تيك توك" : "Watch on TikTok"}
             </h3>
-            <div className="flex bg-creamey justify-center">
-              {(() => {
-                const videoMatch = blog.tikTokVideoUrl.match(/\/video\/(\d+)/);
-                const photoMatch = blog.tikTokVideoUrl.match(/\/photo\/(\d+)/);
-                if (photoMatch) {
-                  if (tikTokLoading) {
-                    return (
-                      <div className="bg-creamey p-8 rounded-lg border-2 border-lovely/20 text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lovely mx-auto mb-4"></div>
-                        <p className="text-lovely">Loading TikTok content...</p>
-                      </div>
-                    );
-                  }
-                  if (tikTokError) {
-                    return (
-                      <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
-                        <p className="text-lovely mb-3">
-                          Unable to load TikTok content. Click below to view:
-                        </p>
-                        <a
-                          href={blog.tikTokVideoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-4 py-2 bg-lovely text-white rounded-lg hover:bg-lovely/90 transition-colors"
-                        >
-                          View TikTok Post
-                          <svg
-                            className="ml-2 w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
-                        </a>
-                      </div>
-                    );
-                  }
-                  if (tikTokEmbedData?.html) {
-                    return (
-                      <div
-                        className="tiktok-embed-container"
-                        dangerouslySetInnerHTML={{
-                          __html: tikTokEmbedData.html,
-                        }}
-                      />
-                    );
-                  }
-                  return (
-                    <div className="bg-creamey p-4 rounded-lg border-2 border-lovely/20">
-                      <p className="text-lovely mb-3">
-                        This is a TikTok photo post. Click below to view:
-                      </p>
-                      <a
-                        href={blog.tikTokVideoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 bg-lovely text-white rounded-lg hover:bg-lovely/90 transition-colors"
-                      >
-                        View TikTok Post
-                        <svg
-                          className="ml-2 w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                          />
-                        </svg>
-                      </a>
-                    </div>
-                  );
-                }
-                let embedUrl;
-                if (videoMatch) {
-                  embedUrl = `https://www.tiktok.com/embed/v2/${videoMatch[1]}?lang=en-US&autoplay=0&muted=1`;
-                } else {
-                  const idMatch = blog.tikTokVideoUrl.match(/(\d+)/);
-                  embedUrl = idMatch
-                    ? `https://www.tiktok.com/embed/v2/${idMatch[0]}?lang=en-US&autoplay=0&muted=1`
-                    : blog.tikTokVideoUrl;
-                }
-                return (
-                  <iframe
-                    src={embedUrl}
-                    width="325"
-                    height="580"
-                    frameBorder="0"
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="rounded-lg bg-creamey border-none"
-                    style={{
-                      backgroundColor: "#fbf3e0",
-                      maxWidth: "100%",
-                      height: "auto",
-                      aspectRatio: "9/16",
-                    }}
-                  />
-                );
-              })()}
-            </div>
+            <TikTokEmbed url={blog.tikTokVideoUrl} locale={previewLang} />
           </div>
         )}
 
-        {/* Tags * /}
-        {blog.tags.length > 0 && (
-          <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8">
-            <h3 className="text-lg font-semibold text-lovely mb-4">Tags</h3>
+        {/* Tags */}
+        {blog.tags && blog.tags.length > 0 && (
+          <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8 border border-lovely/15">
+            <h3 className="text-lg font-semibold text-lovely mb-4">
+              {isArabic ? "الوسوم" : "Tags"}
+            </h3>
             <div className="flex flex-wrap gap-2">
               {blog.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="bg-pinkey text-lovely text-sm px-3 py-1 rounded-full  cursor-pointer"
+                  className="bg-pinkey text-lovely text-sm px-3 py-1 rounded-full"
                 >
                   #{tag}
                 </span>
@@ -402,219 +629,71 @@ const BlogDetailPage = () => {
           </div>
         )}
 
+        {/* Comments Section */}
         <BlogsCommentSection slug={blog.slug} blogId={blog._id} />
 
+        {/* Related Blogs */}
         {relatedBlogs.length > 0 && (
-          <div className="bg-creamey rounded-lg shadow-sm p-6">
+          <div className="bg-creamey rounded-lg shadow-sm p-6 border border-lovely/15 mt-8">
             <h3 className="text-2xl font-bold text-lovely mb-6">
-              Related Blogs
+              {isArabic ? "مقالات ذات صلة" : "Related Blogs"}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedBlogs.map((relatedBlog) => (
-                <article
-                  key={relatedBlog._id}
-                  className="bg-lovely rounded-lg text-creamey"
-                >
-                  <Link href={`/blogs/${relatedBlog.slug}`}>
-                    {relatedBlog.featuredImage && (
-                      <div className="relative w-full  aspect-video mb-4">
-                        <Image
-                          fill
-                          src={relatedBlog.featuredImage}
-                          alt={relatedBlog.title}
-                          className="w-full h-40 object-cover rounded-t-lg group-hover:opacity-90 transition-opacity"
-                          unoptimized
-                        />
+              {relatedBlogs.map((relatedBlog) => {
+                const relTitle = isArabic
+                  ? relatedBlog.titleAR ||
+                    relatedBlog.translations?.ar?.title ||
+                    relatedBlog.title
+                  : relatedBlog.title;
+                const relExcerpt = isArabic
+                  ? relatedBlog.excerptAR ||
+                    relatedBlog.translations?.ar?.excerpt ||
+                    relatedBlog.excerpt
+                  : relatedBlog.excerpt;
+                return (
+                  <article
+                    key={relatedBlog._id}
+                    className="bg-lovely rounded-lg text-creamey overflow-hidden"
+                  >
+                    <Link
+                      href={`/${routeLocale}/blogs/${relatedBlog.slug}?lang=${previewLang}`}
+                    >
+                      {relatedBlog.featuredImage && (
+                        <div className="relative w-full aspect-video mb-3">
+                          <Image
+                            fill
+                            src={relatedBlog.featuredImage}
+                            alt={relTitle}
+                            className="w-full h-40 object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <h4 className="text-lg font-semibold text-creamey mb-2">
+                          {relTitle}
+                        </h4>
+                        <p className="text-creamey/90 text-sm mb-3">
+                          {truncateText(stripHtml(relExcerpt), 100)}
+                        </p>
                       </div>
-                    )}
-                    <h4 className="text-lg px-2 font-semibold text-creamey mb-2 group-hover:text-blue-600 transition-colors">
-                      {relatedBlog.title}
-                    </h4>
-                    <p className="px-2 text-creamey/90 text-sm mb-3">
-                      {truncateText(stripHtml(relatedBlog.excerpt), 100)}
-                    </p>
-                    <div className="flex px-2 items-center text-xs text-lovely/80">
-                      <span>
-                        {formatDate(
-                          relatedBlog.publishedAt || relatedBlog.createdAt
-                        )}
-                      </span>
-                      <span className="mx-2">•</span>
-                      <span>{relatedBlog.readingTime} min read</span>
-                    </div>
-                  </Link>
-                </article>
-              ))}
+                    </Link>
+                  </article>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Navigation * /}
+        {/* Navigation */}
         <div className="mt-12 text-center">
           <Link
-            href="/blogs"
-            className="inline-flex items-center px-6 py-3 border hover:text-creamey duration-500  border-lovely text-base font-medium rounded-md text-lovely bg-creamey hover:bg-lovely  transition-colors"
+            href={`/${routeLocale}/blogs?lang=${previewLang}`}
+            className="inline-flex items-center px-6 py-3 border hover:text-creamey duration-500 border-lovely text-base font-medium rounded-md text-lovely bg-creamey hover:bg-lovely transition-colors"
           >
-            ← Back to Blogs
+            {isArabic ? "→ العودة إلى المدونة" : "← Back to Blogs"}
           </Link>
         </div>
       </article>
-    </div>
-  );
-};
-*/
-
-const AppShowcaseCarousel = () => {
-  const images = [
-    "/blogsImages/1.webp",
-    "/blogsImages/2.webp",
-    "/blogsImages/3.webp",
-    "/blogsImages/4.webp",
-    "/blogsImages/5.webp",
-  ];
-  
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [images.length]);
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
-
-  return (
-    <div className="relative w-[260px] aspect-[9/19.5] mb-12 group">
-      {/* Slides Container */}
-      <div className="relative w-full h-full overflow-hidden rounded-sm border border-lovely/10 shadow-lg bg-black/5">
-        {images.map((src, idx) => (
-          <div
-            key={idx}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
-          >
-            <Image
-              src={src}
-              alt={`Mobile App Screen ${idx + 1}`}
-              fill
-              className="object-cover w-full h-full"
-              priority={idx === 0}
-            />
-          </div>
-        ))}
-
-        {/* Navigation Arrows */}
-        <button
-          onClick={handlePrev}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/60 text-lovely hover:bg-white/90 hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 border border-lovely/10 backdrop-blur-sm shadow-md"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/60 text-lovely hover:bg-white/90 hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100 border border-lovely/10 backdrop-blur-sm shadow-md"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Dot Indicators */}
-      <div className="flex justify-center gap-1.5 mt-4 z-20 relative">
-        {images.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              idx === currentIndex
-                ? "w-5 bg-lovely"
-                : "w-2 bg-lovely/30 hover:bg-lovely/50"
-            }`}
-            aria-label={`Go to slide ${idx + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const BlogDetailPage = () => {
-  const params = useParams();
-  const slug = params?.slug as string;
-
-  useEffect(() => {
-    if (slug) {
-      fetch(`/api/blogs/${slug}?source=web`).catch((err) => {
-        console.error("Failed to track blog view on web:", err);
-      });
-    }
-  }, [slug]);
-
-  return (
-    <div className="min-h-screen container-custom bg-creamey py-6 md:py-12">
-      <div className="max-w-4xl mx-auto px-4 text-center flex flex-col items-center">
-        {/* Premium Badge */}
-        <span className="inline-flex items-center gap-1.5 bg-lovely/10 text-lovely text-sm font-semibold tracking-wider uppercase px-4 py-1.5 rounded-full mb-6 border border-lovely/20 animate-pulse">
-          <Sparkles className="w-4 h-4 text-lovely" />
-          New Experience
-        </span>
-        
-        {/* Heading */}
-        <h1 className={`${thirdFont.className} text-4xl md:text-6xl font-bold text-lovely mb-6 leading-tight`}>
-          Wifey for Lifey is Now on Mobile!
-        </h1>
-        
-        {/* Description */}
-        <p className="text-lg md:text-xl text-lovely/80 max-w-2xl mx-auto mb-10 leading-relaxed">
-          To provide you with a richer, more interactive bridal era bestie experience, all our wedding blogs have moved exclusively to our mobile app.
-        </p>
-
-        {/* Download Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 w-full max-w-md sm:max-w-none">
-          {/* App Store */}
-          <a
-            href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-lovely text-creamey hover:bg-lovely/90 px-8 py-4 rounded-xl shadow-xl transition-all duration-300 hover:scale-105 group border border-lovely/30 w-full sm:w-auto justify-center"
-          >
-            <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.49-.62.71-1.16 1.85-1.01 2.96 1.12.09 2.27-.58 2.94-1.39z"/>
-            </svg>
-            <div className="text-left">
-              <p className="text-[10px] uppercase tracking-wider opacity-85">Download on the</p>
-              <p className="text-lg font-semibold font-sans">App Store</p>
-            </div>
-          </a>
-
-          {/* Google Play Store */}
-          <a
-            href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&hl=en"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-everGreen text-creamey hover:bg-everGreen/90 px-8 py-4 rounded-xl shadow-xl transition-all duration-300 hover:scale-105 group border border-everGreen/30 w-full sm:w-auto justify-center"
-          >
-            <FaGooglePlay className="text-creamey w-6 h-6" />
-
-            <div className="text-left">
-              <p className="text-[10px] uppercase tracking-wider opacity-85">Get it on</p>
-              <p className="text-lg font-semibold font-sans">Google Play</p>
-            </div>
-          </a>
-        </div>
-
-        {/* Showcase Image Carousel */}
-        <AppShowcaseCarousel />
-      </div>
     </div>
   );
 };

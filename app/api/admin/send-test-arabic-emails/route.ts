@@ -102,21 +102,21 @@ async function handleSend(request: Request) {
         title: "5. إيميل رحلة جهازك الكاملة (Full Wifey Experience Welcome)",
         subject: "نورتي مجتمع وايفي يا أحلى عروسة! 💗",
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-        body: genFullWelcome(recipientName, { editionName: "النسخة العربية (Arabic Edition)" }, "ar"),
+        body: genFullWelcome(recipientName, { editionName: "النسخة العربية (Arabic Edition)" } as any, "ar"),
       },
       {
         id: "6-mini-experience-welcome",
         title: "6. إيميل رحلة جهازك المصغرة (Mini Wifey Experience Welcome)",
         subject: "أهلاً بيكي في رحلة جهازكِ المصغّرة مع وايفي! 💕",
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-        body: generateMiniExperienceMail(recipientName, {}, "ar"),
+        body: generateMiniExperienceMail(recipientName, {} as any, "ar"),
       },
       {
         id: "7-wedding-planning-welcome",
         title: "7. إيميل فرحك مع وايفي (Wedding Planning Bestie Welcome)",
         subject: "أهلاً بيكي في رحلة تنظيم فرحكِ مع وايفي! 💕",
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-        body: genWeddingWelcome(recipientName, {}, "ar"),
+        body: genWeddingWelcome(recipientName, {} as any, "ar"),
       },
       {
         id: "8-gehaz-upgrade",
@@ -137,7 +137,7 @@ async function handleSend(request: Request) {
         title: "10. إيميل تأكيد شراء هدية (Gift Purchase Confirmation)",
         subject: "شكراً لشرائكِ هدية مميزة! 🎁💖",
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
-        body: giftMail("ORD-GIFT-5544", sampleItems, "ar"),
+        body: giftMail("ORD-GIFT-5544", sampleItems as any, "ar"),
       },
       {
         id: "11-groom-invite",
@@ -194,8 +194,7 @@ async function handleSend(request: Request) {
         from: "Wifey For Lifey <noreply@shopwifeyforlifey.com>",
         body: generateSuspiciousLoginEmail(
           recipientName,
-          "القاهرة، مصر (Cairo, Egypt)",
-          "Google Chrome on Windows",
+          "Google Chrome on Windows — القاهرة، مصر (Cairo, Egypt)",
           "ar"
         ),
       },

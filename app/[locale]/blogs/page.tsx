@@ -7,13 +7,34 @@ import Image from "next/image";
 import { Smartphone, Sparkles, CalendarDays, ListTodo, Radio, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaGooglePlay } from "react-icons/fa";
 
+export interface ContentBlock {
+  type: "text" | "image" | "imageText" | "carousel" | "embed";
+  textHtml?: string;
+  arabicContent?: string;
+  imageUrl?: string;
+  url?: string;
+  caption?: string;
+  alt?: string;
+  layout?: "img-left" | "img-block";
+  images?: { imageUrl: string; alt?: string; caption?: string }[];
+}
+
 export interface Blog {
   _id: string;
   title: string;
+  titleAR?: string;
   slug: string;
   content: string;
+  blocks?: ContentBlock[];
+  v2?: {
+    titleAR?: string;
+    excerptAR?: string;
+    blocks?: ContentBlock[];
+  };
   excerpt: string;
+  excerptAR?: string;
   featuredImage?: string;
+  tikTokVideoUrl?: string;
   status: "draft" | "published" | "archived";
   tags: string[];
   categories: string[];
@@ -25,6 +46,13 @@ export interface Blog {
   createdAt: string;
   readingTime: number;
   formattedPublishDate?: string;
+  translations?: {
+    ar?: {
+      title?: string;
+      excerpt?: string;
+      content?: string;
+    };
+  };
 }
 
 const BlogListPage = () => {
@@ -298,11 +326,10 @@ const BlogListPage = () => {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                      page === pageNum
+                    className={`px-4 py-2 text-sm font-medium rounded-lg ${page === pageNum
                         ? "text-white bg-blue-600 border border-blue-600"
                         : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     {pageNum}
                   </button>
@@ -334,7 +361,7 @@ const AppShowcaseCarousel = () => {
     "/blogsImages/4.webp",
     "/blogsImages/5.webp",
   ];
-  
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -359,9 +386,8 @@ const AppShowcaseCarousel = () => {
         {images.map((src, idx) => (
           <div
             key={idx}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+              }`}
           >
             <Image
               src={src}
@@ -396,11 +422,10 @@ const AppShowcaseCarousel = () => {
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              idx === currentIndex
+            className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex
                 ? "w-5 bg-lovely"
                 : "w-2 bg-lovely/30 hover:bg-lovely/50"
-            }`}
+              }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
         ))}
