@@ -52,13 +52,13 @@ export async function GET() {
       );
 
       const arPartOf = existingAr.partOf || (
-        isWedding ? "بلانر تنظيم الفرح" : "بلانر رفيقة الجهاز"
+        isWedding ? "فرحك مع وايفى" : "رحلة جهازك مع وايفى"
       );
 
       const arBadgeLabel = existingAr.badgeLabel || (
         isWedding
-          ? (isMini ? "تجربة الفرح المصغرة" : "تجربة الفرح الكاملة")
-          : (isMini ? "تجربة الجهاز المصغرة" : "تجربة الجهاز الكاملة")
+          ? (isMini ? "فرحك مع وايفى (المصغرة)" : "فرحك مع وايفى")
+          : (isMini ? "رحلة جهازك المصغّرة" : "رحلة جهازك الكاملة مع وايفي")
       );
 
       const arCalloutTitle = existingAr.calloutTitle || (

@@ -595,72 +595,58 @@ async function handleSubscription(
             <p>A new subscription has been successfully created:</p>
             <ul>
               <li><strong>Email:</strong> ${paymentOp.email}</li>
-              ${
-                updatedSub.isGift
-                  ? `<li><strong>Gift:</strong> Yes</li>
-                  <li><strong>Gift Recipient Email:</strong> ${
-                    updatedSub.giftRecipientEmail || "N/A"
-                  }</li>
-                  <li><strong>Gift Sender Email:</strong> ${
-                    updatedSub.giftSenderEmail || "N/A"
-                  }</li>
-              <li><strong>Special Message:</strong> ${
-                updatedSub.specialMessage || "N/A"
-              }</li>
-               <li><strong>Gift Card:</strong> ${
-                 updatedSub.giftCardName || "N/A"
-               }</li>`
-                  : ""
+              ${updatedSub.isGift
+                ? `<li><strong>Gift:</strong> Yes</li>
+                  <li><strong>Gift Recipient Email:</strong> ${updatedSub.giftRecipientEmail || "N/A"
+                }</li>
+                  <li><strong>Gift Sender Email:</strong> ${updatedSub.giftSenderEmail || "N/A"
+                }</li>
+              <li><strong>Special Message:</strong> ${updatedSub.specialMessage || "N/A"
+                }</li>
+               <li><strong>Gift Card:</strong> ${updatedSub.giftCardName || "N/A"
+                }</li>`
+                : ""
               }
-              <li><strong>Package:</strong> ${
-                (updatedSub.packageID as any)?.name || "N/A"
+              <li><strong>Package:</strong> ${(updatedSub.packageID as any)?.name || "N/A"
               }</li>
-              ${
-                updatedSub.edition || updatedSub.editionName
-                  ? `<li><strong>Planner Edition / لغة البلانر:</strong> <span style="color:#d63384;font-weight:bold;">${
-                      updatedSub.editionName ||
-                      (updatedSub.edition === "ar"
-                        ? "النسخة العربية (Arabic Edition)"
-                        : "English Edition")
-                    }</span></li>`
-                  : ""
+              ${updatedSub.edition || updatedSub.editionName
+                ? `<li><strong>Planner Edition / لغة البلانر:</strong> <span style="color:#d63384;font-weight:bold;">${updatedSub.editionName ||
+                (updatedSub.edition === "ar"
+                  ? "النسخة العربية (Arabic Edition)"
+                  : "English Edition")
+                }</span></li>`
+                : ""
               }
-              <li><strong>Contact First Name:</strong> ${
-                updatedSub.billingFirstName || "N/A"
+              <li><strong>Contact First Name:</strong> ${updatedSub.billingFirstName || "N/A"
               }</li>
-              <li><strong>Contact Last Name:</strong> ${
-                updatedSub.billingLastName || "N/A"
+              <li><strong>Contact Last Name:</strong> ${updatedSub.billingLastName || "N/A"
               }</li>
               <li><strong>Contact Phone:</strong> ${updatedSub.billingPhone || "N/A"}</li>
               <li><strong>Contact WhatsApp Number:</strong> ${updatedSub.billingWhatsAppNumber || "N/A"}</li>
-              <li><strong>Country:</strong> ${
-                updatedSub.country || "N/A"
+              <li><strong>Country:</strong> ${updatedSub.country || "N/A"
               }</li>
-              ${
-                updatedSub.cart && updatedSub.cart.length > 0
-                  ? `<li><strong>Bundled Cart Items:</strong>
+              ${updatedSub.cart && updatedSub.cart.length > 0
+                ? `<li><strong>Bundled Cart Items:</strong>
                       <ul>
                         ${updatedSub.cart
-                          .map(
-                            (item: any) =>
-                              `<li>${item.productName} x ${item.quantity} ${
-                                item.variant
-                                  ? `(${item.variant.name}${
-                                      item.attributes?.name
-                                        ? `: ${item.attributes.name}`
-                                        : ""
-                                    })`
-                                  : ""
-                              }</li>`
-                          )
-                          .join("")}
+                  .map(
+                    (item: any) =>
+                      `<li>${item.productName} x ${item.quantity} ${item.variant
+                        ? `(${item.variant.name}${item.attributes?.name
+                          ? `: ${item.attributes.name}`
+                          : ""
+                        })`
+                        : ""
+                      }</li>`
+                  )
+                  .join("")}
                       </ul>
                      </li>`
-                  : ""
+                : ""
               }
             </ul>
           `,
-          from: "noreply@shopwifeyforlifey.com",
+            from: "noreply@shopwifeyforlifey.com",
           });
           console.log("Subscription notification email sent successfully");
         } else if (isUpgradeProcess) {
@@ -847,7 +833,7 @@ async function handleSubscription(
                 name: targetFirstName,
                 subject:
                   targetLang === "ar"
-                    ? "أهلاً بيكي في رحلة جهازكِ المصغّرة مع وايفي! 💕"
+                    ? "أهلاً بيكي في رحلة جهازك المصغّرة! 💕"
                     : "Welcome to the Mini Wifey Experience! 💕",
                 body: generateMiniExperienceMail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
@@ -878,7 +864,7 @@ async function handleSubscription(
                 name: targetFirstName,
                 subject:
                   targetLang === "ar"
-                    ? "أهلاً بيكي في رحلة تنظيم فرحكِ مع وايفي! 💕"
+                    ? "أهلاً بيكي في فرحك مع وايفى! 💕"
                     : "Welcome to the Mini Wedding Planning Experience! 💕",
                 body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
@@ -909,7 +895,7 @@ async function handleSubscription(
                 name: targetFirstName,
                 subject:
                   targetLang === "ar"
-                    ? "أهلاً بيكي في رحلة تنظيم فرحكِ مع وايفي! 💕"
+                    ? "أهلاً بيكي في فرحك مع وايفى! 💕"
                     : "Welcome to the Wedding Planning Experience! 💕",
                 body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
@@ -942,9 +928,9 @@ async function handleSubscription(
     // Link user account (ensure subscription is in the array)
     const subscribedUser = (updatedSub?._id && subscriptionEmail)
       ? await UserModel.findOneAndUpdate(
-          { email: subscriptionEmail },
-          { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
-        )
+        { email: subscriptionEmail },
+        { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
+      )
       : null;
 
     // (subscriptionPayment is already marked "confirmed" right after creation above)
@@ -954,24 +940,21 @@ async function handleSubscription(
       const giftParam = updatedSub?.isGift ? "&gift=true" : "";
       if (
         (updatedSub?.packageID as any)?._id?.toString() ===
-        "68bf6ae9c4d5c1af12cdcd37" || 
+        "68bf6ae9c4d5c1af12cdcd37" ||
         (updatedSub?.packageID as any)?._id?.toString() ===
         "6a2d9aec3def6ce76dc7babc"
       ) {
-        finalRedirect = `payment/success?subscription=mini${
-          subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}${giftParam}`;
+        finalRedirect = `payment/success?subscription=mini${subscribedUser ? "&account=true" : ""
+          }&process=${paymentOp.process}${giftParam}`;
       } else if (
         (updatedSub?.packageID as any)?._id?.toString() ===
         "6965e63c6df4503dda02c12b"
       ) {
-        finalRedirect = `payment/success?subscription=wedding${
-          subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}${giftParam}`;
+        finalRedirect = `payment/success?subscription=wedding${subscribedUser ? "&account=true" : ""
+          }&process=${paymentOp.process}${giftParam}`;
       } else {
-        finalRedirect = `payment/success?subscription=true${
-          subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}${giftParam}`;
+        finalRedirect = `payment/success?subscription=true${subscribedUser ? "&account=true" : ""
+          }&process=${paymentOp.process}${giftParam}`;
       }
     }
   }

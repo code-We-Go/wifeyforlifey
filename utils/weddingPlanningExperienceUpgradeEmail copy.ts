@@ -15,7 +15,7 @@ export function generateWeddingPlanningExperienceUpgradeEmail(
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
 	const newsTitle = isAr ? "خبر رائع! 💖" : "Wonderful news! 💖";
 	const upgradedText = isAr
-		? "تمت ترقية باقتك بنجاح إلى تجربة Wedding Planning Bestie الكاملة."
+		? "تمت ترقية باقتك بنجاح إلى فرحك مع وايفى."
 		: "Your package has been successfully upgraded.";
 	const thankYouText = isAr
 		? "شكراً لاختياركِ ترقية تجربتكِ معنا. متحمسين جداً نكون جزءاً من رحلة فرحك ونسهل عليكي كل خطوة لتكون أجمل ذكرى."

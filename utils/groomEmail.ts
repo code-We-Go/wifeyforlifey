@@ -1,47 +1,45 @@
 export function groomEmail(
-  GroomName: string,
-  BrideName: string,
-  hasAccount: boolean,
-  BrideMessage: string,
-  lang: "en" | "ar" = "en"
+	GroomName: string,
+	BrideName: string,
+	hasAccount: boolean,
+	BrideMessage: string,
+	lang: "en" | "ar" = "en"
 ) {
-  const isAr = lang === "ar";
-  const dir = isAr ? "rtl" : "ltr";
-  const textAlign = isAr ? "right" : "left";
-  const fontFamily = isAr
-    ? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
-    : "Helvetica Neue, Helvetica, Arial, sans-serif";
+	const isAr = lang === "ar";
+	const dir = isAr ? "rtl" : "ltr";
+	const textAlign = isAr ? "right" : "left";
+	const fontFamily = isAr
+		? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+		: "Helvetica Neue, Helvetica, Arial, sans-serif";
 
-  const greeting = isAr ? `مرحباً ${GroomName}،` : `Hi ${GroomName},`;
-  const inviteText = isAr
-    ? `قامت ${BrideName} بدعوتك للانضمام إلى تجربة تنظيم الفرح على Wifey For Lifey 💍`
-    : `${BrideName} has invited you to join her wedding planning experience on Wifey For Lifey 💍`;
-  const accessText = isAr
-    ? `أصبح بإمكانك الآن الوصول إلى باقة فرحها.<br><br>${
-        hasAccount
-          ? "يمكنك الاستفادة من مزايا الباقة مباشرة باستخدام حسابك الحالي."
-          : "للبدء، يرجى إنشاء حسابك من خلال زر الدعوة بالأسفل."
-      }`
-    : `You now have access to her wedding package.<br><br>${
-        hasAccount
-          ? "You can access some benefits of her package directly using your existing account."
-          : "To get started, please create your account using the invitation button below."
-      }`;
-  const buttonText = isAr
-    ? hasAccount
-      ? "تسجيل الدخول لحسابك"
-      : "إنشاء حساب الآن"
-    : hasAccount
-    ? "Login to Your Account"
-    : "Sign Up Now";
-  const personalMsgLabel = isAr
-    ? `رسالة خاصة من ${BrideName}:`
-    : `Personal message from ${BrideName}:`;
-  const signoff = isAr
-    ? "مع خالص التحيات،<br>فريق Wifey For Lifey."
-    : "Best regards,<br>The  Wifey For Lifey Team.";
+	const greeting = isAr ? `مرحباً ${GroomName}،` : `Hi ${GroomName},`;
+	const inviteText = isAr
+		? `قامت ${BrideName} بدعوتك للانضمام إلى فرحك مع وايفى على Wifey For Lifey 💍`
+		: `${BrideName} has invited you to join her wedding planning experience on Wifey For Lifey 💍`;
+	const accessText = isAr
+		? `أصبح بإمكانك الآن الوصول إلى باقة فرحها.<br><br>${hasAccount
+			? "يمكنك الاستفادة من مزايا الباقة مباشرة باستخدام حسابك الحالي."
+			: "للبدء، يرجى إنشاء حسابك من خلال زر الدعوة بالأسفل."
+		}`
+		: `You now have access to her wedding package.<br><br>${hasAccount
+			? "You can access some benefits of her package directly using your existing account."
+			: "To get started, please create your account using the invitation button below."
+		}`;
+	const buttonText = isAr
+		? hasAccount
+			? "تسجيل الدخول لحسابك"
+			: "إنشاء حساب الآن"
+		: hasAccount
+			? "Login to Your Account"
+			: "Sign Up Now";
+	const personalMsgLabel = isAr
+		? `رسالة خاصة من ${BrideName}:`
+		: `Personal message from ${BrideName}:`;
+	const signoff = isAr
+		? "مع خالص التحيات،<br>فريق Wifey For Lifey."
+		: "Best regards,<br>The  Wifey For Lifey Team.";
 
-  return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 
 <head>

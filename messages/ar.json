@@ -101,8 +101,8 @@
   },
   "home": {
     "doubleHero": {
-      "weddingBestieButton": "Wedding Planning Bestie",
-      "gehazBestieButton": "Gehaz Bestie"
+      "weddingBestieButton": "فرحك مع وايفى",
+      "gehazBestieButton": "رحلة جهازك مع وايفى"
     },
     "marquee": {
       "planners": "بلانرز التخطيط",
@@ -320,8 +320,8 @@
     "playlistNotFound": "قائمة الفيديوهات غير موجودة",
     "playlistNotFoundDesc": "القائمة اللي بتدوري عليها مش موجودة أو تم حذفها.",
     "backToPlaylists": "الرجوع للفيديوهات",
-    "gehazBestieCategory": "تجربة جهاز البيستي",
-    "weddingPlanningCategory": "تجربة تخطيط الفرح"
+    "gehazBestieCategory": "رحلة جهازك مع وايفى",
+    "weddingPlanningCategory": "فرحك مع وايفى"
   },
   "checkoutPage": {
     "checkout": "إتمام الطلب",
@@ -449,12 +449,12 @@
     "lifetime": "مدى الحياة 👑",
     "expired": "منتهي",
     "expires": "هينتهي في",
-    "upgradeFullExperience": "رقّي دلوقتي لتجربة وايفي المتكاملة 💕",
-    "upgradeWeddingPlanning": "رقّي دلوقتي لبيستي تخطيط الفرح المتكاملة 💍",
-    "renewFullExperience": "جددي تجربة وايفي المتكاملة ✨",
-    "renewWeddingPlanning": "جددي اشتراك بيستي تخطيط الفرح 💖",
-    "activateMiniExperience": "فعّلي تجربتك المصغرة دلوقتي 🌸",
-    "invitationsBadge": "دعوات فرحك مع وايفي ({count}/{total}) 💌",
+    "upgradeFullExperience": "رقّي دلوقتي لـ رحلة جهازك الكاملة مع وايفي 💕",
+    "upgradeWeddingPlanning": "رقّي دلوقتي لـ فرحك مع وايفى 💍",
+    "renewFullExperience": "جددي رحلة جهازك الكاملة مع وايفي ✨",
+    "renewWeddingPlanning": "جددي اشتراك فرحك مع وايفى 💖",
+    "activateMiniExperience": "فعّلي رحلة جهازك المصغّرة دلوقتي 🌸",
+    "invitationsBadge": "دعوات فرحك مع وايفى ({count}/{total}) 💌",
     "loyaltyPoints": "نقاط الولاء 🎁",
     "wishlistItems": "منتجات في أمنياتك 💖",
     "totalOrders": "إجمالي أوردراتك 🛍️",
@@ -465,11 +465,11 @@
     "tabFavorites": "المفضلة ⭐",
     "tabInspo": "إنسبو وأفكار ✨",
     "tabShoppingBestie": "بيستي الشوبنج 🛒",
-    "tabWeddingPlanningBestie": "بيستي تخطيط الفرح 📖",
+    "tabWeddingPlanningBestie": "فرحك مع وايفى 📖",
     "tabNotifications": "الإشعارات 🔔",
     "tabLoyalty": "نقاط الولاء 🎁",
     "tabInfo": "بياناتي 👤",
-    "tabInvitations": "دعوات فرحك مع وايفي 💌",
+    "tabInvitations": "دعوات فرحك مع وايفى 💌",
     "tabWishlist": "قائمة أمنياتي 💖",
     "tabOrders": "أوردراتي الأخيرة 📦",
     "notificationsTitle": "كل الإشعارات 🔔",

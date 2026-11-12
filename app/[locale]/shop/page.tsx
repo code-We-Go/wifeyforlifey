@@ -195,7 +195,7 @@ function ShopPage() {
         const gehazBestiePlanner: Ipackage = {
           _id: "custom-gehaz-bestie-planner",
           slug: "GehazBestiePlanner",
-          name: locale === "ar" ? "بلانر رفيقة الجهاز" : "Gehaz Bestie Planner",
+          name: locale === "ar" ? "رحلة جهازك مع وايفى" : "Gehaz Bestie Planner",
           imgUrl: "/experience/gehaz1.png",
           images: ["/experience/gehaz1.png"],
           price: 1500,
@@ -212,7 +212,7 @@ function ShopPage() {
           active: true,
           translations: {
             ar: {
-              name: "بلانر رفيقة الجهاز",
+              name: "رحلة جهازك مع وايفى",
               notes: [
                 "بتجهزي شقتك؟",
                 "جهزي بيتك أوضة بأوضة مع ١١ فصل فيهم كل اللي ممكن تحتاجيه، من الأساسيات للكماليات، وكمان الكميات المناسبة ليكي عشان تشتري كل اللي محتاجاه من غير مصاريف زيادة!"
@@ -223,7 +223,7 @@ function ShopPage() {
         const weddingBestiePlanner: Ipackage = {
           _id: "custom-wedding-bestie-planner",
           slug: "WeddingBestiePlanner",
-          name: locale === "ar" ? "بلانر رفيقة الفرح" : "Wedding Bestie Planner",
+          name: locale === "ar" ? "فرحك مع وايفى" : "Wedding Bestie Planner",
           imgUrl: "/weddingPlanningPlanner/mob.jpeg",
           images: ["/weddingPlanningPlanner/mob.jpeg"],
           price: 1700,
@@ -240,7 +240,7 @@ function ShopPage() {
           active: true,
           translations: {
             ar: {
-              name: "بلانر رفيقة الفرح",
+              name: "فرحك مع وايفى",
               notes: [
                 "بتنظمي يوم فرحك؟",
                 "خططي ليوم فرحك خطوة بخطوة، مع 2 بلانر للتجهيزات: واحدة ليكي وواحدة لعريسك! هتعرفوا تعملوا إيه وإمتى، من يوم ما تبدأوا تنظيم لحد الليلة اللي قبل الفرح، عشان متنسيش أي تفصيلة."

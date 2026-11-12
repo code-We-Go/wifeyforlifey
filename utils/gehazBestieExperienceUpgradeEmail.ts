@@ -15,7 +15,7 @@ export function generateGehazBestieExperienceUpgradeEmail(
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
 	const newsTitle = isAr ? "خبر رائع! 💖" : "Wonderful news! 💖";
 	const upgradedText = isAr
-		? "تمت ترقية باقتك بنجاح إلى تجربة Gehaz Bestie الكاملة."
+		? "تمت ترقية باقتك بنجاح إلى رحلة جهازك الكاملة مع وايفي."
 		: "Your package has been successfully upgraded.";
 	const thankYouText = isAr
 		? "شكراً لاختياركِ ترقية تجربتكِ معنا. باقتكِ الجديدة تمنحكِ وصولاً لكافة الفيديوهات والمزايا الحصرية، وتجعل تنظيم كل تفاصيل جهازكِ أسهل وأمتع من البداية للنهاية."
