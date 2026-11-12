@@ -7,6 +7,11 @@ export interface IShoppingSubcategory extends Document {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
 }
 
 const ShoppingSubcategorySchema = new Schema<IShoppingSubcategory>(
@@ -19,6 +24,11 @@ const ShoppingSubcategorySchema = new Schema<IShoppingSubcategory>(
       required: true,
     },
     isActive: { type: Boolean, default: true },
+    translations: {
+      ar: {
+        name: { type: String, required: false },
+      },
+    },
   },
   { timestamps: true },
 );

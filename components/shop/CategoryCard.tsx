@@ -16,7 +16,7 @@ export default function CategoryCard({ category, onClick }: CategoryCardProps) {
   return (
     <button
       onClick={onClick}
-      className="group relative overflow-hidden rounded-xl bg-creamey border-2 border-lovely/20 hover:border-lovely flex flex-col justify-start transition-all duration-300 hover:shadow-lg text-left w-full"
+      className="group relative overflow-hidden rounded-xl bg-creamey border-2 border-lovely/20 hover:border-lovely flex flex-col justify-start transition-all duration-300 hover:shadow-lg text-start w-full"
     >
       {/* Image Section */}
       {category.image && (
@@ -46,7 +46,7 @@ export default function CategoryCard({ category, onClick }: CategoryCardProps) {
               {category.subcategories.length} subcategories
             </p> */}
           </div>
-          <ChevronRight className="w-6 h-6 text-lovely/40 group-hover:text-lovely group-hover:translate-x-1 transition-all flex-shrink-0 ml-2" />
+          <ChevronRight className="w-6 h-6 text-lovely/40 group-hover:text-lovely group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-all flex-shrink-0 ms-2" />
         </div>
       </div>
     </button>

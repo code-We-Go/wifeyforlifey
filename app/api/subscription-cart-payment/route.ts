@@ -96,6 +96,8 @@ export async function POST(request: Request) {
         subscribed: false,
         paymentMethod: data.paymentMethod,
         cart: bundledCart,
+        edition: sub.edition,
+        editionName: sub.editionName,
 
         // Apply coupon and loyalty fields to the first subscription only
         redeemedLoyaltyPoints: idx === 0 ? (data.loyalty?.redeemedPoints || 0) : 0,
@@ -188,13 +190,12 @@ export async function POST(request: Request) {
             <p><strong>Name:</strong> ${sub.firstName} ${sub.lastName}</p>
             <p><strong>Phone:</strong> ${sub.phone}</p>
             <p><strong>Is Gift:</strong> ${sub.isGift ? "Yes" : "No"}</p>
-            ${
-              sub.isGift
-                ? `<p><strong>Gift Recipient Email:</strong> ${sub.giftRecipientEmail || "N/A"}</p>
+            ${sub.isGift
+            ? `<p><strong>Gift Recipient Email:</strong> ${sub.giftRecipientEmail || "N/A"}</p>
                    <p><strong>Gift Card:</strong> ${sub.giftCardName || "N/A"}</p>
                    <p><strong>Special Message:</strong> ${sub.specialMessage || "N/A"}</p>`
-                : ""
-            }
+            : ""
+          }
           </div>
         `;
       }
@@ -204,7 +205,7 @@ export async function POST(request: Request) {
         name: `NEW Pending ${subLabel} Request`,
         subject: `NEW Pending ${subLabel} Request`,
         body: adminEmailBody,
-        from: "noreply@shopwifeyforlifey.com",
+        from: "orders@shopwifeyforlifey.com",
       });
 
       return NextResponse.json(

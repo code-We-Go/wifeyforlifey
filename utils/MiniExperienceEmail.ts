@@ -1,17 +1,66 @@
 import { ISubscription } from "@/app/interfaces/interfaces";
 
 export function generateMiniExperienceMail(
-  first_name: string,
-  subscription: ISubscription
+	first_name: string,
+	subscription: ISubscription,
+	lang: "en" | "ar" = "en"
 ) {
-  return `
+	const isAr = lang === "ar";
+	const dir = isAr ? "rtl" : "ltr";
+	const textAlign = isAr ? "right" : "left";
+	const fontFamily = isAr
+		? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+		: "'Helvetica Neue', Helvetica, Arial, sans-serif";
+
+	const greeting = isAr
+		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
+		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
+	const p1 = isAr
+		? "ألف مبروك انضمامك إلى رحلة جهازك المصغّرة 💕"
+		: "Yaaay! Congratulations on joining the Mini Wifey Experience 💕";
+	const p2 = isAr
+		? "أهلاً بيكي في عالم وايفي، المكان اللي الحب فيه بسيط والضغط بنسيبه برة الباب 🌸"
+		: "Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸";
+	const p3 = isAr
+		? `📔 بلانر Gehaz Bestie اتغلفت وجاهزة للشحن (تقدري تتابعي الشحن من هنا ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي البلانر</a>) — هتكون رفيقتك في مرحلة الخطوبة وتجهيز بيتك خطوة بخطوة 💗`
+		: `📔 Your Gehaz Bestie Planner is packed and ready to be shipped (track it here → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's going to be your new bridal era bestie, guiding you every step of the way 💗`;
+	const bundledText = isAr
+		? "📦 المنتجات الإضافية المشمولة في طلبك:"
+		: "📦 Bundled Items included in your order:";
+	const p4 = isAr
+		? "🎀 المفروض تكوني حجزتي جلستك التعليمية دلوقتي — ومتحمسة جداً جداً أقابلك فيها!"
+		: "🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!";
+	const p5 = isAr
+		? `👭 وافتكري دايماً إنك مش لوحدك — انضمي لمجتمع وايفي على الفيسبوك (أكتر من 3,000+ عروسة جاهزين يساعدوكي ويشاركوا معاكي): 👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		: `👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a>`;
+	const p6 = isAr
+		? `📱 حمّلي تطبيقنا الآن ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
+		: `📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`;
+	const p7 = isAr
+		? "متحمسة أوي أكون جنبك في الرحلة الجميلة دي، ودايماً افتكري: إنتِ مش مجرد أي عروسة! إنتِ WIFEY FOR LIFEY 🥹💗"
+		: "So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗";
+	const signoff = isAr
+		? "<p style=\"margin: 0;\">بكل الحب،</p><p style=\"margin: 0;\">ناريمان ✨</p><p style=\"margin: 0;\">Your Bridal Era Bestie</p>"
+		: "<p style=\"margin: 0;\">With love,</p><p style=\"margin: 0;\">Nareiman ✨</p><p style=\"margin: 0;\">Your Bridal Era Bestie</p>";
+
+	return `
 <!DOCTYPE html>
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 
 <head>
 	<title></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"><!--[if mso]>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: ${fontFamily};
+		}<!--[if mso]>
 <xml><w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"><w:DontUseAdvancedTypographyReadingMail/></w:WordDocument>
 <o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml>
 <![endif]--><!--[if !mso]><!--><!--<![endif]-->
@@ -191,49 +240,44 @@ export function generateMiniExperienceMail(
 									<table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbf3e0; border-radius: 0; color: #000000; width: 680px; margin: 0 auto;" width="680">
 										<tbody>
 											<tr>
-												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 48px; padding-left: 48px; padding-right: 48px; vertical-align: top;">
+												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: ${textAlign}; padding-bottom: 48px; padding-left: 48px; padding-right: 48px; vertical-align: top;">
 													<table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
-															<td class="pad" style="padding-top:12px;text-align:center;width:100%;">
-																<h1 style="margin: 0; color: #d32333; direction: ltr; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 38px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️</span></h1>
+															<td class="pad" style="padding-top:12px;text-align:${textAlign};width:100%;">
+																<h1 style="margin: 0; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 28px; font-weight: 700; letter-spacing: normal; line-height: 1.3; text-align: ${textAlign}; margin-top: 0; margin-bottom: 0;"><span class="tinyMce-placeholder" style="word-break: break-word;">${greeting}</span></h1>
 															</td>
 														</tr>
 													</table>
 													<table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
-																<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:left;mso-line-height-alt:24px;">
-																	<p style="margin: 0; margin-bottom: 16px;">Yaaay! Congratulations on joining the Mini Wifey Experience 💕 
-																	</p><p style="margin: 0; margin-bottom: 16px;">Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸</p>
-																	<p style="margin: 0; margin-bottom: 16px;">📔 Your Gehaz Bestie Planner is packed and ready to be shipped (track it here → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's going to be your new bridal era bestie, guiding you every step of the way 💗</p>
-																	${
-																		subscription.cart && subscription.cart.length > 0
-																			? `<p style="margin: 0; margin-bottom: 8px;"><strong>📦 Bundled Items included in your order:</strong></p>
-																				 <ul style="margin: 0; margin-bottom: 16px; padding-left: 20px;">
+																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.6;text-align:${textAlign};">
+																	<p style="margin: 0; margin-bottom: 16px;">${p1}</p>
+																	<p style="margin: 0; margin-bottom: 16px;">${p2}</p>
+																	<p style="margin: 0; margin-bottom: 16px;">${p3}</p>
+																	${subscription.cart && subscription.cart.length > 0
+			? `<p style="margin: 0; margin-bottom: 8px;"><strong>${bundledText}</strong></p>
+																				 <ul style="margin: 0; margin-bottom: 16px; padding-${isAr ? "right" : "left"}: 20px;">
 																					 ${subscription.cart
-																							.map(
-																								(item) =>
-																									`<li>${item.productName} x ${item.quantity} ${
-																										item.variant
-																											? `(${
-																													item.attributes?.name
-																														? ` ${item.attributes.name}`
-																														: ""
-																												})`
-																											: ""
-																									}</li>`
-																							)
-																							.join("")}
+				.map(
+					(item) =>
+						`<li>${item.productName} x ${item.quantity} ${item.variant
+							? `(${item.attributes?.name
+								? ` ${item.attributes.name}`
+								: ""
+							})`
+							: ""
+						}</li>`
+				)
+				.join("")}
 																				 </ul>`
-																			: ""
-																	}
-																	<p style="margin: 0; margin-bottom: 16px;">🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!</p>
-																	<p style="margin: 0; margin-bottom: 16px;">👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></p>
-																	<p style="margin: 0; margin-bottom: 16px;">📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a></p>
-																	<p style="margin: 0; margin-bottom: 16px;">So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗</p>
-																	<p style="margin: 0;">With love,</p>
-																	<p style="margin: 0;">Nareiman ✨</p>
-																	<p style="margin: 0;">Your Bridal Era Bestie</p>
+			: ""
+		}
+																	<p style="margin: 0; margin-bottom: 16px;">${p4}</p>
+																	<p style="margin: 0; margin-bottom: 16px;">${p5}</p>
+																	<p style="margin: 0; margin-bottom: 16px;">${p6}</p>
+																	<p style="margin: 0; margin-bottom: 16px;">${p7}</p>
+																	${signoff}
 																</div>
 															</td>
 														</tr>
@@ -257,7 +301,7 @@ export function generateMiniExperienceMail(
 }
 
 export function generateSuspiciousLoginEmail(first_name: string) {
-  return `
+	return `
 <!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 

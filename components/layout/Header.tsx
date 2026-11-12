@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useContext } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/providers/CartProvider";
 import { INotification } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
@@ -62,6 +63,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { thirdFont } from "@/fonts";
 import { useAuth } from "@/hooks/useAuth";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -112,6 +114,31 @@ const accountItems = [
 ];
 
 export default function Header() {
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
+  const tTheme = useTranslations("theme");
+  const tHeader = useTranslations("header");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
+
+  const getNavLabel = (name: string) => {
+    switch (name) {
+      case "Home": return tNav("home");
+      case "Shop": return tNav("shop");
+      case "Planners": return tNav("planners");
+      case "Playlists": return tNav("playlists");
+      case "About": return tNav("about");
+      case "Tools kit": return tNav("toolskit");
+      case "Blogs": return tNav("blogs");
+      case "Timeline Bestie": return tNav("timelineBestie");
+      case "Join as Vendor": return tNav("joinVendor");
+      case "Wishlist": return tCommon("wishlist");
+      case "Cart": return tCommon("cart");
+      case "Profile": return tCommon("profile");
+      default: return name;
+    }
+  };
+
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -311,7 +338,11 @@ export default function Header() {
         // isVisible ? "translate-y-0" : "-translate-y-16 md:-translate-y-32"
       )}
     >
-      {/* <div className="mx-auto"  > */}
+      {/* Upper small line above the header */}
+      {/* <div className="w-full bg-lovely border-b border-creamey/20 text-creamey relative z-50">
+
+      </div> */}
+
       <div
         className={`
               ${isScrolled
@@ -321,9 +352,50 @@ export default function Header() {
 
         mx-auto ${thirdFont.className} text-6xl font-semibold relative z-50`}
       >
-        <div className="flex h-16 md:h-32 items-center justify-center gap-8 xl:gap-16">
+        <div className="container-custom hidden  mx-auto border-b border-white/40 md:flex items-center justify-end gap-3 py-1.5 px-4 md:px-8">
+          {/* Theme Toggle */}
+          {mounted && (
+            <div
+              className="flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-0.5"
+              style={{ fontFamily: 'var(--font-inter)' }}
+            >
+              <button
+                type="button"
+                onClick={() => setTheme("light")}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer",
+                  !isGroomTheme
+                    ? "bg-creamey text-lovely shadow-sm font-semibold"
+                    : "text-creamey hover:bg-creamey/20"
+                )}
+                title="Bride Theme"
+              >
+                <GiAmpleDress className="w-3.5 h-3.5" />
+                <span>{tTheme("bride")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme("groom")}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer",
+                  isGroomTheme
+                    ? "bg-creamey text-lovely shadow-sm font-semibold"
+                    : "text-creamey hover:bg-creamey/20"
+                )}
+                title="Groom Theme"
+              >
+                <IoIosBowtie className="w-3.5 h-3.5" />
+                <span>{tTheme("groom")}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Language Switcher */}
+          {mounted && <LanguageSwitcher />}
+        </div>
+        <div className="flex h-16 md:h-20 py-4 items-center justify-center gap-8 xl:gap-16">
           {/* Desktop Navigation */}
-          <nav className="hidden  text-lovely justify-center items-center md:flex px-2 py-8">
+          <nav className="hidden  text-lovely justify-center items-center md:flex px-2 ">
             {leftNavigation.map((item) => (
               <Link
                 key={item.name}
@@ -333,9 +405,9 @@ export default function Header() {
                   pathname === item.href ? "text-red-900 " : "text-creamey"
                 )}
               >
-                <div className="flex md:px-2 lg:px-4 xl:px-8 border-l-2 border-creamey  flex-col gap-2 items-center justify-center">
+                <div className="flex md:px-2 lg:px-4 xl:px-8 border-s-2 border-creamey  flex-col gap-2 items-center justify-center">
                   {item.icon}
-                  {item.name}
+                  {getNavLabel(item.name)}
                 </div>
               </Link>
             ))}
@@ -356,44 +428,13 @@ export default function Header() {
                 // src={"/birthday/birthdayLogo.png"}
                 />
               </Link>
-              {/* Theme Toggle */}
-              {mounted && (
-                <div className="flex items-center border border-creamey/30 bg-creamey/10 rounded-full p-1" style={{ fontFamily: 'var(--font-inter)' }}>
-                  <button
-                    onClick={() => setTheme("light")}
-                    className={cn(
-                      "flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium transition-all",
-                      !isGroomTheme ? "bg-lovely text-creamey shadow-md" : "text-creamey hover:bg-creamey/20"
-                    )}
-                    title="Bride Theme"
-                  >
-                    <GiAmpleDress className="w-3 h-3" />
-
-                    {/* <Gem className="w-3 h-3" /> */}
-                    <span>Bride</span>
-                  </button>
-                  <button
-                    onClick={() => setTheme("groom")}
-                    className={cn(
-                      "flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium transition-all",
-                      isGroomTheme ? "bg-lovely text-creamey shadow-md" : "text-creamey hover:bg-creamey/20"
-                    )}
-                    title="Groom Theme"
-                  >
-                    <IoIosBowtie className="w-3 h-3" />
-
-                    {/* <Shirt className="w-3 h-3" /> */}
-                    <span>Groom</span>
-                  </button>
-                </div>
-              )}
             </div>
             {rightNavigation.map((item) => (
               item.items ? (
                 <div key={item.name} className="relative z-50">
                   <button
                     className={cn(
-                      "flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center text-base font-medium transition-colors hover:text-red-900 bg-transparent  cursor-pointer",
+                      "flex md:px-2 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center text-base font-medium transition-colors hover:text-red-900 bg-transparent  cursor-pointer",
                       isToolkitsOpen ? "text-red-900" : "text-creamey"
                     )}
                     onClick={() => setIsToolkitsOpen(!isToolkitsOpen)}
@@ -410,13 +451,13 @@ export default function Header() {
                     }}
                   >
                     {item.icon}
-                    {item.name}
+                    {getNavLabel(item.name)}
                   </button>
 
                   {/* Toolkits Dropdown */}
                   {isToolkitsOpen && (
                     <div
-                      className="absolute right-0 top-full mt-2 w-56 p-2 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg"
+                      className="absolute end-0 top-full mt-2 w-56 p-2 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg"
                       onMouseEnter={() => {
                         if (window.innerWidth >= 768) setIsToolkitsHovering(true);
                       }}
@@ -435,9 +476,9 @@ export default function Header() {
                           onClick={() => setIsToolkitsOpen(false)}
                         >
                           {subItem.icon && (
-                            <span className="mr-3 [&>svg]:h-4 [&>svg]:w-4">{subItem.icon}</span>
+                            <span className="me-3 [&>svg]:h-4 [&>svg]:w-4">{subItem.icon}</span>
                           )}
-                          {subItem.name}
+                          {getNavLabel(subItem.name)}
                         </Link>
                       ))}
                     </div>
@@ -453,9 +494,9 @@ export default function Header() {
                       "text-creamey"
                     )}
                   >
-                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center relative">
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center relative">
                       {item.icon}
-                      {item.name}
+                      {getNavLabel(item.name)}
                       {totalItems > 0 && (
                         <span className="absolute top-2 right-2 md:right-4 lg:right-6 bg-red-500 text-creamey text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                           {totalItems}
@@ -472,9 +513,9 @@ export default function Header() {
                       pathname === item.href ? "text-red-900 " : "text-creamey"
                     )}
                   >
-                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center">
+                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center">
                       {item.icon}
-                      {item.name}
+                      {getNavLabel(item.name)}
                     </div>
                   </Link>
                 )
@@ -485,7 +526,7 @@ export default function Header() {
             <div className="relative account-dropdown">
               <button
                 type="button"
-                className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-r-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer bg-transparent border-0"
+                className="flex md:px-2 text-creamey hover:text-red-900 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center cursor-pointer bg-transparent border-0"
                 aria-label="Account"
                 onClick={() => setIsAccountOpen(!isAccountOpen)}
                 onMouseEnter={() => {
@@ -503,13 +544,13 @@ export default function Header() {
                 }}
               >
                 <User />
-                <span className="text-base font-medium">Account</span>
+                <span className="text-base font-medium">{tCommon("profile")}</span>
               </button>
 
               {/* Dropdown Content */}
               {isAccountOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg z-50"
+                  className="absolute end-0 top-full mt-2 w-64 p-0 bg-creamey border text-lovely border-lovely/80 rounded-lg shadow-lg z-50"
                   onMouseEnter={() => {
                     // Keep dropdown open when hovering over content
                     if (window.innerWidth >= 768) {
@@ -533,8 +574,8 @@ export default function Header() {
                             className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                             onClick={() => setIsAccountOpen(false)}
                           >
-                            <item.icon className="mr-3 h-4 w-4 text-lovely " />
-                            {item.label}
+                            <item.icon className="me-3 h-4 w-4 text-lovely " />
+                            {getNavLabel(item.label)}
                           </Link>
                         ))
                       ) : (
@@ -550,8 +591,8 @@ export default function Header() {
                               setIsAccountOpen(false);
                             }}
                           >
-                            <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
-                            Sign Out
+                            <LogOut className="me-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                            {tCommon("logout")}
                           </button>
                         </div>
                       ) : (
@@ -561,14 +602,14 @@ export default function Header() {
                             className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                             onClick={() => setIsAccountOpen(false)}
                           >
-                            Sign In
+                            {tCommon("signIn")}
                           </Link>
                           <Link
                             href={"/register"}
                             className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                             onClick={() => setIsAccountOpen(false)}
                           >
-                            Sign up
+                            {tCommon("signUp")}
                           </Link>
                         </div>
                       )}
@@ -616,7 +657,7 @@ export default function Header() {
               </SheetTrigger>
               <SheetTitle className="hidden">test</SheetTitle>
               <SheetContent
-                side="left"
+                side={isArabic ? "right" : "left"}
                 className="w-[300px] bg-lovely text-creamey sm:w-[400px]"
               >
                 <div
@@ -644,28 +685,34 @@ export default function Header() {
                   <nav className="flex flex-col space-y-6">
                     {/* Mobile Theme Toggle */}
                     {mounted && (
-                      <div className="flex items-center w-full max-w-[200px] border border-creamey/30 bg-creamey/10 rounded-full p-1 mb-4" style={{ fontFamily: 'var(--font-inter)' }}>
+                      <div className="flex items-center w-full max-w-[200px] border border-creamey/30 bg-creamey/10 rounded-full p-1 " style={{ fontFamily: 'var(--font-inter)' }}>
                         <button
                           onClick={() => setTheme("light")}
                           className={cn(
-                            "flex flex-1 items-center justify-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-all",
+                            "flex flex-1 items-center justify-center gap-1 px-3 py-2 rounded-full text-sm font-medium transition-all",
                             !isGroomTheme ? "bg-creamey text-lovely shadow-md" : "text-creamey hover:bg-creamey/20"
                           )}
                         >
                           <GiAmpleDress className="w-4 h-4" />
-                          <span>Bride</span>
+                          <span>{tTheme("bride")}</span>
                         </button>
                         <button
                           onClick={() => setTheme("groom")}
                           className={cn(
-                            "flex flex-1 items-center justify-center space-x-1 px-3 py-2 rounded-full text-sm font-medium transition-all",
+                            "flex flex-1 items-center justify-center gap-1 px-3 py-2 rounded-full text-sm font-medium transition-all",
                             isGroomTheme ? "bg-creamey text-lovely shadow-md" : "text-creamey hover:bg-creamey/20"
                           )}
                         >
                           <IoIosBowtie className="w-4 h-4" />
 
-                          <span>Groom</span>
+                          <span>{tTheme("groom")}</span>
                         </button>
+                      </div>
+                    )}
+                    {/* Mobile Language Switcher */}
+                    {mounted && (
+                      <div className="pt-0">
+                        <LanguageSwitcher variant="mobile" />
                       </div>
                     )}
 
@@ -673,16 +720,16 @@ export default function Header() {
                       item.items ? (
                         <div key={item.name} className="flex flex-col space-y-2">
                           <button
-                            className="text-xl font-medium hover:underline transition duration-300 text-creamey text-left flex items-center justify-between w-full"
+                            className="text-xl font-medium hover:underline transition duration-300 text-creamey text-start flex items-center justify-between w-full"
                             onClick={() => setIsMobileToolkitsExpanded(!isMobileToolkitsExpanded)}
                           >
-                            {item.name}
+                            {getNavLabel(item.name)}
                             {isMobileToolkitsExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                           </button>
 
                           {/* Sub-items */}
                           {isMobileToolkitsExpanded && (
-                            <div className="flex flex-col space-y-3 pl-4  ml-2">
+                            <div className="flex flex-col space-y-3 ps-4 ms-2">
                               {item.items.map(subItem => (
                                 <Link
                                   key={subItem.name}
@@ -693,7 +740,7 @@ export default function Header() {
                                   )}
                                   onClick={handleLinkClick}
                                 >
-                                  {subItem.name}
+                                  {getNavLabel(subItem.name)}
                                 </Link>
                               ))}
                             </div>
@@ -709,7 +756,7 @@ export default function Header() {
                           )}
                           onClick={handleLinkClick}
                         >
-                          {item.name}
+                          {getNavLabel(item.name)}
                         </Link>
                       )
                     ))}
@@ -718,11 +765,11 @@ export default function Header() {
                   <div className="mt-auto text-lg space-y-4">
                     <Link
                       href="/cart"
-                      className="flex items-center space-x-2"
+                      className="flex items-center gap-2"
                       onClick={handleLinkClick}
                     >
                       <ShoppingBag className="h-5 w-5" />
-                      <span>Cart</span>
+                      <span>{tCommon("cart")}</span>
                       {totalItems > 0 && (
                         <span className="bg-red-500 text-creamey text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                           {totalItems}
@@ -732,28 +779,28 @@ export default function Header() {
 
                     <Link
                       href="/wishlist"
-                      className="flex items-center space-x-2"
+                      className="flex items-center gap-2"
                       onClick={handleLinkClick}
                     >
                       <Heart className={cn("h-5 w-5")} />
-                      <span>Wishlist</span>
+                      <span>{tCommon("wishlist")}</span>
                     </Link>
 
                     <Link
                       href="/account"
-                      className="flex items-center space-x-2"
+                      className="flex items-center gap-2"
                       onClick={handleLinkClick}
                     >
                       <User className="h-5 w-5" />
-                      <span>Account</span>
+                      <span>{tCommon("profile")}</span>
                     </Link>
                     {isAuthenticated && (
                       <button
-                        className="w-full flex items-center gap-2 space-x-2 py-2 text-creamey hover:underline rounded-md group transition-colors"
+                        className="w-full flex items-center gap-2 py-2 text-creamey hover:underline rounded-md group transition-colors"
                         onClick={handleLogout}
                       >
                         <LogOut className=" h-5 w-5 " />
-                        Sign Out
+                        {tCommon("logout")}
                       </button>
                     )}
                   </div>
@@ -773,7 +820,7 @@ export default function Header() {
               // src={"/birthday/birthdayLogo.png"}
               />
             </Link>
-            <div className="mr-2 gap-4 flex">
+            <div className="me-2 gap-4 flex">
               {isAuthenticated ? (
                 <div
                   className="relative cursor-pointer"
@@ -869,7 +916,7 @@ export default function Header() {
       <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
         <DialogContent className="sm:max-w-md bg-creamey">
           <DialogHeader>
-            <DialogTitle className="text-lovely">Notifications</DialogTitle>
+            <DialogTitle className="text-lovely">{tHeader("notifications")}</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto">
             {loadingNotifications ? (
@@ -891,7 +938,7 @@ export default function Header() {
             ) : notifications.length === 0 ? (
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">You have no notifications</p>
+                <p className="text-gray-500">{tHeader("noNotifications")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1000,11 +1047,11 @@ export default function Header() {
                               {notification.userId?.firstName}{" "}
                               {notification.userId?.lastName}{" "}
                               {notification.actionType === "like" &&
-                                "liked your comment"}
+                                tHeader("likedComment")}
                               {notification.actionType === "comment" &&
-                                "commented on your video"}
+                                tHeader("commentedVideo")}
                               {notification.actionType === "reply" &&
-                                "replied to your comment"}
+                                tHeader("repliedComment")}
                             </p>
                             {notification.content && (
                               <p className="text-sm text-lovely/70 mt-1">
@@ -1040,7 +1087,7 @@ export default function Header() {
       <Dialog open={isMobileAccountOpen} onOpenChange={setIsMobileAccountOpen}>
         <DialogContent className="sm:max-w-md w-[80%] bg-creamey">
           <DialogHeader>
-            <DialogTitle className="text-lovely">Account</DialogTitle>
+            <DialogTitle className="text-lovely">{tHeader("account")}</DialogTitle>
           </DialogHeader>
           <div className="p-2">
             <nav className="space-y-1">
@@ -1052,8 +1099,8 @@ export default function Header() {
                     className="flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                     onClick={() => setIsMobileAccountOpen(false)}
                   >
-                    <item.icon className="mr-3 h-4 w-4 text-lovely" />
-                    {item.label}
+                    <item.icon className="me-3 h-4 w-4 text-lovely" />
+                    {getNavLabel(item.label)}
                   </Link>
                 ))
               ) : (
@@ -1069,8 +1116,8 @@ export default function Header() {
                       setIsMobileAccountOpen(false);
                     }}
                   >
-                    <LogOut className="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
-                    Sign Out
+                    <LogOut className="me-3 h-4 w-4 text-red-400 group-hover:text-red-500" />
+                    {tCommon("logout")}
                   </button>
                 </div>
               ) : (
@@ -1080,14 +1127,14 @@ export default function Header() {
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                     onClick={() => setIsMobileAccountOpen(false)}
                   >
-                    Sign In
+                    {tCommon("signIn")}
                   </Link>
                   <Link
                     href={"/register"}
                     className="w-full flex items-center px-3 py-2 text-sm font-medium text-lovely hover:underline rounded-md group transition-colors"
                     onClick={() => setIsMobileAccountOpen(false)}
                   >
-                    Sign up
+                    {tCommon("signUp")}
                   </Link>
                 </div>
               )}

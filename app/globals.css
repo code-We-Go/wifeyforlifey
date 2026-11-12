@@ -102,6 +102,9 @@
   * {
     @apply border-border;
   }
+  html[dir="rtl"], [dir="rtl"] {
+    font-family: var(--font-arabic), sans-serif;
+  }
   html, body {
     background-color: #fbf3e0;
     color-scheme: light;

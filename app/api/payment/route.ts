@@ -1,5 +1,6 @@
 import { sendMail } from "@/lib/email";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
+import { getUserPreferredLanguage } from "@/utils/getUserPreferredLanguage";
 import { ConnectDB } from "@/app/config/db";
 import ordersModel from "@/app/modals/ordersModel";
 import subscriptionsModel from "@/app/modals/subscriptionsModel";
@@ -176,14 +177,22 @@ export async function POST(request: Request) {
         // Don't fail the order creation if Bosta fails
       }
 
+      const customerLang = await getUserPreferredLanguage({
+        email: data.email,
+        fallbackLang: "ar",
+      });
+
       // If it's a gift, send gift email to purchaser
       if (data.isGift) {
         const { giftMail } = await import("@/utils/giftMail");
         await sendMail({
           to: data.email,
           name: data.firstName,
-          subject: "Thank You for Your Gift Purchase! 🎁",
-          body: giftMail(res._id.toString()),
+          subject:
+            customerLang === "ar"
+              ? "شكراً لشرائكِ هدية مميزة! 🎁💖"
+              : "Thank You for Your Gift Purchase! 🎁",
+          body: giftMail(res._id.toString(), items, customerLang),
           from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
         });
       }
@@ -193,7 +202,10 @@ export async function POST(request: Request) {
         to: data.email,
         from: "noreply@shopwifeyforlifey.com",
         name: "Order Confirmation",
-        subject: "Order Confirmation",
+        subject:
+          customerLang === "ar"
+            ? "تأكيد طلبكِ من Wifey for Lifey 💕"
+            : "Order Confirmation",
         body: generateEmailBody(
           items,
           data.firstName,
@@ -211,7 +223,8 @@ export async function POST(request: Request) {
           data.state,
           data.city,
           data.postalZip,
-          data.apartment
+          data.apartment,
+          customerLang
         ),
       });
 
@@ -238,7 +251,8 @@ export async function POST(request: Request) {
           data.state,
           data.city,
           data.postalZip,
-          data.apartment
+          data.apartment,
+          "en"
         ),
       });
 

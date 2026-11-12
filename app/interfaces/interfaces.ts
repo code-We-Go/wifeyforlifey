@@ -46,12 +46,23 @@ export interface Video {
   createdAt: Date;
   updatedAt: Date;
   tags?: ("groom" | "bridesmaids")[]; // Array of tags (e.g., ["bride", "groom"])
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string;
+    };
+  };
 }
 
 export interface playlistFolder {
   _id?: string;
   name: string;   // e.g. "Behind the Scenes"
   slug: string;   // e.g. "behind-the-scenes"
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
 }
 // types/Playlist.ts
 export interface Playlist {
@@ -69,6 +80,13 @@ export interface Playlist {
   createdAt: Date;
   updatedAt: Date;
   order?: number;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string[];
+      category?: string;
+    };
+  };
 }
 
 // Add VideoPlaylist type alias for compatibility
@@ -98,7 +116,12 @@ export interface Variant {
   attributes: attribute[]; // e.g., [{ name: "Color", value: "Black" }, { name: "Capacity", value: "2L" }]
   images: media[];
   mobImages?: media[];
-
+  translations?: {
+    ar?: {
+      name?: string;
+      attributeName?: string;
+    };
+  };
 }
 
 export interface Category {
@@ -121,6 +144,11 @@ export type attribute = {
   name: string;
   price?: number;
   stock: number;
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
 };
 export type media = {
   url: string;
@@ -170,6 +198,16 @@ export interface Product {
   season: string;
   featured: boolean;
   ratings: number;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string;
+      productDimensions?: string[];
+      productDetails?: string[];
+      productCare?: string[];
+      season?: string;
+    };
+  };
 }
 
 export type AddProductType = Omit<Product, "_id">;
@@ -204,6 +242,7 @@ export interface SubscriptionCartItem {
   cartItemId: string;
   packageId: string;
   packageName: string;
+  packageNameAr?: string;
   categoryName: string;
   tier: "full" | "mini";
   price: number;
@@ -212,6 +251,8 @@ export interface SubscriptionCartItem {
   saving?: string;
   imageUrl: string;
   quantity: number;
+  edition?: "ar" | "en";
+  editionName?: string;
 }
 
 
@@ -289,11 +330,21 @@ export interface ShippingZone {
 export interface PackageCard {
   image: string;
   points: string[];
+  translations?: {
+    ar?: {
+      points?: string[];
+    };
+  };
 }
 
 export interface PackageItem {
   value: string;
   included: boolean;
+  translations?: {
+    ar?: {
+      value?: string;
+    };
+  };
 }
 
 export interface SupportCard {
@@ -302,6 +353,12 @@ export interface SupportCard {
   description: string[];
   imagePath: string;
   enable?: boolean;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string[];
+    };
+  };
 }
 
 export interface PackageVariant {
@@ -309,12 +366,24 @@ export interface PackageVariant {
   discountedFrom?: number;
   duration: number;
   saving?: string;
+  translations?: {
+    ar?: {
+      saving?: string;
+    };
+  };
 }
 
 export interface ComparisonFeature {
   feature: string;
   fullValue: string;
   miniValue: string;
+  translations?: {
+    ar?: {
+      feature?: string;
+      fullValue?: string;
+      miniValue?: string;
+    };
+  };
 }
 
 export interface Ipackage {
@@ -323,6 +392,9 @@ export interface Ipackage {
   name: string;
   imgUrl: string; // Main image (keeping for backward compatibility)
   images: string[]; // Array of image URLs
+  arabicImgUrl?: string;
+  arabicImages?: string[];
+  enableArabicEdition?: boolean;
   mobMainImage?: string;
   mobImages?: string[];
   price: number;
@@ -348,12 +420,28 @@ export interface Ipackage {
   packageProducts?: any[]; // Products associated with this package
   subSubscriptionSlots?: { role: "groom" | "bridesmaids"; maxCount: number }[];
   comparisonFeatures?: ComparisonFeature[];
-  // heroTitle?: string;
-  // heroSubtitle?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
   badgeLabel?: string;
   calloutBadge?: string;
   calloutTitle?: string;
   calloutDescription?: string;
+  translations?: {
+    ar?: {
+      name?: string;
+      partOf?: string;
+      saving?: string;
+      notes?: string[];
+      badgeLabel?: string;
+      calloutBadge?: string;
+      calloutTitle?: string;
+      calloutDescription?: string;
+      heroTitle?: string;
+      heroSubtitle?: string;
+      imgUrl?: string;
+      images?: string[];
+    };
+  };
 }
 
 export interface ISubscription {
@@ -470,4 +558,24 @@ export interface IAccountFeature extends mongoose.Document {
   // order: number;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  featuredImage?: string;
+  status: "draft" | "published" | "archived";
+  tags: string[];
+  categories: string[];
+  publishedAt?: string;
+  viewCount: number;
+  mobileViewCount?: number;
+  webViewCount?: number;
+  featured: boolean;
+  createdAt: string;
+  readingTime: number;
+  formattedPublishDate?: string;
 }

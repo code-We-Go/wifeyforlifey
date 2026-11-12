@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, TrendingUp, Video, ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { wishListContext } from "@/app/context/wishListContext";
 import axios from "axios";
 
@@ -14,10 +14,14 @@ import PackageCard from "../shop/PackageCard";
 import PackageProductCard from "../shop/PackageProductCard";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { useLocale, useTranslations } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const FeaturedProducts = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const t = useTranslations("home.featuredProducts");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [packages, setPackages] = useState<Ipackage[]>([]);
   const { wishList, setWishList } = useContext(wishListContext);
@@ -31,6 +35,7 @@ const FeaturedProducts = () => {
       align: "start",
       skipSnaps: false,
       dragFree: true,
+      direction: isRtl ? "rtl" : "ltr",
     },
     [
       Autoplay({
@@ -75,7 +80,10 @@ const FeaturedProducts = () => {
             price: 1500,
             duration: 0,
             items: [],
-            notes: [
+            notes: isRtl ? [
+              "بتجهزي شقتك؟",
+              "جهزي بيتك أوضة بأوضة مع ١١ فصل فيهم كل اللي ممكن تحتاجيه، من الأساسيات للكماليات، وكمان الكميات المناسبة ليكي عشان تشتري كل اللي محتاجاه من غير مصاريف زيادة!"
+            ] : [
               "Buying your gehaz?",
               "Your home, room by room — 11 chapters, Essentials vs Nice-to-Haves, and quantity guides so you never overspend."
             ],
@@ -92,7 +100,10 @@ const FeaturedProducts = () => {
             price: 1700,
             duration: 0,
             items: [],
-            notes: [
+            notes: isRtl ? [
+              "بتنظمي يوم فرحك؟",
+              "خططي ليوم فرحك خطوة بخطوة، مع 2 بلانر للتجهيزات: واحدة ليكي وواحدة لعريسك! هتعرفوا تعملوا إيه وإمتى، من يوم ما تبدأوا تنظيم لحد الليلة اللي قبل الفرح، عشان متنسيش أي تفصيلة."
+            ] : [
               "Planning your wedding day?",
               "Your big day, step by step — two checklists included: one for you, one for your groom. Countdown tasks from 2 months out to the night before."
             ],
@@ -115,7 +126,7 @@ const FeaturedProducts = () => {
       };
   
       fetchPackages();
-    }, []);
+    }, [isRtl]);
   
   // const featuredProducts = mockProducts
   //   .filter((product) => product.featured)
@@ -146,9 +157,9 @@ const FeaturedProducts = () => {
             <h2
               className={`${thirdFont.className} ${headerStyle} text-lovely mb-2`}
             >
-              Our Besties' Favorites
+              {t("title")}
             </h2>
-            <span className={`${subHeaderStyle} text-lovely`}>The little things our bride actually use, love, and swear by to make their bridal era feel lighter and more fun.</span>
+            <span className={`${subHeaderStyle} text-lovely`}>{t("subtitle")}</span>
             {/* <p className="text-creamey text">
             Discover our handpicked selection of trending items
           </p> */}
@@ -159,7 +170,7 @@ const FeaturedProducts = () => {
             className="hidden md:flex items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey  mt-4 md:mt-0"
           >
             <Link href="/shop">
-              View All <ArrowRight className=" ml-2 h-4 w-4" />
+              {t("viewAll")} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>
@@ -170,7 +181,7 @@ const FeaturedProducts = () => {
               {[...Array(6)].map((_, index) => (
                 <div
                   key={index}
-                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2"
+                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] px-2"
                 >
                   <ProductCardSkeleton />
                 </div>
@@ -184,7 +195,7 @@ const FeaturedProducts = () => {
               {packages.map((packageItem) => (
                 <div
                   key={packageItem._id}
-                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2 h-full"
+                  className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] px-2 h-full"
                 >
                   <div className="h-full">
                     {packageItem.slug === "GehazBestiePlanner" || packageItem.slug === "WeddingBestiePlanner" ? (
@@ -213,7 +224,7 @@ const FeaturedProducts = () => {
                 return (
                   <div
                     key={product._id}
-                    className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] pl-2 pr-2 h-full"
+                    className="flex-none w-[66.67vw] sm:w-[45vw] md:w-[33vw] lg:w-[33vw] xl:w-[25vw] px-2 h-full"
                   >
                     <div className="h-full">
                       <ProductCard
@@ -236,7 +247,7 @@ const FeaturedProducts = () => {
             className="flex md:hidden w-fit items-center hover:bg-everGreen hover:text-creamey border-0 bg-lovely text-creamey"
           >
             <Link href="/shop">
-              View All <ArrowRight className=" ml-2 h-4 w-4" />
+              {t("viewAll")} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>

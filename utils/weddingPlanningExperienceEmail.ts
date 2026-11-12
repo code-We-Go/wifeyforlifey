@@ -2,16 +2,72 @@ import { ISubscription } from "@/app/interfaces/interfaces";
 
 export function generateWelcomeEmail(
 	first_name: string,
-	subscription: ISubscription
+	subscription: ISubscription,
+	lang: "en" | "ar" = "en"
 ) {
+	const isAr = lang === "ar";
+	const dir = isAr ? "rtl" : "ltr";
+	const textAlign = isAr ? "right" : "left";
+	const fontFamily = isAr
+		? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+		: "Helvetica Neue, Helvetica, Arial, sans-serif";
+
+	const greeting = isAr
+		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
+		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
+	const welcomeText = isAr
+		? "أهلاً بيكي في عالم وايفي — المكان اللي تخطيط الفرح فيه بيكون ممتع وبسيط ومن غير أي توتر 💗"
+		: "Welcome to the Wifeys world — where love is simplified and pressure is left at the door 💗";
+	const excitementText = isAr
+		? "متحمسة جداً جداً لوجودك معانا!! 💗 من النهاردة مش هتكوني لوحدك أبداً — أنا وأخواتك الوايفيز جنبك خطوة بخطوة."
+		: "I’m sooo excited to finally have you here!! 💗 From today, you’re never alone — you’ve got me and your Wifey sisters right by your side.";
+	const bundledText = isAr
+		? "📦 المنتجات الإضافية المشمولة في طلبك:"
+		: "📦 Bundled Items included in your order:";
+	const videosText = isAr
+		? "🎥 وفيديوهات تنظيم الفرح جاهزة ليكي على البروفايل! ابدئي بمرحلة \"The Dreaming stage\" وبعدين اتفرجي على كل مرحلة تحبيها ✨"
+		: "🎥 While you’re waiting for her to arrive, your profile already has 70+ bridal era videos ready for you! Start with “The Dreaming stage” and then dive into any chapter that feels right for you ✨";
+	const stepsHeader = isAr ? "✨ إليكِ خطواتك القادمة:" : "✨ Here’s what’s next:<br>";
+	const step1 = isAr
+		? `👭 انضمي لمجتمعنا الخاص على الواتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		: `👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a>`;
+	const step2 = isAr
+		? `🛒 تسوّقي واحصلي على خصومات حصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
+		: `🛒 Shop your exclusive perks & discounts → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`;
+	const step3 = isAr
+		? `📦 تتبعي شحن البلانر الخاصة بكِ ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي من هنا</a>`
+		: `📦 Track your planner delivery → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a>`;
+	const step4 = isAr
+		? `📱 حمّلي تطبيقنا الآن ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
+		: `📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`;
+	const close1 = isAr
+		? "متحمسة أوي نحتفل سوا بكل خطوة في الرحلة دي 💗"
+		: "So excited to celebrate every step of this journey with you 💗";
+	const close2 = isAr
+		? "ودايماً افتكري — إنتِ مش مجرد أي عروسة، إنتِ WIFEY FOR LIFEY 🥹💗"
+		: "And always remember — you’re not just any bride, you’re a WIFEY FOR LIFEY 🥹💗";
+	const signoff = isAr
+		? "بكل الحب،<br>ناريمان ✨<br>Your Bridal Era Bestie"
+		: "With love,<br>Nareiman ✨<br>Your Bridal Era Bestie";
+
 	return `
 <!DOCTYPE html>
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 
 <head>
 	<title></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"><!--[if mso]>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: ${fontFamily};
+		}<!--[if mso]>
 <xml><w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"><w:DontUseAdvancedTypographyReadingMail/></w:WordDocument>
 <o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml>
 <![endif]--><!--[if !mso]><!--><!--<![endif]-->
@@ -192,22 +248,22 @@ export function generateWelcomeEmail(
 									<table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbf3e0; border-radius: 0; color: #000000; width: 680px; margin: 0 auto;" width="680">
 										<tbody>
 											<tr>
-												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;">
+												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: ${textAlign}; vertical-align: top;">
 													<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
 															<td class="col-pad" style="padding-bottom:48px;padding-left:48px;padding-right:48px;">
 																<table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 																	<tr>
 																		<td class="pad" style="width:100%;padding-top:12px;" align="center">
-																			<h3 style="margin: 0; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 29px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️</span></h3>
+																			<h3 style="margin: 0; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 24px; font-weight: 700; letter-spacing: normal; line-height: 1.3; text-align: ${textAlign}; margin-top: 0; margin-bottom: 0;"><span class="tinyMce-placeholder" style="word-break: break-word;">${greeting}</span></h3>
 																		</td>
 																	</tr>
 																</table>
 																<table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad" style="padding-top:10px;padding-bottom:10px;">
-																			<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">Welcome to the Wifeys world — where love is simplified and pressure is left at the door 💗</p>
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0;">${welcomeText}</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -215,8 +271,8 @@ export function generateWelcomeEmail(
 																<table class="paragraph_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">I’m sooo excited to finally have you here!! 💗 From today, you’re never alone — you’ve got me and your Wifey sisters right by your side.</p>
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0;">${excitementText}</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -224,10 +280,10 @@ export function generateWelcomeEmail(
 																<table class="paragraph_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
 																	${subscription.cart && subscription.cart.length > 0
-			? `<p style="margin: 0; margin-bottom: 8px;"><strong>📦 Bundled Items included in your order:</strong></p>
-																				 <ul style="margin: 0; margin-bottom: 16px; padding-left: 20px;">
+			? `<p style="margin: 0; margin-bottom: 8px;"><strong>${bundledText}</strong></p>
+																				 <ul style="margin: 0; margin-bottom: 16px; padding-${isAr ? "right" : "left"}: 20px;">
 																					 ${subscription.cart
 				.map(
 					(item) =>
@@ -249,8 +305,8 @@ export function generateWelcomeEmail(
 																<table class="paragraph_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">🎥 While you’re waiting for her to arrive, your profile already has 70+ bridal era videos ready for you! Start with “The Dreaming stage” and then dive into any chapter that feels right for you ✨</p>
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0;">${videosText}</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -258,49 +314,49 @@ export function generateWelcomeEmail(
 																<table class="heading_block block-6" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 																	<tr>
 																		<td class="pad" style="width:100%;" align="center">
-																			<h3 style="margin: 0; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 24px;">✨ Here’s what’s next:<br></h3>
+																			<h3 style="margin: 0; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 20px; font-weight: 700; letter-spacing: normal; line-height: 1.3; text-align: ${textAlign}; margin-top: 0; margin-bottom: 0;">${stepsHeader}</h3>
 																		</td>
 																	</tr>
 																</table>
-																<table class="list_block block-7" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																<table class="list_block block-7" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.5; text-align: ${textAlign};">
 																	<tr>
 																		<td class="pad">
-																			<div style="margin-left:-20px">
+																			<div style="margin-${isAr ? "right" : "left"}: -20px">
 																				<ul style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																					<li style="Margin: 0 0 0 0;">👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a></li>
+																					<li style="margin: 0 0 0 0;">${step1}</li>
 																				</ul>
 																			</div>
 																		</td>
 																	</tr>
 																</table>
-																<table class="list_block block-8" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																<table class="list_block block-8" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.5; text-align: ${textAlign};">
 																	<tr>
 																		<td class="pad">
-																			<div style="margin-left:-20px">
+																			<div style="margin-${isAr ? "right" : "left"}: -20px">
 																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																					<li style="Margin: 0 0 0 0;">🛒 Shop your exclusive perks & discounts → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a></li>
+																					<li style="margin: 0 0 0 0;">${step2}</li>
 																				</ul>
 																			</div>
 																		</td>
 																	</tr>
 																</table>
-																<table class="list_block block-9" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																<table class="list_block block-9" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.5; text-align: ${textAlign};">
 																	<tr>
 																		<td class="pad">
-																			<div style="margin-left:-20px">
+																			<div style="margin-${isAr ? "right" : "left"}: -20px">
 																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																					<li style="Margin: 0 0 0 0;">📦 Track your planner delivery → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a></li>
+																					<li style="margin: 0 0 0 0;">${step3}</li>
 																				</ul>
 																			</div>
 																		</td>
 																	</tr>
 																</table>
-																<table class="list_block block-app" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+																<table class="list_block block-app" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.5; text-align: ${textAlign};">
 																	<tr>
 																		<td class="pad">
-																			<div style="margin-left:-20px">
+																			<div style="margin-${isAr ? "right" : "left"}: -20px">
 																				<ul start="1" style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																					<li style="Margin: 0 0 0 0;">📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a></li>
+																					<li style="margin: 0 0 0 0;">${step4}</li>
 																				</ul>
 																			</div>
 																		</td>
@@ -309,8 +365,8 @@ export function generateWelcomeEmail(
 																<table class="paragraph_block block-10" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">So excited to celebrate every step of this journey with you 💗</p>
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0;">${close1}</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -318,8 +374,8 @@ export function generateWelcomeEmail(
 																<table class="paragraph_block block-11" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">And always remember — you’re not just any bride, you’re a WIFEY FOR LIFEY 🥹💗</p>
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0;">${close2}</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -327,8 +383,8 @@ export function generateWelcomeEmail(
 																<table class="paragraph_block block-12" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0;">With love,<br>Nareiman ✨<br>Your Bridal Era Bestie</p>
+																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0;">${signoff}</p>
 																			</div>
 																		</td>
 																	</tr>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   Dialog,
@@ -12,10 +12,19 @@ import { useModal } from "@/app/context/ModalContext";
 import { useCart } from "@/providers/CartProvider";
 import { ShoppingCart } from "lucide-react";
 import { Product, Variant, attribute } from "@/app/interfaces/interfaces";
+import { useLocale, useTranslations } from "next-intl";
+import { localizeProduct } from "@/app/lib/localize";
 
 export default function ProductModal() {
+  const locale = useLocale();
+  const t = useTranslations("common");
   const { isModalOpen, closeModal, modalProduct } = useModal();
   const { addItem, openCart } = useCart();
+
+  const product = useMemo(() => {
+    return modalProduct ? localizeProduct(modalProduct, locale) : null;
+  }, [modalProduct, locale]);
+
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>();
   const [selectedAttribute, setSelectedAttribute] = useState<
     attribute | undefined
@@ -23,18 +32,18 @@ export default function ProductModal() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  // Update selected variant and attribute when modalProduct changes
+  // Update selected variant and attribute when product changes
   useEffect(() => {
-    if (modalProduct) {
-      const initialVariant = modalProduct.variations[0];
+    if (product && product.variations && product.variations.length > 0) {
+      const initialVariant = product.variations[0];
       setSelectedVariant(initialVariant);
-      setSelectedAttribute(initialVariant?.attributes[0]);
+      setSelectedAttribute(initialVariant?.attributes?.[0]);
       setQuantity(1);
       setSelectedImage(0);
     }
-  }, [modalProduct]);
+  }, [product]);
 
-  if (!modalProduct) return null;
+  if (!product) return null;
 
   const handleVariantChange = (variant: Variant) => {
     setSelectedVariant(variant);
@@ -65,14 +74,14 @@ export default function ProductModal() {
     if (!selectedVariant || !selectedAttribute) return;
 
     addItem({
-      productId: modalProduct._id,
-      productName: modalProduct.title,
+      productId: product._id,
+      productName: product.title,
       price:
         selectedAttribute?.price && selectedAttribute.price > 0
           ? selectedAttribute.price
           : selectedVariant?.price && selectedVariant.price > 0
           ? selectedVariant.price
-          : modalProduct.price.local,
+          : product.price.local,
       attributes: selectedAttribute,
       variant: selectedVariant,
       imageUrl: selectedVariant.images?.[0]?.url,
@@ -87,7 +96,7 @@ export default function ProductModal() {
     <Dialog open={isModalOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-scroll text-lovely bg-creamey">
         <DialogHeader>
-          <DialogTitle>Quick Add</DialogTitle>
+          <DialogTitle>{t("quickAdd")}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Product Images */}
@@ -98,7 +107,7 @@ export default function ProductModal() {
                 selectedVariant.images.length > 0 && (
                   <Image
                     src={selectedVariant.images[selectedImage]?.url}
-                    alt={modalProduct.title}
+                    alt={product.title}
                     fill
                     className="object-cover"
                   />
@@ -120,7 +129,7 @@ export default function ProductModal() {
                     <Image
                       unoptimized
                       src={image.url}
-                      alt={`${modalProduct.title} - Image ${index + 1}`}
+                      alt={`${product.title} - Image ${index + 1}`}
                       fill
                       className="object-cover"
                     />
@@ -133,35 +142,19 @@ export default function ProductModal() {
           {/* Product Details */}
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl font-medium">{modalProduct.title}</h2>
+              <h2 className="text-xl font-medium">{product.title}</h2>
               <p className="text-2xl font-medium mt-2">
-                LE
                 {selectedAttribute?.price && selectedAttribute.price > 0
                   ? selectedAttribute.price.toFixed(2)
                   : selectedVariant?.price && selectedVariant.price > 0
                   ? selectedVariant.price.toFixed(2)
-                  : modalProduct.price.local.toFixed(2)}
+                  : product.price.local.toFixed(2)}{" "}
+                {t("le")}
               </p>
             </div>
 
             {/* Variants Selection */}
             <div className="space-y-4">
-              {/* <div>
-                <h3 className="text-sm font-medium mb-2">Variants</h3>
-                <div className="flex flex-wrap gap-2">
-                  {modalProduct.variations.map((variant, index) => (
-                    <Button
-                      key={index}
-                      variant={selectedVariant === variant ? "default" : "outline"}
-                      onClick={() => handleVariantChange(variant)}
-                      className="rounded-full bg-pinkey text-lovely hover:bg-lovely/90 hover:text-creamey"
-                    >
-                      {variant.name}
-                    </Button>
-                  ))}
-                </div>
-              </div> */}
-
               {selectedVariant && (
                 <div>
                   <h3 className="text-sm font-medium mb-2">
@@ -188,8 +181,8 @@ export default function ProductModal() {
 
             {/* Quantity Selection */}
             <div>
-              <div className="text-sm font-medium mb-2">Quantity</div>
-              <div className="flex items-center space-x-2">
+              <div className="text-sm font-medium mb-2">{t("quantity")}</div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
                 <Button
                   className="bg-pinkey hover:bg-lovely/90 hover:text-creamey"
                   variant="outline"
@@ -213,21 +206,6 @@ export default function ProductModal() {
                   <span className="sr-only">Increase quantity</span>
                   <span aria-hidden>+</span>
                 </Button>
-                {/* {selectedAttribute && (
-                  <span
-                    className={`text-sm ml-2 ${
-                      selectedAttribute.stock === 0
-                        ? "text-red-500 font-medium"
-                        : selectedAttribute.stock <= 5
-                        ? "text-orange-500 font-medium"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {selectedAttribute.stock === 0
-                      ? "Out of stock"
-                      : ` Available`}
-                  </span>
-                )} */}
               </div>
             </div>
 
@@ -242,10 +220,10 @@ export default function ProductModal() {
                 (selectedAttribute && selectedAttribute.stock === 0)
               }
             >
-              <ShoppingCart className="mr-2 h-5 w-5" />
+              <ShoppingCart className="mr-2 rtl:ml-2 rtl:mr-0 h-5 w-5" />
               {selectedAttribute && selectedAttribute.stock === 0
-                ? "Out of Stock"
-                : "Add to Cart"}
+                ? t("outOfStock")
+                : t("addToCart")}
             </Button>
           </div>
         </div>

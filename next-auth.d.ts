@@ -5,6 +5,10 @@ declare module "next-auth" {
     id?: string;
     firstName?: string;
     lastName?: string;
+    preferredLanguage?: 'en' | 'ar';
+    whatsAppNumber?: string;
+    weddingDate?: Date | null;
+    onboardingCompleted?: boolean;
     isSubscribed?: boolean;
     subscription?: {
       packageId?: string;
@@ -70,5 +74,9 @@ declare module "next-auth/jwt" {
     sessionId?: string | null;
     deviceFingerprint?: string | null;
     isTesting?: boolean;
+    preferredLanguage?: 'en' | 'ar';
+    whatsAppNumber?: string;
+    weddingDate?: string | null;
+    onboardingCompleted?: boolean;
   }
 }

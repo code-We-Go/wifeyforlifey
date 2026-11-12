@@ -1,12 +1,25 @@
-export function SubscriprtionMail (verificationLink: string){
- return `
+export function SubscriprtionMail(verificationLink: string, lang: "en" | "ar" = "en") {
+  const isAr = lang === "ar";
+  const title = isAr ? "تأكيد بريدك الإلكتروني" : "Confirm your email";
+  const heading = isAr
+    ? "أنتِ على بُعد خطوة واحدة من تفعيل حسابك! 💕"
+    : "You are one step away from creating your account!";
+  const subtext = isAr
+    ? "اضغطي على الزر بالأسفل لتأكيد أن هذا هو بريدكِ الإلكتروني وتفعيل حسابك في Wifey for Lifey."
+    : "click the button below to confirm that's your email.";
+  const buttonText = isAr ? "تأكيد الحساب" : "Confirm";
+  const dir = isAr ? "rtl" : "ltr";
+  const textAlign = isAr ? "right" : "left";
+  const fontFamily = isAr
+    ? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+    : "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
-
+  return `
 <!DOCTYPE html>
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 
 <head>
-	<title></title>
+	<title>${title}</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"><!--[if mso]>
 <xml><w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"><w:DontUseAdvancedTypographyReadingMail/></w:WordDocument>
@@ -20,6 +33,7 @@ export function SubscriprtionMail (verificationLink: string){
 		body {
 			margin: 0;
 			padding: 0;
+			font-family: ${fontFamily};
 		}
 
 		a[x-apple-data-detectors] {
@@ -188,19 +202,19 @@ export function SubscriprtionMail (verificationLink: string){
 									<table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbf3e0; border-radius: 0; color: #000000; width: 680px; margin: 0 auto;" width="680">
 										<tbody>
 											<tr>
-												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 48px; padding-left: 48px; padding-right: 48px; vertical-align: top;">
+												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: ${textAlign}; padding-bottom: 48px; padding-left: 48px; padding-right: 48px; vertical-align: top;">
 													<table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
 															<td class="pad" style="padding-top:12px;text-align:center;width:100%;">
-																<h1 style="margin: 0; color: #d32333; direction: ltr; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 38px;"><span class="tinyMce-placeholder" style="word-break: break-word;">You are one step away from creating your account!</span></h1>
+																<h1 style="margin: 0; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 28px; font-weight: 700; letter-spacing: normal; line-height: 1.3; text-align: center; margin-top: 0; margin-bottom: 0;"><span class="tinyMce-placeholder" style="word-break: break-word;">${heading}</span></h1>
 															</td>
 														</tr>
 													</table>
 													<table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
-																<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	<p style="margin: 0;">click the button below to confirm that's your email.</p>
+																<div style="color:#d32333;direction: ${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:center;">
+																	<p style="margin: 0;">${subtext}</p>
 																</div>
 															</td>
 														</tr>
@@ -209,12 +223,12 @@ export function SubscriprtionMail (verificationLink: string){
 														<tr>
 															<td class="pad" style="padding-top:24px;text-align:center;">
 																<div class="alignment" align="center"><a href="${verificationLink}" target="_blank" style="color:#fbf3e0;text-decoration:none;"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="http://www.example.com/"  style="height:48px;width:91px;v-text-anchor:middle;" arcsize="17%" fillcolor="#d32333">
+<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"  href="http://www.example.com/"  style="height:48px;width:140px;v-text-anchor:middle;" arcsize="17%" fillcolor="#d32333">
 <v:stroke dashstyle="Solid" weight="0px" color="#d32333"/>
 <w:anchorlock/>
 <v:textbox inset="0px,0px,0px,0px">
 <center dir="false" style="color:#fbf3e0;font-family:sans-serif;font-size:16px">
-<![endif]--><span class="button" style="background-color: #d32333; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 8px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #fbf3e0; display: inline-block; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; padding-bottom: 8px; padding-top: 8px; padding-left: 16px; padding-right: 16px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 32px;">Confirm</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
+<![endif]--><span class="button" style="background-color: #d32333; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 8px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #fbf3e0; display: inline-block; font-family: ${fontFamily}; font-size: 16px; font-weight: 600; mso-border-alt: none; padding-bottom: 10px; padding-top: 10px; padding-left: 24px; padding-right: 24px; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span style="word-break: break-word; line-height: 32px;">${buttonText}</span></span><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></a></div>
 															</td>
 														</tr>
 													</table>

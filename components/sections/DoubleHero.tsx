@@ -1,14 +1,15 @@
-"use client";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function DoubleHero() {
+  const t = useTranslations("home.doubleHero");
   return (
     <div className="w-full flex flex-col md:flex-row min-h-[60vh] md:h-[70vh] 2xl:h-[80vh] relative overflow-hidden bg-creamey">
       {/* Left / Upper Section */}
-      <div className="relative flex-1 h-[60vh] md:h-full group overflow-hidden border-b md:border-b-0 md:border-r border-pinkey/30">
+      <div className="relative flex-1 h-[60vh] md:h-full group overflow-hidden border-b md:border-b-0 md:border-e border-pinkey/30">
         {/* Mobile Image */}
         <Image
           src="/weddingPlanningPlanner/mob.jpeg"
@@ -37,7 +38,7 @@ export default function DoubleHero() {
             <Button 
               className="bg-creamey text-lovely hover:bg-creamey border border-lovely md:px-8 px-4 md:py-6 py-4 rounded-full font-bold shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 text-base md:text-lg tracking-wide"
             >
-              Wedding Planning Bestie 
+              {t("weddingBestieButton")}
             </Button>
           </Link>
         </div>
@@ -62,7 +63,7 @@ export default function DoubleHero() {
             <Button 
               className="bg-creamey text-lovely hover:bg-creamey border border-lovely md:px-8 px-4 md:py-6 py-4 rounded-full font-bold shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 text-base md:text-lg tracking-wide"
             >
-              Gehaz Bestie
+              {t("gehazBestieButton")}
             </Button>
           </Link>
         </div>

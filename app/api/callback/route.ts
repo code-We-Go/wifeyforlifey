@@ -13,6 +13,7 @@ import { sendMail } from "@/lib/email";
 import { addContactToBrevo } from "@/lib/brevo";
 import BostaService from "@/app/services/bostaService";
 import { generateEmailBody } from "@/utils/generateOrderEmail";
+import { getUserPreferredLanguage } from "@/utils/getUserPreferredLanguage";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
 import { decreaseStock } from "@/app/utils/productUtils";
@@ -242,6 +243,11 @@ async function handlePartnerSession(
       from: "partners@shopwifeyforlifey.com",
     });
 
+    const clientLang = await getUserPreferredLanguage({
+      email: partnerOrder.clientEmail,
+      fallbackLang: "ar",
+    });
+
     if (String(partnerOrder.sessionId) === "6acfa82b936fe79b1c127ed6") {
       const { getAppliancesMasterClassEmailHtml } = await import(
         "@/utils/AppliancesMasterClassSessionMail"
@@ -258,14 +264,17 @@ async function handlePartnerSession(
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
       });
     } else if (String(partnerOrder.sessionId) === "6a88988e5e832f13002e8653") {
-      const { sexEducationSessionEmailHtml } = await import(
+      const { getSexEducationSessionEmailHtml } = await import(
         "@/utils/SexEducationSessionMail"
       );
       await sendMail({
         to: partnerOrder.clientEmail,
-        subject: "Your Sex Education FAQs Session Booking Confirmation 💕",
+        subject:
+          clientLang === "ar"
+            ? "تأكيد حجز جلسة الثقافة الجنسية 💕"
+            : "Your Sex Education FAQs Session Booking Confirmation 💕",
         name: `${partnerOrder.clientFirstName} ${partnerOrder.clientLastName}`.trim(),
-        body: sexEducationSessionEmailHtml,
+        body: getSexEducationSessionEmailHtml(clientLang),
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
       });
     } else {
@@ -284,10 +293,14 @@ async function handlePartnerSession(
         meetingLink: partnerOrder.meetingLink || partnerOrder.link,
         finalPrice: partnerOrder.finalPrice,
         orderId: partnerOrder._id?.toString(),
+        lang: clientLang,
       });
       await sendMail({
         to: partnerOrder.clientEmail,
-        subject: `Your Booking is Confirmed: ${partnerOrder.sessionTitle} 💕`,
+        subject:
+          clientLang === "ar"
+            ? `تم تأكيد حجزكِ: ${partnerOrder.sessionTitle} 💕`
+            : `Your Booking is Confirmed: ${partnerOrder.sessionTitle} 💕`,
         name: `${partnerOrder.clientFirstName} ${partnerOrder.clientLastName}`.trim(),
         body: clientBody,
         from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
@@ -452,6 +465,8 @@ async function handleSubscription(
       currency: paymentOp.currency,
       paymentMethod: paymentOp.paymentMethod,
       instapayReciept: paymentOp.instapayReciept,
+      edition: paymentOp.edition,
+      editionName: paymentOp.editionName,
       // Bosta fields
       bostaCity: paymentOp.bostaCity,
       bostaCityName: paymentOp.bostaCityName,
@@ -580,62 +595,58 @@ async function handleSubscription(
             <p>A new subscription has been successfully created:</p>
             <ul>
               <li><strong>Email:</strong> ${paymentOp.email}</li>
-              ${
-                updatedSub.isGift
-                  ? `<li><strong>Gift:</strong> Yes</li>
-                  <li><strong>Gift Recipient Email:</strong> ${
-                    updatedSub.giftRecipientEmail || "N/A"
-                  }</li>
-                  <li><strong>Gift Sender Email:</strong> ${
-                    updatedSub.giftSenderEmail || "N/A"
-                  }</li>
-              <li><strong>Special Message:</strong> ${
-                updatedSub.specialMessage || "N/A"
-              }</li>
-               <li><strong>Gift Card:</strong> ${
-                 updatedSub.giftCardName || "N/A"
-               }</li>`
-                  : ""
+              ${updatedSub.isGift
+                ? `<li><strong>Gift:</strong> Yes</li>
+                  <li><strong>Gift Recipient Email:</strong> ${updatedSub.giftRecipientEmail || "N/A"
+                }</li>
+                  <li><strong>Gift Sender Email:</strong> ${updatedSub.giftSenderEmail || "N/A"
+                }</li>
+              <li><strong>Special Message:</strong> ${updatedSub.specialMessage || "N/A"
+                }</li>
+               <li><strong>Gift Card:</strong> ${updatedSub.giftCardName || "N/A"
+                }</li>`
+                : ""
               }
-              <li><strong>Package:</strong> ${
-                (updatedSub.packageID as any)?.name || "N/A"
+              <li><strong>Package:</strong> ${(updatedSub.packageID as any)?.name || "N/A"
               }</li>
-              <li><strong>Contact First Name:</strong> ${
-                updatedSub.billingFirstName || "N/A"
+              ${updatedSub.edition || updatedSub.editionName
+                ? `<li><strong>Planner Edition / لغة البلانر:</strong> <span style="color:#d63384;font-weight:bold;">${updatedSub.editionName ||
+                (updatedSub.edition === "ar"
+                  ? "النسخة العربية (Arabic Edition)"
+                  : "English Edition")
+                }</span></li>`
+                : ""
+              }
+              <li><strong>Contact First Name:</strong> ${updatedSub.billingFirstName || "N/A"
               }</li>
-              <li><strong>Contact Last Name:</strong> ${
-                updatedSub.billingLastName || "N/A"
+              <li><strong>Contact Last Name:</strong> ${updatedSub.billingLastName || "N/A"
               }</li>
               <li><strong>Contact Phone:</strong> ${updatedSub.billingPhone || "N/A"}</li>
               <li><strong>Contact WhatsApp Number:</strong> ${updatedSub.billingWhatsAppNumber || "N/A"}</li>
-              <li><strong>Country:</strong> ${
-                updatedSub.country || "N/A"
+              <li><strong>Country:</strong> ${updatedSub.country || "N/A"
               }</li>
-              ${
-                updatedSub.cart && updatedSub.cart.length > 0
-                  ? `<li><strong>Bundled Cart Items:</strong>
+              ${updatedSub.cart && updatedSub.cart.length > 0
+                ? `<li><strong>Bundled Cart Items:</strong>
                       <ul>
                         ${updatedSub.cart
-                          .map(
-                            (item: any) =>
-                              `<li>${item.productName} x ${item.quantity} ${
-                                item.variant
-                                  ? `(${item.variant.name}${
-                                      item.attributes?.name
-                                        ? `: ${item.attributes.name}`
-                                        : ""
-                                    })`
-                                  : ""
-                              }</li>`
-                          )
-                          .join("")}
+                  .map(
+                    (item: any) =>
+                      `<li>${item.productName} x ${item.quantity} ${item.variant
+                        ? `(${item.variant.name}${item.attributes?.name
+                          ? `: ${item.attributes.name}`
+                          : ""
+                        })`
+                        : ""
+                      }</li>`
+                  )
+                  .join("")}
                       </ul>
                      </li>`
-                  : ""
+                : ""
               }
             </ul>
           `,
-          from: "noreply@shopwifeyforlifey.com",
+            from: "noreply@shopwifeyforlifey.com",
           });
           console.log("Subscription notification email sent successfully");
         } else if (isUpgradeProcess) {
@@ -664,6 +675,10 @@ async function handleSubscription(
           // Send upgrade confirmation email to the subscriber based on target package
           const firstName = updatedSub.firstName || "Wifey";
           const toPkgId = (paymentOp.to as any)?._id?.toString();
+          const subUserLang = await getUserPreferredLanguage({
+            email: updatedSub.email,
+            fallbackLang: "ar",
+          });
 
           if (toPkgId === "6965e63c6df4503dda02c12b") {
             // Wedding Planning Experience upgrade
@@ -673,8 +688,11 @@ async function handleSubscription(
             await sendMail({
               to: updatedSub.email,
               name: firstName,
-              subject: "Your Package Has Been Upgraded! 💖",
-              body: generateWeddingPlanningExperienceUpgradeEmail(firstName),
+              subject:
+                subUserLang === "ar"
+                  ? "تم ترقية باقتكِ بنجاح! 💖"
+                  : "Your Package Has Been Upgraded! 💖",
+              body: generateWeddingPlanningExperienceUpgradeEmail(firstName, subUserLang),
               from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
             console.log("Wedding Planning upgrade email sent to", updatedSub.email);
@@ -694,8 +712,11 @@ async function handleSubscription(
             await sendMail({
               to: updatedSub.email,
               name: firstName,
-              subject: "Your Package Has Been Upgraded! 💖",
-              body: generateGehazBestieExperienceUpgradeEmail(firstName),
+              subject:
+                subUserLang === "ar"
+                  ? "تم ترقية باقتكِ بنجاح! 💖"
+                  : "Your Package Has Been Upgraded! 💖",
+              body: generateGehazBestieExperienceUpgradeEmail(firstName, subUserLang),
               from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
             });
             console.log("Gehaz Bestie upgrade email sent to", updatedSub.email);
@@ -735,11 +756,18 @@ async function handleSubscription(
           const { giftMail } = await import("@/utils/giftMail");
           const recipientEmail = updatedSub.giftSenderEmail || paymentOp.giftSenderEmail || paymentOp.email;
           const senderName = updatedSub.billingFirstName || paymentOp.billingFirstName || "Bestie";
+          const purchaserLang = await getUserPreferredLanguage({
+            email: recipientEmail,
+            fallbackLang: "ar",
+          });
           await sendMail({
             to: recipientEmail,
             name: senderName,
-            subject: "Thank You for Your Gift Purchase! 🎁",
-            body: giftMail(updatedSub._id.toString(), updatedSub.cart),
+            subject:
+              purchaserLang === "ar"
+                ? "شكراً لشرائكِ هدية مميزة! 🎁💖"
+                : "Thank You for Your Gift Purchase! 🎁",
+            body: giftMail(updatedSub._id.toString(), updatedSub.cart, purchaserLang),
             from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
           });
           console.log("Gift email sent successfully to purchaser:", recipientEmail);
@@ -758,6 +786,10 @@ async function handleSubscription(
             updatedSub.lastName || paymentOp.lastName || updatedSub.billingLastName || paymentOp.billingLastName || "";
           const targetPhone =
             updatedSub.phone || updatedSub.billingPhone || paymentOp.phone || "";
+          const targetLang = await getUserPreferredLanguage({
+            email: targetEmail,
+            fallbackLang: "ar",
+          });
 
           if (subPkgId === "687396821b4da119eb1c13fe") {
             // Full Experience (Brevo List 5)
@@ -769,8 +801,10 @@ async function handleSubscription(
                 to: targetEmail,
                 name: targetFirstName,
                 subject:
-                  "You're in, beautiful! Welcome to the Wifeys community 💗",
-                body: generateWelcomeEmail(targetFirstName, updatedSub),
+                  targetLang === "ar"
+                    ? "نورتي مجتمع وايفي يا أحلى عروسة! 💗"
+                    : "You're in, beautiful! Welcome to the Wifeys community 💗",
+                body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
               console.log(
@@ -797,8 +831,11 @@ async function handleSubscription(
               await sendMail({
                 to: targetEmail,
                 name: targetFirstName,
-                subject: "Welcome to the Mini Wifey Experience! 💕",
-                body: generateMiniExperienceMail(targetFirstName, updatedSub),
+                subject:
+                  targetLang === "ar"
+                    ? "أهلاً بيكي في رحلة جهازك المصغّرة! 💕"
+                    : "Welcome to the Mini Wifey Experience! 💕",
+                body: generateMiniExperienceMail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
               console.log(
@@ -825,8 +862,11 @@ async function handleSubscription(
               await sendMail({
                 to: targetEmail,
                 name: targetFirstName,
-                subject: "Welcome to the Mini Wedding Planning Experience! 💕",
-                body: generateWelcomeEmail(targetFirstName, updatedSub),
+                subject:
+                  targetLang === "ar"
+                    ? "أهلاً بيكي في فرحك مع وايفى! 💕"
+                    : "Welcome to the Mini Wedding Planning Experience! 💕",
+                body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
               console.log(
@@ -853,8 +893,11 @@ async function handleSubscription(
               await sendMail({
                 to: targetEmail,
                 name: targetFirstName,
-                subject: "Welcome to the Wedding Planning Experience! 💕",
-                body: generateWelcomeEmail(targetFirstName, updatedSub),
+                subject:
+                  targetLang === "ar"
+                    ? "أهلاً بيكي في فرحك مع وايفى! 💕"
+                    : "Welcome to the Wedding Planning Experience! 💕",
+                body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
               });
               console.log(
@@ -885,9 +928,9 @@ async function handleSubscription(
     // Link user account (ensure subscription is in the array)
     const subscribedUser = (updatedSub?._id && subscriptionEmail)
       ? await UserModel.findOneAndUpdate(
-          { email: subscriptionEmail },
-          { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
-        )
+        { email: subscriptionEmail },
+        { isSubscribed: true, $addToSet: { subscriptions: updatedSub._id } }
+      )
       : null;
 
     // (subscriptionPayment is already marked "confirmed" right after creation above)
@@ -897,24 +940,21 @@ async function handleSubscription(
       const giftParam = updatedSub?.isGift ? "&gift=true" : "";
       if (
         (updatedSub?.packageID as any)?._id?.toString() ===
-        "68bf6ae9c4d5c1af12cdcd37" || 
+        "68bf6ae9c4d5c1af12cdcd37" ||
         (updatedSub?.packageID as any)?._id?.toString() ===
         "6a2d9aec3def6ce76dc7babc"
       ) {
-        finalRedirect = `payment/success?subscription=mini${
-          subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}${giftParam}`;
+        finalRedirect = `payment/success?subscription=mini${subscribedUser ? "&account=true" : ""
+          }&process=${paymentOp.process}${giftParam}`;
       } else if (
         (updatedSub?.packageID as any)?._id?.toString() ===
         "6965e63c6df4503dda02c12b"
       ) {
-        finalRedirect = `payment/success?subscription=wedding${
-          subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}${giftParam}`;
+        finalRedirect = `payment/success?subscription=wedding${subscribedUser ? "&account=true" : ""
+          }&process=${paymentOp.process}${giftParam}`;
       } else {
-        finalRedirect = `payment/success?subscription=true${
-          subscribedUser ? "&account=true" : ""
-        }&process=${paymentOp.process}${giftParam}`;
+        finalRedirect = `payment/success?subscription=true${subscribedUser ? "&account=true" : ""
+          }&process=${paymentOp.process}${giftParam}`;
       }
     }
   }
@@ -986,11 +1026,19 @@ async function handleOrder(
     console.error("Bosta integration error:", bostaError);
   }
 
+  const orderCustomerLang = await getUserPreferredLanguage({
+    email: res.email,
+    fallbackLang: "ar",
+  });
+
   // Send order confirmation email to customer
   await sendMail({
     to: res.email,
     name: res.firstName + " " + res.lastName,
-    subject: "Order Confirmation",
+    subject:
+      orderCustomerLang === "ar"
+        ? "تأكيد طلبكِ من Wifey for Lifey 💕"
+        : "Order Confirmation",
     body: generateEmailBody(
       res.cart,
       res.firstName,
@@ -1008,7 +1056,8 @@ async function handleOrder(
       res.state,
       res.city,
       res.postalZip,
-      res.apartment
+      res.apartment,
+      orderCustomerLang
     ),
     from: "orders@shopwifeyforlifey.com",
   });
@@ -1035,7 +1084,8 @@ async function handleOrder(
       res.state,
       res.city,
       res.postalZip,
-      res.apartment
+      res.apartment,
+      "en"
     ),
     from: "orders@shopwifeyforlifey.com",
   });
@@ -1047,8 +1097,11 @@ async function handleOrder(
     await sendMail({
       to: res.email,
       name: res.firstName,
-      subject: "Thank You for Your Gift Purchase! 🎁",
-      body: giftMail(res._id.toString(), res.cart),
+      subject:
+        orderCustomerLang === "ar"
+          ? "شكراً لشرائكِ هدية مميزة! 🎁💖"
+          : "Thank You for Your Gift Purchase! 🎁",
+      body: giftMail(res._id.toString(), res.cart, orderCustomerLang),
       from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
     });
   }

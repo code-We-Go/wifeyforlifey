@@ -49,11 +49,20 @@ export async function GET(request: Request) {
     
 
     
-    // Map populated categoryID back to string ID for frontend compatibility
+    const locale = searchParams.get('locale') || searchParams.get('lang') || 'en';
+    
+    // Map populated categoryID back to string ID for frontend compatibility and localize
     const responseData = subcategories.map((sub: any) => {
       const subObj = sub.toObject ? sub.toObject() : sub;
       if (subObj.categoryID && typeof subObj.categoryID === 'object') {
         subObj.categoryID = subObj.categoryID._id.toString();
+      }
+      if (locale === 'ar' && subObj.translations?.ar?.subCategoryName) {
+        subObj.originalSubCategoryName = subObj.subCategoryName;
+        subObj.subCategoryName = subObj.translations.ar.subCategoryName;
+        if (subObj.translations.ar.description) {
+          subObj.description = subObj.translations.ar.description;
+        }
       }
       return subObj;
     });

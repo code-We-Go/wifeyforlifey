@@ -1,11 +1,61 @@
-export function groomEmail(GroomName: string, BrideName: string, hasAccount: boolean, BrideMessage: string) {
-  return `<!DOCTYPE html>
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+export function groomEmail(
+	GroomName: string,
+	BrideName: string,
+	hasAccount: boolean,
+	BrideMessage: string,
+	lang: "en" | "ar" = "en"
+) {
+	const isAr = lang === "ar";
+	const dir = isAr ? "rtl" : "ltr";
+	const textAlign = isAr ? "right" : "left";
+	const fontFamily = isAr
+		? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+		: "Helvetica Neue, Helvetica, Arial, sans-serif";
+
+	const greeting = isAr ? `مرحباً ${GroomName}،` : `Hi ${GroomName},`;
+	const inviteText = isAr
+		? `قامت ${BrideName} بدعوتك للانضمام إلى فرحك مع وايفى على Wifey For Lifey 💍`
+		: `${BrideName} has invited you to join her wedding planning experience on Wifey For Lifey 💍`;
+	const accessText = isAr
+		? `أصبح بإمكانك الآن الوصول إلى باقة فرحها.<br><br>${hasAccount
+			? "يمكنك الاستفادة من مزايا الباقة مباشرة باستخدام حسابك الحالي."
+			: "للبدء، يرجى إنشاء حسابك من خلال زر الدعوة بالأسفل."
+		}`
+		: `You now have access to her wedding package.<br><br>${hasAccount
+			? "You can access some benefits of her package directly using your existing account."
+			: "To get started, please create your account using the invitation button below."
+		}`;
+	const buttonText = isAr
+		? hasAccount
+			? "تسجيل الدخول لحسابك"
+			: "إنشاء حساب الآن"
+		: hasAccount
+			? "Login to Your Account"
+			: "Sign Up Now";
+	const personalMsgLabel = isAr
+		? `رسالة خاصة من ${BrideName}:`
+		: `Personal message from ${BrideName}:`;
+	const signoff = isAr
+		? "مع خالص التحيات،<br>فريق Wifey For Lifey."
+		: "Best regards,<br>The  Wifey For Lifey Team.";
+
+	return `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 
 <head>
 	<title></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"><!--[if mso]>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: ${fontFamily};
+		}<!--[if mso]>
 <xml><w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"><w:DontUseAdvancedTypographyReadingMail/></w:WordDocument>
 <o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml>
 <![endif]--><!--[if !mso]><!--><!--<![endif]-->
@@ -173,23 +223,23 @@ export function groomEmail(GroomName: string, BrideName: string, hasAccount: boo
 									<table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbf3e0; border-radius: 0; color: #000000; width: 680px; margin: 0 auto;" width="680">
 										<tbody>
 											<tr>
-												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;">
+												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: ${textAlign}; vertical-align: top;">
 													<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
 															<td class="col-pad" style="padding-bottom:48px;padding-left:48px;padding-right:48px;">
 																<table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 																	<tr>
 																		<td class="pad" style="width:100%;padding-top:12px;" align="center">
-																			<h3 style="margin: 0; color: #618982; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 29px;">Hi ${GroomName},</h3>
+																			<h3 style="margin: 0; color: #618982; direction: ${dir}; font-family: ${fontFamily}; font-size: 24px; font-weight: 700; letter-spacing: normal; line-height: 1.3; text-align: ${textAlign}; margin-top: 0; margin-bottom: 0;">${greeting}</h3>
 																		</td>
 																	</tr>
 																</table>
 																<table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad" style="padding-top:10px;padding-bottom:10px;">
-																			<div style="color:#618982;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				<p style="margin: 0; margin-bottom: 16px;">${BrideName} has invited you to join her wedding planning experience on Wifey For Lifey 💍</p>
-																				<p style="margin: 0;">You now have access to her wedding package.<br><br>${hasAccount ? 'You can access some benefits of her package directly using your existing account.' : 'To get started, please create your account using the invitation button below.'}</p>
+																			<div style="color:#618982;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				<p style="margin: 0; margin-bottom: 16px;">${inviteText}</p>
+																				<p style="margin: 0;">${accessText}</p>
 																			</div>
 																		</td>
 																	</tr>
@@ -197,21 +247,21 @@ export function groomEmail(GroomName: string, BrideName: string, hasAccount: boo
 																<table class="button_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 																	<tr>
 																		<td class="pad" align="center"><!--[if mso]>
-<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"   style="height:41px;width:111px;v-text-anchor:middle;" arcsize="10%" fillcolor="#fb89a9">
+<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"   style="height:41px;width:160px;v-text-anchor:middle;" arcsize="10%" fillcolor="#fb89a9">
 <v:stroke dashstyle="Solid" weight="0px" color="#fb89a9"/>
 <w:anchorlock/>
 <v:textbox inset="0px,0px,0px,0px">
 <center dir="false" style="color:#ffffff;font-family:sans-serif;font-size:16px">
-<![endif]--><a href="${hasAccount ? process.env.NEXTAUTH_URL + '/login' : process.env.NEXTAUTH_URL + '/register'}" target="_blank" style="text-decoration:none;"><span class="button" style="background-color: #fb89a9; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; mso-border-alt: none; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span class="btn-pad" style="word-break: break-word; padding-left: 20px; padding-right: 20px; padding-top: 5px; padding-bottom: 5px; display: block;"><span style="word-break: break-word; line-height: 32px;">${hasAccount ? 'Login to Your Account' : 'Sign Up Now'}</span></span></span></a><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></td>
+<![endif]--><a href="${hasAccount ? process.env.NEXTAUTH_URL + '/login' : process.env.NEXTAUTH_URL + '/register'}" target="_blank" style="text-decoration:none;"><span class="button" style="background-color: #fb89a9; border-bottom: 0px solid transparent; border-left: 0px solid transparent; border-radius: 4px; border-right: 0px solid transparent; border-top: 0px solid transparent; color: #ffffff; display: inline-block; font-family: ${fontFamily}; font-size: 16px; font-weight: 600; mso-border-alt: none; text-align: center; width: auto; word-break: keep-all; letter-spacing: normal;"><span class="btn-pad" style="word-break: break-word; padding-left: 20px; padding-right: 20px; padding-top: 8px; padding-bottom: 8px; display: block;"><span style="word-break: break-word; line-height: 32px;">${buttonText}</span></span></span></a><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></td>
 																	</tr>
 																</table>
 																<table class="paragraph_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
-																			<div style="color:#618982;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																				${BrideMessage ? `<p style="margin: 0; margin-bottom: 16px;">Personal message from ${BrideName}:</p>
+																			<div style="color:#618982;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																				${BrideMessage ? `<p style="margin: 0; margin-bottom: 16px;">${personalMsgLabel}</p>
 																				<p style="margin: 0; margin-bottom: 16px;">“${BrideMessage}”</p>` : ''}
-																				<p style="margin: 0;">Best regards,<br>The&nbsp; Wifey For Lifey Team.</p>
+																				<p style="margin: 0;">${signoff}</p>
 																			</div>
 																		</td>
 																	</tr>

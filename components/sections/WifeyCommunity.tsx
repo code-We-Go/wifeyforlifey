@@ -32,7 +32,7 @@ const socialMediaItems = [
     type: "tiktok",
     thumbnail: "https://p16-sign-sg.tiktokcdn.com/tos-alisg-p-0037/ocHEii1SIKfI4D9CR68DfD8jHeAFDjRAD82RIz~tplv-tiktokx-origin.image?dr=14575&x-expires=1769684400&x-signature=4n8bF2t8yeEsZYCvQsQffO1HBn8%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"
   },
-    // 6 =>4
+  // 6 =>4
   {
     link: "https://vt.tiktok.com/ZSayBtUJL/",
     videoId: "7567527880519896327",
@@ -46,7 +46,7 @@ const socialMediaItems = [
     type: "tiktok",
     thumbnail: "https://p16-sign-sg.tiktokcdn.com/tos-alisg-p-0037/oYfzunRABCBE7EgNeBD3UpIobIcHkkRPpFSE1h~tplv-tiktokx-origin.image?dr=14575&x-expires=1769684400&x-signature=nrJ0Tdqk3QMq%2FDTv0Kitrx20ZUI%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"
   },
-    // 3 =>6
+  // 3 =>6
   {
     link: "https://vt.tiktok.com/ZSayBMouU/",
     videoId: "7575628629506411796",
@@ -165,93 +165,97 @@ const socialMediaItems = [
     type: "tiktok",
     thumbnail: "https://p16-sign-sg.tiktokcdn.com/tos-alisg-p-0037/owMRfABVxX2AviIU0Lh2zDqCwIzoAh1IRN5Ci9~tplv-tiktokx-dmt-logom:tos-alisg-i-0068/ow9VBfxUCiUKIqX5mA0wiBRoE3ICAADGCAnA9s.image?dr=14573&x-expires=1769684400&x-signature=0ZX7fC7zWp6S7T1ZZAzp%2FXqIbqE%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"
   },
- 
+
 ];
+import { useLocale, useTranslations } from "next-intl";
 
 export default function WifeyCommunity() {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const t = useTranslations("home.community");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [selectedVideo, setSelectedVideo] = useState<{ id: string; type: string } | null>(null);
-  
+
   const [emblaRef] = useEmblaCarousel(
-    { 
-      loop: true, 
+    {
+      loop: true,
       dragFree: true,
       align: "center",
-      containScroll: "trimSnaps"
+      containScroll: "trimSnaps",
+      direction: isRtl ? "rtl" : "ltr",
     },
     [
-      AutoScroll({ 
-        playOnInit: true, 
-        stopOnInteraction: true, 
+      AutoScroll({
+        playOnInit: true,
+        stopOnInteraction: true,
         stopOnMouseEnter: true, // Pause on hover
-        speed: 1.5 
+        speed: 1.5
       })
     ]
   );
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className={`py-20 bg-pinkey overflow-hidden relative transition-all duration-1000 ease-out ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
+      className={`py-20 bg-pinkey overflow-hidden relative transition-all duration-1000 ease-out ${isVisible
+          ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-10'
-      }`}
+        }`}
     >
       <div className="container mx-auto px-4 mb-12 text-center">
         <h2 className={`${thirdFont.className} normal-case ${headerStyle} text-lovely mb-4`}>
-          #WifeyForLifeyCommunity
+          {t("hashtag")}
         </h2>
         <p className={`${subHeaderStyle} text-lovely/80 text-lg md:text-xl max-w-2xl mx-auto`}>
-          See how our community is celebrating their journey on TikTok.
+          {t("subtitle")}
         </p>
       </div>
 
       <div className="embla w-full" ref={emblaRef}>
-        <div className="embla__container flex gap-6 pl-4">
+        <div className="embla__container flex gap-6 ps-4">
           {socialMediaItems.map((item, index) => (
-            <div 
-              className="embla__slide flex-[0_0_260px] md:flex-[0_0_300px]" 
+            <div
+              className="embla__slide flex-[0_0_260px] md:flex-[0_0_300px]"
               key={index}
             >
-              <SocialCard 
-                item={item} 
-                index={index + 1} 
-                onPlay={() => setSelectedVideo({ id: item.videoId, type: item.type })} 
+              <SocialCard
+                item={item}
+                index={index + 1}
+                onPlay={() => setSelectedVideo({ id: item.videoId, type: item.type })}
               />
             </div>
           ))}
         </div>
       </div>
-      
+
       {/* Decorative gradient edges */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-creamey via-creamey/80 to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-creamey via-creamey/80 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 start-0 w-24 bg-gradient-to-r rtl:bg-gradient-to-l from-creamey via-creamey/80 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 end-0 w-24 bg-gradient-to-l rtl:bg-gradient-to-r from-creamey via-creamey/80 to-transparent z-10" />
 
       {/* Video Dialog */}
       <Dialog open={!!selectedVideo} onOpenChange={(open) => !open && setSelectedVideo(null)}>
         <DialogContent className="sm:max-w-md md:max-w-xl p-0 h-[90vh] bg-black border-none overflow-hidden flex items-center justify-center">
-            <DialogTitle className="sr-only">Social Media Video</DialogTitle>
-            {selectedVideo && (
-                <div className="w-full h-full flex items-center justify-center">
-                   {selectedVideo.type === 'tiktok' ? (
-                       <iframe
-                         src={`https://www.tiktok.com/embed/v2/${selectedVideo.id}?autoplay=1&mute=1`}
-                         className="w-full h-full"
-                         allow="autoplay; encrypted-media; fullscreen;"
-                         title="TikTok Video"
-                       ></iframe>
-                   ) : (
-                       <iframe
-                         key={selectedVideo.id}
-                         src={`https://www.instagram.com/reel/${selectedVideo.id}/embed/captioned/`}
-                         className="w-full h-full bg-white"
-                         allow="autoplay; encrypted-media; fullscreen;"
-                         title="Instagram Video"
-                       ></iframe>
-                   )}
-                </div>
-            )}
+          <DialogTitle className="sr-only">Social Media Video</DialogTitle>
+          {selectedVideo && (
+            <div className="w-full h-full flex items-center justify-center">
+              {selectedVideo.type === 'tiktok' ? (
+                <iframe
+                  src={`https://www.tiktok.com/player/v1/${selectedVideo.id}?embed_from=oembed&music_info=1&description=1&autoplay=1&muted=1`}
+                  className="w-full h-full"
+                  allow="autoplay; encrypted-media; fullscreen;"
+                  title="TikTok Video"
+                ></iframe>
+              ) : (
+                <iframe
+                  key={selectedVideo.id}
+                  src={`https://www.instagram.com/reel/${selectedVideo.id}/embed/captioned/`}
+                  className="w-full h-full bg-white"
+                  allow="autoplay; encrypted-media; fullscreen;"
+                  title="Instagram Video"
+                ></iframe>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </section>
@@ -263,7 +267,7 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
   const [imgError, setImgError] = useState(false);
   const [dynamicThumbnail, setDynamicThumbnail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Fetch fresh thumbnail from our API route
   React.useEffect(() => {
     if (isTiktok) {
@@ -273,13 +277,13 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
           const response = await fetch(
             `/api/tiktok-thumbnail?url=${encodeURIComponent(item.link)}`
           );
-          
+
           if (!response.ok) {
             console.error('Failed to fetch thumbnail:', response.status);
             setIsLoading(false);
             return;
           }
-          
+
           const data = await response.json();
           if (data.thumbnail_url) {
             setDynamicThumbnail(data.thumbnail_url);
@@ -297,7 +301,7 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
       setIsLoading(false);
     }
   }, [isTiktok, item.link]);
-  
+
   if (item.type === 'instagram') {
     return (
       <div className="block relative w-full aspect-[9/16] bg-white rounded-3xl overflow-hidden shadow-md border-2 border-lovely/5">
@@ -315,7 +319,7 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
   const thumbnailUrl = dynamicThumbnail || item.thumbnail;
 
   return (
-    <button 
+    <button
       onClick={onPlay}
       className="group block relative w-full aspect-[9/16] bg-white rounded-3xl overflow-hidden shadow-md border-2 border-lovely/5 hover:border-lovely/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-left"
     >
@@ -327,11 +331,11 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
           </div>
         </div>
       )}
-      
+
       {/* Background Gradient or Image */}
       {!imgError && thumbnailUrl ? (
-        <img 
-          src={thumbnailUrl} 
+        <img
+          src={thumbnailUrl}
           alt={`Thumbnail for video ${index}`}
           className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
           onError={() => setImgError(true)}
@@ -339,39 +343,39 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
         />
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${isTiktok ? 'from-black/80 via-black/90 to-[#ff0050]/20' : 'from-purple-500/80 via-pink-500/80 to-orange-500/80'} transition-colors duration-500 flex items-center justify-center`}>
-            {/* Fallback pattern */}
-            <div className="opacity-20 transform rotate-12 scale-150">
-               {isTiktok ? <FaTiktok size={100} color="white" /> : <FaInstagram size={100} color="white" />}
-            </div>
+          {/* Fallback pattern */}
+          <div className="opacity-20 transform rotate-12 scale-150">
+            {isTiktok ? <FaTiktok size={100} color="white" /> : <FaInstagram size={100} color="white" />}
+          </div>
         </div>
       )}
-      
+
       {/* Filter Overlay for readability */}
       <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-300"></div>
 
       {/* Center Icon */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 group-hover:scale-110 transition-transform duration-300">
         <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm ${isTiktok ? 'bg-black/80 text-white' : 'bg-white/90 text-[#E1306C]'}`}>
-             {isTiktok ? <FaTiktok size={32} /> : <FaInstagram size={32} />}
+          {isTiktok ? <FaTiktok size={32} /> : <FaInstagram size={32} />}
         </div>
         <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-lovely opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-sm">
-            <FaPlay size={16} className="ml-1" />
+          <FaPlay size={16} className="ml-1" />
         </div>
       </div>
 
       {/* Content */}
       <div className="absolute top-4 right-4 z-10">
-         <span className="bg-white/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-lovely shadow-sm border border-lovely/10">
-            #{index}
-         </span>
+        <span className="bg-white/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-lovely shadow-sm border border-lovely/10">
+          #{index}
+        </span>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 via-black/30 to-transparent pt-20 flex flex-col justify-end">
         <span className="text-white font-bold text-sm tracking-wide uppercase opacity-90 mb-1 drop-shadow-md">
-            {isTiktok ? 'TikTok' : 'Instagram'}
+          {isTiktok ? 'TikTok' : 'Instagram'}
         </span>
         <span className="text-white text-xs font-medium opacity-75 drop-shadow-sm">
-            Tap to Watch
+          Tap to Watch
         </span>
       </div>
     </button>

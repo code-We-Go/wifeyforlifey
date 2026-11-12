@@ -11,7 +11,7 @@ import mongoose from "mongoose";
 
 // GET - Fetch all blogs with pagination, search, and filtering
 export async function GET(req: Request) {
-    await ConnectDB();
+  await ConnectDB();
 
   try {
     const { searchParams } = new URL(req.url);
@@ -29,12 +29,20 @@ export async function GET(req: Request) {
     // Build search query
     const searchQuery: any = {};
 
-    // Text search in title, content, and excerpt
+    // Text search in title, content, excerpt, and v2 blocks (English & Arabic)
     if (search) {
       searchQuery.$or = [
         { title: { $regex: search, $options: "i" } },
+        { "v2.titleAR": { $regex: search, $options: "i" } },
+        { titleAR: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } },
         { excerpt: { $regex: search, $options: "i" } },
+        { "v2.excerptAR": { $regex: search, $options: "i" } },
+        { excerptAR: { $regex: search, $options: "i" } },
+        { "v2.blocks.textHtml": { $regex: search, $options: "i" } },
+        { "v2.blocks.arabicContent": { $regex: search, $options: "i" } },
+        { "blocks.textHtml": { $regex: search, $options: "i" } },
+        { "blocks.arabicContent": { $regex: search, $options: "i" } },
       ];
     }
 
@@ -65,8 +73,9 @@ export async function GET(req: Request) {
 
     // Get blogs with population
     const blogs = await BlogModel.find(searchQuery)
-      .select("title excerpt slug featuredImage categories tags viewCount mobileViewCount webViewCount")
-
+      .select(
+        "title excerpt slug featuredImage tikTokVideoUrl categories tags viewCount mobileViewCount webViewCount status featured publishedAt createdAt content translations v2"
+      )
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -91,15 +100,55 @@ export async function GET(req: Request) {
 
 // POST - Create a new blog
 export async function POST(req: Request) {
+  await ConnectDB();
   try {
     const data = await req.json();
 
-    // Validate required fields
-    if (!data.title || !data.content || !data.excerpt) {
+    const incomingBlocks = data.v2?.blocks || data.blocks;
+    const hasBlocks = Array.isArray(incomingBlocks) && incomingBlocks.length > 0;
+    const hasContent =
+      typeof data.content === "string" && data.content.trim().length > 0;
+
+    // Validate required fields (allow blocks OR content)
+    if (!data.title || (!hasContent && !hasBlocks)) {
       return NextResponse.json(
-        { error: "Title, content, excerpt, and author are required" },
+        { error: "Title and content (or blocks) are required" },
         { status: 400 }
       );
+    }
+
+    // Auto-serialize blocks into content fallback if content is missing
+    if (!hasContent && hasBlocks) {
+      data.content =
+        incomingBlocks
+          .map((b: any) => (b.type === "image" ? "" : b.textHtml || ""))
+          .filter((s: string) => s && s.trim().length > 0)
+          .join("\n<hr/>\n") || "<p></p>";
+    }
+
+    const titleAR = data.v2?.titleAR ?? data.titleAR;
+    const excerptAR = data.v2?.excerptAR ?? data.excerptAR;
+
+    // Ensure v2 namespace is properly structured
+    if (hasBlocks || titleAR || excerptAR) {
+      data.v2 = {
+        ...(data.v2 || {}),
+        ...(hasBlocks ? { blocks: incomingBlocks } : {}),
+        ...(titleAR ? { titleAR } : {}),
+        ...(excerptAR ? { excerptAR } : {}),
+      };
+    }
+
+    // Sync translations.ar with titleAR / excerptAR for backward compatibility with mobile app
+    if (titleAR || excerptAR) {
+      data.translations = {
+        ...(data.translations || {}),
+        ar: {
+          ...(data.translations?.ar || {}),
+          ...(titleAR ? { title: titleAR } : {}),
+          ...(excerptAR ? { excerpt: excerptAR } : {}),
+        },
+      };
     }
 
     // Check if author exists
@@ -146,6 +195,7 @@ export async function POST(req: Request) {
 
 // PUT - Update a blog
 export async function PUT(req: Request) {
+  await ConnectDB();
   try {
     const { searchParams } = new URL(req.url);
     const blogId = searchParams.get("id");
@@ -158,6 +208,31 @@ export async function PUT(req: Request) {
     }
 
     const data = await req.json();
+
+    const titleAR = data.v2?.titleAR ?? data.titleAR;
+    const excerptAR = data.v2?.excerptAR ?? data.excerptAR;
+    const incomingBlocks = data.v2?.blocks || data.blocks;
+
+    if (incomingBlocks !== undefined || titleAR !== undefined || excerptAR !== undefined) {
+      data.v2 = {
+        ...(data.v2 || {}),
+        ...(incomingBlocks !== undefined ? { blocks: incomingBlocks } : {}),
+        ...(titleAR !== undefined ? { titleAR } : {}),
+        ...(excerptAR !== undefined ? { excerptAR } : {}),
+      };
+    }
+
+    // Sync translations.ar with titleAR / excerptAR if provided
+    if (titleAR !== undefined || excerptAR !== undefined) {
+      data.translations = {
+        ...(data.translations || {}),
+        ar: {
+          ...(data.translations?.ar || {}),
+          ...(titleAR !== undefined ? { title: titleAR } : {}),
+          ...(excerptAR !== undefined ? { excerpt: excerptAR } : {}),
+        },
+      };
+    }
 
     // If slug is being updated, check for uniqueness
     if (data.slug) {
@@ -176,6 +251,7 @@ export async function PUT(req: Request) {
     const updatedBlog = await BlogModel.findByIdAndUpdate(blogId, data, {
       new: true,
       runValidators: true,
+      strict: false,
     });
 
     if (!updatedBlog) {

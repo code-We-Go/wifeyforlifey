@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Lock, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +8,15 @@ import { VideoPlaylist } from "@/app/interfaces/interfaces";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { useTranslations, useLocale } from "next-intl";
 
 interface VideoCardProps {
   playlist: VideoPlaylist;
 }
 
 export default function VideoCard({ playlist }: VideoCardProps) {
+  const t = useTranslations("videoCard");
+  const locale = useLocale();
   const { data: session, status } = useSession();
   const isSubscribed = (session?.user as any)?.isSubscribed || false;
   const [watchedCount, setWatchedCount] = useState(0);
@@ -65,28 +68,51 @@ export default function VideoCard({ playlist }: VideoCardProps) {
           <div className="flex items-center h-full justify-between mb-2">
             {playlist.category && (
               <Badge variant="destructive" className="font-normal">
-                {playlist.category.charAt(0).toUpperCase() +
-                  playlist.category.slice(1)}
+                {playlist.category === "Gehaz Bestie Experience"
+                  ? locale === "ar"
+                    ? "تجربة جهاز البيستي"
+                    : playlist.category
+                  : playlist.category === "Wedding Planning Experience"
+                  ? locale === "ar"
+                    ? "تجربة تخطيط الفرح"
+                    : playlist.category
+                  : locale === "ar" && playlist.translations?.ar?.category
+                  ? playlist.translations.ar.category
+                  : playlist.category.charAt(0).toUpperCase() +
+                    playlist.category.slice(1)}
               </Badge>
             )}
             {!playlist.isPublic && (
               <Badge variant="outline" className="font-normal">
-                Premium
+                {t("premium")}
               </Badge>
             )}
           </div>
           <h3 className="font-medium text-lovely line-clamp-1">
-            {playlist.title}
+            {(locale === "ar" && playlist.translations?.ar?.title) ||
+              playlist.title}
           </h3>
           <div className="text-sm min-h-[4vh] md:min-h-[10vh] text-lovely/90 mt-1 line-clamp-2">
-            <p>{playlist.description}</p>
+            <p>
+              {(() => {
+                if (
+                  locale === "ar" &&
+                  playlist.translations?.ar?.description?.length
+                ) {
+                  return playlist.translations.ar.description.join(" ");
+                }
+                return Array.isArray(playlist.description)
+                  ? playlist.description.join(" ")
+                  : playlist.description;
+              })()}
+            </p>
           </div>
           {/* Progress section (shown for authenticated users) */}
           {status === "authenticated" && isSubscribed && (
             <div className="mt-2">
               <div className="flex items-center justify-between text-xs text-lovely/90 mb-1">
                 <span>
-                  Watched {watchedCount} of {totalVideos}
+                  {t("watched", { count: watchedCount, total: totalVideos })}
                 </span>
                 <span>{percent}%</span>
               </div>
@@ -94,8 +120,7 @@ export default function VideoCard({ playlist }: VideoCardProps) {
             </div>
           )}
           <div className="mt-3 mb-2 text-lovely text-sm">
-            {playlist.videos?.length || 0}{" "}
-            {(playlist.videos?.length || 0) === 1 ? "video" : "videos"}
+            {t("videoCount", { count: playlist.videos?.length || 0 })}
           </div>
         </div>
       </div>

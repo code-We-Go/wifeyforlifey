@@ -1,13 +1,81 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { CommentUser } from "../interfaces/interfaces";
 
+// Define block-based content types
+export type BlockLayout = "img-left" | "img-block";
+
+export interface IContentBlock {
+  type: "text" | "image" | "imageText" | "carousel" | "embed";
+  textHtml?: string;
+  imageUrl?: string;
+  url?: string; // For embed (TikTok, Instagram, YouTube)
+  caption?: string;
+  alt?: string;
+  layout?: BlockLayout; // img-left = image beside text, img-block = image above text
+  arabicContent?: string; // Optional field for Arabic content
+  images?: { imageUrl: string; alt?: string; caption?: string }[];
+}
+
+export interface IContentImage {
+  imageUrl?: string;
+  alt?: string;
+  caption?: string;
+}
+
+const ContentImageSchema = new Schema(
+  {
+    imageUrl: { type: String },
+    alt: { type: String },
+    caption: { type: String },
+  } as any,
+  { _id: false }
+);
+
+const ContentBlockSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ["text", "image", "imageText", "carousel", "embed"],
+      required: true,
+    },
+    textHtml: { type: String },
+    imageUrl: { type: String },
+    url: { type: String },
+    caption: { type: String },
+    arabicContent: { type: String },
+    alt: { type: String },
+    images: { type: [ContentImageSchema] },
+    layout: {
+      type: String,
+      enum: ["img-left", "img-block"],
+      default: "img-block",
+    },
+  } as any,
+  { _id: false }
+);
+
+export interface IBlogV2 {
+  titleAR?: string;
+  excerptAR?: string;
+  blocks?: IContentBlock[];
+}
+
+const BlogV2Schema = new Schema(
+  {
+    titleAR: { type: String, trim: true },
+    excerptAR: { type: String },
+    blocks: [ContentBlockSchema],
+  },
+  { _id: false }
+);
+
 // Define the Blog interface
 export interface IBlog extends Document {
   _id: string;
   title: string;
   slug: string;
   tikTokVideoUrl?: string;
-  content: string; // Rich text content (HTML)
+  content: string; // Rich text content (HTML) - mobile app reads this
   excerpt: string;
   featuredImage?: string;
   author: mongoose.Types.ObjectId;
@@ -24,6 +92,19 @@ export interface IBlog extends Document {
   likes: CommentUser[];
   createdAt: Date;
   updatedAt: Date;
+  translations?: {
+    ar?: {
+      title?: string;
+      excerpt?: string;
+      content?: string;
+    };
+  };
+  // New V2 namespace - completely separate from legacy mobile app fields
+  v2?: IBlogV2;
+  // Optional convenience accessors
+  titleAR?: string;
+  excerptAR?: string;
+  blocks?: IContentBlock[];
 }
 
 // Define the Blog schema
@@ -41,7 +122,7 @@ const BlogSchema = new Schema<IBlog>(
       trim: true,
       lowercase: true,
       match: [
-        /^[a-z0-9-]+$/,
+        /^[a-z0-9\s-]+$/,
         "Slug can only contain lowercase letters, numbers, and hyphens",
       ],
     },
@@ -51,11 +132,16 @@ const BlogSchema = new Schema<IBlog>(
     },
     content: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
     },
     excerpt: {
       type: String,
       required: false,
+    },
+    v2: {
+      type: BlogV2Schema,
+      default: () => ({}),
     },
     featuredImage: {
       type: String,
@@ -123,11 +209,19 @@ const BlogSchema = new Schema<IBlog>(
       type: Boolean,
       default: false,
     },
+    translations: {
+      ar: {
+        title: { type: String, required: false },
+        excerpt: { type: String, required: false },
+        content: { type: String, required: false },
+      },
+    },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    strict: false,
   }
 );
 
@@ -139,7 +233,7 @@ BlogSchema.index({ categories: 1 });
 BlogSchema.index({ featured: 1, status: 1 });
 
 // Pre-save middleware to auto-generate slug if not provided
-BlogSchema.pre("save", function (next) {
+BlogSchema.pre("save", function (this: any, next) {
   if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
@@ -162,14 +256,27 @@ BlogSchema.pre("save", function (next) {
 });
 
 // Virtual for reading time estimation (assuming 200 words per minute)
-// BlogSchema.virtual("readingTime").get(function () {
-//   const wordCount = this.content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-//   const readingTime = Math.ceil(wordCount / 200);
-//   return readingTime;
-// });
+BlogSchema.virtual("readingTime").get(function (this: any) {
+  let text = "";
+  const blocks = this.v2?.blocks || this.blocks;
+  if (Array.isArray(blocks) && blocks.length > 0) {
+    text = blocks
+      .map((b: IContentBlock) => (b.textHtml ? b.textHtml : ""))
+      .join(" ");
+  } else if (this.content && typeof this.content === "string") {
+    text = this.content;
+  }
+  const wordCount = text
+    .replace(/<[^>]*>/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+  const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+  return readingTime;
+});
 
 // Virtual for formatted publish date
-BlogSchema.virtual("formattedPublishDate").get(function () {
+BlogSchema.virtual("formattedPublishDate").get(function (this: any) {
   if (this.publishedAt) {
     return this.publishedAt.toLocaleDateString("en-US", {
       year: "numeric",

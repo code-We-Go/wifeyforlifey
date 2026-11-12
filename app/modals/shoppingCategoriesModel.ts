@@ -6,6 +6,11 @@ export interface IShoppingCategory extends Document {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  translations?: {
+    ar?: {
+      name?: string;
+    };
+  };
 }
 
 const ShoppingCategorySchema = new Schema<IShoppingCategory>(
@@ -13,6 +18,11 @@ const ShoppingCategorySchema = new Schema<IShoppingCategory>(
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, unique: true, lowercase: true },
     isActive: { type: Boolean, default: true },
+    translations: {
+      ar: {
+        name: { type: String, required: false },
+      },
+    },
   },
   { timestamps: true },
 );

@@ -61,6 +61,8 @@ export async function GET(request: Request) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
+        { "translations.ar.title": { $regex: search, $options: "i" } },
+        { "translations.ar.description": { $regex: search, $options: "i" } },
       ];
     }
 

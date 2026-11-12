@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { thirdFont } from "@/fonts";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useTranslations } from "next-intl";
 
 export default function TimelinePlanner() {
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
+  const t = useTranslations("home.timelinePlanner");
   
   return (
     <section 
@@ -27,37 +29,37 @@ export default function TimelinePlanner() {
               <h2 
                 className={`${thirdFont.className} ${headerStyle} text-lovely tracking-normal`}
               >
-                Overthinking? We don&apos;t know her.
+                {t("heading1")}
               </h2>
               <h3 
                 className={`${thirdFont.className} ${headerStyle} text-lovely tracking-normal`}
               >
-                Our Wedding Day Timeline Planner does it in under 2 minutes.
+                {t("heading2")}
               </h3>
             </div>
 
             <div className="space-y-2 ">
               <p className={`text-lovely ${subHeaderStyle}`}>
-                The first-ever automated wedding timeline tool created specifically for brides to help you:
+                {t("subtitle")}
               </p>
               
-              <ul className="list-disc list-outside pl-8 md:pl-10 text-lovely font-normal space-y-1">
+              <ul className="list-disc list-outside ps-8 md:ps-10 text-lovely font-normal space-y-1">
                 <li className="text-sm md:text-base">
-                  Know whether to start with hair or makeup
+                  {t("point1")}
                 </li>
                 <li className="text-sm md:text-base">
-                  Choose the right time slots when booking each vendor
+                  {t("point2")}
                 </li>
                 <li className="text-sm md:text-base">
-                  Know exactly when to arrive at the venue
+                  {t("point3")}
                 </li>
                 <li className="text-sm md:text-base">
-                  Create timelines for the bride, groom, bridesmaids & groomsmen
+                  {t("point4")}
                 </li>
               </ul>
 
               <p className="text-lovely  text-sm md:text-base md:pt-2">
-                Built using real wedding-day logic — not guesses.
+                {t("footerNote")}
               </p>
             </div>
 
@@ -66,7 +68,7 @@ export default function TimelinePlanner() {
                 <Button 
                   className="bg-lovely hover:bg-lovely/90 text-white  font-normal text-base  px-8 md:px-12 py-5 md:py-8 rounded-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
-                  Create My Wedding Timeline
+                  {t("button")}
                 </Button>
               </Link>
             </div>
@@ -86,13 +88,13 @@ export default function TimelinePlanner() {
               </div>
                       <div className="mt-4 text-center">
           <p className="text-lovely text-sm md:text-base ">
-            Customizable and shareable — so your wedding planning stays stress-free.
+            {t("caption")}
           </p>
         </div>
               
               {/* Decorative element */}
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-pinkey/10 rounded-full blur-2xl -z-10"></div>
-              <div className="absolute -top-4 -left-4 w-32 h-32 bg-pinkey/10 rounded-full blur-2xl -z-10"></div>
+              <div className="absolute -bottom-4 -end-4 w-24 h-24 bg-pinkey/10 rounded-full blur-2xl -z-10"></div>
+              <div className="absolute -top-4 -start-4 w-32 h-32 bg-pinkey/10 rounded-full blur-2xl -z-10"></div>
             </div>
           </div>
         </div>

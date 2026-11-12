@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { headerStyle } from "@/app/styles/style";
+import { useTranslations } from "next-intl";
 
 const Newsletters = () => {
+  const t = useTranslations("home.newsletter");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,8 +30,8 @@ const Newsletters = () => {
 
       if (response.ok) {
         toast({
-          title: "Success!",
-          description: "You've been subscribed to our newsletter.",
+          title: t("successTitle"),
+          description: t("successDesc"),
           variant: "added",
         });
         setEmail("");
@@ -57,11 +59,10 @@ const Newsletters = () => {
         <h2
           className={`${thirdFont.className} ${headerStyle} text-lovely mb-4`}
         >
-          Join Our Community
+          {t("title")}
         </h2>
         <p className="text-lovely/90 mb-8">
-          Subscribe to our newsletter for the latest product drops, exclusive
-          content, and special offers.
+          {t("subtitle")}
         </p>
         <form
           onSubmit={handleSubmit}
@@ -69,7 +70,7 @@ const Newsletters = () => {
         >
           <Input
             type="email"
-            placeholder="Your email address"
+            placeholder={t("placeholder")}
             className="rounded-full lowercase bg-creamey border-lovely placeholder:text-lovely/90 flex-1"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +81,7 @@ const Newsletters = () => {
             className="hover:bg-everGreen bg-lovely text-creamey rounded-full"
             disabled={isLoading}
           >
-            {isLoading ? "Joining..." : "Join Now"}
+            {isLoading ? t("joining") : t("button")}
           </Button>
         </form>
       </div>

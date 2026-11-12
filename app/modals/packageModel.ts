@@ -5,6 +5,11 @@ import { Ipackage, PackageCard, SupportCard } from "../interfaces/interfaces";
 const PackageCardSchema = new Schema<PackageCard>({
   image: { type: String, required: true },
   points: { type: [String], required: true },
+  translations: {
+    ar: {
+      points: { type: [String], required: false },
+    },
+  },
 });
 
 // Define the Support Card schema
@@ -14,6 +19,12 @@ const SupportCardSchema = new Schema<SupportCard>({
   description: { type: [String], required: true },
   imagePath: { type: String, required: true },
   enable: { type: Boolean, default: true },
+  translations: {
+    ar: {
+      title: { type: String, required: false },
+      description: { type: [String], required: false },
+    },
+  },
 });
 
 // Define the Package schema
@@ -22,6 +33,9 @@ const PackageSchema = new Schema<Ipackage>(
     name: { type: String, required: true },
     imgUrl: { type: String, required: true },
     images: { type: [String], required: false, default: [] },
+    arabicImgUrl: { type: String, required: false },
+    arabicImages: { type: [String], required: false, default: [] },
+    enableArabicEdition: { type: Boolean, required: false },
     mobMainImage: { type: String, required: false },
     mobImages: { type: [String], required: false, default: [] },
 
@@ -37,13 +51,28 @@ const PackageSchema = new Schema<Ipackage>(
           discountedFrom: { type: Number, required: false },
           duration: { type: Number, required: true },
           saving: { type: String, required: false },
+          translations: {
+            ar: {
+              saving: { type: String, required: false },
+            },
+          },
         },
       ],
       required: false,
       default: [],
     },
     items: {
-      type: [{ value: String, included: Boolean }],
+      type: [
+        {
+          value: { type: String, required: true },
+          included: { type: Boolean, required: true },
+          translations: {
+            ar: {
+              value: { type: String, required: false },
+            },
+          },
+        },
+      ],
       required: true,
       default: [],
     },
@@ -98,17 +127,40 @@ const PackageSchema = new Schema<Ipackage>(
           feature: { type: String, required: true },
           fullValue: { type: String, required: true },
           miniValue: { type: String, required: true },
+          translations: {
+            ar: {
+              feature: { type: String, required: false },
+              fullValue: { type: String, required: false },
+              miniValue: { type: String, required: false },
+            },
+          },
         },
       ],
       required: false,
       default: [],
     },
-    // heroTitle: { type: String, required: false },
-    // heroSubtitle: { type: String, required: false },
+    heroTitle: { type: String, required: false },
+    heroSubtitle: { type: String, required: false },
     badgeLabel: { type: String, required: false },
     calloutBadge: { type: String, required: false },
     calloutTitle: { type: String, required: false },
     calloutDescription: { type: String, required: false },
+    translations: {
+      ar: {
+        name: { type: String, required: false },
+        partOf: { type: String, required: false },
+        saving: { type: String, required: false },
+        notes: { type: [String], required: false },
+        badgeLabel: { type: String, required: false },
+        calloutBadge: { type: String, required: false },
+        calloutTitle: { type: String, required: false },
+        calloutDescription: { type: String, required: false },
+        heroTitle: { type: String, required: false },
+        heroSubtitle: { type: String, required: false },
+        imgUrl: { type: String, required: false },
+        images: { type: [String], required: false, default: [] },
+      },
+    },
   },
   {
     timestamps: true,

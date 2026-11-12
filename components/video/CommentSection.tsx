@@ -20,6 +20,8 @@ import { VideoComment, VideoReply } from "@/app/interfaces/interfaces";
 import axios from "axios";
 // Configure axios with longer timeout to prevent timeout errors
 import { formatDistanceToNow } from "date-fns";
+import { arEG } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
 import mongoose from "mongoose";
 import {
   Dialog,
@@ -36,6 +38,8 @@ interface CommentSectionProps {
 
 const CommentSection = ({ videoId }: CommentSectionProps) => {
   const { data: session } = useSession();
+  const t = useTranslations("comments");
+  const locale = useLocale();
   const [comments, setComments] = useState<VideoComment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,7 +80,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
           setVideoLikesCount((videoResponse.data.video.likes || []).length);
         }
       } catch (err) {
-        setError("Failed to load data");
+        setError(t("loadError"));
         console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
@@ -521,13 +525,13 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
 
   // Format date for display
   const formatDate = (date: Date) => {
-    return formatDistanceToNow(new Date(date), { addSuffix: true });
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: locale === "ar" ? arEG : undefined });
   };
 
   if (loading && comments.length === 0) {
     return (
       <div className="mt-8 space-y-4">
-        <h3 className="text-xl font-medium text-lovely">Comments</h3>
+        <h3 className="text-xl font-medium text-lovely">{t("title")}</h3>
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex space-x-4">
@@ -570,7 +574,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
         </button>
         {videoLikesCount === 0 && (
           <p className="hidden sm:block text-lovely">
-            Be the first one to love this video.
+            {t("beFirstToLove")}
           </p>
         )}
         {videoLikesCount > 0 && (
@@ -578,15 +582,14 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
             onClick={fetchLikeUsers}
             className="text-lovely hover:underline"
           >
-            {videoLikesCount}{" "}
             {videoLikesCount === 1
-              ? "person love this video"
-              : "people love this video"}
+              ? t("oneLove", { count: videoLikesCount })
+              : t("peopleLove", { count: videoLikesCount })}
           </button>
         )}
       </div>
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-medium text-lovely">Comments</h3>
+        <h3 className="text-xl font-medium text-lovely">{t("title")}</h3>
         <div className="md:flex hidden  items-center gap-2">
           <button
             onClick={handleLikeVideo}
@@ -678,7 +681,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-center py-4">No likes yet</p>
+              <p className="text-center py-4">{t("noLikesYet")}</p>
             )}
           </div>
         </DialogContent>
@@ -809,7 +812,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                         onClick={() => toggleCommentExpanded(comment._id || "")}
                         className="text-sm text-lovely/60 hover:text-lovely mt-1"
                       >
-                        {isExpanded ? "Show less" : "Show more"}
+                        {isExpanded ? t("showLess") : t("showMore")}
                       </button>
                     )}
                     <div className="flex items-center gap-4 mt-2">
@@ -844,14 +847,14 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                         onClick={() => {
                           if (!session?.user) {
                             setError(
-                              "You must be logged in to reply to comments"
+                              t("loginToReplyError")
                             );
                             return;
                           }
 
                           if (!session?.user.isSubscribed) {
                             setError(
-                              "You must be subscribed to reply to comments"
+                              t("subscribeToReplyError")
                             );
                             return;
                           }
@@ -900,7 +903,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                   <div className="ml-14 mt-2">
                     <div className="flex-1 space-y-2">
                       <Textarea
-                        placeholder="Add a reply..."
+                        placeholder={t("addReply")}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         className="min-h-[60px] bg-creamey text-lovely placeholder:text-lovely/50"
@@ -1075,8 +1078,8 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
                                       }
                                       className="flex items-center text-xs text-red-500 hover:text-red-700"
                                     >
-                                      <Trash2 className="mr-1 h-3 w-3" />
-                                      Delete
+                                      <Trash2 className="mr-1 rtl:mr-0 rtl:ml-1 h-3 w-3" />
+                                      {t("delete")}
                                     </button>
                                   )}
                                 </div>
@@ -1095,7 +1098,7 @@ const CommentSection = ({ videoId }: CommentSectionProps) => {
       ) : (
         <div className="text-center py-8">
           <p className="text-lovely/70">
-            No comments yet. Be the first to comment!
+            {t("noComments")}
           </p>
         </div>
       )}
