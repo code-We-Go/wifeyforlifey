@@ -68,8 +68,8 @@ export const PACKAGE_IDS = {
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `687396821b4da119eb1c13fe` | `PACKAGE_IDS.FULL_EXPERIENCE` | The Full Wifey Experience | تجربة وايفي الكاملة / رحلة جهازك الكاملة مع وايفي | `GehazBestiePlanner` | `full` | 2,500 | Active | Gehaz Bestie Planner | **Yes (Arabic / English)** |
 | `68bf6ae9c4d5c1af12cdcd37` | `PACKAGE_IDS.MINI` | Wifey’s Mini Experience | تجربة وايفي المصغرة / رحلة جهازك المصغّرة | `GehazBestiePlanner` | `mini` | 1,500 | Active | Gehaz Bestie Planner | **Yes (Arabic / English)** |
-| `6965e63c6df4503dda02c12b` | `PACKAGE_IDS.WEDDING_PLANNING_BESTIE` | Full Wedding Experience | تجربة تنظيم الفرح الكاملة / فرحك مع وايفى | `WeddingBestiePlanner` | `full` | 2,700 | Inactive | Wedding Bestie Planner | **No (Not Available)** |
-| `6a2d9aec3def6ce76dc7babc` | `PACKAGE_IDS.MINI_WEDDING` | Mini Wedding Experience | تجربة تنظيم الفرح المصغرة / فرحك مع وايفى (المصغرة) | `WeddingBestiePlanner` | `mini` | 1,700 | Inactive | Wedding Bestie Planner | **No (Not Available)** |
+| `6965e63c6df4503dda02c12b` | `PACKAGE_IDS.WEDDING_PLANNING_BESTIE` | Full Wedding Experience | فرحك مع وايفي الكاملة | `WeddingBestiePlanner` | `full` | 2,700 | Inactive | Wedding Bestie Planner | **No (Not Available)** |
+| `6a2d9aec3def6ce76dc7babc` | `PACKAGE_IDS.MINI_WEDDING` | Mini Wedding Experience | فرحك مع وايفي المصغرة | `WeddingBestiePlanner` | `mini` | 1,700 | Inactive | Wedding Bestie Planner | **No (Not Available)** |
 
 ---
 

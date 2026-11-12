@@ -47,7 +47,7 @@ export async function GET() {
 
       const arName = existingAr.name || (
         isWedding
-          ? (isMini ? "فرحك مع وايفى (المصغرة)" : "فرحك مع وايفى")
+          ? (isMini ? "فرحك مع وايفي المصغرة" : "فرحك مع وايفي الكاملة")
           : (isMini ? "رحلة جهازك المصغّرة" : "رحلة جهازك الكاملة مع وايفي")
       );
 
@@ -57,7 +57,7 @@ export async function GET() {
 
       const arBadgeLabel = existingAr.badgeLabel || (
         isWedding
-          ? (isMini ? "فرحك مع وايفى (المصغرة)" : "فرحك مع وايفى")
+          ? (isMini ? "فرحك مع وايفي المصغرة" : "فرحك مع وايفي الكاملة")
           : (isMini ? "رحلة جهازك المصغّرة" : "رحلة جهازك الكاملة مع وايفي")
       );
 
@@ -78,10 +78,10 @@ export async function GET() {
       const arNotes = (existingAr.notes && existingAr.notes.length > 0)
         ? existingAr.notes
         : [
-            isWedding
-              ? "بلانر تنظيم الفرح هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
-              : "بلانر رفيقة الجهاز هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
-          ];
+          isWedding
+            ? "بلانر تنظيم الفرح هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
+            : "بلانر رفيقة الجهاز هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
+        ];
 
       const arHeroTitle = existingAr.heroTitle || "كل اللي محتاجاه لمرحلة فرحك — في مكان واحد 🎀";
       const arHeroSubtitle = existingAr.heroSubtitle || "بلانرات، أدوات ودعم حقيقي معمول مخصوص للعروسة المصرية. أياً كانت مرحلتك، في رفيقة ليكي 💕";

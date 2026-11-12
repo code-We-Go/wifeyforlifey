@@ -12,9 +12,9 @@ const PACKAGE_ID_TO_AR_NAME: Record<string, string> = {
   // Gehaz Mini Experience
   "68bf6ae9c4d5c1af12cdcd37": "رحلة جهازك المصغّرة",
   // Wedding Full Experience
-  "6965e63c6df4503dda02c12b": "فرحك مع وايفى",
+  "6965e63c6df4503dda02c12b": "فرحك مع وايفي الكاملة",
   // Wedding Mini Experience
-  "6a2d9aec3def6ce76dc7babc": "فرحك مع وايفى (المصغرة)",
+  "6a2d9aec3def6ce76dc7babc": "فرحك مع وايفي المصغرة",
 };
 
 export function getLocalizedPackageName(
@@ -59,8 +59,8 @@ export function getLocalizedPackageName(
   const isFull = lower.includes("full") || item.tier === "full";
 
   if (isWedding) {
-    if (isFull) return "فرحك مع وايفى";
-    if (isMini) return "فرحك مع وايفى (المصغرة)";
+    if (isFull) return "فرحك مع وايفي الكاملة";
+    if (isMini) return "فرحك مع وايفي المصغرة";
     return "فرحك مع وايفى";
   }
 

@@ -864,7 +864,7 @@ async function handleSubscription(
                 name: targetFirstName,
                 subject:
                   targetLang === "ar"
-                    ? "أهلاً بيكي في فرحك مع وايفى! 💕"
+                    ? "أهلاً بيكي في فرحك مع وايفي المصغرة! 💕"
                     : "Welcome to the Mini Wedding Planning Experience! 💕",
                 body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
@@ -895,7 +895,7 @@ async function handleSubscription(
                 name: targetFirstName,
                 subject:
                   targetLang === "ar"
-                    ? "أهلاً بيكي في فرحك مع وايفى! 💕"
+                    ? "أهلاً بيكي في فرحك مع وايفي الكاملة! 💕"
                     : "Welcome to the Wedding Planning Experience! 💕",
                 body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",
