@@ -368,6 +368,8 @@ export interface PackageVariant {
   saving?: string;
   translations?: {
     ar?: {
+      price?: number;
+      discountedFrom?: number;
       saving?: string;
     };
   };
@@ -429,6 +431,8 @@ export interface Ipackage {
   translations?: {
     ar?: {
       name?: string;
+      price?: number;
+      discountedFrom?: number;
       partOf?: string;
       saving?: string;
       notes?: string[];

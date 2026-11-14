@@ -10,6 +10,7 @@ import { thirdFont } from "@/fonts";
 import { useToast } from "@/hooks/use-toast";
 import { useLocale, useTranslations } from "next-intl";
 import { localizePackage } from "@/app/lib/localize";
+import { resolvePackagePrice } from "@/utils/packagePricing";
 
 export default function PackageCard({
   packageItem,
@@ -21,6 +22,9 @@ export default function PackageCard({
   const locale = useLocale();
   const t = useTranslations("common");
   const pkg = localizePackage(packageItem, locale);
+  const cardPricing = resolvePackagePrice(pkg, { isArabic: locale === "ar" });
+  const displayPrice = cardPricing.price;
+  const displayDiscountedFrom = cardPricing.discountedFrom;
 
   const handlePackageClick = (e: React.MouseEvent) => {
     // Only navigate if the click wasn't on a button
@@ -47,11 +51,11 @@ export default function PackageCard({
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10"></div>
-        {pkg.discountedFrom && pkg.discountedFrom > pkg.price && (
+        {displayDiscountedFrom && displayDiscountedFrom > displayPrice && (
           <div className="absolute top-3 end-3 z-10 bg-lovely text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
             {locale === "ar"
-              ? `وفري ${Math.round(((pkg.discountedFrom - pkg.price) / pkg.discountedFrom) * 100)}%`
-              : `Save ${Math.round(((pkg.discountedFrom - pkg.price) / pkg.discountedFrom) * 100)}%`}
+              ? `وفري ${Math.round(((displayDiscountedFrom - displayPrice) / displayDiscountedFrom) * 100)}%`
+              : `Save ${Math.round(((displayDiscountedFrom - displayPrice) / displayDiscountedFrom) * 100)}%`}
           </div>
         )}
       </div>
@@ -83,13 +87,13 @@ export default function PackageCard({
         <div className="mt-3 flex items-baseline gap-2 flex-wrap">
           <p className={cn(thirdFont.className, "font-semibold text-[19px] flex items-center gap-1.5 flex-wrap")}>
             {locale === "ar"
-              ? `يبدأ من ${packageItem.price.toLocaleString()} ${t("le")}`
-              : `From LE ${packageItem.price.toLocaleString()}`}
-            {packageItem.discountedFrom && packageItem.discountedFrom > packageItem.price && (
+              ? `يبدأ من ${displayPrice.toLocaleString()} ${t("le")}`
+              : `From LE ${displayPrice.toLocaleString()}`}
+            {displayDiscountedFrom && displayDiscountedFrom > displayPrice && (
               <span className="text-[14px] text-lovely/60 line-through font-normal">
                 {locale === "ar"
-                  ? `${packageItem.discountedFrom.toLocaleString()} ${t("le")}`
-                  : `LE ${packageItem.discountedFrom.toLocaleString()}`}
+                  ? `${displayDiscountedFrom.toLocaleString()} ${t("le")}`
+                  : `LE ${displayDiscountedFrom.toLocaleString()}`}
               </span>
             )}
             <small className="font-sans font-medium text-[12px] opacity-85 normal-case tracking-normal">

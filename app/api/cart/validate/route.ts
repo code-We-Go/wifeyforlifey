@@ -3,6 +3,7 @@ import productsModel from "@/app/modals/productsModel";
 import packageModel from "@/app/modals/packageModel";
 import { ConnectDB } from "@/app/config/db";
 import { CartItem, SubscriptionCartItem } from "@/app/interfaces/interfaces";
+import { resolvePackagePrice } from "@/utils/packagePricing";
 
 export async function POST(req: Request) {
   await ConnectDB();
@@ -85,19 +86,14 @@ export async function POST(req: Request) {
             return null; // Package no longer exists
           }
 
-          // Check if package has variants matching sub.duration
-          let price = pkg.price;
-          let discountedFrom = pkg.discountedFrom;
-          let saving = pkg.saving;
-
-          if (pkg.variants && Array.isArray(pkg.variants) && pkg.variants.length > 0) {
-            const variant = pkg.variants.find((v: any) => Number(v.duration) === Number(sub.duration));
-            if (variant && variant.price !== undefined && variant.price !== null) {
-              price = variant.price;
-              discountedFrom = variant.discountedFrom;
-              saving = variant.saving;
-            }
-          }
+          // Check if package has variants matching sub.duration and resolve effective price
+          const pricing = resolvePackagePrice(pkg, {
+            duration: sub.duration,
+            edition: sub.edition,
+          });
+          const price = pricing.price;
+          const discountedFrom = pricing.discountedFrom;
+          const saving = pricing.saving;
 
           if (price !== sub.price) {
             subscriptionsChanged = true;

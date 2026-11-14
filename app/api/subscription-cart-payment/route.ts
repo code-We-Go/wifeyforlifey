@@ -3,6 +3,8 @@ import { ConnectDB } from "@/app/config/db";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
+import packageModel from "@/app/modals/packageModel";
+import { resolvePackagePrice } from "@/utils/packagePricing";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
@@ -20,6 +22,41 @@ export async function POST(request: Request) {
     : `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
   try {
+    // 0. Verify and enforce subscription prices from DB (handling Arabic Edition pricing)
+    if (Array.isArray(data.subscriptions) && data.subscriptions.length > 0) {
+      const packageIds = data.subscriptions.map((s: any) => s.packageId).filter(Boolean);
+      const dbPackages = await packageModel.find({ _id: { $in: packageIds } });
+      const pkgMap = new Map(dbPackages.map((p) => [p._id.toString(), p]));
+
+      let verifiedSubsSubTotal = 0;
+      for (const sub of data.subscriptions) {
+        const pkg = pkgMap.get(sub.packageId);
+        if (pkg) {
+          const pricing = resolvePackagePrice(pkg, {
+            duration: sub.duration,
+            edition: sub.edition,
+          });
+          sub.price = pricing.price;
+          sub.discountedFrom = pricing.discountedFrom;
+          sub.saving = pricing.saving;
+        }
+        verifiedSubsSubTotal += (sub.price || 0) * (sub.quantity || 1);
+      }
+
+      // If client's subTotal differed from verified, adjust totals safely
+      const itemsSubTotal = Array.isArray(data.cart)
+        ? data.cart.reduce((sum: number, item: any) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0)
+        : 0;
+      const verifiedSubTotal = verifiedSubsSubTotal + itemsSubTotal;
+      const discount = Number(data.appliedDiscountAmount) || 0;
+      const loyalty = Number(data.loyalty?.discountAmount) || 0;
+      const shipping = Number(data.shipping) || 0;
+      const verifiedTotal = Math.max(0, verifiedSubTotal - discount - loyalty + shipping);
+
+      data.subTotal = verifiedSubTotal;
+      data.total = verifiedTotal;
+    }
+
     let orderId = specialReference;
     let clientSecret = "";
 
@@ -93,6 +130,7 @@ export async function POST(request: Request) {
         to: sub.packageId,
         packageID: sub.packageId,
         selectedDuration: sub.duration,
+        price: sub.price,
         subscribed: false,
         paymentMethod: data.paymentMethod,
         cart: bundledCart,

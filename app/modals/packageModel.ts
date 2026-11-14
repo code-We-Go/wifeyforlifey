@@ -53,6 +53,8 @@ const PackageSchema = new Schema<Ipackage>(
           saving: { type: String, required: false },
           translations: {
             ar: {
+              price: { type: Number, required: false, min: 0 },
+              discountedFrom: { type: Number, required: false, min: 0 },
               saving: { type: String, required: false },
             },
           },
@@ -148,6 +150,8 @@ const PackageSchema = new Schema<Ipackage>(
     translations: {
       ar: {
         name: { type: String, required: false },
+        price: { type: Number, required: false, min: 0 },
+        discountedFrom: { type: Number, required: false, min: 0 },
         partOf: { type: String, required: false },
         saving: { type: String, required: false },
         notes: { type: [String], required: false },

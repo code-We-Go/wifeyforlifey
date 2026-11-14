@@ -33,6 +33,7 @@ import WifeyCommunity from "@/components/sections/WifeyCommunity";
 import { useCart } from "@/providers/CartProvider";
 import { useLocale } from "next-intl";
 import { localizePackage } from "@/app/lib/localize";
+import { resolvePackagePrice } from "@/utils/packagePricing";
 
 // Quiz Data
 interface QuizOption {
@@ -218,7 +219,12 @@ export default function PackageeDetailPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [selectedEdition, setSelectedEdition] = useState<"ar" | "en">("ar");
+  const [selectedEdition, setSelectedEdition] = useState<"ar" | "en">(locale === "ar" ? "ar" : "en");
+
+  // Sync default edition when locale changes
+  useEffect(() => {
+    setSelectedEdition(locale === "ar" ? "ar" : "en");
+  }, [locale]);
 
   // Touch swipe refs for mobile gesture navigation
   const touchStartXRef = useRef<number | null>(null);
@@ -553,21 +559,10 @@ We’re beyond excited to share this experience with you… your planner will be
 
   const handleAddToCart = () => {
     if (!packageData) return;
-    let price = packageData.price;
-    let discountedFrom = packageData.discountedFrom;
-    let duration = packageData.duration;
-    let saving = packageData.saving;
 
-    if (packageData.variants && packageData.variants.length > 0) {
-      if (selectedVariantIndex === -1) {
-        showToast("Please select a plan variant before adding to cart.");
-        return;
-      }
-      const selected = packageData.variants[selectedVariantIndex];
-      price = selected.price;
-      discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
-      duration = selected.duration;
-      saving = selected.saving;
+    if (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex === -1) {
+      showToast("Please select a plan variant before adding to cart.");
+      return;
     }
 
     const activeEdition = hasEditionSelection ? selectedEdition : undefined;
@@ -577,6 +572,21 @@ We’re beyond excited to share this experience with you… your planner will be
     const activeImg = (hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0)
       ? arabicImages[0]
       : (packageData.imgUrl || "");
+
+    const effectiveEdition = hasEditionSelection ? selectedEdition : (locale === "ar" ? "ar" : "en");
+    const pricing = resolvePackagePrice(packageData, {
+      variantIndex: (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex >= 0)
+        ? selectedVariantIndex
+        : undefined,
+      edition: effectiveEdition,
+    });
+
+    const price = pricing.price;
+    const discountedFrom = pricing.discountedFrom;
+    const saving = pricing.saving;
+    const duration = (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex >= 0)
+      ? packageData.variants[selectedVariantIndex].duration
+      : packageData.duration;
 
     addSubscription({
       packageId: packageData._id || "",
@@ -604,21 +614,10 @@ We’re beyond excited to share this experience with you… your planner will be
 
   const handleSubscribeNow = () => {
     if (!packageData) return;
-    let price = packageData.price;
-    let discountedFrom = packageData.discountedFrom;
-    let duration = packageData.duration;
-    let saving = packageData.saving;
 
-    if (packageData.variants && packageData.variants.length > 0) {
-      if (selectedVariantIndex === -1) {
-        showToast("Please select a plan variant before subscribing.");
-        return;
-      }
-      const selected = packageData.variants[selectedVariantIndex];
-      price = selected.price;
-      discountedFrom = selected.discountedFrom ?? packageData.discountedFrom;
-      duration = selected.duration;
-      saving = selected.saving;
+    if (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex === -1) {
+      showToast("Please select a plan variant before subscribing.");
+      return;
     }
 
     const activeEdition = hasEditionSelection ? selectedEdition : undefined;
@@ -628,6 +627,21 @@ We’re beyond excited to share this experience with you… your planner will be
     const activeImg = (hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0)
       ? arabicImages[0]
       : (packageData.imgUrl || "");
+
+    const effectiveEdition = hasEditionSelection ? selectedEdition : (locale === "ar" ? "ar" : "en");
+    const pricing = resolvePackagePrice(packageData, {
+      variantIndex: (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex >= 0)
+        ? selectedVariantIndex
+        : undefined,
+      edition: effectiveEdition,
+    });
+
+    const price = pricing.price;
+    const discountedFrom = pricing.discountedFrom;
+    const saving = pricing.saving;
+    const duration = (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex >= 0)
+      ? packageData.variants[selectedVariantIndex].duration
+      : packageData.duration;
 
     addSubscription({
       packageId: packageData._id || "",
@@ -749,24 +763,6 @@ We’re beyond excited to share this experience with you… your planner will be
   const displayPackage = currentPackage || packageData;
   const displayAllPackages = packagesList.length > 0 ? packagesList : allPackages;
 
-  const selectedVariant =
-    displayPackage.variants && selectedVariantIndex >= 0
-      ? displayPackage.variants[selectedVariantIndex]
-      : null;
-
-  const activePrice = selectedVariant
-    ? selectedVariant.price
-    : displayPackage.price;
-  const activeSaving = selectedVariant
-    ? selectedVariant.saving
-    : displayPackage.saving;
-
-  // Resolve the full-tier package (highest price) for comparisonFeatures & hero/callout
-  const fullPackage =
-    displayAllPackages.length > 0
-      ? displayAllPackages.reduce((max, pkg) => (pkg.price > max.price ? pkg : max), displayAllPackages[0])
-      : displayPackage;
-
   const isWeddingPackage = Boolean(
     (typeof params?.slug === "string" && params.slug.toLowerCase().includes("wedding")) ||
     (displayPackage?.slug && displayPackage.slug.toLowerCase().includes("wedding")) ||
@@ -784,6 +780,28 @@ We’re beyond excited to share this experience with you… your planner will be
   const hasEditionSelection =
     displayPackage?.enableArabicEdition === true ||
     (displayPackage?.enableArabicEdition !== false && isGehazPackage && !isWeddingPackage);
+
+  const effectiveEdition = hasEditionSelection ? selectedEdition : (locale === "ar" ? "ar" : "en");
+
+  const selectedVariant =
+    displayPackage.variants && selectedVariantIndex >= 0
+      ? displayPackage.variants[selectedVariantIndex]
+      : null;
+
+  const activePricing = resolvePackagePrice(displayPackage, {
+    variant: selectedVariant,
+    edition: effectiveEdition,
+  });
+
+  const activePrice = activePricing.price;
+  const activeDiscountedFrom = activePricing.discountedFrom;
+  const activeSaving = activePricing.saving;
+
+  // Resolve the full-tier package (highest price) for comparisonFeatures & hero/callout
+  const fullPackage =
+    displayAllPackages.length > 0
+      ? displayAllPackages.reduce((max, pkg) => (pkg.price > max.price ? pkg : max), displayAllPackages[0])
+      : displayPackage;
 
   const arabicCover = displayPackage?.arabicImgUrl || displayPackage?.translations?.ar?.imgUrl;
   const arabicGallery = displayPackage?.arabicImages || displayPackage?.translations?.ar?.images || [];
@@ -986,12 +1004,21 @@ We’re beyond excited to share this experience with you… your planner will be
                           <span className="block text-sm sm:text-base font-extrabold leading-tight">
                             {pkg.name}
                           </span>
-                          <span
-                            className={`block text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-lovely/80"
-                              }`}
-                          >
-                            {locale === "ar" ? `${pkg.price.toLocaleString()} ج.م` : `LE ${pkg.price.toLocaleString()}`}
-                          </span>
+                          {(() => {
+                            const pillPricing = resolvePackagePrice(pkg, {
+                              edition: (pkg.enableArabicEdition === true || (pkg.enableArabicEdition !== false && isGehazPackage))
+                                ? selectedEdition
+                                : (locale === "ar" ? "ar" : "en"),
+                            });
+                            return (
+                              <span
+                                className={`block text-xs sm:text-sm mt-0.5 font-medium ${isSelected ? "text-white/90" : "text-lovely/80"
+                                  }`}
+                              >
+                                {locale === "ar" ? `${pillPricing.price.toLocaleString()} ج.م` : `LE ${pillPricing.price.toLocaleString()}`}
+                              </span>
+                            );
+                          })()}
                         </button>
                       );
                     });
@@ -1084,31 +1111,44 @@ We’re beyond excited to share this experience with you… your planner will be
                     {locale === "ar" ? "اختاري خطة التجربة" : "Choose Experience Plan"}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {packageData.variants.map((variant, index) => (
-                      <div
-                        key={index}
-                        onClick={() => setSelectedVariantIndex(index)}
-                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedVariantIndex === index
-                          ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
-                          : "border-lovely/20 bg-white/50 hover:bg-white/80"
-                          }`}
-                        id={`variant-card-${index}`}
-                      >
-                        {formatDuration(variant.duration) && (
-                          <p className="font-bold text-xs uppercase tracking-wider text-lovely">
-                            {formatDuration(variant.duration)}
-                          </p>
-                        )}
-                        <p className={`${thirdFont.className} text-2xl font-bold text-lovely mt-1`}>
-                          {locale === "ar" ? `${variant.price.toFixed(2)} ج.م` : `LE ${variant.price.toFixed(2)}`}
-                        </p>
-                        {variant.saving && (
-                          <p className="text-xs text-lovely/80 font-medium mt-1">
-                            {variant.saving}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    {packageData.variants.map((variant, index) => {
+                      const vPricing = resolvePackagePrice(packageData, {
+                        variant,
+                        edition: effectiveEdition,
+                      });
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => setSelectedVariantIndex(index)}
+                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedVariantIndex === index
+                            ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
+                            : "border-lovely/20 bg-white/50 hover:bg-white/80"
+                            }`}
+                          id={`variant-card-${index}`}
+                        >
+                          {formatDuration(variant.duration) && (
+                            <p className="font-bold text-xs uppercase tracking-wider text-lovely">
+                              {formatDuration(variant.duration)}
+                            </p>
+                          )}
+                          <div className="flex items-baseline gap-2 mt-1 flex-wrap">
+                            <p className={`${thirdFont.className} text-2xl font-bold text-lovely`}>
+                              {locale === "ar" ? `${vPricing.price.toFixed(2)} ج.م` : `LE ${vPricing.price.toFixed(2)}`}
+                            </p>
+                            {vPricing.discountedFrom && vPricing.discountedFrom > vPricing.price && (
+                              <span className="text-sm text-lovely/60 line-through">
+                                {locale === "ar" ? `${vPricing.discountedFrom.toFixed(2)} ج.م` : `LE ${vPricing.discountedFrom.toFixed(2)}`}
+                              </span>
+                            )}
+                          </div>
+                          {vPricing.saving && (
+                            <p className="text-xs text-lovely/80 font-medium mt-1">
+                              {vPricing.saving}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -1118,9 +1158,16 @@ We’re beyond excited to share this experience with you… your planner will be
                       {locale === "ar" ? `المدة: ${formatDuration(packageData.duration)}` : `Duration: ${formatDuration(packageData.duration)}`}
                     </p>
                   )}
-                  <p className={`${thirdFont.className} text-3xl font-extrabold text-lovely`}>
-                    {locale === "ar" ? `${activePrice.toFixed(2)} ج.م` : `LE ${activePrice.toFixed(2)}`}
-                  </p>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <p className={`${thirdFont.className} text-3xl font-extrabold text-lovely`}>
+                      {locale === "ar" ? `${activePrice.toFixed(2)} ج.م` : `LE ${activePrice.toFixed(2)}`}
+                    </p>
+                    {activeDiscountedFrom && activeDiscountedFrom > activePrice && (
+                      <span className="text-lg text-lovely/60 line-through">
+                        {locale === "ar" ? `${activeDiscountedFrom.toFixed(2)} ج.م` : `LE ${activeDiscountedFrom.toFixed(2)}`}
+                      </span>
+                    )}
+                  </div>
                   {activeSaving && (
                     <p className="text-sm text-lovely/80 font-medium mt-1">
                       {activeSaving}
