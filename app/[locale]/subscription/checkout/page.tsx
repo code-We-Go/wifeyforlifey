@@ -156,6 +156,7 @@ const UnifiedCheckoutPage = () => {
   const [states, setStates] = useState<any[]>([]);
   const [shippingZones, setShippingZones] = useState<any[]>([]);
   const [shipping, setShipping] = useState(0);
+  const [effectiveShipping, setEffectiveShipping] = useState(0);
   const [useSameAsShipping, setUseSameAsShipping] = useState(true);
 
   const [bostaLocation, setBostaLocation] = useState<{
@@ -362,7 +363,7 @@ const UnifiedCheckoutPage = () => {
     );
     const isFreeShipping = calculatedSubTotal > 2000 || hasFreeShippingPackage;
 
-    let effectiveShipping = isFreeShipping ? 0 : shipping;
+    let computedEffectiveShipping = isFreeShipping ? 0 : shipping;
     let newDiscountAmount = 0;
 
     if (appliedDiscount) {
@@ -371,10 +372,11 @@ const UnifiedCheckoutPage = () => {
       } else if (appliedDiscount.calculationType === "FIXED_AMOUNT") {
         newDiscountAmount = appliedDiscount.value;
       } else if (appliedDiscount.calculationType === "FREE_SHIPPING") {
-        effectiveShipping = 0;
+        computedEffectiveShipping = 0;
         newDiscountAmount = shipping;
       }
     }
+    setEffectiveShipping(computedEffectiveShipping);
     setDiscountAmount(newDiscountAmount);
 
     let validRedeem = Math.max(
@@ -392,7 +394,7 @@ const UnifiedCheckoutPage = () => {
 
     const finalTotal = Math.max(
       0,
-      calculatedSubTotal - newDiscountAmount - loyaltyLE + effectiveShipping + giftCardsCost
+      calculatedSubTotal - newDiscountAmount - loyaltyLE + computedEffectiveShipping + giftCardsCost
     );
     setTotal(finalTotal);
   }, [configs, cartProducts, shipping, appliedDiscount, redeemPoints, loyaltyPoints, subscriptionItems]);
@@ -564,7 +566,8 @@ const UnifiedCheckoutPage = () => {
         discount: loyaltyDiscount,
       },
       subTotal,
-      shipping,
+      shipping: effectiveShipping,
+      baseShipping: shipping,
       total,
       currency: "EGP",
     };
@@ -1463,10 +1466,20 @@ const UnifiedCheckoutPage = () => {
               )}
 
               <div className="flex justify-between text-base">
-                {appliedDiscount?.calculationType === "FREE_SHIPPING" || subTotal > 2000 || subscriptionItems.some((item) => item.packageId === "687396821b4da119eb1c13fe" || item.packageId === "6965e63c6df4503dda02c12b") ? (
+                {effectiveShipping === 0 ? (
                   <>
-                    <span className="line-through">{t("shipping")}</span>
-                    <span className="line-through">{shipping} {isAr ? "ج.م" : "LE"}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{t("shipping")}</span>
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                        {isAr ? "شحن مجاني" : "Free Shipping"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {shipping > 0 && (
+                        <span className="line-through text-lovely/50">{shipping} {isAr ? "ج.م" : "LE"}</span>
+                      )}
+                      <span className="text-green-600 font-bold">{isAr ? "مجاناً" : "Free"}</span>
+                    </div>
                   </>
                 ) : (
                   <>

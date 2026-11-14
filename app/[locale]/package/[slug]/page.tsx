@@ -367,14 +367,19 @@ export default function PackageeDetailPage() {
     }
   };
 
-  // Package-specific modal content
-  const getModalContent = (packageId: string) => {
+  // Package-specific modal content - only Arabic version is a pre-order, not English
+  const getModalContent = (packageId: string, edition: "ar" | "en" = selectedEdition) => {
+    // Only Arabic edition is a pre-order; English edition is available immediately
+    if (edition !== "ar") {
+      return null;
+    }
+
     const isAr = locale === "ar";
     const packageContents = {
       "687396821b4da119eb1c13fe": {
-        header: isAr ? "هذا الطلب حجز مسبق 🎀" : "This is a pre-order",
+        header: isAr ? "هذا الطلب حجز مسبق (النسخة العربية) 🎀" : "This is a pre-order (Arabic Edition) 🎀",
         content: isAr
-          ? `يرجى العلم أن هذا الطلب بنظام الحجز المسبق، وهيتم شحن وتوصيل البلانر ليكي خلال 10 أيام عمل.
+          ? `يرجى العلم أن طلب النسخة العربية بنظام الحجز المسبق، وهيتم شحن وتوصيل البلانر ليكي خلال 10 أيام عمل.
 
 وعبال ما رفيقة الجهاز توصلك، تقدري تبدأي تستمتعي بـ:
 ✨ قوائم تشغيل وايفي الحصرية
@@ -382,7 +387,7 @@ export default function PackageeDetailPage() {
 ✨ الانضمام لدوائر دعم ومجتمع وايفي
 
 شكراً لثقتك وحبك — متحمسين جداً تفرحي بالبلانر أول ما يوصلك! 💗`
-          : `Please note that this order is a pre-order, and your planner will be shipped within 10 business days.
+          : `Please note that the Arabic Edition is on pre-order, and your planner will be shipped within 10 business days.
 
 While you wait for your gehaz bestie to arrive, you can already enjoy:
 ✨ Wifey's curated playlists
@@ -392,16 +397,16 @@ While you wait for your gehaz bestie to arrive, you can already enjoy:
 Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
       },
       "68bf6ae9c4d5c1af12cdcd37": {
-        header: isAr ? "هذا الطلب حجز مسبق 🎀" : "This is a pre-order",
+        header: isAr ? "هذا الطلب حجز مسبق (النسخة العربية) 🎀" : "This is a pre-order (Arabic Edition) 🎀",
         content: isAr
-          ? `يرجى العلم أن هذا الطلب بنظام الحجز المسبق، وهيتم شحن بلانر رفيقة الجهاز ليكي خلال 10 أيام عمل.
+          ? `يرجى العلم أن طلب النسخة العربية بنظام الحجز المسبق، وهيتم شحن بلانر رفيقة الجهاز ليكي خلال 10 أيام عمل.
 
 بعد إتمام الطلب، هيوصلك إيميل تأكيد بمتابعة الشحنة خطوة بخطوة.
 
 أول ما يوصلك البلانر، هتستفيدي بميزة حصرية من وايفي 💗 — وصول لقائمة تشغيل من اختيارك لمدة 6 شهور عبر كود QR مطبوع داخل الباكدج.
 
 متحمسين جداً نخوض الرحلة دي سوا.. البلانر في طريقه ليكي قريب جداً! ✨`
-          : `Please note that this order is a pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days.
+          : `Please note that the Arabic Edition is on pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days.
 
 After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
 
@@ -515,17 +520,17 @@ We’re beyond excited to share this experience with you… your planner will be
     fetchPackageData();
   }, [params?.slug]);
 
-  // Show modal when package data is loaded for specific packages
+  // Show modal when package data or selected edition is loaded/changed for pre-order packages
   useEffect(() => {
     if (packageData && packageData._id) {
-      const modalContent = getModalContent(packageData._id);
-      // remove false for activating pre-order modal
-      // if (modalContent && false) {
+      const modalContent = getModalContent(packageData._id, selectedEdition);
       if (modalContent) {
         setShowModal(true);
+      } else {
+        setShowModal(false);
       }
     }
-  }, [packageData]);
+  }, [packageData, selectedEdition]);
 
   // Handle keyboard navigation & body scroll lock for lightbox
   useEffect(() => {
@@ -1063,9 +1068,14 @@ We’re beyond excited to share this experience with you… your planner will be
                       id="edition-btn-ar"
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm sm:text-base text-lovely">
-                          النسخة العربية
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm sm:text-base text-lovely">
+                            النسخة العربية
+                          </span>
+                          <span className="text-[10px] bg-lovely/15 text-lovely font-bold px-2 py-0.5 rounded-full">
+                            {locale === "ar" ? "حجز مسبق" : "Pre-order"}
+                          </span>
+                        </div>
                         {selectedEdition === "ar" && (
                           <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
                         )}
@@ -1551,8 +1561,8 @@ We’re beyond excited to share this experience with you… your planner will be
 
       </div>
 
-      {/* Modal for specific packages */}
-      {showModal && packageData?._id && getModalContent(packageData._id) && (
+      {/* Modal for specific packages - only shown for Arabic pre-order */}
+      {showModal && packageData?._id && getModalContent(packageData._id, selectedEdition) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-creamey rounded-2xl max-w-md w-full mx-4 relative shadow-2xl border-2 border-lovely">
             {/* Close button */}
@@ -1567,21 +1577,25 @@ We’re beyond excited to share this experience with you… your planner will be
             <div className="p-6 pt-12">
               <div className="text-center">
                 <div className="text-4xl mb-4">💖</div>
-                {getModalContent(packageData._id) && (
-                  <>
-                    <h2 className="text-lovely text-lg font-bold mb-4">
-                      {getModalContent(packageData._id)?.header}
-                    </h2>
-                    <div className="text-lovely leading-relaxed whitespace-pre-line text-sm font-medium">
-                      {getModalContent(packageData._id)?.content}
-                    </div>
-                  </>
-                )}
+                {(() => {
+                  const modal = getModalContent(packageData._id, selectedEdition);
+                  if (!modal) return null;
+                  return (
+                    <>
+                      <h2 className="text-lovely text-lg font-bold mb-4">
+                        {modal.header}
+                      </h2>
+                      <div className="text-lovely leading-relaxed whitespace-pre-line text-sm font-medium">
+                        {modal.content}
+                      </div>
+                    </>
+                  );
+                })()}
                 <button
                   onClick={() => setShowModal(false)}
-                  className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg"
+                  className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg cursor-pointer"
                 >
-                  Got it!
+                  {locale === "ar" ? "فهمت!" : "Got it!"}
                 </button>
               </div>
             </div>

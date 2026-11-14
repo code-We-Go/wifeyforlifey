@@ -49,11 +49,28 @@ export async function POST(request: Request) {
         : 0;
       const verifiedSubTotal = verifiedSubsSubTotal + itemsSubTotal;
       const discount = Number(data.appliedDiscountAmount) || 0;
-      const loyalty = Number(data.loyalty?.discountAmount) || 0;
-      const shipping = Number(data.shipping) || 0;
-      const verifiedTotal = Math.max(0, verifiedSubTotal - discount - loyalty + shipping);
+      const loyalty = Number(data.loyalty?.discountAmount || data.loyalty?.discount) || 0;
+
+      // Free shipping check: free if subtotal > 2000 OR contains Full Experience package
+      const hasFreeShippingPackage = Array.isArray(data.subscriptions) && data.subscriptions.some(
+        (sub: any) =>
+          sub.packageId === "687396821b4da119eb1c13fe" ||
+          sub.packageId === "6965e63c6df4503dda02c12b" ||
+          sub.packageId === PACKAGE_IDS.FULL_EXPERIENCE ||
+          sub.packageId === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+      );
+      const isFreeShipping = verifiedSubTotal > 2000 || hasFreeShippingPackage;
+      const effectiveShipping = isFreeShipping ? 0 : (Number(data.shipping) || 0);
+
+      // Selected Gift Cards cost (+20 LE per gift card checked)
+      const giftCardsCost = Array.isArray(data.subscriptions)
+        ? data.subscriptions.reduce((sum: number, item: any) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0)
+        : 0;
+
+      const verifiedTotal = Math.max(0, verifiedSubTotal - discount - loyalty + effectiveShipping + giftCardsCost);
 
       data.subTotal = verifiedSubTotal;
+      data.shipping = effectiveShipping;
       data.total = verifiedTotal;
     }
 
