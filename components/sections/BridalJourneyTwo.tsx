@@ -2,10 +2,12 @@
 
 import { thirdFont } from "@/fonts";
 import React, { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 const BridalJourneyTwo = () => {
   const t = useTranslations("home.marquee");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -33,82 +35,66 @@ const BridalJourneyTwo = () => {
   }, []);
 
   const items = [
+    // t("tagline"),
     t("planners"),
     t("expertSessions"),
+    t("tagline"),
     t("smartTools"),
     t("bridalEssentials"),
-    t("tagline"),
   ];
 
   return (
     <section
       ref={sectionRef}
-      className="bg-lovely text-creamey py-3 md:py-6 overflow-hidden relative"
+      className="bg-lovely text-creamey py-2 md:py-3 overflow-hidden relative select-none"
     >
       <div className="relative w-full">
         {/* Scrolling Marquee */}
-        <div className="flex items-center">
+        <div className="flex items-center overflow-hidden" dir="ltr">
           <div className="animate-scroll flex whitespace-nowrap">
-            {/* First set */}
-            <div className="flex items-center gap-8 px-4">
-              {items.map((item, index) => (
-                <React.Fragment key={`first-${index}`}>
-                  <h2
-                    className={`${thirdFont.className} text-2xl md:text-3xl lg:text-4xl tracking-wide font-bold`}
-                  >
-                    {item}
-                  </h2>
-                  {index < items.length - 1 && (
-                    <span className="text-2xl md:text-3xl">•</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-            
-            {/* Duplicate set for seamless loop */}
-            <div className="flex items-center gap-8 px-4">
-              {items.map((item, index) => (
-                <React.Fragment key={`second-${index}`}>
-                  <span className="text-2xl md:text-3xl">•</span>
-                  <h2
-                    className={`${thirdFont.className} text-2xl md:text-3xl lg:text-4xl tracking-wide font-bold`}
-                  >
-                    {item}
-                  </h2>
-                </React.Fragment>
-              ))}
-            </div>
-
-            {/* Third set for seamless loop */}
-            <div className="flex items-center gap-8 px-4">
-              {items.map((item, index) => (
-                <React.Fragment key={`third-${index}`}>
-                  <span className="text-2xl md:text-3xl">•</span>
-                  <h2
-                    className={`${thirdFont.className} text-2xl md:text-3xl lg:text-4xl font-bold tracking-widest`}
-                  >
-                    {item}
-                  </h2>
-                </React.Fragment>
-              ))}
-            </div>
+            {[0, 1, 2].map((setIndex) => (
+              <div
+                key={setIndex}
+                className="flex items-center gap-6 sm:gap-8 px-3 sm:px-4 shrink-0"
+              >
+                {items.map((item, index) => (
+                  <React.Fragment key={`${setIndex}-${index}`}>
+                    <h2
+                      className={`${thirdFont.className} ${isArabic
+                        ? "text-lg md:text-xl lg:text-2xl tracking-normal"
+                        : "text-lg md:text-xl lg:text-2xl tracking-wider"
+                        } font-bold text-creamey inline-block`}
+                      dir={isArabic ? "rtl" : "ltr"}
+                    >
+                      {item}
+                    </h2>
+                    <span
+                      className={`${isArabic ? "text-lg md:text-2xl" : "text-2xl md:text-3xl"
+                        } text-creamey/80 select-none`}
+                    >
+                      •
+                    </span>
+                  </React.Fragment>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Custom Animations */}
       <style jsx>{`
-        @keyframes scroll {
+        @keyframes marquee {
           0% {
-            transform: translateX(0);
+            transform: translateX(0%);
           }
           100% {
-            transform: translateX(-33.333%);
+            transform: translateX(-33.333333%);
           }
         }
 
         .animate-scroll {
-          animation: scroll 20s linear infinite;
+          animation: marquee 50s linear infinite;
         }
 
         .animate-scroll:hover {

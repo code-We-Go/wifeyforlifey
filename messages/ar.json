@@ -105,11 +105,11 @@
       "gehazBestieButton": "رحلة جهازك مع وايفى"
     },
     "marquee": {
-      "planners": "بلانرز التخطيط",
+      "planners": "بلانر للتخطيط",
       "expertSessions": "جلسات مع خبراء",
-      "smartTools": "أدوات ذكية",
-      "bridalEssentials": "أساسيات العروسة",
-      "tagline": "كل اللي محتاجاه عشان تخططي بروقان وتختاري صح 💕"
+      "smartTools": "أدوات تسهّل عليكي التخطيط",
+      "bridalEssentials": "أساسيات محتاجاها كل عروسة",
+      "tagline": "كل اللي محتاجاه عشان تخطّطي براحتك وتختاري اللي يناسبك"
     },
     "joinNow": {
       "title": "بسسست... بتجهزي وتائهة في وسط دوشة وتفاصيل الجهاز؟",
@@ -236,7 +236,7 @@
   },
   "shopPage": {
     "title": "المتجر",
-    "tabPlanners": "بلانرز وتخطيط",
+    "tabPlanners": "بلانر و منظمات",
     "tabProducts": "المنتجات",
     "tabSessions": "استشيري خبراء وايفى",
     "searchPlaceholder": "بتدوري على إيه؟...",

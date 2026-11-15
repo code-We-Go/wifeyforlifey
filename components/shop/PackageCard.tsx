@@ -29,7 +29,7 @@ export default function PackageCard({
   const handlePackageClick = (e: React.MouseEvent) => {
     // Only navigate if the click wasn't on a button
     if (!(e.target as HTMLElement).closest("button")) {
-    router.push(`/package/${packageItem.slug}`);
+      router.push(`/package/${packageItem.slug}`);
     }
   };
 
@@ -52,21 +52,33 @@ export default function PackageCard({
         />
         <div className="absolute inset-0 transition-colors duration-300 bg-black/0 group-hover:bg-black/10"></div>
         {displayDiscountedFrom && displayDiscountedFrom > displayPrice && (
-          <div className="absolute top-3 end-3 z-10 bg-lovely text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+          <div
+            className={cn(
+              "absolute top-3 end-3 z-10 bg-lovely text-white font-bold rounded-full shadow-md",
+              locale === "ar" ? "text-xs sm:text-sm px-3 py-1" : "text-xs px-2.5 py-1"
+            )}
+          >
             {locale === "ar"
               ? `وفري ${Math.round(((displayDiscountedFrom - displayPrice) / displayDiscountedFrom) * 100)}%`
               : `Save ${Math.round(((displayDiscountedFrom - displayPrice) / displayDiscountedFrom) * 100)}%`}
           </div>
         )}
       </div>
-      
+
       <div className="p-[16px_18px_20px] flex flex-col grow">
         {pkg.notes && pkg.notes.length > 0 && (
-          <span className="inline-block self-start text-[11px] font-semibold tracking-[0.06em] uppercase bg-lovely/20  px-2.5 py-1 rounded-full mb-2">
+          <span
+            className={cn(
+              "inline-block self-start font-semibold bg-lovely/20 rounded-full mb-2",
+              locale === "ar"
+                ? "text-[13px] sm:text-[14px] px-3 py-1 tracking-normal"
+                : "text-[11px] font-semibold tracking-[0.06em] uppercase px-2.5 py-1"
+            )}
+          >
             {pkg.notes[0]}
           </span>
         )}
-        
+
         <h3
           className={cn(
             thirdFont.className,
@@ -75,13 +87,20 @@ export default function PackageCard({
         >
           {pkg.name}
         </h3>
-        
+
         {pkg.notes && pkg.notes.length > 1 && (
-          <p className="text-[13.5px] leading-[1.55] mt-1.5 text-lovely/90 line-clamp-3">
+          <p
+            className={cn(
+              "mt-1.5 text-lovely/90 line-clamp-3",
+              locale === "ar"
+                ? "text-[15px] sm:text-[16px] leading-[1.65]"
+                : "text-[13.5px] leading-[1.55]"
+            )}
+          >
             {pkg.notes[1]}
           </p>
         )}
-        
+
         <div className="grow" />
 
         <div className="mt-3 flex items-baseline gap-2 flex-wrap">
@@ -96,7 +115,12 @@ export default function PackageCard({
                   : `LE ${displayDiscountedFrom.toLocaleString()}`}
               </span>
             )}
-            <small className="font-sans font-medium text-[12px] opacity-85 normal-case tracking-normal">
+            <small
+              className={cn(
+                "font-sans font-medium opacity-85 normal-case tracking-normal",
+                locale === "ar" ? "text-[13px]" : "text-[12px]"
+              )}
+            >
               {packageItem.duration > 0 ? (
                 <>
                   | {(() => {
@@ -117,9 +141,8 @@ export default function PackageCard({
                     const remainingMonths = months % 12;
                     let result = `${years} ${years === 1 ? "Year" : "Years"}`;
                     if (remainingMonths > 0) {
-                      result += ` and ${remainingMonths} ${
-                        remainingMonths === 1 ? "Month" : "Months"
-                      }`;
+                      result += ` and ${remainingMonths} ${remainingMonths === 1 ? "Month" : "Months"
+                        }`;
                     }
                     return result;
                   })()}

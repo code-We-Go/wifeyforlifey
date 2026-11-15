@@ -4,8 +4,11 @@ import { thirdFont } from "@/fonts";
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 
 const BridalJourney = () => {
+  const locale = useLocale();
+  const isArabic = locale === "ar";
   const [isVisible, setIsVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -33,12 +36,21 @@ const BridalJourney = () => {
     };
   }, []);
 
-  const items = [
-    "planners",
-    "expert sessions",
-    "smart tools",
-    "and bridal essentials !",
-  ];
+  const items = isArabic
+    ? [
+      // "كل اللي محتاجاه عشان تخطّطي براحتك وتختاري اللي يناسبك",
+      "بلانر للتخطيط",
+      "جلسات مع خبراء",
+      "أدوات تسهّل عليكي التخطيط",
+      "أساسيات محتاجاها كل عروسة",
+    ]
+    : [
+      // "Everything you need to plan comfortably and choose what suits you",
+      "planners",
+      "expert sessions",
+      "smart tools",
+      "and bridal essentials !",
+    ];
 
   // Auto-cycle through items
   useEffect(() => {
@@ -46,7 +58,7 @@ const BridalJourney = () => {
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % items.length);
-    }, 1500); // Change every 2.5 seconds
+    }, 3500); // Change every 3.5 seconds to give comfortable reading time
 
     return () => clearInterval(interval);
   }, [isVisible, items.length]);
@@ -119,20 +131,30 @@ const BridalJourney = () => {
         </div> */}
       </div>
 
-      <div className="container-custom max-w-5xl mx-auto text-center space-y-8 md:space-y-12 relative z-10">
+      <div
+        className="container-custom max-w-5xl mx-auto text-center space-y-8 md:space-y-12 relative z-10"
+        dir={isArabic ? "rtl" : "ltr"}
+      >
         {/* Animated Text Items - Cycling with Fade */}
-        <div className="relative h-24 md:h-32 lg:h-40 flex items-center justify-center">
+        <div
+          className={`relative flex items-center justify-center ${isArabic
+            ? "h-20 sm:h-24 md:h-28 lg:h-32"
+            : "h-24 md:h-32 lg:h-40"
+            }`}
+        >
           {items.map((item, index) => (
             <div
               key={index}
-              className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out animate-in ${
-                currentIndex === index
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-95"
-              }`}
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out animate-in ${currentIndex === index
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-95"
+                }`}
             >
               <h2
-                className={`${thirdFont.className} text-3xl tracking-normal md:text-4xl lg:text-5xl font-bold `}
+                className={`${thirdFont.className} font-bold text-center px-4 ${isArabic
+                  ? "text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-snug tracking-normal"
+                  : "text-3xl tracking-normal md:text-4xl lg:text-5xl"
+                  }`}
               >
                 {item}
               </h2>
@@ -142,24 +164,29 @@ const BridalJourney = () => {
 
         {/* Subtitle */}
         <div
-          className={`transform transition-all duration-700 ease-out delay-300 ${
-            isVisible
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-8"
-          }`}
+          className={`transform transition-all duration-700 ease-out delay-300 ${isVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-8"
+            }`}
         >
-          <p className="text-lg md:text-xl lg:text-2xl font-semibold max-w-3xl mx-auto leading-relaxed">
-            everything you need to plan calmly and make right choices
+          <p
+            className={`font-semibold max-w-3xl mx-auto leading-relaxed ${isArabic
+              ? "text-base sm:text-base md:text-xl lg:text-2xl"
+              : "text-base md:text-lg "
+              }`}
+          >
+            {isArabic
+              ? "كل اللي محتاجاه عشان تخطّطي براحتك وتختاري اللي يناسبك"
+              : "everything you need to plan calmly and make right choices"}
           </p>
         </div>
 
         {/* CTA Button */}
         <div
-          className={`transform transition-all duration-700 ease-out delay-500 ${
-            isVisible
-              ? "opacity-100 translate-y-0 scale-100"
-              : "opacity-0 translate-y-8 scale-95"
-          }`}
+          className={`transform transition-all duration-700 ease-out delay-500 ${isVisible
+            ? "opacity-100 translate-y-0 scale-100"
+            : "opacity-0 translate-y-8 scale-95"
+            }`}
         >
           <Button
             onClick={() => {
@@ -170,7 +197,7 @@ const BridalJourney = () => {
             size="lg"
             className="rounded-full font-normal tracking-wide text-base md:text-lg px-8 md:px-12 py-6 md:py-8 bg-lovely hover:bg-lovely/90 text-creamey shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
           >
-            begin your bridal journey 💗
+            {isArabic ? "ابدأي رحلتك كعروسة 💗" : "begin your bridal journey 💗"}
           </Button>
         </div>
       </div>
