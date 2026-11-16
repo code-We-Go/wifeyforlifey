@@ -255,3 +255,40 @@ export function localizeSubcategory<T = any>(subcategory: T, locale: string = "e
     description: arTrans?.description !== undefined && arTrans.description !== "" ? arTrans.description : s.description,
   };
 }
+
+/**
+ * Localizes a PartnerSession document, including its variants.
+ */
+export function localizePartnerSession<T = any>(session: T, locale: string = "en"): T {
+  if (!session || typeof session !== "object" || locale !== "ar") {
+    return session;
+  }
+
+  const s: any = session;
+  const arTrans = s.translations?.ar;
+
+  const localizedTitle = (arTrans?.title && arTrans.title.trim() !== "") ? arTrans.title : s.title;
+  const localizedPartnerName = (arTrans?.partnerName && arTrans.partnerName.trim() !== "") ? arTrans.partnerName : s.partnerName;
+  const localizedDescription = (arTrans?.description && arTrans.description.trim() !== "") ? arTrans.description : s.description;
+
+  const localizedVariants = Array.isArray(s.variants)
+    ? s.variants.map((v: any) => {
+        const vAr = v.translations?.ar;
+        const vTitle = (vAr?.title && vAr.title.trim() !== "") ? vAr.title : v.title;
+        const vDesc = (vAr?.description && vAr.description.trim() !== "") ? vAr.description : v.description;
+        return {
+          ...v,
+          title: vTitle,
+          description: vDesc,
+        };
+      })
+    : s.variants;
+
+  return {
+    ...s,
+    title: localizedTitle,
+    partnerName: localizedPartnerName,
+    description: localizedDescription,
+    variants: localizedVariants,
+  };
+}

@@ -8,10 +8,14 @@
   --background-end-rgb: 255, 255, 255;
 
   /* Brand Colors */
-  --primary-color: 323, 100%, 90%; /* Light Pink */
-  --primary-hover: 323, 100%, 85%; /* Slightly darker Pink */
-  --secondary-color: 266, 100%, 94%; /* Lavender */
-  --accent-color: 152, 70%, 95%; /* Mint */
+  --primary-color: 323, 100%, 90%;
+  /* Light Pink */
+  --primary-hover: 323, 100%, 85%;
+  /* Slightly darker Pink */
+  --secondary-color: 266, 100%, 94%;
+  /* Lavender */
+  --accent-color: 152, 70%, 95%;
+  /* Mint */
 
   /* UI Colors */
   --success-color: 142, 76%, 36%;
@@ -62,6 +66,7 @@
     --ring: 323 80% 90%;
     --radius: 0.75rem;
   }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -102,14 +107,19 @@
   * {
     @apply border-border;
   }
-  html[dir="rtl"], [dir="rtl"] {
+
+  html[dir="rtl"],
+  [dir="rtl"] {
     font-family: var(--font-arabic), sans-serif;
   }
-  html, body {
+
+  html,
+  body {
     background-color: #fbf3e0;
     color-scheme: light;
     @apply bg-background text-foreground;
   }
+
   h1,
   h2,
   h3,
@@ -118,24 +128,31 @@
   h6 {
     @apply font-medium tracking-tight;
   }
+
   h1 {
     @apply text-4xl sm:text-5xl md:text-6xl;
   }
+
   h2 {
     @apply text-3xl sm:text-4xl;
   }
+
   h3 {
     @apply text-2xl sm:text-3xl;
   }
+
   h4 {
     @apply text-xl sm:text-2xl;
   }
+
   h5 {
     @apply text-lg sm:text-xl;
   }
+
   h6 {
     @apply text-base sm:text-lg;
   }
+
   p {
     @apply leading-relaxed;
   }
@@ -180,7 +197,7 @@
   }
 
   .product-card {
-    @apply rounded-sm  bg-card shadow-sm card-hover;
+    @apply rounded-sm bg-card shadow-sm card-hover;
   }
 
   .video-card {
@@ -214,7 +231,8 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b91c2a; /* Slightly darker shade for hover */
+  background: #b91c2a;
+  /* Slightly darker shade for hover */
   transform: scale(1.05);
 }
 
@@ -250,16 +268,21 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #b91c2a; /* Slightly darker shade for hover */
+  background: #b91c2a;
+  /* Slightly darker shade for hover */
 }
 
 /* Hide scrollbar but keep scrolling functionality */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
 
 .scrollbar-creamey {
@@ -297,4 +320,39 @@ input::placeholder {
 input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(21%) sepia(98%) saturate(6943%) hue-rotate(350deg) brightness(89%) contrast(96%);
   cursor: pointer;
+}
+
+/* ==========================================================================
+   Arabic Typography Enhancements (Larger font sizes only - line-height preserved)
+   ========================================================================== */
+html[dir="rtl"] {
+  font-size: 17.5px;
+}
+
+@media (min-width: 768px) {
+  html[dir="rtl"] {
+    font-size: 18px;
+  }
+}
+
+html[dir="rtl"] body {
+  font-size: 1.05rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ensure smaller text utilities remain comfortably readable in Arabic */
+[dir="rtl"] .text-xs {
+  font-size: 0.88rem;
+}
+
+[dir="rtl"] .text-sm {
+  font-size: 1.02rem;
+}
+
+[dir="rtl"] .text-base {
+  font-size: 1.15rem;
+}
+
+[dir="rtl"] .text-lg {
+  font-size: 1.28rem;
 }

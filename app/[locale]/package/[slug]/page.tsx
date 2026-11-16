@@ -375,48 +375,30 @@ export default function PackageeDetailPage() {
     }
 
     const isAr = locale === "ar";
-    const packageContents = {
-      "687396821b4da119eb1c13fe": {
-        header: isAr ? "هذا الطلب حجز مسبق (النسخة العربية) 🎀" : "This is a pre-order (Arabic Edition) 🎀",
-        content: isAr
-          ? `يرجى العلم أن طلب النسخة العربية بنظام الحجز المسبق، وهيتم شحن وتوصيل البلانر ليكي خلال 10 أيام عمل.
+    const preorderDetails = {
+      header: isAr ? "طلب مسبق 💗" : "Pre-order (Arabic Edition) 💗",
+      buttonText: isAr ? "تمام، فهمت!" : "Got it!",
+      content: isAr
+        ? `يرجى العلم أن طلب النسخة العربية بنظام الحجز المسبق، هنشحن لكِ بلانر جهاز بيستي خلال ١٠ أيام عمل من تأكيد طلبك. ولحد ما البلانر يوصلك، تقدري تستمتعي من دلوقتي بـ:
+✨ فيديوهات وايفي اللي هتساعدك تفهمى الفرق بين انواع الحاجات فى جهازك
+✨ خصومات حصرية من شركاء وايفي
+✨ جروب واتساب وايفي، مساحة تسألي وتشاركي فيها مع عرايس بيجهّزوا زيّك
 
-وعبال ما رفيقة الجهاز توصلك، تقدري تبدأي تستمتعي بـ:
-✨ قوائم تشغيل وايفي الحصرية
-✨ خصومات الشركاء الموثوقين
-✨ الانضمام لدوائر دعم ومجتمع وايفي
-
-شكراً لثقتك وحبك — متحمسين جداً تفرحي بالبلانر أول ما يوصلك! 💗`
-          : `Please note that the Arabic Edition is on pre-order, and your planner will be shipped within 10 business days.
-
-While you wait for your gehaz bestie to arrive, you can already enjoy:
-✨ Wifey's curated playlists
+شكرًا على صبرك وحبك. متحمسين أوي للحظة اللي هتفتحي فيها البلانر بتاعك! 💗`
+        : `Please note that the Arabic Edition is on pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days of your order confirmation. While you wait for your planner to arrive, you can already enjoy:
+✨ Wifey's videos to help you understand the differences between all items in your gehaz
 ✨ Exclusive partner discounts
-✨ Access to supportive Wifey circles
+✨ Wifey WhatsApp group to connect and share with brides preparing just like you
 
-Thank you for your patience and love — we can't wait for you to unwrap your planner! 💗`,
-      },
-      "68bf6ae9c4d5c1af12cdcd37": {
-        header: isAr ? "هذا الطلب حجز مسبق (النسخة العربية) 🎀" : "This is a pre-order (Arabic Edition) 🎀",
-        content: isAr
-          ? `يرجى العلم أن طلب النسخة العربية بنظام الحجز المسبق، وهيتم شحن بلانر رفيقة الجهاز ليكي خلال 10 أيام عمل.
-
-بعد إتمام الطلب، هيوصلك إيميل تأكيد بمتابعة الشحنة خطوة بخطوة.
-
-أول ما يوصلك البلانر، هتستفيدي بميزة حصرية من وايفي 💗 — وصول لقائمة تشغيل من اختيارك لمدة 6 شهور عبر كود QR مطبوع داخل الباكدج.
-
-متحمسين جداً نخوض الرحلة دي سوا.. البلانر في طريقه ليكي قريب جداً! ✨`
-          : `Please note that the Arabic Edition is on pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days.
-
-After completing your purchase, you’ll receive a confirmation email with a tracking link so you can follow your planner’s journey every step of the way.
-
-Once you receive your planner, you’ll unlock a special Wifey bonus 💗 — access to one playlist of your choice for 6 months. Inside your package, you’ll find a thank-you card with a QR code that lets you browse and select your favorite playlist.
-
-We’re beyond excited to share this experience with you… your planner will be on its way very soon! ✨`,
-      },
+Thank you for your patience and love. We're so excited for the moment you unwrap your planner! 💗`,
     };
 
-    return packageContents[packageId as keyof typeof packageContents] || null;
+    const packageContents: Record<string, typeof preorderDetails> = {
+      "687396821b4da119eb1c13fe": preorderDetails,
+      "68bf6ae9c4d5c1af12cdcd37": preorderDetails,
+    };
+
+    return packageContents[packageId] || preorderDetails;
   };
 
   // Quiz State
@@ -1035,9 +1017,15 @@ We’re beyond excited to share this experience with you… your planner will be
               {allPackages.length > 1 && (
                 <div className="mb-6 p-3.5 sm:p-4 bg-white border-2 border-dashed border-pinkey rounded-2xl text-xs sm:text-sm text-lovely/90 leading-relaxed shadow-sm">
                   {locale === "ar" ? (
-                    <>
-                      <strong className="text-lovely">محتارة؟</strong> محتاجة كتاب البلانر بس؟ اختاري <strong className="text-lovely">التجربة المصغرة (Mini)</strong>. عاوزة البلانر <em>بالإضافة إلى</em> {isWeddingPackage ? "6 شهور" : "سنة كاملة"} من الخصومات، الفيديوهات، مجتمع العرايس ودعم الخبراء؟ اختاري <strong className="text-lovely">التجربة الكاملة (Full)</strong>.
-                    </>
+                    isWeddingPackage ? (
+                      <>
+                        <strong className="text-lovely">محتارة؟</strong> محتاجة  البلانر بس؟ اختاري <strong className="text-lovely">التجربة المصغرة (Mini)</strong>. عاوزة البلانر <em>بالإضافة إلى</em> 6 شهور من الخصومات، الفيديوهات، مجتمع العرايس ودعم الخبراء؟ اختاري <strong className="text-lovely">التجربة الكاملة (Full)</strong>.
+                      </>
+                    ) : (
+                      <>
+                        <strong className="text-lovely">محتارة؟</strong> محتاجة البلانر بس، اختاري <strong className="text-lovely">الرحلة المصغرة</strong>. لكن لو محتاجة حد يساعدك فى كل اختياراتك و ميسيبكيش اختارى <strong className="text-lovely">الرحلة الكاملة مع وايفى</strong> فيها البلانر ومعاها سنة كاملة من الخصومات والفيديوهات وجروب واتساب وايفي ودعم من خبرائنا فى مجالات مختلفة.
+                      </>
+                    )
                   ) : (
                     <>
                       <strong className="text-lovely">Not sure?</strong> Just want the planner? Choose <strong className="text-lovely">Mini</strong>. Want the planner <em>plus</em> {isWeddingPackage ? "6 months" : "a year"} of discounts, videos, community &amp; expert support? Choose <strong className="text-lovely">Full</strong>.
@@ -1185,7 +1173,7 @@ We’re beyond excited to share this experience with you… your planner will be
                   )}
                   <p className="text-xs sm:text-sm text-lovely font-bold mt-2.5 flex items-center gap-1.5">
                     {locale === "ar"
-                      ? `🎁 بيوصلك مع الباقة ${Math.round(activePrice).toLocaleString()} نقطة وايفي — تقدري تستخدميهم في مشترياتك الجاية 💕`
+                      ? `🎁 مع الباكدج دي هتكسبي ${Math.round(activePrice).toLocaleString()} نقطة وايفي، تقدري تستخدميهم في مشترياتك الجاية 💕`
                       : `🎁 Comes with ${Math.round(activePrice).toLocaleString()} Wifey Points — to spend them on our lovely items later.`}
                   </p>
                 </div>
@@ -1339,7 +1327,7 @@ We’re beyond excited to share this experience with you… your planner will be
           <div className="mt-4 p-4 border-2 text-lovely/90 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
             {locale === "ar" ? (
               <>
-                <strong>كتاب البلانر المطبوع ملكك دائماً.</strong> المميزات الرقمية والدعم يستمروا لمدة {isWeddingPackage ? "6 شهور" : "12 شهراً"} من تاريخ الشراء.
+                <strong> البلانر المطبوع ملكك دائماً.</strong> المميزات الرقمية والدعم يستمروا لمدة {isWeddingPackage ? "6 شهور" : "12 شهراً"} من تاريخ الشراء.
               </>
             ) : (
               <>
@@ -1349,7 +1337,7 @@ We’re beyond excited to share this experience with you… your planner will be
           </div>
         </div>
         {/* Notes Section */}
-        {displayPackage.notes && displayPackage.notes.length > 0 && (
+        {/* {displayPackage.notes && displayPackage.notes.length > 0 && (
           <div className="bg-pinkey/80 p-6 sm:p-8 rounded-3xl border-2 border-lovely/20 shadow-md my-12 ">
             <h3 className={`${thirdFont.className} text-xl font-bold text-lovely mb-3 uppercase tracking-wide`}>
               {locale === "ar" ? "ملاحظات هامة" : "Important Notes"}
@@ -1363,7 +1351,7 @@ We’re beyond excited to share this experience with you… your planner will be
               ))}
             </ul>
           </div>
-        )}
+        )} */}
         {/* Make it a full order Section (Suggested Products from MongoDB) */}
         {((displayPackage.packageProducts && displayPackage.packageProducts.length > 0) ||
           (fullPackage?.packageProducts && fullPackage.packageProducts.length > 0)) && (
@@ -1564,11 +1552,14 @@ We’re beyond excited to share this experience with you… your planner will be
       {/* Modal for specific packages - only shown for Arabic pre-order */}
       {showModal && packageData?._id && getModalContent(packageData._id, selectedEdition) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-creamey rounded-2xl max-w-md w-full mx-4 relative shadow-2xl border-2 border-lovely">
+          <div
+            className="bg-creamey rounded-2xl max-w-md w-full mx-4 relative shadow-2xl border-2 border-lovely"
+            dir={locale === "ar" ? "rtl" : "ltr"}
+          >
             {/* Close button */}
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-lovely hover:text-lovely/70 transition-colors"
+              className="absolute top-4 end-4 text-lovely hover:text-lovely/70 transition-colors"
             >
               <X size={24} />
             </button>
@@ -1588,15 +1579,15 @@ We’re beyond excited to share this experience with you… your planner will be
                       <div className="text-lovely leading-relaxed whitespace-pre-line text-sm font-medium">
                         {modal.content}
                       </div>
+                      <button
+                        onClick={() => setShowModal(false)}
+                        className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg cursor-pointer"
+                      >
+                        {modal.buttonText || (locale === "ar" ? "تمام، فهمت!" : "Got it!")}
+                      </button>
                     </>
                   );
                 })()}
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="mt-6 bg-lovely text-creamey hover:bg-lovely/90 transition-colors rounded-full px-8 py-3 font-semibold shadow-lg cursor-pointer"
-                >
-                  {locale === "ar" ? "فهمت!" : "Got it!"}
-                </button>
               </div>
             </div>
           </div>

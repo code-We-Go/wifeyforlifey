@@ -2,10 +2,12 @@ import React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function DoubleHero() {
   const t = useTranslations("home.doubleHero");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
   return (
     <div className="w-full flex flex-col md:flex-row min-h-[60vh] md:h-[70vh] 2xl:h-[80vh] relative overflow-hidden bg-creamey">
       {/* Left / Upper Section */}
@@ -47,7 +49,7 @@ export default function DoubleHero() {
       {/* Right / Below Section */}
       <div className="relative flex-1 h-[50vh] md:h-full group overflow-hidden">
         <Image
-          src="/experience/gehaz1.png"
+          src={isArabic ? "/ar/hero/gehazBestie.jpeg" : "/experience/gehaz1.png"}
           alt="Gehaz Experience"
           fill
           className="object-cover object-center transition-transform duration-700 group-hover:scale-105"

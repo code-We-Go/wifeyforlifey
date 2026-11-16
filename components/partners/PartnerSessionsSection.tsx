@@ -16,6 +16,7 @@ import { sortSessions, SessionSortKey } from "@/components/shared/sessionSort";
 import ConsultantAvailabilityModal, {
   getAvailabilityNotice,
 } from "@/components/shared/ConsultantAvailabilityModal";
+import { localizePartnerSession } from "@/app/lib/localize";
 
 export type PartnerSessionVariant = {
   _id?: string;
@@ -143,10 +144,13 @@ export default function PartnerSessionsSection() {
 
     const best = validDiscounts[0];
     if (best.calculationType === "PERCENTAGE" && best.value) {
-      return `${best.value}% OFF`;
+      return isArabic ? `خصم ${best.value}%` : `${best.value}% OFF`;
     }
     if (best.calculationType === "FIXED_AMOUNT" && best.value) {
       const pct = Math.round((best.value / sessionPrice) * 100);
+      if (isArabic) {
+        return pct > 0 ? `خصم ${pct}%` : `خصم ${best.value} ج.م`;
+      }
       return pct > 0 ? `${pct}% OFF` : `EGP ${best.value} OFF`;
     }
     return null;
@@ -441,13 +445,17 @@ export default function PartnerSessionsSection() {
       ? selected.variants[selectedVariantIndex] || selected.variants[0]
       : null;
 
+  const localizedSessions = useMemo(() => {
+    return sessions.map((s) => localizePartnerSession(s, locale));
+  }, [sessions, locale]);
+
   const featuredSessions = useMemo(() => {
-    return sessions.filter((s) => Boolean(s.featured));
-  }, [sessions]);
+    return localizedSessions.filter((s) => Boolean(s.featured));
+  }, [localizedSessions]);
 
   const sortedSessions = useMemo(() => {
-    return sortSessions(sessions, sortBy);
-  }, [sessions, sortBy]);
+    return sortSessions(localizedSessions, sortBy);
+  }, [localizedSessions, sortBy]);
 
   const bookingBasePrice = selected
     ? getSessionBasePrice(selected, selectedVariantIndex)
@@ -458,7 +466,9 @@ export default function PartnerSessionsSection() {
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lovely mx-auto"></div>
-          <p className="mt-4 text-lovely/90">Loading sessions...</p>
+          <p className="mt-4 text-lovely/90">
+            {isArabic ? "جاري تحميل الجلسات..." : "Loading sessions..."}
+          </p>
         </div>
       ) : sortedSessions.length > 0 ? (
         <div>
@@ -471,9 +481,6 @@ export default function PartnerSessionsSection() {
 
                 {/* Section Header */}
                 <div className="flex items-center gap-3 mb-6">
-                  {/* <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-2xl bg-lovely text-white shadow-md shadow-lovely/20">
-                    <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
-                  </div> */}
                   <div>
                     <div className="flex items-center gap-2">
                       <h3
@@ -481,9 +488,6 @@ export default function PartnerSessionsSection() {
                       >
                         {isArabic ? "ورش عمل جماعية" : "Featured Sessions"}
                       </h3>
-                      {/* <span className="rounded-full bg-lovely/15 px-2.5 py-0.5 text-xs font-bold text-lovely uppercase tracking-wide">
-                        Featured
-                      </span> */}
                     </div>
                     <p className="text-xs md:text-sm text-lovely/80 mt-0.5">
                       {isArabic
@@ -514,10 +518,19 @@ export default function PartnerSessionsSection() {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-lovely/15">
             <div>
               <h3 className={`${thirdFont.className} text-lg md:text-xl font-bold text-lovely`}>
-                All Sessions
+                {isArabic ? "جميع الجلسات" : "All Sessions"}
               </h3>
               <p className="text-xs md:text-sm text-lovely/70">
-                Showing <span className="font-bold text-lovely">{sortedSessions.length}</span> expert session{sortedSessions.length === 1 ? "" : "s"}
+                {isArabic ? (
+                  <>
+                    عرض <span className="font-bold text-lovely">{sortedSessions.length}</span>{" "}
+                    {sortedSessions.length === 1 ? "جلسة مع الخبراء" : "جلسات مع الخبراء"}
+                  </>
+                ) : (
+                  <>
+                    Showing <span className="font-bold text-lovely">{sortedSessions.length}</span> expert session{sortedSessions.length === 1 ? "" : "s"}
+                  </>
+                )}
               </p>
             </div>
             <SessionSortSelect
@@ -541,7 +554,9 @@ export default function PartnerSessionsSection() {
           </div>
         </div>
       ) : (
-        <p className="text-lovely/90">No sessions available at the moment.</p>
+        <p className="text-lovely/90">
+          {isArabic ? "لا توجد جلسات متاحة حالياً." : "No sessions available at the moment."}
+        </p>
       )}
 
       <ConsultantAvailabilityModal
@@ -562,6 +577,7 @@ export default function PartnerSessionsSection() {
           onClick={() => setSelectedForDetails(null)}
         >
           <div
+            dir={isArabic ? "rtl" : "ltr"}
             className="bg-creamey rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -586,9 +602,11 @@ export default function PartnerSessionsSection() {
                 <p className="text-lg text-lovely/70 mb-2">
                   {activeDetailsVariant?.title || selectedForDetails.title}
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <p className="text-xl font-semibold text-lovely">
-                    EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
+                    {isArabic
+                      ? `${activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price} ج.م`
+                      : `EGP ${activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}`}
                   </p>
                   {getSessionDiscountBadge(selectedForDetails) && (
                     <span className="bg-lovely text-creamey text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
@@ -597,7 +615,7 @@ export default function PartnerSessionsSection() {
                   )}
                   {activeDetailsVariant?.duration ? (
                     <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
-                      ⏱ {activeDetailsVariant.duration} mins
+                      ⏱ {activeDetailsVariant.duration} {isArabic ? "دقيقة" : "mins"}
                     </span>
                   ) : null}
                 </div>
@@ -608,7 +626,7 @@ export default function PartnerSessionsSection() {
             {selectedForDetails.variants && selectedForDetails.variants.length > 1 && (
               <div className="mb-6">
                 <h4 className="font-bold text-lovely text-sm mb-2 uppercase tracking-wide">
-                  Choose Variant:
+                  {isArabic ? "اختاري الباقة:" : "Choose Variant:"}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedForDetails.variants.map((v, idx) => (
@@ -622,8 +640,8 @@ export default function PartnerSessionsSection() {
                         }`}
                     >
                       <span>{v.title}</span>
-                      <span className="ml-2 text-xs opacity-80">
-                        (EGP {v.price} • {v.duration}m)
+                      <span className="ms-2 text-xs opacity-80">
+                        ({isArabic ? `${v.price} ج.م • ${v.duration} د` : `EGP ${v.price} • ${v.duration}m`})
                       </span>
                     </button>
                   ))}
@@ -633,7 +651,9 @@ export default function PartnerSessionsSection() {
 
             {/* Description */}
             <div className="mb-6">
-              <h4 className="font-bold text-lovely text-lg mb-2">Helps you with:</h4>
+              <h4 className="font-bold text-lovely text-lg mb-2">
+                {isArabic ? "بتساعدك في:" : "Helps you with:"}
+              </h4>
               <div className="text-base font-medium text-lovely/90 whitespace-pre-line">
                 {(activeDetailsVariant?.description || selectedForDetails.description)
                   .split('\n')
@@ -654,8 +674,12 @@ export default function PartnerSessionsSection() {
             {selectedForDetails.sessionType && (
               <div className="mb-6 space-y-1">
                 <p className="text-lovely/80">
-                  <span className="font-semibold">Session Type:</span>{" "}
-                  {selectedForDetails.sessionType === "one-to-one" ? "One-to-One" : "Webinar"}
+                  <span className="font-semibold">
+                    {isArabic ? "نوع الجلسة:" : "Session Type:"}
+                  </span>{" "}
+                  {selectedForDetails.sessionType === "one-to-one"
+                    ? (isArabic ? "جلسة فردية (1:1)" : "One-to-One")
+                    : (isArabic ? "ورشة جماعية (Webinar)" : "Webinar")}
                 </p>
                 {selectedForDetails.sessionType === "webinar" &&
                   typeof selectedForDetails.maxCapacity === "number" &&
@@ -663,13 +687,19 @@ export default function PartnerSessionsSection() {
                     <div className="text-xs">
                       {isSessionFullyBooked(selectedForDetails) ? (
                         <span className="inline-flex items-center font-semibold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
-                          Fully Booked (Max capacity {selectedForDetails.maxCapacity} reached)
+                          {isArabic
+                            ? `مكتمل العدد (تم الوصول للحد الأقصى ${selectedForDetails.maxCapacity} مقعد)`
+                            : `Fully Booked (Max capacity ${selectedForDetails.maxCapacity} reached)`}
                         </span>
                       ) : (
                         <span className="text-lovely/70">
-                          Capacity: {selectedForDetails.maxCapacity} seats
-                          <span className="ml-1 text-emerald-600 font-medium">
-                            ({Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} spots remaining)
+                          {isArabic
+                            ? `السعة: ${selectedForDetails.maxCapacity} مقعد`
+                            : `Capacity: ${selectedForDetails.maxCapacity} seats`}
+                          <span className="ms-1 text-emerald-600 font-medium">
+                            {isArabic
+                              ? `(متبقي ${Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} أماكن)`
+                              : `(${Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} spots remaining)`}
                           </span>
                         </span>
                       )}
@@ -681,7 +711,9 @@ export default function PartnerSessionsSection() {
             {/* Links */}
             {selectedForDetails.links && selectedForDetails.links.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-bold text-lovely text-lg mb-2">Links:</h4>
+                <h4 className="font-bold text-lovely text-lg mb-2">
+                  {isArabic ? "روابط مهمة:" : "Links:"}
+                </h4>
                 <div className="space-y-2">
                   {selectedForDetails.links.map((link, i) => (
                     <a
@@ -694,7 +726,9 @@ export default function PartnerSessionsSection() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
-                      <span>{link.description || link.url} (Anonymously)</span>
+                      <span>
+                        {link.description || link.url} {isArabic ? "(بسرية تامة)" : "(Anonymously)"}
+                      </span>
                     </a>
                   ))}
                 </div>
@@ -708,7 +742,7 @@ export default function PartnerSessionsSection() {
                   disabled
                   className="bg-gray-300 text-gray-500 font-bold rounded-md px-10 md:px-20 py-3 md:py-6 cursor-not-allowed"
                 >
-                  Fully Booked
+                  {isArabic ? "مكتمل العدد" : "Fully Booked"}
                 </Button>
               ) : (
                 <Button
@@ -719,7 +753,7 @@ export default function PartnerSessionsSection() {
                   }}
                   className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
                 >
-                  Book Now
+                  {isArabic ? "احجزي الآن" : "Book Now"}
                 </Button>
               )}
             </div>
@@ -736,6 +770,7 @@ export default function PartnerSessionsSection() {
           }}
         >
           <div
+            dir={isArabic ? "rtl" : "ltr"}
             className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -747,28 +782,64 @@ export default function PartnerSessionsSection() {
                   <CheckCircle2 className="w-10 h-10 text-green-600" />
                 </div>
                 <h3 className="text-xl font-bold text-lovely">
-                  Booking Submitted! 🎉
+                  {isArabic ? "تم إرسال الحجز بنجاح! 🎉" : "Booking Submitted! 🎉"}
                 </h3>
                 <p className="text-lovely/80 text-sm leading-relaxed">
-                  Your booking for <span className="font-semibold">{activeBookingVariant?.title || selected.title}</span> has been received.
+                  {isArabic ? (
+                    <>
+                      تم استلام طلب حجزك لـ{" "}
+                      <span className="font-semibold">
+                        {activeBookingVariant?.title || selected.title}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    <>
+                      Your booking for{" "}
+                      <span className="font-semibold">
+                        {activeBookingVariant?.title || selected.title}
+                      </span>{" "}
+                      has been received.
+                    </>
+                  )}
                 </p>
-                <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-left space-y-2">
+                <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-start space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="text-lg">⏳</span>
                     <p className="text-sm text-lovely/90">
-                      Our administration team will review your payment receipt. This may take up to <span className="font-bold">24 hours</span>.
+                      {isArabic ? (
+                        <>
+                          سيقوم فريق الإدارة بمراجعة إيصال الدفع الخاص بكِ خلال{" "}
+                          <span className="font-bold">24 ساعة</span>.
+                        </>
+                      ) : (
+                        <>
+                          Our administration team will review your payment receipt. This may take up to{" "}
+                          <span className="font-bold">24 hours</span>.
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-lg">📧</span>
                     <p className="text-sm text-lovely/90">
-                      You will receive a confirmation email once your payment is verified.
+                      {isArabic
+                        ? "ستصلكِ رسالة تأكيد على البريد الإلكتروني بمجرد التحقق من الدفع."
+                        : "You will receive a confirmation email once your payment is verified."}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-lg">🕐</span>
                     <p className="text-sm text-lovely/90">
-                      Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
+                      {isArabic ? (
+                        <>
+                          مواعيد العمل: <span className="font-medium">من الإثنين إلى الجمعة، 5 مساءً – 11 مساءً</span>. يتم مراجعة طلبات نهاية الأسبوع يوم الإثنين.
+                        </>
+                      ) : (
+                        <>
+                          Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -780,13 +851,14 @@ export default function PartnerSessionsSection() {
                     setSelected(null);
                   }}
                 >
-                  Got it!
+                  {isArabic ? "تمام، فهمت!" : "Got it!"}
                 </Button>
               </div>
             ) : (
               <>
                 <h3 className="text-xl font-semibold text-lovely mb-2">
-                  Book: {activeBookingVariant?.title || selected.title}
+                  {isArabic ? "حجز: " : "Book: "}
+                  {activeBookingVariant?.title || selected.title}
                 </h3>
 
                 {String(selected._id) === "6acfa82b936fe79b1c127ed6" && (
@@ -811,7 +883,7 @@ export default function PartnerSessionsSection() {
                 {selected.variants && selected.variants.length > 1 && (
                   <div className="mb-4">
                     <label className="block text-xs font-semibold text-lovely uppercase tracking-wide mb-1.5">
-                      Selected Variant
+                      {isArabic ? "الباقة المختارة" : "Selected Variant"}
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {selected.variants.map((v, idx) => (
@@ -824,7 +896,7 @@ export default function PartnerSessionsSection() {
                             : "bg-white/60 text-lovely border-lovely/30 hover:bg-white"
                             }`}
                         >
-                          {v.title} (EGP {v.price})
+                          {v.title} ({isArabic ? `${v.price} ج.م` : `EGP ${v.price}`})
                         </button>
                       ))}
                     </div>
@@ -860,7 +932,9 @@ export default function PartnerSessionsSection() {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                           </svg>
-                          <span>{link.description || link.url} (Anonymously)</span>
+                          <span>
+                            {link.description || link.url} {isArabic ? "(بسرية تامة)" : "(Anonymously)"}
+                          </span>
                         </a>
                       ))}
                     </div>
@@ -926,35 +1000,46 @@ export default function PartnerSessionsSection() {
                           : ""
                           }`}
                       >
-                        EGP {bookingBasePrice}
+                        {isArabic ? `${bookingBasePrice} ج.م` : `EGP ${bookingBasePrice}`}
                       </span>
                     </div>
                     {subscriptionApplied && subscriptionFinalPrice !== null && (
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-lovely">
-                          Subscription discount (
-                          {selected.subscriptionDiscountPercentage}%){" "}
+                          {isArabic
+                            ? `خصم الاشتراك (${selected.subscriptionDiscountPercentage}%)`
+                            : `Subscription discount (${selected.subscriptionDiscountPercentage}%)`}
                         </span>
                         <span className="text-lovely">
-                          EGP {Math.max(0, bookingBasePrice - subscriptionFinalPrice)}
+                          {isArabic
+                            ? `${Math.max(0, bookingBasePrice - subscriptionFinalPrice)} ج.م`
+                            : `EGP ${Math.max(0, bookingBasePrice - subscriptionFinalPrice)}`}
                         </span>
                       </div>
                     )}
                     {applied && couponFinalPrice !== null && (
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-lovely">
-                          Coupon discount ({Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)
+                          {isArabic
+                            ? `خصم الكوبون (${Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)`
+                            : `Coupon discount (${Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)`}
                         </span>
                         <span className="text-lovely">
-                          EGP {Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}
+                          {isArabic
+                            ? `${Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)} ج.م`
+                            : `EGP ${Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}`}
                         </span>
                       </div>
                     )}
                     {finalPrice !== null && (
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-lovely/20">
-                        <span className="text-lovely font-medium">Final Price</span>
+                        <span className="text-lovely font-medium">
+                          {isArabic ? "السعر النهائي" : "Final Price"}
+                        </span>
                         <span className="text-lovely font-semibold">
-                          {finalPrice === 0 ? "FREE (EGP 0)" : `EGP ${finalPrice}`}
+                          {finalPrice === 0
+                            ? (isArabic ? "مجاناً (0 ج.م)" : "FREE (EGP 0)")
+                            : (isArabic ? `${finalPrice} ج.م` : `EGP ${finalPrice}`)}
                         </span>
                       </div>
                     )}
@@ -996,33 +1081,64 @@ export default function PartnerSessionsSection() {
                         <div className="p-3 border border-lovely/20 rounded-xl bg-lovely/5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                           <div className="flex items-center gap-2 text-lovely font-semibold">
                             <span className="p-1 bg-lovely/10 rounded-full text-sm">💰</span>
-                            <p className="text-xs">InstaPay Instructions</p>
+                            <p className="text-xs">
+                              {isArabic ? "خطوات التحويل عبر إنستا باي" : "InstaPay Instructions"}
+                            </p>
                           </div>
                           <div className="text-[12px] text-lovely space-y-1.5 bg-white/50 p-2.5 rounded-lg border border-lovely/10">
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">1.</span>
-                              <span>Open <b>InstaPay</b> app → <b>"Send Money"</b></span>
+                              <span>
+                                {isArabic ? (
+                                  <>افتحي تطبيق <b>InstaPay</b> ثم اختاري <b>&quot;تحويل أموال / Send Money&quot;</b></>
+                                ) : (
+                                  <>Open <b>InstaPay</b> app → <b>&quot;Send Money&quot;</b></>
+                                )}
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">2.</span>
-                              <span>Select <b>"Bank Account"</b></span>
+                              <span>
+                                {isArabic ? (
+                                  <>اختاري <b>&quot;حساب بنكي / Bank Account&quot;</b></>
+                                ) : (
+                                  <>Select <b>&quot;Bank Account&quot;</b></>
+                                )}
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">3.</span>
-                              <span>Account: <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                              <span>
+                                {isArabic ? "رقم الحساب: " : "Account: "}
+                                <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b>
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">4.</span>
-                              <span>Bank: <b>Credit Agricole</b></span>
+                              <span>
+                                {isArabic ? (
+                                  <>البنك: <b>كريدي أجريكول (Credit Agricole)</b></>
+                                ) : (
+                                  <>Bank: <b>Credit Agricole</b></>
+                                )}
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">5.</span>
-                              <span>Receiver: <b>Wifey</b></span>
+                              <span>
+                                {isArabic ? (
+                                  <>اسم المستلم: <b>Wifey</b></>
+                                ) : (
+                                  <>Receiver: <b>Wifey</b></>
+                                )}
+                              </span>
                             </p>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
+                            <label className="block text-xs font-semibold text-lovely">
+                              {isArabic ? "ارفعي صورة إيصال التحويل" : "Upload Receipt Screenshot"}
+                            </label>
                             <CldUploadWidget
                               uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
                               onSuccess={(result: any) => {
@@ -1038,7 +1154,9 @@ export default function PartnerSessionsSection() {
                                   className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-xs font-medium"
                                 >
                                   <Upload className="w-4 h-4" />
-                                  {instapayReceipt ? "✓ Receipt Uploaded (Change)" : "📸 Upload Receipt"}
+                                  {instapayReceipt
+                                    ? (isArabic ? "✓ تم رفع الإيصال (تغيير)" : "✓ Receipt Uploaded (Change)")
+                                    : (isArabic ? "📸 ارفعي الإيصال" : "📸 Upload Receipt")}
                                 </button>
                               )}
                             </CldUploadWidget>
@@ -1052,7 +1170,13 @@ export default function PartnerSessionsSection() {
 
                           <div className="flex items-start gap-2 text-[11px] text-lovely/70 bg-pinkey/30 p-2 rounded-lg">
                             <span className="text-sm">⚠️</span>
-                            <p>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</p>
+                            <p>
+                              {isArabic ? (
+                                <>سيتم مراجعة طلبك من قبل فريق الإدارة. قد يستغرق التأكيد حتى <b>24 ساعة</b> خلال أيام العمل (من الإثنين إلى الجمعة، 5 م – 11 م).</>
+                              ) : (
+                                <>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</>
+                              )}
+                            </p>
                           </div>
                         </div>
                       )}

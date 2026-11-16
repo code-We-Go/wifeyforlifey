@@ -31,8 +31,10 @@ const Support360 = () => {
         t("card1Point1"),
         t("card1Point2"),
         t("card1Point3"),
+        t("card1Point4"),
+        t("card1Point5"),
       ],
-      imagePath: "/360/50.png"
+      imagePath: "/360/49.png"
     },
     {
       id: 2,
@@ -43,7 +45,7 @@ const Support360 = () => {
         t("card2Point3"),
         t("card2Point4"),
       ],
-      imagePath: "/360/52.png"
+      imagePath: "/360/48.png"
     },
     {
       id: 3,
@@ -53,10 +55,8 @@ const Support360 = () => {
         t("card3Point2"),
         t("card3Point3"),
         t("card3Point4"),
-        t("card3Point5"),
-        t("card3Point6"),
       ],
-      imagePath: "/360/51.png"
+      imagePath: "/360/50.png"
     },
     {
       id: 4,
@@ -67,7 +67,7 @@ const Support360 = () => {
         t("card4Point3"),
         t("card4Point4"),
       ],
-      imagePath: "/360/48.png"
+      imagePath: "/360/52.png"
     },
     {
       id: 5,
@@ -78,7 +78,7 @@ const Support360 = () => {
         t("card5Point3"),
         t("card5Point4"),
       ],
-      imagePath: "/360/49.png"
+      imagePath: "/360/53.png"
     },
     {
       id: 6,
@@ -88,7 +88,7 @@ const Support360 = () => {
         t("card6Point2"),
         t("card6Point3"),
       ],
-      imagePath: "/360/53.png"
+      imagePath: "/360/47.png"
     },
     {
       id: 7,
@@ -96,8 +96,10 @@ const Support360 = () => {
       description: [
         t("card7Point1"),
         t("card7Point2"),
+        t("card7Point3"),
+        t("card7Point4"),
       ],
-      imagePath: "/360/47.png"
+      imagePath: "/360/51.png"
     }
   ];
   
@@ -187,16 +189,16 @@ const Support360 = () => {
           <div className="overflow-x-clip overflow-y-visible" ref={emblaRef}>
             <div className="flex gap-2 md:gap-4">
               {supportCards.map((card) => (
-                <div key={card.id} className="relative flex-[0_0_80%] sm:flex-[0_0_50%] md:flex-[0_0_40%] lg:flex-[0_0_30%]  2xl:flex-[0_0_22%] min-w-0 pb-6 md:pb-12">
-                  <div className="bg-lovely rounded-sm  shadow-xl h-[350px] md:h-[450px] lg:h-[500px] xl:h-[500px] ">
+                <div key={card.id} className="relative flex-[0_0_85%] sm:flex-[0_0_55%] md:flex-[0_0_42%] lg:flex-[0_0_32%] 2xl:flex-[0_0_24%] min-w-0 pb-6 md:pb-12">
+                  <div className="bg-lovely rounded-sm shadow-xl h-[430px] md:h-[510px] lg:h-[550px] xl:h-[550px] relative overflow-hidden">
                     {/* Card Header */}
-                    <div className="p-2 md:p-4 pb-32 md:pb-40 h-full ">
-                      <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3">
+                    <div className="p-3 md:p-5 pb-36 md:pb-44 h-full overflow-y-auto scrollbar-none">
+                      <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3 leading-snug">
                         {card.title}
                       </h3>
-                      <ul className="list-disc list-outside ps-4  text-creamey marker:text-creamey">
+                      <ul className="list-disc list-outside ps-4 text-creamey marker:text-creamey space-y-1.5">
                         {card.description.map((point, index) => (
-                          <li key={index} className="text-xs md:text-sm text-creamey/95 leading-normal">
+                          <li key={index} className="text-sm md:text-base text-creamey/95 leading-relaxed">
                             {point}
                           </li>
                         ))}

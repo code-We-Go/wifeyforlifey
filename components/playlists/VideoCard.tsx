@@ -70,16 +70,16 @@ export default function VideoCard({ playlist }: VideoCardProps) {
               <Badge variant="destructive" className="font-normal">
                 {playlist.category === "Gehaz Bestie Experience"
                   ? locale === "ar"
-                    ? "تجربة جهاز البيستي"
+                    ? "تجربة جهاز بيستي"
                     : playlist.category
                   : playlist.category === "Wedding Planning Experience"
-                  ? locale === "ar"
-                    ? "تجربة تخطيط الفرح"
-                    : playlist.category
-                  : locale === "ar" && playlist.translations?.ar?.category
-                  ? playlist.translations.ar.category
-                  : playlist.category.charAt(0).toUpperCase() +
-                    playlist.category.slice(1)}
+                    ? locale === "ar"
+                      ? "تجربة تخطيط الفرح"
+                      : playlist.category
+                    : locale === "ar" && playlist.translations?.ar?.category
+                      ? playlist.translations.ar.category
+                      : playlist.category.charAt(0).toUpperCase() +
+                      playlist.category.slice(1)}
               </Badge>
             )}
             {!playlist.isPublic && (

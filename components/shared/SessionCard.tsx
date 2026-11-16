@@ -16,7 +16,7 @@ export function isSessionFullyBooked(session?: {
     (session.bookings?.length ?? 0) >= session.maxCapacity
   );
 }
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface SessionCardProps {
   session: {
@@ -40,14 +40,15 @@ export default function SessionCard({
   onBookClick,
 }: SessionCardProps) {
   const isFullyBooked = isSessionFullyBooked(session);
-
+  const locale = useLocale();
+  const isAr = locale === "ar";
   const t = useTranslations("common");
   return (
     <div className="relative flex flex-col gap-1 md:gap-2 w-full max-w-lg h-full bg-creamey border-2 border-lovely rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow">
       {/* Fully Booked Badge */}
       {isFullyBooked && (
-        <div className="absolute top-3.5 left-3.5 z-20 bg-rose-600 text-white text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
-          Fully Booked
+        <div className="absolute top-3.5 start-3.5 z-20 bg-rose-600 text-white text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
+          {isAr ? "مكتمل العدد" : "Fully Booked"}
         </div>
       )}
 
@@ -96,7 +97,7 @@ export default function SessionCard({
               disabled
               className="flex-[2] bg-gray-400 text-white font-semibold rounded-md px-2 py-1 text-sm shadow cursor-not-allowed opacity-80"
             >
-              Fully Booked
+              {isAr ? "مكتمل العدد" : "Fully Booked"}
             </Button>
           ) : (
             <Button

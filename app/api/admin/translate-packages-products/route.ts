@@ -80,7 +80,7 @@ export async function GET() {
         : [
           isWedding
             ? "بلانر تنظيم الفرح هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
-            : "بلانر رفيقة الجهاز هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
+            : "بلانر جهاز بيستي هيوصلك خلال 5 أيام عمل حسب منطقة الشحن."
         ];
 
       const arHeroTitle = existingAr.heroTitle || "كل اللي محتاجاه لمرحلة فرحك — في مكان واحد 🎀";
@@ -93,7 +93,7 @@ export async function GET() {
 
         if (!arVal) {
           if (itemVal.toLowerCase().includes("planner delivered")) {
-            arVal = isWedding ? "بلانرات تنظيم الفرح واصلة لحد باب بيتك 💍" : "بلانر رفيقة الجهاز واصل لحد باب بيتك 🎀";
+            arVal = isWedding ? "بلانرات تنظيم الفرح واصلة لحد باب بيتك 💍" : "بلانر جهاز بيستي واصل لحد باب بيتك 🎀";
           } else if (itemVal.toLowerCase().includes("playlist") || itemVal.toLowerCase().includes("playlists")) {
             arVal = "وصول لقوائم تشغيل تفصيلية بتشرحلك كل خطوة وكل قرار";
           } else if (itemVal.toLowerCase().includes("community") || itemVal.toLowerCase().includes("whatsapp")) {
@@ -126,19 +126,23 @@ export async function GET() {
         const fText = feat.feature || "";
         let arFeature = feat.translations?.ar?.feature;
 
-        if (!arFeature) {
-          if (fText.toLowerCase().includes("planner")) {
-            arFeature = isWedding ? "بلانر تنظيم الفرح — كتاب مطبوع واصل لحد بيتك" : "بلانر رفيقة الجهاز — كتاب مطبوع واصل لحد بيتك";
-          } else if (fText.toLowerCase().includes("video guide") || fText.toLowerCase().includes("playlist")) {
-            arFeature = "فيديوهات إرشادية لكل عملية شراء وقرار";
-          } else if (fText.toLowerCase().includes("whatsapp") || fText.toLowerCase().includes("support")) {
-            arFeature = "دائرة دعم واتساب 24/7 للعرايس فقط";
-          } else if (fText.toLowerCase().includes("discount") && !fText.toLowerCase().includes("1:1")) {
-            arFeature = "خصومات حصرية من الشركاء الموثوقين";
-          } else if (fText.toLowerCase().includes("1:1") || fText.toLowerCase().includes("consultation")) {
-            arFeature = "خصم 10–20% على استشارات الخبراء الفردية";
-          } else if (fText.toLowerCase().includes("vendor") || fText.toLowerCase().includes("venue")) {
+        if (!arFeature || arFeature === fText || (fText.toLowerCase().includes("vendor") && arFeature.includes("بلانر"))) {
+          if (fText.toLowerCase().includes("vendor") || fText.toLowerCase().includes("venue")) {
             arFeature = "قائمة أكثر من 800 قاعة ومورد فرح مع الأسعار وتفاصيل التواصل";
+          } else if (fText.toLowerCase().includes("workshop")) {
+            arFeature = "4 ورش عمل مع خبراء وايفى علشان تاخدى نصايح من مصادر موثوقة";
+          } else if (fText.toLowerCase().includes("shopper") || fText.toLowerCase().includes("product")) {
+            arFeature = "ليست منتجات وايفى المفضلة و الموثوق فيها علشان متحتاريش و انتى بتشترى";
+          } else if (fText.toLowerCase().includes("planner")) {
+            arFeature = isWedding ? "بلانر تنظيم الفرح — كتاب مطبوع واصل لحد بيتك" : "بلانر جهاز بيستي المطبوع هيوصلك لحد عندك";
+          } else if (fText.toLowerCase().includes("video guide") || fText.toLowerCase().includes("playlist")) {
+            arFeature = isWedding ? "فيديوهات إرشادية لكل عملية شراء وقرار" : "فيديوهات تساعدك في تجهيزاتك";
+          } else if (fText.toLowerCase().includes("whatsapp") || fText.toLowerCase().includes("support")) {
+            arFeature = isWedding ? "دائرة دعم واتساب 24/7 للعرايس فقط" : "جروب دعم وايفي على واتساب، مع خبرائنا و بنساعدك فى كل اسألتك";
+          } else if (fText.toLowerCase().includes("discount") && !fText.toLowerCase().includes("1:1")) {
+            arFeature = isWedding ? "خصومات حصرية من الشركاء الموثوقين" : "خصومات حصرية لبنات وايفي من شركائنا علشان تجهزى بأسعار اقل";
+          } else if (fText.toLowerCase().includes("1:1") || fText.toLowerCase().includes("consultation")) {
+            arFeature = isWedding ? "خصم 10–20% على استشارات الخبراء الفردية" : "خصم من ١٠٪ لـ٢٠٪ على الاستشارات الفردية مع خبراء وايفى";
           } else {
             arFeature = fText;
           }
@@ -180,7 +184,7 @@ export async function GET() {
 
         const titleLower = (sc.title || "").toLowerCase();
         if (!arTitle) {
-          if (titleLower.includes("gehaz bestie")) arTitle = "بلانر رفيقة الجهاز";
+          if (titleLower.includes("gehaz bestie")) arTitle = "بلانر جهاز بيستى";
           else if (titleLower.includes("wedding planning")) arTitle = "بلانر تنظيم الفرح";
           else if (titleLower.includes("video guide")) arTitle = "فيديوهات إرشادية لمرحلة الفرح";
           else if (titleLower.includes("discount") && titleLower.includes("partner")) arTitle = "خصومات وشراكات موثوقة";

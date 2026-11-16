@@ -10,6 +10,12 @@ export interface IPartnerSessionVariant {
   description: string;
   price: number;
   duration: number;
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string;
+    };
+  };
 }
 
 export interface IPartnerSessionBooking {
@@ -45,6 +51,13 @@ export interface IPartnerSession extends Document {
   bookings?: IPartnerSessionBooking[];
   variants?: IPartnerSessionVariant[];
   links?: IPartnerSessionLink[];
+  translations?: {
+    ar?: {
+      title?: string;
+      description?: string;
+      partnerName?: string;
+    };
+  };
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
@@ -63,6 +76,12 @@ const PartnerSessionVariantSchema = new Schema<IPartnerSessionVariant>(
     description: { type: String, required: false, default: "" },
     price: { type: Number, required: false },
     duration: { type: Number, required: false },
+    translations: {
+      ar: {
+        title: { type: String, required: false },
+        description: { type: String, required: false },
+      },
+    },
   },
   { _id: false }
 );
@@ -124,6 +143,13 @@ const PartnerSessionSchema = new Schema<IPartnerSession>(
     order: { type: Number, required: false, default: 0 },
     featured: { type: Boolean, default: false },
     maxCapacity: { type: Number, required: false, default: 0 },
+    translations: {
+      ar: {
+        title: { type: String, required: false },
+        description: { type: String, required: false },
+        partnerName: { type: String, required: false },
+      },
+    },
   },
   { timestamps: true }
 );
