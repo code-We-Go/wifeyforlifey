@@ -465,7 +465,7 @@ We’re beyond excited to share this experience with you… your planner will be
     if (packageData && packageData._id) {
       const modalContent = getModalContent(packageData._id);
       // add false for stop pre-order modal
-      if (modalContent) {
+      if (modalContent && false) {
         setShowModal(true);
       }
     }
