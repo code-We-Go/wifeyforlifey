@@ -93,9 +93,8 @@ function renderContentBlocks(
                 />
                 {block.caption && (
                   <p
-                    className={`text-sm w-full ${
-                      isRtl ? "text-right" : "text-left"
-                    } text-lovely/75 mt-2`}
+                    className={`text-sm w-full ${isRtl ? "text-right" : "text-left"
+                      } text-lovely/75 mt-2`}
                   >
                     {block.caption}
                   </p>
@@ -422,15 +421,15 @@ const BlogDetailPage = () => {
 
   const displayTitle = isArabic
     ? blog.v2?.titleAR ||
-      blog.titleAR ||
-      blog.translations?.ar?.title ||
-      blog.title
+    blog.titleAR ||
+    blog.translations?.ar?.title ||
+    blog.title
     : blog.title;
   const displayExcerpt = isArabic
     ? blog.v2?.excerptAR ||
-      blog.excerptAR ||
-      blog.translations?.ar?.excerpt ||
-      blog.excerpt
+    blog.excerptAR ||
+    blog.translations?.ar?.excerpt ||
+    blog.excerpt
     : blog.excerpt;
   const effectiveBlocks = blog.v2?.blocks || blog.blocks;
   const hasBlocks = Array.isArray(effectiveBlocks) && effectiveBlocks.length > 0;
@@ -474,22 +473,20 @@ const BlogDetailPage = () => {
             <button
               type="button"
               onClick={() => setPreviewLang("en")}
-              className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${
-                previewLang === "en"
+              className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${previewLang === "en"
                   ? "bg-lovely text-creamey"
                   : "text-lovely hover:bg-lovely/10"
-              }`}
+                }`}
             >
               EN
             </button>
             <button
               type="button"
               onClick={() => setPreviewLang("ar")}
-              className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${
-                previewLang === "ar"
+              className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${previewLang === "ar"
                   ? "bg-lovely text-creamey"
                   : "text-lovely hover:bg-lovely/10"
-              }`}
+                }`}
             >
               AR
             </button>
@@ -614,7 +611,7 @@ const BlogDetailPage = () => {
         {blog.tags && blog.tags.length > 0 && (
           <div className="bg-creamey rounded-lg shadow-sm p-6 mb-8 border border-lovely/15">
             <h3 className="text-lg font-semibold text-lovely mb-4">
-              {isArabic ? "الوسوم" : "Tags"}
+              {isArabic ? "المواضيع" : "Tags"}
             </h3>
             <div className="flex flex-wrap gap-2">
               {blog.tags.map((tag, index) => (
@@ -642,13 +639,13 @@ const BlogDetailPage = () => {
               {relatedBlogs.map((relatedBlog) => {
                 const relTitle = isArabic
                   ? relatedBlog.titleAR ||
-                    relatedBlog.translations?.ar?.title ||
-                    relatedBlog.title
+                  relatedBlog.translations?.ar?.title ||
+                  relatedBlog.title
                   : relatedBlog.title;
                 const relExcerpt = isArabic
                   ? relatedBlog.excerptAR ||
-                    relatedBlog.translations?.ar?.excerpt ||
-                    relatedBlog.excerpt
+                  relatedBlog.translations?.ar?.excerpt ||
+                  relatedBlog.excerpt
                   : relatedBlog.excerpt;
                 return (
                   <article

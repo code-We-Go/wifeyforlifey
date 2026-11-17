@@ -231,22 +231,20 @@ const TestBlogListPage = () => {
                 <button
                   type="button"
                   onClick={() => setPreviewLang("en")}
-                  className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
-                    previewLang === "en"
+                  className={`rounded-md px-3 py-1 text-xs font-semibold transition ${previewLang === "en"
                       ? "bg-lovely text-creamey"
                       : "text-lovely hover:bg-lovely/10"
-                  }`}
+                    }`}
                 >
                   English
                 </button>
                 <button
                   type="button"
                   onClick={() => setPreviewLang("ar")}
-                  className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
-                    previewLang === "ar"
+                  className={`rounded-md px-3 py-1 text-xs font-semibold transition ${previewLang === "ar"
                       ? "bg-lovely text-creamey"
                       : "text-lovely hover:bg-lovely/10"
-                  }`}
+                    }`}
                 >
                   العربية
                 </button>
@@ -427,7 +425,7 @@ const TestBlogListPage = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pinkey bg-creamey text-lovely/80"
               >
                 <option value="">
-                  {isArabic ? "كل الوسوم" : "All Tags"}
+                  {isArabic ? "كل المواضيع" : "All Tags"}
                 </option>
                 {allTags.map((tag) => (
                   <option key={tag} value={tag}>
@@ -547,11 +545,10 @@ const TestBlogListPage = () => {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                      page === pageNum
+                    className={`px-4 py-2 text-sm font-medium rounded-lg ${page === pageNum
                         ? "text-creamey bg-lovely border border-lovely"
                         : "text-lovely bg-white border border-lovely/30 hover:bg-lovely/10"
-                    }`}
+                      }`}
                   >
                     {pageNum}
                   </button>

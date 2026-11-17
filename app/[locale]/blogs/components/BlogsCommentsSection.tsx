@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import { useTranslations } from "next-intl";
 // axios.defaults.timeout = 30000; // 30 seconds timeout
 
 interface BlogsCommentSectionProps {
@@ -36,6 +37,7 @@ interface BlogsCommentSectionProps {
 }
 
 const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
+  const t = useTranslations("blogsPage");
   const { data: session } = useSession();
   //   const [comments, setComments] = useState<BlogComment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -551,29 +553,27 @@ const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
       <div className="flex md:hidden justify-end w-full  items-center gap-2">
         <button
           onClick={handleLikeBlog}
-          className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${
-            session?.user &&
-            session.user.id &&
-            blogLikes.some((id) => id.toString() === session.user.id)
+          className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${session?.user &&
+              session.user.id &&
+              blogLikes.some((id) => id.toString() === session.user.id)
               ? "bg-lovely text-creamey"
               : "bg-creamey text-lovely border border-lovely"
-          }`}
+            }`}
           disabled={!session?.user}
         >
           <Heart
-            className={`h-4 w-4 transition-all duration-300 transform ${
-              session?.user &&
-              session.user.id &&
-              blogLikes.some((id) => id.toString() === session.user.id)
+            className={`h-4 w-4 transition-all duration-300 transform ${session?.user &&
+                session.user.id &&
+                blogLikes.some((id) => id.toString() === session.user.id)
                 ? "fill-creamey animate-heartbeat"
                 : "hover:scale-125"
-            }`}
+              }`}
           />
           {/* <span>Like</span> */}
         </button>
         {blogLikesCount === 0 && (
           <p className="hidden sm:block text-lovely">
-            Be the first one to love this blog.
+            {t("beFirstToLove")}
           </p>
         )}
         {blogLikesCount > 0 && (
@@ -583,8 +583,8 @@ const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
           >
             {blogLikesCount}{" "}
             {blogLikesCount === 1
-              ? "person love this blog"
-              : "people love this blog"}
+              ? t("personLoveThisBlog")
+              : t("peopleLoveThisBlog")}
           </button>
         )}
       </div>
@@ -593,29 +593,27 @@ const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
         <div className="md:flex hidden  items-center gap-2">
           <button
             onClick={handleLikeBlog}
-            className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${
-              session?.user &&
-              session.user.id &&
-              blogLikes.some((id) => id.toString() === session.user.id)
+            className={`flex items-center gap-1 px-3 py-2 rounded-full transition-all duration-300 ${session?.user &&
+                session.user.id &&
+                blogLikes.some((id) => id.toString() === session.user.id)
                 ? "bg-lovely text-creamey"
                 : "bg-creamey text-lovely border border-lovely"
-            }`}
+              }`}
             disabled={!session?.user}
           >
             <Heart
-              className={`h-4 w-4 transition-all duration-300 transform ${
-                session?.user &&
-                session.user.id &&
-                blogLikes.some((id) => id.toString() === session.user.id)
+              className={`h-4 w-4 transition-all duration-300 transform ${session?.user &&
+                  session.user.id &&
+                  blogLikes.some((id) => id.toString() === session.user.id)
                   ? "fill-creamey animate-heartbeat"
                   : "hover:scale-125"
-              }`}
+                }`}
             />
             {/* <span>Like</span> */}
           </button>
           {blogLikesCount === 0 && (
             <p className="hidden sm:block text-lovely">
-              Be the first one to love this blog.
+              {t("beFirstToLove")}
             </p>
           )}
           {blogLikesCount > 0 && (
@@ -625,8 +623,8 @@ const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
             >
               {blogLikesCount}{" "}
               {blogLikesCount === 1
-                ? "person love this blog"
-                : "people love this blog"}
+                ? t("personLoveThisBlog")
+                : t("peopleLoveThisBlog")}
             </button>
           )}
         </div>
@@ -637,7 +635,7 @@ const BlogsCommentSection = ({ slug, blogId }: BlogsCommentSectionProps) => {
         <DialogContent className="bg-creamey text-lovely max-h-[80vh] overflow-y-scroll max-w-sm md:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lovely">
-              People who loved this blog
+              {t("peopleWhoLoved")}
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto py-4">

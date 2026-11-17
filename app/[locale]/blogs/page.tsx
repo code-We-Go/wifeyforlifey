@@ -6,6 +6,7 @@ import { thirdFont } from "@/fonts";
 import Image from "next/image";
 import { Smartphone, Sparkles, CalendarDays, ListTodo, Radio, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaGooglePlay } from "react-icons/fa";
+import { useTranslations } from "next-intl";
 
 export interface ContentBlock {
   type: "text" | "image" | "imageText" | "carousel" | "embed";
@@ -56,6 +57,7 @@ export interface Blog {
 }
 
 const BlogListPage = () => {
+  const t = useTranslations("blogsPage");
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [featuredBlogs, setFeaturedBlogs] = useState<Blog[]>([]);
   const [page, setPage] = useState(1);
@@ -151,7 +153,7 @@ const BlogListPage = () => {
             <h1
               className={`${thirdFont.className} text-4xl md:text-5xl text-lovely font-semibold`}
             >
-              Blogs
+              {t("title")}
             </h1>
           </div>
         </div>
@@ -164,7 +166,7 @@ const BlogListPage = () => {
             <h2
               className={`${thirdFont.className} text-2xl md:text-3xl tracking-normal font-bold text-lovely mb-6`}
             >
-              Featured Blogs
+              {t("featuredBlogs")}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredBlogs.map((blog) => (
@@ -207,7 +209,7 @@ const BlogListPage = () => {
             <div className="md:col-span-2">
               <input
                 type="text"
-                placeholder="Search blogs..."
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pinkey bg-creamey placeholder:text-lovely/80"
@@ -219,7 +221,7 @@ const BlogListPage = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pinkey bg-creamey text-lovely/80 placeholder:text-lovely/80"
               >
-                <option value="">All Categories</option>
+                <option value="">{t("allCategories")}</option>
                 {allCategories.map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -233,7 +235,7 @@ const BlogListPage = () => {
                 onChange={(e) => setSelectedTag(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pinkey bg-creamey text-lovely/80 placeholder:text-lovely/80"
               >
-                <option value="">All Tags</option>
+                <option value="">{t("allTags")}</option>
                 {allTags.map((tag) => (
                   <option key={tag} value={tag}>
                     {tag}
@@ -248,7 +250,7 @@ const BlogListPage = () => {
                 onClick={clearFilters}
                 className="text-creamey hover:underline text-sm font-medium"
               >
-                Clear all filters
+                {t("clearAllFilters")}
               </button>
             </div>
           )}

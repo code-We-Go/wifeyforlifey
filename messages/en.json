@@ -1064,5 +1064,23 @@
     "endOfDay": "End of day",
     "adjustTimelineTitle": "Adjust Timeline",
     "adjustTimelineDesc": "How should this time change affect your day?"
+  },
+  "blogsPage": {
+    "title": "Blogs",
+    "featuredBlogs": "Featured Blogs",
+    "featuredBadge": "Featured",
+    "searchPlaceholder": "Search blogs...",
+    "allCategories": "All Categories",
+    "allTags": "All Tags",
+    "clearAllFilters": "Clear all filters",
+    "loading": "Loading blogs...",
+    "noBlogsFound": "No blogs found.",
+    "clearFiltersToSeeAll": "Clear filters to see all blogs",
+    "previous": "Previous",
+    "next": "Next",
+    "personLoveThisBlog": "person love this blog",
+    "peopleLoveThisBlog": "people love this blog",
+    "beFirstToLove": "Be the first one to love this blog.",
+    "peopleWhoLoved": "People who loved this blog"
   }
 }

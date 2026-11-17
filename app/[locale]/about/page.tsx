@@ -43,9 +43,11 @@ const AboutPage = () => {
           <p className="text-base md:text-lg text-lovely/90 mb-4 leading-relaxed">
             {t.rich("introP1", { brand: brandRenderer })}
           </p>
-          <p className="text-base md:text-lg leading-relaxed mb-3">
-            {t("introP2")}
-          </p>
+          {t("introP2") ? (
+            <p className="text-base md:text-lg leading-relaxed mb-3">
+              {t("introP2")}
+            </p>
+          ) : null}
           <p className="text-base md:text-lg leading-relaxed">
             {t.rich("introP3", { brand: brandRenderer })}
           </p>

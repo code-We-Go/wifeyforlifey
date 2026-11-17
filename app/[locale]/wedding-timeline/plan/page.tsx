@@ -34,7 +34,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { thirdFont } from "@/fonts";
 import { useLocale } from "next-intl";
-import { formatTimelineTimeLabel } from "@/lib/wedding-timeline-localization";
+import {
+  formatTimelineTimeLabel,
+  localizeEvent,
+} from "@/lib/wedding-timeline-localization";
 import {
   DndContext,
   closestCenter,
@@ -106,9 +109,8 @@ function SortableRow({
       style={style}
       {...attributes}
       {...listeners}
-      className={`hover:bg-pinkey w-full cursor-grab active:cursor-grabbing ${
-        event.isBreak ? "bg-pinkey/30" : "bg-pinkey/60"
-      } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
+      className={`hover:bg-pinkey w-full cursor-grab active:cursor-grabbing ${event.isBreak ? "bg-pinkey/30" : "bg-pinkey/60"
+        } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
     >
       <TableCell className="font-medium whitespace-nowrap text-sm ">
         {/* <div className="flex flex-col items-center gap-1 mr-2">
@@ -140,9 +142,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "brideActivity", e.target.value)
           }
-          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${event.isBreak ? "text-lovely italic" : ""
+            }`}
         />
       </TableCell>
       <TableCell>
@@ -153,9 +154,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "groomActivity", e.target.value)
           }
-          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${event.isBreak ? "text-lovely italic" : ""
+            }`}
         />
       </TableCell>
       <TableCell>
@@ -166,9 +166,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "bridesmaidsActivity", e.target.value)
           }
-          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${event.isBreak ? "text-lovely italic" : ""
+            }`}
         />
       </TableCell>
       <TableCell>
@@ -179,9 +178,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "groomsmenActivity", e.target.value)
           }
-          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`h-8 bg-transparent border-none focus:bg-white focus:border-input ${event.isBreak ? "text-lovely italic" : ""
+            }`}
         />
       </TableCell>
       <TableCell>
@@ -351,7 +349,7 @@ function TimelineEditor() {
           if (res.ok) {
             const data = await res.json();
             if (data.found && data.data && data.data.events?.length > 0) {
-              setEvents(data.data.events);
+              setEvents(data.data.events.map((e: any) => localizeEvent(e, locale)));
               if (data.data.zaffaTime) setZaffaTimeStr(data.data.zaffaTime);
               return; // Stop here, don't use params
             }
@@ -394,26 +392,36 @@ function TimelineEditor() {
             groomsmen: "",
           };
 
-          generatedEvents.push({
-            id: feature.id,
-            duration: feature.duration,
-            brideActivity: meta.bride,
-            groomActivity: meta.groom,
-            bridesmaidsActivity: meta.bridesmaids,
-            groomsmenActivity: meta.groomsmen,
-          });
+          generatedEvents.push(
+            localizeEvent(
+              {
+                id: feature.id,
+                duration: feature.duration,
+                brideActivity: meta.bride,
+                groomActivity: meta.groom,
+                bridesmaidsActivity: meta.bridesmaids,
+                groomsmenActivity: meta.groomsmen,
+              },
+              locale
+            )
+          );
 
           // Add break if not the last event
           if (index < featureList.length - 1) {
-            generatedEvents.push({
-              id: `break_${index}`,
-              duration: 15,
-              brideActivity: "Break / Transition",
-              groomActivity: "Break / Transition",
-              bridesmaidsActivity: "Break / Transition",
-              groomsmenActivity: "Break / Transition",
-              isBreak: true,
-            });
+            generatedEvents.push(
+              localizeEvent(
+                {
+                  id: `break_${index}`,
+                  duration: 15,
+                  brideActivity: "Break / Transition",
+                  groomActivity: "Break / Transition",
+                  bridesmaidsActivity: "Break / Transition",
+                  groomsmenActivity: "Break / Transition",
+                  isBreak: true,
+                },
+                locale
+              )
+            );
           }
         });
 
