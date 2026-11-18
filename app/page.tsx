@@ -39,23 +39,23 @@ export default function Home() {
 
       {/* Hero Section */}
       {/* <HeroSection /> */}
-      
+
       {/* Bridal Journey Section */}
       <BridalJourneyTwo />
       {/* <BridalJourney /> */}
-      
+
       {/* <HeroTwo /> */}
       <JoinNow />
-      
-            {/* <CategoriesSection /> */}
+
+      {/* <CategoriesSection /> */}
       {/* 360 Support Section */}
       <Support360 />
       <TimelinePlanner />
-      
-      
+
+
       {/* Expert Sessions Section */}
       <ExpertSessions />
-      
+
       {/* <Pricing /> */}
 
       {/* Featured Products Section */}
@@ -71,7 +71,7 @@ export default function Home() {
       {/* Newsletter Section */}
       <OurPartners />
 
-      <WifeyCommunity />
+      {/* <WifeyCommunity />*/}
       <Testimonials />
       {/* <div className="relative h-32">
 

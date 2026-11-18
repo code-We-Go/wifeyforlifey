@@ -1296,9 +1296,9 @@ We’re beyond excited to share this experience with you… your planner will be
         </div> */}
 
         {/* Wifey Community Section */}
-        <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
+        {/*  <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
           <WifeyCommunity />
-        </div>
+        </div> */}
 
       </div>
 
