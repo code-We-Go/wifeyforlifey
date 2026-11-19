@@ -125,9 +125,9 @@ const addMinutes = (date: Date, minutes: number) => {
 
 const calculateTimeline = (events: TimelineEvent[], zaffaTimeStr: string, anchorId: string = "zaffa", locale: string = "en") => {
   if (events.length === 0) return [];
-// on Nareiman's Demandss the part starts => entrance
+  // on Nareiman's Demandss the part starts => entrance
   let zaffaIndex = events.findIndex((e) => e.id === anchorId);
-  
+
   // Fallback to auto-detecting common anchor IDs if the primary anchorId wasn't found. 
   // (This handles cases where the user restored a timeline from DB without the full variation config).
   if (zaffaIndex === -1) {
@@ -246,9 +246,8 @@ function SortableRow({
     <TableRow
       ref={setNodeRef}
       style={style}
-      className={`hover:bg-pinkey w-full ${
-        event.isBreak ? "bg-pinkey/50" : "bg-pinkey/60"
-      } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
+      className={`hover:bg-pinkey w-full ${event.isBreak ? "bg-pinkey/50" : "bg-pinkey/60"
+        } ${isDragging ? "opacity-50 shadow-lg bg-pinkey/80" : ""}`}
     >
       {/* Drag Handle Column */}
       <TableCell className="p-1 md:p-2 align-middle w-8">
@@ -280,9 +279,8 @@ function SortableRow({
         </div>
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 align-middle ${
-          mobileActiveColumn === "brideActivity" ? "table-cell" : "hidden"
-        } md:table-cell`}
+        className={`p-1 md:p-4 align-middle ${mobileActiveColumn === "brideActivity" ? "table-cell" : "hidden"
+          } md:table-cell`}
       >
         <Textarea
           ref={brideRef}
@@ -292,9 +290,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "brideActivity", e.target.value)
           }
-          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${event.isBreak ? "text-lovely italic" : ""
+            }`}
           rows={1}
           style={{
             height: 'auto',
@@ -308,9 +305,8 @@ function SortableRow({
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 align-middle ${
-          mobileActiveColumn === "groomActivity" ? "table-cell" : "hidden"
-        } md:table-cell`}
+        className={`p-1 md:p-4 align-middle ${mobileActiveColumn === "groomActivity" ? "table-cell" : "hidden"
+          } md:table-cell`}
       >
         <Textarea
           ref={groomRef}
@@ -320,9 +316,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "groomActivity", e.target.value)
           }
-          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${event.isBreak ? "text-lovely italic" : ""
+            }`}
           rows={1}
           style={{
             height: 'auto',
@@ -336,9 +331,8 @@ function SortableRow({
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 align-middle ${
-          mobileActiveColumn === "bridesmaidsActivity" ? "table-cell" : "hidden"
-        } md:table-cell`}
+        className={`p-1 md:p-4 align-middle ${mobileActiveColumn === "bridesmaidsActivity" ? "table-cell" : "hidden"
+          } md:table-cell`}
       >
         <Textarea
           ref={bridesmaidsRef}
@@ -348,9 +342,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "bridesmaidsActivity", e.target.value)
           }
-          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${event.isBreak ? "text-lovely italic" : ""
+            }`}
           rows={1}
           style={{
             height: 'auto',
@@ -364,9 +357,8 @@ function SortableRow({
         />
       </TableCell>
       <TableCell
-        className={`p-1 md:p-4 align-middle ${
-          mobileActiveColumn === "groomsmenActivity" ? "table-cell" : "hidden"
-        } md:table-cell`}
+        className={`p-1 md:p-4 align-middle ${mobileActiveColumn === "groomsmenActivity" ? "table-cell" : "hidden"
+          } md:table-cell`}
       >
         <Textarea
           ref={groomsmenRef}
@@ -376,9 +368,8 @@ function SortableRow({
           onChange={(e) =>
             handleActivityChange(index, "groomsmenActivity", e.target.value)
           }
-          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${
-            event.isBreak ? "text-lovely italic" : ""
-          }`}
+          className={`min-h-[1.5rem] md:min-h-[2rem] bg-transparent border-none focus:bg-white focus:border-input text-xs md:text-sm p-1 text-center resize-none overflow-hidden ${event.isBreak ? "text-lovely italic" : ""
+            }`}
           rows={1}
           style={{
             height: 'auto',
@@ -458,7 +449,7 @@ function WeddingTimelinePageContent() {
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
   const [mobileActiveColumn, setMobileActiveColumn] = useState("brideActivity");
   const contentRef = useRef<HTMLDivElement>(null);
-  
+
   // -- Share State --
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -507,21 +498,21 @@ function WeddingTimelinePageContent() {
   // -- Helper for Anchor Event --
   const getAnchorEventId = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
     if (!variation) return "zaffa";
-    
+
     // For these variations, use the user's selected anchor if available
     if ((variation === "christian_church_venue" || variation === "muslim_katb_ketab_wedding") && anchorOverride) return anchorOverride;
 
-    if (variation === "christian_venue_only"  || variation === "christian_church_venue") return "Grand_Entrance";
+    if (variation === "christian_venue_only" || variation === "christian_church_venue") return "Grand_Entrance";
     if (variation === "christian_church_only") return "church";
-    
+
     // Muslim variations
     if (variation === "muslim_katb_ketab_only") return "katb_ketab";
     if (variation === "muslim_katb_ketab_wedding") return anchorOverride || "Grand_Entrance";
-    if (variation === "muslim_wedding_only") return "Grand_Entrance"; 
-    
-    return "zaffa"; 
+    if (variation === "muslim_wedding_only") return "Grand_Entrance";
+
+    return "zaffa";
   };
-  
+
   const getAnchorLabel = (variation: CeremonyVariation | null, anchorOverride?: string | null) => {
     const anchorId = getAnchorEventId(variation, anchorOverride);
     const feature = ALL_FEATURES.find(f => f.id === anchorId);
@@ -530,29 +521,40 @@ function WeddingTimelinePageContent() {
   };
 
   // Tutorial Steps
+  const isAr = locale === "ar";
   const tutorialSteps = [
     {
-      image: "/weddingPlanningToutorial/step1.gif",
+      image: isAr
+        ? "/weddingPlanningToutorial/ar/step1.png"
+        : "/weddingPlanningToutorial/step1.gif",
       title: t("tutorialStep1Title"),
       description: t("tutorialStep1Desc"),
     },
     {
-      image: "/weddingPlanningToutorial/2.gif",
+      image: isAr
+        ? "/weddingPlanningToutorial/ar/2.png"
+        : "/weddingPlanningToutorial/2.gif",
       title: t("tutorialStep2Title"),
       description: t("tutorialStep2Desc"),
     },
     {
-      image: "/weddingPlanningToutorial/3.gif",
+      image: isAr
+        ? "/weddingPlanningToutorial/ar/3.png"
+        : "/weddingPlanningToutorial/3.gif",
       title: t("tutorialStep3Title"),
       description: t("tutorialStep3Desc"),
     },
     {
-      image: "/weddingPlanningToutorial/4.gif",
+      image: isAr
+        ? "/weddingPlanningToutorial/ar/4.png"
+        : "/weddingPlanningToutorial/4.gif",
       title: t("tutorialStep4Title"),
       description: t("tutorialStep4Desc"),
     },
     {
-      image: "/weddingPlanningToutorial/step5.gif",
+      image: isAr
+        ? "/weddingPlanningToutorial/ar/5.png"
+        : "/weddingPlanningToutorial/step5.gif",
       title: t("tutorialStep5Title"),
       description: t("tutorialStep5Desc"),
     },
@@ -577,16 +579,16 @@ function WeddingTimelinePageContent() {
           const res = await fetch("/api/wedding-timeline");
           if (res.ok) {
             const data = await res.json();
-              if (data.found && data.data) {
-                // Existing plan found -> Load it and go to Step 3
-                const { zaffaTime: savedZaffa, events: savedEvents, feedback, brideFirstName: savedBride, groomFirstName: savedGroom } = data.data;
-                if (savedZaffa) setZaffaTime(savedZaffa);
-                if (savedBride) setBrideFirstName(savedBride);
-                if (savedGroom) setGroomFirstName(savedGroom);
-                if (savedEvents && savedEvents.length > 0) {
-                  setEvents(savedEvents.map((e: any) => localizeEvent(e, locale)));
-                  setStep(6);
-                }
+            if (data.found && data.data) {
+              // Existing plan found -> Load it and go to Step 3
+              const { zaffaTime: savedZaffa, events: savedEvents, feedback, brideFirstName: savedBride, groomFirstName: savedGroom } = data.data;
+              if (savedZaffa) setZaffaTime(savedZaffa);
+              if (savedBride) setBrideFirstName(savedBride);
+              if (savedGroom) setGroomFirstName(savedGroom);
+              if (savedEvents && savedEvents.length > 0) {
+                setEvents(savedEvents.map((e: any) => localizeEvent(e, locale)));
+                setStep(6);
+              }
               // Check if user has already provided feedback
               // Only set hasFeedback to true if feedback exists and has actual data
               if (feedback && (feedback.easeOfUse > 0 || feedback.satisfaction > 0 || feedback.timeSaved || feedback.recommend || (feedback.feelings && feedback.feelings.length > 0))) {
@@ -608,10 +610,10 @@ function WeddingTimelinePageContent() {
   // 2. Show tutorial for first-time users when they reach step 5 (Timeline)
   useEffect(() => {
     const hasSeenStorage = localStorage.getItem("weddingTimelineTutorialSeen");
-    if ( !hasSeenTutorial && !hasSeenStorage) {
+    if (!hasSeenTutorial && !hasSeenStorage) {
       // Small delay to let the timeline render first
-        setShowTutorial(true);
-        localStorage.setItem("weddingTimelineTutorialSeen", "true");
+      setShowTutorial(true);
+      localStorage.setItem("weddingTimelineTutorialSeen", "true");
     }
   }, [step, hasSeenTutorial]);
 
@@ -619,7 +621,7 @@ function WeddingTimelinePageContent() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const stepParam = params.get('step');
-    
+
     if (stepParam === '5' && isAuthenticated && !checkingTimeline) {
       const savedStateStr = localStorage.getItem('pendingWeddingTimelineState');
       if (savedStateStr) {
@@ -636,7 +638,7 @@ function WeddingTimelinePageContent() {
           if (parsed.selectedFeatures) setSelectedFeatures(parsed.selectedFeatures);
           if (parsed.brideFirstName) setBrideFirstName(parsed.brideFirstName);
           if (parsed.groomFirstName) setGroomFirstName(parsed.groomFirstName);
-        } catch(e) {}
+        } catch (e) { }
         localStorage.removeItem('pendingWeddingTimelineState');
       }
       setStep(5);
@@ -849,7 +851,7 @@ function WeddingTimelinePageContent() {
           if (ca.condition.bridesmaidsAtPrep && ca.condition.bridesmaidsAtPrep !== bridesmaidsAtPrep) match = false;
           if (ca.condition.photoAtKatbLocation && ca.condition.photoAtKatbLocation !== photoAtKatbLocation) match = false;
           if (ca.condition.photoshootLocation && ca.condition.photoshootLocation !== photoshootLocation) match = false;
-          
+
           if (match) {
             acts = { ...acts, ...ca.activities };
           }
@@ -997,7 +999,7 @@ function WeddingTimelinePageContent() {
       setEvents([...events, newEvent]);
     }
     setShowAddEventModal(false);
-    
+
     toast({
       title: locale === "ar" ? "تمت إضافة الفقرة" : "Event Added",
       description:
@@ -1042,13 +1044,13 @@ function WeddingTimelinePageContent() {
       if (!response.ok) throw new Error("Failed to get share link");
 
       const data = await response.json();
-      
+
       if (data.success && data.shareUrl) {
         setShareUrl(data.shareUrl);
-        
+
         // Copy to clipboard
         await navigator.clipboard.writeText(data.shareUrl);
-        
+
         toast({
           title: locale === "ar" ? "تم تجهيز رابط المشاركة!" : "Share Link Created!",
           description:
@@ -1316,7 +1318,7 @@ function WeddingTimelinePageContent() {
       setHasSeenTutorial(false);
       setBrideFirstName("");
       setGroomFirstName("");
-      
+
       // Clear tutorial flag from localStorage so it shows again
       localStorage.removeItem("weddingTimelineTutorialSeen");
 
@@ -1348,17 +1350,19 @@ function WeddingTimelinePageContent() {
 
   return (
     <div
-      className={`min-h-[85vh] h-auto bg-creamey flex flex-col ${
-        isWizard ? "items-center justify-center p-8 md:pt-16" : "p-4 md:p-8"
-      }`}
+      className={`min-h-[85vh] h-auto w-full overflow-x-hidden bg-creamey flex flex-col ${isWizard ? "items-center justify-center p-5 sm:p-8 md:pt-16" : "p-4 md:p-8"
+        }`}
     >
       {/* Wizard Step 1 & 2 */}
       {isWizard && (
-        <div className="bg-creamey border-lovely p-8 rounded-lg shadow-lg max-w-2xl w-full border-4 relative">
+        <div className="bg-creamey border-lovely p-6 sm:p-8 rounded-lg shadow-lg max-w-2xl w-full border-4 relative">
           <NextImage
             width={100}
             height={70}
-            className="absolute -top-8 -rotate-45 -left-10 z-20"
+            className={`absolute -top-8 z-20 ${locale === "ar"
+              ? "-right-6 sm:-right-10 rotate-45"
+              : "-left-6 sm:-left-10 -rotate-45"
+              }`}
             alt="fyonka"
             src={"/fyonkaCreamey.png"}
           />
@@ -1405,10 +1409,9 @@ function WeddingTimelinePageContent() {
                           key={option.id}
                           className={`
                             border-2 rounded-lg p-4 cursor-pointer transition-all
-                            ${
-                              activeCeremonyType === option.id
-                                ? "border-pinkey bg-pinkey/50 text-lovely"
-                                : "border-pinkey/30 hover:border-pinkey/60 bg-creamey"
+                            ${activeCeremonyType === option.id
+                              ? "border-pinkey bg-pinkey/50 text-lovely"
+                              : "border-pinkey/30 hover:border-pinkey/60 bg-creamey"
                             }
                           `}
                           onClick={() => setActiveCeremonyType(option.id)}
@@ -1416,7 +1419,7 @@ function WeddingTimelinePageContent() {
                           <h3 className="text-lg font-bold text-lovely text-center">
                             {getLocalizedFeatureLabel(option.label, locale)}
                           </h3>
-                          
+
                           {activeCeremonyType === option.id && (
                             <div className="space-y-2 mt-4 animate-in fade-in slide-in-from-top-2">
                               {option.variations.map((variation) => (
@@ -1424,10 +1427,9 @@ function WeddingTimelinePageContent() {
                                   key={variation.id}
                                   className={`
                                     p-3 rounded border cursor-pointer flex items-center gap-3
-                                    ${
-                                      selectedCeremonyVariation === variation.id
-                                        ? "bg-lovely text-creamey border-lovely"
-                                        : "bg-white/50 hover:text-creamey hover:bg-lovely/90 text-lovely border-pinkey/20"
+                                    ${selectedCeremonyVariation === variation.id
+                                      ? "bg-lovely text-creamey border-lovely"
+                                      : "bg-white/50 hover:text-creamey hover:bg-lovely/90 text-lovely border-pinkey/20"
                                     }
                                   `}
                                   onClick={(e) => {
@@ -1473,7 +1475,7 @@ function WeddingTimelinePageContent() {
                     }}
                     className="w-full bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg py-6 mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
+                    {t("nextStep")} <ArrowRight className={`ms-2 h-4 w-4 ${locale === "ar" ? "rotate-180" : ""}`} />
                   </Button>
                 </div>
               )}
@@ -1481,40 +1483,39 @@ function WeddingTimelinePageContent() {
               {step === 2 && (
                 <div className="space-y-6 sm:px-4 md:px-12 lg:px-16 xl:px-24 animate-in fade-in slide-in-from-right-4 duration-300">
                   {/* Q1: Where are you getting ready? */}
-                {selectedCeremonyVariation !== "christian_church_only" && (
-                  <div className="space-y-3">
-                    <Label className="text-xl text-lovely text-center block">
-                      {t("whereGettingReady")}
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(["home", "venue"] as const).map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => setGettingReadyLocation(option)}
-                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                            gettingReadyLocation === option
+                  {selectedCeremonyVariation !== "christian_church_only" && (
+                    <div className="space-y-3">
+                      <Label className="text-xl text-lovely text-center block">
+                        {t("whereGettingReady")}
+                      </Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {(["home", "venue"] as const).map((option) => (
+                          <button
+                            key={option}
+                            onClick={() => setGettingReadyLocation(option)}
+                            className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${gettingReadyLocation === option
                               ? "bg-lovely text-creamey border-lovely"
                               : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                          }`}
-                        >
-                          <div className="flex flex-col items-center gap-1">
-                            <span>{option === "home" ? t("somewhereElse") : (selectedCeremonyVariation === "muslim_katb_ketab_only" ? t("katbKetabVenue") : t("weddingVenue"))}</span>
-                            {option === "home" && (
-                              <span className="text-[10px] normal-case font-normal opacity-70">
-                                {t("somewhereElseSub")}
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      ))}
+                              }`}
+                          >
+                            <div className="flex flex-col items-center gap-1">
+                              <span>{option === "home" ? t("somewhereElse") : (selectedCeremonyVariation === "muslim_katb_ketab_only" ? t("katbKetabVenue") : t("weddingVenue"))}</span>
+                              {option === "home" && (
+                                <span className="text-[10px] normal-case font-normal opacity-70">
+                                  {t("somewhereElseSub")}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      {gettingReadyLocation === "home" && (
+                        <p className="text-xs text-lovely/60 text-center">
+                          {t("prepTransportationNotice")}
+                        </p>
+                      )}
                     </div>
-                    {gettingReadyLocation === "home" && (
-                      <p className="text-xs text-lovely/60 text-center">
-                        {t("prepTransportationNotice")}
-                      </p>
-                    )}
-                  </div>
-              )}
+                  )}
                   {/* Q2: Will bridesmaids come to preparations? */}
                   <div className="space-y-3">
                     <Label className="text-xl text-lovely text-center block">
@@ -1525,84 +1526,81 @@ function WeddingTimelinePageContent() {
                         <button
                           key={option}
                           onClick={() => setBridesmaidsAtPrep(option)}
-                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                            bridesmaidsAtPrep === option
-                              ? "bg-lovely text-creamey border-lovely"
-                              : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                          }`}
+                          className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${bridesmaidsAtPrep === option
+                            ? "bg-lovely text-creamey border-lovely"
+                            : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
+                            }`}
                         >
                           {option === "yes" ? t("yes") : t("no")}
                         </button>
                       ))}
                     </div>
                   </div>
-                
+
 
                   {/* Q3: Photo session location/timing */}
                   {selectedCeremonyVariation && (
-                  <div className="space-y-3">
-                    {activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") ? (
-                      <>
-                        <Label className="text-xl text-lovely text-center block">
-                          {t("photoshootTiming")}
-                        </Label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {(["before", "after"] as const).map((option) => (
-                            <button
-                              key={option}
-                              onClick={() => setPhotoshootTiming(option)}
-                              className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                                photoshootTiming === option
+                    <div className="space-y-3">
+                      {activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") ? (
+                        <>
+                          <Label className="text-xl text-lovely text-center block">
+                            {t("photoshootTiming")}
+                          </Label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {(["before", "after"] as const).map((option) => (
+                              <button
+                                key={option}
+                                onClick={() => setPhotoshootTiming(option)}
+                                className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${photoshootTiming === option
                                   ? "bg-lovely text-creamey border-lovely"
                                   : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                              }`}
-                            >
-                              {option === "before" ? t("beforeChurch") : t("afterChurch")}
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    ) : ( 
-                      // Muslim or variations where we ask location relative to anchor
-                      <>
-                        <Label className="text-xl text-lovely text-center block">
-                          {t("photoshootSameLocation", {
-                            location: selectedCeremonyVariation?.includes("church")
-                              ? t("church")
-                              : selectedCeremonyVariation?.includes("katb_ketab")
-                              ? t("katbKetabLocation")
-                              : t("venue")
-                          })}
-                        </Label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {(["yes", "no"] as const).map((option) => (
-                            <button
-                              key={option}
-                              onClick={() => {
-                                if (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only") {
-                                  setPhotoshootLocation(option === "yes" ? "venue" : "another_place");
-                                } else {
-                                  setPhotoAtKatbLocation(option);
-                                }
-                              }}
-                              className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${
-                                (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? (photoshootLocation === (option === "yes" ? "venue" : "another_place")) : (photoAtKatbLocation === option))
+                                  }`}
+                              >
+                                {option === "before" ? t("beforeChurch") : t("afterChurch")}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        // Muslim or variations where we ask location relative to anchor
+                        <>
+                          <Label className="text-xl text-lovely text-center block">
+                            {t("photoshootSameLocation", {
+                              location: selectedCeremonyVariation?.includes("church")
+                                ? t("church")
+                                : selectedCeremonyVariation?.includes("katb_ketab")
+                                  ? t("katbKetabLocation")
+                                  : t("venue")
+                            })}
+                          </Label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {(["yes", "no"] as const).map((option) => (
+                              <button
+                                key={option}
+                                onClick={() => {
+                                  if (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only") {
+                                    setPhotoshootLocation(option === "yes" ? "venue" : "another_place");
+                                  } else {
+                                    setPhotoAtKatbLocation(option);
+                                  }
+                                }}
+                                className={`p-4 rounded-lg border-2 font-semibold capitalize transition-all ${(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? (photoshootLocation === (option === "yes" ? "venue" : "another_place")) : (photoAtKatbLocation === option))
                                   ? "bg-lovely text-creamey border-lovely"
                                   : "bg-white/50 text-lovely border-pinkey/40 hover:border-pinkey"
-                              }`}
-                            >
-                              {option === "yes" ? t("yesSamePlace") : t("noDifferentPlace")}
-                            </button>
-                          ))}
-                        </div>
-                        {(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? photoshootLocation === "another_place" : photoAtKatbLocation === "no") && (
-                          <p className="text-xs text-lovely/60 text-center">
-                            {t("photoshootTransportationNotice")}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
+                                  }`}
+                              >
+                                {option === "yes" ? t("yesSamePlace") : t("noDifferentPlace")}
+                              </button>
+                            ))}
+                          </div>
+                          {(selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? photoshootLocation === "another_place" : photoAtKatbLocation === "no") && (
+                            <p className="text-xs text-lovely/60 text-center">
+                              {t("photoshootTransportationNotice")}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
                   )}
 
                   <div className="flex gap-4 pt-2">
@@ -1615,16 +1613,16 @@ function WeddingTimelinePageContent() {
                     </Button>
                     <Button
                       disabled={
-                        !gettingReadyLocation && selectedCeremonyVariation !== "christian_church_only"||
+                        !gettingReadyLocation && selectedCeremonyVariation !== "christian_church_only" ||
                         (selectedCeremonyVariation !== "christian_church_venue" && !bridesmaidsAtPrep) ||
-                        (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only") 
-                          ? !photoshootTiming 
+                        (activeCeremonyType === "christian" && (selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "christian_church_only")
+                          ? !photoshootTiming
                           : (selectedCeremonyVariation === "muslim_wedding_only" || selectedCeremonyVariation === "christian_venue_only" ? !photoshootLocation : !photoAtKatbLocation))
                       }
                       onClick={() => setStep(3)}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("nextStep")} <ArrowRight className={`ms-2 h-4 w-4 ${locale === "ar" ? "rotate-180" : ""}`} />
                     </Button>
                   </div>
                 </div>
@@ -1692,8 +1690,8 @@ function WeddingTimelinePageContent() {
                       </div>
                       {(selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor && (
                         <div className="flex justify-center">
-                          <Button 
-                            variant="link" 
+                          <Button
+                            variant="link"
                             onClick={() => setSelectedAnchor(null)}
                             className="text-lovely/60 text-xs underline"
                           >
@@ -1708,20 +1706,20 @@ function WeddingTimelinePageContent() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                      if ((selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor) {
-                        setSelectedAnchor(null);
-                      } else {
-                        setStep(
-                          selectedCeremonyVariation === "muslim_katb_ketab_only" ||
-                          selectedCeremonyVariation === "muslim_katb_ketab_wedding" ||
-                          selectedCeremonyVariation === "muslim_wedding_only" ||
-                          selectedCeremonyVariation === "christian_church_only" ||
-                          selectedCeremonyVariation === "christian_church_venue" ||
-                          selectedCeremonyVariation === "christian_venue_only"
-                            ? 2
-                            : 1
-                        );
-                      }
+                        if ((selectedCeremonyVariation === "christian_church_venue" || selectedCeremonyVariation === "muslim_katb_ketab_wedding") && selectedAnchor) {
+                          setSelectedAnchor(null);
+                        } else {
+                          setStep(
+                            selectedCeremonyVariation === "muslim_katb_ketab_only" ||
+                              selectedCeremonyVariation === "muslim_katb_ketab_wedding" ||
+                              selectedCeremonyVariation === "muslim_wedding_only" ||
+                              selectedCeremonyVariation === "christian_church_only" ||
+                              selectedCeremonyVariation === "christian_church_venue" ||
+                              selectedCeremonyVariation === "christian_venue_only"
+                              ? 2
+                              : 1
+                          );
+                        }
                       }}
                       className="flex-1 bg-creamey text-lovely border-pinkey border-2 hover:text-lovely font-bold hover:bg-pinkey/10"
                     >
@@ -1732,7 +1730,7 @@ function WeddingTimelinePageContent() {
                       onClick={() => setStep(4)}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90 text-lovely font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("nextStep")} <ArrowRight className={`ms-2 h-4 w-4 ${locale === "ar" ? "rotate-180" : ""}`} />
                     </Button>
                   </div>
                 </div>
@@ -1770,60 +1768,59 @@ function WeddingTimelinePageContent() {
                           return true;
                         })
                         .map((feature) => (
-                        <div
-                          key={feature.id}
-                          className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${
-                            selectedFeatures[feature.id].enabled
+                          <div
+                            key={feature.id}
+                            className={`flex items-center gap-4 p-3 rounded-lg border transition-colors ${selectedFeatures[feature.id].enabled
                               ? "bg-pinkey/20 border-pinkey/50"
                               : "bg-creamey border-pinkey opacity-70"
-                          }`}
-                        >
-                          <Checkbox
-                            id={feature.id}
-                            checked={selectedFeatures[feature.id].enabled}
-                            onCheckedChange={() =>
-                              handleFeatureToggle(feature.id)
-                            }
-                            className="data-[state=checked]:bg-pinkey border-pinkey  border-2 data-[state=checked]:border-pinkey"
-                          />
-                          <div className="flex-1">
-                            <Label
-                              htmlFor={feature.id}
-                              className="text-base font-medium cursor-pointer"
-                            >
-                              {getLocalizedFeatureLabel(feature.label, locale)}
-                              {(feature.id === "hair" && activeCeremonyType !== "christian") && (
-                                <span className="block text-xs font-normal text-lovely/70 mt-1">
-                                  {t("hijabiTip")}
-                                </span>
-                              )}
-                            </Label>
-                          </div>
-                          {selectedFeatures[feature.id].enabled && (
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
-                                value={selectedFeatures[feature.id]?.duration ?? feature.defaultDuration}
-                                onFocus={(e) => setOriginalDuration(parseInt(e.target.value) || 0)}
-                                onChange={(e) =>
-                                  handleFeatureDurationChange(
-                                    feature.id,
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                onBlur={(e) =>
-                                  handleFeatureDurationBlur(
-                                    feature.id,
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                className="w-20 text-center h-8 bg-creamey border-pinkey"
-                              />
-                              <span className="text-xs  w-8">{t("min")}</span>
+                              }`}
+                          >
+                            <Checkbox
+                              id={feature.id}
+                              checked={selectedFeatures[feature.id].enabled}
+                              onCheckedChange={() =>
+                                handleFeatureToggle(feature.id)
+                              }
+                              className="data-[state=checked]:bg-pinkey border-pinkey  border-2 data-[state=checked]:border-pinkey"
+                            />
+                            <div className="flex-1">
+                              <Label
+                                htmlFor={feature.id}
+                                className="text-base font-medium cursor-pointer"
+                              >
+                                {getLocalizedFeatureLabel(feature.label, locale)}
+                                {(feature.id === "hair" && activeCeremonyType !== "christian") && (
+                                  <span className="block text-xs font-normal text-lovely/70 mt-1">
+                                    {t("hijabiTip")}
+                                  </span>
+                                )}
+                              </Label>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                            {selectedFeatures[feature.id].enabled && (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  value={selectedFeatures[feature.id]?.duration ?? feature.defaultDuration}
+                                  onFocus={(e) => setOriginalDuration(parseInt(e.target.value) || 0)}
+                                  onChange={(e) =>
+                                    handleFeatureDurationChange(
+                                      feature.id,
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  onBlur={(e) =>
+                                    handleFeatureDurationBlur(
+                                      feature.id,
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  className="w-20 text-center h-8 bg-creamey border-pinkey"
+                                />
+                                <span className="text-xs  w-8">{t("min")}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                     </div>
                   </div>
 
@@ -1840,7 +1837,7 @@ function WeddingTimelinePageContent() {
                       disabled={loading}
                       className="flex-1 bg-pinkey hover:bg-pinkey/90  font-bold  text-lovely"
                     >
-                      {t("nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("nextStep")} <ArrowRight className={`ms-2 h-4 w-4 ${locale === "ar" ? "rotate-180" : ""}`} />
                     </Button>
                   </div>
                 </div>
@@ -1978,9 +1975,9 @@ function WeddingTimelinePageContent() {
               )}
             </>
           )
-        }
-      </div>
-    )}
+          }
+        </div>
+      )}
 
       {/* Timeline Editor Step 6 */}
       {step === 6 && (
@@ -2261,12 +2258,15 @@ function WeddingTimelinePageContent() {
       )}
 
       {/* Feedback Dialog */}
-      {showFeedbackDialog &&  (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-lg w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto">
+      {showFeedbackDialog && (
+        <div
+          dir={locale === "ar" ? "rtl" : "ltr"}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        >
+          <div className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-lg w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300 max-h-[90vh] overflow-y-auto text-start">
             <button
               onClick={() => setShowFeedbackDialog(false)}
-              className="absolute top-4 right-4 text-lovely/50 hover:text-lovely transition-colors z-10"
+              className="absolute top-4 end-4 text-lovely/50 hover:text-lovely transition-colors z-10"
             >
               <X className="h-5 w-5" />
             </button>
@@ -2300,11 +2300,10 @@ function WeddingTimelinePageContent() {
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star
-                        className={`h-8 w-8 ${
-                          star <= feedbackRatings.easeOfUse
-                            ? "fill-lovely text-lovely"
-                            : "text-lovely/30"
-                        }`}
+                        className={`h-8 w-8 ${star <= feedbackRatings.easeOfUse
+                          ? "fill-lovely text-lovely"
+                          : "text-lovely/30"
+                          }`}
                       />
                     </button>
                   ))}
@@ -2330,11 +2329,10 @@ function WeddingTimelinePageContent() {
                       className="focus:outline-none transition-transform hover:scale-110"
                     >
                       <Star
-                        className={`h-8 w-8 ${
-                          star <= feedbackRatings.satisfaction
-                            ? "fill-lovely text-lovely"
-                            : "text-lovely/30"
-                        }`}
+                        className={`h-8 w-8 ${star <= feedbackRatings.satisfaction
+                          ? "fill-lovely text-lovely"
+                          : "text-lovely/30"
+                          }`}
                       />
                     </button>
                   ))}
@@ -2355,13 +2353,12 @@ function WeddingTimelinePageContent() {
                     <button
                       key={option.value}
                       onClick={() => setFeedbackTimeSaved(option.value)}
-                      className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
-                        feedbackTimeSaved === option.value
-                          ? "border-lovely bg-pinkey/50 text-lovely font-medium"
-                          : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
-                      }`}
+                      className={`w-full text-start px-4 py-2 rounded-lg border-2 transition-all ${feedbackTimeSaved === option.value
+                        ? "border-lovely bg-pinkey/50 text-lovely font-medium"
+                        : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
+                        }`}
                     >
-                      <span className="mr-2">{feedbackTimeSaved === option.value ? "●" : "○"}</span>
+                      <span className="me-2">{feedbackTimeSaved === option.value ? "●" : "○"}</span>
                       {option.label}
                     </button>
                   ))}
@@ -2391,13 +2388,12 @@ function WeddingTimelinePageContent() {
                             : [...prev, option.value]
                         );
                       }}
-                      className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
-                        feedbackFeelings.includes(option.value)
-                          ? "border-lovely bg-pinkey/50 text-lovely font-semibold"
-                          : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
-                      }`}
+                      className={`w-full text-start px-4 py-2 rounded-lg border-2 transition-all ${feedbackFeelings.includes(option.value)
+                        ? "border-lovely bg-pinkey/50 text-lovely font-semibold"
+                        : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
+                        }`}
                     >
-                      <span className="mr-2">{feedbackFeelings.includes(option.value) ? "☑" : "☐"}</span>
+                      <span className="me-2">{feedbackFeelings.includes(option.value) ? "☑" : "☐"}</span>
                       {option.label}
                     </button>
                   ))}
@@ -2418,13 +2414,12 @@ function WeddingTimelinePageContent() {
                     <button
                       key={option.value}
                       onClick={() => setFeedbackRecommend(option.value)}
-                      className={`w-full text-left px-4 py-2 rounded-lg border-2 transition-all ${
-                        feedbackRecommend === option.value
-                          ? "border-lovely bg-pinkey/50 text-lovely font-medium"
-                          : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
-                      }`}
+                      className={`w-full text-start px-4 py-2 rounded-lg border-2 transition-all ${feedbackRecommend === option.value
+                        ? "border-lovely bg-pinkey/50 text-lovely font-medium"
+                        : "border-pinkey bg-creamey hover:border-lovely text-lovely/80"
+                        }`}
                     >
-                      <span className="mr-2">{feedbackRecommend === option.value ? "●" : "○"}</span>
+                      <span className="me-2">{feedbackRecommend === option.value ? "●" : "○"}</span>
                       {option.label}
                     </button>
                   ))}
@@ -2435,7 +2430,7 @@ function WeddingTimelinePageContent() {
               <div>
                 <label className="text-sm font-medium text-lovely block mb-2">
                   {t("feedbackComments")}
-                  <span className="text-lovely ml-1">*</span>
+                  <span className="text-lovely ms-1">*</span>
                 </label>
                 <Textarea
                   value={feedbackText}
@@ -2460,7 +2455,7 @@ function WeddingTimelinePageContent() {
                 className="flex-1 bg-lovely hover:bg-lovely/90 text-white"
               >
                 {isSubmittingFeedback ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 ) : null}
                 {t("submitFeedback")}
               </Button>
@@ -2531,21 +2526,19 @@ function WeddingTimelinePageContent() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setNewEventPosition("start")}
-                    className={`p-3 rounded-lg border-2 font-medium transition-all ${
-                      newEventPosition === "start"
-                        ? "bg-lovely text-white border-lovely shadow-md"
-                        : "bg-creamey text-lovely border-pinkey hover:border-lovely"
-                    }`}
+                    className={`p-3 rounded-lg border-2 font-medium transition-all ${newEventPosition === "start"
+                      ? "bg-lovely text-white border-lovely shadow-md"
+                      : "bg-creamey text-lovely border-pinkey hover:border-lovely"
+                      }`}
                   >
                     {t("beginningOfDay")}
                   </button>
                   <button
                     onClick={() => setNewEventPosition("end")}
-                    className={`p-3 rounded-lg border-2 font-medium transition-all ${
-                      newEventPosition === "end"
-                        ? "bg-lovely text-white border-lovely shadow-md"
-                        : "bg-creamey text-lovely border-pinkey hover:border-lovely"
-                    }`}
+                    className={`p-3 rounded-lg border-2 font-medium transition-all ${newEventPosition === "end"
+                      ? "bg-lovely text-white border-lovely shadow-md"
+                      : "bg-creamey text-lovely border-pinkey hover:border-lovely"
+                      }`}
                   >
                     {t("endOfDay")}
                   </button>
@@ -2672,11 +2665,10 @@ function WeddingTimelinePageContent() {
                   <button
                     key={index}
                     onClick={() => setCurrentTutorialStep(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentTutorialStep
-                        ? "w-8 bg-lovely"
-                        : "w-2 bg-lovely/30 hover:bg-lovely/50"
-                    }`}
+                    className={`h-2 rounded-full transition-all ${index === currentTutorialStep
+                      ? "w-8 bg-lovely"
+                      : "w-2 bg-lovely/30 hover:bg-lovely/50"
+                      }`}
                   />
                 ))}
               </div>
@@ -2689,7 +2681,7 @@ function WeddingTimelinePageContent() {
                   variant="outline"
                   className="flex-1 border-2 border-pinkey bg-creamey text-lovely hover:text-lovely hover:bg-pinkey/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  <ChevronLeft className={`me-2 h-4 w-4 ${locale === "ar" ? "rotate-180" : ""}`} />
                   {t("previous")}
                 </Button>
                 <Button
@@ -2701,7 +2693,7 @@ function WeddingTimelinePageContent() {
                   ) : (
                     <>
                       {t("next")}
-                      <ChevronRight className="ml-2 h-4 w-4" />
+                      <ChevronRight className={`ms-2 h-4 w-4 ${locale === "ar" ? "rotate-180" : ""}`} />
                     </>
                   )}
                 </Button>
@@ -2757,9 +2749,9 @@ function WeddingTimelinePageContent() {
       {/* Options Modal (Mobile) */}
       {showOptionsModal && (
         <div
-        onClick={() => setShowOptionsModal(false)}
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div 
+          onClick={() => setShowOptionsModal(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
             onClick={(e) => e.stopPropagation()}
             className="bg-creamey border-4 border-lovely rounded-lg shadow-2xl max-w-md w-full p-6 relative animate-in fade-in slide-in-from-bottom-4 duration-300">
             <button

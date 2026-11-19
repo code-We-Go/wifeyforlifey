@@ -13,31 +13,33 @@ export function generateGehazBestieExperienceUpgradeEmail(
 	const greeting = isAr
 		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
-	const newsTitle = isAr ? "خبر رائع! 💖" : "Wonderful news! 💖";
+	const newsTitle = isAr
+		? "مبروك! الترقية تمّت، ودلوقتي إنتِ مشتركة في رحلة جهازك الكاملة مع وايفى."
+		: "Wonderful news! 💖";
 	const upgradedText = isAr
-		? "تمت ترقية باقتك بنجاح إلى رحلة جهازك الكاملة مع وايفي."
+		? ""
 		: "Your package has been successfully upgraded.";
 	const thankYouText = isAr
-		? "شكراً لاختياركِ ترقية تجربتكِ معنا. باقتكِ الجديدة تمنحكِ وصولاً لكافة الفيديوهات والمزايا الحصرية، وتجعل تنظيم كل تفاصيل جهازكِ أسهل وأمتع من البداية للنهاية."
+		? "شكرًا إنك اخترتي تكمّلي تجهيزاتك معانا. كل الفيديوهات والمزايا الحصرية بقت متاحة ليكي، عشان ترتّبي جهازك وتاخدي قراراتك على مهلك."
 		: "Thank you for choosing to enhance your experience with us. Your upgraded package gives you access to more features and benefits, making it even easier to manage every detail of your Gehaz journey from start to finish.";
-	const stepsHeader = isAr ? "✨ إليكِ خطواتك القادمة:" : "✨ Here’s what’s next:<br>";
+	const stepsHeader = isAr ? "تقدري تبدأي من هنا" : "✨ Here’s what’s next:<br>";
 	const stepVideos = isAr
-		? "🎥 أصبح بإمكانكِ الآن مشاهدة أكثر من 70+ فيديو لرحلة العروسة! ابدئي بفيديو \"Meet Your Bridal Era Bestie\" ثم شاهدي أي مرحلة تحبينها ✨"
+		? "🎥 اتفرّجي على أكتر من ٧٠ فيديو لتجهيزاتك. ابدئي بفيديو صاحبتك اللي هتكون معاكي في رحلة جهازك!، وبعدها اختاري المرحلة اللي محتاجاها دلوقتي."
 		: "Your profile now has access 70+ bridal era videos ready for you! Start with “Meet Your Bridal Era Bestie” and then dive into any chapter that feels right for you ✨";
 	const stepCommunity = isAr
-		? `👭 انضمي لمجتمعنا الخاص على الواتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		? `👭 انضمي لجروب وايفي الخاص على واتساب. اسألي عن اللي محيّرك وشاركي تجربتك مع عرايس بيجهّزوا زيّك. ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
 		: `👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">[Join Here]</a>`;
 	const stepShop = isAr
-		? `🛒 تسوّقي واحصلي على خصومات حصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
+		? `🛒 استفيدي من خصوماتك الحصرية. شوفي عروض شركاء وايفي على <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>.`
 		: `🛒 Shop your exclusive perks & discounts → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`;
 	const close1 = isAr
-		? "متحمسة أوي نحتفل سوا بكل خطوة في الرحلة دي 💗"
+		? "متحمّسة أوي أكمّل معاكي وأفرح معاكي بكل خطوة في تجهيزاتك."
 		: "So excited to celebrate every step of this journey with you 💗";
 	const close2 = isAr
-		? "ودايماً افتكري — إنتِ مش مجرد أي عروسة، إنتِ WIFEY FOR LIFEY 🥹💗"
+		? ""
 		: "And always remember — you’re not just any bride, you’re a WIFEY FOR LIFEY 🥹💗";
 	const signoff = isAr
-		? "بكل الحب،<br>ناريمان ✨<br>Your Bridal Era Bestie"
+		? "بكل الحب،<br>وايفى"
 		: "With love,<br>Nareiman ✨<br>Your Bridal Era Bestie";
 
 	return `
@@ -255,7 +257,7 @@ export function generateGehazBestieExperienceUpgradeEmail(
 																		</td>
 																	</tr>
 																</table>
-																<table class="paragraph_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																${upgradedText ? `<table class="paragraph_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad" style="padding-top:10px;padding-bottom:10px;">
 																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
@@ -263,7 +265,7 @@ export function generateGehazBestieExperienceUpgradeEmail(
 																			</div>
 																		</td>
 																	</tr>
-																</table>
+																</table>` : ""}
 																<table class="paragraph_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
@@ -322,7 +324,7 @@ export function generateGehazBestieExperienceUpgradeEmail(
 																		</td>
 																	</tr>
 																</table>
-																<table class="paragraph_block block-10" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+																${close2 ? `<table class="paragraph_block block-10" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">
 																			<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
@@ -330,7 +332,7 @@ export function generateGehazBestieExperienceUpgradeEmail(
 																			</div>
 																		</td>
 																	</tr>
-																</table>
+																</table>` : ""}
 																<table class="paragraph_block block-11" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 																	<tr>
 																		<td class="pad">

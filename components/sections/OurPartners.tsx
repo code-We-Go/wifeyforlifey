@@ -41,7 +41,10 @@ const OurPartners = () => {
           {t("title")}
         </h2>
 
-        <div className="logos group flex gap-8 relative overflow-hidden whitespace-nowrap py-10 [mask-image:_linear-gradient(to_right,_transparent_0,_white_128px,white_calc(100%-128px),_transparent_100%)]">
+        <div
+          dir="ltr"
+          className="logos group flex gap-8 relative overflow-hidden whitespace-nowrap py-10 [mask-image:_linear-gradient(to_right,_transparent_0,_white_128px,white_calc(100%-128px),_transparent_100%)]"
+        >
           {/* First loop */}
           <div className="animate-slide-left-infinite group-hover:animation-pause w-max flex gap-8">
             {partners.map((partner, index) => (

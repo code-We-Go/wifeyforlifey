@@ -16,10 +16,10 @@ export function generateWelcomeEmail(
 		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
 	const welcomeText = isAr
-		? "أهلاً بيكي في عالم وايفي — المكان اللي تخطيط الفرح فيه بيكون ممتع وبسيط ومن غير أي توتر 💗"
+		? "أهلًا بيكي في عالم وايفي! هنا هنساعدك ترتّبي فرحك على مهلك وتستمتعي بالتجهيزات على طريقتك."
 		: "Welcome to the Wifeys world — where love is simplified and pressure is left at the door 💗";
 	const excitementText = isAr
-		? "متحمسة جداً جداً لوجودك معانا!! 💗 من النهاردة مش هتكوني لوحدك أبداً — أنا وأخواتك الوايفيز جنبك خطوة بخطوة."
+		? "متحمسة أوي إنك معانا! احنا جنبك، من أول سؤال أبدأ منين؟ لحد يوم فرحك."
 		: "I’m sooo excited to finally have you here!! 💗 From today, you’re never alone — you’ve got me and your Wifey sisters right by your side.";
 	const bundledText = isAr
 		? "📦 المنتجات الإضافية المشمولة في طلبك:"
@@ -27,27 +27,27 @@ export function generateWelcomeEmail(
 	const videosText = isAr
 		? "🎥 وفيديوهات تنظيم الفرح جاهزة ليكي على البروفايل! ابدئي بمرحلة \"The Dreaming stage\" وبعدين اتفرجي على كل مرحلة تحبيها ✨"
 		: "🎥 While you’re waiting for her to arrive, your profile already has 70+ bridal era videos ready for you! Start with “The Dreaming stage” and then dive into any chapter that feels right for you ✨";
-	const stepsHeader = isAr ? "✨ إليكِ خطواتك القادمة:" : "✨ Here’s what’s next:<br>";
+	const stepsHeader = isAr ? "تقدري تبدأي من هنا" : "✨ Here’s what’s next:<br>";
 	const step1 = isAr
-		? `👭 انضمي لمجتمعنا الخاص على الواتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		? `👭 انضمي لجروب وايفي الخاص على واتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
 		: `👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a>`;
 	const step2 = isAr
-		? `🛒 تسوّقي واحصلي على خصومات حصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
+		? `🛒 اتسوّقي واستفيدي من خصوماتك الحصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
 		: `🛒 Shop your exclusive perks & discounts → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`;
 	const step3 = isAr
-		? `📦 تتبعي شحن البلانر الخاصة بكِ ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي من هنا</a>`
+		? `📦 تابعي شحنة البلانر بتاعك ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تابعي الشحنة من هنا</a>`
 		: `📦 Track your planner delivery → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a>`;
 	const step4 = isAr
-		? `📱 حمّلي تطبيقنا الآن ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
+		? `📱 نزّلي أبلكيشن وايفي ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
 		: `📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`;
 	const close1 = isAr
-		? "متحمسة أوي نحتفل سوا بكل خطوة في الرحلة دي 💗"
+		? "متحمّسة أوي نفرح سوا بكل خطوة، من أول فكرة لحد يوم الفرح."
 		: "So excited to celebrate every step of this journey with you 💗";
 	const close2 = isAr
-		? "ودايماً افتكري — إنتِ مش مجرد أي عروسة، إنتِ WIFEY FOR LIFEY 🥹💗"
+		? "ومن النهارده، إنتِ Wifey for Lifey 💗"
 		: "And always remember — you’re not just any bride, you’re a WIFEY FOR LIFEY 🥹💗";
 	const signoff = isAr
-		? "بكل الحب،<br>ناريمان ✨<br>Your Bridal Era Bestie"
+		? "بكل الحب،<br>وايفى"
 		: "With love,<br>Nareiman ✨<br>Your Bridal Era Bestie";
 
 	return `

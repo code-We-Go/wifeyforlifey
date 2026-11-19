@@ -16,44 +16,44 @@ export function generateWelcomeEmail(
 		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
 	const welcomeText = isAr
-		? "أهلاً بيكي في عالم وايفي — المكان اللي الحب فيه بسيط والضغط بنسيبه برة الباب 💗"
+		? "مبسوطة إنك معانا. بلانر جهاز بيستي اتغلّف وبقى في طريقه ليكي. هيساعدك ترتّبي خطواتك من أول الخطوبة وإنتِ بتجهّزي بيتك."
 		: "Welcome to the Wifeys world — where love is simplified and pressure is left at the door 💗";
 	const excitementText = isAr
-		? "متحمسة جداً جداً لوجودك معانا!! 💗 من النهاردة مش هتكوني لوحدك أبداً — أنا وأخواتك الوايفيز جنبك في كل خطوة."
+		? ""
 		: "I’m sooo excited to finally have you here!! 💗 From today, you’re never alone — you’ve got me and your Wifey sisters right by your side.";
 	const trackerText = isAr
-		? `💗 بلانر Gehaz Bestie اتغلفت وفي طريقها ليكي (تقدري تتابعي الشحن من هنا ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي البلانر</a>) — هتكون البيستي بتاعتك في رحلة الخطوبة وتجهيز بيتك، وتخليكي منظمة ومبسوطة ومن غير أي توتر.&nbsp;`
+		? ""
 		: `💗 Your Gehaz Bestie Planner is packed and on her way (track it here → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's about to be your bridal era bestie, keeping you organized and stress-free every step of the way&nbsp;`;
 	const videosText = isAr
-		? "🎥 وعقبال ما البلانر توصلك، بروفايلك عليه أكتر من 70+ فيديو لرحلة العروسة جاهزين ليكي! ابدئي بفيديو \"Meet Your Bridal Era Bestie\" وبعدين اتفرجي على أي مرحلة تحبيها ✨"
+		? "🎥 ولحد ما البلانر يوصلك، تقدري تتفرّجي على أكتر من ٧٠ فيديو جاهزين على حسابك. ابدئي بفيديو صاحبتك اللي هتكون معاكي في رحلة جهازك، وبعدها اختاري البلاي ليست اللي تناسب المرحلة اللي إنتِ فيها دلوقتي."
 		: "🎥 While you’re waiting for her to arrive, your profile already has 70+ bridal era videos ready for you! Start with “Meet Your Bridal Era Bestie” and then dive into any chapter that feels right for you ✨";
-	const stepsHeader = isAr ? "✨ إليكِ خطواتك القادمة:" : "✨ Here’s what’s next:<br>";
+	const stepsHeader = isAr ? "تقدري تبدأي من هنا" : "✨ Here’s what’s next:<br>";
 	const step1 = isAr
-		? `👭 انضمي لمجتمعنا الخاص على الواتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		? `👭 انضمي لجروب وايفي الخاص على واتساب. ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
 		: `👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a>`;
 	const step2 = isAr
-		? `🎶 استمتعي بقوائم فيديوهات العروسة ← <a href="https://www.shopwifeyforlifey.com/playlists" style="color: #d32333; text-decoration: underline; font-weight: bold;">شاهدي هنا</a>`
+		? `🎶 اتفرّجي على فيديوهات تجهيزاتك. ← <a href="https://www.shopwifeyforlifey.com/playlists" style="color: #d32333; text-decoration: underline; font-weight: bold;">شوفي ليست الفيديوهات</a>`
 		: `🎶 Enjoy your bridal playlist → <a href="https://www.shopwifeyforlifey.com/playlists" style="color: #d32333; text-decoration: underline; font-weight: bold;">Watch Here</a>`;
 	const step3 = isAr
-		? `🛒 شوفي شراكاتنا وخصوماتنا الحصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
+		? `🛒 شوفي شركاء وايفي واستفيدي من خصوماتك الحصرية. ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
 		: `🛒 See partnerships & discounts here → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`;
 	const step4 = isAr
-		? `📦 تتبعي شحن البلانر الخاصة بكِ ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي من هنا</a>`
+		? `📦 تابعي شحنة البلانر. ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تابعي الشحنة من هنا</a>`
 		: `📦 Track your planner delivery → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track Here</a>`;
 	const step5 = isAr
-		? `📱 حمّلي تطبيقنا الآن ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
+		? `📱 نزّلي أبلكيشن وايفي. ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
 		: `📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`;
 	const bundledText = isAr
 		? "📦 المنتجات الإضافية المشمولة في طلبك:"
 		: "📦 Bundled Items included in your order:";
 	const close1 = isAr
-		? "متحمسة أوي احتفل معاكي بكل خطوة في الرحلة دي 💗"
+		? "متحمّسة أكون معاكي في تجهيزاتك وأفرح معاكي بكل خطوة."
 		: "So excited to celebrate every step of this journey with you 💗";
 	const close2 = isAr
-		? "ودايماً افتكري — إنتِ مش مجرد أي عروسة، إنتِ WIFEY FOR LIFEY 🥹💗"
+		? ""
 		: "And always remember — you’re not just any bride, you’re a WIFEY FOR LIFEY 🥹💗";
 	const signoff = isAr
-		? "بكل الحب،<br>ناريمان ✨<br>Your Bridal Era Bestie"
+		? "بكل الحب،<br>وايفى"
 		: "With love,<br>Nareiman ✨<br>Your Bridal Era Bestie";
 
 	return `
@@ -272,7 +272,7 @@ export function generateWelcomeEmail(
 															</td>
 														</tr>
 													</table>
-													<table class="paragraph_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+													${excitementText ? `<table class="paragraph_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
 																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
@@ -280,8 +280,8 @@ export function generateWelcomeEmail(
 																</div>
 															</td>
 														</tr>
-													</table>
-													<table class="paragraph_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+													</table>` : ""}
+													${trackerText ? `<table class="paragraph_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
 																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
@@ -289,7 +289,7 @@ export function generateWelcomeEmail(
 																</div>
 															</td>
 														</tr>
-													</table>
+													</table>` : ""}
 													<table class="paragraph_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
@@ -396,7 +396,7 @@ export function generateWelcomeEmail(
 															</td>
 														</tr>
 													</table>
-													<table class="paragraph_block block-12" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+													${close2 ? `<table class="paragraph_block block-12" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
 																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
@@ -404,7 +404,7 @@ export function generateWelcomeEmail(
 																</div>
 															</td>
 														</tr>
-													</table>
+													</table>` : ""}
 													<table class="paragraph_block block-13" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">

@@ -18,17 +18,28 @@ const JoinNow = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
 
-  // All images for the carousel (including the original gehaz1.png as first)
-  const carouselImages = [
-    "/experience/gehaz1.png",
-    "/JoinNowNew/1.png",
-    "/JoinNowNew/2.png",
-    "/JoinNowNew/3.png",
-    "/JoinNowNew/4.png",
-    "/JoinNowNew/5.png",
-    "/JoinNowNew/6.png",
-    // "/JoinNowNew/7.png",
-  ];
+  // All images for the carousel (use Arabic assets when locale is ar)
+  const carouselImages = isRtl
+    ? [
+        "/JoinNowNew/ar/0.jpeg",
+        "/JoinNowNew/ar/1.jpeg",
+        "/JoinNowNew/ar/2.jpeg",
+        "/JoinNowNew/ar/3.jpeg",
+        "/JoinNowNew/ar/4.jpeg",
+        "/JoinNowNew/ar/5.jpeg",
+        "/JoinNowNew/ar/6.jpeg",
+        "/JoinNowNew/ar/7.jpeg",
+      ]
+    : [
+        "/experience/gehaz1.png",
+        "/JoinNowNew/1.png",
+        "/JoinNowNew/2.png",
+        "/JoinNowNew/3.png",
+        "/JoinNowNew/4.png",
+        "/JoinNowNew/5.png",
+        "/JoinNowNew/6.png",
+        // "/JoinNowNew/7.png",
+      ];
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {

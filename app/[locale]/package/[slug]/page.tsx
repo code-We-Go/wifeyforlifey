@@ -1543,9 +1543,9 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
         </div> */}
 
         {/* Wifey Community Section */}
-        <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
+        {/* <div className="rounded-3xl overflow-hidden shadow-lg border-2 border-pinkey">
           <WifeyCommunity />
-        </div>
+        </div> */}
 
       </div>
 

@@ -13,34 +13,36 @@ export function generateWeddingPlanningExperienceUpgradeEmail(
 	const greeting = isAr
 		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
-	const newsTitle = isAr ? "خبر رائع! 💖" : "Wonderful news! 💖";
+	const newsTitle = isAr
+		? "أهلًا بيكي في عالم وايفي! هنا هنساعدك ترتّبي فرحك على مهلك وتستمتعي بالتجهيزات على طريقتك."
+		: "Wonderful news! 💖";
 	const upgradedText = isAr
-		? "تمت ترقية باقتك بنجاح إلى فرحك مع وايفي الكاملة."
+		? "متحمسة أوي إنك معانا! احنا جنبك، من أول سؤال أبدأ منين؟ لحد يوم فرحك."
 		: "Your package has been successfully upgraded.";
 	const thankYouText = isAr
-		? "شكراً لاختياركِ ترقية تجربتكِ معنا. متحمسين جداً نكون جزءاً من رحلة فرحك ونسهل عليكي كل خطوة لتكون أجمل ذكرى."
+		? "تمت ترقية باقتك بنجاح إلى فرحك مع وايفي الكاملة."
 		: "Thank you for choosing to enhance your experience with us. We're excited to be part of your wedding journey and can't wait to help make your special day even more memorable.";
-	const stepsHeader = isAr ? "✨ إليكِ خطواتك القادمة:" : "✨ Here’s what’s next:<br>";
+	const stepsHeader = isAr ? "تقدري تبدأي من هنا" : "✨ Here’s what’s next:<br>";
 	const stepVideos = isAr
 		? "🎥 فيديوهات تنظيم الفرح جاهزة ليكي على البروفايل! ابدئي بمرحلة \"The Dreaming stage\" وبعدين اتفرجي على كل مرحلة تحبيها ✨"
 		: "🎥 While you’re waiting for her to arrive, your profile already has 70+ bridal era videos ready for you! Start with “The Dreaming stage” and then dive into any chapter that feels right for you ✨";
 	const stepCommunity = isAr
-		? `👭 انضمي لمجتمعنا الخاص على الواتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		? `👭 انضمي لجروب وايفي الخاص على واتساب ← <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
 		: `👭 Join our private WhatsApp community → <a href="https://chat.whatsapp.com/HBRWHtfjdql4dMratCHgYR?mode=ems_wa_t" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a>`;
 	const stepShop = isAr
-		? `🛒 تسوّقي واحصلي على خصومات حصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
+		? `🛒 اتسوّقي واستفيدي من خصوماتك الحصرية ← <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`
 		: `🛒 Shop your exclusive perks & discounts → <a href="https://www.shopwifeyforlifey.com/account" style="color: #d32333; text-decoration: underline; font-weight: bold;">ShopWifeyForLifey.com</a>`;
 	const stepApp = isAr
-		? `📱 حمّلي تطبيقنا الآن ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
+		? `📱 نزّلي أبلكيشن وايفي ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
 		: `📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`;
 	const close1 = isAr
-		? "متحمسة أوي نحتفل سوا بكل خطوة في الرحلة دي 💗"
+		? "متحمّسة أوي نفرح سوا بكل خطوة، من أول فكرة لحد يوم الفرح."
 		: "So excited to celebrate every step of this journey with you 💗";
 	const close2 = isAr
-		? "ودايماً افتكري — إنتِ مش مجرد أي عروسة، إنتِ WIFEY FOR LIFEY 🥹💗"
+		? "ومن النهارده، إنتِ Wifey for Lifey 💗"
 		: "And always remember — you’re not just any bride, you’re a WIFEY FOR LIFEY 🥹💗";
 	const signoff = isAr
-		? "بكل الحب،<br>ناريمان ✨<br>Your Bridal Era Bestie"
+		? "بكل الحب،<br>وايفى"
 		: "With love,<br>Nareiman ✨<br>Your Bridal Era Bestie";
 
 	return `

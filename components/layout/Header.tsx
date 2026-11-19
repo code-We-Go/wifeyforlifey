@@ -405,7 +405,7 @@ export default function Header() {
                   pathname === item.href ? "text-red-900 " : "text-creamey"
                 )}
               >
-                <div className="flex md:px-2 lg:px-4 xl:px-8 border-s-2 border-creamey  flex-col gap-2 items-center justify-center">
+                <div className={cn("flex border-s-2 border-creamey flex-col gap-2 items-center justify-center", isArabic ? "md:px-1 lg:px-2 xl:px-4" : "md:px-2 lg:px-4 xl:px-8")}>
                   {item.icon}
                   {getNavLabel(item.name)}
                 </div>
@@ -434,7 +434,8 @@ export default function Header() {
                 <div key={item.name} className="relative z-50">
                   <button
                     className={cn(
-                      "flex md:px-2 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center text-base font-medium transition-colors hover:text-red-900 bg-transparent  cursor-pointer",
+                      "flex border-e-2 border-creamey flex-col gap-2 items-center justify-center text-base font-medium transition-colors hover:text-red-900 bg-transparent cursor-pointer",
+                      isArabic ? "md:px-1 lg:px-2 xl:px-4" : "md:px-2 lg:px-4 xl:px-8",
                       isToolkitsOpen ? "text-red-900" : "text-creamey"
                     )}
                     onClick={() => setIsToolkitsOpen(!isToolkitsOpen)}
@@ -494,7 +495,7 @@ export default function Header() {
                       "text-creamey"
                     )}
                   >
-                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center relative">
+                    <div className={cn("flex border-e-2 border-creamey flex-col gap-2 items-center justify-center relative", isArabic ? "md:px-1 lg:px-2 xl:px-4" : "md:px-2 lg:px-4 xl:px-8")}>
                       {item.icon}
                       {getNavLabel(item.name)}
                       {totalItems > 0 && (
@@ -513,7 +514,7 @@ export default function Header() {
                       pathname === item.href ? "text-red-900 " : "text-creamey"
                     )}
                   >
-                    <div className="flex md:px-2 lg:px-4 xl:px-8 border-e-2 border-creamey flex-col gap-2 items-center justify-center">
+                    <div className={cn("flex border-e-2 border-creamey flex-col gap-2 items-center justify-center", isArabic ? "md:px-1 lg:px-2 xl:px-4" : "md:px-2 lg:px-4 xl:px-8")}>
                       {item.icon}
                       {getNavLabel(item.name)}
                     </div>

@@ -12,24 +12,24 @@ export function giftMail(
     ? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
     : "Helvetica Neue, Helvetica, Arial, sans-serif";
 
-  const greeting = isAr ? "هاي يا جميلة، 💖" : "Hi Gorgeous, 💖<br>";
+  const greeting = isAr ? "أهلًا بيكي 💗" : "Hi Gorgeous, 💖<br>";
   const p1 = isAr
-    ? "يا بخت صاحبتك بيكي! رسمياً هي أسعد عروسة إن عندها حد زيك في ضهرها خلال رحلة فرحها! 🥹✨ إنتِ مش بس بتقدمي لها هدية… إنتِ بتهديها حب، دعم، وراحة بال في أكتر وقت هي محتاجاهم فيه. مبسوطين جداً إنك في حياتها — ودلوقتي، إحنا كمان معاها! 🎀"
+    ? "شكرًا إنك اخترتي هدية من وايفي لصاحبتك. لفتة حلوة منك إنك فكّرتي في حاجة تفرّحها وتساعدها ترتّب تجهيزات فرحها على مهَلها."
     : "Omg — your bestie is officially the luckiest bride ever to have someone like you in her corner during her bridal era! 🥹✨ You’re not just giving her a gift… you’re giving her love, care, and support when she needs it the most. We’re so glad she has YOU — and now, she’s got US too! 🎀";
   const p2 = isAr
-    ? "مش هنتواصل مع عروستك الجميلة خالص لحد ما تدّينا إشارة (عبر انستجرام @wifeyforlifey.community) إنك عملتي المفاجأة ليها. عشان اللحظة تفضل ساحرة ومميزة زي ما خططتي لها. 💌"
+    ? "وعشان المفاجأة تفضل زي ما خطّطتي لها، هنستنى لحد ما تديها الهدية. وقتها ابعتيلنا رسالة على إنستجرام @wifeyforlifey.community، وبعدها هنتواصل معاها."
     : "We’ll hold off on reaching out to your beautiful bride until you let us know (through Instagram @wifeyforlifey.community) that you’ve given her the surprise. That way, the moment stays as magical as you want it to be. 💌";
   const trackingText = isAr
-    ? `ده رابط تتبع شحن بلانر Gehaz Bestie:<br>👈 <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي البلانر</a>`
+    ? `تابعي شحنة البلانر ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تابعي الشحنة من هنا</a>`
     : `Here's the link to track her Gehaz Bestie Planner shipment:<br>👉 <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>`;
   const bundledTitle = isAr
-    ? "المنتجات المشمولة في هديتك:"
+    ? "هدّيتك فيها"
     : "Bundled Items included in your gift:";
   const p3 = isAr
-    ? "من كل قلوبنا — شكراً لثقتك فينا عشان نكون جزء من رحلتها. سوا، هنخلي رحلة فرحها ذكرى ما تتنسيش. 💍💗"
+    ? "شكرًا على ثقتك فينا. مبسوطين إننا جزء من المفاجأة دي!"
     : "From the bottom of our hearts — thank you for trusting us to be part of her journey. Together, we’ll make her bridal era unforgettable. 💍💗";
   const signoff = isAr
-    ? "بكل الحب،<br>فريق Wifey for Lifey ✨"
+    ? "بكل الحب،<br>وايفي فور لايفي"
     : "With love,<br>The Wifey for Lifey Team✨";
 
   return `<!DOCTYPE html>

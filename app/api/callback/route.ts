@@ -802,7 +802,7 @@ async function handleSubscription(
                 name: targetFirstName,
                 subject:
                   targetLang === "ar"
-                    ? "نورتي مجتمع وايفي يا أحلى عروسة! 💗"
+                    ? "أهلًا بيكي يا وايفي"
                     : "You're in, beautiful! Welcome to the Wifeys community 💗",
                 body: generateWelcomeEmail(targetFirstName, updatedSub, targetLang),
                 from: "Wifey For Lifey <orders@shopwifeyforlifey.com>",

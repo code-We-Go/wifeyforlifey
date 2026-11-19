@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         name: inviteeName,
         subject:
           inviteeLang === "ar"
-            ? `دعوة خاصة من عروستك ${brideName} 🤵💍`
+            ? "دعوة خاصة من عروستك"
             : `You’ve Been Invited by ${brideName} 🤵`,
         body: emailBody,
         from: "wifeyforlifey@shopwifeyforlifey.com",

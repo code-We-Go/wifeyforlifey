@@ -102,7 +102,7 @@ const Support360 = () => {
       imagePath: "/360/51.png"
     }
   ];
-  
+
   // Embla Carousel
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
@@ -136,13 +136,12 @@ const Support360 = () => {
   }, [emblaApi, onSelect]);
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-16 md:pb-16 transition-all duration-1000 ease-out ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-10'
-      }`}
+      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-8 md:pb-16 transition-all duration-1000 ease-out ${isVisible
+        ? 'opacity-100 translate-y-0'
+        : 'opacity-0 translate-y-10'
+        }`}
     >
       <div className="container-custom">
         {/* Header */}
@@ -165,9 +164,8 @@ const Support360 = () => {
               <button
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
-                className={`absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 md:-translate-x-12 rtl:md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
+                className={`absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 md:-translate-x-12 rtl:md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                  }`}
                 aria-label="Previous slide"
               >
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
@@ -175,9 +173,8 @@ const Support360 = () => {
               <button
                 onClick={scrollNext}
                 disabled={!canScrollNext}
-                className={`absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 md:translate-x-12 rtl:md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${
-                  !canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
-                }`}
+                className={`absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 md:translate-x-12 rtl:md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                  }`}
                 aria-label="Next slide"
               >
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
@@ -222,23 +219,23 @@ const Support360 = () => {
         </div>
 
         {/* CTA Button */}
-        <div className="flex justify-center mt-48 sm:mt-36 md:mt-32 lg:mt-20 ">
-          <Link 
+        <div className="flex justify-center mt-6 sm:mt-36 md:mt-32 lg:mt-20 ">
+          <Link
             href="/package/GehazBestiePlanner"
             className="bg-lovely relative text-creamey px-8 py-4 rounded-sm font-semibold text-base md:text-lg hover:bg-lovely/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             {t("cta")}
-                <Image
-                  width={60}
-                  height={30}
-                  className="absolute -top-5 -rotate-45 -left-5 z-20"
-                  alt="fyonka"
-                  src={"/fyonkaCreamey.png"}
-                  unoptimized
-                />
+            <Image
+              width={60}
+              height={30}
+              className="absolute -top-5 -rotate-45 -left-5 z-20"
+              alt="fyonka"
+              src={"/fyonkaCreamey.png"}
+              unoptimized
+            />
           </Link>
         </div>
-    
+
       </div>
     </section>
   );

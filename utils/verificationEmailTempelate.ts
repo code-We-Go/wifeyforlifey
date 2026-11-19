@@ -28,7 +28,7 @@ export const verificationEmailTemplate = (
       <style>
         body {
           font-family: ${fontFamily};
-          background-color: #f2f2f2;
+          background-color: #fbf3e0;
           margin: 0;
           padding: 0;
           direction: ${dir};
@@ -38,7 +38,7 @@ export const verificationEmailTemplate = (
           max-width: 600px;
           margin: 0 auto;
           padding: 30px;
-          background-color: #ffffff;
+          background-color: #fbf3e0;
           border-radius: 12px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
           margin-top: 40px;

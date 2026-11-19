@@ -16,31 +16,31 @@ export function generateMiniExperienceMail(
 		? `هاي يا أحلى وايفي، ${first_name}! ✨👰‍♀️`
 		: `Hey my gorgeous Wifey, ${first_name}! ✨👰‍♀️`;
 	const p1 = isAr
-		? "ألف مبروك انضمامك إلى رحلة جهازك المصغّرة 💕"
+		? "مبروك انضمامك لـرحلة الجهاز المصغرة مع وايفى! مبسوطة أوي إنك معانا، وعشان تبدأي تجهيزاتك على مهلك، دي أول كام خطوة."
 		: "Yaaay! Congratulations on joining the Mini Wifey Experience 💕";
 	const p2 = isAr
-		? "أهلاً بيكي في عالم وايفي، المكان اللي الحب فيه بسيط والضغط بنسيبه برة الباب 🌸"
+		? ""
 		: "Welcome to the Wifeys world, where love is simplified and pressure is left at the door 🌸";
 	const p3 = isAr
-		? `📔 بلانر Gehaz Bestie اتغلفت وجاهزة للشحن (تقدري تتابعي الشحن من هنا ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تتبعي البلانر</a>) — هتكون رفيقتك في مرحلة الخطوبة وتجهيز بيتك خطوة بخطوة 💗`
+		? `📔 تابعي شحنة بلانر جهاز بيستي. البلانر اتغلّف وبقى جاهز للشحن. هيبقى معاكي من أول الخطوبة وإنتِ بتجهّزي بيتك، خطوة بخطوة. ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تابعي الشحنة من هنا</a>`
 		: `📔 Your Gehaz Bestie Planner is packed and ready to be shipped (track it here → <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscription._id}&email=${subscription.email}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>) — she's going to be your new bridal era bestie, guiding you every step of the way 💗`;
 	const bundledText = isAr
 		? "📦 المنتجات الإضافية المشمولة في طلبك:"
 		: "📦 Bundled Items included in your order:";
 	const p4 = isAr
-		? "🎀 المفروض تكوني حجزتي جلستك التعليمية دلوقتي — ومتحمسة جداً جداً أقابلك فيها!"
+		? `🎀 استشيرى خبراء وايفى. لو محتارة فى حاجة، خبراء وايفى موجودين علشان يساعدوكى، <a href="https://www.shopwifeyforlifey.com/booking" style="color: #d32333; text-decoration: underline; font-weight: bold;">احجزى سيشن فردية هنا</a>`
 		: "🎀 You should've booked an educational session by now — and I seriously can't wait to meet you there!";
 	const p5 = isAr
-		? `👭 وافتكري دايماً إنك مش لوحدك — انضمي لمجتمع وايفي على الفيسبوك (أكتر من 3,000+ عروسة جاهزين يساعدوكي ويشاركوا معاكي): 👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
+		? `👭 انضمي لجروب وايفي على فيسبوك. هتلاقي أكتر من ٣٬٠٠٠ عروسة بيجهّزوا زيّك. اسأليهم، شاركي تجربتك، وخدي رأيهم في اللي محيّرك. ← <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">انضمي هنا</a>`
 		: `👭 And don't forget! You're never alone — join our Facebook Wifeys Community (3,000+ brides ready to help, share, and cheer you on):👉 <a href="https://www.facebook.com/share/g/1ErZAzr5wN/?mibextid=wwXIfr" style="color: #d32333; text-decoration: underline; font-weight: bold;">Join Here</a>`;
 	const p6 = isAr
-		? `📱 حمّلي تطبيقنا الآن ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
+		? `📱 نزّلي أبلكيشن وايفي. ← <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`
 		: `📱 Download our app now → <a href="https://apps.apple.com/ae/app/wifey-for-lifey/id6757353337" style="color: #d32333; text-decoration: underline; font-weight: bold;">App Store</a> | <a href="https://play.google.com/store/apps/details?id=com.WifeyForLifey&pcampaignid=web_share" style="color: #d32333; text-decoration: underline; font-weight: bold;">Google Play</a>`;
 	const p7 = isAr
-		? "متحمسة أوي أكون جنبك في الرحلة الجميلة دي، ودايماً افتكري: إنتِ مش مجرد أي عروسة! إنتِ WIFEY FOR LIFEY 🥹💗"
+		? "متحمّسة أكون جنبك في التجهيزات وأفرح معاكي بكل خطوة. من النهارده، إنتِ واحدة من بنات وايفي."
 		: "So excited to walk beside you in this beautiful journey & always remember, You're not just any bride! You're a WIFEY FOR LIFEY 🥹💗";
 	const signoff = isAr
-		? "<p style=\"margin: 0;\">بكل الحب،</p><p style=\"margin: 0;\">ناريمان ✨</p><p style=\"margin: 0;\">Your Bridal Era Bestie</p>"
+		? "<p style=\"margin: 0;\">بكل الحب،</p><p style=\"margin: 0;\">وايفى</p>"
 		: "<p style=\"margin: 0;\">With love,</p><p style=\"margin: 0;\">Nareiman ✨</p><p style=\"margin: 0;\">Your Bridal Era Bestie</p>";
 
 	return `
@@ -253,7 +253,7 @@ export function generateMiniExperienceMail(
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
 																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.6;text-align:${textAlign};">
 																	<p style="margin: 0; margin-bottom: 16px;">${p1}</p>
-																	<p style="margin: 0; margin-bottom: 16px;">${p2}</p>
+																	${p2 ? `<p style="margin: 0; margin-bottom: 16px;">${p2}</p>` : ""}
 																	<p style="margin: 0; margin-bottom: 16px;">${p3}</p>
 																	${subscription.cart && subscription.cart.length > 0
 			? `<p style="margin: 0; margin-bottom: 8px;"><strong>${bundledText}</strong></p>

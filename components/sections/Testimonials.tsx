@@ -107,7 +107,7 @@ const Testimonials = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full flex min-h-[75vh] md:min-h-[100vh] flex-col items-center md:justify-center justify-end py-16 bg-creamey"
+      className="relative w-full flex min-h-[75vh] md:min-h-[100vh] flex-col items-center md:justify-center justify-end md:py-16 bg-creamey"
     >
       <div className="flex md:hidden gap-4 w-full max-w-full mx-auto overflow-x-auto py-8 scrollbar-hide snap-x snap-mandatory">
         {mobTestimonials.slice(0, 2).map((t, i) => (
