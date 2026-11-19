@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import AutoScroll from "embla-carousel-auto-scroll";
 import Link from "next/link";
@@ -105,7 +105,7 @@ const socialMediaItems = [
   // 17 - NEW
   {
     link: "https://vt.tiktok.com/ZSaqmudvg/",
-    videoId: "7587543168829197586?",
+    videoId: "7587543168829197586",
     type: "tiktok",
     thumbnail: ""
   },
@@ -236,9 +236,10 @@ export default function WifeyCommunity() {
                 <div className="w-full h-full flex items-center justify-center">
                    {selectedVideo.type === 'tiktok' ? (
                        <iframe
-                         src={`https://www.tiktok.com/embed/v2/${selectedVideo.id}?autoplay=1&mute=1`}
-                         className="w-full h-full"
-                         allow="autoplay; encrypted-media; fullscreen;"
+                         src={`https://www.tiktok.com/embed/v2/${String(selectedVideo.id || '').replace(/\D/g, '')}?autoplay=1&mute=1`}
+                         className="w-full h-full border-0"
+                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+                         allowFullScreen
                          title="TikTok Video"
                        ></iframe>
                    ) : (
@@ -260,43 +261,37 @@ export default function WifeyCommunity() {
 
 function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay: () => void }) {
   const isTiktok = item.type === 'tiktok';
+  const cleanVideoId = String(item.videoId || '').replace(/\D/g, '');
+  // Only trust permanent/self-hosted thumbnails (ignore expired tiktokcdn signed URLs)
+  const hasPermanentThumbnail =
+    Boolean(item.thumbnail) && !String(item.thumbnail).includes('tiktokcdn.com');
+  const cardRef = useRef<HTMLButtonElement | null>(null);
+  const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const [dynamicThumbnail, setDynamicThumbnail] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Fetch fresh thumbnail from our API route
-  React.useEffect(() => {
-    if (isTiktok) {
-      setIsLoading(true);
-      const fetchThumbnail = async () => {
-        try {
-          const response = await fetch(
-            `/api/tiktok-thumbnail?url=${encodeURIComponent(item.link)}`
-          );
-          
-          if (!response.ok) {
-            console.error('Failed to fetch thumbnail:', response.status);
-            setIsLoading(false);
-            return;
-          }
-          
-          const data = await response.json();
-          if (data.thumbnail_url) {
-            setDynamicThumbnail(data.thumbnail_url);
-            setImgError(false);
-          }
-        } catch (error) {
-          console.error('Failed to fetch TikTok thumbnail:', error);
-          setImgError(true);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchThumbnail();
-    } else {
-      setIsLoading(false);
+
+  // Lazy-mount TikTok embed/v2 preview when the card is near the viewport
+  useEffect(() => {
+    if (!isTiktok || !cleanVideoId || (hasPermanentThumbnail && !imgError)) return;
+    const node = cardRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setShouldLoadIframe(true);
+      return;
     }
-  }, [isTiktok, item.link]);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShouldLoadIframe(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '400px' }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isTiktok, cleanVideoId, hasPermanentThumbnail, imgError]);
   
   if (item.type === 'instagram') {
     return (
@@ -312,50 +307,57 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
     );
   }
 
-  const thumbnailUrl = dynamicThumbnail || item.thumbnail;
-
   return (
     <button 
+      ref={cardRef}
+      type="button"
       onClick={onPlay}
-      className="group block relative w-full aspect-[9/16] bg-white rounded-3xl overflow-hidden shadow-md border-2 border-lovely/5 hover:border-lovely/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-left"
+      className="group block relative w-full aspect-[9/16] bg-black rounded-3xl overflow-hidden shadow-md border-2 border-lovely/5 hover:border-lovely/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-left"
     >
-      {/* Loading Skeleton */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-gradient-to-br from-lovely/10 via-lovely/5 to-pinkey/10 animate-pulse">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-lovely/20 animate-pulse"></div>
-          </div>
+      {/* Fallback / Loading Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/90 to-[#ff0050]/20 flex items-center justify-center">
+        <div className={`opacity-20 transform rotate-12 scale-150 ${!isLoaded ? 'animate-pulse' : ''}`}>
+          <FaTiktok size={100} color="white" />
         </div>
-      )}
-      
-      {/* Background Gradient or Image */}
-      {!imgError && thumbnailUrl ? (
-        <img 
-          src={thumbnailUrl} 
+      </div>
+
+      {/* Permanent Self-Hosted Thumbnail OR Live TikTok embed/v2 Preview */}
+      {hasPermanentThumbnail && !imgError ? (
+        <img
+          src={item.thumbnail}
           alt={`Thumbnail for video ${index}`}
-          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+          onLoad={() => setIsLoaded(true)}
           onError={() => setImgError(true)}
-          onLoad={() => setIsLoading(false)}
+          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
         />
       ) : (
-        <div className={`absolute inset-0 bg-gradient-to-br ${isTiktok ? 'from-black/80 via-black/90 to-[#ff0050]/20' : 'from-purple-500/80 via-pink-500/80 to-orange-500/80'} transition-colors duration-500 flex items-center justify-center`}>
-            {/* Fallback pattern */}
-            <div className="opacity-20 transform rotate-12 scale-150">
-               {isTiktok ? <FaTiktok size={100} color="white" /> : <FaInstagram size={100} color="white" />}
-            </div>
-        </div>
+        shouldLoadIframe && cleanVideoId && (
+          <iframe
+            src={`https://www.tiktok.com/embed/v2/${cleanVideoId}`}
+            title={`TikTok Preview ${index}`}
+            loading="lazy"
+            tabIndex={-1}
+            onLoad={() => setIsLoaded(true)}
+            className={`pointer-events-none absolute inset-0 w-full h-full border-0 transition-opacity duration-500 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            allow="accelerometer; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+          />
+        )
       )}
       
-      {/* Filter Overlay for readability */}
-      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-300"></div>
+      {/* Filter Overlay for readability + captures clicks/drags above iframe */}
+      <div className="absolute inset-0 bg-black/15 group-hover:bg-black/25 transition-colors duration-300 z-[1]"></div>
 
       {/* Center Icon */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 group-hover:scale-110 transition-transform duration-300">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm ${isTiktok ? 'bg-black/80 text-white' : 'bg-white/90 text-[#E1306C]'}`}>
-             {isTiktok ? <FaTiktok size={32} /> : <FaInstagram size={32} />}
+      <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 group-hover:scale-110 transition-transform duration-300">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm bg-black/75 text-white">
+          <FaTiktok size={32} />
         </div>
         <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-lovely opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-sm">
-            <FaPlay size={16} className="ml-1" />
+          <FaPlay size={16} className="ml-1" />
         </div>
       </div>
 
@@ -366,9 +368,9 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
          </span>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 via-black/30 to-transparent pt-20 flex flex-col justify-end">
+      <div className="absolute bottom-0 left-0 right-0 z-[2] p-6 bg-gradient-to-t from-black/70 via-black/30 to-transparent pt-20 flex flex-col justify-end">
         <span className="text-white font-bold text-sm tracking-wide uppercase opacity-90 mb-1 drop-shadow-md">
-            {isTiktok ? 'TikTok' : 'Instagram'}
+            TikTok
         </span>
         <span className="text-white text-xs font-medium opacity-75 drop-shadow-sm">
             Tap to Watch

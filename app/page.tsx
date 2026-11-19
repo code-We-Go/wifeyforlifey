@@ -71,7 +71,7 @@ export default function Home() {
       {/* Newsletter Section */}
       <OurPartners />
 
-      {/* <WifeyCommunity />*/}
+      {/* <WifeyCommunity /> */}
       <Testimonials />
       {/* <div className="relative h-32">
 
