@@ -94,7 +94,7 @@ const BridalJourneyTwo = () => {
         }
 
         .animate-scroll {
-          animation: marquee 50s linear infinite;
+          animation: marquee 12s linear infinite;
         }
 
         .animate-scroll:hover {

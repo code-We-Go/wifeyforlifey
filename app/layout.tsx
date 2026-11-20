@@ -17,6 +17,7 @@ import { AnnouncementProvider } from "../context/announcementContext";
 import ConditionalAnnouncmentBar from "@/components/ConditionalAnnouncmentBar";
 import DiscountPopup from "@/components/DiscountPopup";
 import NewsletterPopup from "@/components/NewsletterPopup";
+import ArabicAnnouncementModal from "@/components/ArabicAnnouncementModal";
 import AppliancesWebinarGlobalPopup from "@/components/shared/AppliancesWebinarGlobalPopup";
 import OnboardingModal from "@/components/auth/OnboardingModal";
 import SideCart from "@/components/cart/SideCart";
@@ -123,6 +124,7 @@ export default async function RootLayout({
 
                           <DiscountPopup />
                           <NewsletterPopup />
+                          <ArabicAnnouncementModal />
                           <OnboardingModal />
                           {/* <AppliancesWebinarGlobalPopup /> */}
                           <Toaster />

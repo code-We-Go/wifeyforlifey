@@ -1,7 +1,8 @@
 "use client";
 
 import { lifeyFont, thirdFont } from "@/fonts";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
@@ -10,13 +11,19 @@ import Autoplay from "embla-carousel-autoplay";
 import { useTranslations, useLocale } from "next-intl";
 import { headerStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const JoinNow = () => {
   const t = useTranslations("home.joinNow");
   const locale = useLocale();
   const isRtl = locale === "ar";
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // All images for the carousel (use Arabic assets when locale is ar)
   const carouselImages = isRtl
@@ -51,24 +58,97 @@ const JoinNow = () => {
     },
   );
 
-  // Close modal on Escape key
+  const handlePrev = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setSelectedIndex((prev) =>
+      prev !== null ? (prev - 1 + carouselImages.length) % carouselImages.length : null
+    );
+  }, [carouselImages.length]);
+
+  const handleNext = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setSelectedIndex((prev) =>
+      prev !== null ? (prev + 1) % carouselImages.length : null
+    );
+  }, [carouselImages.length]);
+
+  // Keyboard navigation & body scroll lock
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setSelectedImage(null);
+        setSelectedIndex(null);
+      } else if (e.key === "ArrowLeft") {
+        if (isRtl) {
+          handleNext();
+        } else {
+          handlePrev();
+        }
+      } else if (e.key === "ArrowRight") {
+        if (isRtl) {
+          handlePrev();
+        } else {
+          handleNext();
+        }
       }
     };
 
-    if (selectedImage) {
-      document.addEventListener("keydown", handleEscape);
+    if (selectedIndex !== null) {
+      document.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "unset";
     };
-  }, [selectedImage]);
+  }, [selectedIndex, isRtl, handlePrev, handleNext]);
+
+  // Swipe gesture handling for mobile
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const touchEndY = useRef<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartY.current = e.targetTouches[0].clientY;
+    touchEndX.current = null;
+    touchEndY.current = null;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
+  };
+
+  const onTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+    const diffX = touchStartX.current - touchEndX.current;
+    const diffY = (touchStartY.current || 0) - (touchEndY.current || 0);
+
+    // Only trigger if primarily a horizontal swipe
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        // Swiped Left
+        if (isRtl) {
+          handlePrev();
+        } else {
+          handleNext();
+        }
+      } else {
+        // Swiped Right
+        if (isRtl) {
+          handleNext();
+        } else {
+          handlePrev();
+        }
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+    touchStartY.current = null;
+    touchEndY.current = null;
+  };
 
   return (
     <section
@@ -122,7 +202,7 @@ const JoinNow = () => {
               >
                 <div 
                   className="w-full h-full overflow-hidden shadow-lg bg-pinkey cursor-pointer transition-transform hover:scale-105"
-                  onClick={() => setSelectedImage(src)}
+                  onClick={() => setSelectedIndex(index)}
                 >
                   <Image
                     src={src}
@@ -154,46 +234,65 @@ const JoinNow = () => {
         </div>
       </div>
 
-      {/* Fullscreen Image Modal */}
-      {selectedImage && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-          onClick={() => setSelectedImage(null)}
-        >
-          <button
-            className="absolute top-4 right-4 text-white hover:text-lovely transition-colors p-2 rounded-full hover:bg-white/10"
-            onClick={() => setSelectedImage(null)}
-            aria-label="Close modal"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+      {/* Fullscreen Image Modal with Prev/Next Navigation rendered via Portal to cover entire viewport */}
+      {mounted &&
+        selectedIndex !== null &&
+        createPortal(
           <div 
-            className="relative max-w-[95vw] max-h-[95vh] w-auto h-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-6 select-none touch-pan-y"
+            onClick={() => setSelectedIndex(null)}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
-            <Image
-              src={selectedImage}
-              alt="Fullscreen view"
-              width={1200}
-              height={1200}
-              className="object-contain w-auto h-auto max-w-[95vw] max-h-[95vh]"
-            />
-          </div>
-        </div>
-      )}
+            {/* Close Button */}
+            <button
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[10000] text-white/80 hover:text-white transition-all p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md cursor-pointer"
+              onClick={() => setSelectedIndex(null)}
+              aria-label="Close modal"
+            >
+              <X className="w-6 h-6 sm:w-7 sm:h-7" />
+            </button>
+
+            {/* Previous Button */}
+            <button
+              className="absolute left-2 sm:left-6 md:left-10 top-1/2 -translate-y-1/2 z-[10000] p-2.5 sm:p-3.5 rounded-full bg-black/40 hover:bg-black/75 text-white/90 hover:text-white backdrop-blur-md border border-white/15 transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-2xl"
+              onClick={handlePrev}
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+            </button>
+
+            {/* Next Button */}
+            <button
+              className="absolute right-2 sm:right-6 md:right-10 top-1/2 -translate-y-1/2 z-[10000] p-2.5 sm:p-3.5 rounded-full bg-black/40 hover:bg-black/75 text-white/90 hover:text-white backdrop-blur-md border border-white/15 transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-2xl"
+              onClick={handleNext}
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+            </button>
+
+            {/* Center Image Container */}
+            <div 
+              className="relative flex flex-col items-center justify-center max-w-[92vw] sm:max-w-[85vw] md:max-w-[75vw] lg:max-w-[65vw] max-h-[85vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={carouselImages[selectedIndex]}
+                alt={`Feature preview ${selectedIndex + 1}`}
+                width={1200}
+                height={1200}
+                priority
+                className="object-contain w-auto h-auto max-w-[92vw] sm:max-w-[85vw] md:max-w-[75vw] lg:max-w-[65vw] max-h-[75vh] sm:max-h-[80vh] rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+              />
+              {/* Image counter indicator */}
+              <div className="mt-3 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-white/80 text-xs sm:text-sm font-medium">
+                {selectedIndex + 1} / {carouselImages.length}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </section>
   );
 };

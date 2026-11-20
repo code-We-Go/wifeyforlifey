@@ -16,31 +16,31 @@ export default function TimelinePlanner() {
     <section
       ref={sectionRef}
       className={`w-full bg-creamey py-8 md:py-16 px-4 md:px-8 transition-all duration-1000 ease-out ${isVisible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-10'
+        ? 'opacity-100 translate-y-0'
+        : 'opacity-0 translate-y-10'
         }`}
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12  items-start">
           {/* Left Content */}
           <div className="space-y-2 h-3/4 flex flex-col justify-between">
-            <div className="space-y-2 leading-relaxed">
+            <div className="space-y-2 md:space-y-3 leading-relaxed">
               <h2
                 className={`${thirdFont.className} ${headerStyle} text-lovely tracking-normal`}
               >
                 {t("heading1")}
               </h2>
               {t("heading2") && (
-                <h3
-                  className={`${thirdFont.className} ${headerStyle} text-lovely tracking-normal`}
+                <h4
+                  className={`${thirdFont.className} text-2xl lg:text-4xl font-bold text-lovely tracking-normal`}
                 >
                   {t("heading2")}
-                </h3>
+                </h4>
               )}
             </div>
 
             <div className="space-y-3">
-              <p className={`text-lovely ${subHeaderStyle} leading-relaxed`}>
+              <p className={`${thirdFont.className} text-2xl lg:text-4xl font-bold text-lovely tracking-normal leading-relaxed`}>
                 {t("subtitle")}
               </p>
 
