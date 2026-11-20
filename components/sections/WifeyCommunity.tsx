@@ -323,6 +323,8 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
     );
   }
 
+  const thumbnailUrl = dynamicThumbnail || item.thumbnail;
+
   return (
     <button
       onClick={onPlay}
@@ -333,7 +335,7 @@ function SocialCard({ item, index, onPlay }: { item: any; index: number; onPlay:
         <div className={`opacity-20 transform rotate-12 scale-150 ${!isLoaded ? 'animate-pulse' : ''}`}>
           <FaTiktok size={100} color="white" />
         </div>
-      )}
+      </div>
 
         {/* Background Gradient or Image */}
         {!imgError && thumbnailUrl ? (
