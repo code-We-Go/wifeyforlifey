@@ -8,10 +8,14 @@
   --background-end-rgb: 255, 255, 255;
 
   /* Brand Colors */
-  --primary-color: 323, 100%, 90%; /* Light Pink */
-  --primary-hover: 323, 100%, 85%; /* Slightly darker Pink */
-  --secondary-color: 266, 100%, 94%; /* Lavender */
-  --accent-color: 152, 70%, 95%; /* Mint */
+  --primary-color: 323, 100%, 90%;
+  /* Light Pink */
+  --primary-hover: 323, 100%, 85%;
+  /* Slightly darker Pink */
+  --secondary-color: 266, 100%, 94%;
+  /* Lavender */
+  --accent-color: 152, 70%, 95%;
+  /* Mint */
 
   /* UI Colors */
   --success-color: 142, 76%, 36%;
@@ -62,6 +66,7 @@
     --ring: 323 80% 90%;
     --radius: 0.75rem;
   }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -102,11 +107,21 @@
   * {
     @apply border-border;
   }
-  html, body {
+
+  html[dir="rtl"],
+  [dir="rtl"],
+  .font-arabic,
+  [lang="ar"] {
+    font-family: var(--font-arabic), sans-serif;
+  }
+
+  html,
+  body {
     background-color: #fbf3e0;
     color-scheme: light;
     @apply bg-background text-foreground;
   }
+
   h1,
   h2,
   h3,
@@ -115,24 +130,31 @@
   h6 {
     @apply font-medium tracking-tight;
   }
+
   h1 {
     @apply text-4xl sm:text-5xl md:text-6xl;
   }
+
   h2 {
     @apply text-3xl sm:text-4xl;
   }
+
   h3 {
     @apply text-2xl sm:text-3xl;
   }
+
   h4 {
     @apply text-xl sm:text-2xl;
   }
+
   h5 {
     @apply text-lg sm:text-xl;
   }
+
   h6 {
     @apply text-base sm:text-lg;
   }
+
   p {
     @apply leading-relaxed;
   }
@@ -177,7 +199,7 @@
   }
 
   .product-card {
-    @apply rounded-sm  bg-card shadow-sm card-hover;
+    @apply rounded-sm bg-card shadow-sm card-hover;
   }
 
   .video-card {
@@ -211,7 +233,8 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b91c2a; /* Slightly darker shade for hover */
+  background: #b91c2a;
+  /* Slightly darker shade for hover */
   transform: scale(1.05);
 }
 
@@ -247,16 +270,21 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #b91c2a; /* Slightly darker shade for hover */
+  background: #b91c2a;
+  /* Slightly darker shade for hover */
 }
 
 /* Hide scrollbar but keep scrolling functionality */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
 
 .scrollbar-creamey {
@@ -294,4 +322,117 @@ input::placeholder {
 input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(21%) sepia(98%) saturate(6943%) hue-rotate(350deg) brightness(89%) contrast(96%);
   cursor: pointer;
+}
+
+/* ==========================================================================
+   Arabic Typography Enhancements Across the Entire App
+   Scales all body and utility font sizes in Arabic / RTL context (line-height preserved)
+   ========================================================================== */
+html[dir="rtl"] {
+  font-size: 18px;
+}
+
+@media (min-width: 768px) {
+  html[dir="rtl"] {
+    font-size: 18.5px;
+  }
+}
+
+html[dir="rtl"] body,
+[dir="rtl"] body {
+  font-size: 1.125rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base text utilities for Arabic/RTL (mobile and upward) */
+[dir="rtl"] .text-xs,
+html[dir="rtl"] .text-xs {
+  font-size: 0.95rem !important;
+}
+
+[dir="rtl"] .text-sm,
+html[dir="rtl"] .text-sm {
+  font-size: 1.08rem !important;
+}
+
+[dir="rtl"] .text-base,
+html[dir="rtl"] .text-base {
+  font-size: 1.2rem !important;
+}
+
+[dir="rtl"] .text-lg,
+html[dir="rtl"] .text-lg {
+  font-size: 1.35rem !important;
+}
+
+/* Micro hardcoded sizes that are too small in Arabic */
+[dir="rtl"] [class*="text-\[10px\]"],
+html[dir="rtl"] [class*="text-\[10px\]"],
+[dir="rtl"] [class*="text-\[11px\]"],
+html[dir="rtl"] [class*="text-\[11px\]"],
+[dir="rtl"] [class*="text-\[12px\]"],
+html[dir="rtl"] [class*="text-\[12px\]"],
+[dir="rtl"] [class*="text-\[13px\]"],
+html[dir="rtl"] [class*="text-\[13px\]"] {
+  font-size: 0.88rem !important;
+}
+
+/* Responsive sm: variants (min-width: 640px) */
+@media (min-width: 640px) {
+  [dir="rtl"] .sm\:text-xs,
+  html[dir="rtl"] .sm\:text-xs {
+    font-size: 0.95rem !important;
+  }
+  [dir="rtl"] .sm\:text-sm,
+  html[dir="rtl"] .sm\:text-sm {
+    font-size: 1.08rem !important;
+  }
+  [dir="rtl"] .sm\:text-base,
+  html[dir="rtl"] .sm\:text-base {
+    font-size: 1.2rem !important;
+  }
+  [dir="rtl"] .sm\:text-lg,
+  html[dir="rtl"] .sm\:text-lg {
+    font-size: 1.35rem !important;
+  }
+}
+
+/* Responsive md: variants (min-width: 768px) */
+@media (min-width: 768px) {
+  [dir="rtl"] .md\:text-xs,
+  html[dir="rtl"] .md\:text-xs {
+    font-size: 0.95rem !important;
+  }
+  [dir="rtl"] .md\:text-sm,
+  html[dir="rtl"] .md\:text-sm {
+    font-size: 1.08rem !important;
+  }
+  [dir="rtl"] .md\:text-base,
+  html[dir="rtl"] .md\:text-base {
+    font-size: 1.2rem !important;
+  }
+  [dir="rtl"] .md\:text-lg,
+  html[dir="rtl"] .md\:text-lg {
+    font-size: 1.35rem !important;
+  }
+}
+
+/* Responsive lg: variants (min-width: 1024px) */
+@media (min-width: 1024px) {
+  [dir="rtl"] .lg\:text-xs,
+  html[dir="rtl"] .lg\:text-xs {
+    font-size: 0.95rem !important;
+  }
+  [dir="rtl"] .lg\:text-sm,
+  html[dir="rtl"] .lg\:text-sm {
+    font-size: 1.08rem !important;
+  }
+  [dir="rtl"] .lg\:text-base,
+  html[dir="rtl"] .lg\:text-base {
+    font-size: 1.2rem !important;
+  }
+  [dir="rtl"] .lg\:text-lg,
+  html[dir="rtl"] .lg\:text-lg {
+    font-size: 1.35rem !important;
+  }
 }

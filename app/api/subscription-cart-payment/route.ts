@@ -3,6 +3,8 @@ import { ConnectDB } from "@/app/config/db";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
+import packageModel from "@/app/modals/packageModel";
+import { resolvePackagePrice } from "@/utils/packagePricing";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
@@ -20,6 +22,58 @@ export async function POST(request: Request) {
     : `ref-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
   try {
+    // 0. Verify and enforce subscription prices from DB (handling Arabic Edition pricing)
+    if (Array.isArray(data.subscriptions) && data.subscriptions.length > 0) {
+      const packageIds = data.subscriptions.map((s: any) => s.packageId).filter(Boolean);
+      const dbPackages = await packageModel.find({ _id: { $in: packageIds } });
+      const pkgMap = new Map(dbPackages.map((p) => [p._id.toString(), p]));
+
+      let verifiedSubsSubTotal = 0;
+      for (const sub of data.subscriptions) {
+        const pkg = pkgMap.get(sub.packageId);
+        if (pkg) {
+          const pricing = resolvePackagePrice(pkg, {
+            duration: sub.duration,
+            edition: sub.edition,
+          });
+          sub.price = pricing.price;
+          sub.discountedFrom = pricing.discountedFrom;
+          sub.saving = pricing.saving;
+        }
+        verifiedSubsSubTotal += (sub.price || 0) * (sub.quantity || 1);
+      }
+
+      // If client's subTotal differed from verified, adjust totals safely
+      const itemsSubTotal = Array.isArray(data.cart)
+        ? data.cart.reduce((sum: number, item: any) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0)
+        : 0;
+      const verifiedSubTotal = verifiedSubsSubTotal + itemsSubTotal;
+      const discount = Number(data.appliedDiscountAmount) || 0;
+      const loyalty = Number(data.loyalty?.discountAmount || data.loyalty?.discount) || 0;
+
+      // Free shipping check: free if subtotal > 2000 OR contains Full Experience package
+      const hasFreeShippingPackage = Array.isArray(data.subscriptions) && data.subscriptions.some(
+        (sub: any) =>
+          sub.packageId === "687396821b4da119eb1c13fe" ||
+          sub.packageId === "6965e63c6df4503dda02c12b" ||
+          sub.packageId === PACKAGE_IDS.FULL_EXPERIENCE ||
+          sub.packageId === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
+      );
+      const isFreeShipping = verifiedSubTotal > 2000 || hasFreeShippingPackage;
+      const effectiveShipping = isFreeShipping ? 0 : (Number(data.shipping) || 0);
+
+      // Selected Gift Cards cost (+20 LE per gift card checked)
+      const giftCardsCost = Array.isArray(data.subscriptions)
+        ? data.subscriptions.reduce((sum: number, item: any) => sum + (item.isGift && item.giftCardName ? 20 : 0), 0)
+        : 0;
+
+      const verifiedTotal = Math.max(0, verifiedSubTotal - discount - loyalty + effectiveShipping + giftCardsCost);
+
+      data.subTotal = verifiedSubTotal;
+      data.shipping = effectiveShipping;
+      data.total = verifiedTotal;
+    }
+
     let orderId = specialReference;
     let clientSecret = "";
 
@@ -93,9 +147,12 @@ export async function POST(request: Request) {
         to: sub.packageId,
         packageID: sub.packageId,
         selectedDuration: sub.duration,
+        price: sub.price,
         subscribed: false,
         paymentMethod: data.paymentMethod,
         cart: bundledCart,
+        edition: sub.edition,
+        editionName: sub.editionName,
 
         // Apply coupon and loyalty fields to the first subscription only
         redeemedLoyaltyPoints: idx === 0 ? (data.loyalty?.redeemedPoints || 0) : 0,
@@ -188,13 +245,12 @@ export async function POST(request: Request) {
             <p><strong>Name:</strong> ${sub.firstName} ${sub.lastName}</p>
             <p><strong>Phone:</strong> ${sub.phone}</p>
             <p><strong>Is Gift:</strong> ${sub.isGift ? "Yes" : "No"}</p>
-            ${
-              sub.isGift
-                ? `<p><strong>Gift Recipient Email:</strong> ${sub.giftRecipientEmail || "N/A"}</p>
+            ${sub.isGift
+            ? `<p><strong>Gift Recipient Email:</strong> ${sub.giftRecipientEmail || "N/A"}</p>
                    <p><strong>Gift Card:</strong> ${sub.giftCardName || "N/A"}</p>
                    <p><strong>Special Message:</strong> ${sub.specialMessage || "N/A"}</p>`
-                : ""
-            }
+            : ""
+          }
           </div>
         `;
       }
@@ -204,7 +260,7 @@ export async function POST(request: Request) {
         name: `NEW Pending ${subLabel} Request`,
         subject: `NEW Pending ${subLabel} Request`,
         body: adminEmailBody,
-        from: "noreply@shopwifeyforlifey.com",
+        from: "orders@shopwifeyforlifey.com",
       });
 
       return NextResponse.json(

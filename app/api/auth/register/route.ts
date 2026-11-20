@@ -12,15 +12,34 @@ import { hash } from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    const { username, email, password } = await req.json();
+    const {
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      whatsAppNumber,
+      preferredLanguage,
+      weddingDay,
+      weddingDate,
+    } = await req.json();
     // Normalize email to avoid case-sensitivity issues
     const normalizedEmail = email?.trim().toLowerCase();
-    console.log("here" + username, normalizedEmail, password);
+    const cleanWhatsApp = (whatsAppNumber || "").trim();
+    const chosenLang: "en" | "ar" = preferredLanguage === "ar" ? "ar" : "en";
+    const resolvedWeddingDate = weddingDay || weddingDate;
 
     // Validate required fields
     if (!username || !normalizedEmail || !password) {
       return new Response(
-        JSON.stringify({ error: "All fields are required" }),
+        JSON.stringify({ error: "Username, email, and password are required" }),
+        { status: 400 }
+      );
+    }
+
+    if (!cleanWhatsApp) {
+      return new Response(
+        JSON.stringify({ error: "WhatsApp number is required" }),
         { status: 400 }
       );
     }
@@ -65,10 +84,31 @@ export async function POST(req: Request) {
 
     const subscriptionIds = subscriptions.map(sub => sub._id);
 
+    let parsedWeddingDate: Date | undefined;
+    if (resolvedWeddingDate) {
+      const d = new Date(resolvedWeddingDate);
+      if (!isNaN(d.getTime())) {
+        parsedWeddingDate = d;
+      }
+    }
+
     const user = await UserModel.create({
       username: username,
+      firstName: (firstName || "").trim(),
+      lastName: (lastName || "").trim(),
       email: normalizedEmail,
       password: hashedPassword,
+      whatsAppNumber: cleanWhatsApp,
+      preferredLanguage: chosenLang,
+      weddingDate: parsedWeddingDate,
+      onboardingCompleted: true,
+      shippingData: {
+        firstName: (firstName || "").trim(),
+        lastName: (lastName || "").trim(),
+        email: normalizedEmail,
+        whatsAppNumber: cleanWhatsApp,
+        phone: cleanWhatsApp,
+      },
       subscriptions: subscriptionIds,
     });
 
@@ -89,14 +129,17 @@ export async function POST(req: Request) {
     console.log("here" + userResponse.id);
     //    const token = await bcrypt.hash(savedUser._id.toString(), saltRounds);
     const verificationLink = `${process.env.baseUrl}api/auth/verification/${userResponse.id}`;
+    const emailSubject =
+      chosenLang === "ar"
+        ? "تأكيد حسابك في Wifey for Lifey 💕"
+        : "Please click on link to verify your account";
+
     await sendMail({
       to: normalizedEmail,
-      name: "wiiga",
-      subject: "Please click on link to verify your account",
-      body: `${SubscriprtionMail(verificationLink)}`,
+      name: user.firstName || user.username || "Wifey",
+      subject: emailSubject,
+      body: `${SubscriprtionMail(verificationLink, chosenLang)}`,
       from: "authentication@shopwifeyforlifey.com",
-      // body: `<a href=${verificationLink}> click here to verify your account</a>`,
-      //   body: compileWelcomeTemplate("Vahid", "youtube.com/@sakuradev"),
     });
 
     return new Response(

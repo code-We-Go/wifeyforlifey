@@ -10,6 +10,16 @@ export interface Partner {
   link: string;
   bookingMethod: string;
   imagePath: string;
+  translations?: {
+    ar?: {
+      category?: string;
+      subCategory?: string;
+      brand?: string;
+      offer?: string;
+      discount?: string;
+      bookingMethod?: string;
+    };
+  };
 }
 
 const PartnerSchema = new Schema<Partner>(
@@ -49,6 +59,16 @@ const PartnerSchema = new Schema<Partner>(
     imagePath: {
       type: String,
       required: true,
+    },
+    translations: {
+      ar: {
+        category: { type: String, required: false },
+        subCategory: { type: String, required: false },
+        brand: { type: String, required: false },
+        offer: { type: String, required: false },
+        discount: { type: String, required: false },
+        bookingMethod: { type: String, required: false },
+      },
     },
   },
   { timestamps: true }

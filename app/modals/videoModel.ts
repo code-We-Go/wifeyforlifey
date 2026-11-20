@@ -34,6 +34,12 @@ const VideoSchema = new Schema<Video>({
     },
   likes: [{ type: Schema.Types.ObjectId, ref: 'users' }], // Array of user references who liked the video
   comments: [VideoCommentSchema], // Array of comments
+  translations: {
+    ar: {
+      title: { type: String, required: false },
+      description: { type: String, required: false },
+    },
+  },
 }, {
   timestamps: true // This will automatically add createdAt and updatedAt fields
 });

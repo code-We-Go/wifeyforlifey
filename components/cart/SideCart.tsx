@@ -2,9 +2,11 @@
 
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { X, ShoppingBag, ArrowRight, Trash2, Plus, Minus } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/providers/CartProvider";
+import { getLocalizedPackageName } from "@/utils/subscriptionLocalization";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +19,9 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function SideCart() {
+  const t = useTranslations("sideCart");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const {
     items,
     removeItem,
@@ -46,12 +51,12 @@ export default function SideCart() {
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-      <SheetContent className="w-full sm:max-w-md bg-creamey border-l-lovely/10 p-0 flex flex-col h-full">
+      <SheetContent className="w-full sm:max-w-md bg-creamey border-s-lovely/10 p-0 flex flex-col h-full">
         <SheetHeader className="p-6 border-b border-lovely/10">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-2xl font-medium text-lovely flex items-center gap-2">
               <ShoppingBag className="w-6 h-6" />
-              Your Cart
+              {t("title")}
             </SheetTitle>
           </div>
         </SheetHeader>
@@ -63,16 +68,16 @@ export default function SideCart() {
                 <ShoppingBag className="w-10 h-10 text-lovely opacity-40" />
               </div>
               <h3 className="text-xl font-medium text-lovely mb-2">
-                Your cart is empty
+                {t("emptyTitle")}
               </h3>
               <p className="text-lovely/60 mb-8">
-                Looks like you haven't added anything to your cart yet.
+                {t("emptySubtitle")}
               </p>
               <Button
                 onClick={closeCart}
                 className="rounded-full bg-lovely hover:bg-lovely/90 text-creamey px-8"
               >
-                Continue Shopping
+                {t("continueShopping")}
               </Button>
             </div>
           ) : (
@@ -140,7 +145,7 @@ export default function SideCart() {
                             </button>
                           </div>
                           <span className="font-medium text-lovely">
-                            LE {(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} {tCommon("le")}
                           </span>
                         </div>
                       </div>
@@ -152,13 +157,15 @@ export default function SideCart() {
               {/* Subscriptions Section */}
               {subscriptionItems.length > 0 && (
                 <div className="space-y-6 pt-4 border-t border-lovely/10">
-                  <h4 className="font-medium text-lovely text-sm uppercase tracking-wider mb-2">Subscriptions</h4>
+                  <h4 className="font-medium text-lovely text-sm uppercase tracking-wider mb-2">
+                    {t("subscriptions")}
+                  </h4>
                   {subscriptionItems.map((item) => (
                     <div key={item.cartItemId} className="flex gap-4">
                       <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0 border border-lovely/5">
                         <Image
                           src={item.imageUrl}
-                          alt={item.packageName}
+                          alt={getLocalizedPackageName(item, locale)}
                           fill
                           className="object-cover"
                         />
@@ -166,7 +173,7 @@ export default function SideCart() {
                       <div className="flex flex-col flex-grow min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <h4 className="font-medium text-lovely truncate pr-2">
-                            {item.packageName}
+                            {getLocalizedPackageName(item, locale)}
                           </h4>
                           <button
                             onClick={() => removeSubscription(item.cartItemId)}
@@ -175,9 +182,16 @@ export default function SideCart() {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
+                        {item.edition && (
+                          <div className="mb-1">
+                            <span className="inline-block text-[11px] font-bold bg-pinkey/80 text-lovely border border-lovely/20 px-2 py-0.5 rounded-full">
+                              {item.edition === "ar" ? "النسخة العربية" : "English Edition"}
+                            </span>
+                          </div>
+                        )}
                         {item.duration > 0 && (
                           <p className="text-sm text-lovely/60 mb-2">
-                            {item.duration} Months Subscription
+                            {t("monthsSubscription", { months: item.duration })}
                           </p>
                         )}
                         <div className="flex justify-between items-center mt-auto">
@@ -203,7 +217,7 @@ export default function SideCart() {
                             </button>
                           </div>
                           <span className="font-medium text-lovely">
-                            LE {(item.price * item.quantity).toFixed(2)}
+                            {(item.price * item.quantity).toFixed(2)} {tCommon("le")}
                           </span>
                         </div>
                       </div>
@@ -219,11 +233,11 @@ export default function SideCart() {
           <SheetFooter className="p-6 border-t border-lovely/10 bg-white/50 backdrop-blur-sm mt-auto sm:flex-col gap-4">
             <div className="w-full space-y-4">
               <div className="flex justify-between items-center text-lg font-medium text-lovely">
-                <span>Subtotal</span>
-                <span>LE {totalPrice.toFixed(2)}</span>
+                <span>{t("subtotal")}</span>
+                <span>{totalPrice.toFixed(2)} {tCommon("le")}</span>
               </div>
               <p className="text-xs text-lovely/60">
-                Shipping and taxes calculated at checkout.
+                {t("shippingNote")}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <Button
@@ -232,7 +246,7 @@ export default function SideCart() {
                   className="rounded-full border-lovely bg-creamey text-lovely hover:bg-everGreen hover:text-creamey transition-all duration-300"
                   onClick={closeCart}
                 >
-                  <Link href="/cart">View Cart</Link>
+                  <Link href="/cart">{t("viewCart")}</Link>
                 </Button>
                 <Button
                   asChild
@@ -240,7 +254,7 @@ export default function SideCart() {
                   onClick={closeCart}
                 >
                   <Link href={checkoutLink} className="flex items-center justify-center gap-2">
-                    Checkout <ArrowRight className="w-4 h-4" />
+                    {t("checkout")} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </Link>
                 </Button>
               </div>

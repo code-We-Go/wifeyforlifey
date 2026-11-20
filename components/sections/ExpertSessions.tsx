@@ -18,8 +18,10 @@ import ConsultantAvailabilityModal, {
   getAvailabilityNotice,
 } from "@/components/shared/ConsultantAvailabilityModal";
 import useEmblaCarousel from "embla-carousel-react";
+import { useLocale, useTranslations } from "next-intl";
 import { headerStyle, subHeaderStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { localizePartnerSession } from "@/app/lib/localize";
 
 interface IPartnerSessionVariant {
   _id?: string;
@@ -60,6 +62,9 @@ interface IPartnerSession {
 }
 
 const ExpertSessions = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const t = useTranslations("home.expertSessions");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const { data: authSession } = useSession();
   const [sessions, setSessions] = useState<IPartnerSession[]>([]);
@@ -139,10 +144,13 @@ const ExpertSessions = () => {
 
     const best = validDiscounts[0];
     if (best.calculationType === "PERCENTAGE" && best.value) {
-      return `${best.value}% OFF`;
+      return isRtl ? `خصم ${best.value}%` : `${best.value}% OFF`;
     }
     if (best.calculationType === "FIXED_AMOUNT" && best.value) {
       const pct = Math.round((best.value / sessionPrice) * 100);
+      if (isRtl) {
+        return pct > 0 ? `خصم ${pct}%` : `خصم ${best.value} ج.م`;
+      }
       return pct > 0 ? `${pct}% OFF` : `EGP ${best.value} OFF`;
     }
     return null;
@@ -153,6 +161,7 @@ const ExpertSessions = () => {
     loop: false,
     align: "start",
     slidesToScroll: 1,
+    direction: isRtl ? "rtl" : "ltr",
   });
 
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -179,9 +188,13 @@ const ExpertSessions = () => {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
+  const localizedSessions = useMemo(() => {
+    return sessions.map((s) => localizePartnerSession(s, locale));
+  }, [sessions, locale]);
+
   const sortedSessions = useMemo(() => {
-    return sortSessions(sessions, sortBy);
-  }, [sessions, sortBy]);
+    return sortSessions(localizedSessions, sortBy);
+  }, [localizedSessions, sortBy]);
 
   const handleSortChange = (newSort: SessionSortKey) => {
     setSortBy(newSort);
@@ -471,25 +484,23 @@ const ExpertSessions = () => {
     return (
       <section
         ref={sectionRef}
-        className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${isVisible
+        className={`bg-pinkey text-lovely py-8 md:py-16  transition-all duration-1000 ease-out ${isVisible
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-10'
           }`}
       >
         <div className="container-custom">
           {/* Header */}
-          <div className="text-left mb-6 max-w-4xl">
+          <div className="text-start mb-6 max-w-4xl">
             <h2
               className={`${thirdFont.className} ${headerStyle} mb-4`}
             >
-              Get real answers from real experts
+              {t("title")}
             </h2>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
-
                 <p className={`${subHeaderStyle}`}>
-                  Book consultation sessions with trusted experts and stop relying
-                  on confusing or incorrect advice.
+                  {t("subtitle")}
                 </p>
               </li>
             </ul>
@@ -509,9 +520,9 @@ const ExpertSessions = () => {
           </div>
 
           {/* Footer Note */}
-          <div className="mt-16 text-center md:text-left  pt-6">
-            <p className="text-lovely/70 italic text-lg   decoration-lovely/30">
-              Private, judgment-free sessions — from the comfort of your home.
+          <div className="mt-16 text-center md:text-start pt-6">
+            <p className="text-lovely/70 italic text-lg decoration-lovely/30">
+              {t("footerNote")}
             </p>
           </div>
         </div>
@@ -540,7 +551,7 @@ const ExpertSessions = () => {
   return (
     <section
       ref={sectionRef}
-      className={`bg-pinkey text-lovely pt-8 md:pt-16 pb-2 transition-all duration-1000 ease-out ${isVisible
+      className={`bg-pinkey text-lovely py-8 md:py-16  transition-all duration-1000 ease-out ${isVisible
         ? 'opacity-100 translate-y-0'
         : 'opacity-0 translate-y-10'
         }`}
@@ -548,18 +559,17 @@ const ExpertSessions = () => {
       <div className="container-custom">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-          <div className="text-left max-w-3xl">
+          <div className="text-start max-w-4xl">
             <h2
               className={`${thirdFont.className} ${headerStyle} mb-4`}
             >
-              Get real answers from real experts!
+              {t("title")}
             </h2>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
                 <span className="text-xl mt-1">•</span>
                 <p className={`${subHeaderStyle}`}>
-                  Book consultation sessions with trusted experts and stop relying
-                  on confusing or incorrect advice.
+                  {t("subtitle")}
                 </p>
               </li>
             </ul>
@@ -581,20 +591,20 @@ const ExpertSessions = () => {
               <button
                 onClick={scrollPrev}
                 disabled={!canScrollPrev}
-                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                className={`absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 md:-translate-x-12 rtl:md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollPrev ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
                   }`}
                 aria-label="Previous slide"
               >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
               </button>
               <button
                 onClick={scrollNext}
                 disabled={!canScrollNext}
-                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
+                className={`absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 md:translate-x-12 rtl:md:-translate-x-12 z-10 bg-lovely text-white p-2 md:p-3 rounded-full shadow-lg transition-all ${!canScrollNext ? 'opacity-30 cursor-not-allowed' : 'hover:bg-lovely/90 cursor-pointer'
                   }`}
                 aria-label="Next slide"
               >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                <ChevronRight className="w-5 h-5 md:w-6 md:h-6 rtl:rotate-180" />
               </button>
             </>
           )}
@@ -617,9 +627,9 @@ const ExpertSessions = () => {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-16 text-center md:text-left  pt-6">
-          <p className="text-lovely/70 italic text-lg  decoration-lovely/30">
-            Private, judgment-free sessions — from the comfort of your home.
+        <div className=" text-center md:text-start pt-6">
+          <p className="text-lovely/70 italic text-lg decoration-lovely/30">
+            {t("footerNote")}
           </p>
         </div>
       </div>
@@ -643,6 +653,7 @@ const ExpertSessions = () => {
           onClick={() => setSelectedForDetails(null)}
         >
           <div
+            dir={isRtl ? "rtl" : "ltr"}
             className="bg-creamey rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -667,9 +678,11 @@ const ExpertSessions = () => {
                 <p className="text-lg text-lovely/70 mb-2">
                   {activeDetailsVariant?.title || selectedForDetails.title}
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <p className="text-xl font-semibold text-lovely">
-                    EGP {activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}
+                    {isRtl
+                      ? `${activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price} ج.م`
+                      : `EGP ${activeDetailsVariant ? activeDetailsVariant.price : selectedForDetails.price}`}
                   </p>
                   {getSessionDiscountBadge(selectedForDetails) && (
                     <span className="bg-lovely text-creamey text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
@@ -678,7 +691,7 @@ const ExpertSessions = () => {
                   )}
                   {activeDetailsVariant?.duration ? (
                     <span className="text-xs bg-lovely/10 text-lovely font-medium px-2.5 py-1 rounded-full">
-                      ⏱ {activeDetailsVariant.duration} mins
+                      ⏱ {activeDetailsVariant.duration} {isRtl ? "دقيقة" : "mins"}
                     </span>
                   ) : null}
                 </div>
@@ -689,7 +702,7 @@ const ExpertSessions = () => {
             {selectedForDetails.variants && selectedForDetails.variants.length > 1 && (
               <div className="mb-6">
                 <h4 className="font-bold text-lovely text-sm mb-2 uppercase tracking-wide">
-                  Choose Variant:
+                  {isRtl ? "اختاري الباقة:" : "Choose Variant:"}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedForDetails.variants.map((v, idx) => (
@@ -703,8 +716,8 @@ const ExpertSessions = () => {
                         }`}
                     >
                       <span>{v.title}</span>
-                      <span className="ml-2 text-xs opacity-80">
-                        (EGP {v.price} )
+                      <span className="ms-2 text-xs opacity-80">
+                        ({isRtl ? `${v.price} ج.م` : `EGP ${v.price}`})
                       </span>
                     </button>
                   ))}
@@ -714,7 +727,9 @@ const ExpertSessions = () => {
 
             {/* Description */}
             <div className="mb-6">
-              <h4 className="font-bold text-lovely text-lg mb-2">Helps you with:</h4>
+              <h4 className="font-bold text-lovely text-lg mb-2">
+                {isRtl ? "بتساعدك في:" : "Helps you with:"}
+              </h4>
               <div className="text-base font-medium text-lovely/90 whitespace-pre-line">
                 {(activeDetailsVariant?.description || selectedForDetails.description)
                   .split('\n')
@@ -735,8 +750,12 @@ const ExpertSessions = () => {
             {selectedForDetails.sessionType && (
               <div className="mb-6 space-y-1">
                 <p className="text-lovely/80">
-                  <span className="font-semibold">Session Type:</span>{" "}
-                  {selectedForDetails.sessionType === "one-to-one" ? "One-to-One" : "Webinar"}
+                  <span className="font-semibold">
+                    {isRtl ? "نوع الجلسة:" : "Session Type:"}
+                  </span>{" "}
+                  {selectedForDetails.sessionType === "one-to-one"
+                    ? (isRtl ? "جلسة فردية (1:1)" : "One-to-One")
+                    : (isRtl ? "ورشة جماعية (Webinar)" : "Webinar")}
                 </p>
                 {selectedForDetails.sessionType === "webinar" &&
                   typeof selectedForDetails.maxCapacity === "number" &&
@@ -744,13 +763,19 @@ const ExpertSessions = () => {
                     <div className="text-xs">
                       {isSessionFullyBooked(selectedForDetails) ? (
                         <span className="inline-flex items-center font-semibold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
-                          Fully Booked (Max capacity {selectedForDetails.maxCapacity} reached)
+                          {isRtl
+                            ? `مكتمل العدد (تم الوصول للحد الأقصى ${selectedForDetails.maxCapacity} مقعد)`
+                            : `Fully Booked (Max capacity ${selectedForDetails.maxCapacity} reached)`}
                         </span>
                       ) : (
                         <span className="text-lovely/70">
-                          Capacity: {selectedForDetails.maxCapacity} seats
-                          <span className="ml-1 text-emerald-600 font-medium">
-                            ({Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} spots remaining)
+                          {isRtl
+                            ? `السعة: ${selectedForDetails.maxCapacity} مقعد`
+                            : `Capacity: ${selectedForDetails.maxCapacity} seats`}
+                          <span className="ms-1 text-emerald-600 font-medium">
+                            {isRtl
+                              ? `(متبقي ${Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} أماكن)`
+                              : `(${Math.max(0, selectedForDetails.maxCapacity - (selectedForDetails.bookings?.length ?? 0))} spots remaining)`}
                           </span>
                         </span>
                       )}
@@ -766,7 +791,7 @@ const ExpertSessions = () => {
                   disabled
                   className="bg-gray-300 text-gray-500 font-bold rounded-md px-10 md:px-20 py-3 md:py-6 cursor-not-allowed"
                 >
-                  Fully Booked
+                  {isRtl ? "مكتمل العدد" : "Fully Booked"}
                 </Button>
               ) : (
                 <Button
@@ -777,7 +802,7 @@ const ExpertSessions = () => {
                   }}
                   className="bg-lovely hover:bg-lovely/90 text-white font-bold rounded-md px-10 md:px-20 py-3 md:py-6"
                 >
-                  Book Now
+                  {isRtl ? "احجزي الآن" : "Book Now"}
                 </Button>
               )}
             </div>
@@ -795,6 +820,7 @@ const ExpertSessions = () => {
           }}
         >
           <div
+            dir={isRtl ? "rtl" : "ltr"}
             className="bg-creamey rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -806,28 +832,64 @@ const ExpertSessions = () => {
                   <CheckCircle2 className="w-10 h-10 text-green-600" />
                 </div>
                 <h3 className="text-xl font-bold text-lovely">
-                  Booking Submitted! 🎉
+                  {isRtl ? "تم إرسال الحجز بنجاح! 🎉" : "Booking Submitted! 🎉"}
                 </h3>
                 <p className="text-lovely/80 text-sm leading-relaxed">
-                  Your booking for <span className="font-semibold">{activeBookingVariant?.title || selectedForBooking.title}</span> has been received.
+                  {isRtl ? (
+                    <>
+                      تم استلام طلب حجزك لـ{" "}
+                      <span className="font-semibold">
+                        {activeBookingVariant?.title || selectedForBooking.title}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    <>
+                      Your booking for{" "}
+                      <span className="font-semibold">
+                        {activeBookingVariant?.title || selectedForBooking.title}
+                      </span>{" "}
+                      has been received.
+                    </>
+                  )}
                 </p>
-                <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-left space-y-2">
+                <div className="bg-lovely/5 border border-lovely/20 rounded-xl p-4 text-start space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="text-lg">⏳</span>
                     <p className="text-sm text-lovely/90">
-                      Our administration team will review your payment receipt. This may take up to <span className="font-bold">24 hours</span>.
+                      {isRtl ? (
+                        <>
+                          سيقوم فريق الإدارة بمراجعة إيصال الدفع الخاص بكِ خلال{" "}
+                          <span className="font-bold">24 ساعة</span>.
+                        </>
+                      ) : (
+                        <>
+                          Our administration team will review your payment receipt. This may take up to{" "}
+                          <span className="font-bold">24 hours</span>.
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-lg">📧</span>
                     <p className="text-sm text-lovely/90">
-                      You will receive a confirmation email once your payment is verified.
+                      {isRtl
+                        ? "ستصلكِ رسالة تأكيد على البريد الإلكتروني بمجرد التحقق من الدفع."
+                        : "You will receive a confirmation email once your payment is verified."}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-lg">🕐</span>
                     <p className="text-sm text-lovely/90">
-                      Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
+                      {isRtl ? (
+                        <>
+                          مواعيد العمل: <span className="font-medium">من الإثنين إلى الجمعة، 5 مساءً – 11 مساءً</span>. يتم مراجعة طلبات نهاية الأسبوع يوم الإثنين.
+                        </>
+                      ) : (
+                        <>
+                          Business hours: <span className="font-medium">Mon–Fri, 5 PM – 11 PM</span>. Weekend requests are reviewed on Monday.
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -839,13 +901,14 @@ const ExpertSessions = () => {
                     setSelectedForBooking(null);
                   }}
                 >
-                  Got it!
+                  {isRtl ? "تمام، فهمت!" : "Got it!"}
                 </Button>
               </div>
             ) : (
               <>
                 <h3 className="text-xl font-semibold text-lovely mb-2">
-                  Book: {activeBookingVariant?.title || selectedForBooking.title}
+                  {isRtl ? "حجز: " : "Book: "}
+                  {activeBookingVariant?.title || selectedForBooking.title}
                 </h3>
 
                 {String(selectedForBooking._id) === "6acfa82b936fe79b1c127ed6" && (
@@ -869,7 +932,7 @@ const ExpertSessions = () => {
                 {selectedForBooking.variants && selectedForBooking.variants.length > 1 && (
                   <div className="mb-4">
                     <label className="block text-xs font-semibold text-lovely uppercase tracking-wide mb-1.5">
-                      Selected Variant
+                      {isRtl ? "الباقة المختارة" : "Selected Variant"}
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {selectedForBooking.variants.map((v, idx) => (
@@ -882,7 +945,7 @@ const ExpertSessions = () => {
                             : "bg-white/60 text-lovely border-lovely/30 hover:bg-white"
                             }`}
                         >
-                          {v.title} (EGP {v.price})
+                          {v.title} ({isRtl ? `${v.price} ج.م` : `EGP ${v.price}`})
                         </button>
                       ))}
                     </div>
@@ -891,10 +954,16 @@ const ExpertSessions = () => {
 
                 <p className="text-sm text-lovely/90 mb-4">
                   {finalPrice === 0
-                    ? "Once confirmed, you will be redirected directly to access your session."
+                    ? (isRtl
+                      ? "بمجرد التأكيد، هيتم تحويلك مباشرة للوصول إلى الجلسة."
+                      : "Once confirmed, you will be redirected directly to access your session.")
                     : paymentMethod === "instapay"
-                      ? "Upload your InstaPay receipt and our team will verify your payment within 24 hours."
-                      : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`}
+                      ? (isRtl
+                        ? "ارفعي إيصال إنستاباي وسيقوم فريقنا بمراجعة الدفع خلال 24 ساعة."
+                        : "Upload your InstaPay receipt and our team will verify your payment within 24 hours.")
+                      : (isRtl
+                        ? `بعد إتمام الدفع بنجاح، هيوصلك رقم واتساب ${selectedForBooking.partnerName} أو لينك التواصل معها، عشان تقدروا تنسّقوا مع بعض وتحددوا معاد الاستشارة المناسب ليكم.`
+                        : `After your payment is successfully completed, you will receive ${selectedForBooking.partnerName}'s WhatsApp contact / access link to arrange your session.`)}
                 </p>
 
                 {/* Links */}
@@ -912,7 +981,9 @@ const ExpertSessions = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                           </svg>
-                          <span>{link.description || link.url} (Anonymously)</span>
+                          <span>
+                            {link.description || link.url} {isRtl ? "(بسرية تامة)" : "(Anonymously)"}
+                          </span>
                         </a>
                       ))}
                     </div>
@@ -922,7 +993,7 @@ const ExpertSessions = () => {
                 <form onSubmit={book} className="space-y-3">
                   <Input
                     className="border-pinkey placeholder:text-lovely bg-creamey"
-                    placeholder="First name"
+                    placeholder={isRtl ? "الاسم الأول" : "First name"}
                     value={form.firstName}
                     onChange={(e) =>
                       setForm({ ...form, firstName: e.target.value })
@@ -931,14 +1002,14 @@ const ExpertSessions = () => {
                   />
                   <Input
                     className="border-pinkey placeholder:text-lovely bg-creamey"
-                    placeholder="Last name"
+                    placeholder={isRtl ? "اسم العائلة" : "Last name"}
                     value={form.lastName}
                     onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                     required
                   />
                   <Input
                     className="border-pinkey lowercase placeholder:text-lovely bg-creamey"
-                    placeholder="Email"
+                    placeholder={isRtl ? "البريد الإلكتروني" : "Email"}
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -946,7 +1017,7 @@ const ExpertSessions = () => {
                   />
                   <Input
                     className="border-pinkey placeholder:text-lovely bg-creamey"
-                    placeholder="Phone"
+                    placeholder={isRtl ? "رقم الموبايل" : "Phone"}
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     required
@@ -954,7 +1025,7 @@ const ExpertSessions = () => {
                   <div className="flex gap-2">
                     <Input
                       className="border-pinkey placeholder:text-lovely bg-creamey"
-                      placeholder="Discount code (optional)"
+                      placeholder={isRtl ? "كود الخصم (اختياري)" : "Discount code (optional)"}
                       value={form.discountCode}
                       onChange={(e) =>
                         setForm({ ...form, discountCode: e.target.value })
@@ -966,47 +1037,58 @@ const ExpertSessions = () => {
                       className="border-lovely text-lovely rounded-2xl"
                       onClick={applyDiscount}
                     >
-                      Apply
+                      {isRtl ? "تفعيل" : "Apply"}
                     </Button>
                   </div>
                   <div className="mt-2 p-3 rounded-2xl border border-lovely bg-creamey">
                     <div className="flex items-center justify-between">
-                      <span className="text-lovely">Price</span>
+                      <span className="text-lovely">{isRtl ? "السعر" : "Price"}</span>
                       <span
                         className={`text-lovely ${subscriptionApplied || (applied && finalPrice !== bookingBasePrice)
                           ? "line-through"
                           : ""
                           }`}
                       >
-                        EGP {bookingBasePrice}
+                        {isRtl ? `${bookingBasePrice} ج.م` : `EGP ${bookingBasePrice}`}
                       </span>
                     </div>
                     {subscriptionApplied && subscriptionFinalPrice !== null && (
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-lovely">
-                          Subscription discount (
-                          {selectedForBooking.subscriptionDiscountPercentage}%){" "}
+                          {isRtl
+                            ? `خصم الاشتراك (${selectedForBooking.subscriptionDiscountPercentage}%)`
+                            : `Subscription discount (${selectedForBooking.subscriptionDiscountPercentage}%)`}
                         </span>
                         <span className="text-lovely">
-                          EGP {Math.max(0, bookingBasePrice - subscriptionFinalPrice)}
+                          {isRtl
+                            ? `${Math.max(0, bookingBasePrice - subscriptionFinalPrice)} ج.م`
+                            : `EGP ${Math.max(0, bookingBasePrice - subscriptionFinalPrice)}`}
                         </span>
                       </div>
                     )}
                     {applied && couponFinalPrice !== null && (
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-lovely">
-                          Coupon discount ({Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)
+                          {isRtl
+                            ? `خصم الكوبون (${Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)`
+                            : `Coupon discount (${Math.round((((subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice) / (subscriptionFinalPrice ?? bookingBasePrice)) * 100)}%)`}
                         </span>
                         <span className="text-lovely">
-                          EGP {Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}
+                          {isRtl
+                            ? `${Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)} ج.م`
+                            : `EGP ${Math.max(0, (subscriptionFinalPrice ?? bookingBasePrice) - couponFinalPrice)}`}
                         </span>
                       </div>
                     )}
                     {finalPrice !== null && (
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-lovely/20">
-                        <span className="text-lovely font-medium">Final Price</span>
+                        <span className="text-lovely font-medium">
+                          {isRtl ? "السعر النهائي" : "Final Price"}
+                        </span>
                         <span className="text-lovely font-semibold">
-                          {finalPrice === 0 ? "FREE (EGP 0)" : `EGP ${finalPrice}`}
+                          {finalPrice === 0
+                            ? (isRtl ? "مجاناً (0 ج.م)" : "FREE (EGP 0)")
+                            : (isRtl ? `${finalPrice} ج.م` : `EGP ${finalPrice}`)}
                         </span>
                       </div>
                     )}
@@ -1016,30 +1098,30 @@ const ExpertSessions = () => {
                   {finalPrice !== null && finalPrice > 0 && (
                     <div className="space-y-3">
                       <label className="block text-xs font-semibold text-lovely uppercase tracking-wide">
-                        Payment Method
+                        {isRtl ? "طريقة الدفع" : "Payment Method"}
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
                           onClick={() => setPaymentMethod("card")}
                           className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${paymentMethod === "card"
-                              ? "bg-lovely text-creamey border-lovely shadow-md"
-                              : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
+                            ? "bg-lovely text-creamey border-lovely shadow-md"
+                            : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
                             }`}
                         >
                           <CreditCard className="w-4 h-4" />
-                          Card / Wallet
+                          {isRtl ? "بطاقة بنكية / محفظة إلكترونية" : "Card / Wallet"}
                         </button>
                         <button
                           type="button"
                           onClick={() => setPaymentMethod("instapay")}
                           className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${paymentMethod === "instapay"
-                              ? "bg-lovely text-creamey border-lovely shadow-md"
-                              : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
+                            ? "bg-lovely text-creamey border-lovely shadow-md"
+                            : "bg-white/60 text-lovely border-lovely/30 hover:border-lovely/50 hover:bg-white"
                             }`}
                         >
                           <Smartphone className="w-4 h-4" />
-                          InstaPay
+                          {isRtl ? "إنستا باي" : "InstaPay"}
                         </button>
                       </div>
 
@@ -1048,33 +1130,64 @@ const ExpertSessions = () => {
                         <div className="p-3 border border-lovely/20 rounded-xl bg-lovely/5 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                           <div className="flex items-center gap-2 text-lovely font-semibold">
                             <span className="p-1 bg-lovely/10 rounded-full text-sm">💰</span>
-                            <p className="text-xs">InstaPay Instructions</p>
+                            <p className="text-xs">
+                              {isRtl ? "خطوات التحويل عبر إنستا باي" : "InstaPay Instructions"}
+                            </p>
                           </div>
                           <div className="text-[12px] text-lovely space-y-1.5 bg-white/50 p-2.5 rounded-lg border border-lovely/10">
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">1.</span>
-                              <span>Open <b>InstaPay</b> app → <b>"Send Money"</b></span>
+                              <span>
+                                {isRtl ? (
+                                  <>افتحي تطبيق <b>InstaPay</b> ثم اختاري <b>&quot;تحويل أموال / Send Money&quot;</b></>
+                                ) : (
+                                  <>Open <b>InstaPay</b> app → <b>&quot;Send Money&quot;</b></>
+                                )}
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">2.</span>
-                              <span>Select <b>"Bank Account"</b></span>
+                              <span>
+                                {isRtl ? (
+                                  <>اختاري <b>&quot;حساب بنكي / Bank Account&quot;</b></>
+                                ) : (
+                                  <>Select <b>&quot;Bank Account&quot;</b></>
+                                )}
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">3.</span>
-                              <span>Account: <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b></span>
+                              <span>
+                                {isRtl ? "رقم الحساب: " : "Account: "}
+                                <b className="font-mono text-xs select-all bg-lovely/10 px-1 rounded">15018180131666</b>
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">4.</span>
-                              <span>Bank: <b>Credit Agricole</b></span>
+                              <span>
+                                {isRtl ? (
+                                  <>البنك: <b>كريدي أجريكول (Credit Agricole)</b></>
+                                ) : (
+                                  <>Bank: <b>Credit Agricole</b></>
+                                )}
+                              </span>
                             </p>
                             <p className="flex gap-1.5">
                               <span className="font-bold text-lovely">5.</span>
-                              <span>Receiver: <b>Wifey</b></span>
+                              <span>
+                                {isRtl ? (
+                                  <>اسم المستلم: <b>Wifey</b></>
+                                ) : (
+                                  <>Receiver: <b>Wifey</b></>
+                                )}
+                              </span>
                             </p>
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold text-lovely">Upload Receipt Screenshot</label>
+                            <label className="block text-xs font-semibold text-lovely">
+                              {isRtl ? "ارفعي صورة إيصال التحويل" : "Upload Receipt Screenshot"}
+                            </label>
                             <CldUploadWidget
                               uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default"}
                               onSuccess={(result: any) => {
@@ -1090,7 +1203,9 @@ const ExpertSessions = () => {
                                   className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border-2 border-dashed border-lovely/30 text-lovely rounded-xl hover:bg-lovely/5 hover:border-lovely/50 transition-all text-xs font-medium"
                                 >
                                   <Upload className="w-4 h-4" />
-                                  {instapayReceipt ? "✓ Receipt Uploaded (Change)" : "📸 Upload Receipt"}
+                                  {instapayReceipt
+                                    ? (isRtl ? "✓ تم رفع الإيصال (تغيير)" : "✓ Receipt Uploaded (Change)")
+                                    : (isRtl ? "📸 ارفعي الإيصال" : "📸 Upload Receipt")}
                                 </button>
                               )}
                             </CldUploadWidget>
@@ -1104,7 +1219,13 @@ const ExpertSessions = () => {
 
                           <div className="flex items-start gap-2 text-[11px] text-lovely/70 bg-pinkey/30 p-2 rounded-lg">
                             <span className="text-sm">⚠️</span>
-                            <p>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</p>
+                            <p>
+                              {isRtl ? (
+                                <>سيتم مراجعة طلبك من قبل فريق الإدارة. قد يستغرق التأكيد حتى <b>24 ساعة</b> خلال أيام العمل (من الإثنين إلى الجمعة، 5 م – 11 م).</>
+                              ) : (
+                                <>Your booking will be reviewed by our administration team. Verification may take up to <b>24 hours</b> during business days (Mon–Fri, 5 PM – 11 PM).</>
+                              )}
+                            </p>
                           </div>
                         </div>
                       )}
@@ -1119,12 +1240,12 @@ const ExpertSessions = () => {
                       className="flex-1 bg-lovely text-creamey rounded-2xl"
                     >
                       {submitting
-                        ? "Processing..."
+                        ? (isRtl ? "جاري المعالجة..." : "Processing...")
                         : finalPrice === 0
-                          ? "Book Now"
+                          ? (isRtl ? "احجزي الآن" : "Book Now")
                           : paymentMethod === "instapay"
-                            ? "Submit for Review"
-                            : "Proceed to Pay"}
+                            ? (isRtl ? "إرسال للمراجعة" : "Submit for Review")
+                            : (isRtl ? "إتمام الدفع" : "Proceed to Pay")}
                     </Button>
                     <Button
                       type="button"
@@ -1132,7 +1253,7 @@ const ExpertSessions = () => {
                       className="flex-1 bg-creamey hover:text-lovely hover:bg-creamey/90 border-lovely text-lovely rounded-2xl"
                       onClick={() => setSelectedForBooking(null)}
                     >
-                      Cancel
+                      {isRtl ? "إلغاء" : "Cancel"}
                     </Button>
                   </div>
                 </form>

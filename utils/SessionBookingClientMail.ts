@@ -8,6 +8,7 @@ export interface SessionBookingClientMailProps {
   meetingLink?: string;
   finalPrice?: number;
   orderId?: string;
+  lang?: "en" | "ar";
 }
 
 export function SessionBookingClientMail({
@@ -20,7 +21,15 @@ export function SessionBookingClientMail({
   meetingLink,
   finalPrice,
   orderId,
+  lang = "en",
 }: SessionBookingClientMailProps) {
+  const isAr = lang === "ar";
+  const dir = isAr ? "rtl" : "ltr";
+  const textAlign = isAr ? "right" : "left";
+  const fontFamily = isAr
+    ? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+    : "'Helvetica Neue', Helvetica, Arial, sans-serif";
+
   const clientName = `${clientFirstName} ${clientLastName}`.trim();
   const isWebinar = sessionType === "webinar";
   const cleanPhone = partnerWhatsApp
@@ -37,11 +46,24 @@ export function SessionBookingClientMail({
     sessionTitle
   )}&body=${encodeURIComponent(calDetails)}&location=${encodeURIComponent(calLocation)}`;
 
+  const pageTitle = isAr ? "تأكيد حجز جلستك" : "Your Session Booking Confirmation";
+  const bookedHeader = isAr
+    ? `تم تأكيد حجزك، يا ${clientFirstName}! 💕`
+    : `YOU’RE BOOKED, ${clientFirstName.toUpperCase()}! 💕`;
+  const bookedSubtitle = isAr
+    ? "تم تأكيد حجز جلستك بنجاح. إليكِ تفاصيل الحجز:"
+    : "Your consultation session has been successfully confirmed. Here are the details of your booking:";
+  const lblSession = isAr ? "الجلسة:" : "Session:";
+  const lblExpert = isAr ? "الخبير:" : "Expert:";
+  const lblAmount = isAr ? "المبلغ:" : "Amount:";
+  const lblOrderId = isAr ? "رقم الطلب:" : "Order ID:";
+  const freeText = isAr ? "مجاناً" : "FREE";
+
   return `
 <!DOCTYPE html>
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 <head>
-	<title>Your Session Booking Confirmation</title>
+	<title>${pageTitle}</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<style>
@@ -54,7 +76,7 @@ export function SessionBookingClientMail({
 			background-color: #f8f6ff;
 			-webkit-text-size-adjust: none;
 			text-size-adjust: none;
-			font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			font-family: ${fontFamily};
 		}
 		a[x-apple-data-detectors] {
 			color: inherit !important;
@@ -121,10 +143,10 @@ export function SessionBookingClientMail({
 							<tr>
 								<td class="mobile-pad" style="padding: 10px 40px 36px; color: #592a2f;">
 									<h2 style="margin: 0 0 12px; color: #d32333; font-size: 26px; font-weight: 700; text-align: center;">
-										YOU’RE BOOKED, ${clientFirstName.toUpperCase()}! 💕
+										${bookedHeader}
 									</h2>
 									<p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; text-align: center; color: #592a2f;">
-										Your consultation session has been successfully confirmed. Here are the details of your booking:
+										${bookedSubtitle}
 									</p>
 
 									<!-- Details Box -->
@@ -132,21 +154,21 @@ export function SessionBookingClientMail({
 										<tbody>
 											<tr>
 												<td style="padding: 20px 24px;">
-													<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="font-size: 15px; color: #592a2f;">
+													<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="font-size: 15px; color: #592a2f; direction: ${dir}; text-align: ${textAlign};">
 														<tr>
-															<td width="35%" style="padding: 8px 0; color: #d32333; font-weight: 700;">Session:</td>
+															<td width="35%" style="padding: 8px 0; color: #d32333; font-weight: 700;">${lblSession}</td>
 															<td style="padding: 8px 0; font-weight: 600;">${sessionTitle}</td>
 														</tr>
 														<tr>
-															<td style="padding: 8px 0; color: #d32333; font-weight: 700;">Expert:</td>
+															<td style="padding: 8px 0; color: #d32333; font-weight: 700;">${lblExpert}</td>
 															<td style="padding: 8px 0; font-weight: 600;">${partnerName}</td>
 														</tr>
 														${
                               finalPrice !== undefined && finalPrice !== null
                                 ? `<tr>
-															<td style="padding: 8px 0; color: #d32333; font-weight: 700;">Amount:</td>
+															<td style="padding: 8px 0; color: #d32333; font-weight: 700;">${lblAmount}</td>
 															<td style="padding: 8px 0; font-weight: 600;">${
-                                finalPrice === 0 ? "FREE" : `EGP ${finalPrice}`
+                                finalPrice === 0 ? freeText : (isAr ? `${finalPrice} ج.م` : `EGP ${finalPrice}`)
                               }</td>
 														</tr>`
                                 : ""
@@ -154,7 +176,7 @@ export function SessionBookingClientMail({
 														${
                               orderId
                                 ? `<tr>
-															<td style="padding: 8px 0; color: #d32333; font-weight: 700;">Order ID:</td>
+															<td style="padding: 8px 0; color: #d32333; font-weight: 700;">${lblOrderId}</td>
 															<td style="padding: 8px 0; font-family: monospace; font-size: 13px;">${orderId}</td>
 														</tr>`
                                 : ""
@@ -171,23 +193,23 @@ export function SessionBookingClientMail({
                       isWebinar
                         ? `
 										<h4 style="margin: 0 0 8px; color: #d32333; font-size: 18px; font-weight: 700;">
-											Webinar Access & Calendar 💻
+											${isAr ? "رابط ورشة العمل والتقويم 💻" : "Webinar Access & Calendar 💻"}
 										</h4>
 										<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #592a2f;">
-											This is a group webinar session. You do not need to contact the expert on WhatsApp. Simply join via the session link below at the scheduled time.
+											${isAr ? "هذه ورشة عمل تفاعلية أونلاين. لستِ بحاجة للتواصل مع الخبير عبر واتساب، فقط انضمي مباشرة عبر الرابط بالأسفل في الموعد المحدد." : "This is a group webinar session. You do not need to contact the expert on WhatsApp. Simply join via the session link below at the scheduled time."}
 										</p>
 										${
                       meetingLink
                         ? `<div style="margin-top: 12px; margin-bottom: 16px;">
 											<a class="button" href="${meetingLink}" target="_blank" style="background-color: #d32333; color: #ffffff; display: inline-block;">
-												🔗 Join Webinar Link
+												${isAr ? "🔗 رابط الانضمام للورشة" : "🔗 Join Webinar Link"}
 											</a>
 										</div>`
                         : ""
                     }
 										<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed #efc9cf;">
 											<p style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #592a2f;">
-												📅 Don&apos;t miss it — Add to your Calendar:
+												${isAr ? "📅 لا تفوتي الموعد — أضيفيه إلى تقويمك:" : "📅 Don't miss it — Add to your Calendar:"}
 											</p>
 											<div style="display: inline-block; margin: 4px;">
 												<a class="button" href="${googleCalUrl}" target="_blank" style="background-color: #4285F4; color: #ffffff; font-size: 13px; padding: 10px 20px; display: inline-block;">
@@ -203,16 +225,16 @@ export function SessionBookingClientMail({
 										`
                         : `
 										<h4 style="margin: 0 0 8px; color: #d32333; font-size: 18px; font-weight: 700;">
-											What Happens Next? 💬
+											${isAr ? "ما هي الخطوة التالية؟ 💬" : "What Happens Next? 💬"}
 										</h4>
 										<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #592a2f;">
-											You can reach out to <strong>${partnerName}</strong> directly on WhatsApp to coordinate the date and time of your session, or they will contact you shortly.
+											${isAr ? `يمكنكِ التواصل مع <strong>${partnerName}</strong> مباشرة عبر واتساب لتنسيق وتحديد موعد جلستكِ، أو سيتواصلون معكِ قريباً.` : `You can reach out to <strong>${partnerName}</strong> directly on WhatsApp to coordinate the date and time of your session, or they will contact you shortly.`}
 										</p>
 										${
                       waUrl
                         ? `<div style="margin-top: 12px;">
 											<a class="wa-button" href="${waUrl}" target="_blank" style="background-color: #25D366; color: #ffffff; display: inline-block;">
-												📲 Message ${partnerName} on WhatsApp
+												${isAr ? `📲 تواصلي مع ${partnerName} عبر واتساب` : `📲 Message ${partnerName} on WhatsApp`}
 											</a>
 										</div>`
                         : ""
@@ -221,7 +243,7 @@ export function SessionBookingClientMail({
                       meetingLink
                         ? `<div style="margin-top: 12px;">
 											<a class="button" href="${meetingLink}" target="_blank" style="background-color: #d32333; color: #ffffff; display: inline-block;">
-												🔗 Access Session Link
+												${isAr ? "🔗 رابط الجلسة" : "🔗 Access Session Link"}
 											</a>
 										</div>`
                         : ""
@@ -231,7 +253,7 @@ export function SessionBookingClientMail({
 									</div>
 
 									<p style="margin: 0; font-size: 13px; line-height: 1.5; text-align: center; color: #592a2f; opacity: 0.8;">
-										Have questions? Feel free to reach out to us at <a href="mailto:orders@shopwifeyforlifey.com" style="color: #d32333; font-weight: 600; text-decoration: underline;">orders@shopwifeyforlifey.com</a>.
+										${isAr ? "لديكِ أي سؤال أو استفسار؟ تواصلي معنا عبر" : "Have questions? Feel free to reach out to us at"} <a href="mailto:orders@shopwifeyforlifey.com" style="color: #d32333; font-weight: 600; text-decoration: underline;">orders@shopwifeyforlifey.com</a>.
 									</p>
 								</td>
 							</tr>

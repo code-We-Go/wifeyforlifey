@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
+import { useLocale } from "next-intl";
 import { thirdFont } from "@/fonts";
 
 interface Subcategory {
@@ -15,6 +16,8 @@ interface Subcategory {
 }
 
 const CategoriesSection = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +29,7 @@ const CategoriesSection = () => {
     align: "start",
     slidesToScroll: 1,
     containScroll: "trimSnaps",
+    direction: isRtl ? "rtl" : "ltr",
   });
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -214,18 +218,18 @@ const CategoriesSection = () => {
                  <button
                   onClick={scrollPrev}
                   disabled={!canScrollPrev}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 bg-creamey text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-0 disabled:cursor-not-allowed z-10"
+                  className="absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 lg:-translate-x-8 rtl:lg:translate-x-8 bg-creamey text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-0 disabled:cursor-not-allowed z-10"
                   aria-label="Previous slide"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-6 h-6 rtl:rotate-180" />
                 </button>
                 <button
                   onClick={scrollNext}
                   disabled={!canScrollNext}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 bg-creamey text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-0 disabled:cursor-not-allowed z-10"
+                  className="absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 lg:translate-x-8 rtl:lg:-translate-x-8 bg-creamey text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-0 disabled:cursor-not-allowed z-10"
                   aria-label="Next slide"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-6 h-6 rtl:rotate-180" />
                 </button>
               </>
             )}

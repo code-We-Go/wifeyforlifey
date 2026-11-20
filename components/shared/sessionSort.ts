@@ -14,11 +14,11 @@ export interface SortableSession {
   [key: string]: any;
 }
 
-export const SESSION_SORT_OPTIONS: { value: SessionSortKey; label: string }[] = [
-  { value: "default", label: "Default" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "name-asc", label: "Title: A to Z" },
+export const SESSION_SORT_OPTIONS: { value: SessionSortKey; label: string; labelAr: string }[] = [
+  { value: "default", label: "Default", labelAr: "الافتراضي" },
+  { value: "price-asc", label: "Price: Low to High", labelAr: "السعر: من الأقل للأعلى" },
+  { value: "price-desc", label: "Price: High to Low", labelAr: "السعر: من الأعلى للأقل" },
+  { value: "name-asc", label: "Title: A to Z", labelAr: "الاسم: أ إلى ي" },
 ];
 
 export function getSessionMinPrice(session: SortableSession): number {

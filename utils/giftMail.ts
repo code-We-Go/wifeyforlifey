@@ -1,13 +1,54 @@
 import { CartItem } from "@/app/interfaces/interfaces";
 
-export function giftMail(subscriptionID: string, cart?: CartItem[]) {
+export function giftMail(
+  subscriptionID: string,
+  cart?: CartItem[],
+  lang: "en" | "ar" = "en"
+) {
+  const isAr = lang === "ar";
+  const dir = isAr ? "rtl" : "ltr";
+  const textAlign = isAr ? "right" : "left";
+  const fontFamily = isAr
+    ? "'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif"
+    : "Helvetica Neue, Helvetica, Arial, sans-serif";
+
+  const greeting = isAr ? "أهلًا بيكي 💗" : "Hi Gorgeous, 💖<br>";
+  const p1 = isAr
+    ? "شكرًا إنك اخترتي هدية من وايفي لصاحبتك. لفتة حلوة منك إنك فكّرتي في حاجة تفرّحها وتساعدها ترتّب تجهيزات فرحها على مهَلها."
+    : "Omg — your bestie is officially the luckiest bride ever to have someone like you in her corner during her bridal era! 🥹✨ You’re not just giving her a gift… you’re giving her love, care, and support when she needs it the most. We’re so glad she has YOU — and now, she’s got US too! 🎀";
+  const p2 = isAr
+    ? "وعشان المفاجأة تفضل زي ما خطّطتي لها، هنستنى لحد ما تديها الهدية. وقتها ابعتيلنا رسالة على إنستجرام @wifeyforlifey.community، وبعدها هنتواصل معاها."
+    : "We’ll hold off on reaching out to your beautiful bride until you let us know (through Instagram @wifeyforlifey.community) that you’ve given her the surprise. That way, the moment stays as magical as you want it to be. 💌";
+  const trackingText = isAr
+    ? `تابعي شحنة البلانر ← <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">تابعي الشحنة من هنا</a>`
+    : `Here's the link to track her Gehaz Bestie Planner shipment:<br>👉 <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a>`;
+  const bundledTitle = isAr
+    ? "هدّيتك فيها"
+    : "Bundled Items included in your gift:";
+  const p3 = isAr
+    ? "شكرًا على ثقتك فينا. مبسوطين إننا جزء من المفاجأة دي!"
+    : "From the bottom of our hearts — thank you for trusting us to be part of her journey. Together, we’ll make her bridal era unforgettable. 💍💗";
+  const signoff = isAr
+    ? "بكل الحب،<br>وايفي فور لايفي"
+    : "With love,<br>The Wifey for Lifey Team✨";
+
   return `<!DOCTYPE html>
-<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="${lang}" dir="${dir}">
 
 <head>
 	<title></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"><!--[if mso]>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: ${fontFamily};
+		}<!--[if mso]>
 <xml><w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"><w:DontUseAdvancedTypographyReadingMail/></w:WordDocument>
 <o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml>
 <![endif]--><!--[if !mso]><!--><!--<![endif]-->
@@ -179,19 +220,19 @@ export function giftMail(subscriptionID: string, cart?: CartItem[]) {
 									<table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fbf3e0; border-radius: 0; color: #000000; width: 680px; margin: 0 auto;" width="680">
 										<tbody>
 											<tr>
-												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 48px; padding-left: 48px; padding-right: 48px; vertical-align: top;">
+												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: ${textAlign}; padding-bottom: 48px; padding-left: 48px; padding-right: 48px; vertical-align: top;">
 													<table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
-															<td class="pad" style="padding-top:12px;text-align:center;width:100%;">
-																<h3 style="margin: 0; color: #d32333; direction: ltr; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: left; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 29px;">Hi Gorgeous, 💖<br></h3>
+															<td class="pad" style="padding-top:12px;text-align:${textAlign};width:100%;">
+																<h3 style="margin: 0; color: #d32333; direction: ${dir}; font-family: ${fontFamily}; font-size: 24px; font-weight: 700; letter-spacing: normal; line-height: 1.3; text-align: ${textAlign}; margin-top: 0; margin-bottom: 0;">${greeting}</h3>
 															</td>
 														</tr>
 													</table>
 													<table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-top:10px;">
-																<div style="color:#d32333;direction:ltr;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	<p style="margin: 0;">Omg — your bestie is officially the luckiest bride ever to have someone like you in her corner during her bridal era! 🥹✨ You’re not just giving her a gift… you’re giving her love, care, and support when she needs it the most. We’re so glad she has YOU — and now, she’s got US too! 🎀</p>
+																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																	<p style="margin: 0;">${p1}</p>
 																</div>
 															</td>
 														</tr>
@@ -199,8 +240,8 @@ export function giftMail(subscriptionID: string, cart?: CartItem[]) {
 													<table class="paragraph_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
-																<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	<p style="margin: 0;">We’ll hold off on reaching out to your beautiful bride until you let us know (through Instagram @wifeyforlifey.community) that you’ve given her the surprise. That way, the moment stays as magical as you want it to be. 💌</p>
+																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																	<p style="margin: 0;">${p2}</p>
 																</div>
 															</td>
 														</tr>
@@ -208,12 +249,12 @@ export function giftMail(subscriptionID: string, cart?: CartItem[]) {
 													<table class="paragraph_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
-																<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	<p style="margin: 0;">Here's the link to track her Gehaz Bestie Planner shipment:<br>👉 <a href="https://www.shopwifeyforlifey.com/track-order?subscriptionId=${subscriptionID}" style="color: #d32333; text-decoration: underline; font-weight: bold;">Track My Planner</a></p>
+																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																	<p style="margin: 0;">${trackingText}</p>
 																	${
 																		cart && cart.length > 0
-																			? `<p style="margin: 0; margin-top: 10px;"><strong>Bundled Items included in your gift:</strong></p>
-																				 <ul style="margin: 0; padding-left: 20px;">
+																			? `<p style="margin: 0; margin-top: 10px;"><strong>${bundledTitle}</strong></p>
+																				 <ul style="margin: 0; padding-${isAr ? "right" : "left"}: 20px;">
 																					 ${cart
 																							.map(
 																								(item) =>
@@ -231,7 +272,6 @@ export function giftMail(subscriptionID: string, cart?: CartItem[]) {
 																				 </ul>`
 																			: ""
 																	}
-																	}
 																</div>
 															</td>
 														</tr>
@@ -239,8 +279,8 @@ export function giftMail(subscriptionID: string, cart?: CartItem[]) {
 													<table class="paragraph_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
-																<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	<p style="margin: 0;">From the bottom of our hearts — thank you for trusting us to be part of her journey. Together, we’ll make her bridal era unforgettable. 💍💗</p>
+																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																	<p style="margin: 0;">${p3}</p>
 																</div>
 															</td>
 														</tr>
@@ -248,8 +288,8 @@ export function giftMail(subscriptionID: string, cart?: CartItem[]) {
 													<table class="paragraph_block block-6" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
 														<tr>
 															<td class="pad">
-																<div style="color:#d32333;direction:ltr;font-family:Helvetica Neue, Helvetica, Arial, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:19px;">
-																	<p style="margin: 0;">With love,<br>The Wifey for Lifey Team✨</p>
+																<div style="color:#d32333;direction:${dir};font-family:${fontFamily};font-size:16px;font-weight:400;letter-spacing:0px;line-height:1.5;text-align:${textAlign};">
+																	<p style="margin: 0;">${signoff}</p>
 																</div>
 															</td>
 														</tr>

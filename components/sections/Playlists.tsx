@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { VideoPlaylist } from "@/app/interfaces/interfaces";
 import useEmblaCarousel from "embla-carousel-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import VideoCard from "@/components/playlists/VideoCard";
 import VideoCardSkeleton from "@/components/skeletons/VideoCardSkeleton";
@@ -14,6 +15,9 @@ import { headerStyle } from "@/app/styles/style";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const Playlists = () => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const t = useTranslations("home.playlists");
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
   const [featuredPlaylists, setFeaturedPlaylists] = useState<VideoPlaylist[]>(
     []
@@ -26,6 +30,7 @@ const Playlists = () => {
     loop: false,
     align: "start",
     slidesToScroll: 1,
+    direction: isRtl ? "rtl" : "ltr",
   });
   
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -91,20 +96,20 @@ const Playlists = () => {
     >
       <div className="container-custom">
         <div className="flex flex-col md:flex-row justify-between items-center mb-3 md:mb-6">
-          <div>
+          <div className="text-start">
             <h2
               className={`max-md:pb-3 ${thirdFont.className} ${headerStyle}`}
             >
-              Your Bridal-Era Video Guides
+              {t("title")}
             </h2>
             <p className="max-md:text-sm max-md:pb-2">
-              These videos are designed to support your Gehaz Bestie Planner when it's time to make real-life choices.
+              {t("desc1")}
             </p>
-            <p className="pb-2 max-md:text-sm md:pb-4">Helps you understand your options and avoid confusion or pressure, Protects you from fake reviews and biased sales advice, Guides you to choose what's right for you — confidently.</p>
+            <p className="pb-2 max-md:text-sm md:pb-4">{t("desc2")}</p>
             {/* <p>Protects you from fake reviews and biased sales advice</p> */}
             {/* <p>Guides you to choose what's right for you — confidently</p> */}
             <p className="font-semibold max-md:text-sm">
-              Includes trusted experts videos in selected playlists to support you along the way [OB-GYNs, sex therapists, interior designers, appliance experts, and more]
+              {t("desc3")}
             </p>
           </div>
           {/* <Button
@@ -128,7 +133,7 @@ const Playlists = () => {
           <div className="text-center text-red-500 py-8">{error}</div>
         ) : featuredPlaylists.length === 0 ? (
           <div className="text-center py-8">
-            No featured playlists found.
+            {t("noPlaylists")}
           </div>
         ) : (
           <div className="relative">
@@ -138,7 +143,7 @@ const Playlists = () => {
                 {featuredPlaylists.map((playlist) => (
                   <div
                     key={playlist._id}
-                    className="flex-none w-[60vw] sm:w-[45vw] md:w-[33vw] lg:w-[25vw] pl-2 pr-2"
+                    className="flex-none w-[60vw] sm:w-[45vw] md:w-[33vw] lg:w-[25vw] px-2"
                   >
                     <VideoCard playlist={playlist} />
                   </div>
@@ -151,17 +156,17 @@ const Playlists = () => {
               <>
                 <button
                   onClick={scrollPrev}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute start-0 top-1/2 -translate-y-1/2 -translate-x-4 rtl:translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed z-10"
                   aria-label="Previous slide"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-6 h-6 rtl:rotate-180" />
                 </button>
                 <button
                   onClick={scrollNext}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute end-0 top-1/2 -translate-y-1/2 translate-x-4 rtl:-translate-x-4 bg-creamey hover:bg-creamey/90 text-lovely rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed z-10"
                   aria-label="Next slide"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-6 h-6 rtl:rotate-180" />
                 </button>
               </>
             )}
@@ -190,16 +195,16 @@ const Playlists = () => {
         {/* Subscription CTA */}
         <div className="mt-12 text-center flex flex-col items-center md:flex-row md:items-center gap-2 md:gap-4 justify-start">
           <p className="text-creamey/90 text-sm text-start md:text-base max-w-md mb-6">
-            Access included with your subscription<br />
-            Watch all playlists anytime as part of your Wifey Experience 💗
+            {t("accessNote")}<br />
+            {t("watchAnytime")}
           </p>
           <Button
             asChild
             size="lg"
             className="bg-creamey text-lovely hover:bg-creamey/90  text-sm md:text-base md:px-8 py-4 md:py-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Link href="/package/GehazBestiePlanner" className="text-center leading-tight">
-              Subscribe to unlock <br /> premium videos
+            <Link href="/package/GehazBestiePlanner" className="text-center leading-tight whitespace-pre-line">
+              {t("subscribeButton")}
             </Link>
           </Button>
         </div>

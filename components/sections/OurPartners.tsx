@@ -6,8 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { headerStyle } from "@/app/styles/style";
+import { useTranslations } from "next-intl";
 
 const OurPartners = () => {
+  const t = useTranslations("home.partners");
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,10 +38,13 @@ const OurPartners = () => {
         <h2
           className={`${thirdFont.className} ${headerStyle}   mb-8`}
         >
-          Our Partners
+          {t("title")}
         </h2>
 
-        <div className="logos group flex gap-8 relative overflow-hidden whitespace-nowrap py-10 [mask-image:_linear-gradient(to_right,_transparent_0,_white_128px,white_calc(100%-128px),_transparent_100%)]">
+        <div
+          dir="ltr"
+          className="logos group flex gap-8 relative overflow-hidden whitespace-nowrap py-10 [mask-image:_linear-gradient(to_right,_transparent_0,_white_128px,white_calc(100%-128px),_transparent_100%)]"
+        >
           {/* First loop */}
           <div className="animate-slide-left-infinite group-hover:animation-pause w-max flex gap-8">
             {partners.map((partner, index) => (

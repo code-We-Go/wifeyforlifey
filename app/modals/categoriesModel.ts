@@ -21,6 +21,12 @@ const categoriesSchema = new mongoose.Schema({
     enum: ["product", "weddingPlanning"],
     default: "product",
   },
+  translations: {
+    ar: {
+      categoryName: { type: String, required: false },
+      description: { type: String, required: false },
+    },
+  },
 });
 console.log('Registering CategoryModel');
 const categoriesModel =

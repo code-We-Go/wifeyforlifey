@@ -21,12 +21,18 @@ export async function POST(req: Request) {
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
   await PasswordResetToken.create({ userId: user._id, token, expiresAt });
   // Send email
+  const userLang: "en" | "ar" = user.preferredLanguage === "ar" ? "ar" : "en";
   const resetUrl = `${process.env.baseUrl}login/reset-password?token=${token}`;
+  const subject =
+    userLang === "ar"
+      ? "إعادة تعيين كلمة المرور - Wifey for Lifey 🔐"
+      : "Password Reset - Wifey for Lifey";
+
   await sendMail({
     to: email,
-    subject: "Password Reset",
-    name: user.username,
-    body: `${resetPasswordEmailTemplate(resetUrl)}`,
+    subject: subject,
+    name: user.firstName || user.username || "Wifey",
+    body: `${resetPasswordEmailTemplate(resetUrl, userLang)}`,
     from: "authentication@shopwifeyforlifey.com",
   });
   return NextResponse.json({ success: true, message: "Reset email sent" });

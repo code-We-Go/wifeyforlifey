@@ -50,6 +50,12 @@ export interface IShoppingBrand extends Document {
   submittedBy?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  translations?: {
+    ar?: {
+      name?: string;
+      description?: string;
+    };
+  };
 }
 
 const ShoppingBrandSchema = new Schema<IShoppingBrand>(
@@ -75,7 +81,12 @@ const ShoppingBrandSchema = new Schema<IShoppingBrand>(
       required: false,
       default: null,
     },
-
+    translations: {
+      ar: {
+        name: { type: String, required: false },
+        description: { type: String, required: false },
+      },
+    },
   },
   { timestamps: true }
 );

@@ -212,7 +212,7 @@ export const authOptions: NextAuthOptions = {
               paid: false,
             };
             token.weddingPlanningBestie = null;
-            
+
             // Check for sub-subscriptions (groom/bridesmaid) if no main subscription
             const subSub = await SubSubscriptionModel.findOne({
               inviteeEmail: email,
@@ -222,7 +222,7 @@ export const authOptions: NextAuthOptions = {
             if (subSub && subSub.parentSubscription?.subscribed) {
               const parentExpiry = subSub.parentSubscription.expiryDate;
               const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
-              
+
               if (isParentActive) {
                 token.subSubscription = {
                   role: subSub.role,
@@ -250,7 +250,7 @@ export const authOptions: NextAuthOptions = {
           const miniSub = allSubscriptions.find(
             (sub: any) =>
               (sub.packageID?.toString() === PACKAGE_IDS.MINI ||
-               sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
+                sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
               sub.subscribed
           );
           const anyFullSub = allSubscriptions.find(
@@ -261,7 +261,7 @@ export const authOptions: NextAuthOptions = {
 
           if (mainSubscription) {
             const isMini =
-              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+              mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI ||
               mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
 
             // Mini is active if subscribed=true (no expiry check)
@@ -269,9 +269,9 @@ export const authOptions: NextAuthOptions = {
             token.isSubscribed = isMini
               ? !!mainSubscription.subscribed
               : !!(
-                  mainSubscription.expiryDate &&
-                  mainSubscription.expiryDate.getTime() > Date.now()
-                );
+                mainSubscription.expiryDate &&
+                mainSubscription.expiryDate.getTime() > Date.now()
+              );
 
             token.subscriptionExpiryDate = mainSubscription.expiryDate
               ? mainSubscription.expiryDate.toISOString()
@@ -296,10 +296,10 @@ export const authOptions: NextAuthOptions = {
               sub.packageID?.toString() === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
           );
           token.weddingPlanningBestie = bestieSub
-            ? { 
-                expiryDate: bestieSub.expiryDate?.toISOString() || null,
-                isSubscribed: !!(bestieSub.subscribed && (!bestieSub.expiryDate || new Date(bestieSub.expiryDate).getTime() > Date.now()))
-              }
+            ? {
+              expiryDate: bestieSub.expiryDate?.toISOString() || null,
+              isSubscribed: !!(bestieSub.subscribed && (!bestieSub.expiryDate || new Date(bestieSub.expiryDate).getTime() > Date.now()))
+            }
             : null;
           // token.loyaltyPoints = await calculateLoyaltyPoints(email);
         }
@@ -341,13 +341,13 @@ export const authOptions: NextAuthOptions = {
         if (session.user) {
           session.user.weddingPlanningBestie = token.weddingPlanningBestie
             ? {
-                expiryDate: token.weddingPlanningBestie.expiryDate
-                  ? new Date(token.weddingPlanningBestie.expiryDate)
-                  : null,
-                isSubscribed: token.weddingPlanningBestie.isSubscribed
-              }
+              expiryDate: token.weddingPlanningBestie.expiryDate
+                ? new Date(token.weddingPlanningBestie.expiryDate)
+                : null,
+              isSubscribed: token.weddingPlanningBestie.isSubscribed
+            }
             : null;
-            
+
           session.user.subSubscription = token.subSubscription || null;
         }
         // session.user.loyaltyPoints = token.loyaltyPoints;
@@ -373,6 +373,10 @@ export const authOptions: NextAuthOptions = {
             session.user.lastName = userData.lastName || "";
             session.user.isTesting = userData.isTesting || false;
             session.user.shippingData = userData.shippingData;
+            session.user.preferredLanguage = (userData.preferredLanguage as 'en' | 'ar') || 'en';
+            session.user.whatsAppNumber = userData.whatsAppNumber || userData.shippingData?.whatsAppNumber || "";
+            session.user.weddingDate = userData.weddingDate || null;
+            session.user.onboardingCompleted = userData.onboardingCompleted ?? (!!(userData.whatsAppNumber || userData.shippingData?.whatsAppNumber));
 
             // Fetch fresh subscription data to avoid stale JWT
             if (userData.email) {
@@ -392,7 +396,7 @@ export const authOptions: NextAuthOptions = {
                 const miniSub = allSubscriptions.find(
                   (sub: any) =>
                     (sub.packageID?.toString() === PACKAGE_IDS.MINI ||
-                     sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
+                      sub.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING) &&
                     sub.subscribed
                 );
                 const anyFullSub = allSubscriptions.find(
@@ -403,15 +407,15 @@ export const authOptions: NextAuthOptions = {
 
                 if (mainSubscription) {
                   const isMini =
-                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI || 
+                    mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI ||
                     mainSubscription.packageID?.toString() === PACKAGE_IDS.MINI_WEDDING;
 
                   session.user.isSubscribed = isMini
                     ? !!mainSubscription.subscribed
                     : !!(
-                        mainSubscription.expiryDate &&
-                        mainSubscription.expiryDate.getTime() > Date.now()
-                      );
+                      mainSubscription.expiryDate &&
+                      mainSubscription.expiryDate.getTime() > Date.now()
+                    );
                   session.user.subscriptionExpiryDate = mainSubscription.expiryDate;
                   session.user.subscription = {
                     packageId: mainSubscription.packageID?.toString(),
@@ -430,10 +434,10 @@ export const authOptions: NextAuthOptions = {
                     sub.packageID?.toString() === PACKAGE_IDS.WEDDING_PLANNING_BESTIE
                 );
                 session.user.weddingPlanningBestie = bestieSub
-                  ? { 
-                      expiryDate: bestieSub.expiryDate || null,
-                      isSubscribed: !!(bestieSub.subscribed && (!bestieSub.expiryDate || new Date(bestieSub.expiryDate).getTime() > Date.now()))
-                    }
+                  ? {
+                    expiryDate: bestieSub.expiryDate || null,
+                    isSubscribed: !!(bestieSub.subscribed && (!bestieSub.expiryDate || new Date(bestieSub.expiryDate).getTime() > Date.now()))
+                  }
                   : null;
               } else {
                 // If DB says no subscription, overwrite token (which might say yes)
@@ -441,7 +445,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.subscription = undefined;
                 session.user.weddingPlanningBestie = null;
               }
-              
+
               // Refetch SubSubscription fresh
               const subSub = await SubSubscriptionModel.findOne({
                 inviteeEmail: userData.email,
@@ -451,7 +455,7 @@ export const authOptions: NextAuthOptions = {
               if (subSub && subSub.parentSubscription?.subscribed) {
                 const parentExpiry = subSub.parentSubscription.expiryDate;
                 const isParentActive = !parentExpiry || new Date(parentExpiry).getTime() > Date.now();
-                
+
                 if (isParentActive) {
                   session.user.subSubscription = {
                     role: subSub.role,

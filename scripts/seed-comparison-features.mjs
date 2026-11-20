@@ -23,21 +23,165 @@ const WEDDING_MINI_ID = "6a2d9aec3def6ce76dc7babc";
 const WEDDING_SLUG = "WeddingBestiePlanner";
 
 const GEHAZ_COMPARISON = [
-  { feature: "Your Gehaz Bestie Planner — physical book delivered", fullValue: "✓", miniValue: "✓" },
-  { feature: "Bridal-era video guides for every purchase", fullValue: "12 playlists", miniValue: "1 playlist" },
-  { feature: "Wifeys WhatsApp support circle — 24/7, brides only", fullValue: "✓", miniValue: "—" },
-  { feature: "Exclusive community discounts from trusted partners", fullValue: "✓", miniValue: "—" },
-  { feature: "10–20% off 1:1 expert consultations", fullValue: "✓", miniValue: "—" },
-  { feature: "Virtual personal shopper — Wifey-approved products & fair prices", fullValue: "✓", miniValue: "—" },
+  {
+    feature: "Your Gehaz Bestie Planner — physical book delivered",
+    fullValue: "✓",
+    miniValue: "✓",
+    translations: {
+      ar: {
+        feature: "بلانر جهاز بيستي المطبوع هيوصلك لحد عندك",
+        fullValue: "✓",
+        miniValue: "✓",
+      },
+    },
+  },
+  {
+    feature: "Bridal-era video guides for every purchase",
+    fullValue: "12 playlists",
+    miniValue: "1 playlist",
+    translations: {
+      ar: {
+        feature: "فيديوهات تساعدك في تجهيزاتك",
+        fullValue: "12 قائمة تشغيل",
+        miniValue: "قائمة تشغيل واحدة",
+      },
+    },
+  },
+  {
+    feature: "Wifeys WhatsApp support circle — 24/7, brides only",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "جروب دعم وايفي على واتساب، مع خبرائنا و بنساعدك فى كل اسألتك",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "Exclusive community discounts from trusted partners",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "خصومات حصرية لبنات وايفي من شركائنا علشان تجهزى بأسعار اقل",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "10–20% off 1:1 expert consultations",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "خصم من ١٠٪ لـ٢٠٪ على الاستشارات الفردية مع خبراء وايفى",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "Virtual personal shopper — Wifey-approved products & fair prices",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "ليست منتجات وايفى المفضلة و الموثوق فيها علشان متحتاريش و انتى بتشترى",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "4 interactive workshops with Wifey experts for trusted advice",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "4 ورش عمل مع خبراء وايفى علشان تاخدى نصايح من مصادر موثوقة",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
 ];
 
 const WEDDING_COMPARISON = [
-  { feature: "Your Wedding Bestie Planner — physical book delivered", fullValue: "✓", miniValue: "✓" },
-  { feature: "Bridal-era video guides for every purchase", fullValue: "12 playlists", miniValue: "1 playlist" },
-  { feature: "Wifeys WhatsApp support circle — 24/7, brides only", fullValue: "✓", miniValue: "—" },
-  { feature: "Exclusive community discounts from trusted partners", fullValue: "✓", miniValue: "—" },
-  { feature: "10–20% off 1:1 expert consultations", fullValue: "✓", miniValue: "—" },
-  { feature: "Virtual personal shopper — Wifey-approved products & fair prices", fullValue: "✓", miniValue: "—" },
+  {
+    feature: "Your Wedding Bestie Planner — physical book delivered",
+    fullValue: "✓",
+    miniValue: "✓",
+    translations: {
+      ar: {
+        feature: "بلانر تنظيم الفرح — كتاب مطبوع واصل لحد بيتك",
+        fullValue: "✓",
+        miniValue: "✓",
+      },
+    },
+  },
+  {
+    feature: "Bridal-era video guides for every purchase",
+    fullValue: "12 playlists",
+    miniValue: "1 playlist",
+    translations: {
+      ar: {
+        feature: "فيديوهات إرشادية لكل عملية شراء وقرار",
+        fullValue: "12 قائمة تشغيل",
+        miniValue: "قائمة تشغيل واحدة",
+      },
+    },
+  },
+  {
+    feature: "Wifeys WhatsApp support circle — 24/7, brides only",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "دائرة دعم واتساب 24/7 للعرايس فقط",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "Exclusive community discounts from trusted partners",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "خصومات حصرية من الشركاء الموثوقين",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "10–20% off 1:1 expert consultations",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "خصم 10–20% على استشارات الخبراء الفردية",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
+  {
+    feature: "800++Venues & Vendors list - you’ll get lists of wedding planners, makeup artists, photographers, videographers, zaffa groups, catering services, and venues—with their links, and if you’re lucky, their latest prices too! ",
+    fullValue: "✓",
+    miniValue: "—",
+    translations: {
+      ar: {
+        feature: "قائمة أكثر من 800 قاعة ومورد فرح — منظمين، ميك اب ارتيست، مصورين، زفات، بوفيه وقاعات مع اللينكات وأحدث الأسعار!",
+        fullValue: "✓",
+        miniValue: "—",
+      },
+    },
+  },
 ];
 
 const HERO_CALLOUT = {

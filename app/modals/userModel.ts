@@ -42,6 +42,9 @@ export interface IUser extends Document {
   appleUserId?: string;
   googleUserId?: string;
   authProvider?: 'email' | 'apple' | 'google';
+  preferredLanguage?: 'en' | 'ar';
+  whatsAppNumber?: string;
+  onboardingCompleted?: boolean;
 
   shippingData?: {
     email?: string;
@@ -142,6 +145,22 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ['email', 'apple', 'google'],
       default: 'email',
+      required: false,
+    },
+    preferredLanguage: {
+      type: String,
+      enum: ['en', 'ar'],
+      default: 'en',
+      required: false,
+    },
+    whatsAppNumber: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
       required: false,
     },
     shippingData: {

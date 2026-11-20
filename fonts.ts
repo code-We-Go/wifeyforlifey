@@ -9,3 +9,8 @@ export const wifeyFont = localFont({
 export const thirdFont = localFont({
   src: './app/fonts/BebasNeue-Regular.ttf',
 }) 
+export const arabicFont = localFont({
+  src: './app/fonts/SkolarSansArabicTEST-Rg.otf',
+  variable: '--font-arabic',
+});
+export const skolarFont = arabicFont; 

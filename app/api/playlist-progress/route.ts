@@ -4,10 +4,11 @@ import { ConnectDB } from "@/app/config/db";
 import UserModel from "@/app/modals/userModel";
 import playlistsProgress from "@/app/modals/playlistsProgress";
 import playlistModel from "@/app/modals/playlistModel";
+import videoModel from "@/app/modals/videoModel";
 
 // GET: fetch playlist progress record for current user
 export async function GET(request: NextRequest) {
-  console.log(playlistModel+ "importing Playlists schema")
+  console.log(playlistModel+ "importing Playlists schema", videoModel)
   try {
     await ConnectDB();
     const { isAuthenticated, user: authUser, authType } = await authenticateRequest(request);
@@ -32,6 +33,11 @@ export async function GET(request: NextRequest) {
     if (playlistId) {
       const record = await playlistsProgress
         .findOne({ userID: user._id, playlistID: playlistId })
+        .populate({
+          path: "lastWatchedVideoID",
+          model: "videos",
+          select: "title thumbnailUrl isPublic url translations",
+        })
         .lean();
 
       return NextResponse.json({ success: true, progress: record || null });
@@ -44,12 +50,22 @@ export async function GET(request: NextRequest) {
       .populate({
         path: "playlistID",
         model: "playlists",
-        select: "title thumbnailUrl isPublic",
+        select: "title thumbnailUrl isPublic translations videos",
+        populate: {
+          path: "videos",
+          model: "videos",
+          select: "title thumbnailUrl isPublic url translations",
+        },
       })
       .populate({
         path: "lastWatchedVideoID",
         model: "videos",
-        select: "title thumbnailUrl isPublic url",
+        select: "title thumbnailUrl isPublic url translations",
+      })
+      .populate({
+        path: "videosWatched",
+        model: "videos",
+        select: "title thumbnailUrl isPublic url translations",
       })
       .lean();
 
@@ -127,10 +143,13 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Only mark the video as watched when it ends; do not update lastWatchedVideoID here
+    // Mark video as watched and ensure lastWatchedVideoID is kept current
     const record = await playlistsProgress.findOneAndUpdate(
       { userID: user._id, playlistID: playlistId },
-      { $addToSet: { videosWatched: videoId } },
+      {
+        $addToSet: { videosWatched: videoId },
+        $set: { lastWatchedVideoID: videoId },
+      },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 

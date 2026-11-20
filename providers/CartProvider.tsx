@@ -142,18 +142,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addSubscription = (item: Omit<SubscriptionCartItem, "cartItemId">) => {
     setSubscriptionItems((prev) => {
       const existing = prev.find(
-        (i) => i.packageId === item.packageId && i.duration === item.duration
+        (i) =>
+          i.packageId === item.packageId &&
+          i.duration === item.duration &&
+          (i.edition || "") === (item.edition || "")
       );
       if (existing) {
         return prev.map((i) =>
-          i.packageId === item.packageId && i.duration === item.duration
+          i.packageId === item.packageId &&
+          i.duration === item.duration &&
+          (i.edition || "") === (item.edition || "")
             ? { ...i, quantity: i.quantity + item.quantity }
             : i
         );
       }
+      const editionSuffix = item.edition ? `-${item.edition}` : "";
       const newSub: SubscriptionCartItem = {
         ...item,
-        cartItemId: `${item.packageId}-${item.duration}`
+        cartItemId: `${item.packageId}-${item.duration}${editionSuffix}`
       };
       return [...prev, newSub];
     });

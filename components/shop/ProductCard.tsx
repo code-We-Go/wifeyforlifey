@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { ShoppingCart, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,14 @@ import { Product } from "@/app/interfaces/interfaces";
 import { wishListContext } from "@/app/context/wishListContext";
 import { useContext, useState } from "react";
 import { cartContext } from "@/app/context/cartContext";
-import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/app/context/ModalContext";
 import { thirdFont } from "@/fonts";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations, useLocale } from "next-intl";
+import { localizeProduct } from "@/app/lib/localize";
+
 export default function ProductCard({
   product,
   favorite,
@@ -21,6 +23,9 @@ export default function ProductCard({
   product: Product;
   favorite: boolean;
 }) {
+  const t = useTranslations("common");
+  const locale = useLocale();
+  const localizedProduct = localizeProduct(product, locale);
   const router = useRouter();
   const { wishList, setWishList } = useContext(wishListContext);
   const { cart, setCart } = useContext(cartContext);
@@ -38,7 +43,7 @@ export default function ProductCard({
         {
           id: wishList.length,
           productId: product._id,
-          productName: product.title,
+          productName: localizedProduct.title,
           price: product.price.local,
           variant: product.variations?.[0],
           quantity: 1,
@@ -46,22 +51,9 @@ export default function ProductCard({
           imageUrl: product.variations?.[0]?.images?.[0]?.url,
         },
       ]);
-      // Swal.fire({
-      //   background: "#cb808b",
-      //   color: "white",
-      //   toast: false,
-      //   iconColor: "#473728",
-      //   position: "center",
-      //   text: "YOUR PRODUCT HAS BEEN ADDED TO YOUR WISHLIST",
-      //   showConfirmButton: false,
-      //   timer: 2000,
-      //   customClass: {
-      //     popup: "no-rounded-corners small-popup",
-      //   },
-      // });
       toast({
-        title: "Added item to Wishlist",
-        description: "Item has been added to your wishlist.",
+        title: t("addedToWishlist"),
+        description: t("addedToWishlistDesc"),
         variant: "added",
       });
     } else {
@@ -70,8 +62,8 @@ export default function ProductCard({
       );
       setWishList(newWishList);
       toast({
-        title: "Removed item from Wishlist",
-        description: "Item has been removed from your wishlist.",
+        title: t("removedFromWishlist"),
+        description: t("removedFromWishlistDesc"),
         variant: "removed",
       });
     }
@@ -108,7 +100,7 @@ export default function ProductCard({
       <div className="relative aspect-square overflow-hidden">
         <Image
           src={product.variations[0].images[0].url}
-          alt={product.title}
+          alt={localizedProduct.title}
           fill
           className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
             isOutOfStock ? " opacity-80" : ""
@@ -122,7 +114,7 @@ export default function ProductCard({
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-              Out of Stock
+              {t("outOfStock")}
             </div>
           </div>
         )}
@@ -134,7 +126,7 @@ export default function ProductCard({
             heartIsEmpty
               ? "bg-transparent hover:bg-lovely shadow-md text-creamey"
               : "bg-lovely text-creamey hover:bg-transparent shadow-md",
-            "rounded-full h-9 w-9 absolute top-4 right-4 z-10"
+            "rounded-full h-9 w-9 absolute top-4 end-4 z-10"
           )}
         >
           <Heart
@@ -151,25 +143,25 @@ export default function ProductCard({
         <h4
           className={`${thirdFont.className} text-sm md:text-base xl:text-lg tracking-wide font-semibold text-creamey line-clamp-1`}
         >
-          {product.title}
+          {localizedProduct.title}
         </h4>
         <div className="flex items-center justify-between mt-2">
           <div className="space-y-0">
             {product.comparedPrice > 0 ? (
               <del className="text-creamey text-xs md:text-sm block">
-                LE{product.comparedPrice.toFixed(2)}
+                {product.comparedPrice.toFixed(2)} {t("le")}
               </del>
             ) : (
-              <div className="text-xs md:text-sm block invisible">LE0.00</div>
+              <div className="text-xs md:text-sm block invisible">0.00 {t("le")}</div>
             )}
             <p className="price-tag text-xs md:text-sm text-creamey">
-              LE{product.price.local.toFixed(2)}
+              {product.price.local.toFixed(2)} {t("le")}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {isOutOfStock ? (
               <div className="text-xs text-creamey bg-pinkey/70 py-2 px-2 rounded-full font-medium">
-                Out of Stock
+                {t("outOfStock")}
               </div>
             ) : (
               <Button
@@ -178,8 +170,8 @@ export default function ProductCard({
                 className="h-8 hover:bg-creamey/90 text-lovely bg-creamey rounded-full"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                <span className="text-xs">Add</span>
+                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 me-1" />
+                <span className="text-xs">{t("addToCart")}</span>
               </Button>
             )}
           </div>

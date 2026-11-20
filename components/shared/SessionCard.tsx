@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -9,11 +11,12 @@ export function isSessionFullyBooked(session?: {
   if (!session) return false;
   return Boolean(
     session.sessionType === "webinar" &&
-      typeof session.maxCapacity === "number" &&
-      session.maxCapacity > 0 &&
-      (session.bookings?.length ?? 0) >= session.maxCapacity
+    typeof session.maxCapacity === "number" &&
+    session.maxCapacity > 0 &&
+    (session.bookings?.length ?? 0) >= session.maxCapacity
   );
 }
+import { useLocale, useTranslations } from "next-intl";
 
 interface SessionCardProps {
   session: {
@@ -37,19 +40,21 @@ export default function SessionCard({
   onBookClick,
 }: SessionCardProps) {
   const isFullyBooked = isSessionFullyBooked(session);
-
+  const locale = useLocale();
+  const isAr = locale === "ar";
+  const t = useTranslations("common");
   return (
     <div className="relative flex flex-col gap-1 md:gap-2 w-full max-w-lg h-full bg-creamey border-2 border-lovely rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow">
       {/* Fully Booked Badge */}
       {isFullyBooked && (
-        <div className="absolute top-3.5 left-3.5 z-20 bg-rose-600 text-white text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
-          Fully Booked
+        <div className="absolute top-3.5 start-3.5 z-20 bg-rose-600 text-white text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
+          {isAr ? "مكتمل العدد" : "Fully Booked"}
         </div>
       )}
 
       {/* Discount Badge */}
       {discountBadge && (
-        <div className="absolute top-3.5 right-3.5 z-20 bg-lovely text-creamey text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
+        <div className="absolute top-3.5 end-3.5 z-20 bg-lovely text-creamey text-xs md:text-sm font-bold px-2.5 py-1 rounded-full shadow-md tracking-wide">
           {discountBadge}
         </div>
       )}
@@ -69,7 +74,7 @@ export default function SessionCard({
       </div>
 
       {/* Expert Info */}
-      <div className="flex flex-col justify-between flex-grow w-full text-left space-y-1 md:space-y-2">
+      <div className="flex flex-col justify-between flex-grow w-full text-start space-y-1 md:space-y-2">
         <div className="space-y-1">
           <p className="text-base md:text-lg text-lovely font-bold">
             {session.partnerName}
@@ -78,28 +83,28 @@ export default function SessionCard({
             {session.title}
           </p>
         </div>
-        
+
         {/* Action Button */}
         <div className="flex text-sm flex-col sm:flex-row gap-3 w-full">
           <Button
             onClick={onDetailsClick}
             className="flex-1 bg-creamey border border-lovely text-lovely hover:bg-creamey/80 font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
           >
-            More Details
+            {t("seeDetails")}
           </Button>
           {isFullyBooked ? (
             <Button
               disabled
               className="flex-[2] bg-gray-400 text-white font-semibold rounded-md px-2 py-1 text-sm shadow cursor-not-allowed opacity-80"
             >
-              Fully Booked
+              {isAr ? "مكتمل العدد" : "Fully Booked"}
             </Button>
           ) : (
             <Button
               onClick={onBookClick}
               className="flex-[2] bg-lovely hover:bg-lovely/90 text-white font-semibold rounded-md px-2 py-1 text-sm shadow-lg"
             >
-              Book Now
+              {t("bookNow")}
             </Button>
           )}
         </div>

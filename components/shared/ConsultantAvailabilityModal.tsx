@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarClock } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -13,12 +14,12 @@ const CONSULTANT_AVAILABILITY: {
   availableFrom: Date;
   label: string;
 }[] = [
-  {
-    partnerName: "Sherry Louis",
-    availableFrom: new Date("2026-10-18T00:00:00+03:00"),
-    label: "18/10",
-  },
-];
+    {
+      partnerName: "Sherry Louis",
+      availableFrom: new Date("2026-10-18T00:00:00+03:00"),
+      label: "18/10",
+    },
+  ];
 
 const normalize = (s?: string) => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
@@ -39,6 +40,9 @@ type Props = {
 };
 
 export default function ConsultantAvailabilityModal({ notice, onClose, onContinue }: Props) {
+  const locale = useLocale();
+  const isAr = locale === "ar";
+
   if (!notice) return null;
 
   return (
@@ -47,17 +51,29 @@ export default function ConsultantAvailabilityModal({ notice, onClose, onContinu
       onClick={onClose}
     >
       <div
+        dir={isAr ? "rtl" : "ltr"}
         className="bg-creamey rounded-2xl w-full max-w-sm p-6 text-center shadow-xl animate-in fade-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto w-16 h-16 bg-lovely/10 rounded-full flex items-center justify-center mb-4">
           <CalendarClock className="w-8 h-8 text-lovely" />
         </div>
-        <h3 className="text-xl font-bold text-lovely mb-2">Heads up! 💕</h3>
+        <h3 className="text-xl font-bold text-lovely mb-2">
+          {isAr ? "تنبيه لطيف! 💕" : "Heads up! 💕"}
+        </h3>
         <p className="text-lovely/90 text-sm leading-relaxed mb-6">
-          <span className="font-semibold">{notice.partnerName}</span> is available for sessions
-          starting from <span className="font-bold">{notice.label}</span>. You can book now and
-          your session will be scheduled after that date.
+          {isAr ? (
+            <>
+              <span className="font-semibold">{notice.partnerName}</span> متاحة للجلسات ابتداءً من{" "}
+              <span className="font-bold">{notice.label}</span>. تقدري تحجزي دلوقتي وسيتم تنسيق موعد جلستك بعد هذا التاريخ.
+            </>
+          ) : (
+            <>
+              <span className="font-semibold">{notice.partnerName}</span> is available for sessions
+              starting from <span className="font-bold">{notice.label}</span>. You can book now and
+              your session will be scheduled after that date.
+            </>
+          )}
         </p>
         <div className="flex flex-col gap-2">
           <Button
@@ -65,7 +81,7 @@ export default function ConsultantAvailabilityModal({ notice, onClose, onContinu
             onClick={onContinue}
             className="w-full bg-lovely hover:bg-lovely/90 text-creamey rounded-2xl"
           >
-            Continue to booking
+            {isAr ? "متابعة الحجز" : "Continue to booking"}
           </Button>
           <Button
             type="button"
@@ -73,7 +89,7 @@ export default function ConsultantAvailabilityModal({ notice, onClose, onContinu
             onClick={onClose}
             className="w-full border-lovely text-lovely rounded-2xl"
           >
-            Maybe later
+            {isAr ? "ربما لاحقاً" : "Maybe later"}
           </Button>
         </div>
       </div>

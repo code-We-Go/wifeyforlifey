@@ -1,4 +1,5 @@
 import LoginModel from "@/app/modals/loginsModel";
+import UserModel from "@/app/modals/userModel";
 import { generateSuspiciousLoginEmail } from "./suspiciousLoginEmail";
 import nodemailer from "nodemailer";
 
@@ -52,15 +53,29 @@ export async function checkSuspiciousLoginActivity(
     // Check if there are more than 3 unique fingerprints
     if (uniqueFingerprints.size > 3) {
       console.log("haramyyyyyyy");
+      let userLang: "en" | "ar" = "en";
+      try {
+        const u = await UserModel.findById(userId).select("preferredLanguage").lean();
+        if (u && (u as any).preferredLanguage === "ar") {
+          userLang = "ar";
+        }
+      } catch (err) {
+        console.warn("Could not fetch user preferredLanguage for suspicious login email:", err);
+      }
+
       // Generate suspicious login email content
-      const emailContent = generateSuspiciousLoginEmail(first_name, {
-        fingerprintCount: uniqueFingerprints.size,
-        currentFingerprint,
-      });
+      const emailContent = generateSuspiciousLoginEmail(
+        first_name,
+        {
+          fingerprintCount: uniqueFingerprints.size,
+          currentFingerprint,
+        },
+        userLang
+      );
 
       // Send email notification
       console.log("firstName" + first_name);
-      await sendSuspiciousLoginEmail(email, first_name, emailContent);
+      await sendSuspiciousLoginEmail(email, first_name, emailContent, userLang);
 
       return true; // Suspicious activity detected
     }
@@ -78,18 +93,25 @@ export async function checkSuspiciousLoginActivity(
  * @param email - The recipient's email address
  * @param first_name - The user's first name
  * @param emailContent - The HTML content of the email
+ * @param lang - User's preferred language ('en' | 'ar')
  * @returns Promise<void>
  */
 async function sendSuspiciousLoginEmail(
   email: string,
   first_name: string,
-  emailContent: string
+  emailContent: string,
+  lang: "en" | "ar" = "en"
 ): Promise<void> {
   try {
+    const isAr = lang === "ar";
+    const subject = isAr
+      ? "🚨 تنبيه أمني: نشاط تسجيل دخول غير معتاد لحسابكِ"
+      : "🚨 Security Alert: Suspicious Login Activity Detected";
+
     await transporter.sendMail({
       from: `"Wifey For Lifey Security Team" <authentication@shopwifeyforlifey.com>`,
       to: email,
-      subject: "🚨 Security Alert: Suspicious Login Activity Detected",
+      subject,
       html: emailContent,
     });
 

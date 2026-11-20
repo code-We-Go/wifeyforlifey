@@ -38,6 +38,9 @@ export async function GET(request: NextRequest) {
         isSubscribed: user.isSubscribed,
         birthDate: user.birthDate,
         weddingDate: user.weddingDate,
+        preferredLanguage: user.preferredLanguage || 'en',
+        whatsAppNumber: user.whatsAppNumber || user.shippingData?.whatsAppNumber || '',
+        onboardingCompleted: user.onboardingCompleted ?? (!!(user.whatsAppNumber || user.shippingData?.whatsAppNumber)),
         shippingData: user.shippingData,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
@@ -58,7 +61,7 @@ export async function PUT(request: NextRequest) {
     await ConnectDB();
     
     const body = await request.json();
-    const { email, username, firstName, lastName, imageURL, birthDate, weddingDate, shippingData } = body;
+    const { email, username, firstName, lastName, imageURL, birthDate, weddingDate, shippingData, preferredLanguage, whatsAppNumber } = body;
     
     if (!email) {
       return NextResponse.json(
@@ -73,11 +76,22 @@ export async function PUT(request: NextRequest) {
       lastName,
       imageURL,
       birthDate: birthDate ? new Date(birthDate) : undefined,
-      weddingDate: weddingDate ? new Date(weddingDate) : undefined
+      weddingDate: weddingDate ? new Date(weddingDate) : undefined,
     };
 
+    if (preferredLanguage) {
+      updateData.preferredLanguage = preferredLanguage === 'ar' ? 'ar' : 'en';
+    }
+    if (whatsAppNumber !== undefined) {
+      updateData.whatsAppNumber = whatsAppNumber;
+      if (!updateData.shippingData) {
+        updateData.shippingData = {};
+      }
+      updateData.shippingData.whatsAppNumber = whatsAppNumber;
+    }
+
     if (shippingData) {
-      updateData.shippingData = shippingData;
+      updateData.shippingData = { ...updateData.shippingData, ...shippingData };
     }
 
     const updatedUser = await UserModel.findOneAndUpdate(

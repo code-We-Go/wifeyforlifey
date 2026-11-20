@@ -10,6 +10,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const locale = searchParams.get('locale') || searchParams.get('lang') || 'en';
 
     let query: any = { active: true };
     if (type) {
@@ -37,18 +38,40 @@ export async function GET(request: Request) {
 
         console.log(`Category: ${category.categoryName}, Subcategories found: ${subcategories.length}`);
 
+        const catName = locale === 'ar' && category.translations?.ar?.categoryName
+          ? category.translations.ar.categoryName
+          : category.categoryName;
+        const catDesc = locale === 'ar' && category.translations?.ar?.description
+          ? category.translations.ar.description
+          : category.description;
+
         return {
           _id: category._id,
-          name: category.categoryName,
-          description: category.description,
+          name: catName,
+          categoryName: catName,
+          originalName: category.categoryName,
+          description: catDesc,
           image: category.image,
-          subcategories: subcategories.map((sub: any) => ({
-            _id: sub._id,
-            name: sub.subCategoryName,
-            description: sub.description,
-            image: sub.image,
-            categoryID: sub.categoryID
-          }))
+          translations: category.translations,
+          subcategories: subcategories.map((sub: any) => {
+            const subName = locale === 'ar' && sub.translations?.ar?.subCategoryName
+              ? sub.translations.ar.subCategoryName
+              : sub.subCategoryName;
+            const subDesc = locale === 'ar' && sub.translations?.ar?.description
+              ? sub.translations.ar.description
+              : sub.description;
+
+            return {
+              _id: sub._id,
+              name: subName,
+              subCategoryName: subName,
+              originalName: sub.subCategoryName,
+              description: subDesc,
+              image: sub.image,
+              categoryID: sub.categoryID,
+              translations: sub.translations
+            };
+          })
         };
       })
     );
