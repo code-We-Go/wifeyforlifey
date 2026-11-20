@@ -187,15 +187,15 @@ const Support360 = () => {
             <div className="flex gap-2 md:gap-4">
               {supportCards.map((card) => (
                 <div key={card.id} className="relative flex-[0_0_85%] sm:flex-[0_0_55%] md:flex-[0_0_42%] lg:flex-[0_0_32%] 2xl:flex-[0_0_24%] min-w-0 pb-6 md:pb-12">
-                  <div className="bg-lovely rounded-sm shadow-xl h-[550px] xl:h-[550px] relative overflow-hidden">
+                  <div className="bg-lovely rounded-sm shadow-xl h-[550px] rtl:h-[650px] xl:h-[550px] rtl:xl:h-[660px] relative overflow-hidden">
                     {/* Card Header */}
-                    <div className="p-3 md:p-5 pb-36 md:pb-44 h-full overflow-y-auto scrollbar-none">
+                    <div className="p-3 md:p-5 pb-36 md:pb-44 h-full overflow-y-auto scrollbar-hide">
                       <h3 className="text-base lg:text-lg font-bold text-creamey mb-2 md:mb-3 leading-snug">
                         {card.title}
                       </h3>
                       <ul className="list-disc list-outside ps-4 text-creamey marker:text-creamey space-y-1.5">
                         {card.description.map((point, index) => (
-                          <li key={index} className="text-sm md:text-base text-creamey/95 leading-relaxed">
+                          <li key={index} className="text-sm md:text-base text-creamey/95 ">
                             {point}
                           </li>
                         ))}
@@ -203,7 +203,7 @@ const Support360 = () => {
                     </div>
 
                     {/* Mobile Screen Mockup - Absolutely positioned at bottom */}
-                    <div className="absolute -bottom-10 md:-bottom-20 lg:-bottom-16 xl:-bottom-4 2xl:-bottom-14  left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px] md:w-[520px] lg:w-[580px] xl:w-[600px] 2xl:w-[620px] h-[450px] xs:h-[550px] md:h-[550px] lg:h-[640px] xl:h-[800px] 2xl:h-[840px]">
+                    <div className="pointer-events-none absolute -bottom-10 md:-bottom-20 lg:-bottom-16 xl:-bottom-4 2xl:-bottom-14  left-1/2 z-20 -translate-x-1/2 w-[420px] xs:w-[550px] md:w-[520px] lg:w-[580px] xl:w-[600px] 2xl:w-[620px] h-[450px] xs:h-[550px] md:h-[550px] lg:h-[640px] xl:h-[800px] 2xl:h-[840px]">
                       <Image
                         src={card.imagePath}
                         alt={card.title}

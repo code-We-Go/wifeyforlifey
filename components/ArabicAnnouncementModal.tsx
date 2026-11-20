@@ -120,19 +120,19 @@ export default function ArabicAnnouncementModal() {
             </h2>
 
             {/* Description 1 */}
-            <p className="text-xs sm:text-sm text-lovely/90 leading-relaxed font-medium">
+            <p className="text-base sm:text-lg text-lovely/90 leading-relaxed font-medium">
               علشان رحلتك في تجهيز بيتك تبقى أسهل وألطف، موقع وايفي وGehaz Bestie Planner بقوا متاحين بالعربي! 💗
             </p>
 
             {/* Pre-order Callout Box */}
-            <div className="p-3 bg-pinkey/25 border border-pinkey/60 rounded-2xl text-xs sm:text-sm font-semibold text-lovely leading-relaxed shadow-2xs">
-              والأحلى؟ تقدري دلوقتي تعملي Pre-order للنسخة العربي من البلانر وتكوني من أول الوايفيز اللي تستلمها!
+            <div className="p-3.5 bg-pinkey/25 border border-pinkey/60 rounded-2xl text-base sm:text-lg font-bold text-lovely leading-relaxed shadow-2xs">
+              والأحلى؟ تقدري دلوقتي تعملي حجز مسبق للنسخة العربي من البلانر وتكوني من أول الوايفيز اللي تستلمها! 🎀
             </div>
 
             {/* Language Switcher Buttons inside popup */}
             <div className="p-3 bg-creamey rounded-2xl border border-lovely/20 shadow-xs">
-              <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-lovely">
-                <Globe className="w-3.5 h-3.5 text-lovely" />
+              <div className="flex items-center gap-2 mb-2 text-sm sm:text-base font-semibold text-lovely">
+                <Globe className="w-4 h-4 text-lovely" />
                 <span>اختاري لغة التصفح:</span>
               </div>
 
@@ -142,13 +142,13 @@ export default function ArabicAnnouncementModal() {
                   type="button"
                   onClick={() => handleSelectLanguage("ar")}
                   disabled={isPending}
-                  className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer ${locale === "ar"
-                      ? "bg-lovely text-creamey border-lovely shadow-sm"
-                      : "bg-creamey text-lovely border-lovely/30 hover:bg-pinkey/20"
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl border text-base sm:text-lg font-bold transition-all cursor-pointer ${locale === "ar"
+                    ? "bg-lovely text-creamey border-lovely shadow-sm"
+                    : "bg-creamey text-lovely border-lovely/30 hover:bg-pinkey/20"
                     }`}
                 >
                   <span>العربية</span>
-                  {locale === "ar" && <Check className="w-4 h-4 text-creamey" />}
+                  {locale === "ar" && <Check className="w-5 h-5 text-creamey" />}
                 </button>
 
                 {/* English Option */}
@@ -156,13 +156,13 @@ export default function ArabicAnnouncementModal() {
                   type="button"
                   onClick={() => handleSelectLanguage("en")}
                   disabled={isPending}
-                  className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer ${locale === "en"
-                      ? "bg-lovely text-creamey border-lovely shadow-sm"
-                      : "bg-creamey text-lovely border-lovely/30 hover:bg-pinkey/20"
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl border text-base sm:text-lg font-bold transition-all cursor-pointer ${locale === "en"
+                    ? "bg-lovely text-creamey border-lovely shadow-sm"
+                    : "bg-creamey text-lovely border-lovely/30 hover:bg-pinkey/20"
                     }`}
                 >
                   <span>English</span>
-                  {locale === "en" && <Check className="w-4 h-4 text-creamey" />}
+                  {locale === "en" && <Check className="w-5 h-5 text-creamey" />}
                 </button>
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function ArabicAnnouncementModal() {
               type="button"
               onClick={handleBookNow}
               disabled={isPending}
-              className="w-full py-3.5 px-4 bg-lovely hover:bg-lovely/90 text-creamey rounded-2xl font-bold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-4 px-4 bg-lovely hover:bg-lovely/90 text-creamey rounded-2xl font-bold text-base sm:text-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>احجزي نسختك دلوقتي 💌</span>
             </button>
@@ -185,7 +185,7 @@ export default function ArabicAnnouncementModal() {
               type="button"
               onClick={() => handleSelectLanguage(locale === "ar" ? "ar" : "en")}
               disabled={isPending}
-              className="w-full py-2 px-3 text-xs sm:text-sm text-lovely/75 hover:text-lovely font-semibold transition-colors cursor-pointer"
+              className="w-full py-2.5 px-3 text-sm sm:text-base text-lovely/85 hover:text-lovely font-semibold transition-colors cursor-pointer"
             >
               {locale === "ar"
                 ? "تصفحي الموقع بالعربي"

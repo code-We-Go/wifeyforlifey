@@ -219,12 +219,29 @@ export default function PackageeDetailPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [selectedEdition, setSelectedEdition] = useState<"ar" | "en">(locale === "ar" ? "ar" : "en");
+  const isWeddingSlug =
+    typeof params?.slug === "string" &&
+    params.slug.toLowerCase().includes("wedding");
 
-  // Sync default edition when locale changes
+  const [selectedEdition, setSelectedEdition] = useState<"ar" | "en">(
+    isWeddingSlug ? "en" : locale === "ar" ? "ar" : "en"
+  );
+
+  // Sync default edition when locale or package changes (WeddingBestiePlanner is English-only)
   useEffect(() => {
-    setSelectedEdition(locale === "ar" ? "ar" : "en");
-  }, [locale]);
+    const isWedding =
+      isWeddingSlug ||
+      Boolean(packageData?.slug?.toLowerCase().includes("wedding")) ||
+      Boolean(packageData?.name?.toLowerCase().includes("wedding")) ||
+      Boolean(packageData?.partOf?.toLowerCase().includes("wedding")) ||
+      packageData?.duration === 6;
+
+    if (isWedding) {
+      setSelectedEdition("en");
+    } else {
+      setSelectedEdition(locale === "ar" ? "ar" : "en");
+    }
+  }, [locale, isWeddingSlug, packageData]);
 
   // Touch swipe refs for mobile gesture navigation
   const touchStartXRef = useRef<number | null>(null);
@@ -398,7 +415,7 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
       "68bf6ae9c4d5c1af12cdcd37": preorderDetails,
     };
 
-    return packageContents[packageId] || preorderDetails;
+    return packageContents[packageId] || null;
   };
 
   // Quiz State
@@ -552,15 +569,25 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
       return;
     }
 
-    const activeEdition = hasEditionSelection ? selectedEdition : undefined;
+    const activeEdition = hasEditionSelection
+      ? selectedEdition
+      : isWeddingPackage
+        ? "en"
+        : undefined;
     const activeEditionName = hasEditionSelection
       ? (selectedEdition === "ar" ? "النسخة العربية (Arabic Edition)" : "English Edition")
-      : undefined;
+      : isWeddingPackage
+        ? "English Edition"
+        : undefined;
     const activeImg = (hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0)
       ? arabicImages[0]
       : (packageData.imgUrl || "");
 
-    const effectiveEdition = hasEditionSelection ? selectedEdition : (locale === "ar" ? "ar" : "en");
+    const effectiveEdition = hasEditionSelection
+      ? selectedEdition
+      : isWeddingPackage
+        ? "en"
+        : (locale === "ar" ? "ar" : "en");
     const pricing = resolvePackagePrice(packageData, {
       variantIndex: (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex >= 0)
         ? selectedVariantIndex
@@ -607,15 +634,25 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
       return;
     }
 
-    const activeEdition = hasEditionSelection ? selectedEdition : undefined;
+    const activeEdition = hasEditionSelection
+      ? selectedEdition
+      : isWeddingPackage
+        ? "en"
+        : undefined;
     const activeEditionName = hasEditionSelection
       ? (selectedEdition === "ar" ? "النسخة العربية (Arabic Edition)" : "English Edition")
-      : undefined;
+      : isWeddingPackage
+        ? "English Edition"
+        : undefined;
     const activeImg = (hasEditionSelection && selectedEdition === "ar" && arabicImages.length > 0)
       ? arabicImages[0]
       : (packageData.imgUrl || "");
 
-    const effectiveEdition = hasEditionSelection ? selectedEdition : (locale === "ar" ? "ar" : "en");
+    const effectiveEdition = hasEditionSelection
+      ? selectedEdition
+      : isWeddingPackage
+        ? "en"
+        : (locale === "ar" ? "ar" : "en");
     const pricing = resolvePackagePrice(packageData, {
       variantIndex: (packageData.variants && packageData.variants.length > 0 && selectedVariantIndex >= 0)
         ? selectedVariantIndex
@@ -765,10 +802,15 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
   );
 
   const hasEditionSelection =
-    displayPackage?.enableArabicEdition === true ||
-    (displayPackage?.enableArabicEdition !== false && isGehazPackage && !isWeddingPackage);
+    !isWeddingPackage &&
+    (displayPackage?.enableArabicEdition === true ||
+      (displayPackage?.enableArabicEdition !== false && isGehazPackage));
 
-  const effectiveEdition = hasEditionSelection ? selectedEdition : (locale === "ar" ? "ar" : "en");
+  const effectiveEdition = hasEditionSelection
+    ? selectedEdition
+    : isWeddingPackage
+      ? "en"
+      : (locale === "ar" ? "ar" : "en");
 
   const selectedVariant =
     displayPackage.variants && selectedVariantIndex >= 0
@@ -1034,51 +1076,55 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
                 </div>
               )}
 
-              {/* Planner Edition Selector (Arabic vs English) */}
-              {hasEditionSelection && (
+              {/* Planner Edition Selector (Arabic vs English for Gehaz, English default for Wedding) */}
+              {(hasEditionSelection || isWeddingPackage) && (
                 <div className="mb-6 bg-pinkey/50 border-2 border-lovely/30 p-4 rounded-2xl shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className={`${thirdFont.className} text-lg font-bold text-lovely flex items-center gap-2`}>
                       <span>{locale === "ar" ? "لغة البلانر (النسخة)" : "Planner Edition"}</span>
                     </h3>
                     <span className="text-xs bg-lovely text-white font-semibold px-2.5 py-0.5 rounded-full">
-                      {selectedEdition === "ar" ? (locale === "ar" ? "النسخة العربية" : "Arabic Edition") : "English Edition"}
+                      {hasEditionSelection && selectedEdition === "ar"
+                        ? (locale === "ar" ? "النسخة العربية" : "Arabic Edition")
+                        : "English Edition"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedEdition("ar")}
-                      className={`p-3.5 rounded-xl border-2 text-start transition-all cursor-pointer flex flex-col justify-between ${selectedEdition === "ar"
-                        ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
-                        : "border-lovely/20 bg-white/60 hover:bg-white/90"
-                        }`}
-                      id="edition-btn-ar"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm sm:text-base text-lovely">
-                            النسخة العربية
-                          </span>
-                          <span className="text-[10px] bg-lovely/15 text-lovely font-bold px-2 py-0.5 rounded-full">
-                            {locale === "ar" ? "حجز مسبق" : "Pre-order"}
-                          </span>
+                  <div className={`grid ${hasEditionSelection ? "grid-cols-2" : "grid-cols-1"} gap-3`}>
+                    {hasEditionSelection && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEdition("ar")}
+                        className={`p-3.5 rounded-xl border-2 text-start transition-all cursor-pointer flex flex-col justify-between ${selectedEdition === "ar"
+                          ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
+                          : "border-lovely/20 bg-white/60 hover:bg-white/90"
+                          }`}
+                        id="edition-btn-ar"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm sm:text-base text-lovely">
+                              النسخة العربية
+                            </span>
+                            <span className="text-[10px] bg-lovely/15 text-lovely font-bold px-2 py-0.5 rounded-full">
+                              {locale === "ar" ? "حجز مسبق" : "Pre-order"}
+                            </span>
+                          </div>
+                          {selectedEdition === "ar" && (
+                            <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
+                          )}
                         </div>
-                        {selectedEdition === "ar" && (
-                          <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
-                        )}
-                      </div>
-                      <p className="text-xs text-lovely/70 leading-snug">
-                        {locale === "ar"
-                          ? "محتوى وغلاف البلانر باللغة العربية"
-                          : "Arabic planner pages, prompts & cover"}
-                      </p>
-                    </button>
+                        <p className="text-xs sm:text-sm text-lovely/80 leading-snug font-medium">
+                          {locale === "ar"
+                            ? "محتوى وغلاف البلانر باللغة العربية"
+                            : "Arabic planner pages, prompts & cover"}
+                        </p>
+                      </button>
+                    )}
 
                     <button
                       type="button"
                       onClick={() => setSelectedEdition("en")}
-                      className={`p-3.5 rounded-xl border-2 text-start transition-all cursor-pointer flex flex-col justify-between ${selectedEdition === "en"
+                      className={`p-3.5 rounded-xl border-2 text-start transition-all cursor-pointer flex flex-col justify-between ${(!hasEditionSelection || selectedEdition === "en")
                         ? "border-lovely bg-creamey shadow-md ring-2 ring-lovely/20"
                         : "border-lovely/20 bg-white/60 hover:bg-white/90"
                         }`}
@@ -1088,11 +1134,11 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
                         <span className="font-bold text-sm sm:text-base text-lovely">
                           English Edition
                         </span>
-                        {selectedEdition === "en" && (
+                        {(!hasEditionSelection || selectedEdition === "en") && (
                           <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
                         )}
                       </div>
-                      <p className="text-xs text-lovely/70 leading-snug">
+                      <p className="text-xs sm:text-sm text-lovely/80 leading-snug font-medium">
                         {locale === "ar"
                           ? "محتوى وغلاف البلانر باللغة الإنجليزية"
                           : "English planner pages, prompts & cover"}
@@ -1234,11 +1280,11 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
         {/* Feature Comparison Section (Mockup Table Design) */}
         <div className="bg-pinkey/70 p-6 sm:p-8 rounded-3xl border-2 border-pinkey shadow-md mb-12">
           <h2 className={`${thirdFont.className} text-2xl sm:text-3xl font-extrabold text-lovely uppercase tracking-wide mb-4 text-center`}>
-            {locale === "ar" ? "اختاري باقة التجربة المناسبة ليكي 🎀" : "Choose Your Experience Tier 🎀"}
+            {locale === "ar" ? " اختارى رحلة جهازك المناسبة ليكى🎀" : "Choose Your Experience Tier 🎀"}
           </h2>
-          <p className="text-center text-sm text-lovely/80 mb-6 max-w-xl mx-auto">
+          <p className="text-center text-base sm:text-lg text-lovely/90 mb-6 max-w-xl mx-auto leading-relaxed font-medium">
             {locale === "ar"
-              ? "قارني بين الباقة المصغرة والكاملة واختاري الرفيقة الأنسب لاحتياجات مرحلة فرحك."
+              ? "قارني بين الباقة المصغرة والكاملة واختارى رحلة جهازك الأنسب لاحتياجات مرحلة فرحك."
               : "Compare the Mini and Full packages to decide which bestie fits your bridal era needs."}
           </p>
 
@@ -1246,13 +1292,13 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
             <table className="w-full border-separate border-spacing-y-2">
               <thead>
                 <tr>
-                  <th className="text-left rtl:text-right p-3 text-xs uppercase tracking-wider text-lovely/70 font-semibold">
+                  <th className="text-left rtl:text-right p-3.5 text-sm rtl:text-base rtl:md:text-lg sm:text-base uppercase tracking-wider text-lovely/90 font-bold">
                     {locale === "ar" ? "المميزات والخدمات المشمولة" : "Features Included"}
                   </th>
-                  <th className="p-3 text-center bg-lovely text-white font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">
+                  <th className="p-3.5 text-center bg-lovely text-white font-bold text-sm sm:text-base rounded-t-xl w-1/4 uppercase tracking-wider">
                     {locale === "ar" ? "المصغرة (Mini)" : "Mini"}
                   </th>
-                  <th className="p-3 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm rounded-t-xl w-1/4 uppercase tracking-wider">
+                  <th className="p-3.5 text-center bg-white text-lovely border-2 border-pinkey font-bold text-sm sm:text-base rounded-t-xl w-1/4 uppercase tracking-wider">
                     {locale === "ar" ? "الكاملة (Full)" : "Full"}
                   </th>
                 </tr>
@@ -1263,30 +1309,30 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
                   const isDash = (val: string) => val === "—" || val === "-" || val.toLowerCase() === "false";
                   return (
                     <tr key={idx}>
-                      <td className="p-3 bg-lovely/80 text-white rounded-l-xl rtl:rounded-l-none rtl:rounded-r-xl text-xs sm:text-sm font-medium">
+                      <td className="p-3.5 bg-lovely/80 text-white rounded-l-xl rtl:rounded-l-none rtl:rounded-r-xl text-sm sm:text-base font-semibold leading-relaxed">
                         {feat.feature}
                       </td>
-                      <td className="p-3 text-center bg-pinkey/20 border border-pinkey/50 font-bold">
+                      <td className="p-3.5 text-center bg-pinkey/20 border border-pinkey/50 font-bold">
                         {isCheck(feat.miniValue) ? (
                           <Check className="inline h-5 w-5 text-emerald-600" />
                         ) : isDash(feat.miniValue) ? (
-                          <span className="text-gray-400 font-bold">—</span>
+                          <span className="text-gray-400 font-bold text-lg">—</span>
                         ) : (
                           <>
                             <Check className="inline h-5 w-5 text-emerald-600" />
-                            <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.miniValue}</span>
+                            <span className="block text-xs sm:text-sm text-lovely font-bold mt-0.5">{feat.miniValue}</span>
                           </>
                         )}
                       </td>
-                      <td className="p-3 text-center bg-white border border-pinkey/50 rounded-r-xl rtl:rounded-r-none rtl:rounded-l-xl font-bold">
+                      <td className="p-3.5 text-center bg-white border border-pinkey/50 rounded-r-xl rtl:rounded-r-none rtl:rounded-l-xl font-bold">
                         {isCheck(feat.fullValue) ? (
                           <Check className="inline h-5 w-5 text-emerald-600" />
                         ) : isDash(feat.fullValue) ? (
-                          <span className="text-gray-400 font-bold">—</span>
+                          <span className="text-gray-400 font-bold text-lg">—</span>
                         ) : (
                           <>
                             <Check className="inline h-5 w-5 text-emerald-600" />
-                            <span className="block text-[10px] text-lovely font-semibold mt-0.5">{feat.fullValue}</span>
+                            <span className="block text-xs sm:text-sm text-lovely font-bold mt-0.5">{feat.fullValue}</span>
                           </>
                         )}
                       </td>
@@ -1298,11 +1344,11 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
           </div>
 
           {/* Redbox Callout (HTML Mockup Design) */}
-          <div className="mt-6 bg-lovely text-white p-6 rounded-2xl shadow-md space-y-2">
-            <h3 className={`${thirdFont.className} text-xl font-bold uppercase tracking-wide`}>
+          <div className="mt-6 bg-lovely text-white p-6 rounded-2xl shadow-md space-y-2.5">
+            <h3 className={`${thirdFont.className} text-xl sm:text-2xl font-bold uppercase tracking-wide`}>
               {fullPackage?.calloutTitle || (locale === "ar" ? "ليه أغلب العرايس بيختاروا التجربة الكاملة 💕" : "Why most brides choose Full 💕")}
             </h3>
-            <p className="text-sm leading-relaxed text-white/95">
+            <p className="text-base sm:text-lg leading-relaxed text-white/95 font-medium">
               {fullPackage?.calloutDescription ? (
                 isWeddingPackage ? (
                   fullPackage.calloutDescription
@@ -1324,7 +1370,7 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
               )}
             </p>
           </div>
-          <div className="mt-4 p-4 border-2 text-lovely/90 border-dashed border-pinkey rounded-xl text-center text-xs sm:text-sm font-medium">
+          <div className="mt-4 p-4 border-2 text-lovely border-dashed border-pinkey rounded-xl text-center text-sm sm:text-base font-semibold leading-relaxed">
             {locale === "ar" ? (
               <>
                 <strong> البلانر المطبوع ملكك دائماً.</strong> المميزات الرقمية والدعم يستمروا لمدة {isWeddingPackage ? "6 شهور" : "12 شهراً"} من تاريخ الشراء.
