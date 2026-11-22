@@ -403,6 +403,46 @@ const AccountPage = () => {
     fetchSubscription();
   }, [session?.user?.email]);
 
+  // Check renewal availability directly from the package (not from the latest subscription doc,
+  // which may belong to another package or be an unpaid attempt)
+  const [renewablePackages, setRenewablePackages] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    const ids: string[] = [];
+    const fullExpiry = session?.user?.subscriptionExpiryDate
+      ? new Date(session.user.subscriptionExpiryDate as any)
+      : null;
+    const fullExpired =
+      session?.user?.subscription?.packageId === "687396821b4da119eb1c13fe" &&
+      (!session?.user?.isSubscribed || (fullExpiry !== null && fullExpiry < new Date()));
+    if (fullExpired) ids.push("687396821b4da119eb1c13fe");
+    if (session?.user?.weddingPlanningBestie && !session.user.weddingPlanningBestie.isSubscribed) {
+      ids.push("6965e63c6df4503dda02c12b");
+    }
+    if (ids.length === 0) return;
+
+    let cancelled = false;
+    Promise.all(
+      ids.map(async (id) => {
+        try {
+          const res = await axios.get(`/api/packages?packageID=${id}`);
+          return [id, (res.data?.data?.renewals?.length || 0) > 0] as const;
+        } catch {
+          return [id, false] as const;
+        }
+      })
+    ).then((entries) => {
+      if (!cancelled) setRenewablePackages(Object.fromEntries(entries));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    session?.user?.subscription?.packageId,
+    session?.user?.isSubscribed,
+    session?.user?.subscriptionExpiryDate,
+    session?.user?.weddingPlanningBestie?.isSubscribed,
+  ]);
+
   useEffect(() => {
     try {
       if (!session?.user?.isSubscribed && subscriptionDoc) {
@@ -1054,9 +1094,10 @@ const AccountPage = () => {
                 )}
 
               {/* Full Experience Renew */}
-              {user.subscription?.packageId === "687396821b4da119eb1c13fe" && !user.isSubscribed &&
-                subscriptionDoc?.packageID?._id === "687396821b4da119eb1c13fe" &&
-                subscriptionDoc?.packageID?.renewals?.length > 0 && (
+              {user.subscription?.packageId === "687396821b4da119eb1c13fe" &&
+                (!user.isSubscribed ||
+                  (user.subscriptionExpiryDate && new Date(user.subscriptionExpiryDate) < new Date())) &&
+                renewablePackages["687396821b4da119eb1c13fe"] && (
                   <Link href={`/subscription/687396821b4da119eb1c13fe?renew=true`}>
                     <Button
                       size="sm"
@@ -1069,8 +1110,7 @@ const AccountPage = () => {
 
               {/* Wedding Planning Bestie Renew */}
               {user.weddingPlanningBestie && !user.weddingPlanningBestie.isSubscribed &&
-                subscriptionDoc?.packageID?._id === "6965e63c6df4503dda02c12b" &&
-                subscriptionDoc?.packageID?.renewals?.length > 0 && (
+                renewablePackages["6965e63c6df4503dda02c12b"] && (
                   <Link href={`/subscription/6965e63c6df4503dda02c12b?renew=true`}>
                     <Button
                       size="sm"
