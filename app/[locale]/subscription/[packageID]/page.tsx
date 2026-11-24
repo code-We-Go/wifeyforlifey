@@ -1112,17 +1112,24 @@ We’re beyond excited to share this experience with you… your planner will be
   }, [packageID]);
 
   // Show modal when package data is loaded for specific packages
+  // Skip the pre-order popup for upgrades and renewals (renewal only extends online access, no planner shipped)
   useEffect(() => {
-    if (packageData && packageID && !isUpgrade) {
+    const isRenewOrUpgrade =
+      isUpgrade ||
+      isRenew ||
+      searchParams.get("renew") === "true" ||
+      !!searchParams.get("upgrade");
+    if (isRenewOrUpgrade) {
+      setShowModal(false);
+      return;
+    }
+    if (packageData && packageID) {
       const modalContent = getModalContent(packageID as string);
       if (modalContent) {
-
-        // setShowModal(false);
-        // not a pre order now
         setShowModal(true);
       }
     }
-  }, [packageData, packageID]);
+  }, [packageData, packageID, isUpgrade, isRenew, searchParams]);
 
   useEffect(() => {
     if (isRenew && packageData?.renewals && packageData.renewals.length > 0 && !selectedDuration) {
@@ -1260,8 +1267,8 @@ We’re beyond excited to share this experience with you… your planner will be
                           setSelectedDuration(option.duration);
                         }}
                         className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${selectedDuration === option.duration && variantPrice === option.price
-                            ? "border-lovely bg-lovely/10 shadow-md"
-                            : "border-pinkey hover:border-lovely/50 bg-creamey"
+                          ? "border-lovely bg-lovely/10 shadow-md"
+                          : "border-pinkey hover:border-lovely/50 bg-creamey"
                           }`}
                       >
                         <span className="text-lovely font-bold text-lg">{option.duration} Months</span>
@@ -1325,8 +1332,8 @@ We’re beyond excited to share this experience with you… your planner will be
                   disabled={loading || !acceptedTerms || loadingUpgradePrice}
                   type="submit"
                   className={`border text-base transition duration-300 border-lovely p-1 ${loading || !acceptedTerms || loadingUpgradePrice
-                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
-                      : "hover:cursor-pointer bg-lovely px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
+                    ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
+                    : "hover:cursor-pointer bg-lovely px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
                     }`}
                 >
                   {loadingUpgradePrice ? "Calculating price..." : loading ? "Processing..." : "PROCEED TO PAYMENT"}
@@ -1447,9 +1454,9 @@ We’re beyond excited to share this experience with you… your planner will be
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div
                         className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName ===
-                            "Born to shine birthday gift card"
-                            ? "border-lovely"
-                            : "border-transparent"
+                          "Born to shine birthday gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
                           }`}
                         onClick={() => {
                           const newGiftCardName =
@@ -1492,9 +1499,9 @@ We’re beyond excited to share this experience with you… your planner will be
 
                       <div
                         className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName ===
-                            "The I love you more than words gift card"
-                            ? "border-lovely"
-                            : "border-transparent"
+                          "The I love you more than words gift card"
+                          ? "border-lovely"
+                          : "border-transparent"
                           }`}
                         onClick={() => {
                           const newGiftCardName =
@@ -1537,8 +1544,8 @@ We’re beyond excited to share this experience with you… your planner will be
 
                       <div
                         className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName === "The Wifey to be card"
-                            ? "border-lovely"
-                            : "border-transparent"
+                          ? "border-lovely"
+                          : "border-transparent"
                           }`}
                         onClick={() => {
                           const newGiftCardName =
@@ -1579,8 +1586,8 @@ We’re beyond excited to share this experience with you… your planner will be
 
                       <div
                         className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${formData.giftCardName === "Merry and Married"
-                            ? "border-lovely"
-                            : "border-transparent"
+                          ? "border-lovely"
+                          : "border-transparent"
                           }`}
                         onClick={() => {
                           const newGiftCardName =
@@ -2307,8 +2314,8 @@ We’re beyond excited to share this experience with you… your planner will be
                   disabled={loading || !acceptedTerms}
                   type="submit"
                   className={`border text-base transition duration-300 border-lovely p-1 ${loading || !acceptedTerms
-                      ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
-                      : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
+                    ? "cursor-not-allowed bg-gray-300 px-4 py-2 text-gray-500 rounded-2xl"
+                    : "hover:cursor-pointer bg-lovely  px-4 py-2 text-creamey hover:bg-lovely/90 rounded-2xl"
                     }`}
                 >
                   PROCEED TO PAYMENT
