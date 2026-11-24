@@ -13,6 +13,7 @@ import BostaService, { BostaAddress } from "@/app/services/bostaService";
 import UserModel, { PACKAGE_IDS } from "@/app/modals/userModel";
 import subscriptionPaymentModel from "@/app/modals/subscriptionPaymentModel";
 import PendingPaymentModel from "@/app/modals/pendingPaymentModel";
+import packageModel from "@/app/modals/packageModel";
 import { decreaseStock } from "@/app/utils/productUtils";
 
 const loadDB = async () => {
@@ -359,6 +360,16 @@ export async function POST(request: Request) {
         });
 
 
+        // Resolve package name from DB since subPayment.packageID is an unpopulated ObjectId
+        let instapayPackageName = (subPayment.packageID as any)?.name;
+        if (!instapayPackageName && subPayment.packageID) {
+          const pkgDoc = await packageModel
+            .findById(subPayment.packageID)
+            .select("name")
+            .lean();
+          instapayPackageName = (pkgDoc as any)?.name;
+        }
+
         // Send to admin about this subscription
         await sendMail({
           to: "orders@shopwifeyforlifey.com",
@@ -379,7 +390,7 @@ export async function POST(request: Request) {
               }</li>`
               : ""
             }
-            <li><strong>Package:</strong> ${(subPayment.packageID as any)?.name || "N/A"
+            <li><strong>Package:</strong> ${instapayPackageName || "N/A"
             }</li>
             <li><strong>First Name:</strong> ${subPayment.firstName || "N/A"
             }</li>

@@ -352,8 +352,8 @@ async function handleSubscription(
 
   const paymentOps = await subscriptionPaymentModel
     .find({ $or: queryConditions })
-    .populate({ path: "to", options: { strictPopulate: false } })
-    .populate({ path: "from", options: { strictPopulate: false } });
+    .populate({ path: "to", model: packageModel, strictPopulate: false })
+    .populate({ path: "from", model: packageModel, strictPopulate: false });
 
   if (!paymentOps || paymentOps.length === 0) {
     console.error(
@@ -414,10 +414,13 @@ async function handleSubscription(
     console.log("subscriptionEmail:", subscriptionEmail);
 
     // Build subscription data
+    const resolvedPackageId =
+      (paymentOp.to as any)?._id || paymentOp.to || paymentOp.packageID;
+
     const subscriptionData: any = {
       paymentID: paymentOp.paymentID || paymobOrderId,
       email: subscriptionEmail,
-      packageID: paymentOp.to,
+      packageID: resolvedPackageId,
       selectedDuration: paymentOp.selectedDuration,
       subscribed: true,
       expiryDate,
@@ -512,7 +515,8 @@ async function handleSubscription(
     if (updatedSub?._id) {
       updatedSub = await subscriptionsModel.findById(updatedSub._id).populate({
         path: "packageID",
-        options: { strictPopulate: false },
+        model: packageModel,
+        strictPopulate: false,
       });
     }
 
@@ -584,6 +588,28 @@ async function handleSubscription(
     // Send email notifications
     try {
       if (updatedSub) {
+        // Resolve package name reliably (populated subscription -> populated paymentOp.to -> direct DB lookup)
+        let resolvedPackageName =
+          (updatedSub.packageID as any)?.name ||
+          (paymentOp.to as any)?.name ||
+          (targetPackage as any)?.name;
+
+        if (!resolvedPackageName) {
+          const fallbackPkgId =
+            (updatedSub.packageID as any)?._id ||
+            updatedSub.packageID ||
+            (paymentOp.to as any)?._id ||
+            paymentOp.to ||
+            paymentOp.packageID;
+          if (fallbackPkgId && mongoose.Types.ObjectId.isValid(String(fallbackPkgId))) {
+            const pkgDoc = await packageModel
+              .findById(fallbackPkgId)
+              .select("name")
+              .lean();
+            resolvedPackageName = (pkgDoc as any)?.name;
+          }
+        }
+
         // Admin notification
         if (!isUpgradeProcess && !isRenewProcess) {
           await sendMail({
@@ -607,7 +633,7 @@ async function handleSubscription(
                 }</li>`
                 : ""
               }
-              <li><strong>Package:</strong> ${(updatedSub.packageID as any)?.name || "N/A"
+              <li><strong>Package:</strong> ${resolvedPackageName || "N/A"
               }</li>
               ${updatedSub.edition || updatedSub.editionName
                 ? `<li><strong>Planner Edition / لغة البلانر:</strong> <span style="color:#d63384;font-weight:bold;">${updatedSub.editionName ||
@@ -730,7 +756,7 @@ async function handleSubscription(
             });
           }
         } else if (isRenewProcess) {
-          const packageName = (updatedSub.packageID as any)?.name || (paymentOp.to as any)?.name || "N/A";
+          const packageName = resolvedPackageName || "N/A";
           await sendMail({
             to: "orders@shopwifeyforlifey.com",
             name: "RENEWAL ALERT",

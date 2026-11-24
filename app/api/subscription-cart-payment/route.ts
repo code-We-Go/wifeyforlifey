@@ -237,10 +237,24 @@ export async function POST(request: Request) {
         <h3>Subscription${isMulti ? "s" : ""} details:</h3>
       `;
 
+      const pkgIdsForEmail = createdPayments
+        .map((s: any) => s.packageID)
+        .filter(Boolean);
+      const emailPkgs = await packageModel
+        .find({ _id: { $in: pkgIdsForEmail } })
+        .select("name")
+        .lean();
+      const emailPkgMap = new Map(
+        emailPkgs.map((p: any) => [p._id.toString(), p.name])
+      );
+
       for (const sub of createdPayments) {
+        const subPkgName =
+          emailPkgMap.get(sub.packageID?.toString()) || sub.packageID || "N/A";
         adminEmailBody += `
           <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; margin-bottom: 12px; background-color: #f8fafc;">
-            <p><strong>Package:</strong> ${sub.packageID}</p>
+            <p><strong>Package:</strong> ${subPkgName}</p>
+            ${sub.edition || sub.editionName ? `<p><strong>Edition:</strong> ${sub.editionName || (sub.edition === "ar" ? "النسخة العربية (Arabic Edition)" : "English Edition")}</p>` : ""}
             <p><strong>Email:</strong> ${sub.email}</p>
             <p><strong>Name:</strong> ${sub.firstName} ${sub.lastName}</p>
             <p><strong>Phone:</strong> ${sub.phone}</p>
