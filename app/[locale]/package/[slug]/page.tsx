@@ -384,25 +384,24 @@ export default function PackageeDetailPage() {
     }
   };
 
-  // Package-specific modal content - only Arabic version is a pre-order, not English
+  // Package-specific modal content - both Arabic and English editions are pre-orders
   const getModalContent = (packageId: string, edition: "ar" | "en" = selectedEdition) => {
-    // Only Arabic edition is a pre-order; English edition is available immediately
-    if (edition !== "ar") {
-      return null;
-    }
-
     const isAr = locale === "ar";
+    const isArEdition = edition === "ar";
+    const editionNameAr = isArEdition ? "النسخة العربية" : "النسخة الإنجليزية";
+    const editionNameEn = isArEdition ? "Arabic Edition" : "English Edition";
+
     const preorderDetails = {
-      header: isAr ? "طلب مسبق 💗" : "Pre-order (Arabic Edition) 💗",
+      header: isAr ? `طلب مسبق (${editionNameAr}) 💗` : `Pre-order (${editionNameEn}) 💗`,
       buttonText: isAr ? "تمام، فهمت!" : "Got it!",
       content: isAr
-        ? `يرجى العلم أن طلب النسخة العربية بنظام الحجز المسبق، هنشحن لكِ بلانر جهاز بيستي خلال ١٠ أيام عمل من تأكيد طلبك. ولحد ما البلانر يوصلك، تقدري تستمتعي من دلوقتي بـ:
+        ? `يرجى العلم أن طلب ${editionNameAr} بنظام الحجز المسبق، هنشحن لكِ بلانر جهاز بيستي خلال ١٠ أيام عمل من تأكيد طلبك. ولحد ما البلانر يوصلك، تقدري تستمتعي من دلوقتي بـ:
 ✨ فيديوهات وايفي اللي هتساعدك تفهمى الفرق بين انواع الحاجات فى جهازك
 ✨ خصومات حصرية من شركاء وايفي
 ✨ جروب واتساب وايفي، مساحة تسألي وتشاركي فيها مع عرايس بيجهّزوا زيّك
 
 شكرًا على صبرك وحبك. متحمسين أوي للحظة اللي هتفتحي فيها البلانر بتاعك! 💗`
-        : `Please note that the Arabic Edition is on pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days of your order confirmation. While you wait for your planner to arrive, you can already enjoy:
+        : `Please note that the ${editionNameEn} is on pre-order, and your Gehaz Bestie Planner will be shipped within 10 business days of your order confirmation. While you wait for your planner to arrive, you can already enjoy:
 ✨ Wifey's videos to help you understand the differences between all items in your gehaz
 ✨ Exclusive partner discounts
 ✨ Wifey WhatsApp group to connect and share with brides preparing just like you
@@ -1131,9 +1130,14 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
                       id="edition-btn-en"
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-sm sm:text-base text-lovely">
-                          English Edition
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm sm:text-base text-lovely">
+                            English Edition
+                          </span>
+                          <span className="text-[10px] bg-lovely/15 text-lovely font-bold px-2 py-0.5 rounded-full">
+                            {locale === "ar" ? "حجز مسبق" : "Pre-order"}
+                          </span>
+                        </div>
                         {(!hasEditionSelection || selectedEdition === "en") && (
                           <span className="w-2.5 h-2.5 rounded-full bg-lovely"></span>
                         )}
@@ -1595,7 +1599,7 @@ Thank you for your patience and love. We're so excited for the moment you unwrap
 
       </div>
 
-      {/* Modal for specific packages - only shown for Arabic pre-order */}
+      {/* Modal for specific packages - pre-order editions */}
       {showModal && packageData?._id && getModalContent(packageData._id, selectedEdition) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div

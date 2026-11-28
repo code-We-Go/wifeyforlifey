@@ -321,7 +321,7 @@ function TrackOrderPage() {
                   <p className="text-creamey mb-1">Estimated Delivery For Pre-orders:</p>
                   <p className="font-medium">
                     {new Date(
-                      new Date(trackingStatus.createdAt).getTime() + 10 * 24 * 60 * 60 * 1000
+                      new Date(trackingStatus.createdAt).getTime() + 15 * 24 * 60 * 60 * 1000
                     ).toLocaleDateString()}
                   </p>
                 </div>
@@ -435,7 +435,7 @@ function TrackOrderPage() {
                   <p className="text-creamey mb-1">Estimated Delivery For Pre-orders :</p>
                   <p className="font-medium">
                     {new Date(
-                      new Date(trackingStatus.createdAt).getTime() + 10 * 24 * 60 * 60 * 1000
+                      new Date(trackingStatus.createdAt).getTime() + 15 * 24 * 60 * 60 * 1000
                     ).toLocaleDateString()}
                   </p>
                 </div>
