@@ -424,7 +424,7 @@ async function handleSubscription(
       selectedDuration: paymentOp.selectedDuration,
       subscribed: true,
       expiryDate,
-      status: "order_created",
+      status: isUpgradeProcess || isRenewProcess ? "delivered" : "order_created",
       process: paymentOp.process,
       cart: paymentOp.cart || [],
       redeemedLoyaltyPoints: paymentOp.redeemedLoyaltyPoints,

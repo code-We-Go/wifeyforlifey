@@ -2349,18 +2349,40 @@ We’re beyond excited to share this experience with you… your planner will be
                 {/* {packageData.name} */}
               </h2>
               <ul className=" w-full px-2 md:px-4 space-y-2 items-start justify-start  text-left text-sm md:text-base text-creamey/95">
-                {packageData.items
-                  .filter((item) => item.included)
-                  .map(
-                    (
-                      item: { value: string; included: boolean },
-                      idx: number
-                    ) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span>{item.value}</span>
-                      </li>
+                {(() => {
+                  const isDeliveryPoint = (text?: string) => {
+                    if (!text) return false;
+                    const lower = text.toLowerCase();
+                    return (
+                      lower.includes("deliver") ||
+                      lower.includes("doorstep") ||
+                      lower.includes("shipping") ||
+                      lower.includes("shipped") ||
+                      lower.includes("شحن") ||
+                      lower.includes("توصيل") ||
+                      lower.includes("التوصيل") ||
+                      lower.includes("واصل لحد") ||
+                      lower.includes("هيوصلك") ||
+                      lower.includes("باب بيتك")
+                    );
+                  };
+                  return packageData.items
+                    .filter(
+                      (item) =>
+                        item.included &&
+                        (!(isUpgrade || isRenew) || !isDeliveryPoint(item.value))
                     )
-                  )}
+                    .map(
+                      (
+                        item: { value: string; included: boolean },
+                        idx: number
+                      ) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span>{item.value}</span>
+                        </li>
+                      )
+                    );
+                })()}
               </ul>
               <div className="flex items-center justify-start gap-3 tracking-wider mt-3 w-full px-2 md:px-4">
                 {(() => {
@@ -2390,21 +2412,45 @@ We’re beyond excited to share this experience with you… your planner will be
                   );
                 })()}
               </div>
-              <div className="flex flex-col justify-start items-start w-full font-thin gap-2  mt-2 mb-2">
-                <span className="text-sm text-creamey/80 font-normal">
-                  Notes :
-                </span>
-                <ul className="pl-4">
-                  {packageData.notes.map((note: string, idx: number) => (
-                    <li
-                      key={idx}
-                      className="text-sm font-normal text-creamey/80"
-                    >
-                      {note}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {(() => {
+                const isDeliveryNote = (text?: string) => {
+                  if (!text) return false;
+                  const lower = text.toLowerCase();
+                  return (
+                    lower.includes("deliver") ||
+                    lower.includes("doorstep") ||
+                    lower.includes("shipping") ||
+                    lower.includes("shipped") ||
+                    lower.includes("شحن") ||
+                    lower.includes("توصيل") ||
+                    lower.includes("التوصيل") ||
+                    lower.includes("واصل لحد") ||
+                    lower.includes("هيوصلك") ||
+                    lower.includes("باب بيتك")
+                  );
+                };
+                const visibleNotes = (packageData.notes || []).filter(
+                  (note: string) => !(isUpgrade || isRenew) || !isDeliveryNote(note)
+                );
+                if (visibleNotes.length === 0) return null;
+                return (
+                  <div className="flex flex-col justify-start items-start w-full font-thin gap-2  mt-2 mb-2">
+                    <span className="text-sm text-creamey/80 font-normal">
+                      Notes :
+                    </span>
+                    <ul className="pl-4">
+                      {visibleNotes.map((note: string, idx: number) => (
+                        <li
+                          key={idx}
+                          className="text-sm font-normal text-creamey/80"
+                        >
+                          {note}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })()}
             </div>
             <DiscountSection
               redeemType="Subscription"
